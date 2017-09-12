@@ -31,13 +31,15 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_
 
-#include <cstddef>
 #include <stdint.h>
+#include <cstddef>
 
 namespace blink {
-    bool parseVDMX(int* ymax, int* ymin,
-                   const uint8_t* vdmx, size_t vdmxLength,
-                   unsigned targetPixelSize);
+bool parseVDMX(int* ymax,
+               int* ymin,
+               const uint8_t* vdmx,
+               size_t vdmxLength,
+               unsigned targetPixelSize);
 }  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_VDMXPARSER_H_

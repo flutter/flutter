@@ -32,78 +32,78 @@
 namespace blink {
 
 enum FontWeight {
-    FontWeight100,
-    FontWeight200,
-    FontWeight300,
-    FontWeight400,
-    FontWeight500,
-    FontWeight600,
-    FontWeight700,
-    FontWeight800,
-    FontWeight900,
-    FontWeightNormal = FontWeight400,
-    FontWeightBold = FontWeight700
+  FontWeight100,
+  FontWeight200,
+  FontWeight300,
+  FontWeight400,
+  FontWeight500,
+  FontWeight600,
+  FontWeight700,
+  FontWeight800,
+  FontWeight900,
+  FontWeightNormal = FontWeight400,
+  FontWeightBold = FontWeight700
 };
 
 // Numeric values matching OS/2 & Windows Metrics usWidthClass table.
 // https://www.microsoft.com/typography/otspec/os2.htm
 enum FontStretch {
-    FontStretchUltraCondensed = 1,
-    FontStretchExtraCondensed = 2,
-    FontStretchCondensed = 3,
-    FontStretchSemiCondensed = 4,
-    FontStretchNormal = 5,
-    FontStretchSemiExpanded = 6,
-    FontStretchExpanded = 7,
-    FontStretchExtraExpanded = 8,
-    FontStretchUltraExpanded = 9
+  FontStretchUltraCondensed = 1,
+  FontStretchExtraCondensed = 2,
+  FontStretchCondensed = 3,
+  FontStretchSemiCondensed = 4,
+  FontStretchNormal = 5,
+  FontStretchSemiExpanded = 6,
+  FontStretchExpanded = 7,
+  FontStretchExtraExpanded = 8,
+  FontStretchUltraExpanded = 9
 };
 
-enum FontStyle {
-    FontStyleNormal = 0,
-    FontStyleItalic = 1
-};
+enum FontStyle { FontStyleNormal = 0, FontStyleItalic = 1 };
 
-enum FontVariant {
-    FontVariantNormal = 0,
-    FontVariantSmallCaps = 1
-};
+enum FontVariant { FontVariantNormal = 0, FontVariantSmallCaps = 1 };
 
 typedef unsigned FontTraitsBitfield;
 
 struct FontTraits {
-    FontTraits(FontStyle style, FontVariant variant, FontWeight weight, FontStretch stretch)
-    {
-        m_traits.m_style = style;
-        m_traits.m_variant = variant;
-        m_traits.m_weight = weight;
-        m_traits.m_stretch = stretch;
-        m_traits.m_filler = 0;
-        ASSERT(!(m_bitfield >> 10));
-    }
-    FontTraits(FontTraitsBitfield bitfield)
-        : m_bitfield(bitfield)
-    {
-        ASSERT(!m_traits.m_filler);
-        ASSERT(!(m_bitfield >> 10));
-    }
-    FontStyle style() const { return static_cast<FontStyle>(m_traits.m_style); }
-    FontVariant variant() const { return static_cast<FontVariant>(m_traits.m_variant); }
-    FontWeight weight() const { return static_cast<FontWeight>(m_traits.m_weight); }
-    FontStretch stretch() const { return static_cast<FontStretch>(m_traits.m_stretch); }
-    FontTraitsBitfield bitfield() const { return m_bitfield; }
+  FontTraits(FontStyle style,
+             FontVariant variant,
+             FontWeight weight,
+             FontStretch stretch) {
+    m_traits.m_style = style;
+    m_traits.m_variant = variant;
+    m_traits.m_weight = weight;
+    m_traits.m_stretch = stretch;
+    m_traits.m_filler = 0;
+    ASSERT(!(m_bitfield >> 10));
+  }
+  FontTraits(FontTraitsBitfield bitfield) : m_bitfield(bitfield) {
+    ASSERT(!m_traits.m_filler);
+    ASSERT(!(m_bitfield >> 10));
+  }
+  FontStyle style() const { return static_cast<FontStyle>(m_traits.m_style); }
+  FontVariant variant() const {
+    return static_cast<FontVariant>(m_traits.m_variant);
+  }
+  FontWeight weight() const {
+    return static_cast<FontWeight>(m_traits.m_weight);
+  }
+  FontStretch stretch() const {
+    return static_cast<FontStretch>(m_traits.m_stretch);
+  }
+  FontTraitsBitfield bitfield() const { return m_bitfield; }
 
-    union {
-        struct {
-            unsigned m_style : 1;
-            unsigned m_variant : 1;
-            unsigned m_weight : 4;
-            unsigned m_stretch : 4;
-            unsigned m_filler : 22;
-        } m_traits;
-        FontTraitsBitfield m_bitfield;
-    };
+  union {
+    struct {
+      unsigned m_style : 1;
+      unsigned m_variant : 1;
+      unsigned m_weight : 4;
+      unsigned m_stretch : 4;
+      unsigned m_filler : 22;
+    } m_traits;
+    FontTraitsBitfield m_bitfield;
+  };
 };
 
-} // namespace blink
+}  // namespace blink
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTTRAITS_H_

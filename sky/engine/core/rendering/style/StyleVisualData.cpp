@@ -26,21 +26,14 @@
 namespace blink {
 
 StyleVisualData::StyleVisualData()
-    : hasAutoClip(true)
-    , textDecoration(RenderStyle::initialTextDecoration())
-{
-}
+    : hasAutoClip(true), textDecoration(RenderStyle::initialTextDecoration()) {}
 
-StyleVisualData::~StyleVisualData()
-{
-}
+StyleVisualData::~StyleVisualData() {}
 
 StyleVisualData::StyleVisualData(const StyleVisualData& o)
-    : RefCounted<StyleVisualData>()
-    , clip(o.clip)
-    , hasAutoClip(o.hasAutoClip)
-    , textDecoration(o.textDecoration)
-{
-}
+    : RefCounted<StyleVisualData>(),
+      clip(o.clip),
+      hasAutoClip(o.hasAutoClip),
+      textDecoration(o.textDecoration) {}
 
-} // namespace blink
+}  // namespace blink

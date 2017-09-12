@@ -38,32 +38,49 @@ class RenderObject;
 class TextStream;
 
 enum RenderAsTextBehaviorFlags {
-    RenderAsTextBehaviorNormal = 0,
-    RenderAsTextShowAllLayers = 1 << 0, // Dump all layers, not just those that would paint.
-    RenderAsTextShowLayerNesting = 1 << 1, // Annotate the layer lists.
-    RenderAsTextShowCompositedLayers = 1 << 2, // Show which layers are composited.
-    RenderAsTextShowAddresses = 1 << 3, // Show layer and renderer addresses.
-    RenderAsTextShowIDAndClass = 1 << 4, // Show id and class attributes
-    RenderAsTextDontUpdateLayout = 1 << 6, // Don't update layout, to make it safe to call showLayerTree() from the debugger inside layout or painting code.
-    RenderAsTextShowLayoutState = 1 << 7 // Print the various 'needs layout' bits on renderers.
+  RenderAsTextBehaviorNormal = 0,
+  RenderAsTextShowAllLayers =
+      1 << 0,  // Dump all layers, not just those that would paint.
+  RenderAsTextShowLayerNesting = 1 << 1,  // Annotate the layer lists.
+  RenderAsTextShowCompositedLayers = 1
+                                     << 2,  // Show which layers are composited.
+  RenderAsTextShowAddresses = 1 << 3,   // Show layer and renderer addresses.
+  RenderAsTextShowIDAndClass = 1 << 4,  // Show id and class attributes
+  RenderAsTextDontUpdateLayout =
+      1 << 6,  // Don't update layout, to make it safe to call showLayerTree()
+               // from the debugger inside layout or painting code.
+  RenderAsTextShowLayoutState =
+      1 << 7  // Print the various 'needs layout' bits on renderers.
 };
 typedef unsigned RenderAsTextBehavior;
 
-// You don't need pageWidthInPixels if you don't specify RenderAsTextInPrintingMode.
-void write(TextStream&, const RenderObject&, int indent = 0, RenderAsTextBehavior = RenderAsTextBehaviorNormal);
+// You don't need pageWidthInPixels if you don't specify
+// RenderAsTextInPrintingMode.
+void write(TextStream&,
+           const RenderObject&,
+           int indent = 0,
+           RenderAsTextBehavior = RenderAsTextBehaviorNormal);
 
 class RenderTreeAsText {
-// FIXME: This is a cheesy hack to allow easy access to RenderStyle colors.  It won't be needed if we convert
-// it to use colorIncludingFallback instead. (This just involves rebaselining many results though, so for now it's
-// not being done).
-public:
-static void writeRenderObject(TextStream& ts, const RenderObject& o, RenderAsTextBehavior behavior);
-static void writeLayers(TextStream&, const RenderLayer* rootLayer, RenderLayer*, const LayoutRect& paintDirtyRect, int indent = 0, RenderAsTextBehavior = RenderAsTextBehaviorNormal);
+  // FIXME: This is a cheesy hack to allow easy access to RenderStyle colors.
+  // It won't be needed if we convert it to use colorIncludingFallback instead.
+  // (This just involves rebaselining many results though, so for now it's not
+  // being done).
+ public:
+  static void writeRenderObject(TextStream& ts,
+                                const RenderObject& o,
+                                RenderAsTextBehavior behavior);
+  static void writeLayers(TextStream&,
+                          const RenderLayer* rootLayer,
+                          RenderLayer*,
+                          const LayoutRect& paintDirtyRect,
+                          int indent = 0,
+                          RenderAsTextBehavior = RenderAsTextBehaviorNormal);
 };
 
 // Helper function shared with SVGRenderTreeAsText
 String quoteAndEscapeNonPrintables(const String&);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERTREEASTEXT_H_

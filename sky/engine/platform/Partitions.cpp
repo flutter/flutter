@@ -35,19 +35,17 @@ namespace blink {
 SizeSpecificPartitionAllocator<3072> Partitions::m_objectModelAllocator;
 SizeSpecificPartitionAllocator<1024> Partitions::m_renderingAllocator;
 
-void Partitions::init()
-{
-    m_objectModelAllocator.init();
-    m_renderingAllocator.init();
+void Partitions::init() {
+  m_objectModelAllocator.init();
+  m_renderingAllocator.init();
 }
 
-void Partitions::shutdown()
-{
-    // We could ASSERT here for a memory leak within the partition, but it leads
-    // to very hard to diagnose ASSERTs, so it's best to leave leak checking for
-    // the valgrind and heapcheck bots, which run without partitions.
-    (void) m_renderingAllocator.shutdown();
-    (void) m_objectModelAllocator.shutdown();
+void Partitions::shutdown() {
+  // We could ASSERT here for a memory leak within the partition, but it leads
+  // to very hard to diagnose ASSERTs, so it's best to leave leak checking for
+  // the valgrind and heapcheck bots, which run without partitions.
+  (void)m_renderingAllocator.shutdown();
+  (void)m_objectModelAllocator.shutdown();
 }
 
-} // namespace blink
+}  // namespace blink

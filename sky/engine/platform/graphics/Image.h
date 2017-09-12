@@ -47,92 +47,131 @@ class GraphicsContext;
 class Length;
 class SharedBuffer;
 
-// This class gets notified when an image creates or destroys decoded frames and when it advances animation frames.
+// This class gets notified when an image creates or destroys decoded frames and
+// when it advances animation frames.
 class ImageObserver;
 
 class PLATFORM_EXPORT Image : public RefCounted<Image> {
-    friend class GeneratedImage;
-    friend class GradientGeneratedImage;
-    friend class GraphicsContext;
+  friend class GeneratedImage;
+  friend class GradientGeneratedImage;
+  friend class GraphicsContext;
 
-public:
-    virtual ~Image();
+ public:
+  virtual ~Image();
 
-    virtual bool currentFrameKnownToBeOpaque() = 0;
+  virtual bool currentFrameKnownToBeOpaque() = 0;
 
-    bool isNull() const { return size().isEmpty(); }
+  bool isNull() const { return size().isEmpty(); }
 
-    virtual void setContainerSize(const IntSize&) { }
-    virtual bool usesContainerSize() const { return false; }
-    virtual bool hasRelativeWidth() const { return false; }
-    virtual bool hasRelativeHeight() const { return false; }
-    virtual void computeIntrinsicDimensions(Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio);
+  virtual void setContainerSize(const IntSize&) {}
+  virtual bool usesContainerSize() const { return false; }
+  virtual bool hasRelativeWidth() const { return false; }
+  virtual bool hasRelativeHeight() const { return false; }
+  virtual void computeIntrinsicDimensions(Length& intrinsicWidth,
+                                          Length& intrinsicHeight,
+                                          FloatSize& intrinsicRatio);
 
-    virtual IntSize size() const = 0;
-    IntRect rect() const { return IntRect(IntPoint(), size()); }
-    int width() const { return size().width(); }
-    int height() const { return size().height(); }
-    virtual bool getHotSpot(IntPoint&) const { return false; }
+  virtual IntSize size() const = 0;
+  IntRect rect() const { return IntRect(IntPoint(), size()); }
+  int width() const { return size().width(); }
+  int height() const { return size().height(); }
+  virtual bool getHotSpot(IntPoint&) const { return false; }
 
-    bool setData(PassRefPtr<SharedBuffer> data, bool allDataReceived);
-    virtual bool dataChanged(bool /*allDataReceived*/) { return false; }
+  bool setData(PassRefPtr<SharedBuffer> data, bool allDataReceived);
+  virtual bool dataChanged(bool /*allDataReceived*/) { return false; }
 
-    virtual String filenameExtension() const { return String(); } // null string if unknown
+  virtual String filenameExtension() const {
+    return String();
+  }  // null string if unknown
 
-    virtual void destroyDecodedData(bool destroyAll) = 0;
+  virtual void destroyDecodedData(bool destroyAll) = 0;
 
-    SharedBuffer* data() { return m_encodedImageData.get(); }
+  SharedBuffer* data() { return m_encodedImageData.get(); }
 
-    // Animation begins whenever someone draws the image, so startAnimation() is not normally called.
-    // It will automatically pause once all observers no longer want to render the image anywhere.
-    enum CatchUpAnimation { DoNotCatchUp, CatchUp };
-    virtual void startAnimation(CatchUpAnimation = CatchUp) { }
-    virtual void stopAnimation() {}
-    virtual void resetAnimation() {}
+  // Animation begins whenever someone draws the image, so startAnimation() is
+  // not normally called. It will automatically pause once all observers no
+  // longer want to render the image anywhere.
+  enum CatchUpAnimation { DoNotCatchUp, CatchUp };
+  virtual void startAnimation(CatchUpAnimation = CatchUp) {}
+  virtual void stopAnimation() {}
+  virtual void resetAnimation() {}
 
-    // True if this image can potentially animate.
-    virtual bool maybeAnimated() { return false; }
+  // True if this image can potentially animate.
+  virtual bool maybeAnimated() { return false; }
 
-    // Typically the ImageResource that owns us.
-    ImageObserver* imageObserver() const { return m_imageObserver; }
-    void setImageObserver(ImageObserver* observer) { m_imageObserver = observer; }
+  // Typically the ImageResource that owns us.
+  ImageObserver* imageObserver() const { return m_imageObserver; }
+  void setImageObserver(ImageObserver* observer) { m_imageObserver = observer; }
 
-    enum TileRule { StretchTile, RoundTile, SpaceTile, RepeatTile };
+  enum TileRule { StretchTile, RoundTile, SpaceTile, RepeatTile };
 
-    virtual PassRefPtr<Image> imageForDefaultFrame();
+  virtual PassRefPtr<Image> imageForDefaultFrame();
 
-    virtual void drawPattern(GraphicsContext*, const FloatRect&,
-        const FloatSize&, const FloatPoint& phase, CompositeOperator,
-        const FloatRect&, WebBlendMode = WebBlendModeNormal, const IntSize& repeatSpacing = IntSize());
+  virtual void drawPattern(GraphicsContext*,
+                           const FloatRect&,
+                           const FloatSize&,
+                           const FloatPoint& phase,
+                           CompositeOperator,
+                           const FloatRect&,
+                           WebBlendMode = WebBlendModeNormal,
+                           const IntSize& repeatSpacing = IntSize());
 
 #if ENABLE(ASSERT)
-    virtual bool notSolidColor() { return true; }
+  virtual bool notSolidColor() { return true; }
 #endif
 
-protected:
-    Image(ImageObserver* = 0);
+ protected:
+  Image(ImageObserver* = 0);
 
-    static void fillWithSolidColor(GraphicsContext*, const FloatRect& dstRect, const Color&, CompositeOperator);
-    static FloatRect adjustForNegativeSize(const FloatRect&); // A helper method for translating negative width and height values.
+  static void fillWithSolidColor(GraphicsContext*,
+                                 const FloatRect& dstRect,
+                                 const Color&,
+                                 CompositeOperator);
+  static FloatRect adjustForNegativeSize(const FloatRect&);  // A helper method
+                                                             // for translating
+                                                             // negative width
+                                                             // and height
+                                                             // values.
 
-    virtual void draw(GraphicsContext*, const FloatRect& dstRect, const FloatRect& srcRect, CompositeOperator, WebBlendMode) = 0;
-    virtual void draw(GraphicsContext*, const FloatRect& dstRect, const FloatRect& srcRect, CompositeOperator, WebBlendMode, RespectImageOrientationEnum);
-    void drawTiled(GraphicsContext*, const FloatRect& dstRect, const FloatPoint& srcPoint, const FloatSize& tileSize,
-        CompositeOperator, WebBlendMode, const IntSize& repeatSpacing);
-    void drawTiled(GraphicsContext*, const FloatRect& dstRect, const FloatRect& srcRect, const FloatSize& tileScaleFactor, TileRule hRule, TileRule vRule, CompositeOperator);
+  virtual void draw(GraphicsContext*,
+                    const FloatRect& dstRect,
+                    const FloatRect& srcRect,
+                    CompositeOperator,
+                    WebBlendMode) = 0;
+  virtual void draw(GraphicsContext*,
+                    const FloatRect& dstRect,
+                    const FloatRect& srcRect,
+                    CompositeOperator,
+                    WebBlendMode,
+                    RespectImageOrientationEnum);
+  void drawTiled(GraphicsContext*,
+                 const FloatRect& dstRect,
+                 const FloatPoint& srcPoint,
+                 const FloatSize& tileSize,
+                 CompositeOperator,
+                 WebBlendMode,
+                 const IntSize& repeatSpacing);
+  void drawTiled(GraphicsContext*,
+                 const FloatRect& dstRect,
+                 const FloatRect& srcRect,
+                 const FloatSize& tileScaleFactor,
+                 TileRule hRule,
+                 TileRule vRule,
+                 CompositeOperator);
 
-    // Supporting tiled drawing
-    virtual bool mayFillWithSolidColor() { return false; }
-    virtual Color solidColor() const { return Color(); }
+  // Supporting tiled drawing
+  virtual bool mayFillWithSolidColor() { return false; }
+  virtual Color solidColor() const { return Color(); }
 
-private:
-    RefPtr<SharedBuffer> m_encodedImageData;
-    ImageObserver* m_imageObserver;
+ private:
+  RefPtr<SharedBuffer> m_encodedImageData;
+  ImageObserver* m_imageObserver;
 };
 
-#define DEFINE_IMAGE_TYPE_CASTS(typeName) \
-    DEFINE_TYPE_CASTS(typeName, Image, image, image->is##typeName(), image.is##typeName())
+#define DEFINE_IMAGE_TYPE_CASTS(typeName)                          \
+  DEFINE_TYPE_CASTS(typeName, Image, image, image->is##typeName(), \
+                    image.is##typeName())
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGE_H_

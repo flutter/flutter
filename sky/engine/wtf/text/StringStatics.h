@@ -36,13 +36,13 @@
 namespace WTF {
 
 class StringStatics {
-public:
-    WTF_EXPORT static void init();
+ public:
+  WTF_EXPORT static void init();
 
-private:
-    StringStatics();
+ private:
+  StringStatics();
 };
 
-}
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_STRINGSTATICS_H_

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2003, 2006, 2008, 2009, 2010, 2012 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2006, 2008, 2009, 2010, 2012 Apple Inc.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -33,70 +34,66 @@
 
 namespace WTF {
 
-// CStringBuffer is the ref-counted storage class for the characters in a CString.
-// The data is implicitly allocated 1 character longer than length(), as it is zero-terminated.
+// CStringBuffer is the ref-counted storage class for the characters in a
+// CString. The data is implicitly allocated 1 character longer than length(),
+// as it is zero-terminated.
 class WTF_EXPORT CStringBuffer : public RefCounted<CStringBuffer> {
-public:
-    const char* data() { return mutableData(); }
-    size_t length() const { return m_length; }
+ public:
+  const char* data() { return mutableData(); }
+  size_t length() const { return m_length; }
 
-private:
-    friend class CString;
-    friend class RefCounted<CStringBuffer>;
-    // CStringBuffers are allocated out of the WTF buffer partition.
-    void* operator new(size_t, void* ptr) { return ptr; };
-    void operator delete(void*);
+ private:
+  friend class CString;
+  friend class RefCounted<CStringBuffer>;
+  // CStringBuffers are allocated out of the WTF buffer partition.
+  void* operator new(size_t, void* ptr) { return ptr; };
+  void operator delete(void*);
 
-    static PassRefPtr<CStringBuffer> createUninitialized(size_t length);
+  static PassRefPtr<CStringBuffer> createUninitialized(size_t length);
 
-    CStringBuffer(size_t length) : m_length(length) { }
-    char* mutableData() { return reinterpret_cast<char*>(this + 1); }
+  CStringBuffer(size_t length) : m_length(length) {}
+  char* mutableData() { return reinterpret_cast<char*>(this + 1); }
 
-    const unsigned m_length;
+  const unsigned m_length;
 };
 
 // A container for a null-terminated char array supporting copy-on-write
 // assignment.  The contained char array may be null.
 class WTF_EXPORT CString {
-public:
-    CString() { }
-    CString(const char*);
-    CString(const char*, size_t length);
-    CString(CStringBuffer* buffer) : m_buffer(buffer) { }
-    static CString newUninitialized(size_t length, char*& characterBuffer);
+ public:
+  CString() {}
+  CString(const char*);
+  CString(const char*, size_t length);
+  CString(CStringBuffer* buffer) : m_buffer(buffer) {}
+  static CString newUninitialized(size_t length, char*& characterBuffer);
 
-    std::string toStdString() const
-    {
-        return std::string(data(), length());
-    }
+  std::string toStdString() const { return std::string(data(), length()); }
 
-    const char* data() const
-    {
-        return m_buffer ? m_buffer->data() : 0;
-    }
-    char* mutableData();
-    size_t length() const
-    {
-        return m_buffer ? m_buffer->length() : 0;
-    }
+  const char* data() const { return m_buffer ? m_buffer->data() : 0; }
+  char* mutableData();
+  size_t length() const { return m_buffer ? m_buffer->length() : 0; }
 
-    bool isNull() const { return !m_buffer; }
-    bool isSafeToSendToAnotherThread() const;
+  bool isNull() const { return !m_buffer; }
+  bool isSafeToSendToAnotherThread() const;
 
-    CStringBuffer* buffer() const { return m_buffer.get(); }
+  CStringBuffer* buffer() const { return m_buffer.get(); }
 
-private:
-    void copyBufferIfNeeded();
-    void init(const char*, size_t length);
-    RefPtr<CStringBuffer> m_buffer;
+ private:
+  void copyBufferIfNeeded();
+  void init(const char*, size_t length);
+  RefPtr<CStringBuffer> m_buffer;
 };
 
 WTF_EXPORT bool operator==(const CString& a, const CString& b);
-inline bool operator!=(const CString& a, const CString& b) { return !(a == b); }
+inline bool operator!=(const CString& a, const CString& b) {
+  return !(a == b);
+}
 WTF_EXPORT bool operator==(const CString& a, const char* b);
-inline bool operator!=(const CString& a, const char* b) { return !(a == b); }
+inline bool operator!=(const CString& a, const char* b) {
+  return !(a == b);
+}
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::CString;
 

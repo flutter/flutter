@@ -32,76 +32,73 @@
 namespace blink {
 
 class BorderValue {
-friend class RenderStyle;
-public:
-    BorderValue()
-        : m_color(0)
-        , m_colorIsCurrentColor(true)
-        , m_width(3)
-        , m_style(BNONE)
-        , m_isAuto(AUTO_OFF)
-    {
-    }
+  friend class RenderStyle;
 
-    bool nonZero(bool checkStyle = true) const
-    {
-        return width() && (!checkStyle || m_style != BNONE);
-    }
+ public:
+  BorderValue()
+      : m_color(0),
+        m_colorIsCurrentColor(true),
+        m_width(3),
+        m_style(BNONE),
+        m_isAuto(AUTO_OFF) {}
 
-    bool isTransparent() const
-    {
-        return !m_colorIsCurrentColor && !m_color.alpha();
-    }
+  bool nonZero(bool checkStyle = true) const {
+    return width() && (!checkStyle || m_style != BNONE);
+  }
 
-    bool isVisible(bool checkStyle = true) const
-    {
-        return nonZero(checkStyle) && !isTransparent() && (!checkStyle || m_style != BHIDDEN);
-    }
+  bool isTransparent() const {
+    return !m_colorIsCurrentColor && !m_color.alpha();
+  }
 
-    bool operator==(const BorderValue& o) const
-    {
-        return m_width == o.m_width && m_style == o.m_style && m_color == o.m_color && m_colorIsCurrentColor == o.m_colorIsCurrentColor;
-    }
+  bool isVisible(bool checkStyle = true) const {
+    return nonZero(checkStyle) && !isTransparent() &&
+           (!checkStyle || m_style != BHIDDEN);
+  }
 
-    // The default width is 3px, but if the style is none we compute a value of 0 (in RenderStyle itself)
-    bool visuallyEqual(const BorderValue& o) const
-    {
-        if (m_style == BNONE && o.m_style == BNONE)
-            return true;
-        if (m_style == BHIDDEN && o.m_style == BHIDDEN)
-            return true;
-        return *this == o;
-    }
+  bool operator==(const BorderValue& o) const {
+    return m_width == o.m_width && m_style == o.m_style &&
+           m_color == o.m_color &&
+           m_colorIsCurrentColor == o.m_colorIsCurrentColor;
+  }
 
-    bool operator!=(const BorderValue& o) const
-    {
-        return !(*this == o);
-    }
+  // The default width is 3px, but if the style is none we compute a value of 0
+  // (in RenderStyle itself)
+  bool visuallyEqual(const BorderValue& o) const {
+    if (m_style == BNONE && o.m_style == BNONE)
+      return true;
+    if (m_style == BHIDDEN && o.m_style == BHIDDEN)
+      return true;
+    return *this == o;
+  }
 
-    void setColor(const StyleColor& color)
-    {
-        m_color = color.resolve(Color());
-        m_colorIsCurrentColor = color.isCurrentColor();
-    }
+  bool operator!=(const BorderValue& o) const { return !(*this == o); }
 
-    StyleColor color() const { return m_colorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_color); }
+  void setColor(const StyleColor& color) {
+    m_color = color.resolve(Color());
+    m_colorIsCurrentColor = color.isCurrentColor();
+  }
 
-    unsigned width() const { return m_width; }
+  StyleColor color() const {
+    return m_colorIsCurrentColor ? StyleColor::currentColor()
+                                 : StyleColor(m_color);
+  }
 
-    EBorderStyle style() const { return static_cast<EBorderStyle>(m_style); }
-    void setStyle(EBorderStyle style) { m_style = style; }
+  unsigned width() const { return m_width; }
 
-protected:
-    Color m_color;
-    unsigned m_colorIsCurrentColor : 1;
+  EBorderStyle style() const { return static_cast<EBorderStyle>(m_style); }
+  void setStyle(EBorderStyle style) { m_style = style; }
 
-    unsigned m_width : 26;
-    unsigned m_style : 4; // EBorderStyle
+ protected:
+  Color m_color;
+  unsigned m_colorIsCurrentColor : 1;
 
-    // This is only used by OutlineValue but moved here to keep the bits packed.
-    unsigned m_isAuto : 1; // OutlineIsAuto
+  unsigned m_width : 26;
+  unsigned m_style : 4;  // EBorderStyle
+
+  // This is only used by OutlineValue but moved here to keep the bits packed.
+  unsigned m_isAuto : 1;  // OutlineIsAuto
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_BORDERVALUE_H_

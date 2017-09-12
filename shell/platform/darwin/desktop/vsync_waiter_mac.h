@@ -5,8 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_DARWIN_DESKTOP_VSYNC_WAITER_MAC_H_
 #define FLUTTER_SHELL_PLATFORM_DARWIN_DESKTOP_VSYNC_WAITER_MAC_H_
 
-#include "lib/fxl/macros.h"
 #include "flutter/shell/common/vsync_waiter.h"
+#include "lib/fxl/macros.h"
 
 namespace shell {
 

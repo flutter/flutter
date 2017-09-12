@@ -34,46 +34,45 @@
 
 namespace {
 
-TEST(AtomicStringTest, Number)
-{
-    int intValue = 1234;
-    ASSERT_EQ(AtomicString::number(intValue), "1234");
-    intValue = -1234;
-    ASSERT_EQ(AtomicString::number(intValue), "-1234");
-    unsigned unsignedValue = 1234u;
-    ASSERT_EQ(AtomicString::number(unsignedValue), "1234");
-    long longValue = 6553500;
-    ASSERT_EQ(AtomicString::number(longValue), "6553500");
-    longValue = -6553500;
-    ASSERT_EQ(AtomicString::number(longValue), "-6553500");
-    unsigned long unsignedLongValue = 4294967295u;
-    ASSERT_EQ(AtomicString::number(unsignedLongValue), "4294967295");
-    long long longlongValue = 9223372036854775807;
-    ASSERT_EQ(AtomicString::number(longlongValue), "9223372036854775807");
-    longlongValue = -9223372036854775807;
-    ASSERT_EQ(AtomicString::number(longlongValue), "-9223372036854775807");
-    unsigned long long unsignedLongLongValue = 18446744073709551615u;
-    ASSERT_EQ(AtomicString::number(unsignedLongLongValue), "18446744073709551615");
-    double doubleValue = 1234.56;
-    ASSERT_EQ(AtomicString::number(doubleValue), "1234.56");
-    doubleValue = 1234.56789;
-    ASSERT_EQ(AtomicString::number(doubleValue, 9), "1234.56789");
+TEST(AtomicStringTest, Number) {
+  int intValue = 1234;
+  ASSERT_EQ(AtomicString::number(intValue), "1234");
+  intValue = -1234;
+  ASSERT_EQ(AtomicString::number(intValue), "-1234");
+  unsigned unsignedValue = 1234u;
+  ASSERT_EQ(AtomicString::number(unsignedValue), "1234");
+  long longValue = 6553500;
+  ASSERT_EQ(AtomicString::number(longValue), "6553500");
+  longValue = -6553500;
+  ASSERT_EQ(AtomicString::number(longValue), "-6553500");
+  unsigned long unsignedLongValue = 4294967295u;
+  ASSERT_EQ(AtomicString::number(unsignedLongValue), "4294967295");
+  long long longlongValue = 9223372036854775807;
+  ASSERT_EQ(AtomicString::number(longlongValue), "9223372036854775807");
+  longlongValue = -9223372036854775807;
+  ASSERT_EQ(AtomicString::number(longlongValue), "-9223372036854775807");
+  unsigned long long unsignedLongLongValue = 18446744073709551615u;
+  ASSERT_EQ(AtomicString::number(unsignedLongLongValue),
+            "18446744073709551615");
+  double doubleValue = 1234.56;
+  ASSERT_EQ(AtomicString::number(doubleValue), "1234.56");
+  doubleValue = 1234.56789;
+  ASSERT_EQ(AtomicString::number(doubleValue, 9), "1234.56789");
 }
 
-TEST(AtomicStringTest, ImplEquality)
-{
-    AtomicString foo("foo");
-    AtomicString bar("bar");
-    AtomicString baz("baz");
-    AtomicString foo2("foo");
-    AtomicString baz2("baz");
-    AtomicString bar2("bar");
-    ASSERT_EQ(foo.impl(), foo2.impl());
-    ASSERT_EQ(bar.impl(), bar2.impl());
-    ASSERT_EQ(baz.impl(), baz2.impl());
-    ASSERT_NE(foo.impl(), bar.impl());
-    ASSERT_NE(foo.impl(), baz.impl());
-    ASSERT_NE(bar.impl(), baz.impl());
+TEST(AtomicStringTest, ImplEquality) {
+  AtomicString foo("foo");
+  AtomicString bar("bar");
+  AtomicString baz("baz");
+  AtomicString foo2("foo");
+  AtomicString baz2("baz");
+  AtomicString bar2("bar");
+  ASSERT_EQ(foo.impl(), foo2.impl());
+  ASSERT_EQ(bar.impl(), bar2.impl());
+  ASSERT_EQ(baz.impl(), baz2.impl());
+  ASSERT_NE(foo.impl(), bar.impl());
+  ASSERT_NE(foo.impl(), baz.impl());
+  ASSERT_NE(bar.impl(), baz.impl());
 }
 
-} // namespace
+}  // namespace

@@ -76,8 +76,8 @@ GrBackendSemaphore VulkanSurface::GetAcquireSemaphore() const {
   return gr_semaphore;
 }
 
-vulkan::VulkanHandle<VkSemaphore>
-VulkanSurface::SemaphoreFromEvent(const mx::event &event) const {
+vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
+    const mx::event& event) const {
   VkResult result;
   VkSemaphore semaphore;
 
@@ -187,7 +187,7 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
   vk_.GetImageMemoryRequirements(backend_context_->fDevice,  //
                                  vk_image_,                  //
                                  &memory_reqs                //
-                                 );
+  );
 
   uint32_t memory_type = 0;
   for (; memory_type < 32; memory_type++) {
@@ -261,18 +261,19 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
       .fLevelCount = image_create_info.mipLevels,
   };
 
-  GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0, 0, image_info);
+  GrBackendRenderTarget sk_render_target(size.width(), size.height(), 0, 0,
+                                         image_info);
 
   SkSurfaceProps sk_surface_props(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
 
   auto sk_surface =
-      SkSurface::MakeFromBackendRenderTarget(context.get(),            //
-                                             sk_render_target,         //
-                                             kTopLeft_GrSurfaceOrigin, //
-                                             nullptr,                  //
-                                             &sk_surface_props         //
-                                             );
+      SkSurface::MakeFromBackendRenderTarget(context.get(),             //
+                                             sk_render_target,          //
+                                             kTopLeft_GrSurfaceOrigin,  //
+                                             nullptr,                   //
+                                             &sk_surface_props          //
+      );
 
   if (!sk_surface || sk_surface->getCanvas() == nullptr) {
     return false;
@@ -289,7 +290,7 @@ bool VulkanSurface::PushSessionImageSetupOps(scenic_lib::Session* session,
   }
 
   scenic_lib::Memory memory(session, std::move(exported_vmo),
-                                scenic::MemoryType::VK_DEVICE_MEMORY);
+                            scenic::MemoryType::VK_DEVICE_MEMORY);
 
   auto image_info = scenic::ImageInfo::New();
   image_info->width = sk_surface_->width();

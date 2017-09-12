@@ -45,9 +45,9 @@ namespace WTF {
 
 #if USE(PTHREADS)
 struct PlatformMutex {
-    pthread_mutex_t m_internalMutex;
+  pthread_mutex_t m_internalMutex;
 #if ENABLE(ASSERT)
-    size_t m_recursionCount;
+  size_t m_recursionCount;
 #endif
 };
 typedef pthread_cond_t PlatformCondition;
@@ -57,62 +57,64 @@ typedef void* PlatformCondition;
 #endif
 
 class WTF_EXPORT MutexBase {
-    WTF_MAKE_NONCOPYABLE(MutexBase); WTF_MAKE_FAST_ALLOCATED;
-public:
-    ~MutexBase();
+  WTF_MAKE_NONCOPYABLE(MutexBase);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    void lock();
-    void unlock();
+ public:
+  ~MutexBase();
+
+  void lock();
+  void unlock();
 #if ENABLE(ASSERT)
-    bool locked() { return m_mutex.m_recursionCount > 0; }
+  bool locked() { return m_mutex.m_recursionCount > 0; }
 #endif
 
-public:
-    PlatformMutex& impl() { return m_mutex; }
+ public:
+  PlatformMutex& impl() { return m_mutex; }
 
-protected:
-    MutexBase(bool recursive);
+ protected:
+  MutexBase(bool recursive);
 
-    PlatformMutex m_mutex;
+  PlatformMutex m_mutex;
 };
 
 class WTF_EXPORT Mutex : public MutexBase {
-public:
-    Mutex() : MutexBase(false) { }
-    bool tryLock();
+ public:
+  Mutex() : MutexBase(false) {}
+  bool tryLock();
 };
 
 class WTF_EXPORT RecursiveMutex : public MutexBase {
-public:
-    RecursiveMutex() : MutexBase(true) { }
-    bool tryLock();
+ public:
+  RecursiveMutex() : MutexBase(true) {}
+  bool tryLock();
 };
 
 typedef Locker<MutexBase> MutexLocker;
 
 class MutexTryLocker {
-    WTF_MAKE_NONCOPYABLE(MutexTryLocker);
-public:
-    MutexTryLocker(Mutex& mutex) : m_mutex(mutex), m_locked(mutex.tryLock()) { }
-    ~MutexTryLocker()
-    {
-        if (m_locked)
-            m_mutex.unlock();
-    }
+  WTF_MAKE_NONCOPYABLE(MutexTryLocker);
 
-    bool locked() const { return m_locked; }
+ public:
+  MutexTryLocker(Mutex& mutex) : m_mutex(mutex), m_locked(mutex.tryLock()) {}
+  ~MutexTryLocker() {
+    if (m_locked)
+      m_mutex.unlock();
+  }
 
-private:
-    Mutex& m_mutex;
-    bool m_locked;
+  bool locked() const { return m_locked; }
+
+ private:
+  Mutex& m_mutex;
+  bool m_locked;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
-using WTF::MutexBase;
 using WTF::Mutex;
-using WTF::RecursiveMutex;
+using WTF::MutexBase;
 using WTF::MutexLocker;
 using WTF::MutexTryLocker;
+using WTF::RecursiveMutex;
 
 #endif  // SKY_ENGINE_WTF_THREADINGPRIMITIVES_H_

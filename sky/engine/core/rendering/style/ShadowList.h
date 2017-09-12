@@ -48,34 +48,37 @@ typedef Vector<ShadowData, 1> ShadowDataVector;
 // These are used to store shadows in specified order, but we usually want to
 // iterate over them backwards as the first-specified shadow is painted on top.
 class ShadowList : public RefCounted<ShadowList> {
-public:
-    // This consumes passed in vector.
-    static PassRefPtr<ShadowList> adopt(ShadowDataVector& shadows)
-    {
-        return adoptRef(new ShadowList(shadows));
-    }
-    const ShadowDataVector& shadows() const { return m_shadows; }
-    bool operator==(const ShadowList& o) const { return m_shadows == o.m_shadows; }
-    bool operator!=(const ShadowList& o) const { return !(*this == o); }
+ public:
+  // This consumes passed in vector.
+  static PassRefPtr<ShadowList> adopt(ShadowDataVector& shadows) {
+    return adoptRef(new ShadowList(shadows));
+  }
+  const ShadowDataVector& shadows() const { return m_shadows; }
+  bool operator==(const ShadowList& o) const {
+    return m_shadows == o.m_shadows;
+  }
+  bool operator!=(const ShadowList& o) const { return !(*this == o); }
 
-    static PassRefPtr<ShadowList> blend(const ShadowList* from, const ShadowList* to, double progress);
+  static PassRefPtr<ShadowList> blend(const ShadowList* from,
+                                      const ShadowList* to,
+                                      double progress);
 
-    void adjustRectForShadow(LayoutRect&) const;
-    void adjustRectForShadow(FloatRect&) const;
+  void adjustRectForShadow(LayoutRect&) const;
+  void adjustRectForShadow(FloatRect&) const;
 
-    PassOwnPtr<DrawLooperBuilder> createDrawLooper(DrawLooperBuilder::ShadowAlphaMode) const;
+  PassOwnPtr<DrawLooperBuilder> createDrawLooper(
+      DrawLooperBuilder::ShadowAlphaMode) const;
 
-private:
-    ShadowList(ShadowDataVector& shadows)
-    {
-        // If we have no shadows, we use a null ShadowList
-        ASSERT(!shadows.isEmpty());
-        m_shadows.swap(shadows);
-        m_shadows.shrinkToFit();
-    }
-    ShadowDataVector m_shadows;
+ private:
+  ShadowList(ShadowDataVector& shadows) {
+    // If we have no shadows, we use a null ShadowList
+    ASSERT(!shadows.isEmpty());
+    m_shadows.swap(shadows);
+    m_shadows.shrinkToFit();
+  }
+  ShadowDataVector m_shadows;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWLIST_H_

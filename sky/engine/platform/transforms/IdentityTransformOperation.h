@@ -30,39 +30,34 @@
 namespace blink {
 
 class PLATFORM_EXPORT IdentityTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<IdentityTransformOperation> create()
-    {
-        return adoptRef(new IdentityTransformOperation());
-    }
+ public:
+  static PassRefPtr<IdentityTransformOperation> create() {
+    return adoptRef(new IdentityTransformOperation());
+  }
 
-    virtual bool canBlendWith(const TransformOperation& other) const
-    {
-        return isSameType(other);
-    }
+  virtual bool canBlendWith(const TransformOperation& other) const {
+    return isSameType(other);
+  }
 
-private:
-    virtual bool isIdentity() const override final { return true; }
-    virtual OperationType type() const override { return Identity; }
+ private:
+  virtual bool isIdentity() const override final { return true; }
+  virtual OperationType type() const override { return Identity; }
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        return isSameType(o);
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    return isSameType(o);
+  }
 
-    virtual void apply(TransformationMatrix&, const FloatSize&) const override { }
+  virtual void apply(TransformationMatrix&, const FloatSize&) const override {}
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation*, double, bool = false) override
-    {
-        return this;
-    }
+  virtual PassRefPtr<TransformOperation> blend(const TransformOperation*,
+                                               double,
+                                               bool = false) override {
+    return this;
+  }
 
-    IdentityTransformOperation()
-    {
-    }
-
+  IdentityTransformOperation() {}
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_IDENTITYTRANSFORMOPERATION_H_

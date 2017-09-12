@@ -41,59 +41,60 @@ namespace blink {
 class SimpleFontData;
 
 struct FontDataCacheKeyHash {
-    static unsigned hash(const FontPlatformData& platformData)
-    {
-        return platformData.hash();
-    }
+  static unsigned hash(const FontPlatformData& platformData) {
+    return platformData.hash();
+  }
 
-    static bool equal(const FontPlatformData& a, const FontPlatformData& b)
-    {
-        return a == b;
-    }
+  static bool equal(const FontPlatformData& a, const FontPlatformData& b) {
+    return a == b;
+  }
 
-    static const bool safeToCompareToEmptyOrDeleted = true;
+  static const bool safeToCompareToEmptyOrDeleted = true;
 };
 
 struct FontDataCacheKeyTraits : WTF::GenericHashTraits<FontPlatformData> {
-    static const bool emptyValueIsZero = true;
-    static const bool needsDestruction = true;
-    static const FontPlatformData& emptyValue()
-    {
-        DEFINE_STATIC_LOCAL(FontPlatformData, key, (0.f, false, false));
-        return key;
-    }
-    static void constructDeletedValue(FontPlatformData& slot, bool)
-    {
-        new (NotNull, &slot) FontPlatformData(WTF::HashTableDeletedValue);
-    }
-    static bool isDeletedValue(const FontPlatformData& value)
-    {
-        return value.isHashTableDeletedValue();
-    }
+  static const bool emptyValueIsZero = true;
+  static const bool needsDestruction = true;
+  static const FontPlatformData& emptyValue() {
+    DEFINE_STATIC_LOCAL(FontPlatformData, key, (0.f, false, false));
+    return key;
+  }
+  static void constructDeletedValue(FontPlatformData& slot, bool) {
+    new (NotNull, &slot) FontPlatformData(WTF::HashTableDeletedValue);
+  }
+  static bool isDeletedValue(const FontPlatformData& value) {
+    return value.isHashTableDeletedValue();
+  }
 };
 
 class FontDataCache {
-public:
-    PassRefPtr<SimpleFontData> get(const FontPlatformData*, ShouldRetain = Retain);
-    bool contains(const FontPlatformData*) const;
-    void release(const SimpleFontData*);
+ public:
+  PassRefPtr<SimpleFontData> get(const FontPlatformData*,
+                                 ShouldRetain = Retain);
+  bool contains(const FontPlatformData*) const;
+  void release(const SimpleFontData*);
 
-    // This is used by FontVerticalDataCache to mark all items with vertical data
-    // that are currently in cache as "in cache", which is later used to sweep the FontVerticalDataCache.
-    void markAllVerticalData();
+  // This is used by FontVerticalDataCache to mark all items with vertical data
+  // that are currently in cache as "in cache", which is later used to sweep the
+  // FontVerticalDataCache.
+  void markAllVerticalData();
 
-    // Purges items in FontDataCache according to provided severity.
-    // Returns true if any removal of cache items actually occurred.
-    bool purge(PurgeSeverity);
+  // Purges items in FontDataCache according to provided severity.
+  // Returns true if any removal of cache items actually occurred.
+  bool purge(PurgeSeverity);
 
-private:
-    bool purgeLeastRecentlyUsed(int count);
+ private:
+  bool purgeLeastRecentlyUsed(int count);
 
-    typedef HashMap<FontPlatformData, pair<RefPtr<SimpleFontData>, unsigned>, FontDataCacheKeyHash, FontDataCacheKeyTraits> Cache;
-    Cache m_cache;
-    ListHashSet<RefPtr<SimpleFontData> > m_inactiveFontData;
+  typedef HashMap<FontPlatformData,
+                  pair<RefPtr<SimpleFontData>, unsigned>,
+                  FontDataCacheKeyHash,
+                  FontDataCacheKeyTraits>
+      Cache;
+  Cache m_cache;
+  ListHashSet<RefPtr<SimpleFontData>> m_inactiveFontData;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTDATACACHE_H_

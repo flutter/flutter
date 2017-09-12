@@ -34,6 +34,6 @@ namespace blink {
 
 typedef unsigned short Glyph;
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPH_H_

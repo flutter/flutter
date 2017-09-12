@@ -33,16 +33,13 @@ namespace WTF {
 ThreadSpecific<WTFThreadData>* WTFThreadData::staticData;
 
 WTFThreadData::WTFThreadData()
-    : m_atomicStringTable(0)
-    , m_atomicStringTableDestructor(0)
-    , m_cachedConverterICU(adoptPtr(new ICUConverterWrapper))
-{
+    : m_atomicStringTable(0),
+      m_atomicStringTableDestructor(0),
+      m_cachedConverterICU(adoptPtr(new ICUConverterWrapper)) {}
+
+WTFThreadData::~WTFThreadData() {
+  if (m_atomicStringTableDestructor)
+    m_atomicStringTableDestructor(m_atomicStringTable);
 }
 
-WTFThreadData::~WTFThreadData()
-{
-    if (m_atomicStringTableDestructor)
-        m_atomicStringTableDestructor(m_atomicStringTable);
-}
-
-} // namespace WTF
+}  // namespace WTF

@@ -37,37 +37,35 @@ namespace WTF {
 class RefCountedBase;
 class ThreadSafeRefCountedBase;
 
-template<typename T>
+template <typename T>
 struct IsRefCounted {
-    static const bool value = IsSubclass<T, RefCountedBase>::value
-        || IsSubclass<T, ThreadSafeRefCountedBase>::value;
+  static const bool value = IsSubclass<T, RefCountedBase>::value ||
+                            IsSubclass<T, ThreadSafeRefCountedBase>::value;
 };
 
 template <typename T>
 struct OwnedPtrDeleter {
-    static void deletePtr(T* ptr)
-    {
-        COMPILE_ASSERT(!IsRefCounted<T>::value, UseRefPtrForRefCountedObjects);
-        COMPILE_ASSERT(sizeof(T) > 0, TypeMustBeComplete);
-        delete ptr;
-    }
+  static void deletePtr(T* ptr) {
+    COMPILE_ASSERT(!IsRefCounted<T>::value, UseRefPtrForRefCountedObjects);
+    COMPILE_ASSERT(sizeof(T) > 0, TypeMustBeComplete);
+    delete ptr;
+  }
 };
 
 template <typename T>
 struct OwnedPtrDeleter<T[]> {
-    static void deletePtr(T* ptr)
-    {
-        COMPILE_ASSERT(!IsRefCounted<T>::value, UseRefPtrForRefCountedObjects);
-        COMPILE_ASSERT(sizeof(T) > 0, TypeMustBeComplete);
-        delete[] ptr;
-    }
+  static void deletePtr(T* ptr) {
+    COMPILE_ASSERT(!IsRefCounted<T>::value, UseRefPtrForRefCountedObjects);
+    COMPILE_ASSERT(sizeof(T) > 0, TypeMustBeComplete);
+    delete[] ptr;
+  }
 };
 
 template <class T, int n>
 struct OwnedPtrDeleter<T[n]> {
-    COMPILE_ASSERT(sizeof(T) < 0, DoNotUseArrayWithSizeAsType);
+  COMPILE_ASSERT(sizeof(T) < 0, DoNotUseArrayWithSizeAsType);
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_OWNPTRCOMMON_H_

@@ -13,7 +13,7 @@
 
 namespace tonic {
 class DartLibraryNatives;
-}  // namspace tonic
+}  // namespace tonic
 
 namespace blink {
 

@@ -33,153 +33,146 @@
 namespace blink {
 
 class PLATFORM_EXPORT Region {
-public:
-    Region();
-    Region(const IntRect&);
+ public:
+  Region();
+  Region(const IntRect&);
 
-    IntRect bounds() const { return m_bounds; }
-    bool isEmpty() const { return m_bounds.isEmpty(); }
-    bool isRect() const { return m_shape.isRect(); }
+  IntRect bounds() const { return m_bounds; }
+  bool isEmpty() const { return m_bounds.isEmpty(); }
+  bool isRect() const { return m_shape.isRect(); }
 
-    Vector<IntRect> rects() const;
+  Vector<IntRect> rects() const;
 
-    void unite(const Region&);
-    void intersect(const Region&);
-    void subtract(const Region&);
+  void unite(const Region&);
+  void intersect(const Region&);
+  void subtract(const Region&);
+
+  void translate(const IntSize&);
+
+  // Returns true if the query region is a subset of this region.
+  bool contains(const Region&) const;
+
+  bool contains(const IntPoint&) const;
+
+  // Returns true if the query region intersects any part of this region.
+  bool intersects(const Region&) const;
+
+  unsigned totalArea() const;
+
+#ifndef NDEBUG
+  void dump() const;
+#endif
+
+ private:
+  struct Span {
+    Span(int y, size_t segmentIndex) : y(y), segmentIndex(segmentIndex) {}
+
+    int y;
+    size_t segmentIndex;
+  };
+
+  class Shape {
+   public:
+    Shape();
+    Shape(const IntRect&);
+    Shape(size_t segmentsCapacity, size_t spansCapacity);
+
+    IntRect bounds() const;
+    bool isEmpty() const { return m_spans.isEmpty(); }
+    bool isRect() const {
+      return m_spans.size() <= 2 && m_segments.size() <= 2;
+    }
+
+    typedef const Span* SpanIterator;
+    SpanIterator spansBegin() const;
+    SpanIterator spansEnd() const;
+    size_t spansSize() const { return m_spans.size(); }
+
+    typedef const int* SegmentIterator;
+    SegmentIterator segmentsBegin(SpanIterator) const;
+    SegmentIterator segmentsEnd(SpanIterator) const;
+    size_t segmentsSize() const { return m_segments.size(); }
+
+    static Shape unionShapes(const Shape& shape1, const Shape& shape2);
+    static Shape intersectShapes(const Shape& shape1, const Shape& shape2);
+    static Shape subtractShapes(const Shape& shape1, const Shape& shape2);
 
     void translate(const IntSize&);
+    void swap(Shape&);
 
-    // Returns true if the query region is a subset of this region.
-    bool contains(const Region&) const;
+    struct CompareContainsOperation;
+    struct CompareIntersectsOperation;
 
-    bool contains(const IntPoint&) const;
-
-    // Returns true if the query region intersects any part of this region.
-    bool intersects(const Region&) const;
-
-    unsigned totalArea() const;
+    template <typename CompareOperation>
+    static bool compareShapes(const Shape& shape1, const Shape& shape2);
+    void trimCapacities();
 
 #ifndef NDEBUG
     void dump() const;
 #endif
 
-private:
-    struct Span {
-        Span(int y, size_t segmentIndex)
-            : y(y), segmentIndex(segmentIndex)
-        {
-        }
+   private:
+    struct UnionOperation;
+    struct IntersectOperation;
+    struct SubtractOperation;
 
-        int y;
-        size_t segmentIndex;
-    };
+    template <typename Operation>
+    static Shape shapeOperation(const Shape& shape1, const Shape& shape2);
 
-    class Shape {
-    public:
-        Shape();
-        Shape(const IntRect&);
-        Shape(size_t segmentsCapacity, size_t spansCapacity);
+    void appendSegment(int x);
+    void appendSpan(int y);
+    void appendSpan(int y, SegmentIterator begin, SegmentIterator end);
+    void appendSpans(const Shape&, SpanIterator begin, SpanIterator end);
 
-        IntRect bounds() const;
-        bool isEmpty() const { return m_spans.isEmpty(); }
-        bool isRect() const { return m_spans.size() <= 2 && m_segments.size() <= 2; }
+    bool canCoalesce(SegmentIterator begin, SegmentIterator end);
 
-        typedef const Span* SpanIterator;
-        SpanIterator spansBegin() const;
-        SpanIterator spansEnd() const;
-        size_t spansSize() const { return m_spans.size(); }
+    Vector<int, 32> m_segments;
+    Vector<Span, 16> m_spans;
 
-        typedef const int* SegmentIterator;
-        SegmentIterator segmentsBegin(SpanIterator) const;
-        SegmentIterator segmentsEnd(SpanIterator) const;
-        size_t segmentsSize() const { return m_segments.size(); }
-
-        static Shape unionShapes(const Shape& shape1, const Shape& shape2);
-        static Shape intersectShapes(const Shape& shape1, const Shape& shape2);
-        static Shape subtractShapes(const Shape& shape1, const Shape& shape2);
-
-        void translate(const IntSize&);
-        void swap(Shape&);
-
-        struct CompareContainsOperation;
-        struct CompareIntersectsOperation;
-
-        template<typename CompareOperation>
-        static bool compareShapes(const Shape& shape1, const Shape& shape2);
-        void trimCapacities();
-
-#ifndef NDEBUG
-        void dump() const;
-#endif
-
-    private:
-        struct UnionOperation;
-        struct IntersectOperation;
-        struct SubtractOperation;
-
-        template<typename Operation>
-        static Shape shapeOperation(const Shape& shape1, const Shape& shape2);
-
-        void appendSegment(int x);
-        void appendSpan(int y);
-        void appendSpan(int y, SegmentIterator begin, SegmentIterator end);
-        void appendSpans(const Shape&, SpanIterator begin, SpanIterator end);
-
-        bool canCoalesce(SegmentIterator begin, SegmentIterator end);
-
-        Vector<int, 32> m_segments;
-        Vector<Span, 16> m_spans;
-
-        friend bool operator==(const Shape&, const Shape&);
-    };
-
-    IntRect m_bounds;
-    Shape m_shape;
-
-    friend bool operator==(const Region&, const Region&);
     friend bool operator==(const Shape&, const Shape&);
-    friend bool operator==(const Span&, const Span&);
+  };
+
+  IntRect m_bounds;
+  Shape m_shape;
+
+  friend bool operator==(const Region&, const Region&);
+  friend bool operator==(const Shape&, const Shape&);
+  friend bool operator==(const Span&, const Span&);
 };
 
-static inline Region intersect(const Region& a, const Region& b)
-{
-    Region result(a);
-    result.intersect(b);
+static inline Region intersect(const Region& a, const Region& b) {
+  Region result(a);
+  result.intersect(b);
 
-    return result;
+  return result;
 }
 
-static inline Region subtract(const Region& a, const Region& b)
-{
-    Region result(a);
-    result.subtract(b);
+static inline Region subtract(const Region& a, const Region& b) {
+  Region result(a);
+  result.subtract(b);
 
-    return result;
+  return result;
 }
 
-static inline Region translate(const Region& region, const IntSize& offset)
-{
-    Region result(region);
-    result.translate(offset);
+static inline Region translate(const Region& region, const IntSize& offset) {
+  Region result(region);
+  result.translate(offset);
 
-    return result;
+  return result;
 }
 
-inline bool operator==(const Region& a, const Region& b)
-{
-    return a.m_bounds == b.m_bounds && a.m_shape == b.m_shape;
+inline bool operator==(const Region& a, const Region& b) {
+  return a.m_bounds == b.m_bounds && a.m_shape == b.m_shape;
 }
 
-inline bool operator==(const Region::Shape& a, const Region::Shape& b)
-{
-    return a.m_spans == b.m_spans && a.m_segments == b.m_segments;
+inline bool operator==(const Region::Shape& a, const Region::Shape& b) {
+  return a.m_spans == b.m_spans && a.m_segments == b.m_segments;
 }
 
-inline bool operator==(const Region::Span& a, const Region::Span& b)
-{
-    return a.y == b.y && a.segmentIndex == b.segmentIndex;
+inline bool operator==(const Region::Span& a, const Region::Span& b) {
+  return a.y == b.y && a.segmentIndex == b.segmentIndex;
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_REGION_H_

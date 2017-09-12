@@ -50,15 +50,13 @@ namespace WTF {
 //         ValueN
 //     } ENUM_CLASS_END(MyEnums);
 //
-// The ENUM_CLASS macros will use C++11's enum class if the compiler supports it.
-// Otherwise, it will use the EnumClass template below.
+// The ENUM_CLASS macros will use C++11's enum class if the compiler supports
+// it. Otherwise, it will use the EnumClass template below.
 
-
-#define ENUM_CLASS(__enumName) \
-    enum class __enumName
+#define ENUM_CLASS(__enumName) enum class __enumName
 
 #define ENUM_CLASS_END(__enumName)
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_ENUMCLASS_H_

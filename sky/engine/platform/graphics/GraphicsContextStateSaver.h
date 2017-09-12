@@ -35,44 +35,41 @@
 namespace blink {
 
 class PLATFORM_EXPORT GraphicsContextStateSaver {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    GraphicsContextStateSaver(GraphicsContext& context, bool saveAndRestore = true)
-        : m_context(context)
-        , m_saveAndRestore(saveAndRestore)
-    {
-        if (m_saveAndRestore)
-            m_context.save();
-    }
+  WTF_MAKE_FAST_ALLOCATED;
 
-    ~GraphicsContextStateSaver()
-    {
-        if (m_saveAndRestore)
-            m_context.restore();
-    }
+ public:
+  GraphicsContextStateSaver(GraphicsContext& context,
+                            bool saveAndRestore = true)
+      : m_context(context), m_saveAndRestore(saveAndRestore) {
+    if (m_saveAndRestore)
+      m_context.save();
+  }
 
-    void save()
-    {
-        ASSERT(!m_saveAndRestore);
-        m_context.save();
-        m_saveAndRestore = true;
-    }
+  ~GraphicsContextStateSaver() {
+    if (m_saveAndRestore)
+      m_context.restore();
+  }
 
-    void restore()
-    {
-        ASSERT(m_saveAndRestore);
-        m_context.restore();
-        m_saveAndRestore = false;
-    }
+  void save() {
+    ASSERT(!m_saveAndRestore);
+    m_context.save();
+    m_saveAndRestore = true;
+  }
 
-    GraphicsContext* context() const { return &m_context; }
-    bool saved() const { return m_saveAndRestore; }
+  void restore() {
+    ASSERT(m_saveAndRestore);
+    m_context.restore();
+    m_saveAndRestore = false;
+  }
 
-private:
-    GraphicsContext& m_context;
-    bool m_saveAndRestore;
+  GraphicsContext* context() const { return &m_context; }
+  bool saved() const { return m_saveAndRestore; }
+
+ private:
+  GraphicsContext& m_context;
+  bool m_saveAndRestore;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATESAVER_H_

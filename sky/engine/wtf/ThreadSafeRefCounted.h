@@ -39,60 +39,47 @@
 namespace WTF {
 
 class WTF_EXPORT ThreadSafeRefCountedBase {
-    WTF_MAKE_NONCOPYABLE(ThreadSafeRefCountedBase);
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    ThreadSafeRefCountedBase(int initialRefCount = 1)
-        : m_refCount(initialRefCount)
-    {
-    }
+  WTF_MAKE_NONCOPYABLE(ThreadSafeRefCountedBase);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    void ref()
-    {
-        atomicIncrement(&m_refCount);
-    }
+ public:
+  ThreadSafeRefCountedBase(int initialRefCount = 1)
+      : m_refCount(initialRefCount) {}
 
-    bool hasOneRef()
-    {
-        return refCount() == 1;
-    }
+  void ref() { atomicIncrement(&m_refCount); }
 
-    int refCount() const
-    {
-        return static_cast<int const volatile &>(m_refCount);
-    }
+  bool hasOneRef() { return refCount() == 1; }
 
-protected:
-    // Returns whether the pointer should be freed or not.
-    bool derefBase()
-    {
-        WTF_ANNOTATE_HAPPENS_BEFORE(&m_refCount);
-        if (atomicDecrement(&m_refCount) <= 0) {
-            WTF_ANNOTATE_HAPPENS_AFTER(&m_refCount);
-            return true;
-        }
-        return false;
-    }
+  int refCount() const { return static_cast<int const volatile&>(m_refCount); }
 
-private:
-    int m_refCount;
+ protected:
+  // Returns whether the pointer should be freed or not.
+  bool derefBase() {
+    WTF_ANNOTATE_HAPPENS_BEFORE(&m_refCount);
+    if (atomicDecrement(&m_refCount) <= 0) {
+      WTF_ANNOTATE_HAPPENS_AFTER(&m_refCount);
+      return true;
+    }
+    return false;
+  }
+
+ private:
+  int m_refCount;
 };
 
-template<class T> class ThreadSafeRefCounted : public ThreadSafeRefCountedBase {
-public:
-    void deref()
-    {
-        if (derefBase())
-            delete static_cast<T*>(this);
-    }
+template <class T>
+class ThreadSafeRefCounted : public ThreadSafeRefCountedBase {
+ public:
+  void deref() {
+    if (derefBase())
+      delete static_cast<T*>(this);
+  }
 
-protected:
-    ThreadSafeRefCounted()
-    {
-    }
+ protected:
+  ThreadSafeRefCounted() {}
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::ThreadSafeRefCounted;
 

@@ -42,77 +42,81 @@
 namespace blink {
 class GraphicsContext;
 
-enum RegionTrackingMode {
-    TrackOpaqueRegion,
-    TRackOverwriteRegion
-};
+enum RegionTrackingMode { TrackOpaqueRegion, TRackOverwriteRegion };
 
-// This class is an encapsulation of functionality for GraphicsContext, and its methods are mirrored
-// there for the outside world. It tracks paints and computes what area will be opaque.
+// This class is an encapsulation of functionality for GraphicsContext, and its
+// methods are mirrored there for the outside world. It tracks paints and
+// computes what area will be opaque.
 class PLATFORM_EXPORT RegionTracker final {
-public:
-    RegionTracker();
+ public:
+  RegionTracker();
 
-    // The resulting opaque region as a single rect.
-    IntRect asRect() const;
+  // The resulting opaque region as a single rect.
+  IntRect asRect() const;
 
-    void pushCanvasLayer(const SkPaint*);
-    void popCanvasLayer(const GraphicsContext*);
+  void pushCanvasLayer(const SkPaint*);
+  void popCanvasLayer(const GraphicsContext*);
 
-    void setImageMask(const SkRect& imageOpaqueRect);
+  void setImageMask(const SkRect& imageOpaqueRect);
 
-    enum RegionType {
-        Opaque,
-        Overwrite
-    };
+  enum RegionType { Opaque, Overwrite };
 
-    // Set this to true to track regions that occlude the destination instead of only regions that produce opaque pixels.
-    void setTrackedRegionType(RegionType type) { m_trackedRegionType = type; }
+  // Set this to true to track regions that occlude the destination instead of
+  // only regions that produce opaque pixels.
+  void setTrackedRegionType(RegionType type) { m_trackedRegionType = type; }
 
-    enum DrawType {
-        FillOnly,
-        FillOrStroke
-    };
+  enum DrawType { FillOnly, FillOrStroke };
 
-    void didDrawRect(const GraphicsContext*, const SkRect&, const SkPaint&, const SkBitmap* sourceBitmap);
-    void didDrawPath(const GraphicsContext*, const SkPath&, const SkPaint&);
-    void didDrawPoints(const GraphicsContext*, SkCanvas::PointMode, int numPoints, const SkPoint[], const SkPaint&);
-    void didDrawBounded(const GraphicsContext*, const SkRect&, const SkPaint&);
-    void didDrawUnbounded(const GraphicsContext*, const SkPaint&, DrawType);
+  void didDrawRect(const GraphicsContext*,
+                   const SkRect&,
+                   const SkPaint&,
+                   const SkBitmap* sourceBitmap);
+  void didDrawPath(const GraphicsContext*, const SkPath&, const SkPaint&);
+  void didDrawPoints(const GraphicsContext*,
+                     SkCanvas::PointMode,
+                     int numPoints,
+                     const SkPoint[],
+                     const SkPaint&);
+  void didDrawBounded(const GraphicsContext*, const SkRect&, const SkPaint&);
+  void didDrawUnbounded(const GraphicsContext*, const SkPaint&, DrawType);
 
-    struct CanvasLayerState {
-        CanvasLayerState()
-            : hasImageMask(false)
-            , opaqueRect(SkRect::MakeEmpty())
-        { }
+  struct CanvasLayerState {
+    CanvasLayerState() : hasImageMask(false), opaqueRect(SkRect::MakeEmpty()) {}
 
-        SkPaint paint;
+    SkPaint paint;
 
-        // An image mask is being applied to the layer.
-        bool hasImageMask;
-        // The opaque area in the image mask.
-        SkRect imageOpaqueRect;
+    // An image mask is being applied to the layer.
+    bool hasImageMask;
+    // The opaque area in the image mask.
+    SkRect imageOpaqueRect;
 
-        SkRect opaqueRect;
-    };
+    SkRect opaqueRect;
+  };
 
-    void reset();
+  void reset();
 
-private:
-    void didDraw(const GraphicsContext*, const SkRect&, const SkPaint&, const SkBitmap* sourceBitmap, bool fillsBounds, DrawType);
-    void applyOpaqueRegionFromLayer(const GraphicsContext*, const SkRect& layerOpaqueRect, const SkPaint&);
-    void markRectAsOpaque(const SkRect&);
-    void markRectAsNonOpaque(const SkRect&);
-    void markAllAsNonOpaque();
+ private:
+  void didDraw(const GraphicsContext*,
+               const SkRect&,
+               const SkPaint&,
+               const SkBitmap* sourceBitmap,
+               bool fillsBounds,
+               DrawType);
+  void applyOpaqueRegionFromLayer(const GraphicsContext*,
+                                  const SkRect& layerOpaqueRect,
+                                  const SkPaint&);
+  void markRectAsOpaque(const SkRect&);
+  void markRectAsNonOpaque(const SkRect&);
+  void markAllAsNonOpaque();
 
-    SkRect& currentTrackingOpaqueRect();
+  SkRect& currentTrackingOpaqueRect();
 
-    SkRect m_opaqueRect;
-    RegionType m_trackedRegionType;
+  SkRect m_opaqueRect;
+  RegionType m_trackedRegionType;
 
-    Vector<CanvasLayerState, 3> m_canvasLayerStack;
+  Vector<CanvasLayerState, 3> m_canvasLayerStack;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_REGIONTRACKER_H_

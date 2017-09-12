@@ -41,39 +41,56 @@
 namespace blink {
 
 class PLATFORM_EXPORT Character {
-public:
-    static CodePath characterRangeCodePath(const LChar*, unsigned) { return SimplePath; }
-    static CodePath characterRangeCodePath(const UChar*, unsigned len);
+ public:
+  static CodePath characterRangeCodePath(const LChar*, unsigned) {
+    return SimplePath;
+  }
+  static CodePath characterRangeCodePath(const UChar*, unsigned len);
 
-    static bool isCJKIdeograph(UChar32);
-    static bool isCJKIdeographOrSymbol(UChar32);
+  static bool isCJKIdeograph(UChar32);
+  static bool isCJKIdeographOrSymbol(UChar32);
 
-    static unsigned expansionOpportunityCount(const LChar*, size_t length, TextDirection, bool& isAfterExpansion);
-    static unsigned expansionOpportunityCount(const UChar*, size_t length, TextDirection, bool& isAfterExpansion);
+  static unsigned expansionOpportunityCount(const LChar*,
+                                            size_t length,
+                                            TextDirection,
+                                            bool& isAfterExpansion);
+  static unsigned expansionOpportunityCount(const UChar*,
+                                            size_t length,
+                                            TextDirection,
+                                            bool& isAfterExpansion);
 
-    static bool treatAsSpace(UChar c) { return c == ' ' || c == '\t' || c == '\n' || c == noBreakSpace; }
-    static bool treatAsZeroWidthSpace(UChar c) { return treatAsZeroWidthSpaceInComplexScript(c) || c == 0x200c || c == 0x200d; }
-    static bool treatAsZeroWidthSpaceInComplexScript(UChar c) { return c < 0x20 || (c >= 0x7F && c < 0xA0) || c == softHyphen || c == zeroWidthSpace || (c >= 0x200e && c <= 0x200f) || (c >= 0x202a && c <= 0x202e) || c == zeroWidthNoBreakSpace || c == objectReplacementCharacter; }
-    static bool canReceiveTextEmphasis(UChar32);
+  static bool treatAsSpace(UChar c) {
+    return c == ' ' || c == '\t' || c == '\n' || c == noBreakSpace;
+  }
+  static bool treatAsZeroWidthSpace(UChar c) {
+    return treatAsZeroWidthSpaceInComplexScript(c) || c == 0x200c ||
+           c == 0x200d;
+  }
+  static bool treatAsZeroWidthSpaceInComplexScript(UChar c) {
+    return c < 0x20 || (c >= 0x7F && c < 0xA0) || c == softHyphen ||
+           c == zeroWidthSpace || (c >= 0x200e && c <= 0x200f) ||
+           (c >= 0x202a && c <= 0x202e) || c == zeroWidthNoBreakSpace ||
+           c == objectReplacementCharacter;
+  }
+  static bool canReceiveTextEmphasis(UChar32);
 
-    static inline UChar normalizeSpaces(UChar character)
-    {
-        if (treatAsSpace(character))
-            return space;
+  static inline UChar normalizeSpaces(UChar character) {
+    if (treatAsSpace(character))
+      return space;
 
-        if (treatAsZeroWidthSpace(character))
-            return zeroWidthSpace;
+    if (treatAsZeroWidthSpace(character))
+      return zeroWidthSpace;
 
-        return character;
-    }
+    return character;
+  }
 
-    static String normalizeSpaces(const LChar*, unsigned length);
-    static String normalizeSpaces(const UChar*, unsigned length);
+  static String normalizeSpaces(const LChar*, unsigned length);
+  static String normalizeSpaces(const UChar*, unsigned length);
 
-private:
-    Character();
+ private:
+  Character();
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_CHARACTER_H_

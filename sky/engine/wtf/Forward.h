@@ -24,22 +24,29 @@
 #include <stddef.h>
 
 namespace WTF {
-    template<typename T> class Function;
-    template<typename T> class OwnPtr;
-    template<typename T> class PassOwnPtr;
-    template<typename T> class PassRefPtr;
-    template<typename T> class RefPtr;
-    template<typename T, size_t inlineCapacity, typename Allocator> class Vector;
+template <typename T>
+class Function;
+template <typename T>
+class OwnPtr;
+template <typename T>
+class PassOwnPtr;
+template <typename T>
+class PassRefPtr;
+template <typename T>
+class RefPtr;
+template <typename T, size_t inlineCapacity, typename Allocator>
+class Vector;
 
-    class AtomicString;
-    class CString;
-    template<size_t size>
-    class SizeSpecificPartitionAllocator;
-    class String;
-    template <typename T> class StringBuffer;
-    class StringBuilder;
-    class StringImpl;
-}
+class AtomicString;
+class CString;
+template <size_t size>
+class SizeSpecificPartitionAllocator;
+class String;
+template <typename T>
+class StringBuffer;
+class StringBuilder;
+class StringImpl;
+}  // namespace WTF
 
 using WTF::Function;
 using WTF::OwnPtr;

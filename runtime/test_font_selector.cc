@@ -27,13 +27,12 @@ PassRefPtr<FontData> TestFontSelector::getFontData(
 
   bool syntheticBold = (fontDescription.weight() >= FontWeight600 ||
                         fontDescription.isSyntheticBold());
-  bool syntheticItalic = (fontDescription.style() ||
-                          fontDescription.isSyntheticItalic());
-  FontPlatformData platform_data(test_typeface_, "Ahem",
-                                 fontDescription.effectiveFontSize(),
-                                 syntheticBold, syntheticItalic,
-                                 fontDescription.orientation(),
-                                 fontDescription.useSubpixelPositioning());
+  bool syntheticItalic =
+      (fontDescription.style() || fontDescription.isSyntheticItalic());
+  FontPlatformData platform_data(
+      test_typeface_, "Ahem", fontDescription.effectiveFontSize(),
+      syntheticBold, syntheticItalic, fontDescription.orientation(),
+      fontDescription.useSubpixelPositioning());
 
   return SimpleFontData::create(platform_data, CustomFontData::create());
 }

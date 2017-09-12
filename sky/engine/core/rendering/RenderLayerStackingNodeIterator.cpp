@@ -35,77 +35,74 @@
 
 namespace blink {
 
-RenderLayerStackingNode* RenderLayerStackingNodeIterator::next()
-{
-    if (m_remainingChildren & NormalFlowChildren) {
-        Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
-        if (normalFlowList && m_index < normalFlowList->size())
-            return normalFlowList->at(m_index++);
+RenderLayerStackingNode* RenderLayerStackingNodeIterator::next() {
+  if (m_remainingChildren & NormalFlowChildren) {
+    Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
+    if (normalFlowList && m_index < normalFlowList->size())
+      return normalFlowList->at(m_index++);
 
-        m_index = 0;
-        m_remainingChildren &= ~NormalFlowChildren;
-    }
+    m_index = 0;
+    m_remainingChildren &= ~NormalFlowChildren;
+  }
 
-    if (m_remainingChildren & PositiveZOrderChildren) {
-        Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
-        if (zOrderList && m_index < zOrderList->size())
-            return zOrderList->at(m_index++);
+  if (m_remainingChildren & PositiveZOrderChildren) {
+    Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
+    if (zOrderList && m_index < zOrderList->size())
+      return zOrderList->at(m_index++);
 
-        m_index = 0;
-        m_remainingChildren &= ~PositiveZOrderChildren;
-    }
+    m_index = 0;
+    m_remainingChildren &= ~PositiveZOrderChildren;
+  }
 
-    return 0;
+  return 0;
 }
 
-RenderLayerStackingNode* RenderLayerStackingNodeReverseIterator::next()
-{
-    if (m_remainingChildren & NormalFlowChildren) {
-        Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
-        if (normalFlowList && m_index >= 0)
-            return normalFlowList->at(m_index--);
+RenderLayerStackingNode* RenderLayerStackingNodeReverseIterator::next() {
+  if (m_remainingChildren & NormalFlowChildren) {
+    Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
+    if (normalFlowList && m_index >= 0)
+      return normalFlowList->at(m_index--);
 
-        m_remainingChildren &= ~NormalFlowChildren;
-        setIndexToLastItem();
-    }
+    m_remainingChildren &= ~NormalFlowChildren;
+    setIndexToLastItem();
+  }
 
-    if (m_remainingChildren & PositiveZOrderChildren) {
-        Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
-        if (zOrderList && m_index >= 0)
-            return zOrderList->at(m_index--);
+  if (m_remainingChildren & PositiveZOrderChildren) {
+    Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
+    if (zOrderList && m_index >= 0)
+      return zOrderList->at(m_index--);
 
-        m_remainingChildren &= ~PositiveZOrderChildren;
-        setIndexToLastItem();
-    }
+    m_remainingChildren &= ~PositiveZOrderChildren;
+    setIndexToLastItem();
+  }
 
-    return 0;
+  return 0;
 }
 
-void RenderLayerStackingNodeReverseIterator::setIndexToLastItem()
-{
-    if (m_remainingChildren & NormalFlowChildren) {
-        Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
-        if (normalFlowList) {
-            m_index = normalFlowList->size() - 1;
-            return;
-        }
-
-        m_remainingChildren &= ~NormalFlowChildren;
+void RenderLayerStackingNodeReverseIterator::setIndexToLastItem() {
+  if (m_remainingChildren & NormalFlowChildren) {
+    Vector<RenderLayerStackingNode*>* normalFlowList = m_root.normalFlowList();
+    if (normalFlowList) {
+      m_index = normalFlowList->size() - 1;
+      return;
     }
 
-    if (m_remainingChildren & PositiveZOrderChildren) {
-        Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
-        if (zOrderList) {
-            m_index = zOrderList->size() - 1;
-            return;
-        }
+    m_remainingChildren &= ~NormalFlowChildren;
+  }
 
-        m_remainingChildren &= ~PositiveZOrderChildren;
+  if (m_remainingChildren & PositiveZOrderChildren) {
+    Vector<RenderLayerStackingNode*>* zOrderList = m_root.zOrderList();
+    if (zOrderList) {
+      m_index = zOrderList->size() - 1;
+      return;
     }
 
-    // No more list to visit.
-    ASSERT(!m_remainingChildren);
-    m_index = -1;
+    m_remainingChildren &= ~PositiveZOrderChildren;
+  }
+
+  // No more list to visit.
+  ASSERT(!m_remainingChildren);
+  m_index = -1;
 }
 
-} // namespace blink
+}  // namespace blink

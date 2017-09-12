@@ -31,6 +31,6 @@ namespace blink {
 PLATFORM_EXPORT const char* currentSearchLocaleID();
 PLATFORM_EXPORT const char* currentTextBreakLocaleID();
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTBREAKITERATORINTERNALICU_H_

@@ -9,7 +9,7 @@
 #include <mxio/namespace.h>
 #include <utility>
 
-#include "lib/app/cpp/connect.h"
+#include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
@@ -21,11 +21,11 @@
 #include "flutter/runtime/dart_controller.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/runtime_init.h"
-#include "dart-pkg/zircon/sdk_ext/handle.h"
+#include "lib/app/cpp/connect.h"
+#include "lib/fsl/vmo/vector.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
-#include "lib/fsl/vmo/vector.h"
 #include "lib/zip/create_unzipper.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
@@ -371,8 +371,8 @@ void RuntimeHolder::InitDartIoInternal() {
   Dart_Handle namespace_args[1];
   namespace_args[0] = Dart_NewInteger(reinterpret_cast<intptr_t>(namespc_));
   DART_CHECK_VALID(namespace_args[0]);
-  DART_CHECK_VALID(Dart_Invoke(
-      namespace_type, ToDart("_setupNamespace"), 1, namespace_args));
+  DART_CHECK_VALID(Dart_Invoke(namespace_type, ToDart("_setupNamespace"), 1,
+                               namespace_args));
 
   // Disable dart:io exit()
   Dart_Handle embedder_config_type =
@@ -385,8 +385,8 @@ void RuntimeHolder::InitDartIoInternal() {
 void RuntimeHolder::InitFuchsia() {
   fidl::InterfaceHandle<app::ApplicationEnvironment> environment;
   context_->ConnectToEnvironmentService(environment.NewRequest());
-  fuchsia::dart::Initialize(std::move(environment), std::move(outgoing_services_));
-
+  fuchsia::dart::Initialize(std::move(environment),
+                            std::move(outgoing_services_));
 }
 
 void RuntimeHolder::InitMozartInternal() {

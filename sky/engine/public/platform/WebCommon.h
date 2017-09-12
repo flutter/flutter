@@ -44,21 +44,20 @@
 #endif
 
 #if defined(COMPONENT_BUILD)
-    #define BLINK_EXPORT __attribute__((visibility("default")))
-    #define BLINK_PLATFORM_EXPORT __attribute__((visibility("default")))
-    #define BLINK_COMMON_EXPORT __attribute__((visibility("default")))
-#else // defined(COMPONENT_BUILD)
-    #define BLINK_EXPORT
-    #define BLINK_PLATFORM_EXPORT
-    #define BLINK_COMMON_EXPORT
+#define BLINK_EXPORT __attribute__((visibility("default")))
+#define BLINK_PLATFORM_EXPORT __attribute__((visibility("default")))
+#define BLINK_COMMON_EXPORT __attribute__((visibility("default")))
+#else  // defined(COMPONENT_BUILD)
+#define BLINK_EXPORT
+#define BLINK_PLATFORM_EXPORT
+#define BLINK_COMMON_EXPORT
 #endif
-
 
 // -----------------------------------------------------------------------------
 // Basic types
 
-#include <stddef.h> // For size_t
-#include <stdint.h> // For int32_t
+#include <stddef.h>  // For size_t
+#include <stdint.h>  // For int32_t
 
 namespace blink {
 
@@ -74,18 +73,23 @@ typedef unsigned char WebLChar;
 // -----------------------------------------------------------------------------
 // Assertions
 
-BLINK_COMMON_EXPORT void failedAssertion(const char* file, int line, const char* function, const char* assertion);
+BLINK_COMMON_EXPORT void failedAssertion(const char* file,
+                                         int line,
+                                         const char* function,
+                                         const char* assertion);
 
-} // namespace blink
+}  // namespace blink
 
-// Ideally, only use inside the public directory but outside of INSIDE_BLINK blocks.  (Otherwise use WTF's ASSERT.)
+// Ideally, only use inside the public directory but outside of INSIDE_BLINK
+// blocks.  (Otherwise use WTF's ASSERT.)
 #if defined(NDEBUG)
 #define BLINK_ASSERT(assertion) ((void)0)
 #else
-#define BLINK_ASSERT(assertion) do { \
-    if (!(assertion)) \
-        failedAssertion(__FILE__, __LINE__, __FUNCTION__, #assertion); \
-} while (0)
+#define BLINK_ASSERT(assertion)                                      \
+  do {                                                               \
+    if (!(assertion))                                                \
+      failedAssertion(__FILE__, __LINE__, __FUNCTION__, #assertion); \
+  } while (0)
 #endif
 
 #define BLINK_ASSERT_NOT_REACHED() BLINK_ASSERT(0)

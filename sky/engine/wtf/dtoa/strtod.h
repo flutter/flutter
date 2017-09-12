@@ -34,12 +34,12 @@ namespace WTF {
 
 namespace double_conversion {
 
-    // The buffer must only contain digits in the range [0-9]. It must not
-    // contain a dot or a sign. It must not start with '0', and must not be empty.
-    double Strtod(Vector<const char> buffer, int exponent);
+// The buffer must only contain digits in the range [0-9]. It must not
+// contain a dot or a sign. It must not start with '0', and must not be empty.
+double Strtod(Vector<const char> buffer, int exponent);
 
 }  // namespace double_conversion
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_DTOA_STRTOD_H_

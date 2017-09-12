@@ -27,7 +27,8 @@
 
 // The vprintf_stderr_common function triggers this error in the Mac build.
 // Feel free to remove this pragma if this file builds on Mac.
-// According to http://gcc.gnu.org/onlinedocs/gcc-4.2.1/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+// According to
+// http://gcc.gnu.org/onlinedocs/gcc-4.2.1/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
 // we need to place this directive before any data or functions are defined.
 #pragma GCC diagnostic ignored "-Wmissing-format-attribute"
 
@@ -60,12 +61,11 @@
 extern "C" {
 
 WTF_ATTRIBUTE_PRINTF(1, 0)
-static void vprintf_stderr_common(const char* format, va_list args)
-{
+static void vprintf_stderr_common(const char* format, va_list args) {
 #if OS(ANDROID)
-    __android_log_vprint(ANDROID_LOG_WARN, "flutter", format, args);
+  __android_log_vprint(ANDROID_LOG_WARN, "flutter", format, args);
 #else
-    vfprintf(stderr, format, args);
+  vfprintf(stderr, format, args);
 #endif
 }
 
@@ -74,32 +74,34 @@ static void vprintf_stderr_common(const char* format, va_list args)
 #pragma GCC diagnostic ignored "-Wformat-nonliteral"
 #endif
 
-static void vprintf_stderr_with_prefix(const char* prefix, const char* format, va_list args)
-{
-    size_t prefixLength = strlen(prefix);
-    size_t formatLength = strlen(format);
-    OwnPtr<char[]> formatWithPrefix = adoptArrayPtr(new char[prefixLength + formatLength + 1]);
-    memcpy(formatWithPrefix.get(), prefix, prefixLength);
-    memcpy(formatWithPrefix.get() + prefixLength, format, formatLength);
-    formatWithPrefix[prefixLength + formatLength] = 0;
+static void vprintf_stderr_with_prefix(const char* prefix,
+                                       const char* format,
+                                       va_list args) {
+  size_t prefixLength = strlen(prefix);
+  size_t formatLength = strlen(format);
+  OwnPtr<char[]> formatWithPrefix =
+      adoptArrayPtr(new char[prefixLength + formatLength + 1]);
+  memcpy(formatWithPrefix.get(), prefix, prefixLength);
+  memcpy(formatWithPrefix.get() + prefixLength, format, formatLength);
+  formatWithPrefix[prefixLength + formatLength] = 0;
 
-    vprintf_stderr_common(formatWithPrefix.get(), args);
+  vprintf_stderr_common(formatWithPrefix.get(), args);
 }
 
-static void vprintf_stderr_with_trailing_newline(const char* format, va_list args)
-{
-    size_t formatLength = strlen(format);
-    if (formatLength && format[formatLength - 1] == '\n') {
-        vprintf_stderr_common(format, args);
-        return;
-    }
+static void vprintf_stderr_with_trailing_newline(const char* format,
+                                                 va_list args) {
+  size_t formatLength = strlen(format);
+  if (formatLength && format[formatLength - 1] == '\n') {
+    vprintf_stderr_common(format, args);
+    return;
+  }
 
-    OwnPtr<char[]> formatWithNewline = adoptArrayPtr(new char[formatLength + 2]);
-    memcpy(formatWithNewline.get(), format, formatLength);
-    formatWithNewline[formatLength] = '\n';
-    formatWithNewline[formatLength + 1] = 0;
+  OwnPtr<char[]> formatWithNewline = adoptArrayPtr(new char[formatLength + 2]);
+  memcpy(formatWithNewline.get(), format, formatLength);
+  formatWithNewline[formatLength] = '\n';
+  formatWithNewline[formatLength + 1] = 0;
 
-    vprintf_stderr_common(formatWithNewline.get(), args);
+  vprintf_stderr_common(formatWithNewline.get(), args);
 }
 
 #if COMPILER(CLANG) || COMPILER(GCC)
@@ -107,102 +109,117 @@ static void vprintf_stderr_with_trailing_newline(const char* format, va_list arg
 #endif
 
 WTF_ATTRIBUTE_PRINTF(1, 2)
-static void printf_stderr_common(const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_common(format, args);
-    va_end(args);
+static void printf_stderr_common(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_common(format, args);
+  va_end(args);
 }
 
-static void printCallSite(const char* file, int line, const char* function)
-{
-    // By using this format, which matches the format used by MSVC for compiler errors, developers
-    // using Visual Studio can double-click the file/line number in the Output Window to have the
-    // editor navigate to that line of code. It seems fine for other developers, too.
-    printf_stderr_common("%s(%d) : %s\n", file, line, function);
+static void printCallSite(const char* file, int line, const char* function) {
+  // By using this format, which matches the format used by MSVC for compiler
+  // errors, developers using Visual Studio can double-click the file/line
+  // number in the Output Window to have the editor navigate to that line of
+  // code. It seems fine for other developers, too.
+  printf_stderr_common("%s(%d) : %s\n", file, line, function);
 }
 
-void WTFReportAssertionFailure(const char* file, int line, const char* function, const char* assertion)
-{
-    if (assertion)
-        printf_stderr_common("ASSERTION FAILED: %s\n", assertion);
-    else
-        printf_stderr_common("SHOULD NEVER BE REACHED\n");
-    printCallSite(file, line, function);
+void WTFReportAssertionFailure(const char* file,
+                               int line,
+                               const char* function,
+                               const char* assertion) {
+  if (assertion)
+    printf_stderr_common("ASSERTION FAILED: %s\n", assertion);
+  else
+    printf_stderr_common("SHOULD NEVER BE REACHED\n");
+  printCallSite(file, line, function);
 }
 
-void WTFReportAssertionFailureWithMessage(const char* file, int line, const char* function, const char* assertion, const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_prefix("ASSERTION FAILED: ", format, args);
-    va_end(args);
-    printf_stderr_common("\n%s\n", assertion);
-    printCallSite(file, line, function);
+void WTFReportAssertionFailureWithMessage(const char* file,
+                                          int line,
+                                          const char* function,
+                                          const char* assertion,
+                                          const char* format,
+                                          ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_prefix("ASSERTION FAILED: ", format, args);
+  va_end(args);
+  printf_stderr_common("\n%s\n", assertion);
+  printCallSite(file, line, function);
 }
 
-void WTFReportArgumentAssertionFailure(const char* file, int line, const char* function, const char* argName, const char* assertion)
-{
-    printf_stderr_common("ARGUMENT BAD: %s, %s\n", argName, assertion);
-    printCallSite(file, line, function);
+void WTFReportArgumentAssertionFailure(const char* file,
+                                       int line,
+                                       const char* function,
+                                       const char* argName,
+                                       const char* assertion) {
+  printf_stderr_common("ARGUMENT BAD: %s, %s\n", argName, assertion);
+  printCallSite(file, line, function);
 }
 
-void WTFReportBacktrace()
-{
-    glue::PrintStackTrace();
+void WTFReportBacktrace() {
+  glue::PrintStackTrace();
 }
 
-void WTFReportFatalError(const char* file, int line, const char* function, const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_prefix("FATAL ERROR: ", format, args);
-    va_end(args);
-    printf_stderr_common("\n");
-    printCallSite(file, line, function);
+void WTFReportFatalError(const char* file,
+                         int line,
+                         const char* function,
+                         const char* format,
+                         ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_prefix("FATAL ERROR: ", format, args);
+  va_end(args);
+  printf_stderr_common("\n");
+  printCallSite(file, line, function);
 }
 
-void WTFReportError(const char* file, int line, const char* function, const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_prefix("ERROR: ", format, args);
-    va_end(args);
-    printf_stderr_common("\n");
-    printCallSite(file, line, function);
+void WTFReportError(const char* file,
+                    int line,
+                    const char* function,
+                    const char* format,
+                    ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_prefix("ERROR: ", format, args);
+  va_end(args);
+  printf_stderr_common("\n");
+  printCallSite(file, line, function);
 }
 
-void WTFLog(WTFLogChannel* channel, const char* format, ...)
-{
-    if (channel->state != WTFLogChannelOn)
-        return;
+void WTFLog(WTFLogChannel* channel, const char* format, ...) {
+  if (channel->state != WTFLogChannelOn)
+    return;
 
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_trailing_newline(format, args);
-    va_end(args);
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_trailing_newline(format, args);
+  va_end(args);
 }
 
-void WTFLogVerbose(const char* file, int line, const char* function, WTFLogChannel* channel, const char* format, ...)
-{
-    if (channel->state != WTFLogChannelOn)
-        return;
+void WTFLogVerbose(const char* file,
+                   int line,
+                   const char* function,
+                   WTFLogChannel* channel,
+                   const char* format,
+                   ...) {
+  if (channel->state != WTFLogChannelOn)
+    return;
 
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_trailing_newline(format, args);
-    va_end(args);
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_trailing_newline(format, args);
+  va_end(args);
 
-    printCallSite(file, line, function);
+  printCallSite(file, line, function);
 }
 
-void WTFLogAlways(const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    vprintf_stderr_with_trailing_newline(format, args);
-    va_end(args);
+void WTFLogAlways(const char* format, ...) {
+  va_list args;
+  va_start(args, format);
+  vprintf_stderr_with_trailing_newline(format, args);
+  va_end(args);
 }
 
-} // extern "C"
+}  // extern "C"

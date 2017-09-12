@@ -25,7 +25,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  * Alternatively, the contents of this file may be used under the terms
  * of either the Mozilla Public License Version 1.1, found at
@@ -53,76 +53,77 @@ namespace blink {
 class RenderLayer;
 
 class ClipRectsContext {
-public:
-    ClipRectsContext(const RenderLayer* root, ClipRectsCacheSlot slot, const LayoutSize& accumulation = LayoutSize())
-        : rootLayer(root)
-        , cacheSlot(slot)
-        , subPixelAccumulation(accumulation)
-    {
-    }
+ public:
+  ClipRectsContext(const RenderLayer* root,
+                   ClipRectsCacheSlot slot,
+                   const LayoutSize& accumulation = LayoutSize())
+      : rootLayer(root), cacheSlot(slot), subPixelAccumulation(accumulation) {}
 
-    bool usesCache() const
-    {
-        return cacheSlot != UncachedClipRects;
-    }
+  bool usesCache() const { return cacheSlot != UncachedClipRects; }
 
-    const RenderLayer* const rootLayer;
+  const RenderLayer* const rootLayer;
 
-private:
-    friend class RenderLayerClipper;
+ private:
+  friend class RenderLayerClipper;
 
-    ClipRectsCacheSlot cacheSlot;
-    LayoutSize subPixelAccumulation;
+  ClipRectsCacheSlot cacheSlot;
+  LayoutSize subPixelAccumulation;
 };
 
 class RenderLayerClipper {
-    WTF_MAKE_NONCOPYABLE(RenderLayerClipper);
-public:
-    explicit RenderLayerClipper(RenderBox&);
+  WTF_MAKE_NONCOPYABLE(RenderLayerClipper);
 
-    void clearClipRectsIncludingDescendants();
-    void clearClipRectsIncludingDescendants(ClipRectsCacheSlot);
+ public:
+  explicit RenderLayerClipper(RenderBox&);
 
-    LayoutRect localClipRect() const; // Returns the background clip rect of the layer in the local coordinate space.
+  void clearClipRectsIncludingDescendants();
+  void clearClipRectsIncludingDescendants(ClipRectsCacheSlot);
 
-    ClipRects* getClipRects(const ClipRectsContext&) const;
+  LayoutRect localClipRect() const;  // Returns the background clip rect of the
+                                     // layer in the local coordinate space.
 
-    ClipRect backgroundClipRect(const ClipRectsContext&) const;
+  ClipRects* getClipRects(const ClipRectsContext&) const;
 
-    // This method figures out our layerBounds in coordinates relative to
-    // |rootLayer|. It also computes our clip rects for painting/event handling.
-    void calculateRects(const ClipRectsContext&, const LayoutRect& paintDirtyRect, LayoutRect& layerBounds,
-        ClipRect& backgroundRect, const LayoutPoint* offsetFromRoot = 0) const;
+  ClipRect backgroundClipRect(const ClipRectsContext&) const;
 
-private:
-    void calculateClipRects(const ClipRectsContext&, ClipRects&) const;
+  // This method figures out our layerBounds in coordinates relative to
+  // |rootLayer|. It also computes our clip rects for painting/event handling.
+  void calculateRects(const ClipRectsContext&,
+                      const LayoutRect& paintDirtyRect,
+                      LayoutRect& layerBounds,
+                      ClipRect& backgroundRect,
+                      const LayoutPoint* offsetFromRoot = 0) const;
 
-    ClipRects* clipRectsIfCached(const ClipRectsContext&) const;
-    ClipRects* storeClipRectsInCache(const ClipRectsContext&, ClipRects* parentClipRects, const ClipRects&) const;
+ private:
+  void calculateClipRects(const ClipRectsContext&, ClipRects&) const;
 
-    // cachedClipRects looks buggy: It doesn't check whether context.rootLayer and entry.root match.
-    // FIXME: Move callers to clipRectsIfCached, which does the proper checks.
-    ClipRects* cachedClipRects(const ClipRectsContext& context) const
-    {
-        return m_cache ? m_cache->get(context.cacheSlot).clipRects.get() : 0;
-    }
+  ClipRects* clipRectsIfCached(const ClipRectsContext&) const;
+  ClipRects* storeClipRectsInCache(const ClipRectsContext&,
+                                   ClipRects* parentClipRects,
+                                   const ClipRects&) const;
 
-    void getOrCalculateClipRects(const ClipRectsContext&, ClipRects&) const;
+  // cachedClipRects looks buggy: It doesn't check whether context.rootLayer and
+  // entry.root match.
+  // FIXME: Move callers to clipRectsIfCached, which does the proper checks.
+  ClipRects* cachedClipRects(const ClipRectsContext& context) const {
+    return m_cache ? m_cache->get(context.cacheSlot).clipRects.get() : 0;
+  }
 
-    RenderLayer* clippingRootForPainting() const;
+  void getOrCalculateClipRects(const ClipRectsContext&, ClipRects&) const;
 
-    ClipRectsCache& cache() const
-    {
-        if (!m_cache)
-            m_cache = adoptPtr(new ClipRectsCache);
-        return *m_cache;
-    }
+  RenderLayer* clippingRootForPainting() const;
 
-    // FIXME: Could this be a RenderBox?
-    RenderBox& m_renderer;
-    mutable OwnPtr<ClipRectsCache> m_cache;
+  ClipRectsCache& cache() const {
+    if (!m_cache)
+      m_cache = adoptPtr(new ClipRectsCache);
+    return *m_cache;
+  }
+
+  // FIXME: Could this be a RenderBox?
+  RenderBox& m_renderer;
+  mutable OwnPtr<ClipRectsCache> m_cache;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYERCLIPPER_H_

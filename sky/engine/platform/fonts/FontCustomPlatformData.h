@@ -49,20 +49,25 @@ class FontPlatformData;
 class SharedBuffer;
 
 class PLATFORM_EXPORT FontCustomPlatformData {
-    WTF_MAKE_NONCOPYABLE(FontCustomPlatformData);
-public:
-    static PassOwnPtr<FontCustomPlatformData> create(SharedBuffer*);
-    ~FontCustomPlatformData();
+  WTF_MAKE_NONCOPYABLE(FontCustomPlatformData);
 
-    FontPlatformData fontPlatformData(float size, bool bold, bool italic, FontOrientation = Horizontal, FontWidthVariant = RegularWidth);
+ public:
+  static PassOwnPtr<FontCustomPlatformData> create(SharedBuffer*);
+  ~FontCustomPlatformData();
 
-    static bool supportsFormat(const String&);
+  FontPlatformData fontPlatformData(float size,
+                                    bool bold,
+                                    bool italic,
+                                    FontOrientation = Horizontal,
+                                    FontWidthVariant = RegularWidth);
 
-private:
-    explicit FontCustomPlatformData(sk_sp<SkTypeface>);
-    sk_sp<SkTypeface> m_typeface;
+  static bool supportsFormat(const String&);
+
+ private:
+  explicit FontCustomPlatformData(sk_sp<SkTypeface>);
+  sk_sp<SkTypeface> m_typeface;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCUSTOMPLATFORMDATA_H_

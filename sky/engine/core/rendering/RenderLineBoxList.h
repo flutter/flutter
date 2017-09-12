@@ -26,7 +26,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_
 #define SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_
 
@@ -35,56 +34,65 @@
 namespace blink {
 
 class RenderLineBoxList {
-public:
-    RenderLineBoxList()
-        : m_firstLineBox(0)
-        , m_lastLineBox(0)
-    {
-    }
+ public:
+  RenderLineBoxList() : m_firstLineBox(0), m_lastLineBox(0) {}
 
 #if ENABLE(ASSERT)
-    ~RenderLineBoxList();
+  ~RenderLineBoxList();
 #endif
 
-    InlineFlowBox* firstLineBox() const { return m_firstLineBox; }
-    InlineFlowBox* lastLineBox() const { return m_lastLineBox; }
+  InlineFlowBox* firstLineBox() const { return m_firstLineBox; }
+  InlineFlowBox* lastLineBox() const { return m_lastLineBox; }
 
-    void checkConsistency() const;
+  void checkConsistency() const;
 
-    void appendLineBox(InlineFlowBox*);
+  void appendLineBox(InlineFlowBox*);
 
-    void deleteLineBoxTree();
-    void deleteLineBoxes();
+  void deleteLineBoxTree();
+  void deleteLineBoxes();
 
-    void extractLineBox(InlineFlowBox*);
-    void attachLineBox(InlineFlowBox*);
-    void removeLineBox(InlineFlowBox*);
+  void extractLineBox(InlineFlowBox*);
+  void attachLineBox(InlineFlowBox*);
+  void removeLineBox(InlineFlowBox*);
 
-    void dirtyLineBoxes();
-    void dirtyLinesFromChangedChild(RenderObject* parent, RenderObject* child);
+  void dirtyLineBoxes();
+  void dirtyLinesFromChangedChild(RenderObject* parent, RenderObject* child);
 
-    void paint(RenderBoxModelObject*, PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) const;
-    bool hitTest(RenderBoxModelObject*, const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) const;
+  void paint(RenderBoxModelObject*,
+             PaintInfo&,
+             const LayoutPoint&,
+             Vector<RenderBox*>& layers) const;
+  bool hitTest(RenderBoxModelObject*,
+               const HitTestRequest&,
+               HitTestResult&,
+               const HitTestLocation& locationInContainer,
+               const LayoutPoint& accumulatedOffset) const;
 
-private:
-    bool anyLineIntersectsRect(RenderBoxModelObject*, const LayoutRect&, const LayoutPoint&) const;
-    bool lineIntersectsDirtyRect(RenderBoxModelObject*, InlineFlowBox*, const PaintInfo&, const LayoutPoint&) const;
-    bool rangeIntersectsRect(RenderBoxModelObject*, LayoutUnit logicalTop, LayoutUnit logicalBottom, const LayoutRect&, const LayoutPoint&) const;
+ private:
+  bool anyLineIntersectsRect(RenderBoxModelObject*,
+                             const LayoutRect&,
+                             const LayoutPoint&) const;
+  bool lineIntersectsDirtyRect(RenderBoxModelObject*,
+                               InlineFlowBox*,
+                               const PaintInfo&,
+                               const LayoutPoint&) const;
+  bool rangeIntersectsRect(RenderBoxModelObject*,
+                           LayoutUnit logicalTop,
+                           LayoutUnit logicalBottom,
+                           const LayoutRect&,
+                           const LayoutPoint&) const;
 
-    // For block flows, each box represents the root inline box for a line in the
-    // paragraph.
-    // For inline flows, each box represents a portion of that inline.
-    InlineFlowBox* m_firstLineBox;
-    InlineFlowBox* m_lastLineBox;
+  // For block flows, each box represents the root inline box for a line in the
+  // paragraph.
+  // For inline flows, each box represents a portion of that inline.
+  InlineFlowBox* m_firstLineBox;
+  InlineFlowBox* m_lastLineBox;
 };
 
-
 #if !ENABLE(ASSERT)
-inline void RenderLineBoxList::checkConsistency() const
-{
-}
+inline void RenderLineBoxList::checkConsistency() const {}
 #endif
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERLINEBOXLIST_H_

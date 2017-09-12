@@ -8,12 +8,12 @@
 #include <memory>
 #include <unordered_set>
 
+#include "flutter/content_handler/application_controller_impl.h"
 #include "lib/app/cpp/application_context.h"
 #include "lib/app/fidl/application_runner.fidl.h"
-#include "flutter/content_handler/application_controller_impl.h"
+#include "lib/fsl/threading/thread.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/synchronization/waitable_event.h"
-#include "lib/fsl/threading/thread.h"
 
 namespace flutter_runner {
 

@@ -35,103 +35,109 @@ namespace WTF {
 typedef uintptr_t MachineWord;
 const uintptr_t machineWordAlignmentMask = sizeof(MachineWord) - 1;
 
-inline bool isAlignedToMachineWord(const void* pointer)
-{
-    return !(reinterpret_cast<uintptr_t>(pointer) & machineWordAlignmentMask);
+inline bool isAlignedToMachineWord(const void* pointer) {
+  return !(reinterpret_cast<uintptr_t>(pointer) & machineWordAlignmentMask);
 }
 
-template<typename T> inline T* alignToMachineWord(T* pointer)
-{
-    return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pointer) & ~machineWordAlignmentMask);
+template <typename T>
+inline T* alignToMachineWord(T* pointer) {
+  return reinterpret_cast<T*>(reinterpret_cast<uintptr_t>(pointer) &
+                              ~machineWordAlignmentMask);
 }
 
-template<size_t size, typename CharacterType> struct NonASCIIMask;
-template<> struct NonASCIIMask<4, UChar> {
-    static inline uint32_t value() { return 0xFF80FF80U; }
+template <size_t size, typename CharacterType>
+struct NonASCIIMask;
+template <>
+struct NonASCIIMask<4, UChar> {
+  static inline uint32_t value() { return 0xFF80FF80U; }
 };
-template<> struct NonASCIIMask<4, LChar> {
-    static inline uint32_t value() { return 0x80808080U; }
+template <>
+struct NonASCIIMask<4, LChar> {
+  static inline uint32_t value() { return 0x80808080U; }
 };
-template<> struct NonASCIIMask<8, UChar> {
-    static inline uint64_t value() { return 0xFF80FF80FF80FF80ULL; }
+template <>
+struct NonASCIIMask<8, UChar> {
+  static inline uint64_t value() { return 0xFF80FF80FF80FF80ULL; }
 };
-template<> struct NonASCIIMask<8, LChar> {
-    static inline uint64_t value() { return 0x8080808080808080ULL; }
+template <>
+struct NonASCIIMask<8, LChar> {
+  static inline uint64_t value() { return 0x8080808080808080ULL; }
 };
 
-
-template<typename CharacterType>
-inline bool isAllASCII(MachineWord word)
-{
-    return !(word & NonASCIIMask<sizeof(MachineWord), CharacterType>::value());
+template <typename CharacterType>
+inline bool isAllASCII(MachineWord word) {
+  return !(word & NonASCIIMask<sizeof(MachineWord), CharacterType>::value());
 }
 
 // Note: This function assume the input is likely all ASCII, and
 // does not leave early if it is not the case.
-template<typename CharacterType>
-inline bool charactersAreAllASCII(const CharacterType* characters, size_t length)
-{
-    MachineWord allCharBits = 0;
-    const CharacterType* end = characters + length;
+template <typename CharacterType>
+inline bool charactersAreAllASCII(const CharacterType* characters,
+                                  size_t length) {
+  MachineWord allCharBits = 0;
+  const CharacterType* end = characters + length;
 
-    // Prologue: align the input.
-    while (!isAlignedToMachineWord(characters) && characters != end) {
-        allCharBits |= *characters;
-        ++characters;
-    }
+  // Prologue: align the input.
+  while (!isAlignedToMachineWord(characters) && characters != end) {
+    allCharBits |= *characters;
+    ++characters;
+  }
 
-    // Compare the values of CPU word size.
-    const CharacterType* wordEnd = alignToMachineWord(end);
-    const size_t loopIncrement = sizeof(MachineWord) / sizeof(CharacterType);
-    while (characters < wordEnd) {
-        allCharBits |= *(reinterpret_cast_ptr<const MachineWord*>(characters));
-        characters += loopIncrement;
-    }
+  // Compare the values of CPU word size.
+  const CharacterType* wordEnd = alignToMachineWord(end);
+  const size_t loopIncrement = sizeof(MachineWord) / sizeof(CharacterType);
+  while (characters < wordEnd) {
+    allCharBits |= *(reinterpret_cast_ptr<const MachineWord*>(characters));
+    characters += loopIncrement;
+  }
 
-    // Process the remaining bytes.
-    while (characters != end) {
-        allCharBits |= *characters;
-        ++characters;
-    }
+  // Process the remaining bytes.
+  while (characters != end) {
+    allCharBits |= *characters;
+    ++characters;
+  }
 
-    MachineWord nonASCIIBitMask = NonASCIIMask<sizeof(MachineWord), CharacterType>::value();
-    return !(allCharBits & nonASCIIBitMask);
+  MachineWord nonASCIIBitMask =
+      NonASCIIMask<sizeof(MachineWord), CharacterType>::value();
+  return !(allCharBits & nonASCIIBitMask);
 }
 
-inline void copyLCharsFromUCharSource(LChar* destination, const UChar* source, size_t length)
-{
-#if COMPILER(GCC) && CPU(ARM_NEON) && !(CPU(BIG_ENDIAN) || CPU(MIDDLE_ENDIAN)) && defined(NDEBUG)
-    const LChar* const end = destination + length;
-    const uintptr_t memoryAccessSize = 8;
+inline void copyLCharsFromUCharSource(LChar* destination,
+                                      const UChar* source,
+                                      size_t length) {
+#if COMPILER(GCC) && CPU(ARM_NEON) && \
+    !(CPU(BIG_ENDIAN) || CPU(MIDDLE_ENDIAN)) && defined(NDEBUG)
+  const LChar* const end = destination + length;
+  const uintptr_t memoryAccessSize = 8;
 
-    if (length >= (2 * memoryAccessSize) - 1) {
-        // Prefix: align dst on 64 bits.
-        const uintptr_t memoryAccessMask = memoryAccessSize - 1;
-        while (!isAlignedTo<memoryAccessMask>(destination))
-            *destination++ = static_cast<LChar>(*source++);
+  if (length >= (2 * memoryAccessSize) - 1) {
+    // Prefix: align dst on 64 bits.
+    const uintptr_t memoryAccessMask = memoryAccessSize - 1;
+    while (!isAlignedTo<memoryAccessMask>(destination))
+      *destination++ = static_cast<LChar>(*source++);
 
-        // Vector interleaved unpack, we only store the lower 8 bits.
-        const uintptr_t lengthLeft = end - destination;
-        const LChar* const simdEnd = end - (lengthLeft % memoryAccessSize);
-        do {
-            asm("vld2.8   { d0-d1 }, [%[SOURCE]] !\n\t"
-                "vst1.8   { d0 }, [%[DESTINATION],:64] !\n\t"
-                : [SOURCE]"+r" (source), [DESTINATION]"+r" (destination)
-                :
-                : "memory", "d0", "d1");
-        } while (destination != simdEnd);
-    }
+    // Vector interleaved unpack, we only store the lower 8 bits.
+    const uintptr_t lengthLeft = end - destination;
+    const LChar* const simdEnd = end - (lengthLeft % memoryAccessSize);
+    do {
+      asm("vld2.8   { d0-d1 }, [%[SOURCE]] !\n\t"
+          "vst1.8   { d0 }, [%[DESTINATION],:64] !\n\t"
+          : [SOURCE] "+r"(source), [DESTINATION] "+r"(destination)
+          :
+          : "memory", "d0", "d1");
+    } while (destination != simdEnd);
+  }
 
-    while (destination != end)
-        *destination++ = static_cast<LChar>(*source++);
+  while (destination != end)
+    *destination++ = static_cast<LChar>(*source++);
 #else
-    for (size_t i = 0; i < length; ++i) {
-        ASSERT(!(source[i] & 0xff00));
-        destination[i] = static_cast<LChar>(source[i]);
-    }
+  for (size_t i = 0; i < length; ++i) {
+    ASSERT(!(source[i] & 0xff00));
+    destination[i] = static_cast<LChar>(source[i]);
+  }
 #endif
 }
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_ASCIIFASTPATH_H_

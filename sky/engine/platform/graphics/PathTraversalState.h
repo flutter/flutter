@@ -32,40 +32,43 @@
 namespace blink {
 
 class PLATFORM_EXPORT PathTraversalState {
-public:
-    enum PathTraversalAction {
-        TraversalTotalLength,
-        TraversalPointAtLength,
-        TraversalSegmentAtLength,
-        TraversalNormalAngleAtLength
-    };
+ public:
+  enum PathTraversalAction {
+    TraversalTotalLength,
+    TraversalPointAtLength,
+    TraversalSegmentAtLength,
+    TraversalNormalAngleAtLength
+  };
 
-    PathTraversalState(PathTraversalAction);
+  PathTraversalState(PathTraversalAction);
 
-    float closeSubpath();
-    float moveTo(const FloatPoint&);
-    float lineTo(const FloatPoint&);
-    float quadraticBezierTo(const FloatPoint& newControl, const FloatPoint& newEnd);
-    float cubicBezierTo(const FloatPoint& newControl1, const FloatPoint& newControl2, const FloatPoint& newEnd);
+  float closeSubpath();
+  float moveTo(const FloatPoint&);
+  float lineTo(const FloatPoint&);
+  float quadraticBezierTo(const FloatPoint& newControl,
+                          const FloatPoint& newEnd);
+  float cubicBezierTo(const FloatPoint& newControl1,
+                      const FloatPoint& newControl2,
+                      const FloatPoint& newEnd);
 
-    void processSegment();
+  void processSegment();
 
-public:
-    PathTraversalAction m_action;
-    bool m_success;
+ public:
+  PathTraversalAction m_action;
+  bool m_success;
 
-    FloatPoint m_current;
-    FloatPoint m_start;
+  FloatPoint m_current;
+  FloatPoint m_start;
 
-    float m_totalLength;
-    unsigned m_segmentIndex;
-    float m_desiredLength;
+  float m_totalLength;
+  unsigned m_segmentIndex;
+  float m_desiredLength;
 
-    // For normal calculations
-    FloatPoint m_previous;
-    float m_normalAngle; // degrees
+  // For normal calculations
+  FloatPoint m_previous;
+  float m_normalAngle;  // degrees
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PATHTRAVERSALSTATE_H_

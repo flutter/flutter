@@ -39,38 +39,45 @@ namespace blink {
 class SimpleFontData;
 
 class PLATFORM_EXPORT FontData : public RefCounted<FontData> {
-    WTF_MAKE_NONCOPYABLE(FontData); WTF_MAKE_FAST_ALLOCATED;
-public:
-    FontData()
-        : m_maxGlyphPageTreeLevel(0)
-    {
-    }
+  WTF_MAKE_NONCOPYABLE(FontData);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    virtual ~FontData();
+ public:
+  FontData() : m_maxGlyphPageTreeLevel(0) {}
 
-    virtual const SimpleFontData* fontDataForCharacter(UChar32) const = 0;
-    virtual bool isCustomFont() const = 0;
-    virtual bool isLoading() const = 0;
-    // Returns whether this is a temporary font data for a custom font which is not yet loaded.
-    virtual bool isLoadingFallback() const = 0;
-    virtual bool isSegmented() const = 0;
-    virtual bool shouldSkipDrawing() const = 0;
+  virtual ~FontData();
 
-    void setMaxGlyphPageTreeLevel(unsigned level) const { m_maxGlyphPageTreeLevel = level; }
-    unsigned maxGlyphPageTreeLevel() const { return m_maxGlyphPageTreeLevel; }
+  virtual const SimpleFontData* fontDataForCharacter(UChar32) const = 0;
+  virtual bool isCustomFont() const = 0;
+  virtual bool isLoading() const = 0;
+  // Returns whether this is a temporary font data for a custom font which is
+  // not yet loaded.
+  virtual bool isLoadingFallback() const = 0;
+  virtual bool isSegmented() const = 0;
+  virtual bool shouldSkipDrawing() const = 0;
+
+  void setMaxGlyphPageTreeLevel(unsigned level) const {
+    m_maxGlyphPageTreeLevel = level;
+  }
+  unsigned maxGlyphPageTreeLevel() const { return m_maxGlyphPageTreeLevel; }
 
 #ifndef NDEBUG
-    virtual String description() const = 0;
+  virtual String description() const = 0;
 #endif
 
-private:
-    mutable unsigned m_maxGlyphPageTreeLevel;
+ private:
+  mutable unsigned m_maxGlyphPageTreeLevel;
 };
 
-#define DEFINE_FONT_DATA_TYPE_CASTS(thisType, predicate) \
-    template<typename T> inline thisType* to##thisType(const RefPtr<T>& fontData) { return to##thisType(fontData.get()); } \
-    DEFINE_TYPE_CASTS(thisType, FontData, fontData, fontData->isSegmented() == predicate, fontData.isSegmented() == predicate)
+#define DEFINE_FONT_DATA_TYPE_CASTS(thisType, predicate)     \
+  template <typename T>                                      \
+  inline thisType* to##thisType(const RefPtr<T>& fontData) { \
+    return to##thisType(fontData.get());                     \
+  }                                                          \
+  DEFINE_TYPE_CASTS(thisType, FontData, fontData,            \
+                    fontData->isSegmented() == predicate,    \
+                    fontData.isSegmented() == predicate)
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTDATA_H_

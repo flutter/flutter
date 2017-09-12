@@ -37,14 +37,17 @@ class FontData;
 class FontDescription;
 
 class FontSelector : public FontCacheClient {
-public:
-    virtual ~FontSelector() { }
-    virtual PassRefPtr<FontData> getFontData(const FontDescription&, const AtomicString& familyName) = 0;
-    virtual void willUseFontData(const FontDescription&, const AtomicString& familyName, UChar32) = 0;
+ public:
+  virtual ~FontSelector() {}
+  virtual PassRefPtr<FontData> getFontData(const FontDescription&,
+                                           const AtomicString& familyName) = 0;
+  virtual void willUseFontData(const FontDescription&,
+                               const AtomicString& familyName,
+                               UChar32) = 0;
 
-    virtual unsigned version() const = 0;
+  virtual unsigned version() const = 0;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTSELECTOR_H_

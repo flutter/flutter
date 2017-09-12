@@ -36,29 +36,33 @@
 namespace blink {
 
 struct FrameData {
-    WTF_MAKE_NONCOPYABLE(FrameData);
-public:
-    FrameData();
-    ~FrameData();
+  WTF_MAKE_NONCOPYABLE(FrameData);
 
-    // Clear the cached image data on the frame, and (optionally) the metadata.
-    // Returns whether there was cached image data to clear.
-    bool clear(bool clearMetadata);
+ public:
+  FrameData();
+  ~FrameData();
 
-    ImageOrientation m_orientation;
-    float m_duration;
-    bool m_haveMetadata : 1;
-    bool m_isComplete : 1;
-    bool m_hasAlpha : 1;
-    unsigned m_frameBytes;
+  // Clear the cached image data on the frame, and (optionally) the metadata.
+  // Returns whether there was cached image data to clear.
+  bool clear(bool clearMetadata);
+
+  ImageOrientation m_orientation;
+  float m_duration;
+  bool m_haveMetadata : 1;
+  bool m_isComplete : 1;
+  bool m_hasAlpha : 1;
+  unsigned m_frameBytes;
 };
 
-} // namespace blink
+}  // namespace blink
 
 namespace WTF {
-template<> struct VectorTraits<blink::FrameData> : public SimpleClassVectorTraits<blink::FrameData> {
-    static const bool canInitializeWithMemset = false; // Not all FrameData members initialize to 0.
+template <>
+struct VectorTraits<blink::FrameData>
+    : public SimpleClassVectorTraits<blink::FrameData> {
+  static const bool canInitializeWithMemset =
+      false;  // Not all FrameData members initialize to 0.
 };
-}
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_FRAMEDATA_H_

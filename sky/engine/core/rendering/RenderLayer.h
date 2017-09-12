@@ -25,7 +25,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  * Alternatively, the contents of this file may be used under the terms
  * of either the Mozilla Public License Version 1.1, found at
@@ -57,127 +57,150 @@ namespace blink {
 
 class RenderStyle;
 
-enum BorderRadiusClippingRule { IncludeSelfForBorderRadius, DoNotIncludeSelfForBorderRadius };
+enum BorderRadiusClippingRule {
+  IncludeSelfForBorderRadius,
+  DoNotIncludeSelfForBorderRadius
+};
 enum IncludeSelfOrNot { IncludeSelf, ExcludeSelf };
 
 class RenderLayer {
-    WTF_MAKE_NONCOPYABLE(RenderLayer);
-public:
-    RenderLayer(RenderBox*, LayerType);
-    ~RenderLayer();
+  WTF_MAKE_NONCOPYABLE(RenderLayer);
 
-    RenderBox* renderer() const { return m_renderer; }
-    RenderLayer* parent() const { return m_parent; }
-    RenderLayer* previousSibling() const { return m_previous; }
-    RenderLayer* nextSibling() const { return m_next; }
-    RenderLayer* firstChild() const { return m_first; }
-    RenderLayer* lastChild() const { return m_last; }
+ public:
+  RenderLayer(RenderBox*, LayerType);
+  ~RenderLayer();
 
-    void addChild(RenderLayer* newChild, RenderLayer* beforeChild = 0);
-    RenderLayer* removeChild(RenderLayer*);
+  RenderBox* renderer() const { return m_renderer; }
+  RenderLayer* parent() const { return m_parent; }
+  RenderLayer* previousSibling() const { return m_previous; }
+  RenderLayer* nextSibling() const { return m_next; }
+  RenderLayer* firstChild() const { return m_first; }
+  RenderLayer* lastChild() const { return m_last; }
 
-    void removeOnlyThisLayer();
-    void insertOnlyThisLayer();
+  void addChild(RenderLayer* newChild, RenderLayer* beforeChild = 0);
+  RenderLayer* removeChild(RenderLayer*);
 
-    void styleChanged(StyleDifference, const RenderStyle* oldStyle);
-    bool isSelfPaintingLayer() const { return m_isSelfPaintingLayer; }
-    void setLayerType(LayerType layerType) { m_layerType = layerType; }
+  void removeOnlyThisLayer();
+  void insertOnlyThisLayer();
 
-    const RenderLayer* root() const
-    {
-        const RenderLayer* curr = this;
-        while (curr->parent())
-            curr = curr->parent();
-        return curr;
-    }
+  void styleChanged(StyleDifference, const RenderStyle* oldStyle);
+  bool isSelfPaintingLayer() const { return m_isSelfPaintingLayer; }
+  void setLayerType(LayerType layerType) { m_layerType = layerType; }
 
-    LayoutPoint location() const;
-    IntSize size() const;
-    LayoutRect rect() const { return LayoutRect(location(), size()); }
+  const RenderLayer* root() const {
+    const RenderLayer* curr = this;
+    while (curr->parent())
+      curr = curr->parent();
+    return curr;
+  }
 
-    bool isRootLayer() const { return m_isRootLayer; }
+  LayoutPoint location() const;
+  IntSize size() const;
+  LayoutRect rect() const { return LayoutRect(location(), size()); }
 
-    void updateLayerPositionsAfterLayout();
+  bool isRootLayer() const { return m_isRootLayer; }
 
-    RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
-    const RenderLayerStackingNode* stackingNode() const { return m_stackingNode.get(); }
+  void updateLayerPositionsAfterLayout();
 
-    // Gets the nearest enclosing positioned ancestor layer (also includes
-    // the <html> layer and the root layer).
-    RenderLayer* enclosingPositionedAncestor() const;
+  RenderLayerStackingNode* stackingNode() { return m_stackingNode.get(); }
+  const RenderLayerStackingNode* stackingNode() const {
+    return m_stackingNode.get();
+  }
 
-    const RenderLayer* compositingContainer() const;
+  // Gets the nearest enclosing positioned ancestor layer (also includes
+  // the <html> layer and the root layer).
+  RenderLayer* enclosingPositionedAncestor() const;
 
-    void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutPoint&) const;
-    void convertToLayerCoords(const RenderLayer* ancestorLayer, LayoutRect&) const;
+  const RenderLayer* compositingContainer() const;
 
-    // Pass offsetFromRoot if known.
-    bool intersectsDamageRect(const LayoutRect& layerBounds, const LayoutRect& damageRect, const RenderLayer* rootLayer, const LayoutPoint* offsetFromRoot = 0) const;
+  void convertToLayerCoords(const RenderLayer* ancestorLayer,
+                            LayoutPoint&) const;
+  void convertToLayerCoords(const RenderLayer* ancestorLayer,
+                            LayoutRect&) const;
 
-    // Bounding box relative to some ancestor layer. Pass offsetFromRoot if known.
-    LayoutRect physicalBoundingBox(const RenderLayer* ancestorLayer, const LayoutPoint* offsetFromRoot = 0) const;
-    LayoutRect physicalBoundingBoxIncludingReflectionAndStackingChildren(const RenderLayer* ancestorLayer, const LayoutPoint& offsetFromRoot) const;
-    LayoutRect boundingBoxForCompositing(const RenderLayer* ancestorLayer = 0) const;
+  // Pass offsetFromRoot if known.
+  bool intersectsDamageRect(const LayoutRect& layerBounds,
+                            const LayoutRect& damageRect,
+                            const RenderLayer* rootLayer,
+                            const LayoutPoint* offsetFromRoot = 0) const;
 
-    bool has3DTransformedDescendant() const { return m_has3DTransformedDescendant; }
-    // Both updates the status, and returns true if descendants of this have 3d.
-    bool update3DTransformedDescendantStatus();
+  // Bounding box relative to some ancestor layer. Pass offsetFromRoot if known.
+  LayoutRect physicalBoundingBox(const RenderLayer* ancestorLayer,
+                                 const LayoutPoint* offsetFromRoot = 0) const;
+  LayoutRect physicalBoundingBoxIncludingReflectionAndStackingChildren(
+      const RenderLayer* ancestorLayer,
+      const LayoutPoint& offsetFromRoot) const;
+  LayoutRect boundingBoxForCompositing(
+      const RenderLayer* ancestorLayer = 0) const;
 
-    void* operator new(size_t);
-    // Only safe to call from RenderBox::destroyLayer()
-    void operator delete(void*);
+  bool has3DTransformedDescendant() const {
+    return m_has3DTransformedDescendant;
+  }
+  // Both updates the status, and returns true if descendants of this have 3d.
+  bool update3DTransformedDescendantStatus();
 
-    RenderLayerClipper& clipper() { return m_clipper; }
-    const RenderLayerClipper& clipper() const { return m_clipper; }
+  void* operator new(size_t);
+  // Only safe to call from RenderBox::destroyLayer()
+  void operator delete(void*);
 
-    inline bool isPositionedContainer() const
-    {
-        // FIXME: This is not in sync with containingBlock.
-        return isRootLayer() || renderer()->isPositioned() || renderer()->hasTransform();
-    }
+  RenderLayerClipper& clipper() { return m_clipper; }
+  const RenderLayerClipper& clipper() const { return m_clipper; }
 
-    void clipToRect(const LayerPaintingInfo&, GraphicsContext*, const ClipRect&, BorderRadiusClippingRule = IncludeSelfForBorderRadius);
-    void restoreClip(GraphicsContext*, const LayoutRect& paintDirtyRect, const ClipRect&);
+  inline bool isPositionedContainer() const {
+    // FIXME: This is not in sync with containingBlock.
+    return isRootLayer() || renderer()->isPositioned() ||
+           renderer()->hasTransform();
+  }
 
-    // Bounding box in the coordinates of this layer.
-    LayoutRect logicalBoundingBox() const;
+  void clipToRect(const LayerPaintingInfo&,
+                  GraphicsContext*,
+                  const ClipRect&,
+                  BorderRadiusClippingRule = IncludeSelfForBorderRadius);
+  void restoreClip(GraphicsContext*,
+                   const LayoutRect& paintDirtyRect,
+                   const ClipRect&);
 
-    void setNextSibling(RenderLayer* next) { m_next = next; }
-    void setPreviousSibling(RenderLayer* prev) { m_previous = prev; }
-    void setFirstChild(RenderLayer* first) { m_first = first; }
-    void setLastChild(RenderLayer* last) { m_last = last; }
+  // Bounding box in the coordinates of this layer.
+  LayoutRect logicalBoundingBox() const;
 
-    bool shouldBeSelfPaintingLayer() const;
+  void setNextSibling(RenderLayer* next) { m_next = next; }
+  void setPreviousSibling(RenderLayer* prev) { m_previous = prev; }
+  void setFirstChild(RenderLayer* first) { m_first = first; }
+  void setLastChild(RenderLayer* last) { m_last = last; }
 
-    void dirty3DTransformedDescendantStatus();
+  bool shouldBeSelfPaintingLayer() const;
 
-private:
-    LayerType m_layerType;
+  void dirty3DTransformedDescendantStatus();
 
-    // Self-painting layer is an optimization where we avoid the heavy RenderLayer painting
-    // machinery for a RenderLayer allocated only to handle the overflow clip case.
-    // FIXME(crbug.com/332791): Self-painting layer should be merged into the overflow-only concept.
-    unsigned m_isSelfPaintingLayer : 1;
+ private:
+  LayerType m_layerType;
 
-    const unsigned m_isRootLayer : 1;
+  // Self-painting layer is an optimization where we avoid the heavy RenderLayer
+  // painting machinery for a RenderLayer allocated only to handle the overflow
+  // clip case.
+  // FIXME(crbug.com/332791): Self-painting layer should be merged into the
+  // overflow-only concept.
+  unsigned m_isSelfPaintingLayer : 1;
 
-    unsigned m_3DTransformedDescendantStatusDirty : 1;
-    // Set on a stacking context layer that has 3D descendants anywhere
-    // in a preserves3D hierarchy. Hint to do 3D-aware hit testing.
-    unsigned m_has3DTransformedDescendant : 1;
+  const unsigned m_isRootLayer : 1;
 
-    RenderBox* m_renderer;
+  unsigned m_3DTransformedDescendantStatusDirty : 1;
+  // Set on a stacking context layer that has 3D descendants anywhere
+  // in a preserves3D hierarchy. Hint to do 3D-aware hit testing.
+  unsigned m_has3DTransformedDescendant : 1;
 
-    RenderLayer* m_parent;
-    RenderLayer* m_previous;
-    RenderLayer* m_next;
-    RenderLayer* m_first;
-    RenderLayer* m_last;
+  RenderBox* m_renderer;
 
-    RenderLayerClipper m_clipper; // FIXME: Lazily allocate?
-    OwnPtr<RenderLayerStackingNode> m_stackingNode;
+  RenderLayer* m_parent;
+  RenderLayer* m_previous;
+  RenderLayer* m_next;
+  RenderLayer* m_first;
+  RenderLayer* m_last;
+
+  RenderLayerClipper m_clipper;  // FIXME: Lazily allocate?
+  OwnPtr<RenderLayerStackingNode> m_stackingNode;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERLAYER_H_

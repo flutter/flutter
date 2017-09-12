@@ -31,47 +31,51 @@
 namespace blink {
 
 class RenderTheme : public RefCounted<RenderTheme> {
-protected:
-    RenderTheme();
+ protected:
+  RenderTheme();
 
-public:
-    // This function is to be implemented in your platform-specific theme implementation to hand back the
-    // appropriate platform theme.
-    static RenderTheme& theme();
+ public:
+  // This function is to be implemented in your platform-specific theme
+  // implementation to hand back the appropriate platform theme.
+  static RenderTheme& theme();
 
-    Color focusRingColor() const;
-    virtual double caretBlinkInterval() const { return 0.5; }
+  Color focusRingColor() const;
+  virtual double caretBlinkInterval() const { return 0.5; }
 
-    // Text selection colors.
-    Color activeSelectionBackgroundColor() const;
-    Color inactiveSelectionBackgroundColor() const;
-    Color activeSelectionForegroundColor() const;
-    Color inactiveSelectionForegroundColor() const;
+  // Text selection colors.
+  Color activeSelectionBackgroundColor() const;
+  Color inactiveSelectionBackgroundColor() const;
+  Color activeSelectionForegroundColor() const;
+  Color inactiveSelectionForegroundColor() const;
 
-    virtual bool supportsSelectionForegroundColors() const { return true; }
-    virtual Color platformDefaultCompositionBackgroundColor() const { return defaultCompositionBackgroundColor; }
-    void setCustomFocusRingColor(const Color&);
+  virtual bool supportsSelectionForegroundColors() const { return true; }
+  virtual Color platformDefaultCompositionBackgroundColor() const {
+    return defaultCompositionBackgroundColor;
+  }
+  void setCustomFocusRingColor(const Color&);
 
-    static Color tapHighlightColor();
-    virtual Color platformTapHighlightColor() const { return RenderTheme::defaultTapHighlightColor; }
+  static Color tapHighlightColor();
+  virtual Color platformTapHighlightColor() const {
+    return RenderTheme::defaultTapHighlightColor;
+  }
 
-protected:
-    virtual Color platformActiveSelectionBackgroundColor() const;
-    virtual Color platformInactiveSelectionBackgroundColor() const;
-    virtual Color platformActiveSelectionForegroundColor() const;
-    virtual Color platformInactiveSelectionForegroundColor() const;
-    virtual Color platformFocusRingColor() const { return Color(0, 0, 0); }
+ protected:
+  virtual Color platformActiveSelectionBackgroundColor() const;
+  virtual Color platformInactiveSelectionBackgroundColor() const;
+  virtual Color platformActiveSelectionForegroundColor() const;
+  virtual Color platformInactiveSelectionForegroundColor() const;
+  virtual Color platformFocusRingColor() const { return Color(0, 0, 0); }
 
-private:
-    Color m_customFocusRingColor;
-    bool m_hasCustomFocusRingColor;
+ private:
+  Color m_customFocusRingColor;
+  bool m_hasCustomFocusRingColor;
 
-    // This color is expected to be drawn on a semi-transparent overlay,
-    // making it more transparent than its alpha value indicates.
-    static const RGBA32 defaultTapHighlightColor = 0x66000000;
-    static const RGBA32 defaultCompositionBackgroundColor = 0xFFFFDD55;
+  // This color is expected to be drawn on a semi-transparent overlay,
+  // making it more transparent than its alpha value indicates.
+  static const RGBA32 defaultTapHighlightColor = 0x66000000;
+  static const RGBA32 defaultCompositionBackgroundColor = 0xFFFFDD55;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERTHEME_H_

@@ -38,57 +38,79 @@ class TextRun;
 struct GlyphData;
 
 struct PLATFORM_EXPORT WidthIterator {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    WidthIterator(const Font*, const TextRun&, HashSet<const SimpleFontData*>* fallbackFonts = 0, bool accountForGlyphBounds = false, bool forTextEmphasis = false);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    unsigned advance(int to, GlyphBuffer* = 0);
-    bool advanceOneCharacter(float& width);
+ public:
+  WidthIterator(const Font*,
+                const TextRun&,
+                HashSet<const SimpleFontData*>* fallbackFonts = 0,
+                bool accountForGlyphBounds = false,
+                bool forTextEmphasis = false);
 
-    float maxGlyphBoundingBoxY() const { ASSERT(m_accountForGlyphBounds); return m_maxGlyphBoundingBoxY; }
-    float minGlyphBoundingBoxY() const { ASSERT(m_accountForGlyphBounds); return m_minGlyphBoundingBoxY; }
-    float firstGlyphOverflow() const { ASSERT(m_accountForGlyphBounds); return m_firstGlyphOverflow; }
-    float lastGlyphOverflow() const { ASSERT(m_accountForGlyphBounds); return m_lastGlyphOverflow; }
+  unsigned advance(int to, GlyphBuffer* = 0);
+  bool advanceOneCharacter(float& width);
 
-    const TextRun& run() const { return m_run; }
-    float runWidthSoFar() const { return m_runWidthSoFar; }
+  float maxGlyphBoundingBoxY() const {
+    ASSERT(m_accountForGlyphBounds);
+    return m_maxGlyphBoundingBoxY;
+  }
+  float minGlyphBoundingBoxY() const {
+    ASSERT(m_accountForGlyphBounds);
+    return m_minGlyphBoundingBoxY;
+  }
+  float firstGlyphOverflow() const {
+    ASSERT(m_accountForGlyphBounds);
+    return m_firstGlyphOverflow;
+  }
+  float lastGlyphOverflow() const {
+    ASSERT(m_accountForGlyphBounds);
+    return m_lastGlyphOverflow;
+  }
 
-    const Font* m_font;
+  const TextRun& run() const { return m_run; }
+  float runWidthSoFar() const { return m_runWidthSoFar; }
 
-    const TextRun& m_run;
+  const Font* m_font;
 
-    unsigned m_currentCharacter;
-    float m_runWidthSoFar;
-    float m_expansion;
-    float m_expansionPerOpportunity;
-    bool m_isAfterExpansion;
+  const TextRun& m_run;
 
-private:
-    struct CharacterData {
-        UChar32 character;
-        unsigned clusterLength;
-        int characterOffset;
-    };
+  unsigned m_currentCharacter;
+  float m_runWidthSoFar;
+  float m_expansion;
+  float m_expansionPerOpportunity;
+  bool m_isAfterExpansion;
 
-    GlyphData glyphDataForCharacter(CharacterData&);
-    float characterWidth(UChar32, const GlyphData&) const;
-    void cacheFallbackFont(UChar32, const SimpleFontData*, const SimpleFontData* primaryFont);
-    float adjustSpacing(float, const CharacterData&, const SimpleFontData&, GlyphBuffer*);
-    void updateGlyphBounds(const GlyphData&, float width, bool firstCharacter);
+ private:
+  struct CharacterData {
+    UChar32 character;
+    unsigned clusterLength;
+    int characterOffset;
+  };
 
-    template <typename TextIterator>
-    unsigned advanceInternal(TextIterator&, GlyphBuffer*);
+  GlyphData glyphDataForCharacter(CharacterData&);
+  float characterWidth(UChar32, const GlyphData&) const;
+  void cacheFallbackFont(UChar32,
+                         const SimpleFontData*,
+                         const SimpleFontData* primaryFont);
+  float adjustSpacing(float,
+                      const CharacterData&,
+                      const SimpleFontData&,
+                      GlyphBuffer*);
+  void updateGlyphBounds(const GlyphData&, float width, bool firstCharacter);
 
-    HashSet<const SimpleFontData*>* m_fallbackFonts;
-    float m_maxGlyphBoundingBoxY;
-    float m_minGlyphBoundingBoxY;
-    float m_firstGlyphOverflow;
-    float m_lastGlyphOverflow;
+  template <typename TextIterator>
+  unsigned advanceInternal(TextIterator&, GlyphBuffer*);
 
-    bool m_accountForGlyphBounds : 1;
-    bool m_forTextEmphasis : 1;
+  HashSet<const SimpleFontData*>* m_fallbackFonts;
+  float m_maxGlyphBoundingBoxY;
+  float m_minGlyphBoundingBoxY;
+  float m_firstGlyphOverflow;
+  float m_lastGlyphOverflow;
+
+  bool m_accountForGlyphBounds : 1;
+  bool m_forTextEmphasis : 1;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_WIDTHITERATOR_H_

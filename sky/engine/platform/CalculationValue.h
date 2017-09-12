@@ -40,30 +40,31 @@
 namespace blink {
 
 class PLATFORM_EXPORT CalculationValue : public RefCounted<CalculationValue> {
-public:
-    static PassRefPtr<CalculationValue> create(PixelsAndPercent value, ValueRange range)
-    {
-        return adoptRef(new CalculationValue(value, range));
-    }
+ public:
+  static PassRefPtr<CalculationValue> create(PixelsAndPercent value,
+                                             ValueRange range) {
+    return adoptRef(new CalculationValue(value, range));
+  }
 
-    float evaluate(float maxValue) const { return pixels() + percent() / 100 * maxValue; }
-    bool operator==(const CalculationValue& o) const { return pixels() == o.pixels() && percent() == o.percent(); }
-    bool isNonNegative() const { return m_isNonNegative; }
-    float pixels() const { return m_value.pixels; }
-    float percent() const { return m_value.percent; }
-    PixelsAndPercent pixelsAndPercent() const { return m_value; }
+  float evaluate(float maxValue) const {
+    return pixels() + percent() / 100 * maxValue;
+  }
+  bool operator==(const CalculationValue& o) const {
+    return pixels() == o.pixels() && percent() == o.percent();
+  }
+  bool isNonNegative() const { return m_isNonNegative; }
+  float pixels() const { return m_value.pixels; }
+  float percent() const { return m_value.percent; }
+  PixelsAndPercent pixelsAndPercent() const { return m_value; }
 
-private:
-    CalculationValue(PixelsAndPercent value, ValueRange range)
-        : m_value(value)
-        , m_isNonNegative(range == ValueRangeNonNegative)
-    {
-    }
+ private:
+  CalculationValue(PixelsAndPercent value, ValueRange range)
+      : m_value(value), m_isNonNegative(range == ValueRangeNonNegative) {}
 
-    PixelsAndPercent m_value;
-    bool m_isNonNegative;
+  PixelsAndPercent m_value;
+  bool m_isNonNegative;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_CALCULATIONVALUE_H_

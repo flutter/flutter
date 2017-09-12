@@ -25,7 +25,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  * Alternatively, the contents of this file may be used under the terms
  * of either the Mozilla Public License Version 1.1, found at
@@ -53,17 +53,17 @@ namespace blink {
 class RenderLayer;
 
 struct LayerPaintingInfo {
-    LayerPaintingInfo(RenderLayer* inRootLayer, const LayoutRect& inDirtyRect,
-        const LayoutSize& inSubPixelAccumulation)
-        : rootLayer(inRootLayer)
-        , paintDirtyRect(inDirtyRect)
-        , subPixelAccumulation(inSubPixelAccumulation)
-    { }
-    RenderLayer* rootLayer;
-    LayoutRect paintDirtyRect; // relative to rootLayer;
-    LayoutSize subPixelAccumulation;
+  LayerPaintingInfo(RenderLayer* inRootLayer,
+                    const LayoutRect& inDirtyRect,
+                    const LayoutSize& inSubPixelAccumulation)
+      : rootLayer(inRootLayer),
+        paintDirtyRect(inDirtyRect),
+        subPixelAccumulation(inSubPixelAccumulation) {}
+  RenderLayer* rootLayer;
+  LayoutRect paintDirtyRect;  // relative to rootLayer;
+  LayoutSize subPixelAccumulation;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_LAYERPAINTINGINFO_H_

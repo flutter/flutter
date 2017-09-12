@@ -7,10 +7,10 @@
 
 #include <memory>
 
-#include "lib/ui/scenic/fidl/session.fidl.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
+#include "lib/ui/scenic/fidl/session.fidl.h"
 #include "magenta/system/ulib/mx/include/mx/eventpair.h"
 
 namespace flutter_runner {

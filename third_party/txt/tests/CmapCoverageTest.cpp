@@ -49,7 +49,8 @@ static std::vector<uint8_t> buildCmapFormat4Table(
   uint16_t segmentCount = ranges.size() / 2 + 1 /* +1 for end marker */;
 
   const size_t numOfUint16 =
-      8 /* format, length, languages, segCountX2, searchRange, entrySelector, rangeShift, pad */
+      8 /* format, length, languages, segCountX2, searchRange, entrySelector,
+           rangeShift, pad */
       + segmentCount * 4 /* endCount, startCount, idRange, idRangeOffset */;
   const size_t finalLength = sizeof(uint16_t) * numOfUint16;
 

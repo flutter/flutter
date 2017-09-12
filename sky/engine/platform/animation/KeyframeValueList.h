@@ -36,55 +36,50 @@
 namespace blink {
 
 enum AnimatedPropertyID {
-    AnimatedPropertyInvalid,
-    AnimatedPropertyTransform,
-    AnimatedPropertyOpacity,
-    AnimatedPropertyBackgroundColor,
-    AnimatedPropertyFilter
+  AnimatedPropertyInvalid,
+  AnimatedPropertyTransform,
+  AnimatedPropertyOpacity,
+  AnimatedPropertyBackgroundColor,
+  AnimatedPropertyFilter
 };
 
 // Used to store a series of values in a keyframe list.
 // Values will all be of the same type, which can be inferred from the property.
 class PLATFORM_EXPORT KeyframeValueList {
-public:
-    explicit KeyframeValueList(AnimatedPropertyID property)
-        : m_property(property)
-    {
-    }
+ public:
+  explicit KeyframeValueList(AnimatedPropertyID property)
+      : m_property(property) {}
 
-    KeyframeValueList(const KeyframeValueList& other)
-        : m_property(other.property())
-    {
-        for (size_t i = 0; i < other.m_values.size(); ++i)
-            m_values.append(other.m_values[i]->clone());
-    }
+  KeyframeValueList(const KeyframeValueList& other)
+      : m_property(other.property()) {
+    for (size_t i = 0; i < other.m_values.size(); ++i)
+      m_values.append(other.m_values[i]->clone());
+  }
 
-    KeyframeValueList& operator=(const KeyframeValueList& other)
-    {
-        KeyframeValueList copy(other);
-        swap(copy);
-        return *this;
-    }
+  KeyframeValueList& operator=(const KeyframeValueList& other) {
+    KeyframeValueList copy(other);
+    swap(copy);
+    return *this;
+  }
 
-    void swap(KeyframeValueList& other)
-    {
-        std::swap(m_property, other.m_property);
-        m_values.swap(other.m_values);
-    }
+  void swap(KeyframeValueList& other) {
+    std::swap(m_property, other.m_property);
+    m_values.swap(other.m_values);
+  }
 
-    AnimatedPropertyID property() const { return m_property; }
+  AnimatedPropertyID property() const { return m_property; }
 
-    size_t size() const { return m_values.size(); }
-    const AnimationValue* at(size_t i) const { return m_values.at(i).get(); }
+  size_t size() const { return m_values.size(); }
+  const AnimationValue* at(size_t i) const { return m_values.at(i).get(); }
 
-    // Insert, sorted by keyTime.
-    void insert(PassOwnPtr<const AnimationValue>);
+  // Insert, sorted by keyTime.
+  void insert(PassOwnPtr<const AnimationValue>);
 
-protected:
-    Vector<OwnPtr<const AnimationValue> > m_values;
-    AnimatedPropertyID m_property;
+ protected:
+  Vector<OwnPtr<const AnimationValue>> m_values;
+  AnimatedPropertyID m_property;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_ANIMATION_KEYFRAMEVALUELIST_H_

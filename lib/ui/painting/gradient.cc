@@ -4,9 +4,9 @@
 
 #include "flutter/lib/ui/painting/gradient.h"
 
+#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_args.h"
 #include "lib/tonic/dart_binding_macros.h"
-#include "lib/tonic/converter/dart_converter.h"
 #include "lib/tonic/dart_library_natives.h"
 
 namespace blink {

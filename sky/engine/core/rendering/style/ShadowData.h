@@ -2,7 +2,8 @@
  * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
  *           (C) 2000 Antti Koivisto (koivisto@kde.org)
  *           (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2003, 2005, 2006, 2007, 2008, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2005, 2006, 2007, 2008, 2009 Apple Inc.
+ * All rights reserved.
  * Copyright (C) 2006 Graham Dennis (graham.dennis@gmail.com)
  *
  * This library is free software; you can redistribute it and/or
@@ -32,41 +33,46 @@ namespace blink {
 
 enum ShadowStyle { Normal, Inset };
 
-// This class holds information about shadows for the text-shadow and box-shadow properties.
+// This class holds information about shadows for the text-shadow and box-shadow
+// properties.
 class ShadowData {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    ShadowData(const FloatPoint& location, float blur, float spread, ShadowStyle style, const Color& color)
-        : m_location(location)
-        , m_blur(blur)
-        , m_spread(spread)
-        , m_color(color)
-        , m_style(style)
-    {
-    }
+  WTF_MAKE_FAST_ALLOCATED;
 
-    bool operator==(const ShadowData&) const;
-    bool operator!=(const ShadowData& o) const { return !(*this == o); }
+ public:
+  ShadowData(const FloatPoint& location,
+             float blur,
+             float spread,
+             ShadowStyle style,
+             const Color& color)
+      : m_location(location),
+        m_blur(blur),
+        m_spread(spread),
+        m_color(color),
+        m_style(style) {}
 
-    ShadowData blend(const ShadowData& from, double progress) const;
+  bool operator==(const ShadowData&) const;
+  bool operator!=(const ShadowData& o) const { return !(*this == o); }
 
-    float x() const { return m_location.x(); }
-    float y() const { return m_location.y(); }
-    FloatPoint location() const { return m_location; }
-    float blur() const { return m_blur; }
-    float spread() const { return m_spread; }
-    ShadowStyle style() const { return m_style; }
-    const Color& color() const { return m_color; }
+  ShadowData blend(const ShadowData& from, double progress) const;
 
-private:
-    FloatPoint m_location;
-    float m_blur;
-    float m_spread;
-    // FIXME: We should use StyleColor here to allow currentColor to work correctly with visited links
-    Color m_color;
-    ShadowStyle m_style;
+  float x() const { return m_location.x(); }
+  float y() const { return m_location.y(); }
+  FloatPoint location() const { return m_location; }
+  float blur() const { return m_blur; }
+  float spread() const { return m_spread; }
+  ShadowStyle style() const { return m_style; }
+  const Color& color() const { return m_color; }
+
+ private:
+  FloatPoint m_location;
+  float m_blur;
+  float m_spread;
+  // FIXME: We should use StyleColor here to allow currentColor to work
+  // correctly with visited links
+  Color m_color;
+  ShadowStyle m_style;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_SHADOWDATA_H_

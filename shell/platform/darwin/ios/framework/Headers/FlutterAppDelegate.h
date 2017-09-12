@@ -24,8 +24,7 @@
  * code as necessary from FlutterAppDelegate.mm.
  */
 FLUTTER_EXPORT
-@interface FlutterAppDelegate
-    : UIResponder<UIApplicationDelegate, FlutterPluginRegistry>
+@interface FlutterAppDelegate : UIResponder<UIApplicationDelegate, FlutterPluginRegistry>
 
 @property(strong, nonatomic) UIWindow* window;
 
@@ -33,7 +32,7 @@ FLUTTER_EXPORT
 // typically a FlutterViewController, for plugin interop.
 //
 // Defaults to window's rootViewController.
-- (NSObject<FlutterBinaryMessenger>*) binaryMessenger;
+- (NSObject<FlutterBinaryMessenger>*)binaryMessenger;
 
 @end
 

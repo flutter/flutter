@@ -10,37 +10,32 @@
 
 namespace WTF {
 
-// A helper class for managing double buffered deques, typically where the client locks when appending or swapping.
-template <typename T> class DoubleBufferedDeque {
-    WTF_MAKE_NONCOPYABLE(DoubleBufferedDeque);
-public:
-    DoubleBufferedDeque()
-        : m_activeIndex(0) { }
+// A helper class for managing double buffered deques, typically where the
+// client locks when appending or swapping.
+template <typename T>
+class DoubleBufferedDeque {
+  WTF_MAKE_NONCOPYABLE(DoubleBufferedDeque);
 
-    void append(const T& value)
-    {
-        m_queue[m_activeIndex].append(value);
-    }
+ public:
+  DoubleBufferedDeque() : m_activeIndex(0) {}
 
-    bool isEmpty() const
-    {
-        return m_queue[m_activeIndex].isEmpty();
-    }
+  void append(const T& value) { m_queue[m_activeIndex].append(value); }
 
-    Deque<T>& swapBuffers()
-    {
-        int oldIndex = m_activeIndex;
-        m_activeIndex ^= 1;
-        ASSERT(m_queue[m_activeIndex].isEmpty());
-        return m_queue[oldIndex];
-    }
+  bool isEmpty() const { return m_queue[m_activeIndex].isEmpty(); }
 
-private:
-    Deque<T> m_queue[2];
-    int m_activeIndex;
+  Deque<T>& swapBuffers() {
+    int oldIndex = m_activeIndex;
+    m_activeIndex ^= 1;
+    ASSERT(m_queue[m_activeIndex].isEmpty());
+    return m_queue[oldIndex];
+  }
+
+ private:
+  Deque<T> m_queue[2];
+  int m_activeIndex;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::DoubleBufferedDeque;
 

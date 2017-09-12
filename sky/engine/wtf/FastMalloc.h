@@ -38,7 +38,7 @@ WTF_EXPORT char* fastStrDup(const char*);
 
 WTF_EXPORT void fastFree(void*);
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::fastFree;
 using WTF::fastMalloc;

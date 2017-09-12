@@ -30,9 +30,9 @@
 
 #include "flutter/sky/engine/platform/fonts/harfbuzz/HarfBuzzFace.h"
 
+#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 #include "hb-ot.h"
 #include "hb.h"
-#include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 
 namespace blink {
 
@@ -45,86 +45,87 @@ const hb_tag_t HarfBuzzFace::vrt2Tag = HB_TAG('v', 'r', 't', '2');
 // underling font data (e.g. CTFontRef, FTFace).
 
 class FaceCacheEntry : public RefCounted<FaceCacheEntry> {
-public:
-    static PassRefPtr<FaceCacheEntry> create(hb_face_t* face)
-    {
-        ASSERT(face);
-        return adoptRef(new FaceCacheEntry(face));
-    }
-    ~FaceCacheEntry()
-    {
-        hb_face_destroy(m_face);
-    }
+ public:
+  static PassRefPtr<FaceCacheEntry> create(hb_face_t* face) {
+    ASSERT(face);
+    return adoptRef(new FaceCacheEntry(face));
+  }
+  ~FaceCacheEntry() { hb_face_destroy(m_face); }
 
-    hb_face_t* face() { return m_face; }
-    HashMap<uint32_t, uint16_t>* glyphCache() { return &m_glyphCache; }
+  hb_face_t* face() { return m_face; }
+  HashMap<uint32_t, uint16_t>* glyphCache() { return &m_glyphCache; }
 
-private:
-    explicit FaceCacheEntry(hb_face_t* face)
-        : m_face(face)
-    { }
+ private:
+  explicit FaceCacheEntry(hb_face_t* face) : m_face(face) {}
 
-    hb_face_t* m_face;
-    HashMap<uint32_t, uint16_t> m_glyphCache;
+  hb_face_t* m_face;
+  HashMap<uint32_t, uint16_t> m_glyphCache;
 };
 
-typedef HashMap<uint64_t, RefPtr<FaceCacheEntry>, WTF::IntHash<uint64_t>, WTF::UnsignedWithZeroKeyHashTraits<uint64_t> > HarfBuzzFaceCache;
+typedef HashMap<uint64_t,
+                RefPtr<FaceCacheEntry>,
+                WTF::IntHash<uint64_t>,
+                WTF::UnsignedWithZeroKeyHashTraits<uint64_t>>
+    HarfBuzzFaceCache;
 
-static HarfBuzzFaceCache* harfBuzzFaceCache()
-{
-    DEFINE_STATIC_LOCAL(HarfBuzzFaceCache, s_harfBuzzFaceCache, ());
-    return &s_harfBuzzFaceCache;
+static HarfBuzzFaceCache* harfBuzzFaceCache() {
+  DEFINE_STATIC_LOCAL(HarfBuzzFaceCache, s_harfBuzzFaceCache, ());
+  return &s_harfBuzzFaceCache;
 }
 
 HarfBuzzFace::HarfBuzzFace(FontPlatformData* platformData, uint64_t uniqueID)
-    : m_platformData(platformData)
-    , m_uniqueID(uniqueID)
-    , m_scriptForVerticalText(HB_SCRIPT_INVALID)
-{
-    HarfBuzzFaceCache::AddResult result = harfBuzzFaceCache()->add(m_uniqueID, nullptr);
-    if (result.isNewEntry)
-        result.storedValue->value = FaceCacheEntry::create(createFace());
-    result.storedValue->value->ref();
-    m_face = result.storedValue->value->face();
-    m_glyphCacheForFaceCacheEntry = result.storedValue->value->glyphCache();
+    : m_platformData(platformData),
+      m_uniqueID(uniqueID),
+      m_scriptForVerticalText(HB_SCRIPT_INVALID) {
+  HarfBuzzFaceCache::AddResult result =
+      harfBuzzFaceCache()->add(m_uniqueID, nullptr);
+  if (result.isNewEntry)
+    result.storedValue->value = FaceCacheEntry::create(createFace());
+  result.storedValue->value->ref();
+  m_face = result.storedValue->value->face();
+  m_glyphCacheForFaceCacheEntry = result.storedValue->value->glyphCache();
 }
 
-HarfBuzzFace::~HarfBuzzFace()
-{
-    HarfBuzzFaceCache::iterator result = harfBuzzFaceCache()->find(m_uniqueID);
-    ASSERT_WITH_SECURITY_IMPLICATION(result != harfBuzzFaceCache()->end());
-    ASSERT(result.get()->value->refCount() > 1);
-    result.get()->value->deref();
-    if (result.get()->value->refCount() == 1)
-        harfBuzzFaceCache()->remove(m_uniqueID);
+HarfBuzzFace::~HarfBuzzFace() {
+  HarfBuzzFaceCache::iterator result = harfBuzzFaceCache()->find(m_uniqueID);
+  ASSERT_WITH_SECURITY_IMPLICATION(result != harfBuzzFaceCache()->end());
+  ASSERT(result.get()->value->refCount() > 1);
+  result.get()->value->deref();
+  if (result.get()->value->refCount() == 1)
+    harfBuzzFaceCache()->remove(m_uniqueID);
 }
 
-static hb_script_t findScriptForVerticalGlyphSubstitution(hb_face_t* face)
-{
-    static const unsigned maxCount = 32;
+static hb_script_t findScriptForVerticalGlyphSubstitution(hb_face_t* face) {
+  static const unsigned maxCount = 32;
 
-    unsigned scriptCount = maxCount;
-    hb_tag_t scriptTags[maxCount];
-    hb_ot_layout_table_get_script_tags(face, HB_OT_TAG_GSUB, 0, &scriptCount, scriptTags);
-    for (unsigned scriptIndex = 0; scriptIndex < scriptCount; ++scriptIndex) {
-        unsigned languageCount = maxCount;
-        hb_tag_t languageTags[maxCount];
-        hb_ot_layout_script_get_language_tags(face, HB_OT_TAG_GSUB, scriptIndex, 0, &languageCount, languageTags);
-        for (unsigned languageIndex = 0; languageIndex < languageCount; ++languageIndex) {
-            unsigned featureIndex;
-            if (hb_ot_layout_language_find_feature(face, HB_OT_TAG_GSUB, scriptIndex, languageIndex, HarfBuzzFace::vertTag, &featureIndex)
-                || hb_ot_layout_language_find_feature(face, HB_OT_TAG_GSUB, scriptIndex, languageIndex, HarfBuzzFace::vrt2Tag, &featureIndex))
-                return hb_ot_tag_to_script(scriptTags[scriptIndex]);
-        }
+  unsigned scriptCount = maxCount;
+  hb_tag_t scriptTags[maxCount];
+  hb_ot_layout_table_get_script_tags(face, HB_OT_TAG_GSUB, 0, &scriptCount,
+                                     scriptTags);
+  for (unsigned scriptIndex = 0; scriptIndex < scriptCount; ++scriptIndex) {
+    unsigned languageCount = maxCount;
+    hb_tag_t languageTags[maxCount];
+    hb_ot_layout_script_get_language_tags(face, HB_OT_TAG_GSUB, scriptIndex, 0,
+                                          &languageCount, languageTags);
+    for (unsigned languageIndex = 0; languageIndex < languageCount;
+         ++languageIndex) {
+      unsigned featureIndex;
+      if (hb_ot_layout_language_find_feature(
+              face, HB_OT_TAG_GSUB, scriptIndex, languageIndex,
+              HarfBuzzFace::vertTag, &featureIndex) ||
+          hb_ot_layout_language_find_feature(
+              face, HB_OT_TAG_GSUB, scriptIndex, languageIndex,
+              HarfBuzzFace::vrt2Tag, &featureIndex))
+        return hb_ot_tag_to_script(scriptTags[scriptIndex]);
     }
-    return HB_SCRIPT_INVALID;
+  }
+  return HB_SCRIPT_INVALID;
 }
 
-void HarfBuzzFace::setScriptForVerticalGlyphSubstitution(hb_buffer_t* buffer)
-{
-    if (m_scriptForVerticalText == HB_SCRIPT_INVALID)
-        m_scriptForVerticalText = findScriptForVerticalGlyphSubstitution(m_face);
-    hb_buffer_set_script(buffer, m_scriptForVerticalText);
+void HarfBuzzFace::setScriptForVerticalGlyphSubstitution(hb_buffer_t* buffer) {
+  if (m_scriptForVerticalText == HB_SCRIPT_INVALID)
+    m_scriptForVerticalText = findScriptForVerticalGlyphSubstitution(m_face);
+  hb_buffer_set_script(buffer, m_scriptForVerticalText);
 }
 
-} // namespace blink
+}  // namespace blink

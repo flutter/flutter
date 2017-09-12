@@ -30,38 +30,33 @@
 
 namespace WTF {
 
-// TemporaryChange<> is useful for setting a variable to a new value only within a
-// particular scope. An TemporaryChange<> object changes a variable to its original
-// value upon destruction, making it an alternative to writing "var = false;"
-// or "var = oldVal;" at all of a block's exit points.
+// TemporaryChange<> is useful for setting a variable to a new value only within
+// a particular scope. An TemporaryChange<> object changes a variable to its
+// original value upon destruction, making it an alternative to writing "var =
+// false;" or "var = oldVal;" at all of a block's exit points.
 //
-// This should be obvious, but note that an TemporaryChange<> instance should have a
-// shorter lifetime than its scopedVariable, to prevent invalid memory writes
-// when the TemporaryChange<> object is destroyed.
+// This should be obvious, but note that an TemporaryChange<> instance should
+// have a shorter lifetime than its scopedVariable, to prevent invalid memory
+// writes when the TemporaryChange<> object is destroyed.
 
-template<typename T>
+template <typename T>
 class TemporaryChange {
-    WTF_MAKE_NONCOPYABLE(TemporaryChange);
-public:
-    TemporaryChange(T& scopedVariable, T newValue)
-        : m_scopedVariable(scopedVariable)
-        , m_originalValue(scopedVariable)
-    {
-        m_scopedVariable = newValue;
-    }
+  WTF_MAKE_NONCOPYABLE(TemporaryChange);
 
-    ~TemporaryChange()
-    {
-        m_scopedVariable = m_originalValue;
-    }
+ public:
+  TemporaryChange(T& scopedVariable, T newValue)
+      : m_scopedVariable(scopedVariable), m_originalValue(scopedVariable) {
+    m_scopedVariable = newValue;
+  }
 
+  ~TemporaryChange() { m_scopedVariable = m_originalValue; }
 
-private:
-    T& m_scopedVariable;
-    T m_originalValue;
+ private:
+  T& m_scopedVariable;
+  T m_originalValue;
 };
 
-}
+}  // namespace WTF
 
 using WTF::TemporaryChange;
 

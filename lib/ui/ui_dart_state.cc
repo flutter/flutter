@@ -49,7 +49,6 @@ void UIDartState::set_font_selector(PassRefPtr<FontSelector> selector) {
   font_selector_ = selector;
 }
 
-
 PassRefPtr<FontSelector> UIDartState::font_selector() {
   return font_selector_;
 }

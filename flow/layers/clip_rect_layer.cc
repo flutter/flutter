@@ -25,9 +25,9 @@ void ClipRectLayer::UpdateScene(SceneUpdateContext& context) {
   FXL_DCHECK(needs_system_composite());
 
   scenic_lib::Rectangle shape(context.session(),   // session
-                                  clip_rect_.width(),  //  width
-                                  clip_rect_.height()  //  height
-                                  );
+                              clip_rect_.width(),  //  width
+                              clip_rect_.height()  //  height
+  );
 
   SceneUpdateContext::Clip clip(context, shape, clip_rect_);
   UpdateSceneChildren(context);

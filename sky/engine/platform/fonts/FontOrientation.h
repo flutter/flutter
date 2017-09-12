@@ -30,6 +30,6 @@ namespace blink {
 
 enum FontOrientation { Horizontal, Vertical };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTORIENTATION_H_

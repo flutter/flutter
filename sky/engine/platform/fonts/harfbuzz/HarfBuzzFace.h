@@ -43,33 +43,33 @@ namespace blink {
 class FontPlatformData;
 
 class HarfBuzzFace : public RefCounted<HarfBuzzFace> {
-public:
-    static const hb_tag_t vertTag;
-    static const hb_tag_t vrt2Tag;
+ public:
+  static const hb_tag_t vertTag;
+  static const hb_tag_t vrt2Tag;
 
-    static PassRefPtr<HarfBuzzFace> create(FontPlatformData* platformData, uint64_t uniqueID)
-    {
-        return adoptRef(new HarfBuzzFace(platformData, uniqueID));
-    }
-    ~HarfBuzzFace();
+  static PassRefPtr<HarfBuzzFace> create(FontPlatformData* platformData,
+                                         uint64_t uniqueID) {
+    return adoptRef(new HarfBuzzFace(platformData, uniqueID));
+  }
+  ~HarfBuzzFace();
 
-    hb_font_t* createFont();
+  hb_font_t* createFont();
 
-    void setScriptForVerticalGlyphSubstitution(hb_buffer_t*);
+  void setScriptForVerticalGlyphSubstitution(hb_buffer_t*);
 
-private:
-    HarfBuzzFace(FontPlatformData*, uint64_t);
+ private:
+  HarfBuzzFace(FontPlatformData*, uint64_t);
 
-    hb_face_t* createFace();
+  hb_face_t* createFace();
 
-    FontPlatformData* m_platformData;
-    uint64_t m_uniqueID;
-    hb_face_t* m_face;
-    WTF::HashMap<uint32_t, uint16_t>* m_glyphCacheForFaceCacheEntry;
+  FontPlatformData* m_platformData;
+  uint64_t m_uniqueID;
+  hb_face_t* m_face;
+  WTF::HashMap<uint32_t, uint16_t>* m_glyphCacheForFaceCacheEntry;
 
-    hb_script_t m_scriptForVerticalText;
+  hb_script_t m_scriptForVerticalText;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZFACE_H_

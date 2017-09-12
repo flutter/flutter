@@ -39,27 +39,31 @@ struct UCollator;
 
 namespace WTF {
 
-    class WTF_EXPORT Collator {
-        WTF_MAKE_NONCOPYABLE(Collator); WTF_MAKE_FAST_ALLOCATED;
-    public:
-        enum Result { Equal = 0, Greater = 1, Less = -1 };
+class WTF_EXPORT Collator {
+  WTF_MAKE_NONCOPYABLE(Collator);
+  WTF_MAKE_FAST_ALLOCATED;
 
-        Collator(const char* locale); // Parsing is lenient; e.g. language identifiers (such as "en-US") are accepted, too.
-        ~Collator();
-        void setOrderLowerFirst(bool);
+ public:
+  enum Result { Equal = 0, Greater = 1, Less = -1 };
 
-        static PassOwnPtr<Collator> userDefault();
+  Collator(const char* locale);  // Parsing is lenient; e.g. language
+                                 // identifiers (such as "en-US") are accepted,
+                                 // too.
+  ~Collator();
+  void setOrderLowerFirst(bool);
 
-        Result collate(const ::UChar*, size_t, const ::UChar*, size_t) const;
+  static PassOwnPtr<Collator> userDefault();
 
-    private:
-        void createCollator() const;
-        void releaseCollator();
-        mutable UCollator* m_collator;
-        char* m_locale;
-        bool m_lowerFirst;
-    };
-}
+  Result collate(const ::UChar*, size_t, const ::UChar*, size_t) const;
+
+ private:
+  void createCollator() const;
+  void releaseCollator();
+  mutable UCollator* m_collator;
+  char* m_locale;
+  bool m_lowerFirst;
+};
+}  // namespace WTF
 
 using WTF::Collator;
 

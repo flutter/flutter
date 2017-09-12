@@ -30,102 +30,103 @@
 
 namespace blink {
 
-static const AtomicString& platformLanguage()
-{
-    DEFINE_STATIC_LOCAL(AtomicString, computedDefaultLanguage, ());
-    if (computedDefaultLanguage.isEmpty()) {
-        std::string defaultLocale = blink::Platform::current()->defaultLocale();
-        computedDefaultLanguage = AtomicString::fromUTF8(defaultLocale.data(), defaultLocale.size());
-        ASSERT(!computedDefaultLanguage.isEmpty());
-    }
-    return computedDefaultLanguage;
+static const AtomicString& platformLanguage() {
+  DEFINE_STATIC_LOCAL(AtomicString, computedDefaultLanguage, ());
+  if (computedDefaultLanguage.isEmpty()) {
+    std::string defaultLocale = blink::Platform::current()->defaultLocale();
+    computedDefaultLanguage =
+        AtomicString::fromUTF8(defaultLocale.data(), defaultLocale.size());
+    ASSERT(!computedDefaultLanguage.isEmpty());
+  }
+  return computedDefaultLanguage;
 }
 
-AtomicString defaultLanguage()
-{
-    Vector<AtomicString> languages = userPreferredLanguages();
-    if (!languages.isEmpty())
-        return languages[0];
+AtomicString defaultLanguage() {
+  Vector<AtomicString> languages = userPreferredLanguages();
+  if (!languages.isEmpty())
+    return languages[0];
 
-    return emptyAtom;
+  return emptyAtom;
 }
 
-static Vector<AtomicString>& preferredLanguagesOverride()
-{
-    DEFINE_STATIC_LOCAL(Vector<AtomicString>, override, ());
+static Vector<AtomicString>& preferredLanguagesOverride() {
+  DEFINE_STATIC_LOCAL(Vector<AtomicString>, override, ());
+  return override;
+}
+
+Vector<AtomicString> userPreferredLanguagesOverride() {
+  return preferredLanguagesOverride();
+}
+
+void overrideUserPreferredLanguages(const Vector<AtomicString>& override) {
+  preferredLanguagesOverride() = override;
+}
+
+Vector<AtomicString> userPreferredLanguages() {
+  Vector<AtomicString>& override = preferredLanguagesOverride();
+  if (!override.isEmpty())
     return override;
+
+  Vector<AtomicString> languages;
+  languages.reserveInitialCapacity(1);
+  languages.append(platformLanguage());
+  return languages;
 }
 
-Vector<AtomicString> userPreferredLanguagesOverride()
-{
-    return preferredLanguagesOverride();
+static String canonicalLanguageIdentifier(const String& languageCode) {
+  String lowercaseLanguageCode = languageCode.lower();
+
+  if (lowercaseLanguageCode.length() >= 3 && lowercaseLanguageCode[2] == '_')
+    lowercaseLanguageCode.replace(2, 1, "-");
+
+  return lowercaseLanguageCode;
 }
 
-void overrideUserPreferredLanguages(const Vector<AtomicString>& override)
-{
-    preferredLanguagesOverride() = override;
-}
+size_t indexOfBestMatchingLanguageInList(
+    const AtomicString& language,
+    const Vector<AtomicString>& languageList) {
+  AtomicString languageWithoutLocaleMatch;
+  AtomicString languageMatchButNotLocale;
+  size_t languageWithoutLocaleMatchIndex = 0;
+  size_t languageMatchButNotLocaleMatchIndex = 0;
+  bool canMatchLanguageOnly = (language.length() == 2 ||
+                               (language.length() >= 3 && language[2] == '-'));
 
-Vector<AtomicString> userPreferredLanguages()
-{
-    Vector<AtomicString>& override = preferredLanguagesOverride();
-    if (!override.isEmpty())
-        return override;
+  for (size_t i = 0; i < languageList.size(); ++i) {
+    String canonicalizedLanguageFromList =
+        canonicalLanguageIdentifier(languageList[i]);
 
-    Vector<AtomicString> languages;
-    languages.reserveInitialCapacity(1);
-    languages.append(platformLanguage());
-    return languages;
-}
+    if (language == canonicalizedLanguageFromList)
+      return i;
 
-static String canonicalLanguageIdentifier(const String& languageCode)
-{
-    String lowercaseLanguageCode = languageCode.lower();
-
-    if (lowercaseLanguageCode.length() >= 3 && lowercaseLanguageCode[2] == '_')
-        lowercaseLanguageCode.replace(2, 1, "-");
-
-    return lowercaseLanguageCode;
-}
-
-size_t indexOfBestMatchingLanguageInList(const AtomicString& language, const Vector<AtomicString>& languageList)
-{
-    AtomicString languageWithoutLocaleMatch;
-    AtomicString languageMatchButNotLocale;
-    size_t languageWithoutLocaleMatchIndex = 0;
-    size_t languageMatchButNotLocaleMatchIndex = 0;
-    bool canMatchLanguageOnly = (language.length() == 2 || (language.length() >= 3 && language[2] == '-'));
-
-    for (size_t i = 0; i < languageList.size(); ++i) {
-        String canonicalizedLanguageFromList = canonicalLanguageIdentifier(languageList[i]);
-
-        if (language == canonicalizedLanguageFromList)
-            return i;
-
-        if (canMatchLanguageOnly && canonicalizedLanguageFromList.length() >= 2) {
-            if (language[0] == canonicalizedLanguageFromList[0] && language[1] == canonicalizedLanguageFromList[1]) {
-                if (!languageWithoutLocaleMatch.length() && canonicalizedLanguageFromList.length() == 2) {
-                    languageWithoutLocaleMatch = languageList[i];
-                    languageWithoutLocaleMatchIndex = i;
-                }
-                if (!languageMatchButNotLocale.length() && canonicalizedLanguageFromList.length() >= 3) {
-                    languageMatchButNotLocale = languageList[i];
-                    languageMatchButNotLocaleMatchIndex = i;
-                }
-            }
+    if (canMatchLanguageOnly && canonicalizedLanguageFromList.length() >= 2) {
+      if (language[0] == canonicalizedLanguageFromList[0] &&
+          language[1] == canonicalizedLanguageFromList[1]) {
+        if (!languageWithoutLocaleMatch.length() &&
+            canonicalizedLanguageFromList.length() == 2) {
+          languageWithoutLocaleMatch = languageList[i];
+          languageWithoutLocaleMatchIndex = i;
         }
+        if (!languageMatchButNotLocale.length() &&
+            canonicalizedLanguageFromList.length() >= 3) {
+          languageMatchButNotLocale = languageList[i];
+          languageMatchButNotLocaleMatchIndex = i;
+        }
+      }
     }
+  }
 
-    // If we have both a language-only match and a languge-but-not-locale match, return the
-    // languge-only match as is considered a "better" match. For example, if the list
-    // provided has both "en-GB" and "en" and the user prefers "en-US" we will return "en".
-    if (languageWithoutLocaleMatch.length())
-        return languageWithoutLocaleMatchIndex;
+  // If we have both a language-only match and a languge-but-not-locale match,
+  // return the languge-only match as is considered a "better" match. For
+  // example, if the list provided has both "en-GB" and "en" and the user
+  // prefers "en-US" we will return "en".
+  if (languageWithoutLocaleMatch.length())
+    return languageWithoutLocaleMatchIndex;
 
-    if (languageMatchButNotLocale.length())
-        return languageMatchButNotLocaleMatchIndex;
+  if (languageMatchButNotLocale.length())
+    return languageMatchButNotLocaleMatchIndex;
 
-    return languageList.size();
+  return languageList.size();
 }
 
-}
+}  // namespace blink

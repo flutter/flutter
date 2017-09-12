@@ -34,24 +34,27 @@ class BidiContext;
 class InlineBox;
 
 struct BidiRun : BidiCharacterRun {
-    BidiRun(int start, int stop, RenderObject* object, BidiContext* context, WTF::Unicode::Direction dir)
-        : BidiCharacterRun(start, stop, context, dir)
-        , m_object(object)
-        , m_box(0)
-    {
-        // Stored in base class to save space.
-        m_hasHyphen = false;
-        m_hasAddedEllipsis = false;
-    }
+  BidiRun(int start,
+          int stop,
+          RenderObject* object,
+          BidiContext* context,
+          WTF::Unicode::Direction dir)
+      : BidiCharacterRun(start, stop, context, dir),
+        m_object(object),
+        m_box(0) {
+    // Stored in base class to save space.
+    m_hasHyphen = false;
+    m_hasAddedEllipsis = false;
+  }
 
-    BidiRun* next() { return static_cast<BidiRun*>(m_next); }
-    RenderObject* object() { return m_object; }
+  BidiRun* next() { return static_cast<BidiRun*>(m_next); }
+  RenderObject* object() { return m_object; }
 
-public:
-    RenderObject* m_object;
-    InlineBox* m_box;
+ public:
+  RenderObject* m_object;
+  InlineBox* m_box;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_BIDIRUN_H_

@@ -32,31 +32,26 @@
 
 namespace blink {
 
-PassRefPtr<Pattern> Pattern::createBitmapPattern(PassRefPtr<Image> tileImage, RepeatMode repeatMode)
-{
-    return adoptRef(new Pattern(tileImage, repeatMode));
+PassRefPtr<Pattern> Pattern::createBitmapPattern(PassRefPtr<Image> tileImage,
+                                                 RepeatMode repeatMode) {
+  return adoptRef(new Pattern(tileImage, repeatMode));
 }
 
-Pattern::Pattern(PassRefPtr<Image> image, RepeatMode repeatMode)
-{
+Pattern::Pattern(PassRefPtr<Image> image, RepeatMode repeatMode) {}
+
+Pattern::~Pattern() {}
+
+SkShader* Pattern::shader() {
+  return m_pattern.get();
 }
 
-Pattern::~Pattern()
-{
+void Pattern::setPatternSpaceTransform(
+    const AffineTransform& patternSpaceTransformation) {
+  if (patternSpaceTransformation == m_patternSpaceTransformation)
+    return;
+
+  m_patternSpaceTransformation = patternSpaceTransformation;
+  m_pattern.reset();
 }
 
-SkShader* Pattern::shader()
-{
-    return m_pattern.get();
-}
-
-void Pattern::setPatternSpaceTransform(const AffineTransform& patternSpaceTransformation)
-{
-    if (patternSpaceTransformation == m_patternSpaceTransformation)
-        return;
-
-    m_patternSpaceTransformation = patternSpaceTransformation;
-    m_pattern.reset();
-}
-
-} // namespace blink
+}  // namespace blink

@@ -32,36 +32,30 @@
 
 namespace blink {
 
-const Length& LengthBox::logicalLeft() const
-{
-    return m_left;
+const Length& LengthBox::logicalLeft() const {
+  return m_left;
 }
 
-const Length& LengthBox::logicalRight() const
-{
-    return m_right;
+const Length& LengthBox::logicalRight() const {
+  return m_right;
 }
 
-const Length& LengthBox::before() const
-{
-    // FIXME(sky): Remove
-    return m_top;
+const Length& LengthBox::before() const {
+  // FIXME(sky): Remove
+  return m_top;
 }
 
-const Length& LengthBox::after() const
-{
-    // FIXME(sky): Remove
-    return m_bottom;
+const Length& LengthBox::after() const {
+  // FIXME(sky): Remove
+  return m_bottom;
 }
 
-const Length& LengthBox::start(TextDirection direction) const
-{
-    return isLeftToRightDirection(direction) ? m_left : m_right;
+const Length& LengthBox::start(TextDirection direction) const {
+  return isLeftToRightDirection(direction) ? m_left : m_right;
 }
 
-const Length& LengthBox::end(TextDirection direction) const
-{
-    return isLeftToRightDirection(direction) ? m_right : m_left;
+const Length& LengthBox::end(TextDirection direction) const {
+  return isLeftToRightDirection(direction) ? m_right : m_left;
 }
 
-} // namespace blink
+}  // namespace blink

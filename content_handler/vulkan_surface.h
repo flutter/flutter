@@ -5,13 +5,13 @@
 #pragma once
 
 #include <memory>
-#include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
-#include "lib/fxl/macros.h"
 #include "lib/fsl/tasks/message_loop.h"
 #include "lib/fsl/tasks/message_loop_handler.h"
+#include "lib/fxl/macros.h"
+#include "lib/ui/scenic/client/resources.h"
 #include "mx/event.h"
 #include "mx/vmo.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -55,7 +55,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   // VkSemaphore)
   GrBackendSemaphore GetAcquireSemaphore() const;
 
-private:
+ private:
   vulkan::VulkanProcTable& vk_;
   sk_sp<GrVkBackendContext> backend_context_;
   scenic_lib::Session* session_;
@@ -92,8 +92,8 @@ private:
 
   void Reset();
 
-  vulkan::VulkanHandle<VkSemaphore>
-  SemaphoreFromEvent(const mx::event &event) const;
+  vulkan::VulkanHandle<VkSemaphore> SemaphoreFromEvent(
+      const mx::event& event) const;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };

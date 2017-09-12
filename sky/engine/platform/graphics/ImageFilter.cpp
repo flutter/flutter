@@ -8,9 +8,8 @@
 
 namespace blink {
 
-FloatRect mapImageFilterRect(SkImageFilter* filter, const FloatRect& rect)
-{
-    return filter->computeFastBounds(rect);
+FloatRect mapImageFilterRect(SkImageFilter* filter, const FloatRect& rect) {
+  return filter->computeFastBounds(rect);
 }
 
-} // namespace blink
+}  // namespace blink

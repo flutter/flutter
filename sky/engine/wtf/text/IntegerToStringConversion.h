@@ -27,73 +27,99 @@
 
 namespace WTF {
 
-enum PositiveOrNegativeNumber {
-    PositiveNumber,
-    NegativeNumber
+enum PositiveOrNegativeNumber { PositiveNumber, NegativeNumber };
+
+template <typename T>
+struct ConversionTrait;
+
+template <>
+struct ConversionTrait<String> {
+  typedef PassRefPtr<StringImpl> ReturnType;
+  typedef void AdditionalArgumentType;
+  static inline ReturnType flush(LChar* characters, unsigned length, void*) {
+    return StringImpl::create(characters, length);
+  }
+};
+template <>
+struct ConversionTrait<StringBuilder> {
+  typedef void ReturnType;
+  typedef StringBuilder AdditionalArgumentType;
+  static inline ReturnType flush(LChar* characters,
+                                 unsigned length,
+                                 StringBuilder* stringBuilder) {
+    stringBuilder->append(characters, length);
+  }
+};
+template <>
+struct ConversionTrait<AtomicString> {
+  typedef AtomicString ReturnType;
+  typedef void AdditionalArgumentType;
+  static inline ReturnType flush(LChar* characters, unsigned length, void*) {
+    return AtomicString(characters, length);
+  }
 };
 
-template<typename T> struct ConversionTrait;
+template <typename T>
+struct UnsignedIntegerTrait;
 
-template<> struct ConversionTrait<String> {
-    typedef PassRefPtr<StringImpl> ReturnType;
-    typedef void AdditionalArgumentType;
-    static inline ReturnType flush(LChar* characters, unsigned length, void*) { return StringImpl::create(characters, length); }
+template <>
+struct UnsignedIntegerTrait<int> {
+  typedef unsigned Type;
 };
-template<> struct ConversionTrait<StringBuilder> {
-    typedef void ReturnType;
-    typedef StringBuilder AdditionalArgumentType;
-    static inline ReturnType flush(LChar* characters, unsigned length, StringBuilder* stringBuilder) { stringBuilder->append(characters, length); }
+template <>
+struct UnsignedIntegerTrait<long> {
+  typedef unsigned long Type;
 };
-template<> struct ConversionTrait<AtomicString> {
-    typedef AtomicString ReturnType;
-    typedef void AdditionalArgumentType;
-    static inline ReturnType flush(LChar* characters, unsigned length, void*) { return AtomicString(characters, length); }
+template <>
+struct UnsignedIntegerTrait<long long> {
+  typedef unsigned long long Type;
 };
 
-template<typename T> struct UnsignedIntegerTrait;
+template <typename T,
+          typename UnsignedIntegerType,
+          PositiveOrNegativeNumber NumberType>
+static typename ConversionTrait<T>::ReturnType numberToStringImpl(
+    UnsignedIntegerType number,
+    typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument) {
+  LChar buf[sizeof(UnsignedIntegerType) * 3 + 1];
+  LChar* end = buf + WTF_ARRAY_LENGTH(buf);
+  LChar* p = end;
 
-template<> struct UnsignedIntegerTrait<int> {
-    typedef unsigned Type;
-};
-template<> struct UnsignedIntegerTrait<long> {
-    typedef unsigned long Type;
-};
-template<> struct UnsignedIntegerTrait<long long> {
-    typedef unsigned long long Type;
-};
+  do {
+    *--p = static_cast<LChar>((number % 10) + '0');
+    number /= 10;
+  } while (number);
 
-template<typename T, typename UnsignedIntegerType, PositiveOrNegativeNumber NumberType>
-static typename ConversionTrait<T>::ReturnType numberToStringImpl(UnsignedIntegerType number, typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument)
-{
-    LChar buf[sizeof(UnsignedIntegerType) * 3 + 1];
-    LChar* end = buf + WTF_ARRAY_LENGTH(buf);
-    LChar* p = end;
+  if (NumberType == NegativeNumber)
+    *--p = '-';
 
-    do {
-        *--p = static_cast<LChar>((number % 10) + '0');
-        number /= 10;
-    } while (number);
-
-    if (NumberType == NegativeNumber)
-        *--p = '-';
-
-    return ConversionTrait<T>::flush(p, static_cast<unsigned>(end - p), additionalArgument);
+  return ConversionTrait<T>::flush(p, static_cast<unsigned>(end - p),
+                                   additionalArgument);
 }
 
-template<typename T, typename SignedIntegerType>
-inline typename ConversionTrait<T>::ReturnType numberToStringSigned(SignedIntegerType number, typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument = 0)
-{
-    if (number < 0)
-        return numberToStringImpl<T, typename UnsignedIntegerTrait<SignedIntegerType>::Type, NegativeNumber>(-number, additionalArgument);
-    return numberToStringImpl<T, typename UnsignedIntegerTrait<SignedIntegerType>::Type, PositiveNumber>(number, additionalArgument);
+template <typename T, typename SignedIntegerType>
+inline typename ConversionTrait<T>::ReturnType numberToStringSigned(
+    SignedIntegerType number,
+    typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument =
+        0) {
+  if (number < 0)
+    return numberToStringImpl<
+        T, typename UnsignedIntegerTrait<SignedIntegerType>::Type,
+        NegativeNumber>(-number, additionalArgument);
+  return numberToStringImpl<
+      T, typename UnsignedIntegerTrait<SignedIntegerType>::Type,
+      PositiveNumber>(number, additionalArgument);
 }
 
-template<typename T, typename UnsignedIntegerType>
-inline typename ConversionTrait<T>::ReturnType numberToStringUnsigned(UnsignedIntegerType number, typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument = 0)
-{
-    return numberToStringImpl<T, UnsignedIntegerType, PositiveNumber>(number, additionalArgument);
+template <typename T, typename UnsignedIntegerType>
+inline typename ConversionTrait<T>::ReturnType numberToStringUnsigned(
+    UnsignedIntegerType number,
+    typename ConversionTrait<T>::AdditionalArgumentType* additionalArgument =
+        0) {
+  return numberToStringImpl<T, UnsignedIntegerType, PositiveNumber>(
+      number, additionalArgument);
 }
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_INTEGERTOSTRINGCONVERSION_H_

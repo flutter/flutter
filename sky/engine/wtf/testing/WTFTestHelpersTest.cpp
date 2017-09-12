@@ -41,30 +41,39 @@ using namespace WTF;
 
 namespace {
 
-CString toCStringThroughPrinter(const String& string)
-{
-    std::ostringstream output;
-    output << string;
-    const std::string& result = output.str();
-    return CString(result.data(), result.length());
+CString toCStringThroughPrinter(const String& string) {
+  std::ostringstream output;
+  output << string;
+  const std::string& result = output.str();
+  return CString(result.data(), result.length());
 }
 
-TEST(WTFTestHelpersTest, StringPrinter)
-{
-    EXPECT_EQ(CString("\"Hello!\""), toCStringThroughPrinter("Hello!"));
-    EXPECT_EQ(CString("\"\\\"\""), toCStringThroughPrinter("\""));
-    EXPECT_EQ(CString("\"\\\\\""), toCStringThroughPrinter("\\"));
-    EXPECT_EQ(CString("\"\\u0000\\u0001\\u0002\\u0003\\u0004\\u0005\\u0006\\u0007\""), toCStringThroughPrinter(String("\x00\x01\x02\x03\x04\x05\x06\x07", 8)));
-    EXPECT_EQ(CString("\"\\u0008\\t\\n\\u000B\\u000C\\r\\u000E\\u000F\""), toCStringThroughPrinter(String("\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F", 8)));
-    EXPECT_EQ(CString("\"\\u0010\\u0011\\u0012\\u0013\\u0014\\u0015\\u0016\\u0017\""), toCStringThroughPrinter(String("\x10\x11\x12\x13\x14\x15\x16\x17", 8)));
-    EXPECT_EQ(CString("\"\\u0018\\u0019\\u001A\\u001B\\u001C\\u001D\\u001E\\u001F\""), toCStringThroughPrinter(String("\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", 8)));
-    EXPECT_EQ(CString("\"\\u007F\\u0080\\u0081\""), toCStringThroughPrinter("\x7F\x80\x81"));
-    EXPECT_EQ(CString("\"\""), toCStringThroughPrinter(emptyString()));
-    EXPECT_EQ(CString("<null>"), toCStringThroughPrinter(String()));
+TEST(WTFTestHelpersTest, StringPrinter) {
+  EXPECT_EQ(CString("\"Hello!\""), toCStringThroughPrinter("Hello!"));
+  EXPECT_EQ(CString("\"\\\"\""), toCStringThroughPrinter("\""));
+  EXPECT_EQ(CString("\"\\\\\""), toCStringThroughPrinter("\\"));
+  EXPECT_EQ(
+      CString("\"\\u0000\\u0001\\u0002\\u0003\\u0004\\u0005\\u0006\\u0007\""),
+      toCStringThroughPrinter(String("\x00\x01\x02\x03\x04\x05\x06\x07", 8)));
+  EXPECT_EQ(
+      CString("\"\\u0008\\t\\n\\u000B\\u000C\\r\\u000E\\u000F\""),
+      toCStringThroughPrinter(String("\x08\x09\x0A\x0B\x0C\x0D\x0E\x0F", 8)));
+  EXPECT_EQ(
+      CString("\"\\u0010\\u0011\\u0012\\u0013\\u0014\\u0015\\u0016\\u0017\""),
+      toCStringThroughPrinter(String("\x10\x11\x12\x13\x14\x15\x16\x17", 8)));
+  EXPECT_EQ(
+      CString("\"\\u0018\\u0019\\u001A\\u001B\\u001C\\u001D\\u001E\\u001F\""),
+      toCStringThroughPrinter(String("\x18\x19\x1A\x1B\x1C\x1D\x1E\x1F", 8)));
+  EXPECT_EQ(CString("\"\\u007F\\u0080\\u0081\""),
+            toCStringThroughPrinter("\x7F\x80\x81"));
+  EXPECT_EQ(CString("\"\""), toCStringThroughPrinter(emptyString()));
+  EXPECT_EQ(CString("<null>"), toCStringThroughPrinter(String()));
 
-    static const UChar unicodeSample[] = { 0x30C6, 0x30B9, 0x30C8 }; // "Test" in Japanese.
-    EXPECT_EQ(CString("\"\\u30C6\\u30B9\\u30C8\""), toCStringThroughPrinter(String(unicodeSample, WTF_ARRAY_LENGTH(unicodeSample))));
-
+  static const UChar unicodeSample[] = {0x30C6, 0x30B9,
+                                        0x30C8};  // "Test" in Japanese.
+  EXPECT_EQ(CString("\"\\u30C6\\u30B9\\u30C8\""),
+            toCStringThroughPrinter(
+                String(unicodeSample, WTF_ARRAY_LENGTH(unicodeSample))));
 }
 
-}
+}  // namespace

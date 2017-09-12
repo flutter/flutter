@@ -19,23 +19,20 @@
     Boston, MA 02110-1301, USA.
 */
 
-
 #include "flutter/sky/engine/platform/geometry/FloatPoint3D.h"
 
 #include <math.h>
 
 namespace blink {
 
-void FloatPoint3D::normalize()
-{
-    float tempLength = length();
+void FloatPoint3D::normalize() {
+  float tempLength = length();
 
-    if (tempLength) {
-        m_x /= tempLength;
-        m_y /= tempLength;
-        m_z /= tempLength;
-    }
+  if (tempLength) {
+    m_x /= tempLength;
+    m_y /= tempLength;
+    m_z /= tempLength;
+  }
 }
 
-} // namespace blink
-
+}  // namespace blink

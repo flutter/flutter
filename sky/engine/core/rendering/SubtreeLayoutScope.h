@@ -47,24 +47,24 @@ namespace blink {
 class RenderObject;
 
 class SubtreeLayoutScope {
-public:
-    SubtreeLayoutScope(RenderObject& root);
-    ~SubtreeLayoutScope();
+ public:
+  SubtreeLayoutScope(RenderObject& root);
+  ~SubtreeLayoutScope();
 
-    void setNeedsLayout(RenderObject* descendant);
-    void setChildNeedsLayout(RenderObject* descendant);
+  void setNeedsLayout(RenderObject* descendant);
+  void setChildNeedsLayout(RenderObject* descendant);
 
-    RenderObject& root() { return m_root; }
-    void addRendererToLayout(RenderObject* renderer);
+  RenderObject& root() { return m_root; }
+  void addRendererToLayout(RenderObject* renderer);
 
-private:
-    RenderObject& m_root;
+ private:
+  RenderObject& m_root;
 
 #if ENABLE(ASSERT)
-    HashSet<RenderObject*> m_renderersToLayout;
+  HashSet<RenderObject*> m_renderersToLayout;
 #endif
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_SUBTREELAYOUTSCOPE_H_

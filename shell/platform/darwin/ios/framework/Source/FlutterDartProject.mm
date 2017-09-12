@@ -182,11 +182,11 @@ static NSString* NSStringFromVMType(VMType type) {
 
   if (_vmTypeRequirement != embedderVMType) {
     NSString* message =
-        [NSString stringWithFormat:@"Could not load the project because of differing project type. "
-                                   @"The project can run in '%@' but the embedder is configured as "
-                                   @"'%@'",
-                                   NSStringFromVMType(_vmTypeRequirement),
-                                   NSStringFromVMType(embedderVMType)];
+        [NSString stringWithFormat:
+                      @"Could not load the project because of differing project type. "
+                      @"The project can run in '%@' but the embedder is configured as "
+                      @"'%@'",
+                      NSStringFromVMType(_vmTypeRequirement), NSStringFromVMType(embedderVMType)];
     result(NO, message);
     return;
   }
@@ -218,9 +218,10 @@ static NSString* NSStringFromVMType(VMType type) {
 
   NSString* path = [self pathForFLXFromBundle:_precompiledDartBundle];
   if (path.length == 0) {
-    NSString* message = [NSString stringWithFormat:@"Could not find the 'app.flx' archive in "
-                                                   @"the precompiled Dart bundle with ID '%@'",
-                                                   _precompiledDartBundle.bundleIdentifier];
+    NSString* message = [NSString stringWithFormat:
+                                      @"Could not find the 'app.flx' archive in "
+                                      @"the precompiled Dart bundle with ID '%@'",
+                                      _precompiledDartBundle.bundleIdentifier];
     result(NO, message);
     return;
   }

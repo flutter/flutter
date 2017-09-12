@@ -38,46 +38,63 @@ namespace WTF {
 class TextCodecInput;
 
 class TextCodecICU final : public TextCodec {
-public:
-    static void registerEncodingNames(EncodingNameRegistrar);
-    static void registerCodecs(TextCodecRegistrar);
+ public:
+  static void registerEncodingNames(EncodingNameRegistrar);
+  static void registerCodecs(TextCodecRegistrar);
 
-    virtual ~TextCodecICU();
+  virtual ~TextCodecICU();
 
-private:
-    TextCodecICU(const TextEncoding&);
-    static PassOwnPtr<TextCodec> create(const TextEncoding&, const void*);
+ private:
+  TextCodecICU(const TextEncoding&);
+  static PassOwnPtr<TextCodec> create(const TextEncoding&, const void*);
 
-    virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) override;
-    virtual CString encode(const UChar*, size_t length, UnencodableHandling) override;
-    virtual CString encode(const LChar*, size_t length, UnencodableHandling) override;
+  virtual String decode(const char*,
+                        size_t length,
+                        FlushBehavior,
+                        bool stopOnError,
+                        bool& sawError) override;
+  virtual CString encode(const UChar*,
+                         size_t length,
+                         UnencodableHandling) override;
+  virtual CString encode(const LChar*,
+                         size_t length,
+                         UnencodableHandling) override;
 
-    template<typename CharType>
-    CString encodeCommon(const CharType*, size_t length, UnencodableHandling);
-    CString encodeInternal(const TextCodecInput&, UnencodableHandling);
+  template <typename CharType>
+  CString encodeCommon(const CharType*, size_t length, UnencodableHandling);
+  CString encodeInternal(const TextCodecInput&, UnencodableHandling);
 
-    void createICUConverter() const;
-    void releaseICUConverter() const;
-    bool needsGBKFallbacks() const { return m_needsGBKFallbacks; }
-    void setNeedsGBKFallbacks(bool needsFallbacks) { m_needsGBKFallbacks = needsFallbacks; }
+  void createICUConverter() const;
+  void releaseICUConverter() const;
+  bool needsGBKFallbacks() const { return m_needsGBKFallbacks; }
+  void setNeedsGBKFallbacks(bool needsFallbacks) {
+    m_needsGBKFallbacks = needsFallbacks;
+  }
 
-    int decodeToBuffer(UChar* buffer, UChar* bufferLimit, const char*& source,
-        const char* sourceLimit, int32_t* offsets, bool flush, UErrorCode&);
+  int decodeToBuffer(UChar* buffer,
+                     UChar* bufferLimit,
+                     const char*& source,
+                     const char* sourceLimit,
+                     int32_t* offsets,
+                     bool flush,
+                     UErrorCode&);
 
-    TextEncoding m_encoding;
-    mutable UConverter* m_converterICU;
-    mutable bool m_needsGBKFallbacks;
+  TextEncoding m_encoding;
+  mutable UConverter* m_converterICU;
+  mutable bool m_needsGBKFallbacks;
 };
 
 struct ICUConverterWrapper {
-    WTF_MAKE_NONCOPYABLE(ICUConverterWrapper); WTF_MAKE_FAST_ALLOCATED;
-public:
-    ICUConverterWrapper() : converter(0) { }
-    ~ICUConverterWrapper();
+  WTF_MAKE_NONCOPYABLE(ICUConverterWrapper);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    UConverter* converter;
+ public:
+  ICUConverterWrapper() : converter(0) {}
+  ~ICUConverterWrapper();
+
+  UConverter* converter;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECICU_H_

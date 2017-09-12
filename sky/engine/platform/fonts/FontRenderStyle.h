@@ -35,43 +35,42 @@ namespace blink {
 // FontRenderStyle describes the user's preferences for rendering a font at a
 // given size.
 struct FontRenderStyle {
-    enum {
-        NoPreference = 2,
-    };
+  enum {
+    NoPreference = 2,
+  };
 
-    FontRenderStyle()
-        : useBitmaps(0)
-        , useAutoHint(0)
-        , useHinting(0)
-        , hintStyle(0)
-        , useAntiAlias(0)
-        , useSubpixelRendering(0)
-        , useSubpixelPositioning(0) { }
+  FontRenderStyle()
+      : useBitmaps(0),
+        useAutoHint(0),
+        useHinting(0),
+        hintStyle(0),
+        useAntiAlias(0),
+        useSubpixelRendering(0),
+        useSubpixelPositioning(0) {}
 
-    bool operator==(const FontRenderStyle& a) const
-    {
-        return useBitmaps == a.useBitmaps
-            && useAutoHint == a.useAutoHint
-            && useHinting == a.useHinting
-            && hintStyle == a.hintStyle
-            && useAntiAlias == a.useAntiAlias
-            && useSubpixelRendering == a.useSubpixelRendering
-            && useSubpixelPositioning == a.useSubpixelPositioning;
-    }
+  bool operator==(const FontRenderStyle& a) const {
+    return useBitmaps == a.useBitmaps && useAutoHint == a.useAutoHint &&
+           useHinting == a.useHinting && hintStyle == a.hintStyle &&
+           useAntiAlias == a.useAntiAlias &&
+           useSubpixelRendering == a.useSubpixelRendering &&
+           useSubpixelPositioning == a.useSubpixelPositioning;
+  }
 
-    // Each of the use* members below can take one of three values:
-    //   0: off
-    //   1: on
-    //   NoPreference: no preference expressed
-    char useBitmaps; // use embedded bitmap strike if possible
-    char useAutoHint; // use 'auto' hinting (FreeType specific)
-    char useHinting; // hint glyphs to the pixel grid
-    char hintStyle; // level of hinting, 0..3
-    char useAntiAlias; // antialias glyph shapes
-    char useSubpixelRendering; // use subpixel rendering (partially-filled pixels)
-    char useSubpixelPositioning; // use subpixel positioning (fractional X positions for glyphs)
+  // Each of the use* members below can take one of three values:
+  //   0: off
+  //   1: on
+  //   NoPreference: no preference expressed
+  char useBitmaps;    // use embedded bitmap strike if possible
+  char useAutoHint;   // use 'auto' hinting (FreeType specific)
+  char useHinting;    // hint glyphs to the pixel grid
+  char hintStyle;     // level of hinting, 0..3
+  char useAntiAlias;  // antialias glyph shapes
+  char
+      useSubpixelRendering;  // use subpixel rendering (partially-filled pixels)
+  char useSubpixelPositioning;  // use subpixel positioning (fractional X
+                                // positions for glyphs)
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTRENDERSTYLE_H_

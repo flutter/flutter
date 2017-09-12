@@ -128,13 +128,9 @@ bool AndroidContextGL::CreateWindowSurface(
   window_ = std::move(window);
   EGLDisplay display = environment_->Display();
 
-  const EGLint srgb_attribs[] = {
-      EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR,
-      EGL_NONE
-  };
-  const EGLint default_attribs[] = {
-      EGL_NONE
-  };
+  const EGLint srgb_attribs[] = {EGL_GL_COLORSPACE_KHR,
+                                 EGL_GL_COLORSPACE_SRGB_KHR, EGL_NONE};
+  const EGLint default_attribs[] = {EGL_NONE};
 
   const EGLint* attribs = default_attribs;
   if (srgb_support_) {
@@ -154,17 +150,14 @@ bool AndroidContextGL::CreatePBufferSurface() {
 
   EGLDisplay display = environment_->Display();
 
-  const EGLint srgb_attribs[] = {
-      EGL_WIDTH, 1,
-      EGL_HEIGHT, 1,
-      EGL_GL_COLORSPACE_KHR, EGL_GL_COLORSPACE_SRGB_KHR,
-      EGL_NONE
-  };
-  const EGLint default_attribs[] = {
-      EGL_WIDTH, 1,
-      EGL_HEIGHT, 1,
-      EGL_NONE
-  };
+  const EGLint srgb_attribs[] = {EGL_WIDTH,
+                                 1,
+                                 EGL_HEIGHT,
+                                 1,
+                                 EGL_GL_COLORSPACE_KHR,
+                                 EGL_GL_COLORSPACE_SRGB_KHR,
+                                 EGL_NONE};
+  const EGLint default_attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
 
   const EGLint* attribs = default_attribs;
   if (srgb_support_) {
@@ -231,12 +224,14 @@ AndroidContextGL::AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,
 
 AndroidContextGL::~AndroidContextGL() {
   if (!TeardownContext(environment_->Display(), context_)) {
-    FXL_LOG(ERROR) << "Could not tear down the EGL context. Possible resource leak.";
+    FXL_LOG(ERROR)
+        << "Could not tear down the EGL context. Possible resource leak.";
     LogLastEGLError();
   }
 
   if (!TeardownSurface(environment_->Display(), surface_)) {
-    FXL_LOG(ERROR) << "Could not tear down the EGL surface. Possible resource leak.";
+    FXL_LOG(ERROR)
+        << "Could not tear down the EGL surface. Possible resource leak.";
     LogLastEGLError();
   }
 }

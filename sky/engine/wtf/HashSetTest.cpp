@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <gtest/gtest.h>
 #include "flutter/sky/engine/wtf/HashSet.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
@@ -32,180 +31,177 @@
 
 namespace {
 
-template<int initialCapacity>
-    struct InitialCapacityTestHashTraits : public WTF::UnsignedWithZeroKeyHashTraits<int> {
-    static const int minimumTableSize = initialCapacity;
+template <int initialCapacity>
+struct InitialCapacityTestHashTraits
+    : public WTF::UnsignedWithZeroKeyHashTraits<int> {
+  static const int minimumTableSize = initialCapacity;
 };
 
-template<unsigned size>
-void testInitialCapacity()
-{
-    const unsigned initialCapacity = WTF::HashTableCapacityForSize<size>::value;
-    HashSet<int, DefaultHash<int>::Hash, InitialCapacityTestHashTraits<initialCapacity> > testSet;
+template <unsigned size>
+void testInitialCapacity() {
+  const unsigned initialCapacity = WTF::HashTableCapacityForSize<size>::value;
+  HashSet<int, DefaultHash<int>::Hash,
+          InitialCapacityTestHashTraits<initialCapacity>>
+      testSet;
 
-    // Initial capacity is null.
-    EXPECT_EQ(0UL, testSet.capacity());
+  // Initial capacity is null.
+  EXPECT_EQ(0UL, testSet.capacity());
 
-    // Adding items up to size should never change the capacity.
-    for (size_t i = 0; i < size; ++i) {
-        testSet.add(i);
-        EXPECT_EQ(initialCapacity, testSet.capacity());
-    }
+  // Adding items up to size should never change the capacity.
+  for (size_t i = 0; i < size; ++i) {
+    testSet.add(i);
+    EXPECT_EQ(initialCapacity, testSet.capacity());
+  }
 
-    // Adding items up to less than half the capacity should not change the capacity.
-    unsigned capacityLimit = initialCapacity / 2 - 1;
-    for (size_t i = size; i < capacityLimit; ++i) {
-        testSet.add(i);
-        EXPECT_EQ(initialCapacity, testSet.capacity());
-    }
+  // Adding items up to less than half the capacity should not change the
+  // capacity.
+  unsigned capacityLimit = initialCapacity / 2 - 1;
+  for (size_t i = size; i < capacityLimit; ++i) {
+    testSet.add(i);
+    EXPECT_EQ(initialCapacity, testSet.capacity());
+  }
 
-    // Adding one more item increase the capacity.
-    testSet.add(initialCapacity);
-    EXPECT_GT(testSet.capacity(), initialCapacity);
+  // Adding one more item increase the capacity.
+  testSet.add(initialCapacity);
+  EXPECT_GT(testSet.capacity(), initialCapacity);
 }
 
-template<unsigned size> void generateTestCapacityUpToSize();
-template<> void generateTestCapacityUpToSize<0>()
-{
-}
-template<unsigned size> void generateTestCapacityUpToSize()
-{
-    generateTestCapacityUpToSize<size - 1>();
-    testInitialCapacity<size>();
+template <unsigned size>
+void generateTestCapacityUpToSize();
+template <>
+void generateTestCapacityUpToSize<0>() {}
+template <unsigned size>
+void generateTestCapacityUpToSize() {
+  generateTestCapacityUpToSize<size - 1>();
+  testInitialCapacity<size>();
 }
 
-TEST(HashSetTest, InitialCapacity)
-{
-    generateTestCapacityUpToSize<128>();
+TEST(HashSetTest, InitialCapacity) {
+  generateTestCapacityUpToSize<128>();
 }
 
 struct Dummy {
-    Dummy(bool& deleted) : deleted(deleted) { }
+  Dummy(bool& deleted) : deleted(deleted) {}
 
-    ~Dummy()
-    {
-        deleted = true;
-    }
+  ~Dummy() { deleted = true; }
 
-    bool& deleted;
+  bool& deleted;
 };
 
-TEST(HashSetTest, HashSetOwnPtr)
-{
-    bool deleted1 = false, deleted2 = false;
+TEST(HashSetTest, HashSetOwnPtr) {
+  bool deleted1 = false, deleted2 = false;
 
-    typedef HashSet<OwnPtr<Dummy> > OwnPtrSet;
+  typedef HashSet<OwnPtr<Dummy>> OwnPtrSet;
+  OwnPtrSet set;
+
+  Dummy* ptr1 = new Dummy(deleted1);
+  {
+    // AddResult in a separate scope to avoid assertion hit,
+    // since we modify the container further.
+    HashSet<OwnPtr<Dummy>>::AddResult res1 = set.add(adoptPtr(ptr1));
+    EXPECT_EQ(ptr1, res1.storedValue->get());
+  }
+
+  EXPECT_FALSE(deleted1);
+  EXPECT_EQ(1UL, set.size());
+  OwnPtrSet::iterator it1 = set.find(ptr1);
+  EXPECT_NE(set.end(), it1);
+  EXPECT_EQ(ptr1, (*it1));
+
+  Dummy* ptr2 = new Dummy(deleted2);
+  {
+    HashSet<OwnPtr<Dummy>>::AddResult res2 = set.add(adoptPtr(ptr2));
+    EXPECT_EQ(res2.storedValue->get(), ptr2);
+  }
+
+  EXPECT_FALSE(deleted2);
+  EXPECT_EQ(2UL, set.size());
+  OwnPtrSet::iterator it2 = set.find(ptr2);
+  EXPECT_NE(set.end(), it2);
+  EXPECT_EQ(ptr2, (*it2));
+
+  set.remove(ptr1);
+  EXPECT_TRUE(deleted1);
+
+  set.clear();
+  EXPECT_TRUE(deleted2);
+  EXPECT_TRUE(set.isEmpty());
+
+  deleted1 = false;
+  deleted2 = false;
+  {
     OwnPtrSet set;
+    set.add(adoptPtr(new Dummy(deleted1)));
+    set.add(adoptPtr(new Dummy(deleted2)));
+  }
+  EXPECT_TRUE(deleted1);
+  EXPECT_TRUE(deleted2);
 
-    Dummy* ptr1 = new Dummy(deleted1);
-    {
-        // AddResult in a separate scope to avoid assertion hit,
-        // since we modify the container further.
-        HashSet<OwnPtr<Dummy> >::AddResult res1 = set.add(adoptPtr(ptr1));
-        EXPECT_EQ(ptr1, res1.storedValue->get());
-    }
-
-    EXPECT_FALSE(deleted1);
+  deleted1 = false;
+  deleted2 = false;
+  OwnPtr<Dummy> ownPtr1;
+  OwnPtr<Dummy> ownPtr2;
+  ptr1 = new Dummy(deleted1);
+  ptr2 = new Dummy(deleted2);
+  {
+    OwnPtrSet set;
+    set.add(adoptPtr(ptr1));
+    set.add(adoptPtr(ptr2));
+    ownPtr1 = set.take(ptr1);
     EXPECT_EQ(1UL, set.size());
-    OwnPtrSet::iterator it1 = set.find(ptr1);
-    EXPECT_NE(set.end(), it1);
-    EXPECT_EQ(ptr1, (*it1));
-
-    Dummy* ptr2 = new Dummy(deleted2);
-    {
-        HashSet<OwnPtr<Dummy> >::AddResult res2 = set.add(adoptPtr(ptr2));
-        EXPECT_EQ(res2.storedValue->get(), ptr2);
-    }
-
-    EXPECT_FALSE(deleted2);
-    EXPECT_EQ(2UL, set.size());
-    OwnPtrSet::iterator it2 = set.find(ptr2);
-    EXPECT_NE(set.end(), it2);
-    EXPECT_EQ(ptr2, (*it2));
-
-    set.remove(ptr1);
-    EXPECT_TRUE(deleted1);
-
-    set.clear();
-    EXPECT_TRUE(deleted2);
+    ownPtr2 = set.takeAny();
     EXPECT_TRUE(set.isEmpty());
+  }
+  EXPECT_FALSE(deleted1);
+  EXPECT_FALSE(deleted2);
 
-    deleted1 = false;
-    deleted2 = false;
-    {
-        OwnPtrSet set;
-        set.add(adoptPtr(new Dummy(deleted1)));
-        set.add(adoptPtr(new Dummy(deleted2)));
-    }
-    EXPECT_TRUE(deleted1);
-    EXPECT_TRUE(deleted2);
-
-    deleted1 = false;
-    deleted2 = false;
-    OwnPtr<Dummy> ownPtr1;
-    OwnPtr<Dummy> ownPtr2;
-    ptr1 = new Dummy(deleted1);
-    ptr2 = new Dummy(deleted2);
-    {
-        OwnPtrSet set;
-        set.add(adoptPtr(ptr1));
-        set.add(adoptPtr(ptr2));
-        ownPtr1 = set.take(ptr1);
-        EXPECT_EQ(1UL, set.size());
-        ownPtr2 = set.takeAny();
-        EXPECT_TRUE(set.isEmpty());
-    }
-    EXPECT_FALSE(deleted1);
-    EXPECT_FALSE(deleted2);
-
-    EXPECT_EQ(ptr1, ownPtr1);
-    EXPECT_EQ(ptr2, ownPtr2);
+  EXPECT_EQ(ptr1, ownPtr1);
+  EXPECT_EQ(ptr2, ownPtr2);
 }
 
-class DummyRefCounted: public WTF::RefCounted<DummyRefCounted> {
-public:
-    DummyRefCounted(bool& isDeleted) : m_isDeleted(isDeleted) { m_isDeleted = false; }
-    ~DummyRefCounted() { m_isDeleted = true; }
+class DummyRefCounted : public WTF::RefCounted<DummyRefCounted> {
+ public:
+  DummyRefCounted(bool& isDeleted) : m_isDeleted(isDeleted) {
+    m_isDeleted = false;
+  }
+  ~DummyRefCounted() { m_isDeleted = true; }
 
-    void ref()
-    {
-        WTF::RefCounted<DummyRefCounted>::ref();
-        ++s_refInvokesCount;
-    }
+  void ref() {
+    WTF::RefCounted<DummyRefCounted>::ref();
+    ++s_refInvokesCount;
+  }
 
-    static int s_refInvokesCount;
+  static int s_refInvokesCount;
 
-private:
-    bool& m_isDeleted;
+ private:
+  bool& m_isDeleted;
 };
 
 int DummyRefCounted::s_refInvokesCount = 0;
 
-TEST(HashSetTest, HashSetRefPtr)
-{
-    bool isDeleted = false;
-    RefPtr<DummyRefCounted> ptr = adoptRef(new DummyRefCounted(isDeleted));
-    EXPECT_EQ(0, DummyRefCounted::s_refInvokesCount);
-    HashSet<RefPtr<DummyRefCounted> > set;
-    set.add(ptr);
-    // Referenced only once (to store a copy in the container).
-    EXPECT_EQ(1, DummyRefCounted::s_refInvokesCount);
+TEST(HashSetTest, HashSetRefPtr) {
+  bool isDeleted = false;
+  RefPtr<DummyRefCounted> ptr = adoptRef(new DummyRefCounted(isDeleted));
+  EXPECT_EQ(0, DummyRefCounted::s_refInvokesCount);
+  HashSet<RefPtr<DummyRefCounted>> set;
+  set.add(ptr);
+  // Referenced only once (to store a copy in the container).
+  EXPECT_EQ(1, DummyRefCounted::s_refInvokesCount);
 
-    DummyRefCounted* rawPtr = ptr.get();
+  DummyRefCounted* rawPtr = ptr.get();
 
-    EXPECT_TRUE(set.contains(rawPtr));
-    EXPECT_NE(set.end(), set.find(rawPtr));
-    EXPECT_TRUE(set.contains(ptr));
-    EXPECT_NE(set.end(), set.find(ptr));
+  EXPECT_TRUE(set.contains(rawPtr));
+  EXPECT_NE(set.end(), set.find(rawPtr));
+  EXPECT_TRUE(set.contains(ptr));
+  EXPECT_NE(set.end(), set.find(ptr));
 
-    ptr.clear();
-    EXPECT_FALSE(isDeleted);
+  ptr.clear();
+  EXPECT_FALSE(isDeleted);
 
-    set.remove(rawPtr);
-    EXPECT_TRUE(isDeleted);
-    EXPECT_TRUE(set.isEmpty());
-    EXPECT_EQ(1, DummyRefCounted::s_refInvokesCount);
+  set.remove(rawPtr);
+  EXPECT_TRUE(isDeleted);
+  EXPECT_TRUE(set.isEmpty());
+  EXPECT_EQ(1, DummyRefCounted::s_refInvokesCount);
 }
 
-
-} // namespace
+}  // namespace

@@ -23,128 +23,199 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <gtest/gtest.h>
 #include "flutter/sky/engine/wtf/CheckedArithmetic.h"
 
 namespace {
 
-#define CheckedArithmeticTest(type, coerceLiteral, MixedSignednessTest) \
-    TEST(WTF, Checked_##type) \
-    { \
-        Checked<type, RecordOverflow> value; \
-        EXPECT_EQ(coerceLiteral(0), value.unsafeGet()); \
-        EXPECT_EQ(std::numeric_limits<type>::max(), (value + std::numeric_limits<type>::max()).unsafeGet()); \
-        EXPECT_EQ(std::numeric_limits<type>::max(), (std::numeric_limits<type>::max() + value).unsafeGet()); \
-        EXPECT_EQ(std::numeric_limits<type>::min(), (value + std::numeric_limits<type>::min()).unsafeGet()); \
-        EXPECT_EQ(std::numeric_limits<type>::min(), (std::numeric_limits<type>::min() + value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value * coerceLiteral(0)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (coerceLiteral(0) * value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value * value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value - coerceLiteral(0)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (coerceLiteral(0) - value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value - value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value++).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(1), (value--).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(1), (++value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (--value).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(10), (value += coerceLiteral(10)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(10), value.unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(100), (value *= coerceLiteral(10)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(100), value.unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value -= coerceLiteral(100)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), value.unsafeGet()); \
-        value = 10; \
-        EXPECT_EQ(coerceLiteral(10), value.unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(0), (value - coerceLiteral(10)).unsafeGet()); \
-        EXPECT_EQ(coerceLiteral(10), value.unsafeGet()); \
-        value = std::numeric_limits<type>::min(); \
-        EXPECT_EQ(true, (Checked<type, RecordOverflow>(value - coerceLiteral(1))).hasOverflowed()); \
-        EXPECT_EQ(true, !((value--).hasOverflowed())); \
-        EXPECT_EQ(true, value.hasOverflowed()); \
-        value = std::numeric_limits<type>::max(); \
-        EXPECT_EQ(true, !value.hasOverflowed()); \
-        EXPECT_EQ(true, (Checked<type, RecordOverflow>(value + coerceLiteral(1))).hasOverflowed()); \
-        EXPECT_EQ(true, !(value++).hasOverflowed()); \
-        EXPECT_EQ(true, value.hasOverflowed()); \
-        value = std::numeric_limits<type>::max(); \
-        EXPECT_EQ(true, (value += coerceLiteral(1)).hasOverflowed()); \
-        EXPECT_EQ(true, value.hasOverflowed()); \
-        value = 10; \
-        type _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (value * Checked<type, RecordOverflow>(0)).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (Checked<type, RecordOverflow>(0) * value).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * value).safeGet(_value)); \
-        value = 0; \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * value).safeGet(_value)); \
-        value = 1; \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * value).safeGet(_value)); \
-        _value = 0; \
-        value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * (type)0).safeGet(_value)); \
-        _value = 0; \
-        value = 1; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidNotOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * (type)1).safeGet(_value)); \
-        _value = 0; \
-        value = 2; \
-        EXPECT_EQ(true, CheckedState::DidOverflow == (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).safeGet(_value)); \
-        _value = 0; \
-        EXPECT_EQ(true, CheckedState::DidOverflow == (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * (type)2).safeGet(_value)); \
-        value = 10; \
-        EXPECT_EQ(true, (value * Checked<type, RecordOverflow>(std::numeric_limits<type>::max())).hasOverflowed()); \
-        MixedSignednessTest(EXPECT_EQ(coerceLiteral(0), (value + -10).unsafeGet())); \
-        MixedSignednessTest(EXPECT_EQ(0U, (value - 10U).unsafeGet())); \
-        MixedSignednessTest(EXPECT_EQ(coerceLiteral(0), (-10 + value).unsafeGet())); \
-        MixedSignednessTest(EXPECT_EQ(0U, (10U - value).unsafeGet())); \
-        value = std::numeric_limits<type>::min(); \
-        MixedSignednessTest(EXPECT_EQ(true, (Checked<type, RecordOverflow>(value - 1)).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, !(value--).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-        value = std::numeric_limits<type>::max(); \
-        MixedSignednessTest(EXPECT_EQ(true, !value.hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, (Checked<type, RecordOverflow>(value + 1)).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, !(value++).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-        value = std::numeric_limits<type>::max(); \
-        MixedSignednessTest(EXPECT_EQ(true, (value += 1).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-        value = std::numeric_limits<type>::min(); \
-        MixedSignednessTest(EXPECT_EQ(true, (value - 1U).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, !(value--).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-        value = std::numeric_limits<type>::max(); \
-        MixedSignednessTest(EXPECT_EQ(true, !value.hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, (Checked<type, RecordOverflow>(value + 1U)).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, !(value++).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-        value = std::numeric_limits<type>::max(); \
-        MixedSignednessTest(EXPECT_EQ(true, (value += 1U).hasOverflowed())); \
-        MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed())); \
-    }
+#define CheckedArithmeticTest(type, coerceLiteral, MixedSignednessTest)        \
+  TEST(WTF, Checked_##type) {                                                  \
+    Checked<type, RecordOverflow> value;                                       \
+    EXPECT_EQ(coerceLiteral(0), value.unsafeGet());                            \
+    EXPECT_EQ(std::numeric_limits<type>::max(),                                \
+              (value + std::numeric_limits<type>::max()).unsafeGet());         \
+    EXPECT_EQ(std::numeric_limits<type>::max(),                                \
+              (std::numeric_limits<type>::max() + value).unsafeGet());         \
+    EXPECT_EQ(std::numeric_limits<type>::min(),                                \
+              (value + std::numeric_limits<type>::min()).unsafeGet());         \
+    EXPECT_EQ(std::numeric_limits<type>::min(),                                \
+              (std::numeric_limits<type>::min() + value).unsafeGet());         \
+    EXPECT_EQ(coerceLiteral(0), (value * coerceLiteral(0)).unsafeGet());       \
+    EXPECT_EQ(coerceLiteral(0), (coerceLiteral(0) * value).unsafeGet());       \
+    EXPECT_EQ(coerceLiteral(0), (value * value).unsafeGet());                  \
+    EXPECT_EQ(coerceLiteral(0), (value - coerceLiteral(0)).unsafeGet());       \
+    EXPECT_EQ(coerceLiteral(0), (coerceLiteral(0) - value).unsafeGet());       \
+    EXPECT_EQ(coerceLiteral(0), (value - value).unsafeGet());                  \
+    EXPECT_EQ(coerceLiteral(0), (value++).unsafeGet());                        \
+    EXPECT_EQ(coerceLiteral(1), (value--).unsafeGet());                        \
+    EXPECT_EQ(coerceLiteral(1), (++value).unsafeGet());                        \
+    EXPECT_EQ(coerceLiteral(0), (--value).unsafeGet());                        \
+    EXPECT_EQ(coerceLiteral(10), (value += coerceLiteral(10)).unsafeGet());    \
+    EXPECT_EQ(coerceLiteral(10), value.unsafeGet());                           \
+    EXPECT_EQ(coerceLiteral(100), (value *= coerceLiteral(10)).unsafeGet());   \
+    EXPECT_EQ(coerceLiteral(100), value.unsafeGet());                          \
+    EXPECT_EQ(coerceLiteral(0), (value -= coerceLiteral(100)).unsafeGet());    \
+    EXPECT_EQ(coerceLiteral(0), value.unsafeGet());                            \
+    value = 10;                                                                \
+    EXPECT_EQ(coerceLiteral(10), value.unsafeGet());                           \
+    EXPECT_EQ(coerceLiteral(0), (value - coerceLiteral(10)).unsafeGet());      \
+    EXPECT_EQ(coerceLiteral(10), value.unsafeGet());                           \
+    value = std::numeric_limits<type>::min();                                  \
+    EXPECT_EQ(true, (Checked<type, RecordOverflow>(value - coerceLiteral(1)))  \
+                        .hasOverflowed());                                     \
+    EXPECT_EQ(true, !((value--).hasOverflowed()));                             \
+    EXPECT_EQ(true, value.hasOverflowed());                                    \
+    value = std::numeric_limits<type>::max();                                  \
+    EXPECT_EQ(true, !value.hasOverflowed());                                   \
+    EXPECT_EQ(true, (Checked<type, RecordOverflow>(value + coerceLiteral(1)))  \
+                        .hasOverflowed());                                     \
+    EXPECT_EQ(true, !(value++).hasOverflowed());                               \
+    EXPECT_EQ(true, value.hasOverflowed());                                    \
+    value = std::numeric_limits<type>::max();                                  \
+    EXPECT_EQ(true, (value += coerceLiteral(1)).hasOverflowed());              \
+    EXPECT_EQ(true, value.hasOverflowed());                                    \
+    value = 10;                                                                \
+    type _value = 0;                                                           \
+    EXPECT_EQ(true,                                                            \
+              CheckedState::DidNotOverflow ==                                  \
+                  (value * Checked<type, RecordOverflow>(0)).safeGet(_value)); \
+    _value = 0;                                                                \
+    EXPECT_EQ(true,                                                            \
+              CheckedState::DidNotOverflow ==                                  \
+                  (Checked<type, RecordOverflow>(0) * value).safeGet(_value)); \
+    _value = 0;                                                                \
+    EXPECT_EQ(true, CheckedState::DidOverflow ==                               \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidOverflow ==                                           \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             value)                                                            \
+                .safeGet(_value));                                             \
+    value = 0;                                                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(true, CheckedState::DidNotOverflow ==                            \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidNotOverflow ==                                        \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             value)                                                            \
+                .safeGet(_value));                                             \
+    value = 1;                                                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(true, CheckedState::DidNotOverflow ==                            \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidNotOverflow ==                                        \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             value)                                                            \
+                .safeGet(_value));                                             \
+    _value = 0;                                                                \
+    value = 0;                                                                 \
+    EXPECT_EQ(true, CheckedState::DidNotOverflow ==                            \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidNotOverflow ==                                        \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             (type)0)                                                          \
+                .safeGet(_value));                                             \
+    _value = 0;                                                                \
+    value = 1;                                                                 \
+    EXPECT_EQ(true, CheckedState::DidNotOverflow ==                            \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidNotOverflow ==                                        \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             (type)1)                                                          \
+                .safeGet(_value));                                             \
+    _value = 0;                                                                \
+    value = 2;                                                                 \
+    EXPECT_EQ(true, CheckedState::DidOverflow ==                               \
+                        (value * Checked<type, RecordOverflow>(                \
+                                     std::numeric_limits<type>::max()))        \
+                            .safeGet(_value));                                 \
+    _value = 0;                                                                \
+    EXPECT_EQ(                                                                 \
+        true,                                                                  \
+        CheckedState::DidOverflow ==                                           \
+            (Checked<type, RecordOverflow>(std::numeric_limits<type>::max()) * \
+             (type)2)                                                          \
+                .safeGet(_value));                                             \
+    value = 10;                                                                \
+    EXPECT_EQ(true, (value * Checked<type, RecordOverflow>(                    \
+                                 std::numeric_limits<type>::max()))            \
+                        .hasOverflowed());                                     \
+    MixedSignednessTest(                                                       \
+        EXPECT_EQ(coerceLiteral(0), (value + -10).unsafeGet()));               \
+    MixedSignednessTest(EXPECT_EQ(0U, (value - 10U).unsafeGet()));             \
+    MixedSignednessTest(                                                       \
+        EXPECT_EQ(coerceLiteral(0), (-10 + value).unsafeGet()));               \
+    MixedSignednessTest(EXPECT_EQ(0U, (10U - value).unsafeGet()));             \
+    value = std::numeric_limits<type>::min();                                  \
+    MixedSignednessTest(EXPECT_EQ(                                             \
+        true, (Checked<type, RecordOverflow>(value - 1)).hasOverflowed()));    \
+    MixedSignednessTest(EXPECT_EQ(true, !(value--).hasOverflowed()));          \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+    value = std::numeric_limits<type>::max();                                  \
+    MixedSignednessTest(EXPECT_EQ(true, !value.hasOverflowed()));              \
+    MixedSignednessTest(EXPECT_EQ(                                             \
+        true, (Checked<type, RecordOverflow>(value + 1)).hasOverflowed()));    \
+    MixedSignednessTest(EXPECT_EQ(true, !(value++).hasOverflowed()));          \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+    value = std::numeric_limits<type>::max();                                  \
+    MixedSignednessTest(EXPECT_EQ(true, (value += 1).hasOverflowed()));        \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+    value = std::numeric_limits<type>::min();                                  \
+    MixedSignednessTest(EXPECT_EQ(true, (value - 1U).hasOverflowed()));        \
+    MixedSignednessTest(EXPECT_EQ(true, !(value--).hasOverflowed()));          \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+    value = std::numeric_limits<type>::max();                                  \
+    MixedSignednessTest(EXPECT_EQ(true, !value.hasOverflowed()));              \
+    MixedSignednessTest(EXPECT_EQ(                                             \
+        true, (Checked<type, RecordOverflow>(value + 1U)).hasOverflowed()));   \
+    MixedSignednessTest(EXPECT_EQ(true, !(value++).hasOverflowed()));          \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+    value = std::numeric_limits<type>::max();                                  \
+    MixedSignednessTest(EXPECT_EQ(true, (value += 1U).hasOverflowed()));       \
+    MixedSignednessTest(EXPECT_EQ(true, value.hasOverflowed()));               \
+  }
 
 #define CoerceLiteralToUnsigned(x) x##U
 #define CoerceLiteralNop(x) x
 #define AllowMixedSignednessTest(x) x
 #define IgnoreMixedSignednessTest(x)
 CheckedArithmeticTest(int8_t, CoerceLiteralNop, IgnoreMixedSignednessTest)
-CheckedArithmeticTest(int16_t, CoerceLiteralNop, IgnoreMixedSignednessTest)
-CheckedArithmeticTest(int32_t, CoerceLiteralNop, AllowMixedSignednessTest)
-CheckedArithmeticTest(uint32_t, CoerceLiteralToUnsigned, AllowMixedSignednessTest)
-CheckedArithmeticTest(int64_t, CoerceLiteralNop, IgnoreMixedSignednessTest)
-CheckedArithmeticTest(uint64_t, CoerceLiteralToUnsigned, IgnoreMixedSignednessTest)
+    CheckedArithmeticTest(int16_t, CoerceLiteralNop, IgnoreMixedSignednessTest)
+        CheckedArithmeticTest(int32_t,
+                              CoerceLiteralNop,
+                              AllowMixedSignednessTest)
+            CheckedArithmeticTest(uint32_t,
+                                  CoerceLiteralToUnsigned,
+                                  AllowMixedSignednessTest)
+                CheckedArithmeticTest(int64_t,
+                                      CoerceLiteralNop,
+                                      IgnoreMixedSignednessTest)
+                    CheckedArithmeticTest(uint64_t,
+                                          CoerceLiteralToUnsigned,
+                                          IgnoreMixedSignednessTest)
 
-} // namespace
+}  // namespace

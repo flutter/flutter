@@ -38,25 +38,28 @@
 
 namespace WTF {
 
-template<typename T> struct PassTraits {
-    typedef T Type;
-    typedef T PassType;
-    static Type& transfer(Type& value) { return value; }
+template <typename T>
+struct PassTraits {
+  typedef T Type;
+  typedef T PassType;
+  static Type& transfer(Type& value) { return value; }
 };
 
-template<typename T> struct PassTraits<OwnPtr<T> > {
-    typedef OwnPtr<T> Type;
-    typedef PassOwnPtr<T> PassType;
-    static PassType transfer(Type& value) { return value.release(); }
+template <typename T>
+struct PassTraits<OwnPtr<T>> {
+  typedef OwnPtr<T> Type;
+  typedef PassOwnPtr<T> PassType;
+  static PassType transfer(Type& value) { return value.release(); }
 };
 
-template<typename T> struct PassTraits<RefPtr<T> > {
-    typedef RefPtr<T> Type;
-    typedef PassRefPtr<T> PassType;
-    static PassType transfer(Type& value) { return value.release(); }
+template <typename T>
+struct PassTraits<RefPtr<T>> {
+  typedef RefPtr<T> Type;
+  typedef PassRefPtr<T> PassType;
+  static PassType transfer(Type& value) { return value.release(); }
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::PassTraits;
 

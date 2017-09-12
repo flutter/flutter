@@ -24,17 +24,17 @@
 
 #include "flutter/sky/engine/core/rendering/RenderText.h"
 
-#include "flutter/sky/engine/core/rendering/break_lines.h"
 #include "flutter/sky/engine/core/rendering/InlineTextBox.h"
 #include "flutter/sky/engine/core/rendering/RenderBlock.h"
 #include "flutter/sky/engine/core/rendering/RenderLayer.h"
 #include "flutter/sky/engine/core/rendering/RenderView.h"
 #include "flutter/sky/engine/core/rendering/TextRunConstructor.h"
-#include "flutter/sky/engine/platform/text/TextBox.h"
+#include "flutter/sky/engine/core/rendering/break_lines.h"
 #include "flutter/sky/engine/platform/fonts/Character.h"
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
 #include "flutter/sky/engine/platform/geometry/FloatQuad.h"
 #include "flutter/sky/engine/platform/text/BidiResolver.h"
+#include "flutter/sky/engine/platform/text/TextBox.h"
 #include "flutter/sky/engine/platform/text/TextBreakIterator.h"
 #include "flutter/sky/engine/platform/text/TextRunIterator.h"
 #include "flutter/sky/engine/wtf/text/StringBuffer.h"
@@ -487,8 +487,9 @@ PositionWithAffinity RenderText::positionForPoint(const LayoutPoint& point) {
     lineDirectionPointFitsInBox(pointLineDirection, lastBox,
                                 shouldAffinityBeDownstream);
     return createPositionWithAffinityForBoxAfterAdjustingOffsetForBiDi(
-        lastBox, lastBox->offsetForPosition(pointLineDirection.toFloat()) +
-                     lastBox->start(),
+        lastBox,
+        lastBox->offsetForPosition(pointLineDirection.toFloat()) +
+            lastBox->start(),
         shouldAffinityBeDownstream);
   }
   return createPositionWithAffinity(0, DOWNSTREAM);

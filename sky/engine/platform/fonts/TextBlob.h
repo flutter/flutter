@@ -14,6 +14,6 @@ namespace blink {
 // Typedefs are used only to insulate core/ from Skia type names.
 typedef sk_sp<const SkTextBlob> TextBlobPtr;
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_TEXTBLOB_H_

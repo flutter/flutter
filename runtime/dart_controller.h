@@ -49,6 +49,6 @@ class DartController {
 
   FXL_DISALLOW_COPY_AND_ASSIGN(DartController);
 };
-}
+}  // namespace blink
 
 #endif  // FLUTTER_RUNTIME_DART_CONTROLLER_H_

@@ -38,27 +38,41 @@
 
 namespace WTF {
 
-inline uint32_t wswap32(uint32_t x) { return ((x & 0xffff0000) >> 16) | ((x & 0x0000ffff) << 16); }
+inline uint32_t wswap32(uint32_t x) {
+  return ((x & 0xffff0000) >> 16) | ((x & 0x0000ffff) << 16);
+}
 
-ALWAYS_INLINE uint64_t bswap64(uint64_t x) { return __builtin_bswap64(x); }
-ALWAYS_INLINE uint32_t bswap32(uint32_t x) { return __builtin_bswap32(x); }
+ALWAYS_INLINE uint64_t bswap64(uint64_t x) {
+  return __builtin_bswap64(x);
+}
+ALWAYS_INLINE uint32_t bswap32(uint32_t x) {
+  return __builtin_bswap32(x);
+}
 // GCC 4.6 lacks __builtin_bswap16. Newer versions have it but we support 4.6.
 #if COMPILER(CLANG)
-ALWAYS_INLINE uint16_t bswap16(uint16_t x) { return __builtin_bswap16(x); }
+ALWAYS_INLINE uint16_t bswap16(uint16_t x) {
+  return __builtin_bswap16(x);
+}
 #else
-inline uint16_t bswap16(uint16_t x) { return ((x & 0xff00) >> 8) | ((x & 0x00ff) << 8); }
+inline uint16_t bswap16(uint16_t x) {
+  return ((x & 0xff00) >> 8) | ((x & 0x00ff) << 8);
+}
 #endif
 
 #if CPU(64BIT)
 
-ALWAYS_INLINE size_t bswapuintptrt(size_t x) { return bswap64(x); }
+ALWAYS_INLINE size_t bswapuintptrt(size_t x) {
+  return bswap64(x);
+}
 
 #else
 
-ALWAYS_INLINE size_t bswapuintptrt(size_t x) { return bswap32(x); }
+ALWAYS_INLINE size_t bswapuintptrt(size_t x) {
+  return bswap32(x);
+}
 
 #endif
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_BYTESWAP_H_

@@ -5,16 +5,16 @@
 #ifndef FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 #define FLUTTER_CONTENT_HANDLER_VULKAN_SURFACE_PRODUCER_H_
 
-#include "lib/ui/scenic/client/resources.h"
-#include "lib/ui/scenic/client/session.h"
 #include "flutter/content_handler/vulkan_surface.h"
 #include "flutter/content_handler/vulkan_surface_pool.h"
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
-#include "lib/fxl/macros.h"
 #include "lib/fsl/tasks/message_loop.h"
+#include "lib/fxl/macros.h"
+#include "lib/ui/scenic/client/resources.h"
+#include "lib/ui/scenic/client/session.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
 namespace flutter_runner {

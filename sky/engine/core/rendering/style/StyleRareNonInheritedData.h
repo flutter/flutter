@@ -45,86 +45,97 @@ class StyleFilterData;
 class StyleFlexibleBoxData;
 class StyleTransformData;
 
-// This struct is for rarely used non-inherited CSS3, CSS2, and WebKit-specific properties.
-// By grouping them together, we save space, and only allocate this object when someone
-// actually uses one of these properties.
+// This struct is for rarely used non-inherited CSS3, CSS2, and WebKit-specific
+// properties. By grouping them together, we save space, and only allocate this
+// object when someone actually uses one of these properties.
 class StyleRareNonInheritedData : public RefCounted<StyleRareNonInheritedData> {
-public:
-    static PassRefPtr<StyleRareNonInheritedData> create() { return adoptRef(new StyleRareNonInheritedData); }
-    PassRefPtr<StyleRareNonInheritedData> copy() const { return adoptRef(new StyleRareNonInheritedData(*this)); }
-    ~StyleRareNonInheritedData();
+ public:
+  static PassRefPtr<StyleRareNonInheritedData> create() {
+    return adoptRef(new StyleRareNonInheritedData);
+  }
+  PassRefPtr<StyleRareNonInheritedData> copy() const {
+    return adoptRef(new StyleRareNonInheritedData(*this));
+  }
+  ~StyleRareNonInheritedData();
 
-    bool operator==(const StyleRareNonInheritedData&) const;
-    bool operator!=(const StyleRareNonInheritedData& o) const { return !(*this == o); }
+  bool operator==(const StyleRareNonInheritedData&) const;
+  bool operator!=(const StyleRareNonInheritedData& o) const {
+    return !(*this == o);
+  }
 
-    bool counterDataEquivalent(const StyleRareNonInheritedData&) const;
-    bool shadowDataEquivalent(const StyleRareNonInheritedData&) const;
-    bool hasOpacity() const { return opacity < 1; }
+  bool counterDataEquivalent(const StyleRareNonInheritedData&) const;
+  bool shadowDataEquivalent(const StyleRareNonInheritedData&) const;
+  bool hasOpacity() const { return opacity < 1; }
 
-    float opacity; // Whether or not we're transparent.
+  float opacity;  // Whether or not we're transparent.
 
-    float m_aspectRatioDenominator;
-    float m_aspectRatioNumerator;
+  float m_aspectRatioDenominator;
+  float m_aspectRatioNumerator;
 
-    float m_perspective;
-    Length m_perspectiveOriginX;
-    Length m_perspectiveOriginY;
+  float m_perspective;
+  Length m_perspectiveOriginX;
+  Length m_perspectiveOriginY;
 
-    DataRef<StyleFlexibleBoxData> m_flexibleBox;
-    DataRef<StyleTransformData> m_transform; // Transform properties (rotate, scale, skew, etc.)
+  DataRef<StyleFlexibleBoxData> m_flexibleBox;
+  DataRef<StyleTransformData>
+      m_transform;  // Transform properties (rotate, scale, skew, etc.)
 
-    DataRef<StyleFilterData> m_filter; // Filter operations (url, sepia, blur, etc.)
+  DataRef<StyleFilterData>
+      m_filter;  // Filter operations (url, sepia, blur, etc.)
 
-    OwnPtr<CounterDirectiveMap> m_counterDirectives;
+  OwnPtr<CounterDirectiveMap> m_counterDirectives;
 
-    RefPtr<ShadowList> m_boxShadow;
+  RefPtr<ShadowList> m_boxShadow;
 
-    RefPtr<ClipPathOperation> m_clipPath;
+  RefPtr<ClipPathOperation> m_clipPath;
 
-    StyleColor m_textDecorationColor;
+  StyleColor m_textDecorationColor;
 
-    int m_order;
+  int m_order;
 
-    LengthPoint m_objectPosition;
+  LengthPoint m_objectPosition;
 
-    AtomicString m_ellipsis;
-    int m_maxLines;
+  AtomicString m_ellipsis;
+  int m_maxLines;
 
-    unsigned m_transformStyle3D : 1; // ETransformStyle3D
+  unsigned m_transformStyle3D : 1;  // ETransformStyle3D
 
-    unsigned m_alignContent : 3; // EAlignContent
-    unsigned m_alignItems : 4; // ItemPosition
-    unsigned m_alignItemsOverflowAlignment : 2; // OverflowAlignment
-    unsigned m_alignSelf : 4; // ItemPosition
-    unsigned m_alignSelfOverflowAlignment : 2; // OverflowAlignment
-    unsigned m_justifyContent : 3; // EJustifyContent
+  unsigned m_alignContent : 3;                 // EAlignContent
+  unsigned m_alignItems : 4;                   // ItemPosition
+  unsigned m_alignItemsOverflowAlignment : 2;  // OverflowAlignment
+  unsigned m_alignSelf : 4;                    // ItemPosition
+  unsigned m_alignSelfOverflowAlignment : 2;   // OverflowAlignment
+  unsigned m_justifyContent : 3;               // EJustifyContent
 
-    unsigned textOverflow : 1; // Whether or not lines that spill out should be truncated with "..."
+  unsigned textOverflow : 1;  // Whether or not lines that spill out should be
+                              // truncated with "..."
 
-    unsigned m_textDecorationStyle : 3; // TextDecorationStyle
-    unsigned m_wrapFlow: 3; // WrapFlow
-    unsigned m_wrapThrough: 1; // WrapThrough
+  unsigned m_textDecorationStyle : 3;  // TextDecorationStyle
+  unsigned m_wrapFlow : 3;             // WrapFlow
+  unsigned m_wrapThrough : 1;          // WrapThrough
 
-    unsigned m_hasAspectRatio : 1; // Whether or not an aspect ratio has been specified.
+  unsigned m_hasAspectRatio : 1;  // Whether or not an aspect ratio has been
+                                  // specified.
 
-    unsigned m_touchAction : TouchActionBits; // TouchAction
+  unsigned m_touchAction : TouchActionBits;  // TouchAction
 
-    unsigned m_objectFit : 3; // ObjectFit
+  unsigned m_objectFit : 3;  // ObjectFit
 
-    unsigned m_isolation : 1; // Isolation
+  unsigned m_isolation : 1;  // Isolation
 
-    unsigned m_justifyItems : 4; // ItemPosition
-    unsigned m_justifyItemsOverflowAlignment : 2; // OverflowAlignment
-    unsigned m_justifyItemsPositionType: 1; // Whether or not alignment uses the 'legacy' keyword.
+  unsigned m_justifyItems : 4;                   // ItemPosition
+  unsigned m_justifyItemsOverflowAlignment : 2;  // OverflowAlignment
+  unsigned m_justifyItemsPositionType : 1;  // Whether or not alignment uses the
+                                            // 'legacy' keyword.
 
-    unsigned m_justifySelf : 4; // ItemPosition
-    unsigned m_justifySelfOverflowAlignment : 2; // OverflowAlignment
+  unsigned m_justifySelf : 4;                   // ItemPosition
+  unsigned m_justifySelfOverflowAlignment : 2;  // OverflowAlignment
 
-private:
-    StyleRareNonInheritedData();
-    StyleRareNonInheritedData(const StyleRareNonInheritedData&);
+ private:
+  StyleRareNonInheritedData();
+  StyleRareNonInheritedData(const StyleRareNonInheritedData&);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLERARENONINHERITEDDATA_H_

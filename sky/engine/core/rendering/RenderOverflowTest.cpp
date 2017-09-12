@@ -39,155 +39,136 @@ using namespace blink;
 namespace blink {
 
 // FIXME: Move this somewhere more generic.
-void PrintTo(const LayoutRect& rect, std::ostream* os)
-{
-    *os << "LayoutRect("
-        << rect.x().toFloat() << ", "
-        << rect.y().toFloat() << ", "
-        << rect.width().toFloat() << ", "
-        << rect.height().toFloat() << ")";
+void PrintTo(const LayoutRect& rect, std::ostream* os) {
+  *os << "LayoutRect(" << rect.x().toFloat() << ", " << rect.y().toFloat()
+      << ", " << rect.width().toFloat() << ", " << rect.height().toFloat()
+      << ")";
 }
 
-} // namespace blink
+}  // namespace blink
 
 namespace {
 
-LayoutRect initialLayoutOverflow()
-{
-    return LayoutRect(10, 10, 80, 80);
+LayoutRect initialLayoutOverflow() {
+  return LayoutRect(10, 10, 80, 80);
 }
 
-LayoutRect initialVisualOverflow()
-{
-    return LayoutRect(0, 0, 100, 100);
+LayoutRect initialVisualOverflow() {
+  return LayoutRect(0, 0, 100, 100);
 }
 
 class RenderOverflowTest : public testing::Test {
-protected:
-    RenderOverflowTest() : m_overflow(initialLayoutOverflow(), initialVisualOverflow()) { }
-    RenderOverflow m_overflow;
+ protected:
+  RenderOverflowTest()
+      : m_overflow(initialLayoutOverflow(), initialVisualOverflow()) {}
+  RenderOverflow m_overflow;
 };
 
-TEST_F(RenderOverflowTest, InitialOverflowRects)
-{
-    EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
-    EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
-    EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
+TEST_F(RenderOverflowTest, InitialOverflowRects) {
+  EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
+  EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
+  EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
 }
 
-TEST_F(RenderOverflowTest, AddLayoutOverflowOutsideExpandsRect)
-{
-    m_overflow.addLayoutOverflow(LayoutRect(0, 10, 30, 10));
-    EXPECT_EQ(LayoutRect(0, 10, 90, 80), m_overflow.layoutOverflowRect());
+TEST_F(RenderOverflowTest, AddLayoutOverflowOutsideExpandsRect) {
+  m_overflow.addLayoutOverflow(LayoutRect(0, 10, 30, 10));
+  EXPECT_EQ(LayoutRect(0, 10, 90, 80), m_overflow.layoutOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddLayoutOverflowInsideDoesNotAffectRect)
-{
-    m_overflow.addLayoutOverflow(LayoutRect(50, 50, 10, 20));
-    EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
+TEST_F(RenderOverflowTest, AddLayoutOverflowInsideDoesNotAffectRect) {
+  m_overflow.addLayoutOverflow(LayoutRect(50, 50, 10, 20));
+  EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddLayoutOverflowEmpty)
-{
-    // This test documents the existing behavior so that we are aware when/if
-    // it changes. It would also be reasonable for addLayoutOverflow to be
-    // a no-op in this situation.
-    m_overflow.addLayoutOverflow(LayoutRect(200, 200, 0, 0));
-    EXPECT_EQ(LayoutRect(10, 10, 190, 190), m_overflow.layoutOverflowRect());
+TEST_F(RenderOverflowTest, AddLayoutOverflowEmpty) {
+  // This test documents the existing behavior so that we are aware when/if
+  // it changes. It would also be reasonable for addLayoutOverflow to be
+  // a no-op in this situation.
+  m_overflow.addLayoutOverflow(LayoutRect(200, 200, 0, 0));
+  EXPECT_EQ(LayoutRect(10, 10, 190, 190), m_overflow.layoutOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddLayoutOverflowDoesNotAffectVisualOverflow)
-{
-    m_overflow.addLayoutOverflow(LayoutRect(300, 300, 300, 300));
-    EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
+TEST_F(RenderOverflowTest, AddLayoutOverflowDoesNotAffectVisualOverflow) {
+  m_overflow.addLayoutOverflow(LayoutRect(300, 300, 300, 300));
+  EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddLayoutOverflowDoesNotAffectContentsVisualOverflow)
-{
-    m_overflow.addLayoutOverflow(LayoutRect(300, 300, 300, 300));
-    EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
+TEST_F(RenderOverflowTest,
+       AddLayoutOverflowDoesNotAffectContentsVisualOverflow) {
+  m_overflow.addLayoutOverflow(LayoutRect(300, 300, 300, 300));
+  EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
 }
 
-TEST_F(RenderOverflowTest, AddVisualOverflowOutsideExpandsRect)
-{
-    m_overflow.addVisualOverflow(LayoutRect(150, -50, 10, 10));
-    EXPECT_EQ(LayoutRect(0, -50, 160, 150), m_overflow.visualOverflowRect());
+TEST_F(RenderOverflowTest, AddVisualOverflowOutsideExpandsRect) {
+  m_overflow.addVisualOverflow(LayoutRect(150, -50, 10, 10));
+  EXPECT_EQ(LayoutRect(0, -50, 160, 150), m_overflow.visualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddVisualOverflowInsideDoesNotAffectRect)
-{
-    m_overflow.addVisualOverflow(LayoutRect(0, 10, 90, 90));
-    EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
+TEST_F(RenderOverflowTest, AddVisualOverflowInsideDoesNotAffectRect) {
+  m_overflow.addVisualOverflow(LayoutRect(0, 10, 90, 90));
+  EXPECT_EQ(initialVisualOverflow(), m_overflow.visualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddVisualOverflowEmpty)
-{
-    // This test documents the existing behavior so that we are aware when/if
-    // it changes. It would also be reasonable for addVisualOverflow to be
-    // a no-op in this situation.
-    m_overflow.addVisualOverflow(LayoutRect(200, 200, 0, 0));
-    EXPECT_EQ(LayoutRect(0, 0, 200, 200), m_overflow.visualOverflowRect());
+TEST_F(RenderOverflowTest, AddVisualOverflowEmpty) {
+  // This test documents the existing behavior so that we are aware when/if
+  // it changes. It would also be reasonable for addVisualOverflow to be
+  // a no-op in this situation.
+  m_overflow.addVisualOverflow(LayoutRect(200, 200, 0, 0));
+  EXPECT_EQ(LayoutRect(0, 0, 200, 200), m_overflow.visualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddVisualOverflowDoesNotAffectLayoutOverflow)
-{
-    m_overflow.addVisualOverflow(LayoutRect(300, 300, 300, 300));
-    EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
+TEST_F(RenderOverflowTest, AddVisualOverflowDoesNotAffectLayoutOverflow) {
+  m_overflow.addVisualOverflow(LayoutRect(300, 300, 300, 300));
+  EXPECT_EQ(initialLayoutOverflow(), m_overflow.layoutOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddVisualOverflowDoesNotAffectContentsVisualOverflow)
-{
-    m_overflow.addVisualOverflow(LayoutRect(300, 300, 300, 300));
-    EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
+TEST_F(RenderOverflowTest,
+       AddVisualOverflowDoesNotAffectContentsVisualOverflow) {
+  m_overflow.addVisualOverflow(LayoutRect(300, 300, 300, 300));
+  EXPECT_TRUE(m_overflow.contentsVisualOverflowRect().isEmpty());
 }
 
-TEST_F(RenderOverflowTest, AddContentsVisualOverflowFirstCall)
-{
-    m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
-    EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
+TEST_F(RenderOverflowTest, AddContentsVisualOverflowFirstCall) {
+  m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
+  EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddContentsVisualOverflowUnitesRects)
-{
-    m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
-    m_overflow.addContentsVisualOverflow(LayoutRect(80, 80, 10, 10));
-    EXPECT_EQ(LayoutRect(0, 0, 90, 90), m_overflow.contentsVisualOverflowRect());
+TEST_F(RenderOverflowTest, AddContentsVisualOverflowUnitesRects) {
+  m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
+  m_overflow.addContentsVisualOverflow(LayoutRect(80, 80, 10, 10));
+  EXPECT_EQ(LayoutRect(0, 0, 90, 90), m_overflow.contentsVisualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddContentsVisualOverflowRectWithinRect)
-{
-    m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
-    m_overflow.addContentsVisualOverflow(LayoutRect(2, 2, 5, 5));
-    EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
+TEST_F(RenderOverflowTest, AddContentsVisualOverflowRectWithinRect) {
+  m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
+  m_overflow.addContentsVisualOverflow(LayoutRect(2, 2, 5, 5));
+  EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, AddContentsVisualOverflowEmpty)
-{
-    // This test documents the existing behavior so that we are aware when/if
-    // it changes. It would also be reasonable for addContentsVisualOverflow to
-    // expand in this situation.
-    m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
-    m_overflow.addContentsVisualOverflow(LayoutRect(20, 20, 0, 0));
-    EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
+TEST_F(RenderOverflowTest, AddContentsVisualOverflowEmpty) {
+  // This test documents the existing behavior so that we are aware when/if
+  // it changes. It would also be reasonable for addContentsVisualOverflow to
+  // expand in this situation.
+  m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
+  m_overflow.addContentsVisualOverflow(LayoutRect(20, 20, 0, 0));
+  EXPECT_EQ(LayoutRect(0, 0, 10, 10), m_overflow.contentsVisualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, MoveAffectsLayoutOverflow)
-{
-    m_overflow.move(500, 100);
-    EXPECT_EQ(LayoutRect(510, 110, 80, 80), m_overflow.layoutOverflowRect());
+TEST_F(RenderOverflowTest, MoveAffectsLayoutOverflow) {
+  m_overflow.move(500, 100);
+  EXPECT_EQ(LayoutRect(510, 110, 80, 80), m_overflow.layoutOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, MoveAffectsVisualOverflow)
-{
-    m_overflow.move(500, 100);
-    EXPECT_EQ(LayoutRect(500, 100, 100, 100), m_overflow.visualOverflowRect());
+TEST_F(RenderOverflowTest, MoveAffectsVisualOverflow) {
+  m_overflow.move(500, 100);
+  EXPECT_EQ(LayoutRect(500, 100, 100, 100), m_overflow.visualOverflowRect());
 }
 
-TEST_F(RenderOverflowTest, MoveAffectsContentsVisualOverflow)
-{
-    m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
-    m_overflow.move(500, 100);
-    EXPECT_EQ(LayoutRect(500, 100, 10, 10), m_overflow.contentsVisualOverflowRect());
+TEST_F(RenderOverflowTest, MoveAffectsContentsVisualOverflow) {
+  m_overflow.addContentsVisualOverflow(LayoutRect(0, 0, 10, 10));
+  m_overflow.move(500, 100);
+  EXPECT_EQ(LayoutRect(500, 100, 10, 10),
+            m_overflow.contentsVisualOverflowRect());
 }
 
-} // namespace
+}  // namespace

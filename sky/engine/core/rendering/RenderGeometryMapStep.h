@@ -37,32 +37,34 @@ class RenderObject;
 
 // Stores data about how to map from one renderer to its container.
 struct RenderGeometryMapStep {
-    RenderGeometryMapStep(const RenderGeometryMapStep& o)
-        : m_renderer(o.m_renderer)
-        , m_offset(o.m_offset)
-        , m_accumulatingTransform(o.m_accumulatingTransform)
-        , m_isNonUniform(o.m_isNonUniform)
-        , m_hasTransform(o.m_hasTransform)
-    {
-        ASSERT(!o.m_transform);
-    }
-    RenderGeometryMapStep(const RenderObject* renderer, bool accumulatingTransform, bool isNonUniform, bool hasTransform)
-        : m_renderer(renderer)
-        , m_accumulatingTransform(accumulatingTransform)
-        , m_isNonUniform(isNonUniform)
-        , m_hasTransform(hasTransform)
-    {
-    }
-    const RenderObject* m_renderer;
-    LayoutSize m_offset;
-    OwnPtr<TransformationMatrix> m_transform; // Includes offset if non-null.
-    bool m_accumulatingTransform;
-    bool m_isNonUniform; // Mapping depends on the input point, e.g. because of CSS columns.
-    bool m_hasTransform;
+  RenderGeometryMapStep(const RenderGeometryMapStep& o)
+      : m_renderer(o.m_renderer),
+        m_offset(o.m_offset),
+        m_accumulatingTransform(o.m_accumulatingTransform),
+        m_isNonUniform(o.m_isNonUniform),
+        m_hasTransform(o.m_hasTransform) {
+    ASSERT(!o.m_transform);
+  }
+  RenderGeometryMapStep(const RenderObject* renderer,
+                        bool accumulatingTransform,
+                        bool isNonUniform,
+                        bool hasTransform)
+      : m_renderer(renderer),
+        m_accumulatingTransform(accumulatingTransform),
+        m_isNonUniform(isNonUniform),
+        m_hasTransform(hasTransform) {}
+  const RenderObject* m_renderer;
+  LayoutSize m_offset;
+  OwnPtr<TransformationMatrix> m_transform;  // Includes offset if non-null.
+  bool m_accumulatingTransform;
+  bool m_isNonUniform;  // Mapping depends on the input point, e.g. because of
+                        // CSS columns.
+  bool m_hasTransform;
 };
 
-} // namespace blink
+}  // namespace blink
 
-WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(blink::RenderGeometryMapStep);
+WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(
+    blink::RenderGeometryMapStep);
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERGEOMETRYMAPSTEP_H_

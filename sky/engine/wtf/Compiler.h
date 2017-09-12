@@ -27,7 +27,8 @@
 #define SKY_ENGINE_WTF_COMPILER_H_
 
 /* COMPILER() - the compiler being used to build the project */
-#define COMPILER(WTF_FEATURE) (defined WTF_COMPILER_##WTF_FEATURE  && WTF_COMPILER_##WTF_FEATURE)
+#define COMPILER(WTF_FEATURE) \
+  (defined WTF_COMPILER_##WTF_FEATURE && WTF_COMPILER_##WTF_FEATURE)
 
 /* ==== COMPILER() - the compiler being used to build the project ==== */
 
@@ -45,15 +46,17 @@
 /* COMPILER(GCC) - GNU Compiler Collection */
 #if defined(__GNUC__)
 #define WTF_COMPILER_GCC 1
-#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
-#define GCC_VERSION_AT_LEAST(major, minor, patch) (GCC_VERSION >= (major * 10000 + minor * 100 + patch))
+#define GCC_VERSION \
+  (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#define GCC_VERSION_AT_LEAST(major, minor, patch) \
+  (GCC_VERSION >= (major * 10000 + minor * 100 + patch))
 #else
-/* Define this for !GCC compilers, just so we can write things like GCC_VERSION_AT_LEAST(4, 1, 0). */
+/* Define this for !GCC compilers, just so we can write things like
+ * GCC_VERSION_AT_LEAST(4, 1, 0). */
 #define GCC_VERSION_AT_LEAST(major, minor, patch) 0
 #endif
 
 /* ==== Compiler features ==== */
-
 
 /* ALWAYS_INLINE */
 
@@ -65,7 +68,6 @@
 #endif
 #endif
 
-
 /* NEVER_INLINE */
 
 #ifndef NEVER_INLINE
@@ -75,7 +77,6 @@
 #define NEVER_INLINE
 #endif
 #endif
-
 
 /* UNLIKELY */
 
@@ -87,7 +88,6 @@
 #endif
 #endif
 
-
 /* LIKELY */
 
 #ifndef LIKELY
@@ -98,9 +98,7 @@
 #endif
 #endif
 
-
 /* NO_RETURN */
-
 
 #ifndef NO_RETURN
 #if COMPILER(GCC)
@@ -110,11 +108,10 @@
 #endif
 #endif
 
-
 /* WARN_UNUSED_RETURN */
 
 #if COMPILER(GCC)
-#define WARN_UNUSED_RETURN __attribute__ ((warn_unused_result))
+#define WARN_UNUSED_RETURN __attribute__((warn_unused_result))
 #else
 #define WARN_UNUSED_RETURN
 #endif
@@ -126,7 +123,6 @@
 #else
 #define ALLOW_UNUSED
 #endif
-
 
 /* REFERENCED_FROM_ASM */
 

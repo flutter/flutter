@@ -23,16 +23,16 @@
 
 namespace WTF {
 
-    template <typename T> inline T* getPtr(T* p)
-    {
-        return p;
-    }
+template <typename T>
+inline T* getPtr(T* p) {
+  return p;
+}
 
-    template <typename T> inline T* getPtr(T& p)
-    {
-        return &p;
-    }
+template <typename T>
+inline T* getPtr(T& p) {
+  return &p;
+}
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_GETPTR_H_

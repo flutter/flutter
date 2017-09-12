@@ -33,56 +33,59 @@
 namespace blink {
 
 class StyleBoxData : public RefCounted<StyleBoxData> {
-public:
-    static PassRefPtr<StyleBoxData> create() { return adoptRef(new StyleBoxData); }
-    PassRefPtr<StyleBoxData> copy() const { return adoptRef(new StyleBoxData(*this)); }
+ public:
+  static PassRefPtr<StyleBoxData> create() {
+    return adoptRef(new StyleBoxData);
+  }
+  PassRefPtr<StyleBoxData> copy() const {
+    return adoptRef(new StyleBoxData(*this));
+  }
 
-    bool operator==(const StyleBoxData& o) const;
-    bool operator!=(const StyleBoxData& o) const
-    {
-        return !(*this == o);
-    }
+  bool operator==(const StyleBoxData& o) const;
+  bool operator!=(const StyleBoxData& o) const { return !(*this == o); }
 
-    const Length& width() const { return m_width; }
-    const Length& height() const { return m_height; }
+  const Length& width() const { return m_width; }
+  const Length& height() const { return m_height; }
 
-    const Length& minWidth() const { return m_minWidth; }
-    const Length& minHeight() const { return m_minHeight; }
+  const Length& minWidth() const { return m_minWidth; }
+  const Length& minHeight() const { return m_minHeight; }
 
-    const Length& maxWidth() const { return m_maxWidth; }
-    const Length& maxHeight() const { return m_maxHeight; }
+  const Length& maxWidth() const { return m_maxWidth; }
+  const Length& maxHeight() const { return m_maxHeight; }
 
-    const Length& verticalAlign() const { return m_verticalAlign; }
+  const Length& verticalAlign() const { return m_verticalAlign; }
 
-    unsigned zIndex() const { return m_zIndex; }
-    bool hasAutoZIndex() const { return m_hasAutoZIndex; }
+  unsigned zIndex() const { return m_zIndex; }
+  bool hasAutoZIndex() const { return m_hasAutoZIndex; }
 
-    EBoxSizing boxSizing() const { return static_cast<EBoxSizing>(m_boxSizing); }
-    EBoxDecorationBreak boxDecorationBreak() const { return static_cast<EBoxDecorationBreak>(m_boxDecorationBreak); }
+  EBoxSizing boxSizing() const { return static_cast<EBoxSizing>(m_boxSizing); }
+  EBoxDecorationBreak boxDecorationBreak() const {
+    return static_cast<EBoxDecorationBreak>(m_boxDecorationBreak);
+  }
 
-private:
-    friend class RenderStyle;
+ private:
+  friend class RenderStyle;
 
-    StyleBoxData();
-    StyleBoxData(const StyleBoxData&);
+  StyleBoxData();
+  StyleBoxData(const StyleBoxData&);
 
-    Length m_width;
-    Length m_height;
+  Length m_width;
+  Length m_height;
 
-    Length m_minWidth;
-    Length m_maxWidth;
+  Length m_minWidth;
+  Length m_maxWidth;
 
-    Length m_minHeight;
-    Length m_maxHeight;
+  Length m_minHeight;
+  Length m_maxHeight;
 
-    Length m_verticalAlign;
+  Length m_verticalAlign;
 
-    unsigned m_zIndex;
-    unsigned m_hasAutoZIndex : 1;
-    unsigned m_boxSizing : 1; // EBoxSizing
-    unsigned m_boxDecorationBreak : 1; // EBoxDecorationBreak
+  unsigned m_zIndex;
+  unsigned m_hasAutoZIndex : 1;
+  unsigned m_boxSizing : 1;           // EBoxSizing
+  unsigned m_boxDecorationBreak : 1;  // EBoxDecorationBreak
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEBOXDATA_H_

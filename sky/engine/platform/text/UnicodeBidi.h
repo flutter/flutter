@@ -29,24 +29,23 @@
 namespace blink {
 
 enum EUnicodeBidi {
-    UBNormal,
-    Embed,
-    Override,
-    Isolate,
-    Plaintext,
-    IsolateOverride,
+  UBNormal,
+  Embed,
+  Override,
+  Isolate,
+  Plaintext,
+  IsolateOverride,
 };
 
-inline bool isIsolated(const EUnicodeBidi& unicodeBidi)
-{
-    return unicodeBidi == Isolate || unicodeBidi == IsolateOverride || unicodeBidi == Plaintext;
+inline bool isIsolated(const EUnicodeBidi& unicodeBidi) {
+  return unicodeBidi == Isolate || unicodeBidi == IsolateOverride ||
+         unicodeBidi == Plaintext;
 }
 
-inline bool isOverride(EUnicodeBidi unicodeBidi)
-{
-    return unicodeBidi == Override || unicodeBidi == IsolateOverride;
+inline bool isOverride(EUnicodeBidi unicodeBidi) {
+  return unicodeBidi == Override || unicodeBidi == IsolateOverride;
 }
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TEXT_UNICODEBIDI_H_

@@ -27,13 +27,10 @@
  *
  */
 
-
 #include "flutter/sky/engine/platform/graphics/ImageObserver.h"
 
 namespace blink {
 
-ImageObserver::~ImageObserver()
-{
-}
+ImageObserver::~ImageObserver() {}
 
-} // namespace blink
+}  // namespace blink

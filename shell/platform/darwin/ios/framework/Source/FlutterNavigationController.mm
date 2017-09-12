@@ -6,7 +6,7 @@
 
 @implementation FlutterNavigationController
 
-- (void) viewWillAppear:(BOOL)animated {
+- (void)viewWillAppear:(BOOL)animated {
   [self setNavigationBarHidden:YES];
   [super viewWillAppear:animated];
 }

@@ -20,8 +20,7 @@ namespace shell {
 PlatformViewIOS::PlatformViewIOS(CALayer* layer)
     : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       ios_surface_(IOSSurface::Create(surface_config_, layer)),
-      weak_factory_(this) {
-}
+      weak_factory_(this) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 

@@ -43,22 +43,23 @@
 // This disallows general allocation of this object but allows to put
 // the object as a value object in collections.
 //
-#define DISALLOW_ALLOCATION()                                   \
-    private:                                                    \
-        void* operator new(size_t) = delete;                    \
-        void* operator new(size_t, NotNullTag, void*) = delete; \
-        void* operator new(size_t, void*) = delete;
+#define DISALLOW_ALLOCATION()                             \
+ private:                                                 \
+  void* operator new(size_t) = delete;                    \
+  void* operator new(size_t, NotNullTag, void*) = delete; \
+  void* operator new(size_t, void*) = delete;
 
-#define ALLOW_ONLY_INLINE_ALLOCATION()                                              \
-    public:                                                                         \
-        void* operator new(size_t, NotNullTag, void* location) { return location; } \
-        void* operator new(size_t, void* location) { return location; }             \
-    private:                                                                        \
-        void* operator new(size_t) = delete;
+#define ALLOW_ONLY_INLINE_ALLOCATION()                                        \
+ public:                                                                      \
+  void* operator new(size_t, NotNullTag, void* location) { return location; } \
+  void* operator new(size_t, void* location) { return location; }             \
+                                                                              \
+ private:                                                                     \
+  void* operator new(size_t) = delete;
 
 #define STATIC_ONLY(Type) \
-    private:              \
-        Type() = delete;
+ private:                 \
+  Type() = delete;
 
 // These macros insert annotations that the Blink GC plugin for clang uses for
 // verification. STACK_ALLOCATED is used to declare that objects of this type
@@ -67,30 +68,32 @@
 // GC_PLUGIN_IGNORE a bug-number should be provided as an argument where the
 // bug describes what needs to happen to remove the GC_PLUGIN_IGNORE again.
 #if COMPILER(CLANG)
-#define STACK_ALLOCATED()                                       \
-    private:                                                    \
-        __attribute__((annotate("blink_stack_allocated")))      \
-        void* operator new(size_t) = delete;                    \
-        void* operator new(size_t, NotNullTag, void*) = delete; \
-        void* operator new(size_t, void*) = delete;
+#define STACK_ALLOCATED()                                                \
+ private:                                                                \
+  __attribute__((annotate("blink_stack_allocated"))) void* operator new( \
+      size_t) = delete;                                                  \
+  void* operator new(size_t, NotNullTag, void*) = delete;                \
+  void* operator new(size_t, void*) = delete;
 
 #else
 #define STACK_ALLOCATED() DISALLOW_ALLOCATION()
 #endif
 
 #define DECLARE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) \
-    public:                                            \
-        ~type();                                       \
-    private:
+ public:                                               \
+  ~type();                                             \
+                                                       \
+ private:
 #define DECLARE_EMPTY_VIRTUAL_DESTRUCTOR_WILL_BE_REMOVED(type) \
-    public:                                                    \
-        virtual ~type();                                       \
-    private:
+ public:                                                       \
+  virtual ~type();                                             \
+                                                               \
+ private:
 
 #define DEFINE_EMPTY_DESTRUCTOR_WILL_BE_REMOVED(type) \
-    type::~type() { }
+  type::~type() {}
 
 #define DEFINE_STATIC_REF_WILL_BE_PERSISTENT(type, name, arguments) \
-    DEFINE_STATIC_REF(type, name, arguments)
+  DEFINE_STATIC_REF(type, name, arguments)
 
 #endif  // SKY_ENGINE_PLATFORM_HEAP_HANDLE_H_

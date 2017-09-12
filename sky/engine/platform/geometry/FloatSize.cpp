@@ -35,29 +35,24 @@
 namespace blink {
 
 FloatSize::FloatSize(const LayoutSize& size)
-    : m_width(size.width().toFloat())
-    , m_height(size.height().toFloat())
-{
+    : m_width(size.width().toFloat()), m_height(size.height().toFloat()) {}
+
+float FloatSize::diagonalLength() const {
+  return sqrtf(diagonalLengthSquared());
 }
 
-float FloatSize::diagonalLength() const
-{
-    return sqrtf(diagonalLengthSquared());
+bool FloatSize::isZero() const {
+  return fabs(m_width) < std::numeric_limits<float>::epsilon() &&
+         fabs(m_height) < std::numeric_limits<float>::epsilon();
 }
 
-bool FloatSize::isZero() const
-{
-    return fabs(m_width) < std::numeric_limits<float>::epsilon() && fabs(m_height) < std::numeric_limits<float>::epsilon();
+bool FloatSize::isExpressibleAsIntSize() const {
+  return isWithinIntRange(m_width) && isWithinIntRange(m_height);
 }
 
-bool FloatSize::isExpressibleAsIntSize() const
-{
-    return isWithinIntRange(m_width) && isWithinIntRange(m_height);
+FloatSize FloatSize::narrowPrecision(double width, double height) {
+  return FloatSize(narrowPrecisionToFloat(width),
+                   narrowPrecisionToFloat(height));
 }
 
-FloatSize FloatSize::narrowPrecision(double width, double height)
-{
-    return FloatSize(narrowPrecisionToFloat(width), narrowPrecisionToFloat(height));
-}
-
-}
+}  // namespace blink

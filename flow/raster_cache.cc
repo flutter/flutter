@@ -82,11 +82,11 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
       SkRect::MakeWH(std::fabs(logical_rect.width() * scale.x()),
                      std::fabs(logical_rect.height() * scale.y()));
 
-  const SkImageInfo image_info =
-      SkImageInfo::MakeN32Premul(std::ceil(physical_rect.width()),      // physical width
-                                 std::ceil(physical_rect.height()),     // physical height
-                                 sk_ref_sp(dst_color_space)  // colorspace
-      );
+  const SkImageInfo image_info = SkImageInfo::MakeN32Premul(
+      std::ceil(physical_rect.width()),   // physical width
+      std::ceil(physical_rect.height()),  // physical height
+      sk_ref_sp(dst_color_space)          // colorspace
+  );
 
   sk_sp<SkSurface> surface =
       context

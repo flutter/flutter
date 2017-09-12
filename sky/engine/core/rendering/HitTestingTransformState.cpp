@@ -30,58 +30,56 @@
 
 namespace blink {
 
-void HitTestingTransformState::translate(int x, int y, TransformAccumulation accumulate)
-{
-    m_accumulatedTransform.translate(x, y);
-    if (accumulate == FlattenTransform)
-        flattenWithTransform(m_accumulatedTransform);
-
-    m_accumulatingTransform = accumulate == AccumulateTransform;
-}
-
-void HitTestingTransformState::applyTransform(const TransformationMatrix& transformFromContainer, TransformAccumulation accumulate)
-{
-    m_accumulatedTransform.multiply(transformFromContainer);
-    if (accumulate == FlattenTransform)
-        flattenWithTransform(m_accumulatedTransform);
-
-    m_accumulatingTransform = accumulate == AccumulateTransform;
-}
-
-void HitTestingTransformState::flatten()
-{
+void HitTestingTransformState::translate(int x,
+                                         int y,
+                                         TransformAccumulation accumulate) {
+  m_accumulatedTransform.translate(x, y);
+  if (accumulate == FlattenTransform)
     flattenWithTransform(m_accumulatedTransform);
+
+  m_accumulatingTransform = accumulate == AccumulateTransform;
 }
 
-void HitTestingTransformState::flattenWithTransform(const TransformationMatrix& t)
-{
-    TransformationMatrix inverseTransform = t.inverse();
-    m_lastPlanarPoint = inverseTransform.projectPoint(m_lastPlanarPoint);
-    m_lastPlanarQuad = inverseTransform.projectQuad(m_lastPlanarQuad);
-    m_lastPlanarArea = inverseTransform.projectQuad(m_lastPlanarArea);
+void HitTestingTransformState::applyTransform(
+    const TransformationMatrix& transformFromContainer,
+    TransformAccumulation accumulate) {
+  m_accumulatedTransform.multiply(transformFromContainer);
+  if (accumulate == FlattenTransform)
+    flattenWithTransform(m_accumulatedTransform);
 
-    m_accumulatedTransform.makeIdentity();
-    m_accumulatingTransform = false;
+  m_accumulatingTransform = accumulate == AccumulateTransform;
 }
 
-FloatPoint HitTestingTransformState::mappedPoint() const
-{
-    return m_accumulatedTransform.inverse().projectPoint(m_lastPlanarPoint);
+void HitTestingTransformState::flatten() {
+  flattenWithTransform(m_accumulatedTransform);
 }
 
-FloatQuad HitTestingTransformState::mappedQuad() const
-{
-    return m_accumulatedTransform.inverse().projectQuad(m_lastPlanarQuad);
+void HitTestingTransformState::flattenWithTransform(
+    const TransformationMatrix& t) {
+  TransformationMatrix inverseTransform = t.inverse();
+  m_lastPlanarPoint = inverseTransform.projectPoint(m_lastPlanarPoint);
+  m_lastPlanarQuad = inverseTransform.projectQuad(m_lastPlanarQuad);
+  m_lastPlanarArea = inverseTransform.projectQuad(m_lastPlanarArea);
+
+  m_accumulatedTransform.makeIdentity();
+  m_accumulatingTransform = false;
 }
 
-FloatQuad HitTestingTransformState::mappedArea() const
-{
-    return m_accumulatedTransform.inverse().projectQuad(m_lastPlanarArea);
+FloatPoint HitTestingTransformState::mappedPoint() const {
+  return m_accumulatedTransform.inverse().projectPoint(m_lastPlanarPoint);
 }
 
-LayoutRect HitTestingTransformState::boundsOfMappedArea() const
-{
-    return m_accumulatedTransform.inverse().clampedBoundsOfProjectedQuad(m_lastPlanarArea);
+FloatQuad HitTestingTransformState::mappedQuad() const {
+  return m_accumulatedTransform.inverse().projectQuad(m_lastPlanarQuad);
 }
 
-} // namespace blink
+FloatQuad HitTestingTransformState::mappedArea() const {
+  return m_accumulatedTransform.inverse().projectQuad(m_lastPlanarArea);
+}
+
+LayoutRect HitTestingTransformState::boundsOfMappedArea() const {
+  return m_accumulatedTransform.inverse().clampedBoundsOfProjectedQuad(
+      m_lastPlanarArea);
+}
+
+}  // namespace blink

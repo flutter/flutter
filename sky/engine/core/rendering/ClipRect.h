@@ -34,53 +34,54 @@ class RenderLayer;
 class HitTestLocation;
 
 class ClipRect {
-public:
-    ClipRect()
-        : m_hasRadius(false)
-    { }
+ public:
+  ClipRect() : m_hasRadius(false) {}
 
-    ClipRect(const LayoutRect& rect)
-        : m_rect(rect)
-        , m_hasRadius(false)
-    { }
+  ClipRect(const LayoutRect& rect) : m_rect(rect), m_hasRadius(false) {}
 
-    const LayoutRect& rect() const { return m_rect; }
-    void setRect(const LayoutRect& rect) { m_rect = rect; }
+  const LayoutRect& rect() const { return m_rect; }
+  void setRect(const LayoutRect& rect) { m_rect = rect; }
 
-    bool hasRadius() const { return m_hasRadius; }
-    void setHasRadius(bool hasRadius) { m_hasRadius = hasRadius; }
+  bool hasRadius() const { return m_hasRadius; }
+  void setHasRadius(bool hasRadius) { m_hasRadius = hasRadius; }
 
-    bool operator==(const ClipRect& other) const { return rect() == other.rect() && hasRadius() == other.hasRadius(); }
-    bool operator!=(const ClipRect& other) const { return rect() != other.rect() || hasRadius() != other.hasRadius(); }
-    bool operator!=(const LayoutRect& otherRect) const { return rect() != otherRect; }
+  bool operator==(const ClipRect& other) const {
+    return rect() == other.rect() && hasRadius() == other.hasRadius();
+  }
+  bool operator!=(const ClipRect& other) const {
+    return rect() != other.rect() || hasRadius() != other.hasRadius();
+  }
+  bool operator!=(const LayoutRect& otherRect) const {
+    return rect() != otherRect;
+  }
 
-    void intersect(const LayoutRect& other) { m_rect.intersect(other); }
-    void intersect(const ClipRect& other)
-    {
-        m_rect.intersect(other.rect());
-        if (other.hasRadius())
-            m_hasRadius = true;
-    }
-    void move(LayoutUnit x, LayoutUnit y) { m_rect.move(x, y); }
-    void move(const LayoutSize& size) { m_rect.move(size); }
-    void moveBy(const LayoutPoint& point) { m_rect.moveBy(point); }
+  void intersect(const LayoutRect& other) { m_rect.intersect(other); }
+  void intersect(const ClipRect& other) {
+    m_rect.intersect(other.rect());
+    if (other.hasRadius())
+      m_hasRadius = true;
+  }
+  void move(LayoutUnit x, LayoutUnit y) { m_rect.move(x, y); }
+  void move(const LayoutSize& size) { m_rect.move(size); }
+  void moveBy(const LayoutPoint& point) { m_rect.moveBy(point); }
 
-    bool isEmpty() const { return m_rect.isEmpty(); }
-    bool intersects(const LayoutRect& rect) const { return m_rect.intersects(rect); }
-    bool intersects(const HitTestLocation&) const;
+  bool isEmpty() const { return m_rect.isEmpty(); }
+  bool intersects(const LayoutRect& rect) const {
+    return m_rect.intersects(rect);
+  }
+  bool intersects(const HitTestLocation&) const;
 
-private:
-    LayoutRect m_rect;
-    bool m_hasRadius;
+ private:
+  LayoutRect m_rect;
+  bool m_hasRadius;
 };
 
-inline ClipRect intersection(const ClipRect& a, const ClipRect& b)
-{
-    ClipRect c = a;
-    c.intersect(b);
-    return c;
+inline ClipRect intersection(const ClipRect& a, const ClipRect& b) {
+  ClipRect c = a;
+  c.intersect(b);
+  return c;
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_CLIPRECT_H_

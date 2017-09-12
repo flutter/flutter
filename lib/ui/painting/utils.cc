@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/common/threads.h"
 #include "flutter/lib/ui/painting/utils.h"
+#include "flutter/common/threads.h"
 
 namespace blink {
 
@@ -13,8 +13,7 @@ constexpr fxl::TimeDelta kDrainDelay = fxl::TimeDelta::FromMilliseconds(250);
 
 }  // anonymous namespace
 
-SkiaUnrefQueue::SkiaUnrefQueue()
-    : drain_pending_(false) {}
+SkiaUnrefQueue::SkiaUnrefQueue() : drain_pending_(false) {}
 
 SkiaUnrefQueue SkiaUnrefQueue::instance_;
 
@@ -27,8 +26,7 @@ void SkiaUnrefQueue::Unref(SkRefCnt* object) {
   objects_.push_back(object);
   if (!drain_pending_) {
     drain_pending_ = true;
-    Threads::IO()->PostDelayedTask([this] { Drain(); },
-                                   kDrainDelay);
+    Threads::IO()->PostDelayedTask([this] { Drain(); }, kDrainDelay);
   }
 }
 

@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #ifndef SKY_ENGINE_PLATFORM_PLATFORMEXPORT_H_
 #define SKY_ENGINE_PLATFORM_PLATFORMEXPORT_H_
 
@@ -38,7 +37,7 @@
 
 #if defined(COMPONENT_BUILD)
 #define PLATFORM_EXPORT __attribute__((visibility("default")))
-#else // defined(COMPONENT_BUILD)
+#else  // defined(COMPONENT_BUILD)
 #define PLATFORM_EXPORT
 #endif
 

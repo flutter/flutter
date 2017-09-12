@@ -42,6 +42,6 @@ namespace blink {
 PLATFORM_EXPORT UScriptCode localeToScriptCodeForFontSelection(const String&);
 PLATFORM_EXPORT UScriptCode scriptNameToCode(const String&);
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TEXT_LOCALETOSCRIPTMAPPING_H_

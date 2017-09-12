@@ -45,142 +45,149 @@ namespace blink {
 // Encapsulates the state information we store for each pushed graphics state.
 // Only GraphicsContext can use this class.
 class PLATFORM_EXPORT GraphicsContextState final {
-public:
-    static PassOwnPtr<GraphicsContextState> create()
-    {
-        return adoptPtr(new GraphicsContextState());
-    }
+ public:
+  static PassOwnPtr<GraphicsContextState> create() {
+    return adoptPtr(new GraphicsContextState());
+  }
 
-    static PassOwnPtr<GraphicsContextState> createAndCopy(const GraphicsContextState& other)
-    {
-        return adoptPtr(new GraphicsContextState(other));
-    }
+  static PassOwnPtr<GraphicsContextState> createAndCopy(
+      const GraphicsContextState& other) {
+    return adoptPtr(new GraphicsContextState(other));
+  }
 
-    void copy(const GraphicsContextState&);
+  void copy(const GraphicsContextState&);
 
-    // SkPaint objects that reflect the current state. If the length of the
-    // path to be stroked is known, pass it in for correct dash or dot placement.
-    const SkPaint& strokePaint(int strokedPathLength = 0) const;
-    const SkPaint& fillPaint() const;
+  // SkPaint objects that reflect the current state. If the length of the
+  // path to be stroked is known, pass it in for correct dash or dot placement.
+  const SkPaint& strokePaint(int strokedPathLength = 0) const;
+  const SkPaint& fillPaint() const;
 
-    uint16_t saveCount() const { return m_saveCount; }
-    void incrementSaveCount() { ++m_saveCount; }
-    void decrementSaveCount() { --m_saveCount; }
+  uint16_t saveCount() const { return m_saveCount; }
+  void incrementSaveCount() { ++m_saveCount; }
+  void decrementSaveCount() { --m_saveCount; }
 
-    // Stroke data
-    const StrokeData& strokeData() const { return m_strokeData; }
+  // Stroke data
+  const StrokeData& strokeData() const { return m_strokeData; }
 
-    void setStrokeStyle(StrokeStyle);
+  void setStrokeStyle(StrokeStyle);
 
-    void setStrokeThickness(float);
+  void setStrokeThickness(float);
 
-    SkColor effectiveStrokeColor() const { return applyAlpha(m_strokeData.color().rgb()); }
-    void setStrokeColor(const Color&);
+  SkColor effectiveStrokeColor() const {
+    return applyAlpha(m_strokeData.color().rgb());
+  }
+  void setStrokeColor(const Color&);
 
-    void setStrokeGradient(const PassRefPtr<Gradient>);
-    void clearStrokeGradient();
+  void setStrokeGradient(const PassRefPtr<Gradient>);
+  void clearStrokeGradient();
 
-    void setStrokePattern(const PassRefPtr<Pattern>);
-    void clearStrokePattern();
+  void setStrokePattern(const PassRefPtr<Pattern>);
+  void clearStrokePattern();
 
-    void setLineCap(LineCap);
+  void setLineCap(LineCap);
 
-    void setLineJoin(LineJoin);
+  void setLineJoin(LineJoin);
 
-    void setMiterLimit(float);
+  void setMiterLimit(float);
 
-    void setLineDash(const DashArray&, float);
+  void setLineDash(const DashArray&, float);
 
-    // Fill data
-    Color fillColor() const { return m_fillColor; }
-    SkColor effectiveFillColor() const { return applyAlpha(m_fillColor.rgb()); }
-    void setFillColor(const Color&);
+  // Fill data
+  Color fillColor() const { return m_fillColor; }
+  SkColor effectiveFillColor() const { return applyAlpha(m_fillColor.rgb()); }
+  void setFillColor(const Color&);
 
-    Gradient* fillGradient() const { return m_fillGradient.get(); }
-    void setFillGradient(const PassRefPtr<Gradient>);
-    void clearFillGradient();
+  Gradient* fillGradient() const { return m_fillGradient.get(); }
+  void setFillGradient(const PassRefPtr<Gradient>);
+  void clearFillGradient();
 
-    Pattern* fillPattern() const { return m_fillPattern.get(); }
-    void setFillPattern(const PassRefPtr<Pattern>);
-    void clearFillPattern();
+  Pattern* fillPattern() const { return m_fillPattern.get(); }
+  void setFillPattern(const PassRefPtr<Pattern>);
+  void clearFillPattern();
 
-    // Path fill rule
-    WindRule fillRule() const { return m_fillRule; }
-    void setFillRule(WindRule rule) { m_fillRule = rule; }
+  // Path fill rule
+  WindRule fillRule() const { return m_fillRule; }
+  void setFillRule(WindRule rule) { m_fillRule = rule; }
 
-    // Shadow. (This will need tweaking if we use draw loopers for other things.)
-    const sk_sp<SkDrawLooper>& drawLooper() const { return m_looper; }
-    void setDrawLooper(sk_sp<SkDrawLooper>);
-    void clearDrawLooper();
+  // Shadow. (This will need tweaking if we use draw loopers for other things.)
+  const sk_sp<SkDrawLooper>& drawLooper() const { return m_looper; }
+  void setDrawLooper(sk_sp<SkDrawLooper>);
+  void clearDrawLooper();
 
-    // Text. (See TextModeFill & friends.)
-    TextDrawingModeFlags textDrawingMode() const { return m_textDrawingMode; }
-    void setTextDrawingMode(TextDrawingModeFlags mode) { m_textDrawingMode = mode; }
+  // Text. (See TextModeFill & friends.)
+  TextDrawingModeFlags textDrawingMode() const { return m_textDrawingMode; }
+  void setTextDrawingMode(TextDrawingModeFlags mode) {
+    m_textDrawingMode = mode;
+  }
 
-    // Common shader state.
-    int alpha() const { return m_alpha; }
-    void setAlphaAsFloat(float);
+  // Common shader state.
+  int alpha() const { return m_alpha; }
+  void setAlphaAsFloat(float);
 
-    SkColorFilter* colorFilter() const { return m_colorFilter.get(); }
-    void setColorFilter(sk_sp<SkColorFilter>);
+  SkColorFilter* colorFilter() const { return m_colorFilter.get(); }
+  void setColorFilter(sk_sp<SkColorFilter>);
 
-    // Compositing control, for the CSS and Canvas compositing spec.
-    void setCompositeOperation(CompositeOperator, WebBlendMode);
-    CompositeOperator compositeOperator() const { return m_compositeOperator; }
-    WebBlendMode blendMode() const { return m_blendMode; }
+  // Compositing control, for the CSS and Canvas compositing spec.
+  void setCompositeOperation(CompositeOperator, WebBlendMode);
+  CompositeOperator compositeOperator() const { return m_compositeOperator; }
+  WebBlendMode blendMode() const { return m_blendMode; }
 
-    // Image interpolation control.
-    InterpolationQuality interpolationQuality() const { return m_interpolationQuality; }
-    void setInterpolationQuality(InterpolationQuality);
+  // Image interpolation control.
+  InterpolationQuality interpolationQuality() const {
+    return m_interpolationQuality;
+  }
+  void setInterpolationQuality(InterpolationQuality);
 
-    bool shouldAntialias() const { return m_shouldAntialias; }
-    void setShouldAntialias(bool);
+  bool shouldAntialias() const { return m_shouldAntialias; }
+  void setShouldAntialias(bool);
 
-    bool shouldClampToSourceRect() const { return m_shouldClampToSourceRect; }
-    void setShouldClampToSourceRect(bool shouldClampToSourceRect) { m_shouldClampToSourceRect = shouldClampToSourceRect; }
+  bool shouldClampToSourceRect() const { return m_shouldClampToSourceRect; }
+  void setShouldClampToSourceRect(bool shouldClampToSourceRect) {
+    m_shouldClampToSourceRect = shouldClampToSourceRect;
+  }
 
-private:
-    GraphicsContextState();
-    explicit GraphicsContextState(const GraphicsContextState&);
-    GraphicsContextState& operator=(const GraphicsContextState&);
+ private:
+  GraphicsContextState();
+  explicit GraphicsContextState(const GraphicsContextState&);
+  GraphicsContextState& operator=(const GraphicsContextState&);
 
-    // Helper function for applying the state's alpha value to the given input
-    // color to produce a new output color.
-    SkColor applyAlpha(SkColor c) const
-    {
-        int a = SkAlphaMul(SkColorGetA(c), m_alpha);
-        return (c & 0x00FFFFFF) | (a << 24);
-    }
+  // Helper function for applying the state's alpha value to the given input
+  // color to produce a new output color.
+  SkColor applyAlpha(SkColor c) const {
+    int a = SkAlphaMul(SkColorGetA(c), m_alpha);
+    return (c & 0x00FFFFFF) | (a << 24);
+  }
 
-    // These are mutbale to enable gradient updates when the paints are fetched for use.
-    mutable SkPaint m_strokePaint;
-    mutable SkPaint m_fillPaint;
+  // These are mutbale to enable gradient updates when the paints are fetched
+  // for use.
+  mutable SkPaint m_strokePaint;
+  mutable SkPaint m_fillPaint;
 
-    StrokeData m_strokeData;
+  StrokeData m_strokeData;
 
-    Color m_fillColor;
-    WindRule m_fillRule;
-    RefPtr<Gradient> m_fillGradient;
-    RefPtr<Pattern> m_fillPattern;
+  Color m_fillColor;
+  WindRule m_fillRule;
+  RefPtr<Gradient> m_fillGradient;
+  RefPtr<Pattern> m_fillPattern;
 
-    sk_sp<SkDrawLooper> m_looper;
+  sk_sp<SkDrawLooper> m_looper;
 
-    TextDrawingModeFlags m_textDrawingMode;
+  TextDrawingModeFlags m_textDrawingMode;
 
-    int m_alpha;
-    sk_sp<SkColorFilter> m_colorFilter;
+  int m_alpha;
+  sk_sp<SkColorFilter> m_colorFilter;
 
-    CompositeOperator m_compositeOperator;
-    WebBlendMode m_blendMode;
+  CompositeOperator m_compositeOperator;
+  WebBlendMode m_blendMode;
 
-    InterpolationQuality m_interpolationQuality;
+  InterpolationQuality m_interpolationQuality;
 
-    uint16_t m_saveCount;
+  uint16_t m_saveCount;
 
-    bool m_shouldAntialias : 1;
-    bool m_shouldClampToSourceRect : 1;
+  bool m_shouldAntialias : 1;
+  bool m_shouldClampToSourceRect : 1;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSCONTEXTSTATE_H_

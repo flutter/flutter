@@ -30,47 +30,46 @@
 
 namespace blink {
 
-class PLATFORM_EXPORT PerspectiveTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<PerspectiveTransformOperation> create(double p)
-    {
-        return adoptRef(new PerspectiveTransformOperation(p));
-    }
+class PLATFORM_EXPORT PerspectiveTransformOperation
+    : public TransformOperation {
+ public:
+  static PassRefPtr<PerspectiveTransformOperation> create(double p) {
+    return adoptRef(new PerspectiveTransformOperation(p));
+  }
 
-    double perspective() const { return m_p; }
+  double perspective() const { return m_p; }
 
-    virtual bool canBlendWith(const TransformOperation& other) const
-    {
-        return isSameType(other);
-    }
+  virtual bool canBlendWith(const TransformOperation& other) const {
+    return isSameType(other);
+  }
 
-private:
-    virtual bool isIdentity() const override { return !m_p; }
-    virtual OperationType type() const override { return Perspective; }
+ private:
+  virtual bool isIdentity() const override { return !m_p; }
+  virtual OperationType type() const override { return Perspective; }
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const PerspectiveTransformOperation* p = static_cast<const PerspectiveTransformOperation*>(&o);
-        return m_p == p->m_p;
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    if (!isSameType(o))
+      return false;
+    const PerspectiveTransformOperation* p =
+        static_cast<const PerspectiveTransformOperation*>(&o);
+    return m_p == p->m_p;
+  }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
-    {
-        transform.applyPerspective(m_p);
-    }
+  virtual void apply(TransformationMatrix& transform,
+                     const FloatSize&) const override {
+    transform.applyPerspective(m_p);
+  }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    PerspectiveTransformOperation(double p)
-        : m_p(p)
-    {
-    }
+  PerspectiveTransformOperation(double p) : m_p(p) {}
 
-    double m_p;
+  double m_p;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_PERSPECTIVETRANSFORMOPERATION_H_

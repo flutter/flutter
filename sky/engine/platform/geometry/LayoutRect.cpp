@@ -38,120 +38,113 @@
 namespace blink {
 
 LayoutRect::LayoutRect(const FloatRect& r)
-    : m_location(LayoutPoint(r.location()))
-    , m_size(LayoutSize(r.size()))
-{
+    : m_location(LayoutPoint(r.location())), m_size(LayoutSize(r.size())) {}
+
+bool LayoutRect::intersects(const LayoutRect& other) const {
+  // Checking emptiness handles negative widths as well as zero.
+  return !isEmpty() && !other.isEmpty() && x() < other.maxX() &&
+         other.x() < maxX() && y() < other.maxY() && other.y() < maxY();
 }
 
-bool LayoutRect::intersects(const LayoutRect& other) const
-{
-    // Checking emptiness handles negative widths as well as zero.
-    return !isEmpty() && !other.isEmpty()
-        && x() < other.maxX() && other.x() < maxX()
-        && y() < other.maxY() && other.y() < maxY();
+bool LayoutRect::contains(const LayoutRect& other) const {
+  return x() <= other.x() && maxX() >= other.maxX() && y() <= other.y() &&
+         maxY() >= other.maxY();
 }
 
-bool LayoutRect::contains(const LayoutRect& other) const
-{
-    return x() <= other.x() && maxX() >= other.maxX()
-        && y() <= other.y() && maxY() >= other.maxY();
+void LayoutRect::intersect(const LayoutRect& other) {
+  LayoutPoint newLocation(std::max(x(), other.x()), std::max(y(), other.y()));
+  LayoutPoint newMaxPoint(std::min(maxX(), other.maxX()),
+                          std::min(maxY(), other.maxY()));
+
+  // Return a clean empty rectangle for non-intersecting cases.
+  if (newLocation.x() >= newMaxPoint.x() ||
+      newLocation.y() >= newMaxPoint.y()) {
+    newLocation = LayoutPoint(0, 0);
+    newMaxPoint = LayoutPoint(0, 0);
+  }
+
+  m_location = newLocation;
+  m_size = newMaxPoint - newLocation;
 }
 
-void LayoutRect::intersect(const LayoutRect& other)
-{
-    LayoutPoint newLocation(std::max(x(), other.x()), std::max(y(), other.y()));
-    LayoutPoint newMaxPoint(std::min(maxX(), other.maxX()), std::min(maxY(), other.maxY()));
+void LayoutRect::unite(const LayoutRect& other) {
+  // Handle empty special cases first.
+  if (other.isEmpty())
+    return;
+  if (isEmpty()) {
+    *this = other;
+    return;
+  }
 
-    // Return a clean empty rectangle for non-intersecting cases.
-    if (newLocation.x() >= newMaxPoint.x() || newLocation.y() >= newMaxPoint.y()) {
-        newLocation = LayoutPoint(0, 0);
-        newMaxPoint = LayoutPoint(0, 0);
-    }
+  LayoutPoint newLocation(std::min(x(), other.x()), std::min(y(), other.y()));
+  LayoutPoint newMaxPoint(std::max(maxX(), other.maxX()),
+                          std::max(maxY(), other.maxY()));
 
-    m_location = newLocation;
-    m_size = newMaxPoint - newLocation;
+  m_location = newLocation;
+  m_size = newMaxPoint - newLocation;
 }
 
-void LayoutRect::unite(const LayoutRect& other)
-{
-    // Handle empty special cases first.
-    if (other.isEmpty())
-        return;
-    if (isEmpty()) {
-        *this = other;
-        return;
-    }
+void LayoutRect::uniteIfNonZero(const LayoutRect& other) {
+  // Handle empty special cases first.
+  if (!other.width() && !other.height())
+    return;
+  if (!width() && !height()) {
+    *this = other;
+    return;
+  }
 
-    LayoutPoint newLocation(std::min(x(), other.x()), std::min(y(), other.y()));
-    LayoutPoint newMaxPoint(std::max(maxX(), other.maxX()), std::max(maxY(), other.maxY()));
+  LayoutPoint newLocation(std::min(x(), other.x()), std::min(y(), other.y()));
+  LayoutPoint newMaxPoint(std::max(maxX(), other.maxX()),
+                          std::max(maxY(), other.maxY()));
 
-    m_location = newLocation;
-    m_size = newMaxPoint - newLocation;
+  m_location = newLocation;
+  m_size = newMaxPoint - newLocation;
 }
 
-void LayoutRect::uniteIfNonZero(const LayoutRect& other)
-{
-    // Handle empty special cases first.
-    if (!other.width() && !other.height())
-        return;
-    if (!width() && !height()) {
-        *this = other;
-        return;
-    }
-
-    LayoutPoint newLocation(std::min(x(), other.x()), std::min(y(), other.y()));
-    LayoutPoint newMaxPoint(std::max(maxX(), other.maxX()), std::max(maxY(), other.maxY()));
-
-    m_location = newLocation;
-    m_size = newMaxPoint - newLocation;
+void LayoutRect::scale(float s) {
+  m_location.scale(s, s);
+  m_size.scale(s);
 }
 
-void LayoutRect::scale(float s)
-{
-    m_location.scale(s, s);
-    m_size.scale(s);
-}
-
-void LayoutRect::scale(float xAxisScale, float yAxisScale)
-{
-    m_location.scale(xAxisScale, yAxisScale);
-    m_size.scale(xAxisScale, yAxisScale);
+void LayoutRect::scale(float xAxisScale, float yAxisScale) {
+  m_location.scale(xAxisScale, yAxisScale);
+  m_size.scale(xAxisScale, yAxisScale);
 }
 
 #ifndef NDEBUG
-void LayoutRect::show(bool showRawValue) const
-{
-    if (showRawValue)
-        printf("Rect (in raw layout units): [x=%d y=%d maxX=%d maxY=%d]\n", x().rawValue(), y().rawValue(), maxX().rawValue(), maxY().rawValue());
-    else
-        printf("Rect (in pixels): [x=%lf y=%lf maxX=%lf maxY=%lf]\n", x().toDouble(), y().toDouble(), maxX().toDouble(), maxY().toDouble());
+void LayoutRect::show(bool showRawValue) const {
+  if (showRawValue)
+    printf("Rect (in raw layout units): [x=%d y=%d maxX=%d maxY=%d]\n",
+           x().rawValue(), y().rawValue(), maxX().rawValue(),
+           maxY().rawValue());
+  else
+    printf("Rect (in pixels): [x=%lf y=%lf maxX=%lf maxY=%lf]\n",
+           x().toDouble(), y().toDouble(), maxX().toDouble(),
+           maxY().toDouble());
 }
 #endif
 
-LayoutRect unionRect(const Vector<LayoutRect>& rects)
-{
-    LayoutRect result;
+LayoutRect unionRect(const Vector<LayoutRect>& rects) {
+  LayoutRect result;
 
-    size_t count = rects.size();
-    for (size_t i = 0; i < count; ++i)
-        result.unite(rects[i]);
+  size_t count = rects.size();
+  for (size_t i = 0; i < count; ++i)
+    result.unite(rects[i]);
 
-    return result;
+  return result;
 }
 
-IntRect enclosingIntRect(const LayoutRect& rect)
-{
-    IntPoint location = flooredIntPoint(rect.minXMinYCorner());
-    IntPoint maxPoint = ceiledIntPoint(rect.maxXMaxYCorner());
+IntRect enclosingIntRect(const LayoutRect& rect) {
+  IntPoint location = flooredIntPoint(rect.minXMinYCorner());
+  IntPoint maxPoint = ceiledIntPoint(rect.maxXMaxYCorner());
 
-    return IntRect(location, maxPoint - location);
+  return IntRect(location, maxPoint - location);
 }
 
-LayoutRect enclosingLayoutRect(const FloatRect& rect)
-{
-    LayoutPoint location = flooredLayoutPoint(rect.minXMinYCorner());
-    LayoutPoint maxPoint = ceiledLayoutPoint(rect.maxXMaxYCorner());
-    return LayoutRect(location, maxPoint - location);
+LayoutRect enclosingLayoutRect(const FloatRect& rect) {
+  LayoutPoint location = flooredLayoutPoint(rect.minXMinYCorner());
+  LayoutPoint maxPoint = ceiledLayoutPoint(rect.maxXMaxYCorner());
+  return LayoutRect(location, maxPoint - location);
 }
 
-} // namespace blink
+}  // namespace blink

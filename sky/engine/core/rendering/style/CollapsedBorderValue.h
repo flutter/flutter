@@ -30,48 +30,51 @@
 namespace blink {
 
 class CollapsedBorderValue {
-public:
-    CollapsedBorderValue()
-        : m_color(0)
-        , m_colorIsCurrentColor(true)
-        , m_width(0)
-        , m_style(BNONE)
-        , m_precedence(BOFF)
-        , m_transparent(false)
-    {
-    }
+ public:
+  CollapsedBorderValue()
+      : m_color(0),
+        m_colorIsCurrentColor(true),
+        m_width(0),
+        m_style(BNONE),
+        m_precedence(BOFF),
+        m_transparent(false) {}
 
-    CollapsedBorderValue(const BorderValue& border, const StyleColor& color, EBorderPrecedence precedence)
-        : m_color(color.resolve(Color()))
-        , m_colorIsCurrentColor(color.isCurrentColor())
-        , m_width(border.nonZero() ? border.width() : 0)
-        , m_style(border.style())
-        , m_precedence(precedence)
-        , m_transparent(border.isTransparent())
-    {
-    }
+  CollapsedBorderValue(const BorderValue& border,
+                       const StyleColor& color,
+                       EBorderPrecedence precedence)
+      : m_color(color.resolve(Color())),
+        m_colorIsCurrentColor(color.isCurrentColor()),
+        m_width(border.nonZero() ? border.width() : 0),
+        m_style(border.style()),
+        m_precedence(precedence),
+        m_transparent(border.isTransparent()) {}
 
-    unsigned width() const { return m_style > BHIDDEN ? m_width : 0; }
-    EBorderStyle style() const { return static_cast<EBorderStyle>(m_style); }
-    bool exists() const { return m_precedence != BOFF; }
-    StyleColor color() const { return m_colorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_color); }
-    bool isTransparent() const { return m_transparent; }
-    EBorderPrecedence precedence() const { return static_cast<EBorderPrecedence>(m_precedence); }
+  unsigned width() const { return m_style > BHIDDEN ? m_width : 0; }
+  EBorderStyle style() const { return static_cast<EBorderStyle>(m_style); }
+  bool exists() const { return m_precedence != BOFF; }
+  StyleColor color() const {
+    return m_colorIsCurrentColor ? StyleColor::currentColor()
+                                 : StyleColor(m_color);
+  }
+  bool isTransparent() const { return m_transparent; }
+  EBorderPrecedence precedence() const {
+    return static_cast<EBorderPrecedence>(m_precedence);
+  }
 
-    bool isSameIgnoringColor(const CollapsedBorderValue& o) const
-    {
-        return width() == o.width() && style() == o.style() && precedence() == o.precedence();
-    }
+  bool isSameIgnoringColor(const CollapsedBorderValue& o) const {
+    return width() == o.width() && style() == o.style() &&
+           precedence() == o.precedence();
+  }
 
-private:
-    Color m_color;
-    unsigned m_colorIsCurrentColor : 1;
-    unsigned m_width : 23;
-    unsigned m_style : 4; // EBorderStyle
-    unsigned m_precedence : 3; // EBorderPrecedence
-    unsigned m_transparent : 1;
+ private:
+  Color m_color;
+  unsigned m_colorIsCurrentColor : 1;
+  unsigned m_width : 23;
+  unsigned m_style : 4;       // EBorderStyle
+  unsigned m_precedence : 3;  // EBorderPrecedence
+  unsigned m_transparent : 1;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_COLLAPSEDBORDERVALUE_H_

@@ -38,49 +38,52 @@
 namespace blink {
 
 class PLATFORM_EXPORT LayoutBoxExtent {
-public:
-    LayoutBoxExtent() : m_top(0), m_right(0), m_bottom(0), m_left(0) { }
-    LayoutBoxExtent(LayoutUnit top, LayoutUnit right, LayoutUnit bottom, LayoutUnit left)
-        : m_top(top), m_right(right), m_bottom(bottom), m_left(left) { }
+ public:
+  LayoutBoxExtent() : m_top(0), m_right(0), m_bottom(0), m_left(0) {}
+  LayoutBoxExtent(LayoutUnit top,
+                  LayoutUnit right,
+                  LayoutUnit bottom,
+                  LayoutUnit left)
+      : m_top(top), m_right(right), m_bottom(bottom), m_left(left) {}
 
-    inline LayoutUnit top() const { return m_top; }
-    inline LayoutUnit right() const { return m_right; }
-    inline LayoutUnit bottom() const { return m_bottom; }
-    inline LayoutUnit left() const { return m_left; }
+  inline LayoutUnit top() const { return m_top; }
+  inline LayoutUnit right() const { return m_right; }
+  inline LayoutUnit bottom() const { return m_bottom; }
+  inline LayoutUnit left() const { return m_left; }
 
-    inline void setTop(LayoutUnit value) { m_top = value; }
-    inline void setRight(LayoutUnit value) { m_right = value; }
-    inline void setBottom(LayoutUnit value) { m_bottom = value; }
-    inline void setLeft(LayoutUnit value) { m_left = value; }
+  inline void setTop(LayoutUnit value) { m_top = value; }
+  inline void setRight(LayoutUnit value) { m_right = value; }
+  inline void setBottom(LayoutUnit value) { m_bottom = value; }
+  inline void setLeft(LayoutUnit value) { m_left = value; }
 
-    LayoutUnit logicalTop() const;
-    LayoutUnit logicalBottom() const;
-    LayoutUnit logicalLeft() const;
-    LayoutUnit logicalRight() const;
+  LayoutUnit logicalTop() const;
+  LayoutUnit logicalBottom() const;
+  LayoutUnit logicalLeft() const;
+  LayoutUnit logicalRight() const;
 
-    LayoutUnit before() const;
-    LayoutUnit after() const;
-    LayoutUnit start(TextDirection) const;
-    LayoutUnit end(TextDirection) const;
+  LayoutUnit before() const;
+  LayoutUnit after() const;
+  LayoutUnit start(TextDirection) const;
+  LayoutUnit end(TextDirection) const;
 
-    void setBefore(LayoutUnit);
-    void setAfter(LayoutUnit);
-    void setStart(TextDirection, LayoutUnit);
-    void setEnd(TextDirection, LayoutUnit);
+  void setBefore(LayoutUnit);
+  void setAfter(LayoutUnit);
+  void setStart(TextDirection, LayoutUnit);
+  void setEnd(TextDirection, LayoutUnit);
 
-    LayoutUnit& mutableLogicalLeft();
-    LayoutUnit& mutableLogicalRight();
+  LayoutUnit& mutableLogicalLeft();
+  LayoutUnit& mutableLogicalRight();
 
-    LayoutUnit& mutableBefore();
-    LayoutUnit& mutableAfter();
+  LayoutUnit& mutableBefore();
+  LayoutUnit& mutableAfter();
 
-private:
-    LayoutUnit m_top;
-    LayoutUnit m_right;
-    LayoutUnit m_bottom;
-    LayoutUnit m_left;
+ private:
+  LayoutUnit m_top;
+  LayoutUnit m_right;
+  LayoutUnit m_bottom;
+  LayoutUnit m_left;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_LAYOUTBOXEXTENT_H_

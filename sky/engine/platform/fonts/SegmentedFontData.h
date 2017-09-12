@@ -35,55 +35,53 @@ namespace blink {
 class SimpleFontData;
 
 struct FontDataRange {
-    FontDataRange(UChar32 from, UChar32 to, PassRefPtr<SimpleFontData> fontData)
-        : m_from(from)
-        , m_to(to)
-        , m_fontData(fontData)
-    {
-    }
+  FontDataRange(UChar32 from, UChar32 to, PassRefPtr<SimpleFontData> fontData)
+      : m_from(from), m_to(to), m_fontData(fontData) {}
 
-    UChar32 from() const { return m_from; }
-    UChar32 to() const { return m_to; }
-    bool isEntireRange() const { return !m_from && m_to >= 0x10ffff; }
-    PassRefPtr<SimpleFontData> fontData() const { return m_fontData; }
+  UChar32 from() const { return m_from; }
+  UChar32 to() const { return m_to; }
+  bool isEntireRange() const { return !m_from && m_to >= 0x10ffff; }
+  PassRefPtr<SimpleFontData> fontData() const { return m_fontData; }
 
-private:
-    UChar32 m_from;
-    UChar32 m_to;
-    RefPtr<SimpleFontData> m_fontData;
+ private:
+  UChar32 m_from;
+  UChar32 m_to;
+  RefPtr<SimpleFontData> m_fontData;
 };
 
 class PLATFORM_EXPORT SegmentedFontData : public FontData {
-public:
-    static PassRefPtr<SegmentedFontData> create() { return adoptRef(new SegmentedFontData); }
+ public:
+  static PassRefPtr<SegmentedFontData> create() {
+    return adoptRef(new SegmentedFontData);
+  }
 
-    virtual ~SegmentedFontData();
+  virtual ~SegmentedFontData();
 
-    void appendRange(const FontDataRange& range) { m_ranges.append(range); }
-    unsigned numRanges() const { return m_ranges.size(); }
-    const FontDataRange& rangeAt(unsigned i) const { return m_ranges[i]; }
-    bool containsCharacter(UChar32) const;
+  void appendRange(const FontDataRange& range) { m_ranges.append(range); }
+  unsigned numRanges() const { return m_ranges.size(); }
+  const FontDataRange& rangeAt(unsigned i) const { return m_ranges[i]; }
+  bool containsCharacter(UChar32) const;
 
 #ifndef NDEBUG
-    virtual String description() const override;
+  virtual String description() const override;
 #endif
 
-private:
-    SegmentedFontData() { }
+ private:
+  SegmentedFontData() {}
 
-    virtual const SimpleFontData* fontDataForCharacter(UChar32) const override;
+  virtual const SimpleFontData* fontDataForCharacter(UChar32) const override;
 
-    virtual bool isCustomFont() const override;
-    virtual bool isLoading() const override;
-    virtual bool isLoadingFallback() const override;
-    virtual bool isSegmented() const override;
-    virtual bool shouldSkipDrawing() const override;
+  virtual bool isCustomFont() const override;
+  virtual bool isLoading() const override;
+  virtual bool isLoadingFallback() const override;
+  virtual bool isSegmented() const override;
+  virtual bool shouldSkipDrawing() const override;
 
-    Vector<FontDataRange, 1> m_ranges;
+  Vector<FontDataRange, 1> m_ranges;
 };
 
 DEFINE_FONT_DATA_TYPE_CASTS(SegmentedFontData, true);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_SEGMENTEDFONTDATA_H_

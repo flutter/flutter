@@ -38,12 +38,12 @@
 namespace blink {
 
 class PLATFORM_EXPORT FontCacheClient : public RefCounted<FontCacheClient> {
-public:
-    virtual ~FontCacheClient() { }
+ public:
+  virtual ~FontCacheClient() {}
 
-    virtual void fontCacheInvalidated() = 0;
+  virtual void fontCacheInvalidated() = 0;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCACHECLIENT_H_

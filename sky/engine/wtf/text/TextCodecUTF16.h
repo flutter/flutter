@@ -30,23 +30,32 @@
 
 namespace WTF {
 
-    class TextCodecUTF16 final : public TextCodec {
-    public:
-        static void registerEncodingNames(EncodingNameRegistrar);
-        static void registerCodecs(TextCodecRegistrar);
+class TextCodecUTF16 final : public TextCodec {
+ public:
+  static void registerEncodingNames(EncodingNameRegistrar);
+  static void registerCodecs(TextCodecRegistrar);
 
-        TextCodecUTF16(bool littleEndian) : m_littleEndian(littleEndian), m_haveBufferedByte(false) { }
+  TextCodecUTF16(bool littleEndian)
+      : m_littleEndian(littleEndian), m_haveBufferedByte(false) {}
 
-        virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) override;
-        virtual CString encode(const UChar*, size_t length, UnencodableHandling) override;
-        virtual CString encode(const LChar*, size_t length, UnencodableHandling) override;
+  virtual String decode(const char*,
+                        size_t length,
+                        FlushBehavior,
+                        bool stopOnError,
+                        bool& sawError) override;
+  virtual CString encode(const UChar*,
+                         size_t length,
+                         UnencodableHandling) override;
+  virtual CString encode(const LChar*,
+                         size_t length,
+                         UnencodableHandling) override;
 
-    private:
-        bool m_littleEndian;
-        bool m_haveBufferedByte;
-        unsigned char m_bufferedByte;
-    };
+ private:
+  bool m_littleEndian;
+  bool m_haveBufferedByte;
+  unsigned char m_bufferedByte;
+};
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECUTF16_H_

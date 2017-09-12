@@ -37,101 +37,117 @@
 namespace blink {
 
 class PLATFORM_EXPORT FloatRoundedRect {
-public:
-    class PLATFORM_EXPORT Radii {
-    public:
-        Radii() { }
-        Radii(const FloatSize& topLeft, const FloatSize& topRight, const FloatSize& bottomLeft, const FloatSize& bottomRight)
-            : m_topLeft(topLeft)
-            , m_topRight(topRight)
-            , m_bottomLeft(bottomLeft)
-            , m_bottomRight(bottomRight)
-        {
-        }
+ public:
+  class PLATFORM_EXPORT Radii {
+   public:
+    Radii() {}
+    Radii(const FloatSize& topLeft,
+          const FloatSize& topRight,
+          const FloatSize& bottomLeft,
+          const FloatSize& bottomRight)
+        : m_topLeft(topLeft),
+          m_topRight(topRight),
+          m_bottomLeft(bottomLeft),
+          m_bottomRight(bottomRight) {}
 
-        Radii(const RoundedRect::Radii& intRadii)
-            : m_topLeft(intRadii.topLeft())
-            , m_topRight(intRadii.topRight())
-            , m_bottomLeft(intRadii.bottomLeft())
-            , m_bottomRight(intRadii.bottomRight())
-        {
-        }
+    Radii(const RoundedRect::Radii& intRadii)
+        : m_topLeft(intRadii.topLeft()),
+          m_topRight(intRadii.topRight()),
+          m_bottomLeft(intRadii.bottomLeft()),
+          m_bottomRight(intRadii.bottomRight()) {}
 
-        void setTopLeft(const FloatSize& size) { m_topLeft = size; }
-        void setTopRight(const FloatSize& size) { m_topRight = size; }
-        void setBottomLeft(const FloatSize& size) { m_bottomLeft = size; }
-        void setBottomRight(const FloatSize& size) { m_bottomRight = size; }
-        const FloatSize& topLeft() const { return m_topLeft; }
-        const FloatSize& topRight() const { return m_topRight; }
-        const FloatSize& bottomLeft() const { return m_bottomLeft; }
-        const FloatSize& bottomRight() const { return m_bottomRight; }
+    void setTopLeft(const FloatSize& size) { m_topLeft = size; }
+    void setTopRight(const FloatSize& size) { m_topRight = size; }
+    void setBottomLeft(const FloatSize& size) { m_bottomLeft = size; }
+    void setBottomRight(const FloatSize& size) { m_bottomRight = size; }
+    const FloatSize& topLeft() const { return m_topLeft; }
+    const FloatSize& topRight() const { return m_topRight; }
+    const FloatSize& bottomLeft() const { return m_bottomLeft; }
+    const FloatSize& bottomRight() const { return m_bottomRight; }
 
-        bool isZero() const;
+    bool isZero() const;
 
-        void scale(float factor);
-        void expand(float topWidth, float bottomWidth, float leftWidth, float rightWidth);
-        void expand(float size) { expand(size, size, size, size); }
-        void shrink(float topWidth, float bottomWidth, float leftWidth, float rightWidth) { expand(-topWidth, -bottomWidth, -leftWidth, -rightWidth); }
-        void shrink(float size) { shrink(size, size, size, size); }
-
-    private:
-        FloatSize m_topLeft;
-        FloatSize m_topRight;
-        FloatSize m_bottomLeft;
-        FloatSize m_bottomRight;
-    };
-
-    explicit FloatRoundedRect(const FloatRect&, const Radii& = Radii());
-    FloatRoundedRect(float x, float y, float width, float height);
-    FloatRoundedRect(const FloatRect&, const FloatSize& topLeft, const FloatSize& topRight, const FloatSize& bottomLeft, const FloatSize& bottomRight);
-
-    const FloatRect& rect() const { return m_rect; }
-    const Radii& radii() const { return m_radii; }
-    bool isRounded() const { return !m_radii.isZero(); }
-    bool isEmpty() const { return m_rect.isEmpty(); }
-
-    void setRect(const FloatRect& rect) { m_rect = rect; }
-    void setRadii(const Radii& radii) { m_radii = radii; }
-
-    void move(const FloatSize& size) { m_rect.move(size); }
-    void inflate(float size) { m_rect.inflate(size);  }
-    void expandRadii(float size) { m_radii.expand(size); }
-    void shrinkRadii(float size) { m_radii.shrink(size); }
-
-    FloatRect topLeftCorner() const
-    {
-        return FloatRect(m_rect.x(), m_rect.y(), m_radii.topLeft().width(), m_radii.topLeft().height());
+    void scale(float factor);
+    void expand(float topWidth,
+                float bottomWidth,
+                float leftWidth,
+                float rightWidth);
+    void expand(float size) { expand(size, size, size, size); }
+    void shrink(float topWidth,
+                float bottomWidth,
+                float leftWidth,
+                float rightWidth) {
+      expand(-topWidth, -bottomWidth, -leftWidth, -rightWidth);
     }
-    FloatRect topRightCorner() const
-    {
-        return FloatRect(m_rect.maxX() - m_radii.topRight().width(), m_rect.y(), m_radii.topRight().width(), m_radii.topRight().height());
-    }
-    FloatRect bottomLeftCorner() const
-    {
-        return FloatRect(m_rect.x(), m_rect.maxY() - m_radii.bottomLeft().height(), m_radii.bottomLeft().width(), m_radii.bottomLeft().height());
-    }
-    FloatRect bottomRightCorner() const
-    {
-        return FloatRect(m_rect.maxX() - m_radii.bottomRight().width(), m_rect.maxY() - m_radii.bottomRight().height(), m_radii.bottomRight().width(), m_radii.bottomRight().height());
-    }
+    void shrink(float size) { shrink(size, size, size, size); }
 
-    bool xInterceptsAtY(float y, float& minXIntercept, float& maxXIntercept) const;
+   private:
+    FloatSize m_topLeft;
+    FloatSize m_topRight;
+    FloatSize m_bottomLeft;
+    FloatSize m_bottomRight;
+  };
 
-private:
-    FloatRect m_rect;
-    Radii m_radii;
+  explicit FloatRoundedRect(const FloatRect&, const Radii& = Radii());
+  FloatRoundedRect(float x, float y, float width, float height);
+  FloatRoundedRect(const FloatRect&,
+                   const FloatSize& topLeft,
+                   const FloatSize& topRight,
+                   const FloatSize& bottomLeft,
+                   const FloatSize& bottomRight);
+
+  const FloatRect& rect() const { return m_rect; }
+  const Radii& radii() const { return m_radii; }
+  bool isRounded() const { return !m_radii.isZero(); }
+  bool isEmpty() const { return m_rect.isEmpty(); }
+
+  void setRect(const FloatRect& rect) { m_rect = rect; }
+  void setRadii(const Radii& radii) { m_radii = radii; }
+
+  void move(const FloatSize& size) { m_rect.move(size); }
+  void inflate(float size) { m_rect.inflate(size); }
+  void expandRadii(float size) { m_radii.expand(size); }
+  void shrinkRadii(float size) { m_radii.shrink(size); }
+
+  FloatRect topLeftCorner() const {
+    return FloatRect(m_rect.x(), m_rect.y(), m_radii.topLeft().width(),
+                     m_radii.topLeft().height());
+  }
+  FloatRect topRightCorner() const {
+    return FloatRect(m_rect.maxX() - m_radii.topRight().width(), m_rect.y(),
+                     m_radii.topRight().width(), m_radii.topRight().height());
+  }
+  FloatRect bottomLeftCorner() const {
+    return FloatRect(m_rect.x(), m_rect.maxY() - m_radii.bottomLeft().height(),
+                     m_radii.bottomLeft().width(),
+                     m_radii.bottomLeft().height());
+  }
+  FloatRect bottomRightCorner() const {
+    return FloatRect(m_rect.maxX() - m_radii.bottomRight().width(),
+                     m_rect.maxY() - m_radii.bottomRight().height(),
+                     m_radii.bottomRight().width(),
+                     m_radii.bottomRight().height());
+  }
+
+  bool xInterceptsAtY(float y,
+                      float& minXIntercept,
+                      float& maxXIntercept) const;
+
+ private:
+  FloatRect m_rect;
+  Radii m_radii;
 };
 
-inline bool operator==(const FloatRoundedRect::Radii& a, const FloatRoundedRect::Radii& b)
-{
-    return a.topLeft() == b.topLeft() && a.topRight() == b.topRight() && a.bottomLeft() == b.bottomLeft() && a.bottomRight() == b.bottomRight();
+inline bool operator==(const FloatRoundedRect::Radii& a,
+                       const FloatRoundedRect::Radii& b) {
+  return a.topLeft() == b.topLeft() && a.topRight() == b.topRight() &&
+         a.bottomLeft() == b.bottomLeft() && a.bottomRight() == b.bottomRight();
 }
 
-inline bool operator==(const FloatRoundedRect& a, const FloatRoundedRect& b)
-{
-    return a.rect() == b.rect() && a.radii() == b.radii();
+inline bool operator==(const FloatRoundedRect& a, const FloatRoundedRect& b) {
+  return a.rect() == b.rect() && a.radii() == b.radii();
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATROUNDEDRECT_H_

@@ -35,184 +35,178 @@
 namespace blink {
 
 struct SameSizeAsFontDescription {
-    FontFamily familyList;
-    RefPtr<FontFeatureSettings> m_featureSettings;
-    String locale;
-    float sizes[4];
-    // FXIME: Make them fit into one word.
-    uint32_t bitfields;
-    uint32_t bitfields2 : 7;
+  FontFamily familyList;
+  RefPtr<FontFeatureSettings> m_featureSettings;
+  String locale;
+  float sizes[4];
+  // FXIME: Make them fit into one word.
+  uint32_t bitfields;
+  uint32_t bitfields2 : 7;
 };
 
-COMPILE_ASSERT(sizeof(FontDescription) == sizeof(SameSizeAsFontDescription), FontDescription_should_stay_small);
+COMPILE_ASSERT(sizeof(FontDescription) == sizeof(SameSizeAsFontDescription),
+               FontDescription_should_stay_small);
 
 TypesettingFeatures FontDescription::s_defaultTypesettingFeatures = 0;
 
 bool FontDescription::s_useSubpixelTextPositioning = false;
 
-FontWeight FontDescription::lighterWeight(FontWeight weight)
-{
-    switch (weight) {
-        case FontWeight100:
-        case FontWeight200:
-        case FontWeight300:
-        case FontWeight400:
-        case FontWeight500:
-            return FontWeight100;
+FontWeight FontDescription::lighterWeight(FontWeight weight) {
+  switch (weight) {
+    case FontWeight100:
+    case FontWeight200:
+    case FontWeight300:
+    case FontWeight400:
+    case FontWeight500:
+      return FontWeight100;
 
-        case FontWeight600:
-        case FontWeight700:
-            return FontWeight400;
+    case FontWeight600:
+    case FontWeight700:
+      return FontWeight400;
 
-        case FontWeight800:
-        case FontWeight900:
-            return FontWeight700;
-    }
-    ASSERT_NOT_REACHED();
-    return FontWeightNormal;
+    case FontWeight800:
+    case FontWeight900:
+      return FontWeight700;
+  }
+  ASSERT_NOT_REACHED();
+  return FontWeightNormal;
 }
 
-FontWeight FontDescription::bolderWeight(FontWeight weight)
-{
-    switch (weight) {
-        case FontWeight100:
-        case FontWeight200:
-        case FontWeight300:
-            return FontWeight400;
+FontWeight FontDescription::bolderWeight(FontWeight weight) {
+  switch (weight) {
+    case FontWeight100:
+    case FontWeight200:
+    case FontWeight300:
+      return FontWeight400;
 
-        case FontWeight400:
-        case FontWeight500:
-            return FontWeight700;
+    case FontWeight400:
+    case FontWeight500:
+      return FontWeight700;
 
-        case FontWeight600:
-        case FontWeight700:
-        case FontWeight800:
-        case FontWeight900:
-            return FontWeight900;
-    }
-    ASSERT_NOT_REACHED();
-    return FontWeightNormal;
+    case FontWeight600:
+    case FontWeight700:
+    case FontWeight800:
+    case FontWeight900:
+      return FontWeight900;
+  }
+  ASSERT_NOT_REACHED();
+  return FontWeightNormal;
 }
 
-FontTraits FontDescription::traits() const
-{
-    return FontTraits(style(), variant(), weight(), stretch());
+FontTraits FontDescription::traits() const {
+  return FontTraits(style(), variant(), weight(), stretch());
 }
 
-FontDescription::VariantLigatures FontDescription::variantLigatures() const
-{
-    VariantLigatures ligatures;
+FontDescription::VariantLigatures FontDescription::variantLigatures() const {
+  VariantLigatures ligatures;
 
-    ligatures.common = commonLigaturesState();
-    ligatures.discretionary = discretionaryLigaturesState();
-    ligatures.historical = historicalLigaturesState();
-    ligatures.contextual = contextualLigaturesState();
+  ligatures.common = commonLigaturesState();
+  ligatures.discretionary = discretionaryLigaturesState();
+  ligatures.historical = historicalLigaturesState();
+  ligatures.contextual = contextualLigaturesState();
 
-    return ligatures;
+  return ligatures;
 }
 
-void FontDescription::setTraits(FontTraits traits)
-{
-    setStyle(traits.style());
-    setVariant(traits.variant());
-    setWeight(traits.weight());
-    setStretch(traits.stretch());
+void FontDescription::setTraits(FontTraits traits) {
+  setStyle(traits.style());
+  setVariant(traits.variant());
+  setWeight(traits.weight());
+  setStretch(traits.stretch());
 }
 
-void FontDescription::setVariantLigatures(const VariantLigatures& ligatures)
-{
-    m_commonLigaturesState = ligatures.common;
-    m_discretionaryLigaturesState = ligatures.discretionary;
-    m_historicalLigaturesState = ligatures.historical;
-    m_contextualLigaturesState = ligatures.contextual;
+void FontDescription::setVariantLigatures(const VariantLigatures& ligatures) {
+  m_commonLigaturesState = ligatures.common;
+  m_discretionaryLigaturesState = ligatures.discretionary;
+  m_historicalLigaturesState = ligatures.historical;
+  m_contextualLigaturesState = ligatures.contextual;
 
-    updateTypesettingFeatures();
+  updateTypesettingFeatures();
 }
 
-float FontDescription::effectiveFontSize() const
-{
-    float size = computedSize();
+float FontDescription::effectiveFontSize() const {
+  float size = computedSize();
 
-    // Ensure that the effective precision matches the font-cache precision.
-    // This guarantees that the same precision is used regardless of cache status.
-    return floorf(size * FontCacheKey::precisionMultiplier()) / FontCacheKey::precisionMultiplier();
+  // Ensure that the effective precision matches the font-cache precision.
+  // This guarantees that the same precision is used regardless of cache status.
+  return floorf(size * FontCacheKey::precisionMultiplier()) /
+         FontCacheKey::precisionMultiplier();
 }
 
-FontCacheKey FontDescription::cacheKey(const FontFaceCreationParams& creationParams, FontTraits desiredTraits) const
-{
-    FontTraits fontTraits = desiredTraits.bitfield() ? desiredTraits : traits();
+FontCacheKey FontDescription::cacheKey(
+    const FontFaceCreationParams& creationParams,
+    FontTraits desiredTraits) const {
+  FontTraits fontTraits = desiredTraits.bitfield() ? desiredTraits : traits();
 
-    unsigned options =
-        static_cast<unsigned>(m_syntheticItalic) << 7 | // bit 8
-        static_cast<unsigned>(m_syntheticBold) << 6 | // bit 7
-        static_cast<unsigned>(m_fontSmoothing) << 4 | // bits 5-6
-        static_cast<unsigned>(m_textRendering) << 2 | // bits 3-4
-        static_cast<unsigned>(m_orientation) << 1 | // bit 2
-        static_cast<unsigned>(m_subpixelTextPosition); // bit 1
+  unsigned options = static_cast<unsigned>(m_syntheticItalic) << 7 |  // bit 8
+                     static_cast<unsigned>(m_syntheticBold) << 6 |    // bit 7
+                     static_cast<unsigned>(m_fontSmoothing) << 4 |   // bits 5-6
+                     static_cast<unsigned>(m_textRendering) << 2 |   // bits 3-4
+                     static_cast<unsigned>(m_orientation) << 1 |     // bit 2
+                     static_cast<unsigned>(m_subpixelTextPosition);  // bit 1
 
-    return FontCacheKey(creationParams, effectiveFontSize(), options | fontTraits.bitfield() << 8);
+  return FontCacheKey(creationParams, effectiveFontSize(),
+                      options | fontTraits.bitfield() << 8);
 }
 
-
-void FontDescription::setDefaultTypesettingFeatures(TypesettingFeatures typesettingFeatures)
-{
-    s_defaultTypesettingFeatures = typesettingFeatures;
+void FontDescription::setDefaultTypesettingFeatures(
+    TypesettingFeatures typesettingFeatures) {
+  s_defaultTypesettingFeatures = typesettingFeatures;
 }
 
-TypesettingFeatures FontDescription::defaultTypesettingFeatures()
-{
-    return s_defaultTypesettingFeatures;
+TypesettingFeatures FontDescription::defaultTypesettingFeatures() {
+  return s_defaultTypesettingFeatures;
 }
 
-void FontDescription::updateTypesettingFeatures() const
-{
-    m_typesettingFeatures = s_defaultTypesettingFeatures;
+void FontDescription::updateTypesettingFeatures() const {
+  m_typesettingFeatures = s_defaultTypesettingFeatures;
 
-    switch (textRendering()) {
+  switch (textRendering()) {
     case AutoTextRendering:
-        break;
+      break;
     case OptimizeSpeed:
-        m_typesettingFeatures &= ~(blink::Kerning | Ligatures);
-        break;
+      m_typesettingFeatures &= ~(blink::Kerning | Ligatures);
+      break;
     case GeometricPrecision:
     case OptimizeLegibility:
-        m_typesettingFeatures |= blink::Kerning | Ligatures;
-        break;
-    }
+      m_typesettingFeatures |= blink::Kerning | Ligatures;
+      break;
+  }
 
-    switch (kerning()) {
+  switch (kerning()) {
     case FontDescription::NoneKerning:
-        m_typesettingFeatures &= ~blink::Kerning;
-        break;
+      m_typesettingFeatures &= ~blink::Kerning;
+      break;
     case FontDescription::NormalKerning:
-        m_typesettingFeatures |= blink::Kerning;
-        break;
+      m_typesettingFeatures |= blink::Kerning;
+      break;
     case FontDescription::AutoKerning:
+      break;
+  }
+
+  // As per CSS (http://dev.w3.org/csswg/css-text-3/#letter-spacing-property),
+  // When the effective letter-spacing between two characters is not zero (due
+  // to either justification or non-zero computed letter-spacing), user agents
+  // should not apply optional ligatures.
+  if (m_letterSpacing == 0) {
+    switch (commonLigaturesState()) {
+      case FontDescription::DisabledLigaturesState:
+        m_typesettingFeatures &= ~Ligatures;
+        break;
+      case FontDescription::EnabledLigaturesState:
+        m_typesettingFeatures |= Ligatures;
+        break;
+      case FontDescription::NormalLigaturesState:
         break;
     }
 
-    // As per CSS (http://dev.w3.org/csswg/css-text-3/#letter-spacing-property),
-    // When the effective letter-spacing between two characters is not zero (due to
-    // either justification or non-zero computed letter-spacing), user agents should
-    // not apply optional ligatures.
-    if (m_letterSpacing == 0) {
-        switch (commonLigaturesState()) {
-        case FontDescription::DisabledLigaturesState:
-            m_typesettingFeatures &= ~Ligatures;
-            break;
-        case FontDescription::EnabledLigaturesState:
-            m_typesettingFeatures |= Ligatures;
-            break;
-        case FontDescription::NormalLigaturesState:
-            break;
-        }
-
-        if (discretionaryLigaturesState() == FontDescription::EnabledLigaturesState
-            || historicalLigaturesState() == FontDescription::EnabledLigaturesState
-            || contextualLigaturesState() == FontDescription::EnabledLigaturesState) {
-            m_typesettingFeatures |= blink::Ligatures;
-        }
+    if (discretionaryLigaturesState() ==
+            FontDescription::EnabledLigaturesState ||
+        historicalLigaturesState() == FontDescription::EnabledLigaturesState ||
+        contextualLigaturesState() == FontDescription::EnabledLigaturesState) {
+      m_typesettingFeatures |= blink::Ligatures;
     }
+  }
 }
 
-} // namespace blink
+}  // namespace blink

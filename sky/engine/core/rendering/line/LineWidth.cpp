@@ -34,75 +34,76 @@
 
 namespace blink {
 
-LineWidth::LineWidth(RenderParagraph& block, bool isFirstLine, IndentTextOrNot shouldIndentText)
-    : m_block(block)
-    , m_uncommittedWidth(0)
-    , m_committedWidth(0)
-    , m_trailingWhitespaceWidth(0)
-    , m_left(0)
-    , m_right(0)
-    , m_availableWidth(0)
-    , m_shouldIndentText(shouldIndentText)
-{
-    updateAvailableWidth();
+LineWidth::LineWidth(RenderParagraph& block,
+                     bool isFirstLine,
+                     IndentTextOrNot shouldIndentText)
+    : m_block(block),
+      m_uncommittedWidth(0),
+      m_committedWidth(0),
+      m_trailingWhitespaceWidth(0),
+      m_left(0),
+      m_right(0),
+      m_availableWidth(0),
+      m_shouldIndentText(shouldIndentText) {
+  updateAvailableWidth();
 }
 
-void LineWidth::updateAvailableWidth()
-{
-    m_left = m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
-    m_right = m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
-    computeAvailableWidthFromLeftAndRight();
+void LineWidth::updateAvailableWidth() {
+  m_left = m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
+  m_right = m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
+  computeAvailableWidthFromLeftAndRight();
 }
 
-void LineWidth::commit()
-{
-    m_committedWidth += m_uncommittedWidth;
-    m_uncommittedWidth = 0;
+void LineWidth::commit() {
+  m_committedWidth += m_uncommittedWidth;
+  m_uncommittedWidth = 0;
 }
 
-void LineWidth::updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, const float& newLineLeft, const float& newLineRight)
-{
-    if (newLineWidth <= m_availableWidth)
-        return;
+void LineWidth::updateLineDimension(LayoutUnit newLineTop,
+                                    LayoutUnit newLineWidth,
+                                    const float& newLineLeft,
+                                    const float& newLineRight) {
+  if (newLineWidth <= m_availableWidth)
+    return;
 
-    m_block.setLogicalHeight(newLineTop);
-    m_availableWidth = newLineWidth.toFloat();
-    m_left = newLineLeft;
-    m_right = newLineRight;
+  m_block.setLogicalHeight(newLineTop);
+  m_availableWidth = newLineWidth.toFloat();
+  m_left = newLineLeft;
+  m_right = newLineRight;
 }
 
+void LineWidth::fitBelowFloats(bool isFirstLine) {
+  ASSERT(!m_committedWidth);
+  ASSERT(!fitsOnLine());
 
-void LineWidth::fitBelowFloats(bool isFirstLine)
-{
-    ASSERT(!m_committedWidth);
-    ASSERT(!fitsOnLine());
+  LayoutUnit floatLogicalBottom;
+  LayoutUnit lastFloatLogicalBottom = m_block.logicalHeight();
+  float newLineWidth = m_availableWidth;
+  float newLineLeft = m_left;
+  float newLineRight = m_right;
 
-    LayoutUnit floatLogicalBottom;
-    LayoutUnit lastFloatLogicalBottom = m_block.logicalHeight();
-    float newLineWidth = m_availableWidth;
-    float newLineLeft = m_left;
-    float newLineRight = m_right;
+  while (true) {
+    floatLogicalBottom = lastFloatLogicalBottom;
+    if (floatLogicalBottom <= lastFloatLogicalBottom)
+      break;
 
-    while (true) {
-        floatLogicalBottom = lastFloatLogicalBottom;
-        if (floatLogicalBottom <= lastFloatLogicalBottom)
-            break;
+    newLineLeft =
+        m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
+    newLineRight =
+        m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
+    newLineWidth = std::max(0.0f, newLineRight - newLineLeft);
 
-        newLineLeft = m_block.logicalLeftOffsetForLine(shouldIndentText()).toFloat();
-        newLineRight = m_block.logicalRightOffsetForLine(shouldIndentText()).toFloat();
-        newLineWidth = std::max(0.0f, newLineRight - newLineLeft);
+    lastFloatLogicalBottom = floatLogicalBottom;
 
-        lastFloatLogicalBottom = floatLogicalBottom;
-
-        if (newLineWidth >= m_uncommittedWidth)
-            break;
-    }
-    updateLineDimension(lastFloatLogicalBottom, newLineWidth, newLineLeft, newLineRight);
+    if (newLineWidth >= m_uncommittedWidth)
+      break;
+  }
+  updateLineDimension(lastFloatLogicalBottom, newLineWidth, newLineLeft,
+                      newLineRight);
 }
 
-void LineWidth::computeAvailableWidthFromLeftAndRight()
-{
-    m_availableWidth = max(0.0f, m_right - m_left);
+void LineWidth::computeAvailableWidthFromLeftAndRight() {
+  m_availableWidth = max(0.0f, m_right - m_left);
 }
 
-}
+}  // namespace blink

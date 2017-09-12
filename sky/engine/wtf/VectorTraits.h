@@ -30,86 +30,92 @@ using std::pair;
 
 namespace WTF {
 
-    class AtomicString;
+class AtomicString;
 
-    template<typename T>
-    struct VectorTraitsBase
-    {
-        static const bool needsDestruction = !IsPod<T>::value;
-        static const bool canInitializeWithMemset = IsPod<T>::value;
-        static const bool canMoveWithMemcpy = IsPod<T>::value;
-        static const bool canCopyWithMemcpy = IsPod<T>::value;
-        static const bool canFillWithMemset = IsPod<T>::value && (sizeof(T) == sizeof(char));
-        static const bool canCompareWithMemcmp = IsPod<T>::value;
-        static const WeakHandlingFlag weakHandlingFlag = NoWeakHandlingInCollections; // We don't support weak handling in vectors.
-    };
+template <typename T>
+struct VectorTraitsBase {
+  static const bool needsDestruction = !IsPod<T>::value;
+  static const bool canInitializeWithMemset = IsPod<T>::value;
+  static const bool canMoveWithMemcpy = IsPod<T>::value;
+  static const bool canCopyWithMemcpy = IsPod<T>::value;
+  static const bool canFillWithMemset =
+      IsPod<T>::value && (sizeof(T) == sizeof(char));
+  static const bool canCompareWithMemcmp = IsPod<T>::value;
+  static const WeakHandlingFlag weakHandlingFlag =
+      NoWeakHandlingInCollections;  // We don't support weak handling in
+                                    // vectors.
+};
 
-    template<typename T>
-    struct VectorTraits : VectorTraitsBase<T> { };
+template <typename T>
+struct VectorTraits : VectorTraitsBase<T> {};
 
-    // Classes marked with SimpleVectorTraits will use memmov, memcpy, memcmp
-    // instead of constructors, copy operators, etc for initialization, move
-    // and comparison.
-    template<typename T>
-    struct SimpleClassVectorTraits : VectorTraitsBase<T>
-    {
-        static const bool canInitializeWithMemset = true;
-        static const bool canMoveWithMemcpy = true;
-        static const bool canCompareWithMemcmp = true;
-    };
+// Classes marked with SimpleVectorTraits will use memmov, memcpy, memcmp
+// instead of constructors, copy operators, etc for initialization, move
+// and comparison.
+template <typename T>
+struct SimpleClassVectorTraits : VectorTraitsBase<T> {
+  static const bool canInitializeWithMemset = true;
+  static const bool canMoveWithMemcpy = true;
+  static const bool canCompareWithMemcmp = true;
+};
 
-    // We know OwnPtr and RefPtr are simple enough that initializing to 0 and
-    // moving with memcpy (and then not destructing the original) will totally
-    // work.
-    template<typename P>
-    struct VectorTraits<RefPtr<P> > : SimpleClassVectorTraits<RefPtr<P> > { };
+// We know OwnPtr and RefPtr are simple enough that initializing to 0 and
+// moving with memcpy (and then not destructing the original) will totally
+// work.
+template <typename P>
+struct VectorTraits<RefPtr<P>> : SimpleClassVectorTraits<RefPtr<P>> {};
 
-    template<typename P>
-    struct VectorTraits<OwnPtr<P> > : SimpleClassVectorTraits<OwnPtr<P> > { };
+template <typename P>
+struct VectorTraits<OwnPtr<P>> : SimpleClassVectorTraits<OwnPtr<P>> {};
 
-    template<typename First, typename Second>
-    struct VectorTraits<pair<First, Second> >
-    {
-        typedef VectorTraits<First> FirstTraits;
-        typedef VectorTraits<Second> SecondTraits;
+template <typename First, typename Second>
+struct VectorTraits<pair<First, Second>> {
+  typedef VectorTraits<First> FirstTraits;
+  typedef VectorTraits<Second> SecondTraits;
 
-        static const bool needsDestruction = FirstTraits::needsDestruction || SecondTraits::needsDestruction;
-        static const bool canInitializeWithMemset = FirstTraits::canInitializeWithMemset && SecondTraits::canInitializeWithMemset;
-        static const bool canMoveWithMemcpy = FirstTraits::canMoveWithMemcpy && SecondTraits::canMoveWithMemcpy;
-        static const bool canCopyWithMemcpy = FirstTraits::canCopyWithMemcpy && SecondTraits::canCopyWithMemcpy;
-        static const bool canFillWithMemset = false;
-        static const bool canCompareWithMemcmp = FirstTraits::canCompareWithMemcmp && SecondTraits::canCompareWithMemcmp;
-        static const WeakHandlingFlag weakHandlingFlag = NoWeakHandlingInCollections; // We don't support weak handling in vectors.
-    };
+  static const bool needsDestruction =
+      FirstTraits::needsDestruction || SecondTraits::needsDestruction;
+  static const bool canInitializeWithMemset =
+      FirstTraits::canInitializeWithMemset &&
+      SecondTraits::canInitializeWithMemset;
+  static const bool canMoveWithMemcpy =
+      FirstTraits::canMoveWithMemcpy && SecondTraits::canMoveWithMemcpy;
+  static const bool canCopyWithMemcpy =
+      FirstTraits::canCopyWithMemcpy && SecondTraits::canCopyWithMemcpy;
+  static const bool canFillWithMemset = false;
+  static const bool canCompareWithMemcmp =
+      FirstTraits::canCompareWithMemcmp && SecondTraits::canCompareWithMemcmp;
+  static const WeakHandlingFlag weakHandlingFlag =
+      NoWeakHandlingInCollections;  // We don't support weak handling in
+                                    // vectors.
+};
 
-} // namespace WTF
+}  // namespace WTF
 
-#define WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(ClassName) \
-namespace WTF { \
-    template<> \
-    struct VectorTraits<ClassName> : SimpleClassVectorTraits<ClassName> { }; \
-}
+#define WTF_ALLOW_MOVE_INIT_AND_COMPARE_WITH_MEM_FUNCTIONS(ClassName)     \
+  namespace WTF {                                                         \
+  template <>                                                             \
+  struct VectorTraits<ClassName> : SimpleClassVectorTraits<ClassName> {}; \
+  }
 
-#define WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(ClassName) \
-namespace WTF { \
-    template<> \
-    struct VectorTraits<ClassName> : VectorTraitsBase<ClassName> \
-    { \
-        static const bool canInitializeWithMemset = true; \
-        static const bool canMoveWithMemcpy = true; \
-    }; \
-}
+#define WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(ClassName)    \
+  namespace WTF {                                                \
+  template <>                                                    \
+  struct VectorTraits<ClassName> : VectorTraitsBase<ClassName> { \
+    static const bool canInitializeWithMemset = true;            \
+    static const bool canMoveWithMemcpy = true;                  \
+  };                                                             \
+  }
 
-#define WTF_ALLOW_INIT_WITH_MEM_FUNCTIONS(ClassName) \
-namespace WTF { \
-    template<> \
-    struct VectorTraits<ClassName> : VectorTraitsBase<ClassName> \
-    { \
-        static const bool canInitializeWithMemset = true; \
-    }; \
-}
+#define WTF_ALLOW_INIT_WITH_MEM_FUNCTIONS(ClassName)             \
+  namespace WTF {                                                \
+  template <>                                                    \
+  struct VectorTraits<ClassName> : VectorTraitsBase<ClassName> { \
+    static const bool canInitializeWithMemset = true;            \
+  };                                                             \
+  }
 
-using WTF::VectorTraits;
 using WTF::SimpleClassVectorTraits;
+using WTF::VectorTraits;
 
 #endif  // SKY_ENGINE_WTF_VECTORTRAITS_H_

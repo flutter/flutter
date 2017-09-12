@@ -34,7 +34,7 @@ void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
       clip_rrect_.radii(SkRRect::kLowerRight_Corner)
           .x(),                                          //  bottom_right_radius
       clip_rrect_.radii(SkRRect::kLowerLeft_Corner).x()  //  bottom_left_radius
-      );
+  );
 
   SceneUpdateContext::Clip clip(context, shape, clip_rrect_.getBounds());
   UpdateSceneChildren(context);

@@ -47,29 +47,29 @@ namespace blink {
 //    mem->unlock();
 //
 class WebDiscardableMemory {
-public:
-    // Must not be called while locked.
-    virtual ~WebDiscardableMemory() { }
+ public:
+  // Must not be called while locked.
+  virtual ~WebDiscardableMemory() {}
 
-    // Locks the memory, prevent it from being discarded. Once locked. you may
-    // obtain a pointer to that memory using the data() method.
-    //
-    // lock() may return false, indicating that the underlying memory was
-    // discarded and that the lock failed. In this case, the
-    // WebDiscardableMemory is effectively dead.
-    //
-    // Nested calls to lock are not allowed.
-    virtual bool lock() = 0;
+  // Locks the memory, prevent it from being discarded. Once locked. you may
+  // obtain a pointer to that memory using the data() method.
+  //
+  // lock() may return false, indicating that the underlying memory was
+  // discarded and that the lock failed. In this case, the
+  // WebDiscardableMemory is effectively dead.
+  //
+  // Nested calls to lock are not allowed.
+  virtual bool lock() = 0;
 
-    // Returns the current pointer for the discardable memory. This call is ONLY
-    // valid when the discardable memory object is locked.
-    virtual void* data() = 0;
+  // Returns the current pointer for the discardable memory. This call is ONLY
+  // valid when the discardable memory object is locked.
+  virtual void* data() = 0;
 
-    // Unlock the memory so that it can be purged by the system. Must be called
-    // after every successful lock call.
-    virtual void unlock() = 0;
+  // Unlock the memory so that it can be purged by the system. Must be called
+  // after every successful lock call.
+  virtual void unlock() = 0;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PUBLIC_PLATFORM_WEBDISCARDABLEMEMORY_H_

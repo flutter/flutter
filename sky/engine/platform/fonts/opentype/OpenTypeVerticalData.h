@@ -10,16 +10,16 @@
  *     notice, this list of conditions and the following disclaimer in the
  *     documentation and/or other materials provided with the distribution.
  *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
- * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
- * ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS BE LIABLE FOR
+ * ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ * SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ * CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+ * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
 #ifndef SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPEVERTICALDATA_H_
@@ -37,39 +37,42 @@ namespace blink {
 class FontPlatformData;
 class SimpleFontData;
 
-class PLATFORM_EXPORT OpenTypeVerticalData : public RefCounted<OpenTypeVerticalData> {
-public:
-    static PassRefPtr<OpenTypeVerticalData> create(const FontPlatformData& platformData)
-    {
-        return adoptRef(new OpenTypeVerticalData(platformData));
-    }
+class PLATFORM_EXPORT OpenTypeVerticalData
+    : public RefCounted<OpenTypeVerticalData> {
+ public:
+  static PassRefPtr<OpenTypeVerticalData> create(
+      const FontPlatformData& platformData) {
+    return adoptRef(new OpenTypeVerticalData(platformData));
+  }
 
-    bool isOpenType() const { return !m_advanceWidths.isEmpty(); }
-    bool hasVerticalMetrics() const { return !m_advanceHeights.isEmpty(); }
-    float advanceHeight(const SimpleFontData*, Glyph) const;
+  bool isOpenType() const { return !m_advanceWidths.isEmpty(); }
+  bool hasVerticalMetrics() const { return !m_advanceHeights.isEmpty(); }
+  float advanceHeight(const SimpleFontData*, Glyph) const;
 
-    bool inFontCache() const { return m_inFontCache; }
-    void setInFontCache(bool inFontCache) { m_inFontCache = inFontCache; }
+  bool inFontCache() const { return m_inFontCache; }
+  void setInFontCache(bool inFontCache) { m_inFontCache = inFontCache; }
 
-    void getVerticalTranslationsForGlyphs(const SimpleFontData*, const Glyph*, size_t, float* outXYArray) const;
+  void getVerticalTranslationsForGlyphs(const SimpleFontData*,
+                                        const Glyph*,
+                                        size_t,
+                                        float* outXYArray) const;
 
-private:
+ private:
+  explicit OpenTypeVerticalData(const FontPlatformData&);
 
-    explicit OpenTypeVerticalData(const FontPlatformData&);
+  void loadMetrics(const FontPlatformData&);
+  bool hasVORG() const { return !m_vertOriginY.isEmpty(); }
 
-    void loadMetrics(const FontPlatformData&);
-    bool hasVORG() const { return !m_vertOriginY.isEmpty(); }
+  HashMap<Glyph, Glyph> m_verticalGlyphMap;
+  Vector<uint16_t> m_advanceWidths;
+  Vector<uint16_t> m_advanceHeights;
+  Vector<int16_t> m_topSideBearings;
+  int16_t m_defaultVertOriginY;
+  HashMap<Glyph, int16_t> m_vertOriginY;
 
-    HashMap<Glyph, Glyph> m_verticalGlyphMap;
-    Vector<uint16_t> m_advanceWidths;
-    Vector<uint16_t> m_advanceHeights;
-    Vector<int16_t> m_topSideBearings;
-    int16_t m_defaultVertOriginY;
-    HashMap<Glyph, int16_t> m_vertOriginY;
-
-    bool m_inFontCache; // for mark & sweep in FontCache::purgeInactiveFontData()
+  bool m_inFontCache;  // for mark & sweep in FontCache::purgeInactiveFontData()
 };
 
-} // namespace blink
+}  // namespace blink
 
-#endif // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPEVERTICALDATA_H_
+#endif  // SKY_ENGINE_PLATFORM_FONTS_OPENTYPE_OPENTYPEVERTICALDATA_H_

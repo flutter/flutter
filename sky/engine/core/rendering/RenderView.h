@@ -27,85 +27,107 @@
 
 namespace blink {
 
-// The root of the render tree, corresponding to the CSS initial containing block.
-// It's dimensions match that of the logical viewport (which may be different from
-// the visible viewport in fixed-layout mode), and it is always at position (0,0)
-// relative to the document (and so isn't necessarily in view).
+// The root of the render tree, corresponding to the CSS initial containing
+// block. It's dimensions match that of the logical viewport (which may be
+// different from the visible viewport in fixed-layout mode), and it is always
+// at position (0,0) relative to the document (and so isn't necessarily in
+// view).
 class RenderView final : public RenderFlexibleBox {
-public:
-    explicit RenderView();
-    virtual ~RenderView();
+ public:
+  explicit RenderView();
+  virtual ~RenderView();
 
-    bool hitTest(const HitTestRequest&, HitTestResult&);
-    bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
+  bool hitTest(const HitTestRequest&, HitTestResult&);
+  bool hitTest(const HitTestRequest&, const HitTestLocation&, HitTestResult&);
 
-    // Returns the total count of calls to HitTest, for testing.
-    unsigned hitTestCount() const { return m_hitTestCount; }
+  // Returns the total count of calls to HitTest, for testing.
+  unsigned hitTestCount() const { return m_hitTestCount; }
 
-    virtual const char* renderName() const override { return "RenderView"; }
+  virtual const char* renderName() const override { return "RenderView"; }
 
-    virtual bool isRenderView() const override { return true; }
+  virtual bool isRenderView() const override { return true; }
 
-    virtual LayerType layerTypeRequired() const override { return NormalLayer; }
+  virtual LayerType layerTypeRequired() const override { return NormalLayer; }
 
-    virtual bool isChildAllowed(RenderObject*, RenderStyle*) const override;
+  virtual bool isChildAllowed(RenderObject*, RenderStyle*) const override;
 
-    virtual void layout() override;
-    virtual void updateLogicalWidth() override;
-    virtual void computeLogicalHeight(LayoutUnit logicalHeight, LayoutUnit logicalTop, LogicalExtentComputedValues&) const override;
+  virtual void layout() override;
+  virtual void updateLogicalWidth() override;
+  virtual void computeLogicalHeight(
+      LayoutUnit logicalHeight,
+      LayoutUnit logicalTop,
+      LogicalExtentComputedValues&) const override;
 
-    // The same as the FrameView's layoutHeight/layoutWidth but with null check guards.
-    int viewHeight() const;
-    int viewWidth() const;
-    int viewLogicalWidth() const { return viewWidth(); }
-    int viewLogicalHeight() const;
-    LayoutUnit viewLogicalHeightForPercentages() const;
+  // The same as the FrameView's layoutHeight/layoutWidth but with null check
+  // guards.
+  int viewHeight() const;
+  int viewWidth() const;
+  int viewLogicalWidth() const { return viewWidth(); }
+  int viewLogicalHeight() const;
+  LayoutUnit viewLogicalHeightForPercentages() const;
 
-    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) override;
-    virtual void paintBoxDecorationBackground(PaintInfo&, const LayoutPoint&) override;
+  virtual void paint(PaintInfo&,
+                     const LayoutPoint&,
+                     Vector<RenderBox*>& layers) override;
+  virtual void paintBoxDecorationBackground(PaintInfo&,
+                                            const LayoutPoint&) override;
 
-    void setSelection(RenderObject* start, int startPos, RenderObject*, int endPos);
-    void getSelection(RenderObject*& startRenderer, int& startOffset, RenderObject*& endRenderer, int& endOffset) const;
-    void clearSelection();
-    RenderObject* selectionStart() const { return m_selectionStart; }
-    RenderObject* selectionEnd() const { return m_selectionEnd; }
-    void selectionStartEnd(int& startPos, int& endPos) const;
+  void setSelection(RenderObject* start,
+                    int startPos,
+                    RenderObject*,
+                    int endPos);
+  void getSelection(RenderObject*& startRenderer,
+                    int& startOffset,
+                    RenderObject*& endRenderer,
+                    int& endOffset) const;
+  void clearSelection();
+  RenderObject* selectionStart() const { return m_selectionStart; }
+  RenderObject* selectionEnd() const { return m_selectionEnd; }
+  void selectionStartEnd(int& startPos, int& endPos) const;
 
-    virtual void absoluteQuads(Vector<FloatQuad>&) const override;
+  virtual void absoluteQuads(Vector<FloatQuad>&) const override;
 
-    void setFrameViewSize(const IntSize& frameViewSize) { m_frameViewSize = frameViewSize; }
+  void setFrameViewSize(const IntSize& frameViewSize) {
+    m_frameViewSize = frameViewSize;
+  }
 
-    IntRect unscaledDocumentRect() const;
-    LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
+  IntRect unscaledDocumentRect() const;
+  LayoutRect backgroundRect(RenderBox* backgroundRenderer) const;
 
-    IntRect documentRect() const;
+  IntRect documentRect() const;
 
-    double layoutViewportWidth() const;
-    double layoutViewportHeight() const;
+  double layoutViewportWidth() const;
+  double layoutViewportHeight() const;
 
-private:
-    virtual void mapLocalToContainer(const RenderBox* paintInvalidationContainer, TransformState&, MapCoordinatesFlags = ApplyContainerFlip) const override;
-    virtual const RenderObject* pushMappingToContainer(const RenderBox* ancestorToStopAt, RenderGeometryMap&) const override;
-    virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags, TransformState&) const override;
+ private:
+  virtual void mapLocalToContainer(
+      const RenderBox* paintInvalidationContainer,
+      TransformState&,
+      MapCoordinatesFlags = ApplyContainerFlip) const override;
+  virtual const RenderObject* pushMappingToContainer(
+      const RenderBox* ancestorToStopAt,
+      RenderGeometryMap&) const override;
+  virtual void mapAbsoluteToLocalPoint(MapCoordinatesFlags,
+                                       TransformState&) const override;
 
-    void positionDialog(RenderBox*);
-    void positionDialogs();
+  void positionDialog(RenderBox*);
+  void positionDialogs();
 
-    IntSize m_frameViewSize;
+  IntSize m_frameViewSize;
 
-    RawPtr<RenderObject> m_selectionStart;
-    RawPtr<RenderObject> m_selectionEnd;
+  RawPtr<RenderObject> m_selectionStart;
+  RawPtr<RenderObject> m_selectionEnd;
 
-    int m_selectionStartPos;
-    int m_selectionEndPos;
+  int m_selectionStartPos;
+  int m_selectionEndPos;
 
-    unsigned m_renderCounterCount;
+  unsigned m_renderCounterCount;
 
-    unsigned m_hitTestCount;
+  unsigned m_hitTestCount;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderView, isRenderView());
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERVIEW_H_

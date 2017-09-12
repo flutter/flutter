@@ -30,63 +30,74 @@
 namespace blink {
 
 class PLATFORM_EXPORT RotateTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<RotateTransformOperation> create(double angle, OperationType type)
-    {
-        return adoptRef(new RotateTransformOperation(0, 0, 1, angle, type));
-    }
+ public:
+  static PassRefPtr<RotateTransformOperation> create(double angle,
+                                                     OperationType type) {
+    return adoptRef(new RotateTransformOperation(0, 0, 1, angle, type));
+  }
 
-    static PassRefPtr<RotateTransformOperation> create(double x, double y, double z, double angle, OperationType type)
-    {
-        return adoptRef(new RotateTransformOperation(x, y, z, angle, type));
-    }
+  static PassRefPtr<RotateTransformOperation> create(double x,
+                                                     double y,
+                                                     double z,
+                                                     double angle,
+                                                     OperationType type) {
+    return adoptRef(new RotateTransformOperation(x, y, z, angle, type));
+  }
 
-    double x() const { return m_x; }
-    double y() const { return m_y; }
-    double z() const { return m_z; }
-    double angle() const { return m_angle; }
+  double x() const { return m_x; }
+  double y() const { return m_y; }
+  double z() const { return m_z; }
+  double angle() const { return m_angle; }
 
-    FloatPoint3D axis() const;
-    static bool shareSameAxis(const RotateTransformOperation* fromRotation, const RotateTransformOperation* toRotation, FloatPoint3D* axis, double* fromAngle, double* toAngle);
+  FloatPoint3D axis() const;
+  static bool shareSameAxis(const RotateTransformOperation* fromRotation,
+                            const RotateTransformOperation* toRotation,
+                            FloatPoint3D* axis,
+                            double* fromAngle,
+                            double* toAngle);
 
-    virtual bool canBlendWith(const TransformOperation& other) const;
-    virtual OperationType type() const override { return m_type; }
+  virtual bool canBlendWith(const TransformOperation& other) const;
+  virtual OperationType type() const override { return m_type; }
 
-private:
-    virtual bool isIdentity() const override { return !m_angle; }
+ private:
+  virtual bool isIdentity() const override { return !m_angle; }
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const RotateTransformOperation* r = static_cast<const RotateTransformOperation*>(&o);
-        return m_x == r->m_x && m_y == r->m_y && m_z == r->m_z && m_angle == r->m_angle;
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    if (!isSameType(o))
+      return false;
+    const RotateTransformOperation* r =
+        static_cast<const RotateTransformOperation*>(&o);
+    return m_x == r->m_x && m_y == r->m_y && m_z == r->m_z &&
+           m_angle == r->m_angle;
+  }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize& /*borderBoxSize*/) const override
-    {
-        transform.rotate3d(m_x, m_y, m_z, m_angle);
-    }
+  virtual void apply(TransformationMatrix& transform,
+                     const FloatSize& /*borderBoxSize*/) const override {
+    transform.rotate3d(m_x, m_y, m_z, m_angle);
+  }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    RotateTransformOperation(double x, double y, double z, double angle, OperationType type)
-        : m_x(x)
-        , m_y(y)
-        , m_z(z)
-        , m_angle(angle)
-        , m_type(type)
-    {
-        ASSERT(type == RotateX || type == RotateY || type == RotateZ || type == Rotate3D);
-    }
+  RotateTransformOperation(double x,
+                           double y,
+                           double z,
+                           double angle,
+                           OperationType type)
+      : m_x(x), m_y(y), m_z(z), m_angle(angle), m_type(type) {
+    ASSERT(type == RotateX || type == RotateY || type == RotateZ ||
+           type == Rotate3D);
+  }
 
-    double m_x;
-    double m_y;
-    double m_z;
-    double m_angle;
-    OperationType m_type;
+  double m_x;
+  double m_y;
+  double m_z;
+  double m_angle;
+  OperationType m_type;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_ROTATETRANSFORMOPERATION_H_

@@ -28,44 +28,47 @@
 namespace blink {
 
 class PLATFORM_EXPORT SurrogatePairAwareTextIterator {
-public:
-    // The passed in UChar pointer starts at 'currentCharacter'. The iterator operatoes on the range [currentCharacter, lastCharacter].
-    // 'endCharacter' denotes the maximum length of the UChar array, which might exceed 'lastCharacter'.
-    SurrogatePairAwareTextIterator(const UChar*, int currentCharacter, int lastCharacter, int endCharacter);
+ public:
+  // The passed in UChar pointer starts at 'currentCharacter'. The iterator
+  // operatoes on the range [currentCharacter, lastCharacter]. 'endCharacter'
+  // denotes the maximum length of the UChar array, which might exceed
+  // 'lastCharacter'.
+  SurrogatePairAwareTextIterator(const UChar*,
+                                 int currentCharacter,
+                                 int lastCharacter,
+                                 int endCharacter);
 
-    inline bool consume(UChar32& character, unsigned& clusterLength)
-    {
-        if (m_currentCharacter >= m_lastCharacter)
-            return false;
+  inline bool consume(UChar32& character, unsigned& clusterLength) {
+    if (m_currentCharacter >= m_lastCharacter)
+      return false;
 
-        character = *m_characters;
-        clusterLength = 1;
+    character = *m_characters;
+    clusterLength = 1;
 
-        if (character < HiraganaLetterSmallA)
-            return true;
+    if (character < HiraganaLetterSmallA)
+      return true;
 
-        return consumeSlowCase(character, clusterLength);
-    }
+    return consumeSlowCase(character, clusterLength);
+  }
 
-    void advance(unsigned advanceLength)
-    {
-        m_characters += advanceLength;
-        m_currentCharacter += advanceLength;
-    }
+  void advance(unsigned advanceLength) {
+    m_characters += advanceLength;
+    m_currentCharacter += advanceLength;
+  }
 
-    int currentCharacter() const { return m_currentCharacter; }
-    const UChar* characters() const { return m_characters; }
+  int currentCharacter() const { return m_currentCharacter; }
+  const UChar* characters() const { return m_characters; }
 
-private:
-    bool consumeSlowCase(UChar32&, unsigned&);
-    UChar32 normalizeVoicingMarks();
+ private:
+  bool consumeSlowCase(UChar32&, unsigned&);
+  UChar32 normalizeVoicingMarks();
 
-    const UChar* m_characters;
-    int m_currentCharacter;
-    int m_lastCharacter;
-    int m_endCharacter;
+  const UChar* m_characters;
+  int m_currentCharacter;
+  int m_lastCharacter;
+  int m_endCharacter;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TEXT_SURROGATEPAIRAWARETEXTITERATOR_H_

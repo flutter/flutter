@@ -29,8 +29,8 @@
 #ifndef SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_
 #define SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_
 
-#include "flutter/sky/engine/platform/graphics/Image.h"
 #include "flutter/sky/engine/platform/PlatformExport.h"
+#include "flutter/sky/engine/platform/graphics/Image.h"
 #include "flutter/sky/engine/platform/transforms/AffineTransform.h"
 #include "flutter/sky/engine/wtf/PassRefPtr.h"
 #include "flutter/sky/engine/wtf/RefCounted.h"
@@ -40,29 +40,30 @@
 namespace blink {
 
 class PLATFORM_EXPORT Pattern : public RefCounted<Pattern> {
-public:
-    enum RepeatMode {
-        RepeatModeX    = 1 << 0,
-        RepeatModeY    = 1 << 1,
+ public:
+  enum RepeatMode {
+    RepeatModeX = 1 << 0,
+    RepeatModeY = 1 << 1,
 
-        RepeatModeNone = 0,
-        RepeatModeXY   = RepeatModeX | RepeatModeY
-    };
+    RepeatModeNone = 0,
+    RepeatModeXY = RepeatModeX | RepeatModeY
+  };
 
-    static PassRefPtr<Pattern> createBitmapPattern(PassRefPtr<Image> tileImage,
-        RepeatMode = RepeatModeXY);
-    ~Pattern();
+  static PassRefPtr<Pattern> createBitmapPattern(PassRefPtr<Image> tileImage,
+                                                 RepeatMode = RepeatModeXY);
+  ~Pattern();
 
-    SkShader* shader();
+  SkShader* shader();
 
-    void setPatternSpaceTransform(const AffineTransform& patternSpaceTransformation);
+  void setPatternSpaceTransform(
+      const AffineTransform& patternSpaceTransformation);
 
-private:
-    Pattern(PassRefPtr<Image>, RepeatMode);
-    AffineTransform m_patternSpaceTransformation;
-    sk_sp<SkShader> m_pattern;
+ private:
+  Pattern(PassRefPtr<Image>, RepeatMode);
+  AffineTransform m_patternSpaceTransformation;
+  sk_sp<SkShader> m_pattern;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_PATTERN_H_

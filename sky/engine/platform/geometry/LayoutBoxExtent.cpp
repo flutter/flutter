@@ -34,94 +34,78 @@
 
 namespace blink {
 
-LayoutUnit LayoutBoxExtent::logicalTop() const
-{
-    return m_top;
+LayoutUnit LayoutBoxExtent::logicalTop() const {
+  return m_top;
 }
 
-LayoutUnit LayoutBoxExtent::logicalBottom() const
-{
-    return m_bottom;
+LayoutUnit LayoutBoxExtent::logicalBottom() const {
+  return m_bottom;
 }
 
-LayoutUnit LayoutBoxExtent::logicalLeft() const
-{
-    return m_left;
+LayoutUnit LayoutBoxExtent::logicalLeft() const {
+  return m_left;
 }
 
-LayoutUnit LayoutBoxExtent::logicalRight() const
-{
-    return m_right;
+LayoutUnit LayoutBoxExtent::logicalRight() const {
+  return m_right;
 }
 
-LayoutUnit LayoutBoxExtent::before() const
-{
-    // FIXME(sky): Remove
-    return m_top;
+LayoutUnit LayoutBoxExtent::before() const {
+  // FIXME(sky): Remove
+  return m_top;
 }
 
-LayoutUnit LayoutBoxExtent::after() const
-{
-    // FIXME(sky): Remove
-    return m_bottom;
+LayoutUnit LayoutBoxExtent::after() const {
+  // FIXME(sky): Remove
+  return m_bottom;
 }
 
-LayoutUnit LayoutBoxExtent::start(TextDirection direction) const
-{
-    return isLeftToRightDirection(direction) ? m_left : m_right;
+LayoutUnit LayoutBoxExtent::start(TextDirection direction) const {
+  return isLeftToRightDirection(direction) ? m_left : m_right;
 }
 
-LayoutUnit LayoutBoxExtent::end(TextDirection direction) const
-{
-    return isLeftToRightDirection(direction) ? m_right : m_left;
+LayoutUnit LayoutBoxExtent::end(TextDirection direction) const {
+  return isLeftToRightDirection(direction) ? m_right : m_left;
 }
 
-void LayoutBoxExtent::setBefore(LayoutUnit value)
-{
-    // FIXME(sky): Remove
-    m_top = value;
+void LayoutBoxExtent::setBefore(LayoutUnit value) {
+  // FIXME(sky): Remove
+  m_top = value;
 }
 
-void LayoutBoxExtent::setAfter(LayoutUnit value)
-{
-    // FIXME(sky): Remove
-    m_bottom = value;
+void LayoutBoxExtent::setAfter(LayoutUnit value) {
+  // FIXME(sky): Remove
+  m_bottom = value;
 }
 
-void LayoutBoxExtent::setStart(TextDirection direction, LayoutUnit value)
-{
-    if (isLeftToRightDirection(direction))
-        m_left = value;
-    else
-        m_right = value;
+void LayoutBoxExtent::setStart(TextDirection direction, LayoutUnit value) {
+  if (isLeftToRightDirection(direction))
+    m_left = value;
+  else
+    m_right = value;
 }
 
-void LayoutBoxExtent::setEnd(TextDirection direction, LayoutUnit value)
-{
-    if (isLeftToRightDirection(direction))
-        m_right = value;
-    else
-        m_left = value;
+void LayoutBoxExtent::setEnd(TextDirection direction, LayoutUnit value) {
+  if (isLeftToRightDirection(direction))
+    m_right = value;
+  else
+    m_left = value;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableLogicalLeft()
-{
-    return m_left;
+LayoutUnit& LayoutBoxExtent::mutableLogicalLeft() {
+  return m_left;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableLogicalRight()
-{
-    return m_right;
+LayoutUnit& LayoutBoxExtent::mutableLogicalRight() {
+  return m_right;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableBefore()
-{
-    return m_top;
+LayoutUnit& LayoutBoxExtent::mutableBefore() {
+  return m_top;
 }
 
-LayoutUnit& LayoutBoxExtent::mutableAfter()
-{
-    return m_bottom;
+LayoutUnit& LayoutBoxExtent::mutableAfter() {
+  return m_bottom;
 }
 
-} // namespace blink
+}  // namespace blink

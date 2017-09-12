@@ -34,106 +34,114 @@
 namespace blink {
 
 FloatRoundedRect::FloatRoundedRect(float x, float y, float width, float height)
-    : m_rect(x, y, width, height)
-{
-}
+    : m_rect(x, y, width, height) {}
 
 FloatRoundedRect::FloatRoundedRect(const FloatRect& rect, const Radii& radii)
-    : m_rect(rect)
-    , m_radii(radii)
-{
+    : m_rect(rect), m_radii(radii) {}
+
+FloatRoundedRect::FloatRoundedRect(const FloatRect& rect,
+                                   const FloatSize& topLeft,
+                                   const FloatSize& topRight,
+                                   const FloatSize& bottomLeft,
+                                   const FloatSize& bottomRight)
+    : m_rect(rect), m_radii(topLeft, topRight, bottomLeft, bottomRight) {}
+
+bool FloatRoundedRect::Radii::isZero() const {
+  return m_topLeft.isZero() && m_topRight.isZero() && m_bottomLeft.isZero() &&
+         m_bottomRight.isZero();
 }
 
-FloatRoundedRect::FloatRoundedRect(const FloatRect& rect, const FloatSize& topLeft, const FloatSize& topRight, const FloatSize& bottomLeft, const FloatSize& bottomRight)
-    : m_rect(rect)
-    , m_radii(topLeft, topRight, bottomLeft, bottomRight)
-{
+void FloatRoundedRect::Radii::scale(float factor) {
+  if (factor == 1)
+    return;
+
+  // If either radius on a corner becomes zero, reset both radii on that corner.
+  m_topLeft.scale(factor);
+  if (!m_topLeft.width() || !m_topLeft.height())
+    m_topLeft = FloatSize();
+  m_topRight.scale(factor);
+  if (!m_topRight.width() || !m_topRight.height())
+    m_topRight = FloatSize();
+  m_bottomLeft.scale(factor);
+  if (!m_bottomLeft.width() || !m_bottomLeft.height())
+    m_bottomLeft = FloatSize();
+  m_bottomRight.scale(factor);
+  if (!m_bottomRight.width() || !m_bottomRight.height())
+    m_bottomRight = FloatSize();
 }
 
-bool FloatRoundedRect::Radii::isZero() const
-{
-    return m_topLeft.isZero() && m_topRight.isZero() && m_bottomLeft.isZero() && m_bottomRight.isZero();
+void FloatRoundedRect::Radii::expand(float topWidth,
+                                     float bottomWidth,
+                                     float leftWidth,
+                                     float rightWidth) {
+  if (m_topLeft.width() > 0 && m_topLeft.height() > 0) {
+    m_topLeft.setWidth(std::max<float>(0, m_topLeft.width() + leftWidth));
+    m_topLeft.setHeight(std::max<float>(0, m_topLeft.height() + topWidth));
+  }
+  if (m_topRight.width() > 0 && m_topRight.height() > 0) {
+    m_topRight.setWidth(std::max<float>(0, m_topRight.width() + rightWidth));
+    m_topRight.setHeight(std::max<float>(0, m_topRight.height() + topWidth));
+  }
+  if (m_bottomLeft.width() > 0 && m_bottomLeft.height() > 0) {
+    m_bottomLeft.setWidth(std::max<float>(0, m_bottomLeft.width() + leftWidth));
+    m_bottomLeft.setHeight(
+        std::max<float>(0, m_bottomLeft.height() + bottomWidth));
+  }
+  if (m_bottomRight.width() > 0 && m_bottomRight.height() > 0) {
+    m_bottomRight.setWidth(
+        std::max<float>(0, m_bottomRight.width() + rightWidth));
+    m_bottomRight.setHeight(
+        std::max<float>(0, m_bottomRight.height() + bottomWidth));
+  }
 }
 
-void FloatRoundedRect::Radii::scale(float factor)
-{
-    if (factor == 1)
-        return;
-
-    // If either radius on a corner becomes zero, reset both radii on that corner.
-    m_topLeft.scale(factor);
-    if (!m_topLeft.width() || !m_topLeft.height())
-        m_topLeft = FloatSize();
-    m_topRight.scale(factor);
-    if (!m_topRight.width() || !m_topRight.height())
-        m_topRight = FloatSize();
-    m_bottomLeft.scale(factor);
-    if (!m_bottomLeft.width() || !m_bottomLeft.height())
-        m_bottomLeft = FloatSize();
-    m_bottomRight.scale(factor);
-    if (!m_bottomRight.width() || !m_bottomRight.height())
-        m_bottomRight = FloatSize();
-
+static inline float cornerRectIntercept(float y, const FloatRect& cornerRect) {
+  ASSERT(cornerRect.height() > 0);
+  return cornerRect.width() *
+         sqrt(1 - (y * y) / (cornerRect.height() * cornerRect.height()));
 }
 
-void FloatRoundedRect::Radii::expand(float topWidth, float bottomWidth, float leftWidth, float rightWidth)
-{
-    if (m_topLeft.width() > 0 && m_topLeft.height() > 0) {
-        m_topLeft.setWidth(std::max<float>(0, m_topLeft.width() + leftWidth));
-        m_topLeft.setHeight(std::max<float>(0, m_topLeft.height() + topWidth));
-    }
-    if (m_topRight.width() > 0 && m_topRight.height() > 0) {
-        m_topRight.setWidth(std::max<float>(0, m_topRight.width() + rightWidth));
-        m_topRight.setHeight(std::max<float>(0, m_topRight.height() + topWidth));
-    }
-    if (m_bottomLeft.width() > 0 && m_bottomLeft.height() > 0) {
-        m_bottomLeft.setWidth(std::max<float>(0, m_bottomLeft.width() + leftWidth));
-        m_bottomLeft.setHeight(std::max<float>(0, m_bottomLeft.height() + bottomWidth));
-    }
-    if (m_bottomRight.width() > 0 && m_bottomRight.height() > 0) {
-        m_bottomRight.setWidth(std::max<float>(0, m_bottomRight.width() + rightWidth));
-        m_bottomRight.setHeight(std::max<float>(0, m_bottomRight.height() + bottomWidth));
-    }
-}
+bool FloatRoundedRect::xInterceptsAtY(float y,
+                                      float& minXIntercept,
+                                      float& maxXIntercept) const {
+  if (y < rect().y() || y > rect().maxY())
+    return false;
 
-static inline float cornerRectIntercept(float y, const FloatRect& cornerRect)
-{
-    ASSERT(cornerRect.height() > 0);
-    return cornerRect.width() * sqrt(1 - (y * y) / (cornerRect.height() * cornerRect.height()));
-}
-
-bool FloatRoundedRect::xInterceptsAtY(float y, float& minXIntercept, float& maxXIntercept) const
-{
-    if (y < rect().y() || y >  rect().maxY())
-        return false;
-
-    if (!isRounded()) {
-        minXIntercept = rect().x();
-        maxXIntercept = rect().maxX();
-        return true;
-    }
-
-    const FloatRect& topLeftRect = topLeftCorner();
-    const FloatRect& bottomLeftRect = bottomLeftCorner();
-
-    if (!topLeftRect.isEmpty() && y >= topLeftRect.y() && y < topLeftRect.maxY())
-        minXIntercept = topLeftRect.maxX() - cornerRectIntercept(topLeftRect.maxY() - y, topLeftRect);
-    else if (!bottomLeftRect.isEmpty() && y >= bottomLeftRect.y() && y <= bottomLeftRect.maxY())
-        minXIntercept =  bottomLeftRect.maxX() - cornerRectIntercept(y - bottomLeftRect.y(), bottomLeftRect);
-    else
-        minXIntercept = m_rect.x();
-
-    const FloatRect& topRightRect = topRightCorner();
-    const FloatRect& bottomRightRect = bottomRightCorner();
-
-    if (!topRightRect.isEmpty() && y >= topRightRect.y() && y <= topRightRect.maxY())
-        maxXIntercept = topRightRect.x() + cornerRectIntercept(topRightRect.maxY() - y, topRightRect);
-    else if (!bottomRightRect.isEmpty() && y >= bottomRightRect.y() && y <= bottomRightRect.maxY())
-        maxXIntercept = bottomRightRect.x() + cornerRectIntercept(y - bottomRightRect.y(), bottomRightRect);
-    else
-        maxXIntercept = m_rect.maxX();
-
+  if (!isRounded()) {
+    minXIntercept = rect().x();
+    maxXIntercept = rect().maxX();
     return true;
+  }
+
+  const FloatRect& topLeftRect = topLeftCorner();
+  const FloatRect& bottomLeftRect = bottomLeftCorner();
+
+  if (!topLeftRect.isEmpty() && y >= topLeftRect.y() && y < topLeftRect.maxY())
+    minXIntercept = topLeftRect.maxX() -
+                    cornerRectIntercept(topLeftRect.maxY() - y, topLeftRect);
+  else if (!bottomLeftRect.isEmpty() && y >= bottomLeftRect.y() &&
+           y <= bottomLeftRect.maxY())
+    minXIntercept = bottomLeftRect.maxX() -
+                    cornerRectIntercept(y - bottomLeftRect.y(), bottomLeftRect);
+  else
+    minXIntercept = m_rect.x();
+
+  const FloatRect& topRightRect = topRightCorner();
+  const FloatRect& bottomRightRect = bottomRightCorner();
+
+  if (!topRightRect.isEmpty() && y >= topRightRect.y() &&
+      y <= topRightRect.maxY())
+    maxXIntercept = topRightRect.x() +
+                    cornerRectIntercept(topRightRect.maxY() - y, topRightRect);
+  else if (!bottomRightRect.isEmpty() && y >= bottomRightRect.y() &&
+           y <= bottomRightRect.maxY())
+    maxXIntercept =
+        bottomRightRect.x() +
+        cornerRectIntercept(y - bottomRightRect.y(), bottomRightRect);
+  else
+    maxXIntercept = m_rect.maxX();
+
+  return true;
 }
 
-} // namespace blink
+}  // namespace blink

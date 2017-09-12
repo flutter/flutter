@@ -168,7 +168,7 @@ void VulkanSurfacePool::TraceStats() {
                 "SkiaCacheResources", skia_resources,             //
                 "SkiaCacheBytes", skia_bytes,                     //
                 "SkiaCachePurgeable", skia_cache_purgeable        //
-                );
+  );
 
   // Reset per present/frame stats.
   trace_surfaces_created_ = 0;

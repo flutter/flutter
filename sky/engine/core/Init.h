@@ -34,20 +34,20 @@
 namespace blink {
 
 class CoreInitializer {
-public:
-    CoreInitializer() : m_isInited(false) { }
-    // Should be called by clients before trying to create Frames.
-    virtual void init();
+ public:
+  CoreInitializer() : m_isInited(false) {}
+  // Should be called by clients before trying to create Frames.
+  virtual void init();
 
-    // FIXME: Why is this function static?
-    static void shutdown();
+  // FIXME: Why is this function static?
+  static void shutdown();
 
-protected:
-    bool isInitialized() const { return m_isInited; }
+ protected:
+  bool isInitialized() const { return m_isInited; }
 
-    bool m_isInited;
+  bool m_isInited;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_INIT_H_

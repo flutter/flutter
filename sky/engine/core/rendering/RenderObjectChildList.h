@@ -34,36 +34,40 @@ namespace blink {
 class RenderObject;
 
 class RenderObjectChildList {
-    DISALLOW_ALLOCATION();
-public:
-    RenderObjectChildList()
-        : m_firstChild(nullptr)
-        , m_lastChild(nullptr)
-    {
-    }
+  DISALLOW_ALLOCATION();
 
-    RenderObject* firstChild() const { return m_firstChild; }
-    RenderObject* lastChild() const { return m_lastChild; }
+ public:
+  RenderObjectChildList() : m_firstChild(nullptr), m_lastChild(nullptr) {}
 
-    // FIXME: Temporary while RenderBox still exists. Eventually this will just happen during insert/append/remove methods on the child list, and nobody
-    // will need to manipulate firstChild or lastChild directly.
-    void setFirstChild(RenderObject* child) { m_firstChild = child; }
-    void setLastChild(RenderObject* child) { m_lastChild = child; }
+  RenderObject* firstChild() const { return m_firstChild; }
+  RenderObject* lastChild() const { return m_lastChild; }
 
-    void destroyLeftoverChildren();
+  // FIXME: Temporary while RenderBox still exists. Eventually this will just
+  // happen during insert/append/remove methods on the child list, and nobody
+  // will need to manipulate firstChild or lastChild directly.
+  void setFirstChild(RenderObject* child) { m_firstChild = child; }
+  void setLastChild(RenderObject* child) { m_lastChild = child; }
 
-    RenderObject* removeChildNode(RenderObject* owner, RenderObject*, bool notifyRenderer = true);
-    void insertChildNode(RenderObject* owner, RenderObject* newChild, RenderObject* beforeChild, bool notifyRenderer = true);
-    void appendChildNode(RenderObject* owner, RenderObject* newChild, bool notifyRenderer = true)
-    {
-        insertChildNode(owner, newChild, 0, notifyRenderer);
-    }
+  void destroyLeftoverChildren();
 
-private:
-    RenderObject* m_firstChild;
-    RenderObject* m_lastChild;
+  RenderObject* removeChildNode(RenderObject* owner,
+                                RenderObject*,
+                                bool notifyRenderer = true);
+  void insertChildNode(RenderObject* owner,
+                       RenderObject* newChild,
+                       RenderObject* beforeChild,
+                       bool notifyRenderer = true);
+  void appendChildNode(RenderObject* owner,
+                       RenderObject* newChild,
+                       bool notifyRenderer = true) {
+    insertChildNode(owner, newChild, 0, notifyRenderer);
+  }
+
+ private:
+  RenderObject* m_firstChild;
+  RenderObject* m_lastChild;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDEROBJECTCHILDLIST_H_

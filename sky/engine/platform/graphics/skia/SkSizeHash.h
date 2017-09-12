@@ -32,54 +32,60 @@
 
 namespace WTF {
 
-template<> struct IntHash<SkSize> {
-    static unsigned hash(const SkSize& key) { return pairIntHash(key.width(), key.height()); }
-    static bool equal(const SkSize& a, const SkSize& b) { return a == b; }
-    static const bool safeToCompareToEmptyOrDeleted = true;
+template <>
+struct IntHash<SkSize> {
+  static unsigned hash(const SkSize& key) {
+    return pairIntHash(key.width(), key.height());
+  }
+  static bool equal(const SkSize& a, const SkSize& b) { return a == b; }
+  static const bool safeToCompareToEmptyOrDeleted = true;
 };
 
-template<> struct DefaultHash<SkSize> {
-    typedef IntHash<SkSize> Hash;
+template <>
+struct DefaultHash<SkSize> {
+  typedef IntHash<SkSize> Hash;
 };
 
-template<> struct HashTraits<SkSize> : GenericHashTraits<SkSize> {
-    static const bool emptyValueIsZero = true;
-    static const bool needsDestruction = false;
-    static SkSize emptyValue() { return SkSize::Make(0, 0); }
-    static void constructDeletedValue(SkSize& slot, bool)
-    {
-        slot = SkSize::Make(-1, -1);
-    }
-    static bool isDeletedValue(const SkSize& value)
-    {
-        return value.width() == -1 && value.height() == -1;
-    }
+template <>
+struct HashTraits<SkSize> : GenericHashTraits<SkSize> {
+  static const bool emptyValueIsZero = true;
+  static const bool needsDestruction = false;
+  static SkSize emptyValue() { return SkSize::Make(0, 0); }
+  static void constructDeletedValue(SkSize& slot, bool) {
+    slot = SkSize::Make(-1, -1);
+  }
+  static bool isDeletedValue(const SkSize& value) {
+    return value.width() == -1 && value.height() == -1;
+  }
 };
 
-template<> struct IntHash<SkISize> {
-    static unsigned hash(const SkISize& key) { return pairIntHash(key.width(), key.height()); }
-    static bool equal(const SkISize& a, const SkISize& b) { return a == b; }
-    static const bool safeToCompareToEmptyOrDeleted = true;
+template <>
+struct IntHash<SkISize> {
+  static unsigned hash(const SkISize& key) {
+    return pairIntHash(key.width(), key.height());
+  }
+  static bool equal(const SkISize& a, const SkISize& b) { return a == b; }
+  static const bool safeToCompareToEmptyOrDeleted = true;
 };
 
-template<> struct DefaultHash<SkISize> {
-    typedef IntHash<SkISize> Hash;
+template <>
+struct DefaultHash<SkISize> {
+  typedef IntHash<SkISize> Hash;
 };
 
-template<> struct HashTraits<SkISize> : GenericHashTraits<SkISize> {
-    static const bool emptyValueIsZero = true;
-    static const bool needsDestruction = false;
-    static SkISize emptyValue() { return SkISize::Make(0, 0); }
-    static void constructDeletedValue(SkISize& slot, bool)
-    {
-        slot = SkISize::Make(-1, -1);
-    }
-    static bool isDeletedValue(const SkISize& value)
-    {
-        return value.width() == -1 && value.height() == -1;
-    }
+template <>
+struct HashTraits<SkISize> : GenericHashTraits<SkISize> {
+  static const bool emptyValueIsZero = true;
+  static const bool needsDestruction = false;
+  static SkISize emptyValue() { return SkISize::Make(0, 0); }
+  static void constructDeletedValue(SkISize& slot, bool) {
+    slot = SkISize::Make(-1, -1);
+  }
+  static bool isDeletedValue(const SkISize& value) {
+    return value.width() == -1 && value.height() == -1;
+  }
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_SKIA_SKSIZEHASH_H_

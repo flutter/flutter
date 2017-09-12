@@ -35,75 +35,57 @@
 namespace blink {
 
 class IntRectExtent {
-public:
-    IntRectExtent()
-        : m_top(0)
-        , m_right(0)
-        , m_bottom(0)
-        , m_left(0)
-    {
-    }
+ public:
+  IntRectExtent() : m_top(0), m_right(0), m_bottom(0), m_left(0) {}
 
-    IntRectExtent(int top, int right, int bottom, int left)
-        : m_top(top)
-        , m_right(right)
-        , m_bottom(bottom)
-        , m_left(left)
-    {
-    }
+  IntRectExtent(int top, int right, int bottom, int left)
+      : m_top(top), m_right(right), m_bottom(bottom), m_left(left) {}
 
-    int top() const { return m_top; }
-    void setTop(int top) { m_top = top; }
+  int top() const { return m_top; }
+  void setTop(int top) { m_top = top; }
 
-    int right() const { return m_right; }
-    void setRight(int right) { m_right = right; }
+  int right() const { return m_right; }
+  void setRight(int right) { m_right = right; }
 
-    int bottom() const { return m_bottom; }
-    void setBottom(int bottom) { m_bottom = bottom; }
+  int bottom() const { return m_bottom; }
+  void setBottom(int bottom) { m_bottom = bottom; }
 
-    int left() const { return m_left; }
-    void setLeft(int left) { m_left = left; }
+  int left() const { return m_left; }
+  void setLeft(int left) { m_left = left; }
 
-    bool isZero() const { return !left() && !right() && !top() && !bottom(); }
+  bool isZero() const { return !left() && !right() && !top() && !bottom(); }
 
-    void expandRect(LayoutRect& rect) const
-    {
-        if (isZero())
-            return;
+  void expandRect(LayoutRect& rect) const {
+    if (isZero())
+      return;
 
-        rect.move(-left(), -top());
-        rect.expand(left() + right(), top() + bottom());
-    }
+    rect.move(-left(), -top());
+    rect.expand(left() + right(), top() + bottom());
+  }
 
-private:
-    int m_top;
-    int m_right;
-    int m_bottom;
-    int m_left;
+ private:
+  int m_top;
+  int m_right;
+  int m_bottom;
+  int m_left;
 };
 
-inline bool operator==(const IntRectExtent& a, const IntRectExtent& b)
-{
-    return a.top() == b.top()
-        && a.right() == b.right()
-        && a.bottom() == b.bottom()
-        && a.left() == b.left();
+inline bool operator==(const IntRectExtent& a, const IntRectExtent& b) {
+  return a.top() == b.top() && a.right() == b.right() &&
+         a.bottom() == b.bottom() && a.left() == b.left();
 }
 
-inline bool operator!=(const IntRectExtent& a, const IntRectExtent& b)
-{
-    return !(a == b);
+inline bool operator!=(const IntRectExtent& a, const IntRectExtent& b) {
+  return !(a == b);
 }
 
-inline void operator+=(IntRectExtent& a, const IntRectExtent& b)
-{
-    a.setTop(a.top() + b.top());
-    a.setRight(a.right() + b.right());
-    a.setBottom(a.bottom() + b.bottom());
-    a.setLeft(a.left() + b.left());
+inline void operator+=(IntRectExtent& a, const IntRectExtent& b) {
+  a.setTop(a.top() + b.top());
+  a.setRight(a.right() + b.right());
+  a.setBottom(a.bottom() + b.bottom());
+  a.setLeft(a.left() + b.left());
 }
 
-} // namespace blink
-
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTRECTEXTENT_H_

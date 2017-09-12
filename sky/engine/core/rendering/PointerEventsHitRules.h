@@ -26,24 +26,24 @@
 namespace blink {
 
 class PointerEventsHitRules {
-public:
-    enum EHitTesting {
-        SVG_IMAGE_HITTESTING,
-        SVG_GEOMETRY_HITTESTING,
-        SVG_TEXT_HITTESTING
-    };
+ public:
+  enum EHitTesting {
+    SVG_IMAGE_HITTESTING,
+    SVG_GEOMETRY_HITTESTING,
+    SVG_TEXT_HITTESTING
+  };
 
-    PointerEventsHitRules(EHitTesting, const HitTestRequest&, EPointerEvents);
+  PointerEventsHitRules(EHitTesting, const HitTestRequest&, EPointerEvents);
 
-    bool requireVisible;
-    bool requireFill;
-    bool requireStroke;
-    bool canHitStroke;
-    bool canHitFill;
-    bool canHitBoundingBox;
+  bool requireVisible;
+  bool requireFill;
+  bool requireStroke;
+  bool canHitStroke;
+  bool canHitFill;
+  bool canHitBoundingBox;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_POINTEREVENTSHITRULES_H_
 

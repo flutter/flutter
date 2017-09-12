@@ -102,7 +102,7 @@ final List<RegExp> copyrightStatementPatterns = <RegExp>[
   new RegExp(r'[-_a-zA-Z0-9()]+ function provided freely by .+'), // TODO(ianh): file a bug on analyzer about what happens if you omit this comma
   new RegExp(r'^.+ optimized code \(C\) COPYRIGHT .+$', caseSensitive: false),
   new RegExp(r'^\(Royal Institute of Technology, Stockholm, Sweden\)\.$'),
-  new RegExp(r'^https?://[^ ]+$'),
+  new RegExp(r'^\(?https?://[^ ]+$\)?'),
 
   new RegExp(r'^The Original Code is Mozilla Communicator client code, released$'),
   new RegExp(r'^March 31, 1998.$'), // mozilla first release date
@@ -1034,7 +1034,7 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2You should have received a copy of the (GNU Lesser) General Public *\n'
       r'^\1\2License along with this library; if not, write to the Free Software *\n'
-      r'^\1\2Foundation, Inc\., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA *\n'
+      r'^\1\2Foundation, Inc\., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 +USA *\n'
       r'^(?:(?:\1\2? *)? *\n)*'
       r'^\1\2Alternatively, the contents of this file may be used under the terms *\n'
       r'^\1\2of either the Mozilla Public License Version 1\.1, found at *\n'

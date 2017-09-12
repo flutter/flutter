@@ -37,44 +37,45 @@
 
 namespace WTF {
 
-// Holds ThreadIdentifier in the thread-specific storage and employs pthreads-specific 2-pass destruction to reliably remove
-// ThreadIdentifier from threadMap. It assumes regular ThreadSpecific types don't use multiple-pass destruction.
+// Holds ThreadIdentifier in the thread-specific storage and employs
+// pthreads-specific 2-pass destruction to reliably remove ThreadIdentifier from
+// threadMap. It assumes regular ThreadSpecific types don't use multiple-pass
+// destruction.
 class ThreadIdentifierData {
-    WTF_MAKE_NONCOPYABLE(ThreadIdentifierData);
-public:
-    ~ThreadIdentifierData();
+  WTF_MAKE_NONCOPYABLE(ThreadIdentifierData);
 
-    // One time initialization for this class as a whole.
-    // This method must be called before initialize() and it is not thread-safe.
-    static void initializeOnce();
+ public:
+  ~ThreadIdentifierData();
 
-    // Creates and puts an instance of ThreadIdentifierData into thread-specific storage.
-    static void initialize(ThreadIdentifier identifier);
+  // One time initialization for this class as a whole.
+  // This method must be called before initialize() and it is not thread-safe.
+  static void initializeOnce();
 
-    // Returns 0 if thread-specific storage was not initialized.
-    static ThreadIdentifier identifier();
+  // Creates and puts an instance of ThreadIdentifierData into thread-specific
+  // storage.
+  static void initialize(ThreadIdentifier identifier);
 
-private:
-    ThreadIdentifierData(ThreadIdentifier identifier)
-        : m_identifier(identifier)
-        , m_isDestroyedOnce(false)
-    {
-    }
+  // Returns 0 if thread-specific storage was not initialized.
+  static ThreadIdentifier identifier();
 
-    // This thread-specific destructor is called 2 times when thread terminates:
-    // - first, when all the other thread-specific destructors are called, it simply remembers it was 'destroyed once'
-    // and re-sets itself into the thread-specific slot to make Pthreads to call it again later.
-    // - second, after all thread-specific destructors were invoked, it gets called again - this time, we remove the
-    // ThreadIdentifier from the threadMap, completing the cleanup.
-    static void destruct(void* data);
+ private:
+  ThreadIdentifierData(ThreadIdentifier identifier)
+      : m_identifier(identifier), m_isDestroyedOnce(false) {}
 
-    ThreadIdentifier m_identifier;
-    bool m_isDestroyedOnce;
-    static pthread_key_t m_key;
+  // This thread-specific destructor is called 2 times when thread terminates:
+  // - first, when all the other thread-specific destructors are called, it
+  // simply remembers it was 'destroyed once' and re-sets itself into the
+  // thread-specific slot to make Pthreads to call it again later.
+  // - second, after all thread-specific destructors were invoked, it gets
+  // called again - this time, we remove the ThreadIdentifier from the
+  // threadMap, completing the cleanup.
+  static void destruct(void* data);
+
+  ThreadIdentifier m_identifier;
+  bool m_isDestroyedOnce;
+  static pthread_key_t m_key;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_THREADIDENTIFIERDATAPTHREADS_H_
-
-

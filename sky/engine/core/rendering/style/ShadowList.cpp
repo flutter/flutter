@@ -35,78 +35,85 @@
 
 namespace blink {
 
-static inline void calculateShadowExtent(const ShadowList* shadowList, float& shadowLeft, float& shadowRight, float& shadowTop, float& shadowBottom)
-{
-    ASSERT(shadowList);
-    size_t shadowCount = shadowList->shadows().size();
-    for (size_t i = 0; i < shadowCount; ++i) {
-        const ShadowData& shadow = shadowList->shadows()[i];
-        if (shadow.style() == Inset)
-            continue;
-        float blurAndSpread = shadow.blur() + shadow.spread();
-        shadowLeft = std::min(shadow.x() - blurAndSpread, shadowLeft);
-        shadowRight = std::max(shadow.x() + blurAndSpread, shadowRight);
-        shadowTop = std::min(shadow.y() - blurAndSpread, shadowTop);
-        shadowBottom = std::max(shadow.y() + blurAndSpread, shadowBottom);
-    }
+static inline void calculateShadowExtent(const ShadowList* shadowList,
+                                         float& shadowLeft,
+                                         float& shadowRight,
+                                         float& shadowTop,
+                                         float& shadowBottom) {
+  ASSERT(shadowList);
+  size_t shadowCount = shadowList->shadows().size();
+  for (size_t i = 0; i < shadowCount; ++i) {
+    const ShadowData& shadow = shadowList->shadows()[i];
+    if (shadow.style() == Inset)
+      continue;
+    float blurAndSpread = shadow.blur() + shadow.spread();
+    shadowLeft = std::min(shadow.x() - blurAndSpread, shadowLeft);
+    shadowRight = std::max(shadow.x() + blurAndSpread, shadowRight);
+    shadowTop = std::min(shadow.y() - blurAndSpread, shadowTop);
+    shadowBottom = std::max(shadow.y() + blurAndSpread, shadowBottom);
+  }
 }
 
-void ShadowList::adjustRectForShadow(LayoutRect& rect) const
-{
-    FloatRect floatRect(rect);
-    adjustRectForShadow(floatRect);
-    rect = LayoutRect(floatRect);
+void ShadowList::adjustRectForShadow(LayoutRect& rect) const {
+  FloatRect floatRect(rect);
+  adjustRectForShadow(floatRect);
+  rect = LayoutRect(floatRect);
 }
 
-void ShadowList::adjustRectForShadow(FloatRect& rect) const
-{
-    float shadowLeft = 0;
-    float shadowRight = 0;
-    float shadowTop = 0;
-    float shadowBottom = 0;
-    calculateShadowExtent(this, shadowLeft, shadowRight, shadowTop, shadowBottom);
+void ShadowList::adjustRectForShadow(FloatRect& rect) const {
+  float shadowLeft = 0;
+  float shadowRight = 0;
+  float shadowTop = 0;
+  float shadowBottom = 0;
+  calculateShadowExtent(this, shadowLeft, shadowRight, shadowTop, shadowBottom);
 
-    rect.move(shadowLeft, shadowTop);
-    rect.setWidth(rect.width() - shadowLeft + shadowRight);
-    rect.setHeight(rect.height() - shadowTop + shadowBottom);
+  rect.move(shadowLeft, shadowTop);
+  rect.setWidth(rect.width() - shadowLeft + shadowRight);
+  rect.setHeight(rect.height() - shadowTop + shadowBottom);
 }
 
-PassRefPtr<ShadowList> ShadowList::blend(const ShadowList* from, const ShadowList* to, double progress)
-{
-    size_t fromLength = from ? from->shadows().size() : 0;
-    size_t toLength = to ? to->shadows().size() : 0;
-    if (!fromLength && !toLength)
-        return nullptr;
+PassRefPtr<ShadowList> ShadowList::blend(const ShadowList* from,
+                                         const ShadowList* to,
+                                         double progress) {
+  size_t fromLength = from ? from->shadows().size() : 0;
+  size_t toLength = to ? to->shadows().size() : 0;
+  if (!fromLength && !toLength)
+    return nullptr;
 
-    ShadowDataVector shadows;
+  ShadowDataVector shadows;
 
-    DEFINE_STATIC_LOCAL(ShadowData, defaultShadowData, (FloatPoint(), 0, 0, Normal, Color::transparent));
-    DEFINE_STATIC_LOCAL(ShadowData, defaultInsetShadowData, (FloatPoint(), 0, 0, Inset, Color::transparent));
+  DEFINE_STATIC_LOCAL(ShadowData, defaultShadowData,
+                      (FloatPoint(), 0, 0, Normal, Color::transparent));
+  DEFINE_STATIC_LOCAL(ShadowData, defaultInsetShadowData,
+                      (FloatPoint(), 0, 0, Inset, Color::transparent));
 
-    size_t maxLength = std::max(fromLength, toLength);
-    for (size_t i = 0; i < maxLength; ++i) {
-        const ShadowData* fromShadow = i < fromLength ? &from->shadows()[i] : 0;
-        const ShadowData* toShadow = i < toLength ? &to->shadows()[i] : 0;
-        if (!fromShadow)
-            fromShadow = toShadow->style() == Inset ? &defaultInsetShadowData : &defaultShadowData;
-        else if (!toShadow)
-            toShadow = fromShadow->style() == Inset ? &defaultInsetShadowData : &defaultShadowData;
-        shadows.append(toShadow->blend(*fromShadow, progress));
-    }
+  size_t maxLength = std::max(fromLength, toLength);
+  for (size_t i = 0; i < maxLength; ++i) {
+    const ShadowData* fromShadow = i < fromLength ? &from->shadows()[i] : 0;
+    const ShadowData* toShadow = i < toLength ? &to->shadows()[i] : 0;
+    if (!fromShadow)
+      fromShadow = toShadow->style() == Inset ? &defaultInsetShadowData
+                                              : &defaultShadowData;
+    else if (!toShadow)
+      toShadow = fromShadow->style() == Inset ? &defaultInsetShadowData
+                                              : &defaultShadowData;
+    shadows.append(toShadow->blend(*fromShadow, progress));
+  }
 
-    return ShadowList::adopt(shadows);
+  return ShadowList::adopt(shadows);
 }
 
-PassOwnPtr<DrawLooperBuilder> ShadowList::createDrawLooper(DrawLooperBuilder::ShadowAlphaMode alphaMode) const
-{
-    OwnPtr<DrawLooperBuilder> drawLooperBuilder = DrawLooperBuilder::create();
-    for (size_t i = shadows().size(); i--; ) {
-        const ShadowData& shadow = shadows()[i];
-        drawLooperBuilder->addShadow(FloatSize(shadow.x(), shadow.y()), shadow.blur(), shadow.color(),
-            DrawLooperBuilder::ShadowRespectsTransforms, alphaMode);
-    }
-    drawLooperBuilder->addUnmodifiedContent();
-    return drawLooperBuilder.release();
+PassOwnPtr<DrawLooperBuilder> ShadowList::createDrawLooper(
+    DrawLooperBuilder::ShadowAlphaMode alphaMode) const {
+  OwnPtr<DrawLooperBuilder> drawLooperBuilder = DrawLooperBuilder::create();
+  for (size_t i = shadows().size(); i--;) {
+    const ShadowData& shadow = shadows()[i];
+    drawLooperBuilder->addShadow(
+        FloatSize(shadow.x(), shadow.y()), shadow.blur(), shadow.color(),
+        DrawLooperBuilder::ShadowRespectsTransforms, alphaMode);
+  }
+  drawLooperBuilder->addUnmodifiedContent();
+  return drawLooperBuilder.release();
 }
 
-} // namespace blink
+}  // namespace blink

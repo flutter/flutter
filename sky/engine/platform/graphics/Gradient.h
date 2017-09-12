@@ -44,104 +44,115 @@ class SkShader;
 namespace blink {
 
 class PLATFORM_EXPORT Gradient : public RefCounted<Gradient> {
-public:
-    static PassRefPtr<Gradient> create(const FloatPoint& p0, const FloatPoint& p1)
-    {
-        return adoptRef(new Gradient(p0, p1));
-    }
-    static PassRefPtr<Gradient> create(const FloatPoint& p0, float r0, const FloatPoint& p1, float r1, float aspectRatio = 1)
-    {
-        return adoptRef(new Gradient(p0, r0, p1, r1, aspectRatio));
-    }
-    ~Gradient();
+ public:
+  static PassRefPtr<Gradient> create(const FloatPoint& p0,
+                                     const FloatPoint& p1) {
+    return adoptRef(new Gradient(p0, p1));
+  }
+  static PassRefPtr<Gradient> create(const FloatPoint& p0,
+                                     float r0,
+                                     const FloatPoint& p1,
+                                     float r1,
+                                     float aspectRatio = 1) {
+    return adoptRef(new Gradient(p0, r0, p1, r1, aspectRatio));
+  }
+  ~Gradient();
 
-    struct ColorStop {
-        float stop;
-        Color color;
+  struct ColorStop {
+    float stop;
+    Color color;
 
-        ColorStop(float s, const Color& c) : stop(s), color(c) { }
-    };
-    void addColorStop(const ColorStop&);
-    void addColorStop(float value, const Color& color) { addColorStop(ColorStop(value, color)); }
+    ColorStop(float s, const Color& c) : stop(s), color(c) {}
+  };
+  void addColorStop(const ColorStop&);
+  void addColorStop(float value, const Color& color) {
+    addColorStop(ColorStop(value, color));
+  }
 
-    bool hasAlpha() const;
-    bool shaderChanged() const { return !m_gradient; }
+  bool hasAlpha() const;
+  bool shaderChanged() const { return !m_gradient; }
 
-    bool isRadial() const { return m_radial; }
-    bool isZeroSize() const { return m_p0.x() == m_p1.x() && m_p0.y() == m_p1.y() && (!m_radial || m_r0 == m_r1); }
+  bool isRadial() const { return m_radial; }
+  bool isZeroSize() const {
+    return m_p0.x() == m_p1.x() && m_p0.y() == m_p1.y() &&
+           (!m_radial || m_r0 == m_r1);
+  }
 
-    const FloatPoint& p0() const { return m_p0; }
-    const FloatPoint& p1() const { return m_p1; }
+  const FloatPoint& p0() const { return m_p0; }
+  const FloatPoint& p1() const { return m_p1; }
 
-    void setP0(const FloatPoint& p)
-    {
-        if (m_p0 == p)
-            return;
+  void setP0(const FloatPoint& p) {
+    if (m_p0 == p)
+      return;
 
-        m_p0 = p;
-    }
+    m_p0 = p;
+  }
 
-    void setP1(const FloatPoint& p)
-    {
-        if (m_p1 == p)
-            return;
+  void setP1(const FloatPoint& p) {
+    if (m_p1 == p)
+      return;
 
-        m_p1 = p;
-    }
+    m_p1 = p;
+  }
 
-    float startRadius() const { return m_r0; }
-    float endRadius() const { return m_r1; }
+  float startRadius() const { return m_r0; }
+  float endRadius() const { return m_r1; }
 
-    void setStartRadius(float r)
-    {
-        if (m_r0 == r)
-            return;
+  void setStartRadius(float r) {
+    if (m_r0 == r)
+      return;
 
-        m_r0 = r;
-    }
+    m_r0 = r;
+  }
 
-    void setEndRadius(float r)
-    {
-        if (m_r1 == r)
-            return;
+  void setEndRadius(float r) {
+    if (m_r1 == r)
+      return;
 
-        m_r1 = r;
-    }
+    m_r1 = r;
+  }
 
-    float aspectRatio() const { return m_aspectRatio; }
+  float aspectRatio() const { return m_aspectRatio; }
 
-    sk_sp<SkShader> shader();
+  sk_sp<SkShader> shader();
 
-    void setDrawsInPMColorSpace(bool drawInPMColorSpace);
+  void setDrawsInPMColorSpace(bool drawInPMColorSpace);
 
-    void setSpreadMethod(GradientSpreadMethod);
-    GradientSpreadMethod spreadMethod() { return m_spreadMethod; }
-    void setGradientSpaceTransform(const AffineTransform& gradientSpaceTransformation);
-    AffineTransform gradientSpaceTransform() { return m_gradientSpaceTransformation; }
+  void setSpreadMethod(GradientSpreadMethod);
+  GradientSpreadMethod spreadMethod() { return m_spreadMethod; }
+  void setGradientSpaceTransform(
+      const AffineTransform& gradientSpaceTransformation);
+  AffineTransform gradientSpaceTransform() {
+    return m_gradientSpaceTransformation;
+  }
 
-private:
-    Gradient(const FloatPoint& p0, const FloatPoint& p1);
-    Gradient(const FloatPoint& p0, float r0, const FloatPoint& p1, float r1, float aspectRatio);
+ private:
+  Gradient(const FloatPoint& p0, const FloatPoint& p1);
+  Gradient(const FloatPoint& p0,
+           float r0,
+           const FloatPoint& p1,
+           float r1,
+           float aspectRatio);
 
-    void destroyShader();
+  void destroyShader();
 
-    void sortStopsIfNecessary();
+  void sortStopsIfNecessary();
 
-    FloatPoint m_p0;
-    FloatPoint m_p1;
-    float m_r0;
-    float m_r1;
-    float m_aspectRatio; // For elliptical gradient, width / height.
-    Vector<ColorStop, 2> m_stops;
-    bool m_radial;
-    bool m_stopsSorted;
-    bool m_drawInPMColorSpace;
-    GradientSpreadMethod m_spreadMethod;
-    AffineTransform m_gradientSpaceTransformation;
+  FloatPoint m_p0;
+  FloatPoint m_p1;
+  float m_r0;
+  float m_r1;
+  float m_aspectRatio;  // For elliptical gradient, width / height.
+  Vector<ColorStop, 2> m_stops;
+  bool m_radial;
+  bool m_stopsSorted;
+  bool m_drawInPMColorSpace;
+  GradientSpreadMethod m_spreadMethod;
+  AffineTransform m_gradientSpaceTransformation;
 
-    sk_sp<SkShader> m_gradient;
+  sk_sp<SkShader> m_gradient;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRADIENT_H_

@@ -30,20 +30,28 @@
 
 namespace WTF {
 
-    class TextCodecUserDefined final : public TextCodec {
-    public:
-        static void registerEncodingNames(EncodingNameRegistrar);
-        static void registerCodecs(TextCodecRegistrar);
+class TextCodecUserDefined final : public TextCodec {
+ public:
+  static void registerEncodingNames(EncodingNameRegistrar);
+  static void registerCodecs(TextCodecRegistrar);
 
-    private:
-        virtual String decode(const char*, size_t length, FlushBehavior, bool stopOnError, bool& sawError) override;
-        virtual CString encode(const UChar*, size_t length, UnencodableHandling) override;
-        virtual CString encode(const LChar*, size_t length, UnencodableHandling) override;
+ private:
+  virtual String decode(const char*,
+                        size_t length,
+                        FlushBehavior,
+                        bool stopOnError,
+                        bool& sawError) override;
+  virtual CString encode(const UChar*,
+                         size_t length,
+                         UnencodableHandling) override;
+  virtual CString encode(const LChar*,
+                         size_t length,
+                         UnencodableHandling) override;
 
-        template<typename CharType>
-        CString encodeCommon(const CharType*, size_t length, UnencodableHandling);
-    };
+  template <typename CharType>
+  CString encodeCommon(const CharType*, size_t length, UnencodableHandling);
+};
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_TEXT_TEXTCODECUSERDEFINED_H_

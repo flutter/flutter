@@ -43,7 +43,7 @@ WTF_EXPORT void initializeMainThread();
 
 WTF_EXPORT bool isMainThread();
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::isMainThread;
 #endif  // SKY_ENGINE_WTF_MAINTHREAD_H_

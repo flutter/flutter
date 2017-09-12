@@ -34,34 +34,38 @@
 
 namespace WTF {
 
-    struct AtomicStringHash {
-        static unsigned hash(const AtomicString& key)
-        {
-            return key.impl()->existingHash();
-        }
+struct AtomicStringHash {
+  static unsigned hash(const AtomicString& key) {
+    return key.impl()->existingHash();
+  }
 
-        static bool equal(const AtomicString& a, const AtomicString& b)
-        {
-            return a == b;
-        }
+  static bool equal(const AtomicString& a, const AtomicString& b) {
+    return a == b;
+  }
 
-        static const bool safeToCompareToEmptyOrDeleted = false;
-    };
+  static const bool safeToCompareToEmptyOrDeleted = false;
+};
 
-    // AtomicStringHash is the default hash for AtomicString
-    template<> struct HashTraits<WTF::AtomicString> : GenericHashTraits<WTF::AtomicString> {
-        // Unlike other types, we can return a const reference for AtomicString's empty value (nullAtom).
-        typedef const WTF::AtomicString& PeekOutType;
+// AtomicStringHash is the default hash for AtomicString
+template <>
+struct HashTraits<WTF::AtomicString> : GenericHashTraits<WTF::AtomicString> {
+  // Unlike other types, we can return a const reference for AtomicString's
+  // empty value (nullAtom).
+  typedef const WTF::AtomicString& PeekOutType;
 
-        static const WTF::AtomicString& emptyValue() { return nullAtom; }
-        static PeekOutType peek(const WTF::AtomicString& value) { return value; }
+  static const WTF::AtomicString& emptyValue() { return nullAtom; }
+  static PeekOutType peek(const WTF::AtomicString& value) { return value; }
 
-        static const bool emptyValueIsZero = true;
-        static void constructDeletedValue(WTF::AtomicString& slot, bool) { new (NotNull, &slot) WTF::AtomicString(HashTableDeletedValue); }
-        static bool isDeletedValue(const WTF::AtomicString& slot) { return slot.isHashTableDeletedValue(); }
-    };
+  static const bool emptyValueIsZero = true;
+  static void constructDeletedValue(WTF::AtomicString& slot, bool) {
+    new (NotNull, &slot) WTF::AtomicString(HashTableDeletedValue);
+  }
+  static bool isDeletedValue(const WTF::AtomicString& slot) {
+    return slot.isHashTableDeletedValue();
+  }
+};
 
-}
+}  // namespace WTF
 
 using WTF::AtomicStringHash;
 

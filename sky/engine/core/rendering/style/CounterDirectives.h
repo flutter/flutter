@@ -34,78 +34,71 @@
 namespace blink {
 
 class CounterDirectives {
-public:
-    CounterDirectives()
-        : m_isResetSet(false)
-        , m_isIncrementSet(false)
-        , m_resetValue(0)
-        , m_incrementValue(0)
-    {
-    }
+ public:
+  CounterDirectives()
+      : m_isResetSet(false),
+        m_isIncrementSet(false),
+        m_resetValue(0),
+        m_incrementValue(0) {}
 
-    // FIXME: The code duplication here could possibly be replaced by using two
-    // maps, or by using a container that held two generic Directive objects.
+  // FIXME: The code duplication here could possibly be replaced by using two
+  // maps, or by using a container that held two generic Directive objects.
 
-    bool isReset() const { return m_isResetSet; }
-    int resetValue() const { return m_resetValue; }
-    void setResetValue(int value)
-    {
-        m_resetValue = value;
-        m_isResetSet = true;
-    }
-    void clearReset()
-    {
-        m_resetValue = 0;
-        m_isResetSet = false;
-    }
-    void inheritReset(CounterDirectives& parent)
-    {
-        m_resetValue = parent.m_resetValue;
-        m_isResetSet = parent.m_isResetSet;
-    }
+  bool isReset() const { return m_isResetSet; }
+  int resetValue() const { return m_resetValue; }
+  void setResetValue(int value) {
+    m_resetValue = value;
+    m_isResetSet = true;
+  }
+  void clearReset() {
+    m_resetValue = 0;
+    m_isResetSet = false;
+  }
+  void inheritReset(CounterDirectives& parent) {
+    m_resetValue = parent.m_resetValue;
+    m_isResetSet = parent.m_isResetSet;
+  }
 
-    bool isIncrement() const { return m_isIncrementSet; }
-    int incrementValue() const { return m_incrementValue; }
-    void addIncrementValue(int value)
-    {
-        m_incrementValue = clampToInteger((double)m_incrementValue + value);
-        m_isIncrementSet = true;
-    }
-    void clearIncrement()
-    {
-        m_incrementValue = 0;
-        m_isIncrementSet = false;
-    }
-    void inheritIncrement(CounterDirectives& parent)
-    {
-        m_incrementValue = parent.m_incrementValue;
-        m_isIncrementSet = parent.m_isIncrementSet;
-    }
+  bool isIncrement() const { return m_isIncrementSet; }
+  int incrementValue() const { return m_incrementValue; }
+  void addIncrementValue(int value) {
+    m_incrementValue = clampToInteger((double)m_incrementValue + value);
+    m_isIncrementSet = true;
+  }
+  void clearIncrement() {
+    m_incrementValue = 0;
+    m_isIncrementSet = false;
+  }
+  void inheritIncrement(CounterDirectives& parent) {
+    m_incrementValue = parent.m_incrementValue;
+    m_isIncrementSet = parent.m_isIncrementSet;
+  }
 
-    bool isDefined() const { return isReset() || isIncrement(); }
+  bool isDefined() const { return isReset() || isIncrement(); }
 
-    int combinedValue() const
-    {
-        ASSERT(m_isResetSet || !m_resetValue);
-        ASSERT(m_isIncrementSet || !m_incrementValue);
-        // FIXME: Shouldn't allow overflow here.
-        return m_resetValue + m_incrementValue;
-    }
+  int combinedValue() const {
+    ASSERT(m_isResetSet || !m_resetValue);
+    ASSERT(m_isIncrementSet || !m_incrementValue);
+    // FIXME: Shouldn't allow overflow here.
+    return m_resetValue + m_incrementValue;
+  }
 
-private:
-    bool m_isResetSet;
-    bool m_isIncrementSet;
-    int m_resetValue;
-    int m_incrementValue;
+ private:
+  bool m_isResetSet;
+  bool m_isIncrementSet;
+  int m_resetValue;
+  int m_incrementValue;
 };
 
 bool operator==(const CounterDirectives&, const CounterDirectives&);
-inline bool operator!=(const CounterDirectives& a, const CounterDirectives& b) { return !(a == b); }
+inline bool operator!=(const CounterDirectives& a, const CounterDirectives& b) {
+  return !(a == b);
+}
 
 typedef HashMap<AtomicString, CounterDirectives> CounterDirectiveMap;
 
 PassOwnPtr<CounterDirectiveMap> clone(const CounterDirectiveMap&);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_COUNTERDIRECTIVES_H_

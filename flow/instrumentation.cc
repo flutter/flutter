@@ -87,8 +87,7 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
   const double sample_margin_unit_width = sample_unit_width / 6.0;
   const double sample_margin_width = width * sample_margin_unit_width;
   path.moveTo(x, bottom);
-  path.lineTo(x, y +
-                     height * (1.0 - UnitHeight(laps_[0].ToMillisecondsF(),
+  path.lineTo(x, y + height * (1.0 - UnitHeight(laps_[0].ToMillisecondsF(),
                                                 max_unit_interval)));
   double unit_x;
   double unit_next_x = 0.0;
@@ -96,16 +95,14 @@ void Stopwatch::Visualize(SkCanvas& canvas, const SkRect& rect) const {
     unit_x = unit_next_x;
     unit_next_x = (static_cast<double>(i + 1) / kMaxSamples);
     const double sample_y =
-        y +
-        height *
-            (1.0 - UnitHeight(laps_[i].ToMillisecondsF(), max_unit_interval));
+        y + height * (1.0 - UnitHeight(laps_[i].ToMillisecondsF(),
+                                       max_unit_interval));
     path.lineTo(x + width * unit_x + sample_margin_width, sample_y);
     path.lineTo(x + width * unit_next_x - sample_margin_width, sample_y);
   }
   path.lineTo(
       right,
-      y +
-          height * (1.0 - UnitHeight(laps_[kMaxSamples - 1].ToMillisecondsF(),
+      y + height * (1.0 - UnitHeight(laps_[kMaxSamples - 1].ToMillisecondsF(),
                                      max_unit_interval)));
   path.lineTo(right, bottom);
   path.close();

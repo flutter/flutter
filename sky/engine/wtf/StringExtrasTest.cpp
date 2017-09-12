@@ -23,7 +23,6 @@
  * THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <gtest/gtest.h>
 #include <limits>
 #include "flutter/sky/engine/wtf/StringExtras.h"
@@ -32,105 +31,128 @@
 
 namespace {
 
-template<typename IntegerType> struct PrintfFormatTrait { static const char format[]; };
+template <typename IntegerType>
+struct PrintfFormatTrait {
+  static const char format[];
+};
 
-template<> struct PrintfFormatTrait<short> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<short> {
+  static const char format[];
+};
 const char PrintfFormatTrait<short>::format[] = "%hd";
 
-template<> struct PrintfFormatTrait<int> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<int> {
+  static const char format[];
+};
 const char PrintfFormatTrait<int>::format[] = "%d";
 
-template<> struct PrintfFormatTrait<long> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<long> {
+  static const char format[];
+};
 const char PrintfFormatTrait<long>::format[] = "%ld";
 
-template<> struct PrintfFormatTrait<long long> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<long long> {
+  static const char format[];
+};
 #if OS(WIN)
 const char PrintfFormatTrait<long long>::format[] = "%I64i";
 #else
 const char PrintfFormatTrait<long long>::format[] = "%lli";
-#endif // OS(WIN)
+#endif  // OS(WIN)
 
-template<> struct PrintfFormatTrait<unsigned short> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<unsigned short> {
+  static const char format[];
+};
 const char PrintfFormatTrait<unsigned short>::format[] = "%hu";
 
-template<> struct PrintfFormatTrait<unsigned> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<unsigned> {
+  static const char format[];
+};
 const char PrintfFormatTrait<unsigned>::format[] = "%u";
 
-template<> struct PrintfFormatTrait<unsigned long> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<unsigned long> {
+  static const char format[];
+};
 const char PrintfFormatTrait<unsigned long>::format[] = "%lu";
 
-template<> struct PrintfFormatTrait<unsigned long long> { static const char format[]; };
+template <>
+struct PrintfFormatTrait<unsigned long long> {
+  static const char format[];
+};
 #if OS(WIN)
 const char PrintfFormatTrait<unsigned long long>::format[] = "%I64u";
 #else
 const char PrintfFormatTrait<unsigned long long>::format[] = "%llu";
-#endif // OS(WIN)
-
+#endif  // OS(WIN)
 
 // FIXME: use snprintf from StringExtras.h
-template<typename IntegerType>
-void testBoundaries()
-{
-    const unsigned bufferSize = 256;
-    Vector<char, bufferSize> buffer;
-    buffer.resize(bufferSize);
+template <typename IntegerType>
+void testBoundaries() {
+  const unsigned bufferSize = 256;
+  Vector<char, bufferSize> buffer;
+  buffer.resize(bufferSize);
 
-    const IntegerType min = std::numeric_limits<IntegerType>::min();
-    CString minStringData = String::number(min).latin1();
-    snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format, min);
-    EXPECT_STREQ(buffer.data(), minStringData.data());
+  const IntegerType min = std::numeric_limits<IntegerType>::min();
+  CString minStringData = String::number(min).latin1();
+  snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format,
+           min);
+  EXPECT_STREQ(buffer.data(), minStringData.data());
 
-    const IntegerType max = std::numeric_limits<IntegerType>::max();
-    CString maxStringData = String::number(max).latin1();
-    snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format, max);
-    EXPECT_STREQ(buffer.data(), maxStringData.data());
+  const IntegerType max = std::numeric_limits<IntegerType>::max();
+  CString maxStringData = String::number(max).latin1();
+  snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format,
+           max);
+  EXPECT_STREQ(buffer.data(), maxStringData.data());
 }
 
-template<typename IntegerType>
-void testNumbers()
-{
-    const unsigned bufferSize = 256;
-    Vector<char, bufferSize> buffer;
-    buffer.resize(bufferSize);
+template <typename IntegerType>
+void testNumbers() {
+  const unsigned bufferSize = 256;
+  Vector<char, bufferSize> buffer;
+  buffer.resize(bufferSize);
 
-    for (int i = -100; i < 100; ++i) {
-        const IntegerType number = static_cast<IntegerType>(i);
-        CString numberStringData = String::number(number).latin1();
-        snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format, number);
-        EXPECT_STREQ(buffer.data(), numberStringData.data());
-    }
+  for (int i = -100; i < 100; ++i) {
+    const IntegerType number = static_cast<IntegerType>(i);
+    CString numberStringData = String::number(number).latin1();
+    snprintf(buffer.data(), bufferSize, PrintfFormatTrait<IntegerType>::format,
+             number);
+    EXPECT_STREQ(buffer.data(), numberStringData.data());
+  }
 }
 
-TEST(StringExtraTest, IntegerToStringConversionSignedIntegerBoundaries)
-{
-    testBoundaries<short>();
-    testBoundaries<int>();
-    testBoundaries<long>();
-    testBoundaries<long long>();
+TEST(StringExtraTest, IntegerToStringConversionSignedIntegerBoundaries) {
+  testBoundaries<short>();
+  testBoundaries<int>();
+  testBoundaries<long>();
+  testBoundaries<long long>();
 }
 
-TEST(StringExtraTest, IntegerToStringConversionSignedIntegerRegularNumbers)
-{
-    testNumbers<short>();
-    testNumbers<int>();
-    testNumbers<long>();
-    testNumbers<long long>();
+TEST(StringExtraTest, IntegerToStringConversionSignedIntegerRegularNumbers) {
+  testNumbers<short>();
+  testNumbers<int>();
+  testNumbers<long>();
+  testNumbers<long long>();
 }
 
-TEST(StringExtraTest, IntegerToStringConversionUnsignedIntegerBoundaries)
-{
-    testBoundaries<unsigned short>();
-    testBoundaries<unsigned>();
-    testBoundaries<unsigned long>();
-    testBoundaries<unsigned long long>();
+TEST(StringExtraTest, IntegerToStringConversionUnsignedIntegerBoundaries) {
+  testBoundaries<unsigned short>();
+  testBoundaries<unsigned>();
+  testBoundaries<unsigned long>();
+  testBoundaries<unsigned long long>();
 }
 
-TEST(StringExtraTest, IntegerToStringConversionUnsignedIntegerRegularNumbers)
-{
-    testNumbers<unsigned short>();
-    testNumbers<unsigned>();
-    testNumbers<unsigned long>();
-    testNumbers<unsigned long long>();
+TEST(StringExtraTest, IntegerToStringConversionUnsignedIntegerRegularNumbers) {
+  testNumbers<unsigned short>();
+  testNumbers<unsigned>();
+  testNumbers<unsigned long>();
+  testNumbers<unsigned long long>();
 }
 
-} // namespace
+}  // namespace

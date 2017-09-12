@@ -14,6 +14,6 @@ namespace WTF {
 // space too badly.
 WTF_EXPORT void* getRandomPageBase();
 
-}
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_ADDRESSSPACERANDOMIZATION_H_

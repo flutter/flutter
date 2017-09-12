@@ -25,20 +25,22 @@ enum EAffinity { UPSTREAM, DOWNSTREAM };
 #define VP_UPSTREAM_IF_POSSIBLE UPSTREAM
 
 class PositionWithAffinity {
-public:
-    PositionWithAffinity(RenderObject* renderer, int offset, EAffinity = DOWNSTREAM);
-    ~PositionWithAffinity();
+ public:
+  PositionWithAffinity(RenderObject* renderer,
+                       int offset,
+                       EAffinity = DOWNSTREAM);
+  ~PositionWithAffinity();
 
-    RenderObject* renderer() const { return m_renderer; }
-    int offset() const { return m_offset; }
-    EAffinity affinity() const { return m_affinity; }
+  RenderObject* renderer() const { return m_renderer; }
+  int offset() const { return m_offset; }
+  EAffinity affinity() const { return m_affinity; }
 
-private:
-    RenderObject* m_renderer;
-    int m_offset;
-    EAffinity m_affinity;
+ private:
+  RenderObject* m_renderer;
+  int m_offset;
+  EAffinity m_affinity;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_EDITING_POSITIONWITHAFFINITY_H_

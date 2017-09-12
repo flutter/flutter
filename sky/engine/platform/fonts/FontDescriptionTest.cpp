@@ -23,98 +23,95 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "flutter/sky/engine/platform/fonts/FontDescription.h"
 
 #include <gtest/gtest.h>
 
 namespace blink {
 
-
-static inline void assertDescriptionMatchesMask(FontDescription& source, FontTraitsBitfield bitfield)
-{
-    FontDescription target;
-    target.setTraits(FontTraits(bitfield));
-    EXPECT_EQ(source.style(), target.style());
-    EXPECT_EQ(source.variant(), target.variant());
-    EXPECT_EQ(source.weight(), target.weight());
-    EXPECT_EQ(source.stretch(), target.stretch());
+static inline void assertDescriptionMatchesMask(FontDescription& source,
+                                                FontTraitsBitfield bitfield) {
+  FontDescription target;
+  target.setTraits(FontTraits(bitfield));
+  EXPECT_EQ(source.style(), target.style());
+  EXPECT_EQ(source.variant(), target.variant());
+  EXPECT_EQ(source.weight(), target.weight());
+  EXPECT_EQ(source.stretch(), target.stretch());
 }
 
-TEST(FontDescriptionTest, TestFontTraits)
-{
-    FontDescription source;
-    source.setStyle(FontStyleNormal);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeightNormal);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+TEST(FontDescriptionTest, TestFontTraits) {
+  FontDescription source;
+  source.setStyle(FontStyleNormal);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeightNormal);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleNormal);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeightNormal);
-    source.setStretch(FontStretchExtraCondensed);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleNormal);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeightNormal);
+  source.setStretch(FontStretchExtraCondensed);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight900);
-    source.setStretch(FontStretchUltraExpanded);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight900);
+  source.setStretch(FontStretchUltraExpanded);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantSmallCaps);
-    source.setWeight(FontWeight100);
-    source.setStretch(FontStretchExtraExpanded);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantSmallCaps);
+  source.setWeight(FontWeight100);
+  source.setStretch(FontStretchExtraExpanded);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight900);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight900);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight800);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight800);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight700);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight700);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight600);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight600);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight500);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight500);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight400);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight400);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight300);
-    source.setStretch(FontStretchUltraExpanded);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight300);
+  source.setStretch(FontStretchUltraExpanded);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 
-    source.setStyle(FontStyleItalic);
-    source.setVariant(FontVariantNormal);
-    source.setWeight(FontWeight200);
-    source.setStretch(FontStretchNormal);
-    assertDescriptionMatchesMask(source, source.traits().bitfield());
+  source.setStyle(FontStyleItalic);
+  source.setVariant(FontVariantNormal);
+  source.setWeight(FontWeight200);
+  source.setStretch(FontStretchNormal);
+  assertDescriptionMatchesMask(source, source.traits().bitfield());
 }
 
-} // namespace blink
+}  // namespace blink

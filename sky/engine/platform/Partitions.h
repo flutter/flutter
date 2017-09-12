@@ -37,23 +37,26 @@
 namespace blink {
 
 class PLATFORM_EXPORT Partitions {
-public:
-    static void init();
-    static void shutdown();
+ public:
+  static void init();
+  static void shutdown();
 
-    ALWAYS_INLINE static PartitionRoot* getObjectModelPartition() { return m_objectModelAllocator.root(); }
-    ALWAYS_INLINE static PartitionRoot* getRenderingPartition() { return m_renderingAllocator.root(); }
+  ALWAYS_INLINE static PartitionRoot* getObjectModelPartition() {
+    return m_objectModelAllocator.root();
+  }
+  ALWAYS_INLINE static PartitionRoot* getRenderingPartition() {
+    return m_renderingAllocator.root();
+  }
 
-    static size_t currentDOMMemoryUsage()
-    {
-        return m_objectModelAllocator.root()->totalSizeOfCommittedPages;
-    }
+  static size_t currentDOMMemoryUsage() {
+    return m_objectModelAllocator.root()->totalSizeOfCommittedPages;
+  }
 
-private:
-    static SizeSpecificPartitionAllocator<3072> m_objectModelAllocator;
-    static SizeSpecificPartitionAllocator<1024> m_renderingAllocator;
+ private:
+  static SizeSpecificPartitionAllocator<3072> m_objectModelAllocator;
+  static SizeSpecificPartitionAllocator<1024> m_renderingAllocator;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_PARTITIONS_H_

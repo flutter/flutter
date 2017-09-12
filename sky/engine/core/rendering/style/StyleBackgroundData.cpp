@@ -27,27 +27,23 @@
 namespace blink {
 
 StyleBackgroundData::StyleBackgroundData()
-    : m_background(BackgroundFillLayer, true)
-    , m_color(RenderStyle::initialBackgroundColor())
-{
-}
+    : m_background(BackgroundFillLayer, true),
+      m_color(RenderStyle::initialBackgroundColor()) {}
 
 StyleBackgroundData::StyleBackgroundData(const StyleBackgroundData& o)
-    : RefCounted<StyleBackgroundData>()
-    , m_background(o.m_background)
-    , m_color(o.m_color)
-    , m_outline(o.m_outline)
-{
+    : RefCounted<StyleBackgroundData>(),
+      m_background(o.m_background),
+      m_color(o.m_color),
+      m_outline(o.m_outline) {}
+
+bool StyleBackgroundData::operator==(const StyleBackgroundData& o) const {
+  return m_background == o.m_background && m_color == o.m_color &&
+         m_outline == o.m_outline;
 }
 
-bool StyleBackgroundData::operator==(const StyleBackgroundData& o) const
-{
-    return m_background == o.m_background && m_color == o.m_color && m_outline == o.m_outline;
+bool StyleBackgroundData::visuallyEqual(const StyleBackgroundData& o) const {
+  return m_background == o.m_background && m_color == o.m_color &&
+         m_outline.visuallyEqual(o.m_outline);
 }
 
-bool StyleBackgroundData::visuallyEqual(const StyleBackgroundData& o) const
-{
-    return m_background == o.m_background && m_color == o.m_color && m_outline.visuallyEqual(o.m_outline);
-}
-
-} // namespace blink
+}  // namespace blink

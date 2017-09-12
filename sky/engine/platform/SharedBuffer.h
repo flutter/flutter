@@ -38,78 +38,88 @@
 namespace blink {
 
 class PLATFORM_EXPORT SharedBuffer : public RefCounted<SharedBuffer> {
-public:
-    static PassRefPtr<SharedBuffer> create() { return adoptRef(new SharedBuffer); }
-    static PassRefPtr<SharedBuffer> create(size_t size) { return adoptRef(new SharedBuffer(size)); }
-    static PassRefPtr<SharedBuffer> create(const char* c, int i) { return adoptRef(new SharedBuffer(c, i)); }
-    static PassRefPtr<SharedBuffer> create(const unsigned char* c, int i) { return adoptRef(new SharedBuffer(c, i)); }
+ public:
+  static PassRefPtr<SharedBuffer> create() {
+    return adoptRef(new SharedBuffer);
+  }
+  static PassRefPtr<SharedBuffer> create(size_t size) {
+    return adoptRef(new SharedBuffer(size));
+  }
+  static PassRefPtr<SharedBuffer> create(const char* c, int i) {
+    return adoptRef(new SharedBuffer(c, i));
+  }
+  static PassRefPtr<SharedBuffer> create(const unsigned char* c, int i) {
+    return adoptRef(new SharedBuffer(c, i));
+  }
 
-    static PassRefPtr<SharedBuffer> createPurgeable(const char* c, int i) { return adoptRef(new SharedBuffer(c, i, PurgeableVector::Purgeable)); }
+  static PassRefPtr<SharedBuffer> createPurgeable(const char* c, int i) {
+    return adoptRef(new SharedBuffer(c, i, PurgeableVector::Purgeable));
+  }
 
-    static PassRefPtr<SharedBuffer> adoptVector(Vector<char>&);
+  static PassRefPtr<SharedBuffer> adoptVector(Vector<char>&);
 
-    ~SharedBuffer();
+  ~SharedBuffer();
 
-    // Calling this function will force internal segmented buffers to be merged
-    // into a flat buffer. Use getSomeData() whenever possible for better
-    // performance.
-    const char* data() const;
+  // Calling this function will force internal segmented buffers to be merged
+  // into a flat buffer. Use getSomeData() whenever possible for better
+  // performance.
+  const char* data() const;
 
-    unsigned size() const;
+  unsigned size() const;
 
-    bool isEmpty() const { return !size(); }
+  bool isEmpty() const { return !size(); }
 
-    void append(PassRefPtr<SharedBuffer>);
-    void append(const char*, unsigned);
-    void append(const Vector<char>&);
+  void append(PassRefPtr<SharedBuffer>);
+  void append(const char*, unsigned);
+  void append(const Vector<char>&);
 
-    void clear();
+  void clear();
 
-    PassRefPtr<SharedBuffer> copy() const;
+  PassRefPtr<SharedBuffer> copy() const;
 
-    // Return the number of consecutive bytes after "position". "data"
-    // points to the first byte.
-    // Return 0 when no more data left.
-    // When extracting all data with getSomeData(), the caller should
-    // repeat calling it until it returns 0.
-    // Usage:
-    //      const char* segment;
-    //      unsigned pos = 0;
-    //      while (unsigned length = sharedBuffer->getSomeData(segment, pos)) {
-    //          // Use the data. for example: decoder->decode(segment, length);
-    //          pos += length;
-    //      }
-    unsigned getSomeData(const char*& data, unsigned position = 0) const;
+  // Return the number of consecutive bytes after "position". "data"
+  // points to the first byte.
+  // Return 0 when no more data left.
+  // When extracting all data with getSomeData(), the caller should
+  // repeat calling it until it returns 0.
+  // Usage:
+  //      const char* segment;
+  //      unsigned pos = 0;
+  //      while (unsigned length = sharedBuffer->getSomeData(segment, pos)) {
+  //          // Use the data. for example: decoder->decode(segment, length);
+  //          pos += length;
+  //      }
+  unsigned getSomeData(const char*& data, unsigned position = 0) const;
 
-    // Creates an SkData and copies this SharedBuffer's contents to that
-    // SkData without merging segmented buffers into a flat buffer.
-    sk_sp<SkData> getAsSkData() const;
+  // Creates an SkData and copies this SharedBuffer's contents to that
+  // SkData without merging segmented buffers into a flat buffer.
+  sk_sp<SkData> getAsSkData() const;
 
-    // See PurgeableVector::lock().
-    bool lock();
+  // See PurgeableVector::lock().
+  bool lock();
 
-    // WARNING: Calling unlock() on a SharedBuffer that wasn't created with the
-    // purgeability option does an extra memcpy(). Please use
-    // SharedBuffer::createPurgeable() if you intend to call unlock().
-    void unlock();
+  // WARNING: Calling unlock() on a SharedBuffer that wasn't created with the
+  // purgeability option does an extra memcpy(). Please use
+  // SharedBuffer::createPurgeable() if you intend to call unlock().
+  void unlock();
 
-    bool isLocked() const;
+  bool isLocked() const;
 
-private:
-    SharedBuffer();
-    explicit SharedBuffer(size_t);
-    SharedBuffer(const char*, int);
-    SharedBuffer(const char*, int, PurgeableVector::PurgeableOption);
-    SharedBuffer(const unsigned char*, int);
+ private:
+  SharedBuffer();
+  explicit SharedBuffer(size_t);
+  SharedBuffer(const char*, int);
+  SharedBuffer(const char*, int, PurgeableVector::PurgeableOption);
+  SharedBuffer(const unsigned char*, int);
 
-    // See SharedBuffer::data().
-    void mergeSegmentsIntoBuffer() const;
+  // See SharedBuffer::data().
+  void mergeSegmentsIntoBuffer() const;
 
-    unsigned m_size;
-    mutable PurgeableVector m_buffer;
-    mutable Vector<char*> m_segments;
+  unsigned m_size;
+  mutable PurgeableVector m_buffer;
+  mutable Vector<char*> m_segments;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_SHAREDBUFFER_H_

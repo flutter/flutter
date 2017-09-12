@@ -38,45 +38,40 @@ using namespace blink;
 namespace blink {
 
 // FIXME: Move this somewhere more generic.
-void PrintTo(const IntRect& rect, std::ostream* os)
-{
-    *os << "IntRect("
-        << rect.x() << ", "
-        << rect.y() << ", "
-        << rect.width() << ", "
-        << rect.height() << ")";
+void PrintTo(const IntRect& rect, std::ostream* os) {
+  *os << "IntRect(" << rect.x() << ", " << rect.y() << ", " << rect.width()
+      << ", " << rect.height() << ")";
 }
 
-} // namespace blink
+}  // namespace blink
 
 namespace {
 
-TEST(RoundedRectTest, RadiusCenterRectZeroRadius)
-{
-    RoundedRect rr(100, 200, 300, 400);
-    EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
-    EXPECT_EQ(IntRect(100, 200, 300, 400), rr.radiusCenterRect());
+TEST(RoundedRectTest, RadiusCenterRectZeroRadius) {
+  RoundedRect rr(100, 200, 300, 400);
+  EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
+  EXPECT_EQ(IntRect(100, 200, 300, 400), rr.radiusCenterRect());
 }
 
-TEST(RoundedRectTest, RadiusCenterRectEqualRadius)
-{
-    RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(10, 10), IntSize(10, 10), IntSize(10, 10), IntSize(10, 10));
-    EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
-    EXPECT_EQ(IntRect(110, 210, 280, 380), rr.radiusCenterRect());
+TEST(RoundedRectTest, RadiusCenterRectEqualRadius) {
+  RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(10, 10), IntSize(10, 10),
+                 IntSize(10, 10), IntSize(10, 10));
+  EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
+  EXPECT_EQ(IntRect(110, 210, 280, 380), rr.radiusCenterRect());
 }
 
-TEST(RoundedRectTest, RadiusCenterRectUnequalRadius)
-{
-    RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(5, 5), IntSize(10, 10), IntSize(15, 15), IntSize(20, 20));
-    EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
-    EXPECT_EQ(IntRect(115, 210, 265, 370), rr.radiusCenterRect());
+TEST(RoundedRectTest, RadiusCenterRectUnequalRadius) {
+  RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(5, 5), IntSize(10, 10),
+                 IntSize(15, 15), IntSize(20, 20));
+  EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
+  EXPECT_EQ(IntRect(115, 210, 265, 370), rr.radiusCenterRect());
 }
 
-TEST(RoundedRectTest, RadiusCenterRectElliptical)
-{
-    RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(20, 10), IntSize(20, 10), IntSize(10, 20), IntSize(10, 20));
-    EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
-    EXPECT_EQ(IntRect(120, 210, 260, 370), rr.radiusCenterRect());
+TEST(RoundedRectTest, RadiusCenterRectElliptical) {
+  RoundedRect rr(IntRect(100, 200, 300, 400), IntSize(20, 10), IntSize(20, 10),
+                 IntSize(10, 20), IntSize(10, 20));
+  EXPECT_TRUE(rr.rect().contains(rr.radiusCenterRect()));
+  EXPECT_EQ(IntRect(120, 210, 260, 370), rr.radiusCenterRect());
 }
 
-} // namespace
+}  // namespace

@@ -40,19 +40,18 @@
 
 namespace WTF {
 
-ALWAYS_INLINE void spinLockLock(int volatile* lock)
-{
-    while (UNLIKELY(atomicTestAndSetToOne(lock))) {
-        while (*lock) { } // Spin without spamming locked instructions.
-    }
+ALWAYS_INLINE void spinLockLock(int volatile* lock) {
+  while (UNLIKELY(atomicTestAndSetToOne(lock))) {
+    while (*lock) {
+    }  // Spin without spamming locked instructions.
+  }
 }
 
-ALWAYS_INLINE void spinLockUnlock(int volatile* lock)
-{
-    atomicSetOneToZero(lock);
+ALWAYS_INLINE void spinLockUnlock(int volatile* lock) {
+  atomicSetOneToZero(lock);
 }
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::spinLockLock;
 using WTF::spinLockUnlock;

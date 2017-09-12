@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All right reserved.
+ * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All
+ * right reserved.
  * Copyright (C) 2010 Google Inc. All rights reserved.
  * Copyright (C) 2013 Adobe Systems Incorporated.
  *
@@ -29,45 +30,47 @@
 namespace blink {
 
 class LineInfo {
-public:
-    LineInfo()
-        : m_isFirstLine(true)
-        , m_isLastLine(false)
-        , m_isEmpty(true)
-        , m_previousLineBrokeCleanly(true)
-        , m_runsFromLeadingWhitespace(0)
-        , m_lineIndex(0)
-    { }
+ public:
+  LineInfo()
+      : m_isFirstLine(true),
+        m_isLastLine(false),
+        m_isEmpty(true),
+        m_previousLineBrokeCleanly(true),
+        m_runsFromLeadingWhitespace(0),
+        m_lineIndex(0) {}
 
-    bool isFirstLine() const { return m_isFirstLine; }
-    bool isLastLine() const { return m_isLastLine; }
-    bool isEmpty() const { return m_isEmpty; }
-    bool previousLineBrokeCleanly() const { return m_previousLineBrokeCleanly; }
-    unsigned runsFromLeadingWhitespace() const { return m_runsFromLeadingWhitespace; }
-    void resetRunsFromLeadingWhitespace() { m_runsFromLeadingWhitespace = 0; }
-    void incrementRunsFromLeadingWhitespace() { m_runsFromLeadingWhitespace++; }
+  bool isFirstLine() const { return m_isFirstLine; }
+  bool isLastLine() const { return m_isLastLine; }
+  bool isEmpty() const { return m_isEmpty; }
+  bool previousLineBrokeCleanly() const { return m_previousLineBrokeCleanly; }
+  unsigned runsFromLeadingWhitespace() const {
+    return m_runsFromLeadingWhitespace;
+  }
+  void resetRunsFromLeadingWhitespace() { m_runsFromLeadingWhitespace = 0; }
+  void incrementRunsFromLeadingWhitespace() { m_runsFromLeadingWhitespace++; }
 
-    void setFirstLine(bool firstLine) { m_isFirstLine = firstLine; }
-    void setLastLine(bool lastLine) { m_isLastLine = lastLine; }
-    void setEmpty(bool empty, RenderBlock* block = 0, LineWidth* lineWidth = 0)
-    {
-        m_isEmpty = empty;
-    }
+  void setFirstLine(bool firstLine) { m_isFirstLine = firstLine; }
+  void setLastLine(bool lastLine) { m_isLastLine = lastLine; }
+  void setEmpty(bool empty, RenderBlock* block = 0, LineWidth* lineWidth = 0) {
+    m_isEmpty = empty;
+  }
 
-    void incrementLineIndex() { ++m_lineIndex; }
-    int lineIndex() const { return m_lineIndex; }
+  void incrementLineIndex() { ++m_lineIndex; }
+  int lineIndex() const { return m_lineIndex; }
 
-    void setPreviousLineBrokeCleanly(bool previousLineBrokeCleanly) { m_previousLineBrokeCleanly = previousLineBrokeCleanly; }
+  void setPreviousLineBrokeCleanly(bool previousLineBrokeCleanly) {
+    m_previousLineBrokeCleanly = previousLineBrokeCleanly;
+  }
 
-private:
-    bool m_isFirstLine;
-    bool m_isLastLine;
-    bool m_isEmpty;
-    bool m_previousLineBrokeCleanly;
-    unsigned m_runsFromLeadingWhitespace;
-    int m_lineIndex;
+ private:
+  bool m_isFirstLine;
+  bool m_isLastLine;
+  bool m_isEmpty;
+  bool m_previousLineBrokeCleanly;
+  unsigned m_runsFromLeadingWhitespace;
+  int m_lineIndex;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINEINFO_H_

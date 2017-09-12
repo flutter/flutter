@@ -33,40 +33,38 @@
 
 namespace WTF {
 
-StringImpl* StringImpl::empty()
-{
-    DEFINE_STATIC_LOCAL(StringImpl, emptyString, (ConstructEmptyString));
-    WTF_ANNOTATE_BENIGN_RACE(&emptyString, "Benign race on StringImpl::emptyString reference counter");
-    return &emptyString;
+StringImpl* StringImpl::empty() {
+  DEFINE_STATIC_LOCAL(StringImpl, emptyString, (ConstructEmptyString));
+  WTF_ANNOTATE_BENIGN_RACE(
+      &emptyString, "Benign race on StringImpl::emptyString reference counter");
+  return &emptyString;
 }
 
-WTF_EXPORT DEFINE_GLOBAL(AtomicString, nullAtom)
-WTF_EXPORT DEFINE_GLOBAL(AtomicString, emptyAtom)
-WTF_EXPORT DEFINE_GLOBAL(AtomicString, starAtom)
+WTF_EXPORT DEFINE_GLOBAL(AtomicString, nullAtom) WTF_EXPORT
+    DEFINE_GLOBAL(AtomicString, emptyAtom) WTF_EXPORT
+    DEFINE_GLOBAL(AtomicString, starAtom)
 
-NEVER_INLINE unsigned StringImpl::hashSlowCase() const
-{
-    if (is8Bit())
-        setHash(StringHasher::computeHashAndMaskTop8Bits(characters8(), m_length));
-    else
-        setHash(StringHasher::computeHashAndMaskTop8Bits(characters16(), m_length));
-    return existingHash();
+        NEVER_INLINE unsigned StringImpl::hashSlowCase() const {
+  if (is8Bit())
+    setHash(StringHasher::computeHashAndMaskTop8Bits(characters8(), m_length));
+  else
+    setHash(StringHasher::computeHashAndMaskTop8Bits(characters16(), m_length));
+  return existingHash();
 }
 
-void AtomicString::init()
-{
-    ASSERT(isMainThread());
+void AtomicString::init() {
+  ASSERT(isMainThread());
 
-    new (NotNull, (void*)&nullAtom) AtomicString;
-    new (NotNull, (void*)&emptyAtom) AtomicString("");
+  new (NotNull, (void*)&nullAtom) AtomicString;
+  new (NotNull, (void*)&emptyAtom) AtomicString("");
 }
 
-void StringStatics::init()
-{
-    ASSERT(isMainThread());
+void StringStatics::init() {
+  ASSERT(isMainThread());
 
-    // FIXME: These should be allocated at compile time.
-    new (NotNull, (void*)&starAtom) AtomicString("*", AtomicString::ConstructFromLiteral);
+  // FIXME: These should be allocated at compile time.
+  new (NotNull, (void*)&starAtom)
+      AtomicString("*", AtomicString::ConstructFromLiteral);
 }
 
-}
+}  // namespace WTF

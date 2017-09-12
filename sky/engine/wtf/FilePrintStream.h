@@ -33,30 +33,28 @@
 namespace WTF {
 
 class WTF_EXPORT FilePrintStream final : public PrintStream {
-public:
-    enum AdoptionMode {
-        Adopt,
-        Borrow
-    };
+ public:
+  enum AdoptionMode { Adopt, Borrow };
 
-    FilePrintStream(FILE*, AdoptionMode = Adopt);
-    virtual ~FilePrintStream();
+  FilePrintStream(FILE*, AdoptionMode = Adopt);
+  virtual ~FilePrintStream();
 
-    static PassOwnPtr<FilePrintStream> open(const char* filename, const char* mode);
+  static PassOwnPtr<FilePrintStream> open(const char* filename,
+                                          const char* mode);
 
-    FILE* file() { return m_file; }
+  FILE* file() { return m_file; }
 
-    virtual void vprintf(const char* format, va_list) override WTF_ATTRIBUTE_PRINTF(2, 0);
-    virtual void flush() override;
+  virtual void vprintf(const char* format, va_list) override
+      WTF_ATTRIBUTE_PRINTF(2, 0);
+  virtual void flush() override;
 
-private:
-    FILE* m_file;
-    AdoptionMode m_adoptionMode;
+ private:
+  FILE* m_file;
+  AdoptionMode m_adoptionMode;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::FilePrintStream;
 
 #endif  // SKY_ENGINE_WTF_FILEPRINTSTREAM_H_
-

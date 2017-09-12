@@ -28,36 +28,29 @@
 namespace WTF {
 
 FilePrintStream::FilePrintStream(FILE* file, AdoptionMode adoptionMode)
-    : m_file(file)
-    , m_adoptionMode(adoptionMode)
-{
+    : m_file(file), m_adoptionMode(adoptionMode) {}
+
+FilePrintStream::~FilePrintStream() {
+  if (m_adoptionMode == Borrow)
+    return;
+  fclose(m_file);
 }
 
-FilePrintStream::~FilePrintStream()
-{
-    if (m_adoptionMode == Borrow)
-        return;
-    fclose(m_file);
+PassOwnPtr<FilePrintStream> FilePrintStream::open(const char* filename,
+                                                  const char* mode) {
+  FILE* file = fopen(filename, mode);
+  if (!file)
+    return PassOwnPtr<FilePrintStream>();
+
+  return adoptPtr(new FilePrintStream(file));
 }
 
-PassOwnPtr<FilePrintStream> FilePrintStream::open(const char* filename, const char* mode)
-{
-    FILE* file = fopen(filename, mode);
-    if (!file)
-        return PassOwnPtr<FilePrintStream>();
-
-    return adoptPtr(new FilePrintStream(file));
+void FilePrintStream::vprintf(const char* format, va_list argList) {
+  vfprintf(m_file, format, argList);
 }
 
-void FilePrintStream::vprintf(const char* format, va_list argList)
-{
-    vfprintf(m_file, format, argList);
+void FilePrintStream::flush() {
+  fflush(m_file);
 }
 
-void FilePrintStream::flush()
-{
-    fflush(m_file);
-}
-
-} // namespace WTF
-
+}  // namespace WTF

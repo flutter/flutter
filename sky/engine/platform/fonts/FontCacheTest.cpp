@@ -12,30 +12,30 @@
 namespace blink {
 
 class EmptyPlatform : public Platform {
-public:
-    EmptyPlatform() { }
-    virtual ~EmptyPlatform() { }
+ public:
+  EmptyPlatform() {}
+  virtual ~EmptyPlatform() {}
 };
 
-TEST(FontCache, getLastResortFallbackFont)
-{
-    FontCache* fontCache = FontCache::fontCache();
-    ASSERT_TRUE(fontCache);
+TEST(FontCache, getLastResortFallbackFont) {
+  FontCache* fontCache = FontCache::fontCache();
+  ASSERT_TRUE(fontCache);
 
-    Platform* oldPlatform = Platform::current();
-    OwnPtr<EmptyPlatform> platform = adoptPtr(new EmptyPlatform);
-    Platform::initialize(platform.get());
+  Platform* oldPlatform = Platform::current();
+  OwnPtr<EmptyPlatform> platform = adoptPtr(new EmptyPlatform);
+  Platform::initialize(platform.get());
 
-    FontDescription fontDescription;
-    fontDescription.setGenericFamily(FontDescription::StandardFamily);
-    RefPtr<SimpleFontData> fontData = fontCache->getLastResortFallbackFont(fontDescription, Retain);
-    EXPECT_TRUE(fontData);
+  FontDescription fontDescription;
+  fontDescription.setGenericFamily(FontDescription::StandardFamily);
+  RefPtr<SimpleFontData> fontData =
+      fontCache->getLastResortFallbackFont(fontDescription, Retain);
+  EXPECT_TRUE(fontData);
 
-    fontDescription.setGenericFamily(FontDescription::SansSerifFamily);
-    fontData = fontCache->getLastResortFallbackFont(fontDescription, Retain);
-    EXPECT_TRUE(fontData);
+  fontDescription.setGenericFamily(FontDescription::SansSerifFamily);
+  fontData = fontCache->getLastResortFallbackFont(fontDescription, Retain);
+  EXPECT_TRUE(fontData);
 
-    Platform::initialize(oldPlatform);
+  Platform::initialize(oldPlatform);
 }
 
-} // namespace blink
+}  // namespace blink

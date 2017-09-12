@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 1999 Antti Koivisto (koivisto@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009 Apple Inc.
+ * All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -25,25 +26,19 @@
 
 namespace blink {
 
-bool ShadowData::operator==(const ShadowData& o) const
-{
-    return m_location == o.m_location
-        && m_blur == o.m_blur
-        && m_spread == o.m_spread
-        && m_style == o.m_style
-        && m_color == o.m_color;
+bool ShadowData::operator==(const ShadowData& o) const {
+  return m_location == o.m_location && m_blur == o.m_blur &&
+         m_spread == o.m_spread && m_style == o.m_style && m_color == o.m_color;
 }
 
-ShadowData ShadowData::blend(const ShadowData& from, double progress) const
-{
-    if (style() != from.style())
-        return *this;
+ShadowData ShadowData::blend(const ShadowData& from, double progress) const {
+  if (style() != from.style())
+    return *this;
 
-    return ShadowData(blink::blend(from.location(), location(), progress),
-        clampTo(blink::blend(from.blur(), blur(), progress), 0.0f),
-        blink::blend(from.spread(), spread(), progress),
-        style(),
-        blink::blend(from.color(), color(), progress));
+  return ShadowData(blink::blend(from.location(), location(), progress),
+                    clampTo(blink::blend(from.blur(), blur(), progress), 0.0f),
+                    blink::blend(from.spread(), spread(), progress), style(),
+                    blink::blend(from.color(), color(), progress));
 }
 
-} // namespace blink
+}  // namespace blink

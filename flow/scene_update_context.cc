@@ -72,7 +72,7 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
       rrect.radii(SkRRect::kUpperRight_Corner).x(),  // top_right_radius
       rrect.radii(SkRRect::kLowerRight_Corner).x(),  // bottom_right_radius
       rrect.radii(SkRRect::kLowerLeft_Corner).x()    // bottom_left_radius
-      );
+  );
   scenic_lib::ShapeNode shape_node(session_);
   shape_node.SetShape(shape);
   shape_node.SetTranslation(shape_bounds.width() * 0.5f + shape_bounds.left(),
@@ -102,7 +102,7 @@ void SceneUpdateContext::CreateFrame(scenic_lib::EntityNode& entity_node,
     SetShapeColor(shape_node, color);
 
     scenic_lib::Rectangle inner_shape(session_, inner_bounds.width(),
-                                          inner_bounds.height());
+                                      inner_bounds.height());
     scenic_lib::ShapeNode inner_node(session_);
     inner_node.SetShape(inner_shape);
     inner_node.SetTranslation(inner_bounds.width() * 0.5f + inner_bounds.left(),
@@ -255,12 +255,12 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
       entity_node().SetTranslation(decomposition.translation().x(),  //
                                    decomposition.translation().y(),  //
                                    decomposition.translation().z()   //
-                                   );
+      );
 
       entity_node().SetScale(decomposition.scale().x(),  //
                              decomposition.scale().y(),  //
                              decomposition.scale().z()   //
-                             );
+      );
       context.top_scale_x_ *= decomposition.scale().x();
       context.top_scale_y_ *= decomposition.scale().y();
 
@@ -268,7 +268,7 @@ SceneUpdateContext::Transform::Transform(SceneUpdateContext& context,
                                 decomposition.rotation().fData[1],  //
                                 decomposition.rotation().fData[2],  //
                                 decomposition.rotation().fData[3]   //
-                                );
+      );
     }
   }
 }

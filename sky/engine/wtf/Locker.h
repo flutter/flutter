@@ -32,16 +32,19 @@
 
 namespace WTF {
 
-template <typename T> class Locker {
-    WTF_MAKE_NONCOPYABLE(Locker);
-public:
-    Locker(T& lockable) : m_lockable(lockable) { m_lockable.lock(); }
-    ~Locker() { m_lockable.unlock(); }
-private:
-    T& m_lockable;
+template <typename T>
+class Locker {
+  WTF_MAKE_NONCOPYABLE(Locker);
+
+ public:
+  Locker(T& lockable) : m_lockable(lockable) { m_lockable.lock(); }
+  ~Locker() { m_lockable.unlock(); }
+
+ private:
+  T& m_lockable;
 };
 
-}
+}  // namespace WTF
 
 using WTF::Locker;
 

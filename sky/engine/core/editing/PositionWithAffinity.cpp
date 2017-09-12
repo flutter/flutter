@@ -6,15 +6,11 @@
 
 namespace blink {
 
-PositionWithAffinity::PositionWithAffinity(RenderObject* renderer, int offset, EAffinity affinity)
-    : m_renderer(renderer)
-    , m_offset(offset)
-    , m_affinity(affinity)
-{
-}
+PositionWithAffinity::PositionWithAffinity(RenderObject* renderer,
+                                           int offset,
+                                           EAffinity affinity)
+    : m_renderer(renderer), m_offset(offset), m_affinity(affinity) {}
 
-PositionWithAffinity::~PositionWithAffinity()
-{
-}
+PositionWithAffinity::~PositionWithAffinity() {}
 
-} // namespace blink
+}  // namespace blink

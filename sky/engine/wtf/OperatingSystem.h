@@ -24,23 +24,28 @@
 #ifndef SKY_ENGINE_WTF_OPERATING_SYSTEM_H_
 #define SKY_ENGINE_WTF_OPERATING_SYSTEM_H_
 
-/* ==== Platform adaptation macros: these describe properties of the target environment. ==== */
+/* ==== Platform adaptation macros: these describe properties of the target
+ * environment. ==== */
 
-/* HAVE() - specific system features (headers, functions or similar) that are present or not */
-#define HAVE(WTF_FEATURE) (defined HAVE_##WTF_FEATURE  && HAVE_##WTF_FEATURE)
-/* OS() - underlying operating system; only to be used for mandated low-level services like
-   virtual memory, not to choose a GUI toolkit */
-#define OS(WTF_FEATURE) (defined WTF_OS_##WTF_FEATURE  && WTF_OS_##WTF_FEATURE)
+/* HAVE() - specific system features (headers, functions or similar) that are
+ * present or not */
+#define HAVE(WTF_FEATURE) (defined HAVE_##WTF_FEATURE && HAVE_##WTF_FEATURE)
+/* OS() - underlying operating system; only to be used for mandated low-level
+   services like virtual memory, not to choose a GUI toolkit */
+#define OS(WTF_FEATURE) (defined WTF_OS_##WTF_FEATURE && WTF_OS_##WTF_FEATURE)
 
-/* ==== Policy decision macros: these define policy choices for a particular port. ==== */
+/* ==== Policy decision macros: these define policy choices for a particular
+ * port. ==== */
 
 /* USE() - use a particular third-party library or optional OS service */
-#define USE(WTF_FEATURE) (defined WTF_USE_##WTF_FEATURE  && WTF_USE_##WTF_FEATURE)
+#define USE(WTF_FEATURE) \
+  (defined WTF_USE_##WTF_FEATURE && WTF_USE_##WTF_FEATURE)
 /* ENABLE() - turn on a specific feature of WebKit */
-#define ENABLE(WTF_FEATURE) (defined ENABLE_##WTF_FEATURE  && ENABLE_##WTF_FEATURE)
+#define ENABLE(WTF_FEATURE) \
+  (defined ENABLE_##WTF_FEATURE && ENABLE_##WTF_FEATURE)
 
-/* ==== OS() - underlying operating system; only to be used for mandated low-level services like
-   virtual memory, not to choose a GUI toolkit ==== */
+/* ==== OS() - underlying operating system; only to be used for mandated
+   low-level services like virtual memory, not to choose a GUI toolkit ==== */
 
 /* OS(ANDROID) - Android */
 #ifdef ANDROID

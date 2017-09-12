@@ -36,34 +36,36 @@
 namespace blink {
 
 class StyleColor {
-public:
-    StyleColor(Color color) : m_color(color), m_currentColor(false) { }
-    static StyleColor currentColor() { return StyleColor(); }
+ public:
+  StyleColor(Color color) : m_color(color), m_currentColor(false) {}
+  static StyleColor currentColor() { return StyleColor(); }
 
-    bool isCurrentColor() const { return m_currentColor; }
-    Color color() const { ASSERT(!isCurrentColor()); return m_color; }
+  bool isCurrentColor() const { return m_currentColor; }
+  Color color() const {
+    ASSERT(!isCurrentColor());
+    return m_color;
+  }
 
-    Color resolve(Color currentColor) const { return m_currentColor ? currentColor : m_color; }
+  Color resolve(Color currentColor) const {
+    return m_currentColor ? currentColor : m_color;
+  }
 
-private:
-    StyleColor() : m_currentColor(true) { }
-    Color m_color;
-    bool m_currentColor;
+ private:
+  StyleColor() : m_currentColor(true) {}
+  Color m_color;
+  bool m_currentColor;
 };
 
-inline bool operator==(const StyleColor& a, const StyleColor& b)
-{
-    if (a.isCurrentColor() || b.isCurrentColor())
-        return a.isCurrentColor() && b.isCurrentColor();
-    return a.color() == b.color();
+inline bool operator==(const StyleColor& a, const StyleColor& b) {
+  if (a.isCurrentColor() || b.isCurrentColor())
+    return a.isCurrentColor() && b.isCurrentColor();
+  return a.color() == b.color();
 }
 
-inline bool operator!=(const StyleColor& a, const StyleColor& b)
-{
-    return !(a == b);
+inline bool operator!=(const StyleColor& a, const StyleColor& b) {
+  return !(a == b);
 }
 
-
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLECOLOR_H_

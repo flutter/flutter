@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/vulkan_surface_producer.h"
+#include <memory>
+#include <string>
+#include <vector>
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
 #include "third_party/skia/src/gpu/vk/GrVkUtil.h"
-#include <memory>
-#include <string>
-#include <vector>
 
 namespace flutter_runner {
 
@@ -33,8 +33,7 @@ VulkanSurfaceProducer::~VulkanSurfaceProducer() {
   FXL_DCHECK(wait_result == VK_SUCCESS);
 };
 
-bool VulkanSurfaceProducer::Initialize(
-    scenic_lib::Session* mozart_session) {
+bool VulkanSurfaceProducer::Initialize(scenic_lib::Session* mozart_session) {
   vk_ = fxl::MakeRefCounted<vulkan::VulkanProcTable>();
 
   std::vector<std::string> extensions = {
@@ -119,11 +118,10 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
     std::vector<
         std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>
         surfaces) {
-
   std::vector<GrBackendSemaphore> semaphores;
   semaphores.reserve(surfaces.size());
-  for (auto &surface : surfaces) {
-    auto vk_surface = static_cast<VulkanSurface *>(surface.get());
+  for (auto& surface : surfaces) {
+    auto vk_surface = static_cast<VulkanSurface*>(surface.get());
     semaphores.push_back(vk_surface->GetAcquireSemaphore());
   }
 

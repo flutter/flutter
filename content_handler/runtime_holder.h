@@ -10,13 +10,6 @@
 
 #include <unordered_set>
 
-#include "lib/app/cpp/application_context.h"
-#include "lib/app/fidl/application_environment.fidl.h"
-#include "lib/app/fidl/service_provider.fidl.h"
-#include "lib/ui/flutter/sdk_ext/src/natives.h"
-#include "lib/ui/input/fidl/input_connection.fidl.h"
-#include "lib/ui/input/fidl/text_input.fidl.h"
-#include "lib/ui/views/fidl/view_manager.fidl.h"
 #include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
@@ -24,10 +17,17 @@
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
 #include "flutter/runtime/runtime_delegate.h"
+#include "lib/app/cpp/application_context.h"
+#include "lib/app/fidl/application_environment.fidl.h"
+#include "lib/app/fidl/service_provider.fidl.h"
 #include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/weak_ptr.h"
+#include "lib/ui/flutter/sdk_ext/src/natives.h"
+#include "lib/ui/input/fidl/input_connection.fidl.h"
+#include "lib/ui/input/fidl/text_input.fidl.h"
+#include "lib/ui/views/fidl/view_manager.fidl.h"
 
 namespace flutter_runner {
 class Rasterizer;

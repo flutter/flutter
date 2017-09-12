@@ -31,47 +31,48 @@
 namespace blink {
 
 class PLATFORM_EXPORT Matrix3DTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<Matrix3DTransformOperation> create(const TransformationMatrix& matrix)
-    {
-        return adoptRef(new Matrix3DTransformOperation(matrix));
-    }
+ public:
+  static PassRefPtr<Matrix3DTransformOperation> create(
+      const TransformationMatrix& matrix) {
+    return adoptRef(new Matrix3DTransformOperation(matrix));
+  }
 
-    TransformationMatrix matrix() const {return m_matrix; }
+  TransformationMatrix matrix() const { return m_matrix; }
 
-    virtual bool canBlendWith(const TransformOperation& other) const
-    {
-        return false;
-    }
+  virtual bool canBlendWith(const TransformOperation& other) const {
+    return false;
+  }
 
-private:
-    virtual bool isIdentity() const override { return m_matrix.isIdentity(); }
+ private:
+  virtual bool isIdentity() const override { return m_matrix.isIdentity(); }
 
-    virtual OperationType type() const override { return Matrix3D; }
+  virtual OperationType type() const override { return Matrix3D; }
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const Matrix3DTransformOperation* m = static_cast<const Matrix3DTransformOperation*>(&o);
-        return m_matrix == m->m_matrix;
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    if (!isSameType(o))
+      return false;
+    const Matrix3DTransformOperation* m =
+        static_cast<const Matrix3DTransformOperation*>(&o);
+    return m_matrix == m->m_matrix;
+  }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
-    {
-        transform.multiply(TransformationMatrix(m_matrix));
-    }
+  virtual void apply(TransformationMatrix& transform,
+                     const FloatSize&) const override {
+    transform.multiply(TransformationMatrix(m_matrix));
+  }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    Matrix3DTransformOperation(const TransformationMatrix& mat)
-    {
-        m_matrix = mat;
-    }
+  Matrix3DTransformOperation(const TransformationMatrix& mat) {
+    m_matrix = mat;
+  }
 
-    TransformationMatrix m_matrix;
+  TransformationMatrix m_matrix;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_MATRIX3DTRANSFORMOPERATION_H_

@@ -35,6 +35,6 @@ namespace WTF {
 
 enum HashTableDeletedValueType { HashTableDeletedValue };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_HASHTABLEDELETEDVALUETYPE_H_

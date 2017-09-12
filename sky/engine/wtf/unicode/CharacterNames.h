@@ -90,11 +90,12 @@ const UChar zeroWidthNonJoiner = 0x200C;
 const UChar zeroWidthSpace = 0x200B;
 const UChar zeroWidthNoBreakSpace = 0xFEFF;
 
-} // namespace Unicode
-} // namespace WTF
+}  // namespace Unicode
+}  // namespace WTF
 
-using WTF::Unicode::aegeanWordSeparatorLine;
+using WTF::Unicode::HiraganaLetterSmallA;
 using WTF::Unicode::aegeanWordSeparatorDot;
+using WTF::Unicode::aegeanWordSeparatorLine;
 using WTF::Unicode::blackCircle;
 using WTF::Unicode::blackSquare;
 using WTF::Unicode::blackUpPointingTriangle;
@@ -107,7 +108,6 @@ using WTF::Unicode::ethiopicWordspace;
 using WTF::Unicode::fisheye;
 using WTF::Unicode::hebrewPunctuationGeresh;
 using WTF::Unicode::hebrewPunctuationGershayim;
-using WTF::Unicode::HiraganaLetterSmallA;
 using WTF::Unicode::horizontalEllipsis;
 using WTF::Unicode::hyphen;
 using WTF::Unicode::hyphenMinus;
@@ -133,8 +133,8 @@ using WTF::Unicode::rightToLeftOverride;
 using WTF::Unicode::sesameDot;
 using WTF::Unicode::softHyphen;
 using WTF::Unicode::space;
-using WTF::Unicode::tibetanMarkIntersyllabicTsheg;
 using WTF::Unicode::tibetanMarkDelimiterTshegBstar;
+using WTF::Unicode::tibetanMarkIntersyllabicTsheg;
 using WTF::Unicode::ugariticWordDivider;
 using WTF::Unicode::whiteBullet;
 using WTF::Unicode::whiteCircle;
@@ -142,8 +142,8 @@ using WTF::Unicode::whiteSesameDot;
 using WTF::Unicode::whiteUpPointingTriangle;
 using WTF::Unicode::yenSign;
 using WTF::Unicode::zeroWidthJoiner;
+using WTF::Unicode::zeroWidthNoBreakSpace;
 using WTF::Unicode::zeroWidthNonJoiner;
 using WTF::Unicode::zeroWidthSpace;
-using WTF::Unicode::zeroWidthNoBreakSpace;
 
 #endif  // SKY_ENGINE_WTF_UNICODE_CHARACTERNAMES_H_

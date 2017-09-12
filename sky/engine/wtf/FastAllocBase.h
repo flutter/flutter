@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2008, 2009 Paul Pedriana <ppedriana@ea.com>. All rights reserved.
+ * Copyright (C) 2008, 2009 Paul Pedriana <ppedriana@ea.com>.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,7 +30,8 @@
 #ifndef SKY_ENGINE_WTF_FASTALLOCBASE_H_
 #define SKY_ENGINE_WTF_FASTALLOCBASE_H_
 
-// Provides customizable overrides of fastMalloc/fastFree and operator new/delete
+// Provides customizable overrides of fastMalloc/fastFree and operator
+// new/delete
 //
 // Provided functionality:
 //    Macro: WTF_MAKE_FAST_ALLOCATED
@@ -51,36 +53,24 @@
 #include "flutter/sky/engine/wtf/FastMalloc.h"
 #include "flutter/sky/engine/wtf/StdLibExtras.h"
 
-#define WTF_MAKE_FAST_ALLOCATED \
-public: \
-    void* operator new(size_t, void* p) { return p; } \
-    void* operator new[](size_t, void* p) { return p; } \
-    \
-    void* operator new(size_t size) \
-    { \
-        return ::WTF::fastMalloc(size); \
-    } \
-    \
-    void operator delete(void* p) \
-    { \
-        ::WTF::fastFree(p); \
-    } \
-    \
-    void* operator new[](size_t size) \
-    { \
-        return ::WTF::fastMalloc(size); \
-    } \
-    \
-    void operator delete[](void* p) \
-    { \
-         ::WTF::fastFree(p); \
-    } \
-    void* operator new(size_t, NotNullTag, void* location) \
-    { \
-        ASSERT(location); \
-        return location; \
-    } \
-private: \
-typedef int __thisIsHereToForceASemicolonAfterThisMacro
+#define WTF_MAKE_FAST_ALLOCATED                                         \
+ public:                                                                \
+  void* operator new(size_t, void* p) { return p; }                     \
+  void* operator new[](size_t, void* p) { return p; }                   \
+                                                                        \
+  void* operator new(size_t size) { return ::WTF::fastMalloc(size); }   \
+                                                                        \
+  void operator delete(void* p) { ::WTF::fastFree(p); }                 \
+                                                                        \
+  void* operator new[](size_t size) { return ::WTF::fastMalloc(size); } \
+                                                                        \
+  void operator delete[](void* p) { ::WTF::fastFree(p); }               \
+  void* operator new(size_t, NotNullTag, void* location) {              \
+    ASSERT(location);                                                   \
+    return location;                                                    \
+  }                                                                     \
+                                                                        \
+ private:                                                               \
+  typedef int __thisIsHereToForceASemicolonAfterThisMacro
 
 #endif  // SKY_ENGINE_WTF_FASTALLOCBASE_H_

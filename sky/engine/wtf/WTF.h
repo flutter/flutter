@@ -37,27 +37,27 @@
 
 namespace WTF {
 
-// This function must be called exactly once from the main thread before using anything else in WTF.
+// This function must be called exactly once from the main thread before using
+// anything else in WTF.
 WTF_EXPORT void initialize();
 WTF_EXPORT void shutdown();
 WTF_EXPORT bool isShutdown();
 
 class WTF_EXPORT Partitions {
-public:
-    static void initialize();
-    static void shutdown();
-    static ALWAYS_INLINE PartitionRootGeneric* getBufferPartition()
-    {
-        if (UNLIKELY(!s_initialized))
-            initialize();
-        return m_bufferAllocator.root();
-    }
+ public:
+  static void initialize();
+  static void shutdown();
+  static ALWAYS_INLINE PartitionRootGeneric* getBufferPartition() {
+    if (UNLIKELY(!s_initialized))
+      initialize();
+    return m_bufferAllocator.root();
+  }
 
-private:
-    static bool s_initialized;
-    static PartitionAllocatorGeneric m_bufferAllocator;
+ private:
+  static bool s_initialized;
+  static PartitionAllocatorGeneric m_bufferAllocator;
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_WTF_H_

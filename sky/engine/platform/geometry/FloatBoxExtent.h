@@ -35,91 +35,71 @@
 namespace blink {
 
 class FloatBoxExtent {
-public:
-    FloatBoxExtent()
-        : m_top(0)
-        , m_right(0)
-        , m_bottom(0)
-        , m_left(0)
-    {
-    }
+ public:
+  FloatBoxExtent() : m_top(0), m_right(0), m_bottom(0), m_left(0) {}
 
-    FloatBoxExtent(float top, float right, float bottom, float left)
-        : m_top(top)
-        , m_right(right)
-        , m_bottom(bottom)
-        , m_left(left)
-    {
-    }
+  FloatBoxExtent(float top, float right, float bottom, float left)
+      : m_top(top), m_right(right), m_bottom(bottom), m_left(left) {}
 
-    float top() const { return m_top; }
-    void setTop(float top) { m_top = top; }
+  float top() const { return m_top; }
+  void setTop(float top) { m_top = top; }
 
-    float right() const { return m_right; }
-    void setRight(float right) { m_right = right; }
+  float right() const { return m_right; }
+  void setRight(float right) { m_right = right; }
 
-    float bottom() const { return m_bottom; }
-    void setBottom(float bottom) { m_bottom = bottom; }
+  float bottom() const { return m_bottom; }
+  void setBottom(float bottom) { m_bottom = bottom; }
 
-    float left() const { return m_left; }
-    void setLeft(float left) { m_left = left; }
+  float left() const { return m_left; }
+  void setLeft(float left) { m_left = left; }
 
-    bool isZero() const { return !left() && !right() && !top() && !bottom(); }
+  bool isZero() const { return !left() && !right() && !top() && !bottom(); }
 
-    void expandRect(FloatRect& rect) const
-    {
-        if (isZero())
-            return;
+  void expandRect(FloatRect& rect) const {
+    if (isZero())
+      return;
 
-        rect.move(-left(), -top());
-        rect.expand(left() + right(), top() + bottom());
-    }
+    rect.move(-left(), -top());
+    rect.expand(left() + right(), top() + bottom());
+  }
 
-    void unite(const FloatBoxExtent& other)
-    {
-        m_top = std::min(m_top, other.top());
-        m_right = std::max(m_right, other.right());
-        m_bottom = std::max(m_bottom, other.bottom());
-        m_left = std::min(m_left, other.left());
-    }
+  void unite(const FloatBoxExtent& other) {
+    m_top = std::min(m_top, other.top());
+    m_right = std::max(m_right, other.right());
+    m_bottom = std::max(m_bottom, other.bottom());
+    m_left = std::min(m_left, other.left());
+  }
 
-    void unite(const FloatRect& rect)
-    {
-        m_top = std::min(m_top, rect.y());
-        m_right = std::max(m_right, rect.maxX());
-        m_bottom = std::max(m_bottom, rect.maxY());
-        m_left = std::min(m_left, rect.x());
-    }
+  void unite(const FloatRect& rect) {
+    m_top = std::min(m_top, rect.y());
+    m_right = std::max(m_right, rect.maxX());
+    m_bottom = std::max(m_bottom, rect.maxY());
+    m_left = std::min(m_left, rect.x());
+  }
 
-private:
-    float m_top;
-    float m_right;
-    float m_bottom;
-    float m_left;
+ private:
+  float m_top;
+  float m_right;
+  float m_bottom;
+  float m_left;
 };
 
-inline bool operator==(const FloatBoxExtent& a, const FloatBoxExtent& b)
-{
-    return a.top() == b.top()
-        && a.right() == b.right()
-        && a.bottom() == b.bottom()
-        && a.left() == b.left();
+inline bool operator==(const FloatBoxExtent& a, const FloatBoxExtent& b) {
+  return a.top() == b.top() && a.right() == b.right() &&
+         a.bottom() == b.bottom() && a.left() == b.left();
 }
 
-inline bool operator!=(const FloatBoxExtent& a, const FloatBoxExtent& b)
-{
-    return !(a == b);
+inline bool operator!=(const FloatBoxExtent& a, const FloatBoxExtent& b) {
+  return !(a == b);
 }
 
-inline void operator+=(FloatBoxExtent& a, const FloatBoxExtent& b)
-{
-    a.setTop(a.top() + b.top());
-    a.setRight(a.right() + b.right());
-    a.setBottom(a.bottom() + b.bottom());
-    a.setLeft(a.left() + b.left());
+inline void operator+=(FloatBoxExtent& a, const FloatBoxExtent& b) {
+  a.setTop(a.top() + b.top());
+  a.setRight(a.right() + b.right());
+  a.setBottom(a.bottom() + b.bottom());
+  a.setLeft(a.left() + b.left());
 }
 
-} // namespace blink
-
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_FLOATBOXEXTENT_H_

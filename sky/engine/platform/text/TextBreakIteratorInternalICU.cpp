@@ -28,22 +28,19 @@
 
 namespace blink {
 
-static const char* UILanguage()
-{
-    // Chrome's UI language can be different from the OS UI language on Windows.
-    // We want to return Chrome's UI language here.
-    DEFINE_STATIC_LOCAL(const CString, locale, (defaultLanguage().latin1()));
-    return locale.data();
+static const char* UILanguage() {
+  // Chrome's UI language can be different from the OS UI language on Windows.
+  // We want to return Chrome's UI language here.
+  DEFINE_STATIC_LOCAL(const CString, locale, (defaultLanguage().latin1()));
+  return locale.data();
 }
 
-const char* currentSearchLocaleID()
-{
-    return UILanguage();
+const char* currentSearchLocaleID() {
+  return UILanguage();
 }
 
-const char* currentTextBreakLocaleID()
-{
-    return UILanguage();
+const char* currentTextBreakLocaleID() {
+  return UILanguage();
 }
 
-} // namespace blink
+}  // namespace blink

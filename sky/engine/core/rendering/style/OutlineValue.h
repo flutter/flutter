@@ -30,40 +30,34 @@
 namespace blink {
 
 class OutlineValue : public BorderValue {
-friend class RenderStyle;
-public:
-    OutlineValue()
-        : m_offset(0)
-    {
-    }
+  friend class RenderStyle;
 
-    bool operator==(const OutlineValue& o) const
-    {
-        return BorderValue::operator==(o) && m_offset == o.m_offset && m_isAuto == o.m_isAuto;
-    }
+ public:
+  OutlineValue() : m_offset(0) {}
 
-    bool operator!=(const OutlineValue& o) const
-    {
-        return !(*this == o);
-    }
+  bool operator==(const OutlineValue& o) const {
+    return BorderValue::operator==(o) && m_offset == o.m_offset &&
+           m_isAuto == o.m_isAuto;
+  }
 
-    bool visuallyEqual(const OutlineValue& o) const
-    {
-        if (m_style == BNONE && o.m_style == BNONE)
-            return true;
-        return *this == o;
-    }
+  bool operator!=(const OutlineValue& o) const { return !(*this == o); }
 
-    int offset() const { return m_offset; }
-    void setOffset(int offset) { m_offset = offset; }
+  bool visuallyEqual(const OutlineValue& o) const {
+    if (m_style == BNONE && o.m_style == BNONE)
+      return true;
+    return *this == o;
+  }
 
-    OutlineIsAuto isAuto() const { return static_cast<OutlineIsAuto>(m_isAuto); }
-    void setIsAuto(OutlineIsAuto isAuto) { m_isAuto = isAuto; }
+  int offset() const { return m_offset; }
+  void setOffset(int offset) { m_offset = offset; }
 
-private:
-    int m_offset;
+  OutlineIsAuto isAuto() const { return static_cast<OutlineIsAuto>(m_isAuto); }
+  void setIsAuto(OutlineIsAuto isAuto) { m_isAuto = isAuto; }
+
+ private:
+  int m_offset;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_OUTLINEVALUE_H_

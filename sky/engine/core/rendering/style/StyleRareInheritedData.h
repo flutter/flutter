@@ -42,88 +42,111 @@ class StyleImage;
 
 typedef RefVector<AppliedTextDecoration> AppliedTextDecorationList;
 
-// This struct is for rarely used inherited CSS3, CSS2, and WebKit-specific properties.
-// By grouping them together, we save space, and only allocate this object when someone
-// actually uses one of these properties.
+// This struct is for rarely used inherited CSS3, CSS2, and WebKit-specific
+// properties. By grouping them together, we save space, and only allocate this
+// object when someone actually uses one of these properties.
 class StyleRareInheritedData : public RefCounted<StyleRareInheritedData> {
-public:
-    static PassRefPtr<StyleRareInheritedData> create() { return adoptRef(new StyleRareInheritedData); }
-    PassRefPtr<StyleRareInheritedData> copy() const { return adoptRef(new StyleRareInheritedData(*this)); }
-    ~StyleRareInheritedData();
+ public:
+  static PassRefPtr<StyleRareInheritedData> create() {
+    return adoptRef(new StyleRareInheritedData);
+  }
+  PassRefPtr<StyleRareInheritedData> copy() const {
+    return adoptRef(new StyleRareInheritedData(*this));
+  }
+  ~StyleRareInheritedData();
 
-    bool operator==(const StyleRareInheritedData& o) const;
-    bool operator!=(const StyleRareInheritedData& o) const
-    {
-        return !(*this == o);
-    }
-    bool shadowDataEquivalent(const StyleRareInheritedData&) const;
+  bool operator==(const StyleRareInheritedData& o) const;
+  bool operator!=(const StyleRareInheritedData& o) const {
+    return !(*this == o);
+  }
+  bool shadowDataEquivalent(const StyleRareInheritedData&) const;
 
-    StyleColor textStrokeColor() const { return m_textStrokeColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textStrokeColor); }
-    StyleColor textFillColor() const { return m_textFillColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textFillColor); }
-    StyleColor textEmphasisColor() const { return m_textEmphasisColorIsCurrentColor ? StyleColor::currentColor() : StyleColor(m_textEmphasisColor); }
+  StyleColor textStrokeColor() const {
+    return m_textStrokeColorIsCurrentColor ? StyleColor::currentColor()
+                                           : StyleColor(m_textStrokeColor);
+  }
+  StyleColor textFillColor() const {
+    return m_textFillColorIsCurrentColor ? StyleColor::currentColor()
+                                         : StyleColor(m_textFillColor);
+  }
+  StyleColor textEmphasisColor() const {
+    return m_textEmphasisColorIsCurrentColor ? StyleColor::currentColor()
+                                             : StyleColor(m_textEmphasisColor);
+  }
 
-    void setTextStrokeColor(const StyleColor& color) { m_textStrokeColor = color.resolve(Color()); m_textStrokeColorIsCurrentColor = color.isCurrentColor(); }
-    void setTextFillColor(const StyleColor& color) { m_textFillColor = color.resolve(Color()); m_textFillColorIsCurrentColor = color.isCurrentColor(); }
-    void setTextEmphasisColor(const StyleColor& color) { m_textEmphasisColor = color.resolve(Color()); m_textEmphasisColorIsCurrentColor = color.isCurrentColor(); }
+  void setTextStrokeColor(const StyleColor& color) {
+    m_textStrokeColor = color.resolve(Color());
+    m_textStrokeColorIsCurrentColor = color.isCurrentColor();
+  }
+  void setTextFillColor(const StyleColor& color) {
+    m_textFillColor = color.resolve(Color());
+    m_textFillColorIsCurrentColor = color.isCurrentColor();
+  }
+  void setTextEmphasisColor(const StyleColor& color) {
+    m_textEmphasisColor = color.resolve(Color());
+    m_textEmphasisColorIsCurrentColor = color.isCurrentColor();
+  }
 
-    Color m_textStrokeColor;
-    float textStrokeWidth;
-    Color m_textFillColor;
-    Color m_textEmphasisColor;
+  Color m_textStrokeColor;
+  float textStrokeWidth;
+  Color m_textFillColor;
+  Color m_textEmphasisColor;
 
-    RefPtr<ShadowList> textShadow; // Our text shadow information for shadowed text drawing.
-    AtomicString highlight; // Apple-specific extension for custom highlight rendering.
+  RefPtr<ShadowList>
+      textShadow;  // Our text shadow information for shadowed text drawing.
+  AtomicString
+      highlight;  // Apple-specific extension for custom highlight rendering.
 
-    Length indent;
+  Length indent;
 
-    unsigned m_textStrokeColorIsCurrentColor : 1;
-    unsigned m_textFillColorIsCurrentColor : 1;
-    unsigned m_textEmphasisColorIsCurrentColor : 1;
+  unsigned m_textStrokeColorIsCurrentColor : 1;
+  unsigned m_textFillColorIsCurrentColor : 1;
+  unsigned m_textEmphasisColorIsCurrentColor : 1;
 
-    unsigned userModify : 2; // EUserModify (editing)
-    unsigned wordBreak : 2; // EWordBreak
-    unsigned overflowWrap : 1; // EOverflowWrap
-    unsigned lineBreak : 3; // LineBreak
-    unsigned userSelect : 2; // EUserSelect
-    unsigned hyphens : 2; // Hyphens
-    unsigned textEmphasisFill : 1; // TextEmphasisFill
-    unsigned textEmphasisMark : 3; // TextEmphasisMark
-    unsigned textEmphasisPosition : 1; // TextEmphasisPosition
-    unsigned m_textAlignLast : 3; // TextAlignLast
-    unsigned m_textJustify : 2; // TextJustify
-    unsigned m_textOrientation : 2; // TextOrientation
-    unsigned m_textIndentLine : 1; // TextIndentEachLine
-    unsigned m_textIndentType : 1; // TextIndentHanging
-    unsigned m_lineBoxContain: 7; // LineBoxContain
-    // CSS Image Values Level 3
-    unsigned m_imageRendering : 3; // EImageRendering
-    unsigned m_textUnderlinePosition : 1; // TextUnderlinePosition
-    unsigned m_touchActionDelay : 1; // TouchActionDelay
+  unsigned userModify : 2;            // EUserModify (editing)
+  unsigned wordBreak : 2;             // EWordBreak
+  unsigned overflowWrap : 1;          // EOverflowWrap
+  unsigned lineBreak : 3;             // LineBreak
+  unsigned userSelect : 2;            // EUserSelect
+  unsigned hyphens : 2;               // Hyphens
+  unsigned textEmphasisFill : 1;      // TextEmphasisFill
+  unsigned textEmphasisMark : 3;      // TextEmphasisMark
+  unsigned textEmphasisPosition : 1;  // TextEmphasisPosition
+  unsigned m_textAlignLast : 3;       // TextAlignLast
+  unsigned m_textJustify : 2;         // TextJustify
+  unsigned m_textOrientation : 2;     // TextOrientation
+  unsigned m_textIndentLine : 1;      // TextIndentEachLine
+  unsigned m_textIndentType : 1;      // TextIndentHanging
+  unsigned m_lineBoxContain : 7;      // LineBoxContain
+  // CSS Image Values Level 3
+  unsigned m_imageRendering : 3;         // EImageRendering
+  unsigned m_textUnderlinePosition : 1;  // TextUnderlinePosition
+  unsigned m_touchActionDelay : 1;       // TouchActionDelay
 
-    // Though will-change is not itself an inherited property, the intent
-    // expressed by 'will-change: contents' includes descendants.
-    unsigned m_subtreeWillChangeContents : 1;
+  // Though will-change is not itself an inherited property, the intent
+  // expressed by 'will-change: contents' includes descendants.
+  unsigned m_subtreeWillChangeContents : 1;
 
-    short hyphenationLimitBefore;
-    short hyphenationLimitAfter;
-    short hyphenationLimitLines;
-    AtomicString hyphenationString;
+  short hyphenationLimitBefore;
+  short hyphenationLimitAfter;
+  short hyphenationLimitLines;
+  AtomicString hyphenationString;
 
-    AtomicString locale;
+  AtomicString locale;
 
-    AtomicString textEmphasisCustomMark;
+  AtomicString textEmphasisCustomMark;
 
-    unsigned m_tabSize;
+  unsigned m_tabSize;
 
-    Color tapHighlightColor;
+  Color tapHighlightColor;
 
-    RefPtr<AppliedTextDecorationList> appliedTextDecorations;
+  RefPtr<AppliedTextDecorationList> appliedTextDecorations;
 
-private:
-    StyleRareInheritedData();
-    StyleRareInheritedData(const StyleRareInheritedData&);
+ private:
+  StyleRareInheritedData();
+  StyleRareInheritedData(const StyleRareInheritedData&);
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLERAREINHERITEDDATA_H_

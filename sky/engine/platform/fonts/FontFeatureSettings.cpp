@@ -28,18 +28,12 @@
 namespace blink {
 
 FontFeature::FontFeature(const AtomicString& tag, int value)
-    : m_tag(tag)
-    , m_value(value)
-{
+    : m_tag(tag), m_value(value) {}
+
+bool FontFeature::operator==(const FontFeature& other) {
+  return m_tag == other.m_tag && m_value == other.m_value;
 }
 
-bool FontFeature::operator==(const FontFeature& other)
-{
-    return m_tag == other.m_tag && m_value == other.m_value;
-}
+FontFeatureSettings::FontFeatureSettings() {}
 
-FontFeatureSettings::FontFeatureSettings()
-{
-}
-
-} // namespace blink
+}  // namespace blink

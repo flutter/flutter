@@ -30,53 +30,52 @@
 
 #include "wtf/testing/WTFTestHelpers.h"
 
-#include <ios> // NOLINT
-#include <ostream> // NOLINT
+#include <ios>      // NOLINT
+#include <ostream>  // NOLINT
 #include "flutter/sky/engine/wtf/text/WTFString.h"
 
 namespace WTF {
 
-std::ostream& operator<<(std::ostream& out, const String& string)
-{
-    if (string.isNull())
-        return out << "<null>";
+std::ostream& operator<<(std::ostream& out, const String& string) {
+  if (string.isNull())
+    return out << "<null>";
 
-    out << '"';
-    for (unsigned index = 0; index < string.length(); ++index) {
-        // Print shorthands for select cases.
-        UChar character = string[index];
-        switch (character) {
-        case '\t':
-            out << "\\t";
-            break;
-        case '\n':
-            out << "\\n";
-            break;
-        case '\r':
-            out << "\\r";
-            break;
-        case '"':
-            out << "\\\"";
-            break;
-        case '\\':
-            out << "\\\\";
-            break;
-        default:
-            if (character >= 0x20 && character < 0x7F) {
-                out << static_cast<char>(character);
-            } else {
-                // Print "\uXXXX" for control or non-ASCII characters.
-                out << "\\u";
-                out.width(4);
-                out.fill('0');
-                out.setf(std::ios_base::hex, std::ios_base::basefield);
-                out.setf(std::ios::uppercase);
-                out << character;
-            }
-            break;
+  out << '"';
+  for (unsigned index = 0; index < string.length(); ++index) {
+    // Print shorthands for select cases.
+    UChar character = string[index];
+    switch (character) {
+      case '\t':
+        out << "\\t";
+        break;
+      case '\n':
+        out << "\\n";
+        break;
+      case '\r':
+        out << "\\r";
+        break;
+      case '"':
+        out << "\\\"";
+        break;
+      case '\\':
+        out << "\\\\";
+        break;
+      default:
+        if (character >= 0x20 && character < 0x7F) {
+          out << static_cast<char>(character);
+        } else {
+          // Print "\uXXXX" for control or non-ASCII characters.
+          out << "\\u";
+          out.width(4);
+          out.fill('0');
+          out.setf(std::ios_base::hex, std::ios_base::basefield);
+          out.setf(std::ios::uppercase);
+          out << character;
         }
+        break;
     }
-    return out << '"';
+  }
+  return out << '"';
 }
 
-} // namespace WTF
+}  // namespace WTF

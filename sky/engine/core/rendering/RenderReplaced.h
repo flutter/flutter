@@ -27,66 +27,84 @@
 namespace blink {
 
 class RenderReplaced : public RenderBox {
-public:
-    RenderReplaced();
-    RenderReplaced(const LayoutSize& intrinsicSize);
-    virtual ~RenderReplaced();
+ public:
+  RenderReplaced();
+  RenderReplaced(const LayoutSize& intrinsicSize);
+  virtual ~RenderReplaced();
 
-    virtual LayoutUnit computeReplacedLogicalWidth(ShouldComputePreferred  = ComputeActual) const override;
-    virtual LayoutUnit computeReplacedLogicalHeight() const override;
+  virtual LayoutUnit computeReplacedLogicalWidth(
+      ShouldComputePreferred = ComputeActual) const override;
+  virtual LayoutUnit computeReplacedLogicalHeight() const override;
 
-    bool hasReplacedLogicalHeight() const;
-    LayoutRect replacedContentRect(const LayoutSize* overriddenIntrinsicSize = 0) const;
+  bool hasReplacedLogicalHeight() const;
+  LayoutRect replacedContentRect(
+      const LayoutSize* overriddenIntrinsicSize = 0) const;
 
-    virtual bool needsPreferredWidthsRecalculation() const override;
+  virtual bool needsPreferredWidthsRecalculation() const override;
 
-    // These values are specified to be 300 and 150 pixels in the CSS 2.1 spec.
-    // http://www.w3.org/TR/CSS2/visudet.html#inline-replaced-width
-    static const int defaultWidth;
-    static const int defaultHeight;
+  // These values are specified to be 300 and 150 pixels in the CSS 2.1 spec.
+  // http://www.w3.org/TR/CSS2/visudet.html#inline-replaced-width
+  static const int defaultWidth;
+  static const int defaultHeight;
 
-protected:
-    virtual void willBeDestroyed() override;
+ protected:
+  virtual void willBeDestroyed() override;
 
-    virtual void layout() override;
+  virtual void layout() override;
 
-    virtual LayoutSize intrinsicSize() const override final { return m_intrinsicSize; }
-    virtual void computeIntrinsicRatioInformation(FloatSize& intrinsicSize, double& intrinsicRatio) const override;
+  virtual LayoutSize intrinsicSize() const override final {
+    return m_intrinsicSize;
+  }
+  virtual void computeIntrinsicRatioInformation(
+      FloatSize& intrinsicSize,
+      double& intrinsicRatio) const override;
 
-    virtual void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const override final;
+  virtual void computeIntrinsicLogicalWidths(
+      LayoutUnit& minLogicalWidth,
+      LayoutUnit& maxLogicalWidth) const override final;
 
-    virtual LayoutUnit intrinsicContentLogicalHeight() const { return intrinsicLogicalHeight(); }
+  virtual LayoutUnit intrinsicContentLogicalHeight() const {
+    return intrinsicLogicalHeight();
+  }
 
-    virtual LayoutUnit minimumReplacedHeight() const { return LayoutUnit(); }
+  virtual LayoutUnit minimumReplacedHeight() const { return LayoutUnit(); }
 
-    virtual void setSelectionState(SelectionState) override final;
+  virtual void setSelectionState(SelectionState) override final;
 
-    bool isSelected() const;
+  bool isSelected() const;
 
-    void setIntrinsicSize(const LayoutSize& intrinsicSize) { m_intrinsicSize = intrinsicSize; }
-    virtual void intrinsicSizeChanged();
+  void setIntrinsicSize(const LayoutSize& intrinsicSize) {
+    m_intrinsicSize = intrinsicSize;
+  }
+  virtual void intrinsicSizeChanged();
 
-    virtual void paint(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) final;
-    bool shouldPaint(PaintInfo&, const LayoutPoint&);
-    LayoutRect localSelectionRect(bool checkWhetherSelected = true) const; // This is in local coordinates, but it's a physical rect (so the top left corner is physical top left).
+  virtual void paint(PaintInfo&,
+                     const LayoutPoint&,
+                     Vector<RenderBox*>& layers) final;
+  bool shouldPaint(PaintInfo&, const LayoutPoint&);
+  LayoutRect localSelectionRect(bool checkWhetherSelected = true)
+      const;  // This is in local coordinates, but it's a physical rect (so the
+              // top left corner is physical top left).
 
-private:
-    virtual const char* renderName() const override { return "RenderReplaced"; }
+ private:
+  virtual const char* renderName() const override { return "RenderReplaced"; }
 
-    virtual bool canHaveChildren() const override { return false; }
+  virtual bool canHaveChildren() const override { return false; }
 
-    virtual void computePreferredLogicalWidths() override final;
-    virtual void paintReplaced(PaintInfo&, const LayoutPoint&) { }
+  virtual void computePreferredLogicalWidths() override final;
+  virtual void paintReplaced(PaintInfo&, const LayoutPoint&) {}
 
-    virtual PositionWithAffinity positionForPoint(const LayoutPoint&) override final;
+  virtual PositionWithAffinity positionForPoint(
+      const LayoutPoint&) override final;
 
-    virtual bool canBeSelectionLeaf() const override { return true; }
+  virtual bool canBeSelectionLeaf() const override { return true; }
 
-    void computeAspectRatioInformationForRenderBox(FloatSize& constrainedSize, double& intrinsicRatio) const;
+  void computeAspectRatioInformationForRenderBox(FloatSize& constrainedSize,
+                                                 double& intrinsicRatio) const;
 
-    mutable LayoutSize m_intrinsicSize;
+  mutable LayoutSize m_intrinsicSize;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERREPLACED_H_

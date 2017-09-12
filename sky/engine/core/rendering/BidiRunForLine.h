@@ -30,12 +30,16 @@
 namespace blink {
 
 TextDirection determinePlaintextDirectionality(RenderObject* root,
-    RenderObject* current = 0, unsigned pos = 0);
+                                               RenderObject* current = 0,
+                                               unsigned pos = 0);
 
-void constructBidiRunsForLine(InlineBidiResolver&, BidiRunList<BidiRun>&,
-    const InlineIterator& endOfLine, VisualDirectionOverride,
-    bool previousLineBrokeCleanly, bool isNewUBAParagraph);
+void constructBidiRunsForLine(InlineBidiResolver&,
+                              BidiRunList<BidiRun>&,
+                              const InlineIterator& endOfLine,
+                              VisualDirectionOverride,
+                              bool previousLineBrokeCleanly,
+                              bool isNewUBAParagraph);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_BIDIRUNFORLINE_H_

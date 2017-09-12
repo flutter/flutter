@@ -14,16 +14,14 @@ namespace blink {
 // to StyleEngine.h for all users of RenderObject.h that don't use
 // these methods.
 
-inline RenderStyle* RenderObject::firstLineStyle() const
-{
-    return style();
+inline RenderStyle* RenderObject::firstLineStyle() const {
+  return style();
 }
 
-inline RenderStyle* RenderObject::style(bool firstLine) const
-{
-    return style();
+inline RenderStyle* RenderObject::style(bool firstLine) const {
+  return style();
 }
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDEROBJECTINLINES_H_

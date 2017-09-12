@@ -27,18 +27,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef SKY_ENGINE_WTF_NULLPTR_H_
 #define SKY_ENGINE_WTF_NULLPTR_H_
 
-// libstdc++ supports nullptr_t starting with gcc 4.6. STLport doesn't define it.
-#if (defined(__GLIBCXX__) && __GLIBCXX__ < 20110325) || defined(_STLPORT_VERSION)
+// libstdc++ supports nullptr_t starting with gcc 4.6. STLport doesn't define
+// it.
+#if (defined(__GLIBCXX__) && __GLIBCXX__ < 20110325) || \
+    defined(_STLPORT_VERSION)
 namespace std {
 typedef decltype(nullptr) nullptr_t;
 }
 #endif
 
 #define WTF_DISALLOW_CONSTRUCTION_FROM_ZERO(ClassName) \
-    private: \
-        ClassName(int) = delete
+ private:                                              \
+  ClassName(int) = delete
 #define WTF_DISALLOW_ZERO_ASSIGNMENT(ClassName) \
-    private: \
-        ClassName& operator=(int) = delete
+ private:                                       \
+  ClassName& operator=(int) = delete
 
 #endif  // SKY_ENGINE_WTF_NULLPTR_H_

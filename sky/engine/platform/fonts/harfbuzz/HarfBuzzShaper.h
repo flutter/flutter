@@ -31,7 +31,6 @@
 #ifndef SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_
 #define SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_
 
-#include "hb.h"
 #include "flutter/sky/engine/platform/geometry/FloatBoxExtent.h"
 #include "flutter/sky/engine/platform/geometry/FloatPoint.h"
 #include "flutter/sky/engine/platform/text/TextRun.h"
@@ -40,6 +39,7 @@
 #include "flutter/sky/engine/wtf/PassOwnPtr.h"
 #include "flutter/sky/engine/wtf/Vector.h"
 #include "flutter/sky/engine/wtf/unicode/CharacterNames.h"
+#include "hb.h"
 
 #include <unicode/uscript.h>
 
@@ -50,116 +50,135 @@ class GlyphBuffer;
 class SimpleFontData;
 
 class HarfBuzzShaper final {
-public:
-    enum ForTextEmphasisOrNot {
-        NotForTextEmphasis,
-        ForTextEmphasis
-    };
+ public:
+  enum ForTextEmphasisOrNot { NotForTextEmphasis, ForTextEmphasis };
 
-    HarfBuzzShaper(const Font*, const TextRun&, ForTextEmphasisOrNot = NotForTextEmphasis, HashSet<const SimpleFontData*>* fallbackFonts = 0);
+  HarfBuzzShaper(const Font*,
+                 const TextRun&,
+                 ForTextEmphasisOrNot = NotForTextEmphasis,
+                 HashSet<const SimpleFontData*>* fallbackFonts = 0);
 
-    void setDrawRange(int from, int to);
-    bool shape(GlyphBuffer* = 0);
-    float totalWidth() { return m_totalWidth; }
-    int offsetForPosition(float targetX);
-    FloatRect selectionRect(const FloatPoint&, int height, int from, int to);
-    FloatBoxExtent glyphBoundingBox() const { return m_glyphBoundingBox; }
+  void setDrawRange(int from, int to);
+  bool shape(GlyphBuffer* = 0);
+  float totalWidth() { return m_totalWidth; }
+  int offsetForPosition(float targetX);
+  FloatRect selectionRect(const FloatPoint&, int height, int from, int to);
+  FloatBoxExtent glyphBoundingBox() const { return m_glyphBoundingBox; }
 
-private:
-    class HarfBuzzRun {
-    public:
-        HarfBuzzRun(const HarfBuzzRun&);
-        ~HarfBuzzRun();
+ private:
+  class HarfBuzzRun {
+   public:
+    HarfBuzzRun(const HarfBuzzRun&);
+    ~HarfBuzzRun();
 
-        static PassOwnPtr<HarfBuzzRun> create(const SimpleFontData* fontData, unsigned startIndex, unsigned numCharacters, hb_direction_t direction, hb_script_t script)
-        {
-            return adoptPtr(new HarfBuzzRun(fontData, startIndex, numCharacters, direction, script));
-        }
+    static PassOwnPtr<HarfBuzzRun> create(const SimpleFontData* fontData,
+                                          unsigned startIndex,
+                                          unsigned numCharacters,
+                                          hb_direction_t direction,
+                                          hb_script_t script) {
+      return adoptPtr(new HarfBuzzRun(fontData, startIndex, numCharacters,
+                                      direction, script));
+    }
 
-        void applyShapeResult(hb_buffer_t*);
-        void setGlyphAndPositions(unsigned index, uint16_t glyphId, float advance, float offsetX, float offsetY);
-        void setWidth(float width) { m_width = width; }
+    void applyShapeResult(hb_buffer_t*);
+    void setGlyphAndPositions(unsigned index,
+                              uint16_t glyphId,
+                              float advance,
+                              float offsetX,
+                              float offsetY);
+    void setWidth(float width) { m_width = width; }
 
-        int characterIndexForXPosition(float targetX);
-        float xPositionForOffset(unsigned offset);
+    int characterIndexForXPosition(float targetX);
+    float xPositionForOffset(unsigned offset);
 
-        const SimpleFontData* fontData() { return m_fontData; }
-        unsigned startIndex() const { return m_startIndex; }
-        unsigned numCharacters() const { return m_numCharacters; }
-        unsigned numGlyphs() const { return m_numGlyphs; }
-        uint16_t* glyphs() { return &m_glyphs[0]; }
-        float* advances() { return &m_advances[0]; }
-        FloatSize* offsets() { return &m_offsets[0]; }
-        bool hasGlyphToCharacterIndexes() const
-        {
-            return m_glyphToCharacterIndexes.size() > 0;
-        }
-        uint16_t* glyphToCharacterIndexes()
-        {
-            return &m_glyphToCharacterIndexes[0];
-        }
-        float width() { return m_width; }
-        hb_direction_t direction() { return m_direction; }
-        bool rtl() { return m_direction == HB_DIRECTION_RTL; }
-        hb_script_t script() { return m_script; }
+    const SimpleFontData* fontData() { return m_fontData; }
+    unsigned startIndex() const { return m_startIndex; }
+    unsigned numCharacters() const { return m_numCharacters; }
+    unsigned numGlyphs() const { return m_numGlyphs; }
+    uint16_t* glyphs() { return &m_glyphs[0]; }
+    float* advances() { return &m_advances[0]; }
+    FloatSize* offsets() { return &m_offsets[0]; }
+    bool hasGlyphToCharacterIndexes() const {
+      return m_glyphToCharacterIndexes.size() > 0;
+    }
+    uint16_t* glyphToCharacterIndexes() {
+      return &m_glyphToCharacterIndexes[0];
+    }
+    float width() { return m_width; }
+    hb_direction_t direction() { return m_direction; }
+    bool rtl() { return m_direction == HB_DIRECTION_RTL; }
+    hb_script_t script() { return m_script; }
 
-    private:
-        HarfBuzzRun(const SimpleFontData*, unsigned startIndex, unsigned numCharacters, hb_direction_t, hb_script_t);
+   private:
+    HarfBuzzRun(const SimpleFontData*,
+                unsigned startIndex,
+                unsigned numCharacters,
+                hb_direction_t,
+                hb_script_t);
 
-        const SimpleFontData* m_fontData;
-        unsigned m_startIndex;
-        size_t m_numCharacters;
-        unsigned m_numGlyphs;
-        hb_direction_t m_direction;
-        hb_script_t m_script;
-        Vector<uint16_t, 256> m_glyphs;
-        Vector<float, 256> m_advances;
-        Vector<uint16_t, 256> m_glyphToCharacterIndexes;
-        Vector<FloatSize, 256> m_offsets;
-        float m_width;
-    };
+    const SimpleFontData* m_fontData;
+    unsigned m_startIndex;
+    size_t m_numCharacters;
+    unsigned m_numGlyphs;
+    hb_direction_t m_direction;
+    hb_script_t m_script;
+    Vector<uint16_t, 256> m_glyphs;
+    Vector<float, 256> m_advances;
+    Vector<uint16_t, 256> m_glyphToCharacterIndexes;
+    Vector<FloatSize, 256> m_offsets;
+    float m_width;
+  };
 
-    int determineWordBreakSpacing();
-    // setPadding sets a number of pixels to be distributed across the TextRun.
-    // WebKit uses this to justify text.
-    void setPadding(int);
+  int determineWordBreakSpacing();
+  // setPadding sets a number of pixels to be distributed across the TextRun.
+  // WebKit uses this to justify text.
+  void setPadding(int);
 
-    void setFontFeatures();
+  void setFontFeatures();
 
-    bool createHarfBuzzRuns();
-    bool shapeHarfBuzzRuns();
-    bool fillGlyphBuffer(GlyphBuffer*);
-    void fillGlyphBufferFromHarfBuzzRun(GlyphBuffer*, HarfBuzzRun*, float& carryAdvance);
-    void fillGlyphBufferForTextEmphasis(GlyphBuffer*, HarfBuzzRun* currentRun);
-    void setGlyphPositionsForHarfBuzzRun(HarfBuzzRun*, hb_buffer_t*);
-    void addHarfBuzzRun(unsigned startCharacter, unsigned endCharacter, const SimpleFontData*, UScriptCode);
+  bool createHarfBuzzRuns();
+  bool shapeHarfBuzzRuns();
+  bool fillGlyphBuffer(GlyphBuffer*);
+  void fillGlyphBufferFromHarfBuzzRun(GlyphBuffer*,
+                                      HarfBuzzRun*,
+                                      float& carryAdvance);
+  void fillGlyphBufferForTextEmphasis(GlyphBuffer*, HarfBuzzRun* currentRun);
+  void setGlyphPositionsForHarfBuzzRun(HarfBuzzRun*, hb_buffer_t*);
+  void addHarfBuzzRun(unsigned startCharacter,
+                      unsigned endCharacter,
+                      const SimpleFontData*,
+                      UScriptCode);
 
-    const Font* m_font;
-    OwnPtr<UChar[]> m_normalizedBuffer;
-    unsigned m_normalizedBufferLength;
-    const TextRun& m_run;
+  const Font* m_font;
+  OwnPtr<UChar[]> m_normalizedBuffer;
+  unsigned m_normalizedBufferLength;
+  const TextRun& m_run;
 
-    float m_wordSpacingAdjustment; // Delta adjustment (pixels) for each word break.
-    float m_padding; // Pixels to be distributed over the line at word breaks.
-    float m_padPerWordBreak; // Pixels to be added to each word break.
-    float m_padError; // m_padPerWordBreak might have a fractional component. Since we only add a whole number of padding pixels at each word break we accumulate error. This is the number of pixels that we are behind so far.
-    float m_letterSpacing; // Pixels to be added after each glyph.
+  float m_wordSpacingAdjustment;  // Delta adjustment (pixels) for each word
+                                  // break.
+  float m_padding;  // Pixels to be distributed over the line at word breaks.
+  float m_padPerWordBreak;  // Pixels to be added to each word break.
+  float m_padError;  // m_padPerWordBreak might have a fractional component.
+                     // Since we only add a whole number of padding pixels at
+                     // each word break we accumulate error. This is the number
+                     // of pixels that we are behind so far.
+  float m_letterSpacing;  // Pixels to be added after each glyph.
 
-    Vector<hb_feature_t, 4> m_features;
-    Vector<OwnPtr<HarfBuzzRun>, 16> m_harfBuzzRuns;
+  Vector<hb_feature_t, 4> m_features;
+  Vector<OwnPtr<HarfBuzzRun>, 16> m_harfBuzzRuns;
 
-    int m_fromIndex;
-    int m_toIndex;
+  int m_fromIndex;
+  int m_toIndex;
 
-    ForTextEmphasisOrNot m_forTextEmphasis;
+  ForTextEmphasisOrNot m_forTextEmphasis;
 
-    float m_totalWidth;
-    FloatBoxExtent m_glyphBoundingBox;
-    HashSet<const SimpleFontData*>* m_fallbackFonts;
+  float m_totalWidth;
+  FloatBoxExtent m_glyphBoundingBox;
+  HashSet<const SimpleFontData*>* m_fallbackFonts;
 
-    friend struct CachedShapingResults;
+  friend struct CachedShapingResults;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_HARFBUZZ_HARFBUZZSHAPER_H_

@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "flutter/sky/engine/wtf/Assertions.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
 #include "flutter/sky/engine/wtf/PassRefPtr.h"
@@ -44,45 +43,57 @@ namespace WTF {
 #if ENABLE(ASSERT) || ENABLE(SECURITY_ASSERT)
 // The debug/assertion version may get bigger.
 struct SameSizeAsRefCounted {
-    int a;
+  int a;
 #if ENABLE(SECURITY_ASSERT)
-    bool b;
+  bool b;
 #endif
 #if ENABLE(ASSERT)
-    bool c;
-    ThreadRestrictionVerifier d;
+  bool c;
+  ThreadRestrictionVerifier d;
 #endif
 };
 #else
 struct SameSizeAsRefCounted {
-    int a;
-    // Don't add anything here because this should stay small.
+  int a;
+  // Don't add anything here because this should stay small.
 };
 #endif
-template<typename T, unsigned inlineCapacity = 0>
+template <typename T, unsigned inlineCapacity = 0>
 struct SameSizeAsVectorWithInlineCapacity;
 
-template<typename T>
+template <typename T>
 struct SameSizeAsVectorWithInlineCapacity<T, 0> {
-    void* bufferPointer;
-    unsigned capacity;
-    unsigned size;
+  void* bufferPointer;
+  unsigned capacity;
+  unsigned size;
 };
 
-template<typename T, unsigned inlineCapacity>
+template <typename T, unsigned inlineCapacity>
 struct SameSizeAsVectorWithInlineCapacity {
-    SameSizeAsVectorWithInlineCapacity<T, 0> baseCapacity;
-    AlignedBuffer<inlineCapacity * sizeof(T), WTF_ALIGN_OF(T)> inlineBuffer;
+  SameSizeAsVectorWithInlineCapacity<T, 0> baseCapacity;
+  AlignedBuffer<inlineCapacity * sizeof(T), WTF_ALIGN_OF(T)> inlineBuffer;
 };
 
 COMPILE_ASSERT(sizeof(OwnPtr<int>) == sizeof(int*), OwnPtr_should_stay_small);
-COMPILE_ASSERT(sizeof(PassRefPtr<RefCounted<int> >) == sizeof(int*), PassRefPtr_should_stay_small);
-COMPILE_ASSERT(sizeof(RefCounted<int>) == sizeof(SameSizeAsRefCounted), RefCounted_should_stay_small);
-COMPILE_ASSERT(sizeof(RefPtr<RefCounted<int> >) == sizeof(int*), RefPtr_should_stay_small);
+COMPILE_ASSERT(sizeof(PassRefPtr<RefCounted<int>>) == sizeof(int*),
+               PassRefPtr_should_stay_small);
+COMPILE_ASSERT(sizeof(RefCounted<int>) == sizeof(SameSizeAsRefCounted),
+               RefCounted_should_stay_small);
+COMPILE_ASSERT(sizeof(RefPtr<RefCounted<int>>) == sizeof(int*),
+               RefPtr_should_stay_small);
 COMPILE_ASSERT(sizeof(String) == sizeof(int*), String_should_stay_small);
-COMPILE_ASSERT(sizeof(AtomicString) == sizeof(String), AtomicString_should_stay_small);
-COMPILE_ASSERT(sizeof(Vector<int>) == sizeof(SameSizeAsVectorWithInlineCapacity<int>), Vector_should_stay_small);
-COMPILE_ASSERT(sizeof(Vector<int, 1>) == sizeof(SameSizeAsVectorWithInlineCapacity<int, 1>), Vector_should_stay_small);
-COMPILE_ASSERT(sizeof(Vector<int, 2>) == sizeof(SameSizeAsVectorWithInlineCapacity<int, 2>), Vector_should_stay_small);
-COMPILE_ASSERT(sizeof(Vector<int, 3>) == sizeof(SameSizeAsVectorWithInlineCapacity<int, 3>), Vector_should_stay_small);
-}
+COMPILE_ASSERT(sizeof(AtomicString) == sizeof(String),
+               AtomicString_should_stay_small);
+COMPILE_ASSERT(sizeof(Vector<int>) ==
+                   sizeof(SameSizeAsVectorWithInlineCapacity<int>),
+               Vector_should_stay_small);
+COMPILE_ASSERT(sizeof(Vector<int, 1>) ==
+                   sizeof(SameSizeAsVectorWithInlineCapacity<int, 1>),
+               Vector_should_stay_small);
+COMPILE_ASSERT(sizeof(Vector<int, 2>) ==
+                   sizeof(SameSizeAsVectorWithInlineCapacity<int, 2>),
+               Vector_should_stay_small);
+COMPILE_ASSERT(sizeof(Vector<int, 3>) ==
+                   sizeof(SameSizeAsVectorWithInlineCapacity<int, 3>),
+               Vector_should_stay_small);
+}  // namespace WTF

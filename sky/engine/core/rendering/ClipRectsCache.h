@@ -10,45 +10,42 @@
 namespace blink {
 
 enum ClipRectsCacheSlot {
-    // Relative to the ancestor treated as the root (e.g. transformed layer). Used for hit testing.
-    RootRelativeClipRects,
+  // Relative to the ancestor treated as the root (e.g. transformed layer). Used
+  // for hit testing.
+  RootRelativeClipRects,
 
-    // Relative to painting ancestor. Used for painting.
-    PaintingClipRects,
+  // Relative to painting ancestor. Used for painting.
+  PaintingClipRects,
 
-    NumberOfClipRectsCacheSlots,
-    UncachedClipRects,
+  NumberOfClipRectsCacheSlots,
+  UncachedClipRects,
 };
 
 class ClipRectsCache {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    struct Entry {
-        Entry()
-            : root(0)
-        {
-        }
+  WTF_MAKE_FAST_ALLOCATED;
 
-        const RenderLayer* root;
-        RefPtr<ClipRects> clipRects;
-    };
+ public:
+  struct Entry {
+    Entry() : root(0) {}
 
-    Entry& get(ClipRectsCacheSlot slot)
-    {
-        ASSERT(slot < NumberOfClipRectsCacheSlots);
-        return m_entries[slot];
-    }
+    const RenderLayer* root;
+    RefPtr<ClipRects> clipRects;
+  };
 
-    void clear(ClipRectsCacheSlot slot)
-    {
-        ASSERT(slot < NumberOfClipRectsCacheSlots);
-        m_entries[slot] = Entry();
-    }
+  Entry& get(ClipRectsCacheSlot slot) {
+    ASSERT(slot < NumberOfClipRectsCacheSlots);
+    return m_entries[slot];
+  }
 
-private:
-    Entry m_entries[NumberOfClipRectsCacheSlots];
+  void clear(ClipRectsCacheSlot slot) {
+    ASSERT(slot < NumberOfClipRectsCacheSlots);
+    m_entries[slot] = Entry();
+  }
+
+ private:
+  Entry m_entries[NumberOfClipRectsCacheSlots];
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_CLIPRECTSCACHE_H_

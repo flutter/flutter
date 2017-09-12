@@ -15,102 +15,162 @@ struct BidiRun;
 class InlineIterator;
 
 class RenderParagraph final : public RenderBlock {
-public:
-    explicit RenderParagraph();
-    virtual ~RenderParagraph();
+ public:
+  explicit RenderParagraph();
+  virtual ~RenderParagraph();
 
-    bool isRenderParagraph() const final { return true; }
+  bool isRenderParagraph() const final { return true; }
 
-    void layout() final;
+  void layout() final;
 
-    LayoutUnit logicalRightOffsetForLine(bool shouldIndentText) const
-    {
-        LayoutUnit right = logicalRightOffsetForContent();
-        if (shouldIndentText && !style()->isLeftToRightDirection())
-            right -= textIndentOffset();
-        return right;
-    }
-    LayoutUnit logicalLeftOffsetForLine(bool shouldIndentText) const
-    {
-        LayoutUnit left = logicalLeftOffsetForContent();
-        if (shouldIndentText && style()->isLeftToRightDirection())
-            left += textIndentOffset();
-        return left;
-    }
+  LayoutUnit logicalRightOffsetForLine(bool shouldIndentText) const {
+    LayoutUnit right = logicalRightOffsetForContent();
+    if (shouldIndentText && !style()->isLeftToRightDirection())
+      right -= textIndentOffset();
+    return right;
+  }
+  LayoutUnit logicalLeftOffsetForLine(bool shouldIndentText) const {
+    LayoutUnit left = logicalLeftOffsetForContent();
+    if (shouldIndentText && style()->isLeftToRightDirection())
+      left += textIndentOffset();
+    return left;
+  }
 
-    LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) final;
-    LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock, LayoutUnit position) final;
+  LayoutUnit logicalLeftSelectionOffset(RenderBlock* rootBlock,
+                                        LayoutUnit position) final;
+  LayoutUnit logicalRightSelectionOffset(RenderBlock* rootBlock,
+                                         LayoutUnit position) final;
 
-    virtual RootInlineBox* lineAtIndex(int) const;
-    virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
+  virtual RootInlineBox* lineAtIndex(int) const;
+  virtual int lineCount(const RootInlineBox* = 0, bool* = 0) const;
 
-    void deleteLineBoxTree() final;
+  void deleteLineBoxTree() final;
 
-    GapRects inlineSelectionGaps(RenderBlock* rootBlock, const LayoutPoint& rootBlockPhysicalPosition, const LayoutSize& offsetFromRootBlock,
-        LayoutUnit& lastLogicalTop, LayoutUnit& lastLogicalLeft, LayoutUnit& lastLogicalRight, const PaintInfo*);
+  GapRects inlineSelectionGaps(RenderBlock* rootBlock,
+                               const LayoutPoint& rootBlockPhysicalPosition,
+                               const LayoutSize& offsetFromRootBlock,
+                               LayoutUnit& lastLogicalTop,
+                               LayoutUnit& lastLogicalLeft,
+                               LayoutUnit& lastLogicalRight,
+                               const PaintInfo*);
 
-    static bool shouldSkipCreatingRunsForObject(RenderObject* obj)
-    {
-        return obj->isOutOfFlowPositioned() && !obj->style()->isOriginalDisplayInlineType() && !obj->container()->isRenderInline();
-    }
+  static bool shouldSkipCreatingRunsForObject(RenderObject* obj) {
+    return obj->isOutOfFlowPositioned() &&
+           !obj->style()->isOriginalDisplayInlineType() &&
+           !obj->container()->isRenderInline();
+  }
 
-    bool didExceedMaxLines() const { return m_didExceedMaxLines; }
+  bool didExceedMaxLines() const { return m_didExceedMaxLines; }
 
-    // TODO(ojan): Remove the need for these.
-    using RenderBlock::lineBoxes;
-    using RenderBlock::firstLineBox;
-    using RenderBlock::lastRootBox;
+  // TODO(ojan): Remove the need for these.
+  using RenderBlock::firstLineBox;
+  using RenderBlock::lastRootBox;
+  using RenderBlock::lineBoxes;
 
-protected:
-    void addOverflowFromChildren() final;
+ protected:
+  void addOverflowFromChildren() final;
 
-    void simplifiedNormalFlowLayout() final;
+  void simplifiedNormalFlowLayout() final;
 
-    void paintChildren(PaintInfo&, const LayoutPoint&, Vector<RenderBox*>& layers) final;
+  void paintChildren(PaintInfo&,
+                     const LayoutPoint&,
+                     Vector<RenderBox*>& layers) final;
 
-    bool hitTestContents(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset) final;
+  bool hitTestContents(const HitTestRequest&,
+                       HitTestResult&,
+                       const HitTestLocation& locationInContainer,
+                       const LayoutPoint& accumulatedOffset) final;
 
-    virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
+  virtual ETextAlign textAlignmentForLine(bool endsWithSoftBreak) const;
 
-    void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth, LayoutUnit& maxLogicalWidth) const final;
+  void computeIntrinsicLogicalWidths(LayoutUnit& minLogicalWidth,
+                                     LayoutUnit& maxLogicalWidth) const final;
 
-    int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const final;
-    int lastLineBoxBaseline(LineDirectionMode) const final;
+  int firstLineBoxBaseline(FontBaselineOrAuto baselineType) const final;
+  int lastLineBoxBaseline(LineDirectionMode) const final;
 
-private:
-    virtual const char* renderName() const override;
+ private:
+  virtual const char* renderName() const override;
 
-    void layoutChildren(bool relayoutChildren, SubtreeLayoutScope&, LayoutUnit beforeEdge, LayoutUnit afterEdge);
+  void layoutChildren(bool relayoutChildren,
+                      SubtreeLayoutScope&,
+                      LayoutUnit beforeEdge,
+                      LayoutUnit afterEdge);
 
-    void markLinesDirtyInBlockRange(LayoutUnit logicalTop, LayoutUnit logicalBottom, RootInlineBox* highest = 0);
+  void markLinesDirtyInBlockRange(LayoutUnit logicalTop,
+                                  LayoutUnit logicalBottom,
+                                  RootInlineBox* highest = 0);
 
-    void updateLogicalWidthForAlignment(const ETextAlign&, const RootInlineBox*, BidiRun* trailingSpaceRun, float& logicalLeft, float& totalLogicalWidth, float& availableLogicalWidth, unsigned expansionOpportunityCount);
+  void updateLogicalWidthForAlignment(const ETextAlign&,
+                                      const RootInlineBox*,
+                                      BidiRun* trailingSpaceRun,
+                                      float& logicalLeft,
+                                      float& totalLogicalWidth,
+                                      float& availableLogicalWidth,
+                                      unsigned expansionOpportunityCount);
 
-    RootInlineBox* createAndAppendRootInlineBox();
-    RootInlineBox* createRootInlineBox();
-    InlineFlowBox* createLineBoxes(RenderObject*, const LineInfo&, InlineBox* childBox);
-    InlineBox* createInlineBoxForRenderer(RenderObject*, bool isRootLineBox, bool isOnlyRun = false);
-    RootInlineBox* constructLine(BidiRunList<BidiRun>&, const LineInfo&);
-    void computeInlineDirectionPositionsForLine(RootInlineBox*, const LineInfo&, BidiRun* firstRun, BidiRun* trailingSpaceRun, bool reachedEnd, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&, WordMeasurements&);
-    BidiRun* computeInlineDirectionPositionsForSegment(RootInlineBox*, const LineInfo&, ETextAlign, float& logicalLeft,
-        float& availableLogicalWidth, BidiRun* firstRun, BidiRun* trailingSpaceRun, GlyphOverflowAndFallbackFontsMap& textBoxDataMap, VerticalPositionCache&, WordMeasurements&);
-    void computeBlockDirectionPositionsForLine(RootInlineBox*, BidiRun*, GlyphOverflowAndFallbackFontsMap&, VerticalPositionCache&);
-    // Helper function for layoutChildren()
-    RootInlineBox* createLineBoxesFromBidiRuns(unsigned bidiLevel, BidiRunList<BidiRun>&, const InlineIterator& end, LineInfo&, VerticalPositionCache&, BidiRun* trailingSpaceRun, WordMeasurements&);
-    void layoutRunsAndFloats(LineLayoutState&);
-    void layoutRunsAndFloatsInRange(LineLayoutState&, InlineBidiResolver&,
-        const InlineIterator& cleanLineStart, const BidiStatus& cleanLineBidiStatus);
-    void linkToEndLineIfNeeded(LineLayoutState&);
-    RootInlineBox* determineStartPosition(LineLayoutState&, InlineBidiResolver&);
-    void determineEndPosition(LineLayoutState&, RootInlineBox* startBox, InlineIterator& cleanLineStart, BidiStatus& cleanLineBidiStatus);
-    bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
-    bool matchedEndLine(LineLayoutState&, const InlineBidiResolver&, const InlineIterator& endLineStart, const BidiStatus& endLineStatus);
+  RootInlineBox* createAndAppendRootInlineBox();
+  RootInlineBox* createRootInlineBox();
+  InlineFlowBox* createLineBoxes(RenderObject*,
+                                 const LineInfo&,
+                                 InlineBox* childBox);
+  InlineBox* createInlineBoxForRenderer(RenderObject*,
+                                        bool isRootLineBox,
+                                        bool isOnlyRun = false);
+  RootInlineBox* constructLine(BidiRunList<BidiRun>&, const LineInfo&);
+  void computeInlineDirectionPositionsForLine(RootInlineBox*,
+                                              const LineInfo&,
+                                              BidiRun* firstRun,
+                                              BidiRun* trailingSpaceRun,
+                                              bool reachedEnd,
+                                              GlyphOverflowAndFallbackFontsMap&,
+                                              VerticalPositionCache&,
+                                              WordMeasurements&);
+  BidiRun* computeInlineDirectionPositionsForSegment(
+      RootInlineBox*,
+      const LineInfo&,
+      ETextAlign,
+      float& logicalLeft,
+      float& availableLogicalWidth,
+      BidiRun* firstRun,
+      BidiRun* trailingSpaceRun,
+      GlyphOverflowAndFallbackFontsMap& textBoxDataMap,
+      VerticalPositionCache&,
+      WordMeasurements&);
+  void computeBlockDirectionPositionsForLine(RootInlineBox*,
+                                             BidiRun*,
+                                             GlyphOverflowAndFallbackFontsMap&,
+                                             VerticalPositionCache&);
+  // Helper function for layoutChildren()
+  RootInlineBox* createLineBoxesFromBidiRuns(unsigned bidiLevel,
+                                             BidiRunList<BidiRun>&,
+                                             const InlineIterator& end,
+                                             LineInfo&,
+                                             VerticalPositionCache&,
+                                             BidiRun* trailingSpaceRun,
+                                             WordMeasurements&);
+  void layoutRunsAndFloats(LineLayoutState&);
+  void layoutRunsAndFloatsInRange(LineLayoutState&,
+                                  InlineBidiResolver&,
+                                  const InlineIterator& cleanLineStart,
+                                  const BidiStatus& cleanLineBidiStatus);
+  void linkToEndLineIfNeeded(LineLayoutState&);
+  RootInlineBox* determineStartPosition(LineLayoutState&, InlineBidiResolver&);
+  void determineEndPosition(LineLayoutState&,
+                            RootInlineBox* startBox,
+                            InlineIterator& cleanLineStart,
+                            BidiStatus& cleanLineBidiStatus);
+  bool checkPaginationAndFloatsAtEndLine(LineLayoutState&);
+  bool matchedEndLine(LineLayoutState&,
+                      const InlineBidiResolver&,
+                      const InlineIterator& endLineStart,
+                      const BidiStatus& endLineStatus);
 
-    bool m_didExceedMaxLines;
+  bool m_didExceedMaxLines;
 };
 
 DEFINE_RENDER_OBJECT_TYPE_CASTS(RenderParagraph, isRenderParagraph());
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_RENDERPARAGRAPH_H_

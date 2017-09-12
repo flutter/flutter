@@ -51,7 +51,7 @@ MessageLoopAndroid::MessageLoopAndroid()
                                    kWakeEvents,            // events
                                    read_event_fd,          // callback
                                    this                    // baton
-                                   );
+  );
   FXL_CHECK(add_result == 1);
 }
 
@@ -70,7 +70,7 @@ void MessageLoopAndroid::Run() {
                                     nullptr,  // out fd,
                                     nullptr,  // out events,
                                     nullptr   // out data
-                                    );
+    );
     if (result == ALOOPER_POLL_TIMEOUT || result == ALOOPER_POLL_ERROR) {
       // This handles the case where the loop is terminated using ALooper APIs.
       running_ = false;

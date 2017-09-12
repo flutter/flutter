@@ -8,11 +8,11 @@
 #include <memory>
 #include <vector>
 
-#include "lib/ui/scenic/client/resources.h"
 #include "flutter/flow/compositor_context.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/macros.h"
+#include "lib/ui/scenic/client/resources.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkSurface.h"
 
@@ -167,12 +167,11 @@ class SceneUpdateContext {
                               const SkRect& paint_bounds,
                               std::vector<Layer*> paint_layers);
   void SetShapeColor(scenic_lib::ShapeNode& shape_node, SkColor color);
-  scenic_lib::Image* GenerateImageIfNeeded(
-      SkColor color,
-      SkScalar scale_x,
-      SkScalar scale_y,
-      const SkRect& paint_bounds,
-      std::vector<Layer*> paint_layers);
+  scenic_lib::Image* GenerateImageIfNeeded(SkColor color,
+                                           SkScalar scale_x,
+                                           SkScalar scale_y,
+                                           const SkRect& paint_bounds,
+                                           std::vector<Layer*> paint_layers);
 
   Entity* top_entity_ = nullptr;
   float top_scale_x_ = 1.f;

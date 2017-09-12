@@ -9,11 +9,11 @@
 #include <magenta/status.h>
 #include <mxio/namespace.h>
 
-#include "lib/app/cpp/connect.h"
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
-#include "lib/fxl/logging.h"
+#include "lib/app/cpp/connect.h"
 #include "lib/fsl/vmo/vector.h"
+#include "lib/fxl/logging.h"
 
 namespace flutter_runner {
 
@@ -52,8 +52,8 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   service_provider_bridge_.AddService<mozart::ViewProvider>(
       [this](fidl::InterfaceRequest<mozart::ViewProvider> request) {
-    view_provider_bindings_.AddBinding(this, std::move(request));
-  });
+        view_provider_bindings_.AddBinding(this, std::move(request));
+      });
 
   app::ServiceProviderPtr service_provider;
   auto request = service_provider.NewRequest();
@@ -67,8 +67,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
   runtime_holder_->Init(
-      mxio_ns,
-      app::ApplicationContext::CreateFrom(std::move(startup_info)),
+      mxio_ns, app::ApplicationContext::CreateFrom(std::move(startup_info)),
       std::move(request), std::move(bundle));
 }
 

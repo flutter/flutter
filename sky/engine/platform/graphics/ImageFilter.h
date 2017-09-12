@@ -13,6 +13,6 @@ namespace blink {
 
 PLATFORM_EXPORT FloatRect mapImageFilterRect(SkImageFilter*, const FloatRect&);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEFILTER_H_

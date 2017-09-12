@@ -17,7 +17,7 @@ void TraceEvent0(TraceArg category_group, TraceArg name) {
                      0,                          // argument_count
                      nullptr,                    // argument_names
                      nullptr                     // argument_values
-                     );
+  );
 }
 
 void TraceEvent1(TraceArg category_group,
@@ -33,7 +33,7 @@ void TraceEvent1(TraceArg category_group,
                      1,                          // argument_count
                      arg_names,                  // argument_names
                      arg_values                  // argument_values
-                     );
+  );
 }
 
 void TraceEvent2(TraceArg category_group,
@@ -51,7 +51,7 @@ void TraceEvent2(TraceArg category_group,
                      2,                          // argument_count
                      arg_names,                  // argument_names
                      arg_values                  // argument_values
-                     );
+  );
 }
 
 void TraceEventEnd(TraceArg name) {
@@ -62,7 +62,7 @@ void TraceEventEnd(TraceArg name) {
                      0,                         // argument_count
                      nullptr,                   // argument_names
                      nullptr                    // argument_values
-                     );
+  );
 }
 
 void TraceEventAsyncBegin0(TraceArg category_group,
@@ -75,7 +75,7 @@ void TraceEventAsyncBegin0(TraceArg category_group,
                      0,                                // argument_count
                      nullptr,                          // argument_names
                      nullptr                           // argument_values
-                     );
+  );
 }
 
 void TraceEventAsyncEnd0(TraceArg category_group,
@@ -88,7 +88,7 @@ void TraceEventAsyncEnd0(TraceArg category_group,
                      0,                              // argument_count
                      nullptr,                        // argument_names
                      nullptr                         // argument_values
-                     );
+  );
 }
 
 void TraceEventAsyncBegin1(TraceArg category_group,
@@ -105,7 +105,7 @@ void TraceEventAsyncBegin1(TraceArg category_group,
                      1,                                // argument_count
                      arg_names,                        // argument_names
                      arg_values                        // argument_values
-                     );
+  );
 }
 
 void TraceEventAsyncEnd1(TraceArg category_group,
@@ -122,7 +122,7 @@ void TraceEventAsyncEnd1(TraceArg category_group,
                      1,                              // argument_count
                      arg_names,                      // argument_names
                      arg_values                      // argument_values
-                     );
+  );
 }
 
 void TraceEventInstant0(TraceArg category_group, TraceArg name) {
@@ -133,7 +133,7 @@ void TraceEventInstant0(TraceArg category_group, TraceArg name) {
                      0,                            // argument_count
                      nullptr,                      // argument_names
                      nullptr                       // argument_values
-                     );
+  );
 }
 
 void TraceEventFlowBegin0(TraceArg category_group,
@@ -146,7 +146,7 @@ void TraceEventFlowBegin0(TraceArg category_group,
                      0,                               // argument_count
                      nullptr,                         // argument_names
                      nullptr                          // argument_values
-                     );
+  );
 }
 
 void TraceEventFlowStep0(TraceArg category_group,
@@ -159,7 +159,7 @@ void TraceEventFlowStep0(TraceArg category_group,
                      0,                              // argument_count
                      nullptr,                        // argument_names
                      nullptr                         // argument_values
-                     );
+  );
 }
 
 void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
@@ -170,7 +170,7 @@ void TraceEventFlowEnd0(TraceArg category_group, TraceArg name, TraceIDArg id) {
                      0,                             // argument_count
                      nullptr,                       // argument_names
                      nullptr                        // argument_values
-                     );
+  );
 }
 
 }  // namespace tracing

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <mutex>
 #include "flutter/lib/ui/text/font_collection.h"
+#include <mutex>
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/rapidjson.h"
 #include "third_party/skia/include/core/SkStream.h"

@@ -32,22 +32,22 @@
 namespace blink {
 
 class StyleFilterData : public RefCounted<StyleFilterData> {
-public:
-    static PassRefPtr<StyleFilterData> create() { return adoptRef(new StyleFilterData); }
-    PassRefPtr<StyleFilterData> copy() const { return adoptRef(new StyleFilterData(*this)); }
+ public:
+  static PassRefPtr<StyleFilterData> create() {
+    return adoptRef(new StyleFilterData);
+  }
+  PassRefPtr<StyleFilterData> copy() const {
+    return adoptRef(new StyleFilterData(*this));
+  }
 
-    bool operator==(const StyleFilterData&) const;
-    bool operator!=(const StyleFilterData& o) const
-    {
-        return !(*this == o);
-    }
+  bool operator==(const StyleFilterData&) const;
+  bool operator!=(const StyleFilterData& o) const { return !(*this == o); }
 
-private:
-    StyleFilterData();
-    StyleFilterData(const StyleFilterData&);
+ private:
+  StyleFilterData();
+  StyleFilterData(const StyleFilterData&);
 };
 
-} // namespace blink
-
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_STYLEFILTERDATA_H_

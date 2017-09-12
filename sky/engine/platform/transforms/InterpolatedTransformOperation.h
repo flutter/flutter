@@ -37,45 +37,48 @@
 namespace blink {
 
 // This class is an implementation detail for deferred interpolations.
-class PLATFORM_EXPORT InterpolatedTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<InterpolatedTransformOperation> create(const TransformOperations& from, const TransformOperations& to, double progress)
-    {
-        return adoptRef(new InterpolatedTransformOperation(from, to, progress));
-    }
+class PLATFORM_EXPORT InterpolatedTransformOperation
+    : public TransformOperation {
+ public:
+  static PassRefPtr<InterpolatedTransformOperation> create(
+      const TransformOperations& from,
+      const TransformOperations& to,
+      double progress) {
+    return adoptRef(new InterpolatedTransformOperation(from, to, progress));
+  }
 
-    virtual bool canBlendWith(const TransformOperation& other) const
-    {
-        return isSameType(other);
-    }
+  virtual bool canBlendWith(const TransformOperation& other) const {
+    return isSameType(other);
+  }
 
-private:
-    virtual bool isIdentity() const override { return false; }
+ private:
+  virtual bool isIdentity() const override { return false; }
 
-    virtual OperationType type() const override { return Interpolated; }
+  virtual OperationType type() const override { return Interpolated; }
 
-    virtual bool operator==(const TransformOperation&) const override;
-    virtual void apply(TransformationMatrix&, const FloatSize& borderBoxSize) const override;
+  virtual bool operator==(const TransformOperation&) const override;
+  virtual void apply(TransformationMatrix&,
+                     const FloatSize& borderBoxSize) const override;
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    virtual bool dependsOnBoxSize() const override
-    {
-        return from.dependsOnBoxSize() || to.dependsOnBoxSize();
-    }
+  virtual bool dependsOnBoxSize() const override {
+    return from.dependsOnBoxSize() || to.dependsOnBoxSize();
+  }
 
-    InterpolatedTransformOperation(const TransformOperations& from, const TransformOperations& to, double progress)
-        : from(from)
-        , to(to)
-        , progress(progress)
-    { }
+  InterpolatedTransformOperation(const TransformOperations& from,
+                                 const TransformOperations& to,
+                                 double progress)
+      : from(from), to(to), progress(progress) {}
 
-    const TransformOperations from;
-    const TransformOperations to;
-    double progress;
+  const TransformOperations from;
+  const TransformOperations to;
+  double progress;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_INTERPOLATEDTRANSFORMOPERATION_H_
-

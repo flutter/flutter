@@ -97,8 +97,7 @@ Paint DartConverter<Paint>::FromArguments(Dart_NativeArguments args,
 
   uint32_t encoded_blend_mode = uint_data[kBlendModeIndex];
   if (encoded_blend_mode) {
-    uint32_t blend_mode =
-        encoded_blend_mode ^ kBlendModeDefault;
+    uint32_t blend_mode = encoded_blend_mode ^ kBlendModeDefault;
     paint.setBlendMode(static_cast<SkBlendMode>(blend_mode));
   }
 

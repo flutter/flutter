@@ -39,58 +39,64 @@ namespace blink {
 // represent values for properties being animated via the GraphicsLayer,
 // without pulling in style-related data from outside of the platform directory.
 class AnimationValue {
-    WTF_MAKE_FAST_ALLOCATED;
-public:
-    explicit AnimationValue(double keyTime, PassRefPtr<TimingFunction> timingFunction = nullptr)
-        : m_keyTime(keyTime)
-        , m_timingFunction(timingFunction)
-    {
-    }
+  WTF_MAKE_FAST_ALLOCATED;
 
-    virtual ~AnimationValue() { }
+ public:
+  explicit AnimationValue(double keyTime,
+                          PassRefPtr<TimingFunction> timingFunction = nullptr)
+      : m_keyTime(keyTime), m_timingFunction(timingFunction) {}
 
-    double keyTime() const { return m_keyTime; }
-    const TimingFunction* timingFunction() const { return m_timingFunction.get(); }
-    virtual PassOwnPtr<AnimationValue> clone() const = 0;
+  virtual ~AnimationValue() {}
 
-private:
-    double m_keyTime;
-    RefPtr<TimingFunction> m_timingFunction;
+  double keyTime() const { return m_keyTime; }
+  const TimingFunction* timingFunction() const {
+    return m_timingFunction.get();
+  }
+  virtual PassOwnPtr<AnimationValue> clone() const = 0;
+
+ private:
+  double m_keyTime;
+  RefPtr<TimingFunction> m_timingFunction;
 };
 
 // Used to store one float value of an animation.
 class FloatAnimationValue final : public AnimationValue {
-public:
-    FloatAnimationValue(double keyTime, float value, PassRefPtr<TimingFunction> timingFunction = nullptr)
-        : AnimationValue(keyTime, timingFunction)
-        , m_value(value)
-    {
-    }
-    virtual PassOwnPtr<AnimationValue> clone() const override { return adoptPtr(new FloatAnimationValue(*this)); }
+ public:
+  FloatAnimationValue(double keyTime,
+                      float value,
+                      PassRefPtr<TimingFunction> timingFunction = nullptr)
+      : AnimationValue(keyTime, timingFunction), m_value(value) {}
+  virtual PassOwnPtr<AnimationValue> clone() const override {
+    return adoptPtr(new FloatAnimationValue(*this));
+  }
 
-    float value() const { return m_value; }
+  float value() const { return m_value; }
 
-private:
-    float m_value;
+ private:
+  float m_value;
 };
 
 // Used to store one transform value in a keyframe list.
 class TransformAnimationValue final : public AnimationValue {
-public:
-    explicit TransformAnimationValue(double keyTime, const TransformOperations* value = 0, PassRefPtr<TimingFunction> timingFunction = nullptr)
-        : AnimationValue(keyTime, timingFunction)
-    {
-        if (value)
-            m_value = *value;
-    }
-    virtual PassOwnPtr<AnimationValue> clone() const override { return adoptPtr(new TransformAnimationValue(*this)); }
+ public:
+  explicit TransformAnimationValue(
+      double keyTime,
+      const TransformOperations* value = 0,
+      PassRefPtr<TimingFunction> timingFunction = nullptr)
+      : AnimationValue(keyTime, timingFunction) {
+    if (value)
+      m_value = *value;
+  }
+  virtual PassOwnPtr<AnimationValue> clone() const override {
+    return adoptPtr(new TransformAnimationValue(*this));
+  }
 
-    const TransformOperations* value() const { return &m_value; }
+  const TransformOperations* value() const { return &m_value; }
 
-private:
-    TransformOperations m_value;
+ private:
+  TransformOperations m_value;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_ANIMATION_ANIMATIONVALUE_H_

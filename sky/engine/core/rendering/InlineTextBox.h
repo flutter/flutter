@@ -1,7 +1,8 @@
 /*
  * (C) 1999 Lars Knoll (knoll@kde.org)
  * (C) 2000 Dirk Mueller (mueller@kde.org)
- * Copyright (C) 2004, 2005, 2006, 2009, 2010, 2011 Apple Inc. All rights reserved.
+ * Copyright (C) 2004, 2005, 2006, 2009, 2010, 2011 Apple Inc.
+ * All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Library General Public
@@ -40,166 +41,224 @@ const unsigned short cNoTruncation = USHRT_MAX;
 const unsigned short cFullTruncation = USHRT_MAX - 1;
 
 class InlineTextBox : public InlineBox {
-public:
-    InlineTextBox(RenderObject& obj)
-        : InlineBox(obj)
-        , m_prevTextBox(0)
-        , m_nextTextBox(0)
-        , m_start(0)
-        , m_len(0)
-        , m_truncation(cNoTruncation)
-    {
-    }
+ public:
+  InlineTextBox(RenderObject& obj)
+      : InlineBox(obj),
+        m_prevTextBox(0),
+        m_nextTextBox(0),
+        m_start(0),
+        m_len(0),
+        m_truncation(cNoTruncation) {}
 
-    RenderText& renderer() const { return toRenderText(InlineBox::renderer()); }
+  RenderText& renderer() const { return toRenderText(InlineBox::renderer()); }
 
-    virtual void destroy() override final;
+  virtual void destroy() override final;
 
-    InlineTextBox* prevTextBox() const { return m_prevTextBox; }
-    InlineTextBox* nextTextBox() const { return m_nextTextBox; }
-    void setNextTextBox(InlineTextBox* n) { m_nextTextBox = n; }
-    void setPreviousTextBox(InlineTextBox* p) { m_prevTextBox = p; }
+  InlineTextBox* prevTextBox() const { return m_prevTextBox; }
+  InlineTextBox* nextTextBox() const { return m_nextTextBox; }
+  void setNextTextBox(InlineTextBox* n) { m_nextTextBox = n; }
+  void setPreviousTextBox(InlineTextBox* p) { m_prevTextBox = p; }
 
-    // FIXME: These accessors should ASSERT(!isDirty()). See https://bugs.webkit.org/show_bug.cgi?id=97264
-    unsigned start() const { return m_start; }
-    unsigned end() const { return m_len ? m_start + m_len - 1 : m_start; }
-    unsigned len() const { return m_len; }
+  // FIXME: These accessors should ASSERT(!isDirty()). See
+  // https://bugs.webkit.org/show_bug.cgi?id=97264
+  unsigned start() const { return m_start; }
+  unsigned end() const { return m_len ? m_start + m_len - 1 : m_start; }
+  unsigned len() const { return m_len; }
 
-    void setStart(unsigned start) { m_start = start; }
-    void setLen(unsigned len) { m_len = len; }
+  void setStart(unsigned start) { m_start = start; }
+  void setLen(unsigned len) { m_len = len; }
 
-    void offsetRun(int d) { ASSERT(!isDirty()); m_start += d; }
+  void offsetRun(int d) {
+    ASSERT(!isDirty());
+    m_start += d;
+  }
 
-    unsigned short truncation() { return m_truncation; }
+  unsigned short truncation() { return m_truncation; }
 
-    virtual void markDirty() override final;
+  virtual void markDirty() override final;
 
-    using InlineBox::hasHyphen;
-    using InlineBox::setHasHyphen;
-    using InlineBox::setHasAddedEllipsis;
-    using InlineBox::canHaveLeadingExpansion;
-    using InlineBox::setCanHaveLeadingExpansion;
+  using InlineBox::canHaveLeadingExpansion;
+  using InlineBox::hasHyphen;
+  using InlineBox::setCanHaveLeadingExpansion;
+  using InlineBox::setHasAddedEllipsis;
+  using InlineBox::setHasHyphen;
 
-    static inline bool compareByStart(const InlineTextBox* first, const InlineTextBox* second) { return first->start() < second->start(); }
+  static inline bool compareByStart(const InlineTextBox* first,
+                                    const InlineTextBox* second) {
+    return first->start() < second->start();
+  }
 
-    virtual int baselinePosition(FontBaseline) const override final;
-    virtual LayoutUnit lineHeight() const override final;
+  virtual int baselinePosition(FontBaseline) const override final;
+  virtual LayoutUnit lineHeight() const override final;
 
-    bool getEmphasisMarkPosition(RenderStyle*, TextEmphasisPosition&) const;
+  bool getEmphasisMarkPosition(RenderStyle*, TextEmphasisPosition&) const;
 
-    LayoutRect logicalOverflowRect() const;
-    void setLogicalOverflowRect(const LayoutRect&);
-    LayoutUnit logicalTopVisualOverflow() const { return logicalOverflowRect().y(); }
-    LayoutUnit logicalBottomVisualOverflow() const { return logicalOverflowRect().maxY(); }
+  LayoutRect logicalOverflowRect() const;
+  void setLogicalOverflowRect(const LayoutRect&);
+  LayoutUnit logicalTopVisualOverflow() const {
+    return logicalOverflowRect().y();
+  }
+  LayoutUnit logicalBottomVisualOverflow() const {
+    return logicalOverflowRect().maxY();
+  }
 
 #ifndef NDEBUG
-    virtual void showBox(int = 0) const override;
-    virtual const char* boxName() const override;
+  virtual void showBox(int = 0) const override;
+  virtual const char* boxName() const override;
 #endif
 
-    enum RotationDirection { Counterclockwise, Clockwise };
-    static AffineTransform rotation(const FloatRect& boxRect, RotationDirection);
-private:
-    LayoutUnit selectionTop();
-    LayoutUnit selectionBottom();
-    LayoutUnit selectionHeight();
+  enum RotationDirection { Counterclockwise, Clockwise };
+  static AffineTransform rotation(const FloatRect& boxRect, RotationDirection);
 
-    // charactersWithHyphen, if provided, must not be destroyed before the TextRun.
-    TextRun constructTextRun(RenderStyle*, const Font&, StringBuilder* charactersWithHyphen = 0) const;
-    TextRun constructTextRun(RenderStyle*, const Font&, StringView, int maximumLength, StringBuilder* charactersWithHyphen = 0) const;
+ private:
+  LayoutUnit selectionTop();
+  LayoutUnit selectionBottom();
+  LayoutUnit selectionHeight();
 
-public:
-    TextRun constructTextRunForInspector(RenderStyle*, const Font&) const;
-    virtual FloatRect calculateBoundaries() const override { return FloatRect(x(), y(), width(), height()); }
+  // charactersWithHyphen, if provided, must not be destroyed before the
+  // TextRun.
+  TextRun constructTextRun(RenderStyle*,
+                           const Font&,
+                           StringBuilder* charactersWithHyphen = 0) const;
+  TextRun constructTextRun(RenderStyle*,
+                           const Font&,
+                           StringView,
+                           int maximumLength,
+                           StringBuilder* charactersWithHyphen = 0) const;
 
-    virtual LayoutRect localSelectionRect(int startPos, int endPos);
-    bool isSelected(int startPos, int endPos) const;
-    void selectionStartEnd(int& sPos, int& ePos);
+ public:
+  TextRun constructTextRunForInspector(RenderStyle*, const Font&) const;
+  virtual FloatRect calculateBoundaries() const override {
+    return FloatRect(x(), y(), width(), height());
+  }
 
-protected:
-    virtual void paint(PaintInfo&, const LayoutPoint&, LayoutUnit lineTop, LayoutUnit lineBottom, Vector<RenderBox*>& layers) override;
-    virtual bool nodeAtPoint(const HitTestRequest&, HitTestResult&, const HitTestLocation& locationInContainer, const LayoutPoint& accumulatedOffset, LayoutUnit lineTop, LayoutUnit lineBottom) override;
+  virtual LayoutRect localSelectionRect(int startPos, int endPos);
+  bool isSelected(int startPos, int endPos) const;
+  void selectionStartEnd(int& sPos, int& ePos);
 
-private:
-    virtual void deleteLine() override final;
-    virtual void extractLine() override final;
-    virtual void attachLine() override final;
+ protected:
+  virtual void paint(PaintInfo&,
+                     const LayoutPoint&,
+                     LayoutUnit lineTop,
+                     LayoutUnit lineBottom,
+                     Vector<RenderBox*>& layers) override;
+  virtual bool nodeAtPoint(const HitTestRequest&,
+                           HitTestResult&,
+                           const HitTestLocation& locationInContainer,
+                           const LayoutPoint& accumulatedOffset,
+                           LayoutUnit lineTop,
+                           LayoutUnit lineBottom) override;
 
-public:
-    virtual RenderObject::SelectionState selectionState() override final;
+ private:
+  virtual void deleteLine() override final;
+  virtual void extractLine() override final;
+  virtual void attachLine() override final;
 
-private:
-    virtual void clearTruncation() override final { m_truncation = cNoTruncation; }
+ public:
+  virtual RenderObject::SelectionState selectionState() override final;
 
-public:
-    virtual bool isLineBreak() const override final;
+ private:
+  virtual void clearTruncation() override final {
+    m_truncation = cNoTruncation;
+  }
 
-    void setExpansion(int newExpansion)
-    {
-        m_logicalWidth -= expansion();
-        InlineBox::setExpansion(newExpansion);
-        m_logicalWidth += newExpansion;
-    }
+ public:
+  virtual bool isLineBreak() const override final;
 
-private:
-    virtual bool isInlineTextBox() const override final { return true; }
+  void setExpansion(int newExpansion) {
+    m_logicalWidth -= expansion();
+    InlineBox::setExpansion(newExpansion);
+    m_logicalWidth += newExpansion;
+  }
 
-public:
-    virtual int caretMinOffset() const override final;
-    virtual int caretMaxOffset() const override final;
+ private:
+  virtual bool isInlineTextBox() const override final { return true; }
 
-private:
-    float textPos() const; // returns the x position relative to the left start of the text line.
+ public:
+  virtual int caretMinOffset() const override final;
+  virtual int caretMaxOffset() const override final;
 
-public:
-    virtual int offsetForPosition(float x, bool includePartialGlyphs = true) const;
-    virtual float positionForOffset(int offset) const;
+ private:
+  float textPos() const;  // returns the x position relative to the left start
+                          // of the text line.
 
-    bool containsCaretOffset(int offset) const; // false for offset after line break
+ public:
+  virtual int offsetForPosition(float x,
+                                bool includePartialGlyphs = true) const;
+  virtual float positionForOffset(int offset) const;
 
-    // Fills a vector with the pixel width of each character.
-    void characterWidths(Vector<float>&) const;
+  bool containsCaretOffset(
+      int offset) const;  // false for offset after line break
 
-private:
-    InlineTextBox* m_prevTextBox; // The previous box that also uses our RenderObject
-    InlineTextBox* m_nextTextBox; // The next box that also uses our RenderObject
-    TextBlobPtr m_cachedTextBlob;
+  // Fills a vector with the pixel width of each character.
+  void characterWidths(Vector<float>&) const;
 
-    int m_start;
-    unsigned short m_len;
+ private:
+  InlineTextBox*
+      m_prevTextBox;  // The previous box that also uses our RenderObject
+  InlineTextBox* m_nextTextBox;  // The next box that also uses our RenderObject
+  TextBlobPtr m_cachedTextBlob;
 
-    unsigned short m_truncation; // Where to truncate when text overflow is applied.  We use special constants to
-                      // denote no truncation (the whole run paints) and full truncation (nothing paints at all).
+  int m_start;
+  unsigned short m_len;
 
-    unsigned underlinePaintStart(const CompositionUnderline&);
-    unsigned underlinePaintEnd(const CompositionUnderline&);
+  unsigned short m_truncation;  // Where to truncate when text overflow is
+                                // applied.  We use special constants to denote
+                                // no truncation (the whole run paints) and full
+                                // truncation (nothing paints at all).
 
-protected:
-    void paintSingleCompositionBackgroundRun(GraphicsContext*, const FloatPoint& boxOrigin, RenderStyle*, const Font&, Color backgroundColor, int startPos, int endPos);
-    void paintCompositionBackgrounds(GraphicsContext*, const FloatPoint& boxOrigin, RenderStyle*, const Font&, bool useCustomUnderlines);
-    void paintCompositionUnderline(GraphicsContext*, const FloatPoint& boxOrigin, const CompositionUnderline&);
+  unsigned underlinePaintStart(const CompositionUnderline&);
+  unsigned underlinePaintEnd(const CompositionUnderline&);
 
-private:
-    void paintDecoration(GraphicsContext*, const FloatPoint& boxOrigin, TextDecoration);
-    void paintSelection(GraphicsContext*, const FloatPoint& boxOrigin, RenderStyle*, const Font&, Color textColor);
+ protected:
+  void paintSingleCompositionBackgroundRun(GraphicsContext*,
+                                           const FloatPoint& boxOrigin,
+                                           RenderStyle*,
+                                           const Font&,
+                                           Color backgroundColor,
+                                           int startPos,
+                                           int endPos);
+  void paintCompositionBackgrounds(GraphicsContext*,
+                                   const FloatPoint& boxOrigin,
+                                   RenderStyle*,
+                                   const Font&,
+                                   bool useCustomUnderlines);
+  void paintCompositionUnderline(GraphicsContext*,
+                                 const FloatPoint& boxOrigin,
+                                 const CompositionUnderline&);
 
-    TextRun::ExpansionBehavior expansionBehavior() const
-    {
-        return (canHaveLeadingExpansion() ? TextRun::AllowLeadingExpansion : TextRun::ForbidLeadingExpansion)
-            | (expansion() && nextLeafChild() ? TextRun::AllowTrailingExpansion : TextRun::ForbidTrailingExpansion);
-    }
+ private:
+  void paintDecoration(GraphicsContext*,
+                       const FloatPoint& boxOrigin,
+                       TextDecoration);
+  void paintSelection(GraphicsContext*,
+                      const FloatPoint& boxOrigin,
+                      RenderStyle*,
+                      const Font&,
+                      Color textColor);
+
+  TextRun::ExpansionBehavior expansionBehavior() const {
+    return (canHaveLeadingExpansion() ? TextRun::AllowLeadingExpansion
+                                      : TextRun::ForbidLeadingExpansion) |
+           (expansion() && nextLeafChild() ? TextRun::AllowTrailingExpansion
+                                           : TextRun::ForbidTrailingExpansion);
+  }
 };
 
 DEFINE_INLINE_BOX_TYPE_CASTS(InlineTextBox);
 
 void alignSelectionRectToDevicePixels(FloatRect&);
 
-inline AffineTransform InlineTextBox::rotation(const FloatRect& boxRect, RotationDirection rotationDirection)
-{
-    return rotationDirection == Clockwise ? AffineTransform(0, 1, -1, 0, boxRect.x() + boxRect.maxY(), boxRect.maxY() - boxRect.x())
-        : AffineTransform(0, -1, 1, 0, boxRect.x() - boxRect.maxY(), boxRect.x() + boxRect.maxY());
+inline AffineTransform InlineTextBox::rotation(
+    const FloatRect& boxRect,
+    RotationDirection rotationDirection) {
+  return rotationDirection == Clockwise
+             ? AffineTransform(0, 1, -1, 0, boxRect.x() + boxRect.maxY(),
+                               boxRect.maxY() - boxRect.x())
+             : AffineTransform(0, -1, 1, 0, boxRect.x() - boxRect.maxY(),
+                               boxRect.x() + boxRect.maxY());
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_INLINETEXTBOX_H_

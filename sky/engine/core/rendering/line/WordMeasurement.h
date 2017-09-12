@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All right reserved.
+ * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All
+ * right reserved.
  * Copyright (C) 2010 Google Inc. All rights reserved.
  * Copyright (C) 2013 Adobe Systems Incorporated.
  *
@@ -32,22 +33,16 @@ namespace blink {
 class RenderText;
 
 class WordMeasurement {
-public:
-    WordMeasurement()
-        : renderer(0)
-        , width(0)
-        , startOffset(0)
-        , endOffset(0)
-    {
-    }
+ public:
+  WordMeasurement() : renderer(0), width(0), startOffset(0), endOffset(0) {}
 
-    RenderText* renderer;
-    float width;
-    int startOffset;
-    int endOffset;
-    HashSet<const SimpleFontData*> fallbackFonts;
+  RenderText* renderer;
+  float width;
+  int startOffset;
+  int endOffset;
+  HashSet<const SimpleFontData*> fallbackFonts;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_LINE_WORDMEASUREMENT_H_

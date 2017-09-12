@@ -17,7 +17,7 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
-*/
+ */
 
 #include "flutter/sky/engine/core/rendering/HitTestResult.h"
 
@@ -26,82 +26,69 @@
 
 namespace blink {
 
-HitTestResult::HitTestResult()
-{
-}
+HitTestResult::HitTestResult() {}
 
 HitTestResult::HitTestResult(const LayoutPoint& point)
-    : m_hitTestLocation(point)
-    , m_pointInInnerNodeFrame(point)
-{
-}
+    : m_hitTestLocation(point), m_pointInInnerNodeFrame(point) {}
 
-HitTestResult::HitTestResult(const LayoutPoint& centerPoint, unsigned topPadding, unsigned rightPadding, unsigned bottomPadding, unsigned leftPadding)
-    : m_hitTestLocation(centerPoint, topPadding, rightPadding, bottomPadding, leftPadding)
-    , m_pointInInnerNodeFrame(centerPoint)
-{
-}
+HitTestResult::HitTestResult(const LayoutPoint& centerPoint,
+                             unsigned topPadding,
+                             unsigned rightPadding,
+                             unsigned bottomPadding,
+                             unsigned leftPadding)
+    : m_hitTestLocation(centerPoint,
+                        topPadding,
+                        rightPadding,
+                        bottomPadding,
+                        leftPadding),
+      m_pointInInnerNodeFrame(centerPoint) {}
 
 HitTestResult::HitTestResult(const HitTestLocation& other)
-    : m_hitTestLocation(other)
-    , m_pointInInnerNodeFrame(m_hitTestLocation.point())
-{
-}
+    : m_hitTestLocation(other),
+      m_pointInInnerNodeFrame(m_hitTestLocation.point()) {}
 
 HitTestResult::HitTestResult(const HitTestResult& other)
-    : m_hitTestLocation(other.m_hitTestLocation)
-    , m_localPoint(other.localPoint())
-{
+    : m_hitTestLocation(other.m_hitTestLocation),
+      m_localPoint(other.localPoint()) {}
+
+HitTestResult::~HitTestResult() {}
+
+HitTestResult& HitTestResult::operator=(const HitTestResult& other) {
+  m_hitTestLocation = other.m_hitTestLocation;
+  m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
+  m_localPoint = other.localPoint();
+  return *this;
 }
 
-HitTestResult::~HitTestResult()
-{
+RenderObject* HitTestResult::renderer() const {
+  return 0;
 }
 
-HitTestResult& HitTestResult::operator=(const HitTestResult& other)
-{
-    m_hitTestLocation = other.m_hitTestLocation;
-    m_pointInInnerNodeFrame = other.m_pointInInnerNodeFrame;
-    m_localPoint = other.localPoint();
-    return *this;
+bool HitTestResult::isSelected() const {
+  return false;
 }
 
-RenderObject* HitTestResult::renderer() const
-{
-    return 0;
+Image* HitTestResult::image() const {
+  return 0;
 }
 
-bool HitTestResult::isSelected() const
-{
-    return false;
+IntRect HitTestResult::imageRect() const {
+  return IntRect();
 }
 
-Image* HitTestResult::image() const
-{
-    return 0;
+bool HitTestResult::isMisspelled() const {
+  return false;
 }
 
-IntRect HitTestResult::imageRect() const
-{
-    return IntRect();
+// FIXME: This function needs a better name and may belong in a different class.
+// It's not really isContentEditable(); it's more like
+// needsEditingContextMenu(). In many ways, this function would make more sense
+// in the ContextMenu class, except that WebElementDictionary hooks into it.
+// Anyway, we should architect this better.
+bool HitTestResult::isContentEditable() const {
+  return false;
 }
 
-bool HitTestResult::isMisspelled() const
-{
-    return false;
-}
+void HitTestResult::append(const HitTestResult& other) {}
 
-// FIXME: This function needs a better name and may belong in a different class. It's not
-// really isContentEditable(); it's more like needsEditingContextMenu(). In many ways, this
-// function would make more sense in the ContextMenu class, except that WebElementDictionary
-// hooks into it. Anyway, we should architect this better.
-bool HitTestResult::isContentEditable() const
-{
-    return false;
-}
-
-void HitTestResult::append(const HitTestResult& other)
-{
-}
-
-} // namespace blink
+}  // namespace blink

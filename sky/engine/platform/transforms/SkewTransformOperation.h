@@ -30,47 +30,48 @@
 namespace blink {
 
 class PLATFORM_EXPORT SkewTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<SkewTransformOperation> create(double angleX, double angleY, OperationType type)
-    {
-        return adoptRef(new SkewTransformOperation(angleX, angleY, type));
-    }
+ public:
+  static PassRefPtr<SkewTransformOperation> create(double angleX,
+                                                   double angleY,
+                                                   OperationType type) {
+    return adoptRef(new SkewTransformOperation(angleX, angleY, type));
+  }
 
-    double angleX() const { return m_angleX; }
-    double angleY() const { return m_angleY; }
+  double angleX() const { return m_angleX; }
+  double angleY() const { return m_angleY; }
 
-    virtual bool canBlendWith(const TransformOperation& other) const;
-private:
-    virtual bool isIdentity() const override { return !m_angleX && !m_angleY; }
-    virtual OperationType type() const override { return m_type; }
+  virtual bool canBlendWith(const TransformOperation& other) const;
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const SkewTransformOperation* s = static_cast<const SkewTransformOperation*>(&o);
-        return m_angleX == s->m_angleX && m_angleY == s->m_angleY;
-    }
+ private:
+  virtual bool isIdentity() const override { return !m_angleX && !m_angleY; }
+  virtual OperationType type() const override { return m_type; }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
-    {
-        transform.skew(m_angleX, m_angleY);
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    if (!isSameType(o))
+      return false;
+    const SkewTransformOperation* s =
+        static_cast<const SkewTransformOperation*>(&o);
+    return m_angleX == s->m_angleX && m_angleY == s->m_angleY;
+  }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual void apply(TransformationMatrix& transform,
+                     const FloatSize&) const override {
+    transform.skew(m_angleX, m_angleY);
+  }
 
-    SkewTransformOperation(double angleX, double angleY, OperationType type)
-        : m_angleX(angleX)
-        , m_angleY(angleY)
-        , m_type(type)
-    {
-    }
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    double m_angleX;
-    double m_angleY;
-    OperationType m_type;
+  SkewTransformOperation(double angleX, double angleY, OperationType type)
+      : m_angleX(angleX), m_angleY(angleY), m_type(type) {}
+
+  double m_angleX;
+  double m_angleY;
+  OperationType m_type;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_SKEWTRANSFORMOPERATION_H_

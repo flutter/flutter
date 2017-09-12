@@ -45,16 +45,21 @@
  * The dynamic analysis tools can intercept these functions and replace them
  * with their own implementations.
  *
- * See http://code.google.com/p/data-race-test/wiki/DynamicAnnotations for more information.
+ * See http://code.google.com/p/data-race-test/wiki/DynamicAnnotations for more
+ * information.
  */
 
 #include "flutter/sky/engine/wtf/OperatingSystem.h"
 #include "flutter/sky/engine/wtf/WTFExport.h"
 
 #if USE(DYNAMIC_ANNOTATIONS)
-/* Tell data race detector that we're not interested in reports on the given address range. */
-#define WTF_ANNOTATE_BENIGN_RACE_SIZED(address, size, description) WTFAnnotateBenignRaceSized(__FILE__, __LINE__, address, size, description)
-#define WTF_ANNOTATE_BENIGN_RACE(pointer, description) WTFAnnotateBenignRaceSized(__FILE__, __LINE__, pointer, sizeof(*(pointer)), description)
+/* Tell data race detector that we're not interested in reports on the given
+ * address range. */
+#define WTF_ANNOTATE_BENIGN_RACE_SIZED(address, size, description) \
+  WTFAnnotateBenignRaceSized(__FILE__, __LINE__, address, size, description)
+#define WTF_ANNOTATE_BENIGN_RACE(pointer, description)                        \
+  WTFAnnotateBenignRaceSized(__FILE__, __LINE__, pointer, sizeof(*(pointer)), \
+                             description)
 
 /* Annotations for user-defined synchronization mechanisms.
  * These annotations can be used to define happens-before arcs in user-defined
@@ -73,27 +78,37 @@
  *     return false;
  * }
  */
-#define WTF_ANNOTATE_HAPPENS_BEFORE(address) WTFAnnotateHappensBefore(__FILE__, __LINE__, address)
-#define WTF_ANNOTATE_HAPPENS_AFTER(address) WTFAnnotateHappensAfter(__FILE__, __LINE__, address)
+#define WTF_ANNOTATE_HAPPENS_BEFORE(address) \
+  WTFAnnotateHappensBefore(__FILE__, __LINE__, address)
+#define WTF_ANNOTATE_HAPPENS_AFTER(address) \
+  WTFAnnotateHappensAfter(__FILE__, __LINE__, address)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 /* Don't use these directly, use the above macros instead. */
-WTF_EXPORT void WTFAnnotateBenignRaceSized(const char* file, int line, const volatile void* memory, long size, const char* description);
-WTF_EXPORT void WTFAnnotateHappensBefore(const char* file, int line, const volatile void* address);
-WTF_EXPORT void WTFAnnotateHappensAfter(const char* file, int line, const volatile void* address);
+WTF_EXPORT void WTFAnnotateBenignRaceSized(const char* file,
+                                           int line,
+                                           const volatile void* memory,
+                                           long size,
+                                           const char* description);
+WTF_EXPORT void WTFAnnotateHappensBefore(const char* file,
+                                         int line,
+                                         const volatile void* address);
+WTF_EXPORT void WTFAnnotateHappensAfter(const char* file,
+                                        int line,
+                                        const volatile void* address);
 #ifdef __cplusplus
-} // extern "C"
+}  // extern "C"
 #endif
 
-#else // USE(DYNAMIC_ANNOTATIONS)
+#else  // USE(DYNAMIC_ANNOTATIONS)
 /* These macros are empty when dynamic annotations are not enabled so you can
  * use them without affecting the performance of release binaries. */
 #define WTF_ANNOTATE_BENIGN_RACE_SIZED(address, size, description)
 #define WTF_ANNOTATE_BENIGN_RACE(pointer, description)
 #define WTF_ANNOTATE_HAPPENS_BEFORE(address)
 #define WTF_ANNOTATE_HAPPENS_AFTER(address)
-#endif // USE(DYNAMIC_ANNOTATIONS)
+#endif  // USE(DYNAMIC_ANNOTATIONS)
 
 #endif  // SKY_ENGINE_WTF_DYNAMICANNOTATIONS_H_

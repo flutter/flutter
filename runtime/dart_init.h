@@ -6,8 +6,8 @@
 #define FLUTTER_RUNTIME_DART_INIT_H_
 
 #include "dart/runtime/include/dart_api.h"
-#include "lib/fxl/functional/closure.h"
 #include "lib/fxl/build_config.h"
+#include "lib/fxl/functional/closure.h"
 
 #include <memory>
 #include <string>

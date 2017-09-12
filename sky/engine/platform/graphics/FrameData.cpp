@@ -29,23 +29,19 @@
 namespace blink {
 
 FrameData::FrameData()
-    : m_orientation(DefaultImageOrientation)
-    , m_duration(0)
-    , m_haveMetadata(false)
-    , m_isComplete(false)
-    , m_hasAlpha(true)
-    , m_frameBytes(0)
-{
+    : m_orientation(DefaultImageOrientation),
+      m_duration(0),
+      m_haveMetadata(false),
+      m_isComplete(false),
+      m_hasAlpha(true),
+      m_frameBytes(0) {}
+
+FrameData::~FrameData() {
+  clear(true);
 }
 
-FrameData::~FrameData()
-{
-    clear(true);
+bool FrameData::clear(bool clearMetadata) {
+  return false;
 }
 
-bool FrameData::clear(bool clearMetadata)
-{
-    return false;
-}
-
-} // namespace blink
+}  // namespace blink

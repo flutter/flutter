@@ -32,13 +32,14 @@
 
 #include "flutter/sky/engine/platform/geometry/FloatSize.h"
 
-
 namespace blink {
 
-void GeneratedImage::computeIntrinsicDimensions(Length& intrinsicWidth, Length& intrinsicHeight, FloatSize& intrinsicRatio)
-{
-    Image::computeIntrinsicDimensions(intrinsicWidth, intrinsicHeight, intrinsicRatio);
-    intrinsicRatio = FloatSize();
+void GeneratedImage::computeIntrinsicDimensions(Length& intrinsicWidth,
+                                                Length& intrinsicHeight,
+                                                FloatSize& intrinsicRatio) {
+  Image::computeIntrinsicDimensions(intrinsicWidth, intrinsicHeight,
+                                    intrinsicRatio);
+  intrinsicRatio = FloatSize();
 }
 
-} // namespace blink
+}  // namespace blink

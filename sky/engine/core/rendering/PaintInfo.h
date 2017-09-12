@@ -3,7 +3,8 @@
  *           (C) 2000 Antti Koivisto (koivisto@kde.org)
  *           (C) 2000 Dirk Mueller (mueller@kde.org)
  *           (C) 2004 Allan Sandfeld Jensen (kde@carewolf.com)
- * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008, 2009 Apple Inc.
+ * All rights reserved.
  * Copyright (C) 2009 Google Inc. All rights reserved.
  *
  * This library is free software; you can redistribute it and/or
@@ -45,41 +46,42 @@ class RenderObject;
  * (tx|ty) is the calculated position of the parent
  */
 struct PaintInfo {
-    PaintInfo(GraphicsContext* newContext, const IntRect& newRect,
-        const RenderBox* newPaintContainer)
-        : context(newContext)
-        , rect(newRect)
-        , m_paintContainer(newPaintContainer)
-    {
-    }
+  PaintInfo(GraphicsContext* newContext,
+            const IntRect& newRect,
+            const RenderBox* newPaintContainer)
+      : context(newContext),
+        rect(newRect),
+        m_paintContainer(newPaintContainer) {}
 
-    void applyTransform(const AffineTransform& localToAncestorTransform, bool identityStatusUnknown = true)
-    {
-        if (identityStatusUnknown && localToAncestorTransform.isIdentity())
-            return;
+  void applyTransform(const AffineTransform& localToAncestorTransform,
+                      bool identityStatusUnknown = true) {
+    if (identityStatusUnknown && localToAncestorTransform.isIdentity())
+      return;
 
-        context->concatCTM(localToAncestorTransform);
+    context->concatCTM(localToAncestorTransform);
 
-        if (rect == infiniteRect())
-            return;
+    if (rect == infiniteRect())
+      return;
 
-        if (localToAncestorTransform.isInvertible())
-            rect = localToAncestorTransform.inverse().mapRect(rect);
-        else
-            rect.setSize(IntSize(0, 0));
-    }
+    if (localToAncestorTransform.isInvertible())
+      rect = localToAncestorTransform.inverse().mapRect(rect);
+    else
+      rect.setSize(IntSize(0, 0));
+  }
 
-    static IntRect infiniteRect() { return IntRect(LayoutRect::infiniteRect()); }
-    const RenderBox* paintContainer() const { return m_paintContainer; }
+  static IntRect infiniteRect() { return IntRect(LayoutRect::infiniteRect()); }
+  const RenderBox* paintContainer() const { return m_paintContainer; }
 
-    // FIXME: Introduce setters/getters at some point. Requires a lot of changes throughout rendering/.
-    GraphicsContext* context;
-    IntRect rect;
+  // FIXME: Introduce setters/getters at some point. Requires a lot of changes
+  // throughout rendering/.
+  GraphicsContext* context;
+  IntRect rect;
 
-private:
-    const RenderBox* m_paintContainer; // the layer object that originates the current painting
+ private:
+  const RenderBox* m_paintContainer;  // the layer object that originates the
+                                      // current painting
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_PAINTINFO_H_

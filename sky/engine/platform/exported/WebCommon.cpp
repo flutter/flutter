@@ -34,10 +34,12 @@
 
 namespace blink {
 
-void failedAssertion(const char* file, int line, const char* function, const char* assertion)
-{
-    WTFReportAssertionFailure(file, line, function, assertion);
-    CRASH();
+void failedAssertion(const char* file,
+                     int line,
+                     const char* function,
+                     const char* assertion) {
+  WTFReportAssertionFailure(file, line, function, assertion);
+  CRASH();
 }
 
-} // namespace blink
+}  // namespace blink

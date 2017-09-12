@@ -36,18 +36,19 @@ class IntRect;
 // Interface for notification about changes to an image, including decoding,
 // drawing, and animating.
 class PLATFORM_EXPORT ImageObserver {
-protected:
-    virtual ~ImageObserver();
-public:
-    virtual void decodedSizeChanged(const Image*, int delta) = 0;
-    virtual void didDraw(const Image*) = 0;
+ protected:
+  virtual ~ImageObserver();
 
-    virtual bool shouldPauseAnimation(const Image*) = 0;
-    virtual void animationAdvanced(const Image*) = 0;
+ public:
+  virtual void decodedSizeChanged(const Image*, int delta) = 0;
+  virtual void didDraw(const Image*) = 0;
 
-    virtual void changedInRect(const Image*, const IntRect&) = 0;
+  virtual bool shouldPauseAnimation(const Image*) = 0;
+  virtual void animationAdvanced(const Image*) = 0;
+
+  virtual void changedInRect(const Image*, const IntRect&) = 0;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_IMAGEOBSERVER_H_

@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012 Apple Inc. All rights reserved.
+ * Copyright (C) 2006, 2007, 2008, 2009, 2010, 2011, 2012 Apple Inc.
+ * All rights reserved.
  *
  * Portions are Copyright (C) 1998 Netscape Communications Corporation.
  *
@@ -24,7 +25,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  * Alternatively, the contents of this file may be used under the terms
  * of either the Mozilla Public License Version 1.1, found at
@@ -53,218 +54,213 @@ namespace blink {
 // in order to determine if we shoulBeNormalFlowOnly() we have to ask the render
 // layer about some of its state.
 RenderLayerStackingNode::RenderLayerStackingNode(RenderLayer* layer)
-    : m_layer(layer)
-    , m_normalFlowListDirty(true)
+    : m_layer(layer),
+      m_normalFlowListDirty(true)
 #if ENABLE(ASSERT)
-    , m_layerListMutationAllowed(true)
-    , m_stackingParent(0)
+      ,
+      m_layerListMutationAllowed(true),
+      m_stackingParent(0)
 #endif
 {
-    m_isNormalFlowOnly = shouldBeNormalFlowOnly();
+  m_isNormalFlowOnly = shouldBeNormalFlowOnly();
 
-    // Non-stacking contexts should have empty z-order lists. As this is already the case,
-    // there is no need to dirty / recompute these lists.
-    m_zOrderListsDirty = isStackingContext();
+  // Non-stacking contexts should have empty z-order lists. As this is already
+  // the case, there is no need to dirty / recompute these lists.
+  m_zOrderListsDirty = isStackingContext();
 }
 
-RenderLayerStackingNode::~RenderLayerStackingNode()
-{
+RenderLayerStackingNode::~RenderLayerStackingNode() {
 #if ENABLE(ASSERT)
-    if (!renderer()->documentBeingDestroyed()) {
-        ASSERT(!isInStackingParentZOrderLists());
-        ASSERT(!isInStackingParentNormalFlowList());
+  if (!renderer()->documentBeingDestroyed()) {
+    ASSERT(!isInStackingParentZOrderLists());
+    ASSERT(!isInStackingParentNormalFlowList());
 
-        updateStackingParentForZOrderLists(0);
-        updateStackingParentForNormalFlowList(0);
-    }
+    updateStackingParentForZOrderLists(0);
+    updateStackingParentForNormalFlowList(0);
+  }
 #endif
 }
 
 // Helper for the sorting of layers by z-index.
-static inline bool compareZIndex(RenderLayerStackingNode* first, RenderLayerStackingNode* second)
-{
-    return first->zIndex() < second->zIndex();
+static inline bool compareZIndex(RenderLayerStackingNode* first,
+                                 RenderLayerStackingNode* second) {
+  return first->zIndex() < second->zIndex();
 }
 
-void RenderLayerStackingNode::dirtyZOrderLists()
-{
-    ASSERT(m_layerListMutationAllowed);
-    ASSERT(isStackingContext());
+void RenderLayerStackingNode::dirtyZOrderLists() {
+  ASSERT(m_layerListMutationAllowed);
+  ASSERT(isStackingContext());
 
 #if ENABLE(ASSERT)
-    updateStackingParentForZOrderLists(0);
+  updateStackingParentForZOrderLists(0);
 #endif
 
-    if (m_zOrderList)
-        m_zOrderList->clear();
-    m_zOrderListsDirty = true;
+  if (m_zOrderList)
+    m_zOrderList->clear();
+  m_zOrderListsDirty = true;
 }
 
-void RenderLayerStackingNode::dirtyStackingContextZOrderLists()
-{
-    if (RenderLayerStackingNode* stackingNode = ancestorStackingContextNode())
-        stackingNode->dirtyZOrderLists();
+void RenderLayerStackingNode::dirtyStackingContextZOrderLists() {
+  if (RenderLayerStackingNode* stackingNode = ancestorStackingContextNode())
+    stackingNode->dirtyZOrderLists();
 }
 
-void RenderLayerStackingNode::dirtyNormalFlowList()
-{
-    ASSERT(m_layerListMutationAllowed);
+void RenderLayerStackingNode::dirtyNormalFlowList() {
+  ASSERT(m_layerListMutationAllowed);
 
 #if ENABLE(ASSERT)
-    updateStackingParentForNormalFlowList(0);
+  updateStackingParentForNormalFlowList(0);
 #endif
 
-    if (m_normalFlowList)
-        m_normalFlowList->clear();
-    m_normalFlowListDirty = true;
+  if (m_normalFlowList)
+    m_normalFlowList->clear();
+  m_normalFlowListDirty = true;
 }
 
-void RenderLayerStackingNode::rebuildZOrderLists()
-{
-    ASSERT(m_layerListMutationAllowed);
-    ASSERT(isDirtyStackingContext());
+void RenderLayerStackingNode::rebuildZOrderLists() {
+  ASSERT(m_layerListMutationAllowed);
+  ASSERT(isDirtyStackingContext());
 
-    for (RenderLayer* child = layer()->firstChild(); child; child = child->nextSibling())
-        child->stackingNode()->collectLayers(m_zOrderList);
+  for (RenderLayer* child = layer()->firstChild(); child;
+       child = child->nextSibling())
+    child->stackingNode()->collectLayers(m_zOrderList);
 
-    if (m_zOrderList)
-        std::stable_sort(m_zOrderList->begin(), m_zOrderList->end(), compareZIndex);
+  if (m_zOrderList)
+    std::stable_sort(m_zOrderList->begin(), m_zOrderList->end(), compareZIndex);
 
 #if ENABLE(ASSERT)
-    updateStackingParentForZOrderLists(this);
+  updateStackingParentForZOrderLists(this);
 #endif
 
-    m_zOrderListsDirty = false;
+  m_zOrderListsDirty = false;
 }
 
-void RenderLayerStackingNode::updateNormalFlowList()
-{
-    if (!m_normalFlowListDirty)
-        return;
+void RenderLayerStackingNode::updateNormalFlowList() {
+  if (!m_normalFlowListDirty)
+    return;
 
-    ASSERT(m_layerListMutationAllowed);
+  ASSERT(m_layerListMutationAllowed);
 
-    for (RenderLayer* child = layer()->firstChild(); child; child = child->nextSibling()) {
-        if (child->stackingNode()->isNormalFlowOnly()) {
-            if (!m_normalFlowList)
-                m_normalFlowList = adoptPtr(new Vector<RenderLayerStackingNode*>);
-            m_normalFlowList->append(child->stackingNode());
-        }
+  for (RenderLayer* child = layer()->firstChild(); child;
+       child = child->nextSibling()) {
+    if (child->stackingNode()->isNormalFlowOnly()) {
+      if (!m_normalFlowList)
+        m_normalFlowList = adoptPtr(new Vector<RenderLayerStackingNode*>);
+      m_normalFlowList->append(child->stackingNode());
     }
+  }
 
 #if ENABLE(ASSERT)
-    updateStackingParentForNormalFlowList(this);
+  updateStackingParentForNormalFlowList(this);
 #endif
 
-    m_normalFlowListDirty = false;
+  m_normalFlowListDirty = false;
 }
 
-void RenderLayerStackingNode::collectLayers(OwnPtr<Vector<RenderLayerStackingNode*> >& buffer)
-{
-    if (!isNormalFlowOnly()) {
-        if (!buffer)
-            buffer = adoptPtr(new Vector<RenderLayerStackingNode*>);
-        buffer->append(this);
-    }
+void RenderLayerStackingNode::collectLayers(
+    OwnPtr<Vector<RenderLayerStackingNode*>>& buffer) {
+  if (!isNormalFlowOnly()) {
+    if (!buffer)
+      buffer = adoptPtr(new Vector<RenderLayerStackingNode*>);
+    buffer->append(this);
+  }
 
-    if (!isStackingContext()) {
-        for (RenderLayer* child = layer()->firstChild(); child; child = child->nextSibling())
-            child->stackingNode()->collectLayers(buffer);
-    }
+  if (!isStackingContext()) {
+    for (RenderLayer* child = layer()->firstChild(); child;
+         child = child->nextSibling())
+      child->stackingNode()->collectLayers(buffer);
+  }
 }
 
 #if ENABLE(ASSERT)
-bool RenderLayerStackingNode::isInStackingParentZOrderLists() const
-{
-    if (!m_stackingParent || m_stackingParent->zOrderListsDirty())
-        return false;
-
-    if (m_stackingParent->zOrderList() && m_stackingParent->zOrderList()->find(this) != kNotFound)
-        return true;
-
+bool RenderLayerStackingNode::isInStackingParentZOrderLists() const {
+  if (!m_stackingParent || m_stackingParent->zOrderListsDirty())
     return false;
+
+  if (m_stackingParent->zOrderList() &&
+      m_stackingParent->zOrderList()->find(this) != kNotFound)
+    return true;
+
+  return false;
 }
 
-bool RenderLayerStackingNode::isInStackingParentNormalFlowList() const
-{
-    if (!m_stackingParent || m_stackingParent->normalFlowListDirty())
-        return false;
+bool RenderLayerStackingNode::isInStackingParentNormalFlowList() const {
+  if (!m_stackingParent || m_stackingParent->normalFlowListDirty())
+    return false;
 
-    return (m_stackingParent->normalFlowList() && m_stackingParent->normalFlowList()->find(this) != kNotFound);
+  return (m_stackingParent->normalFlowList() &&
+          m_stackingParent->normalFlowList()->find(this) != kNotFound);
 }
 
-void RenderLayerStackingNode::updateStackingParentForZOrderLists(RenderLayerStackingNode* stackingParent)
-{
-    if (m_zOrderList) {
-        for (size_t i = 0; i < m_zOrderList->size(); ++i)
-            m_zOrderList->at(i)->setStackingParent(stackingParent);
-    }
+void RenderLayerStackingNode::updateStackingParentForZOrderLists(
+    RenderLayerStackingNode* stackingParent) {
+  if (m_zOrderList) {
+    for (size_t i = 0; i < m_zOrderList->size(); ++i)
+      m_zOrderList->at(i)->setStackingParent(stackingParent);
+  }
 }
 
-void RenderLayerStackingNode::updateStackingParentForNormalFlowList(RenderLayerStackingNode* stackingParent)
-{
-    if (m_normalFlowList) {
-        for (size_t i = 0; i < m_normalFlowList->size(); ++i)
-            m_normalFlowList->at(i)->setStackingParent(stackingParent);
-    }
+void RenderLayerStackingNode::updateStackingParentForNormalFlowList(
+    RenderLayerStackingNode* stackingParent) {
+  if (m_normalFlowList) {
+    for (size_t i = 0; i < m_normalFlowList->size(); ++i)
+      m_normalFlowList->at(i)->setStackingParent(stackingParent);
+  }
 }
 #endif
 
-void RenderLayerStackingNode::updateLayerListsIfNeeded()
-{
-    updateZOrderLists();
-    updateNormalFlowList();
+void RenderLayerStackingNode::updateLayerListsIfNeeded() {
+  updateZOrderLists();
+  updateNormalFlowList();
 }
 
-void RenderLayerStackingNode::updateStackingNodesAfterStyleChange(const RenderStyle* oldStyle)
-{
-    bool wasStackingContext = oldStyle ? !oldStyle->hasAutoZIndex() : false;
-    unsigned oldZIndex = oldStyle ? oldStyle->zIndex() : 0;
+void RenderLayerStackingNode::updateStackingNodesAfterStyleChange(
+    const RenderStyle* oldStyle) {
+  bool wasStackingContext = oldStyle ? !oldStyle->hasAutoZIndex() : false;
+  unsigned oldZIndex = oldStyle ? oldStyle->zIndex() : 0;
 
-    bool isStackingContext = this->isStackingContext();
-    if (isStackingContext == wasStackingContext && oldZIndex == zIndex())
-        return;
+  bool isStackingContext = this->isStackingContext();
+  if (isStackingContext == wasStackingContext && oldZIndex == zIndex())
+    return;
 
-    dirtyStackingContextZOrderLists();
+  dirtyStackingContextZOrderLists();
 
-    if (isStackingContext)
-        dirtyZOrderLists();
-    else
-        clearZOrderLists();
+  if (isStackingContext)
+    dirtyZOrderLists();
+  else
+    clearZOrderLists();
 }
 
 // FIXME: Rename shouldBeNormalFlowOnly to something more accurate now that CSS
 // 2.1 defines the term "normal flow".
-bool RenderLayerStackingNode::shouldBeNormalFlowOnly() const
-{
-    return !isStackingContext() && !renderer()->isPositioned();
+bool RenderLayerStackingNode::shouldBeNormalFlowOnly() const {
+  return !isStackingContext() && !renderer()->isPositioned();
 }
 
-void RenderLayerStackingNode::updateIsNormalFlowOnly()
-{
-    bool isNormalFlowOnly = shouldBeNormalFlowOnly();
-    if (isNormalFlowOnly == this->isNormalFlowOnly())
-        return;
+void RenderLayerStackingNode::updateIsNormalFlowOnly() {
+  bool isNormalFlowOnly = shouldBeNormalFlowOnly();
+  if (isNormalFlowOnly == this->isNormalFlowOnly())
+    return;
 
-    m_isNormalFlowOnly = isNormalFlowOnly;
-    if (RenderLayer* p = layer()->parent())
-        p->stackingNode()->dirtyNormalFlowList();
-    dirtyStackingContextZOrderLists();
+  m_isNormalFlowOnly = isNormalFlowOnly;
+  if (RenderLayer* p = layer()->parent())
+    p->stackingNode()->dirtyNormalFlowList();
+  dirtyStackingContextZOrderLists();
 }
 
-RenderLayerStackingNode* RenderLayerStackingNode::ancestorStackingContextNode() const
-{
-    for (RenderLayer* ancestor = layer()->parent(); ancestor; ancestor = ancestor->parent()) {
-        RenderLayerStackingNode* stackingNode = ancestor->stackingNode();
-        if (stackingNode->isStackingContext())
-            return stackingNode;
-    }
-    return 0;
+RenderLayerStackingNode* RenderLayerStackingNode::ancestorStackingContextNode()
+    const {
+  for (RenderLayer* ancestor = layer()->parent(); ancestor;
+       ancestor = ancestor->parent()) {
+    RenderLayerStackingNode* stackingNode = ancestor->stackingNode();
+    if (stackingNode->isStackingContext())
+      return stackingNode;
+  }
+  return 0;
 }
 
-RenderBox* RenderLayerStackingNode::renderer() const
-{
-    return m_layer->renderer();
+RenderBox* RenderLayerStackingNode::renderer() const {
+  return m_layer->renderer();
 }
 
-} // namespace blink
+}  // namespace blink

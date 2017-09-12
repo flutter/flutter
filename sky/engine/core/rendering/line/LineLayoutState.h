@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2000 Lars Knoll (knoll@kde.org)
- * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All right reserved.
+ * Copyright (C) 2003, 2004, 2006, 2007, 2008, 2009, 2010, 2011 Apple Inc. All
+ * right reserved.
  * Copyright (C) 2010 Google Inc. All rights reserved.
  * Copyright (C) 2014 Adobe Systems Incorporated. All rights reserved.
  *
@@ -30,54 +31,62 @@
 namespace blink {
 
 // LineLayoutState keeps track of global information
-// during an entire linebox tree layout pass (aka RenderParagraph::layoutChildren).
+// during an entire linebox tree layout pass (aka
+// RenderParagraph::layoutChildren).
 class LineLayoutState {
-public:
-    LineLayoutState(bool fullLayout)
-        : m_endLine(0)
-        , m_endLineLogicalTop(0)
-        , m_endLineMatched(false)
-        , m_hasInlineChild(false)
-        , m_isFullLayout(fullLayout)
-        , m_adjustedLogicalLineTop(0)
-    { }
+ public:
+  LineLayoutState(bool fullLayout)
+      : m_endLine(0),
+        m_endLineLogicalTop(0),
+        m_endLineMatched(false),
+        m_hasInlineChild(false),
+        m_isFullLayout(fullLayout),
+        m_adjustedLogicalLineTop(0) {}
 
-    void markForFullLayout() { m_isFullLayout = true; }
-    bool isFullLayout() const { return m_isFullLayout; }
+  void markForFullLayout() { m_isFullLayout = true; }
+  bool isFullLayout() const { return m_isFullLayout; }
 
-    bool endLineMatched() const { return m_endLineMatched; }
-    void setEndLineMatched(bool endLineMatched) { m_endLineMatched = endLineMatched; }
+  bool endLineMatched() const { return m_endLineMatched; }
+  void setEndLineMatched(bool endLineMatched) {
+    m_endLineMatched = endLineMatched;
+  }
 
-    bool hasInlineChild() const { return m_hasInlineChild; }
-    void setHasInlineChild(bool hasInlineChild) { m_hasInlineChild = hasInlineChild; }
+  bool hasInlineChild() const { return m_hasInlineChild; }
+  void setHasInlineChild(bool hasInlineChild) {
+    m_hasInlineChild = hasInlineChild;
+  }
 
-    LineInfo& lineInfo() { return m_lineInfo; }
-    const LineInfo& lineInfo() const { return m_lineInfo; }
+  LineInfo& lineInfo() { return m_lineInfo; }
+  const LineInfo& lineInfo() const { return m_lineInfo; }
 
-    LayoutUnit endLineLogicalTop() const { return m_endLineLogicalTop; }
-    void setEndLineLogicalTop(LayoutUnit logicalTop) { m_endLineLogicalTop = logicalTop; }
+  LayoutUnit endLineLogicalTop() const { return m_endLineLogicalTop; }
+  void setEndLineLogicalTop(LayoutUnit logicalTop) {
+    m_endLineLogicalTop = logicalTop;
+  }
 
-    RootInlineBox* endLine() const { return m_endLine; }
-    void setEndLine(RootInlineBox* line) { m_endLine = line; }
+  RootInlineBox* endLine() const { return m_endLine; }
+  void setEndLine(RootInlineBox* line) { m_endLine = line; }
 
-    LayoutUnit adjustedLogicalLineTop() const { return m_adjustedLogicalLineTop; }
-    void setAdjustedLogicalLineTop(LayoutUnit value) { m_adjustedLogicalLineTop = value; }
+  LayoutUnit adjustedLogicalLineTop() const { return m_adjustedLogicalLineTop; }
+  void setAdjustedLogicalLineTop(LayoutUnit value) {
+    m_adjustedLogicalLineTop = value;
+  }
 
-private:
-    RootInlineBox* m_endLine;
-    LineInfo m_lineInfo;
-    LayoutUnit m_endLineLogicalTop;
-    bool m_endLineMatched;
-    // FIXME(sky): Do we still need this?
-    // Used as a performance optimization to avoid doing a full paint invalidation when our floats
-    // change but we don't have any inline children.
-    bool m_hasInlineChild;
+ private:
+  RootInlineBox* m_endLine;
+  LineInfo m_lineInfo;
+  LayoutUnit m_endLineLogicalTop;
+  bool m_endLineMatched;
+  // FIXME(sky): Do we still need this?
+  // Used as a performance optimization to avoid doing a full paint invalidation
+  // when our floats change but we don't have any inline children.
+  bool m_hasInlineChild;
 
-    bool m_isFullLayout;
+  bool m_isFullLayout;
 
-    LayoutUnit m_adjustedLogicalLineTop;
+  LayoutUnit m_adjustedLogicalLineTop;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINELAYOUTSTATE_H_

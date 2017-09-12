@@ -61,93 +61,113 @@ enum ShouldRetain { Retain, DoNotRetain };
 enum PurgeSeverity { PurgeIfNeeded, ForcePurge };
 
 class PLATFORM_EXPORT FontCache {
-    friend class FontCachePurgePreventer;
+  friend class FontCachePurgePreventer;
 
-    WTF_MAKE_NONCOPYABLE(FontCache); WTF_MAKE_FAST_ALLOCATED;
-public:
-    static FontCache* fontCache();
+  WTF_MAKE_NONCOPYABLE(FontCache);
+  WTF_MAKE_FAST_ALLOCATED;
 
-    void releaseFontData(const SimpleFontData*);
+ public:
+  static FontCache* fontCache();
 
-    // This method is implemented by the plaform and used by
-    // FontFastPath to lookup the font for a given character.
-    PassRefPtr<SimpleFontData> fallbackFontForCharacter(const FontDescription&, UChar32, const SimpleFontData* fontDataToSubstitute);
+  void releaseFontData(const SimpleFontData*);
 
-    // Also implemented by the platform.
-    void platformInit();
+  // This method is implemented by the plaform and used by
+  // FontFastPath to lookup the font for a given character.
+  PassRefPtr<SimpleFontData> fallbackFontForCharacter(
+      const FontDescription&,
+      UChar32,
+      const SimpleFontData* fontDataToSubstitute);
 
-    PassRefPtr<SimpleFontData> getFontData(const FontDescription&, const AtomicString&, bool checkingAlternateName = false, ShouldRetain = Retain);
-    PassRefPtr<SimpleFontData> getLastResortFallbackFont(const FontDescription&, ShouldRetain = Retain);
-    SimpleFontData* getNonRetainedLastResortFallbackFont(const FontDescription&);
-    bool isPlatformFontAvailable(const FontDescription&, const AtomicString&);
+  // Also implemented by the platform.
+  void platformInit();
 
-    void addClient(FontCacheClient*);
+  PassRefPtr<SimpleFontData> getFontData(const FontDescription&,
+                                         const AtomicString&,
+                                         bool checkingAlternateName = false,
+                                         ShouldRetain = Retain);
+  PassRefPtr<SimpleFontData> getLastResortFallbackFont(const FontDescription&,
+                                                       ShouldRetain = Retain);
+  SimpleFontData* getNonRetainedLastResortFallbackFont(const FontDescription&);
+  bool isPlatformFontAvailable(const FontDescription&, const AtomicString&);
+
+  void addClient(FontCacheClient*);
 #if !ENABLE(OILPAN)
-    void removeClient(FontCacheClient*);
+  void removeClient(FontCacheClient*);
 #endif
 
-    unsigned short generation();
-    void invalidate();
+  unsigned short generation();
+  void invalidate();
 
 #if ENABLE(OPENTYPE_VERTICAL)
-    typedef uint32_t FontFileKey;
-    PassRefPtr<OpenTypeVerticalData> getVerticalData(const FontFileKey&, const FontPlatformData&);
+  typedef uint32_t FontFileKey;
+  PassRefPtr<OpenTypeVerticalData> getVerticalData(const FontFileKey&,
+                                                   const FontPlatformData&);
 #endif
 
 #if !OS(ANDROID) && !OS(IOS)
-    struct PlatformFallbackFont {
-        String name;
-        CString filename;
-        int fontconfigInterfaceId;
-        int ttcIndex;
-        bool isBold;
-        bool isItalic;
-    };
-    static void getFontForCharacter(UChar32, const char* preferredLocale, PlatformFallbackFont*);
+  struct PlatformFallbackFont {
+    String name;
+    CString filename;
+    int fontconfigInterfaceId;
+    int ttcIndex;
+    bool isBold;
+    bool isItalic;
+  };
+  static void getFontForCharacter(UChar32,
+                                  const char* preferredLocale,
+                                  PlatformFallbackFont*);
 #endif
 
-private:
-    FontCache();
-    ~FontCache();
+ private:
+  FontCache();
+  ~FontCache();
 
-    void purge(PurgeSeverity = PurgeIfNeeded);
+  void purge(PurgeSeverity = PurgeIfNeeded);
 
-    void disablePurging() { m_purgePreventCount++; }
-    void enablePurging()
-    {
-        ASSERT(m_purgePreventCount);
-        if (!--m_purgePreventCount)
-            purge(PurgeIfNeeded);
-    }
+  void disablePurging() { m_purgePreventCount++; }
+  void enablePurging() {
+    ASSERT(m_purgePreventCount);
+    if (!--m_purgePreventCount)
+      purge(PurgeIfNeeded);
+  }
 
-    // FIXME: This method should eventually be removed.
-    FontPlatformData* getFontPlatformData(const FontDescription&, const FontFaceCreationParams&, bool checkingAlternateName = false);
+  // FIXME: This method should eventually be removed.
+  FontPlatformData* getFontPlatformData(const FontDescription&,
+                                        const FontFaceCreationParams&,
+                                        bool checkingAlternateName = false);
 
-    // These methods are implemented by each platform.
-    FontPlatformData* createFontPlatformData(const FontDescription&, const FontFaceCreationParams&, float fontSize);
+  // These methods are implemented by each platform.
+  FontPlatformData* createFontPlatformData(const FontDescription&,
+                                           const FontFaceCreationParams&,
+                                           float fontSize);
 
-    // Implemented on skia platforms.
-    sk_sp<SkTypeface> createTypeface(const FontDescription&, const FontFaceCreationParams&, CString& name);
+  // Implemented on skia platforms.
+  sk_sp<SkTypeface> createTypeface(const FontDescription&,
+                                   const FontFaceCreationParams&,
+                                   CString& name);
 
-    PassRefPtr<SimpleFontData> fontDataFromFontPlatformData(const FontPlatformData*, ShouldRetain = Retain);
-    PassRefPtr<SimpleFontData> fallbackOnStandardFontStyle(const FontDescription&, UChar32);
+  PassRefPtr<SimpleFontData> fontDataFromFontPlatformData(
+      const FontPlatformData*,
+      ShouldRetain = Retain);
+  PassRefPtr<SimpleFontData> fallbackOnStandardFontStyle(const FontDescription&,
+                                                         UChar32);
 
-    // Don't purge if this count is > 0;
-    int m_purgePreventCount;
+  // Don't purge if this count is > 0;
+  int m_purgePreventCount;
 
 #if OS(ANDROID)
-    friend class ComplexTextController;
+  friend class ComplexTextController;
 #endif
-    friend class SimpleFontData; // For fontDataFromFontPlatformData
-    friend class FontFallbackList;
+  friend class SimpleFontData;  // For fontDataFromFontPlatformData
+  friend class FontFallbackList;
 };
 
 class PLATFORM_EXPORT FontCachePurgePreventer {
-public:
-    FontCachePurgePreventer() { FontCache::fontCache()->disablePurging(); }
-    ~FontCachePurgePreventer() { FontCache::fontCache()->enablePurging(); }
+ public:
+  FontCachePurgePreventer() { FontCache::fontCache()->disablePurging(); }
+  ~FontCachePurgePreventer() { FontCache::fontCache()->enablePurging(); }
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTCACHE_H_

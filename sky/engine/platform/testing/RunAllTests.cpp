@@ -28,7 +28,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include <string.h>
 #include "base/test/test_suite.h"
 #include "flutter/sky/engine/platform/Partitions.h"
@@ -36,16 +35,15 @@
 #include "flutter/sky/engine/wtf/MainThread.h"
 #include "flutter/sky/engine/wtf/WTF.h"
 
-int main(int argc, char** argv)
-{
-    WTF::initialize();
-    WTF::initializeMainThread();
+int main(int argc, char** argv) {
+  WTF::initialize();
+  WTF::initializeMainThread();
 
-    blink::TestingPlatformSupport::Config platformConfig;
-    blink::TestingPlatformSupport platform(platformConfig);
+  blink::TestingPlatformSupport::Config platformConfig;
+  blink::TestingPlatformSupport platform(platformConfig);
 
-    blink::Partitions::init();
-    int result = base::RunUnitTestsUsingBaseTestSuite(argc, argv);
-    blink::Partitions::shutdown();
-    return result;
+  blink::Partitions::init();
+  int result = base::RunUnitTestsUsingBaseTestSuite(argc, argv);
+  blink::Partitions::shutdown();
+  return result;
 }

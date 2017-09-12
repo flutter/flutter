@@ -37,10 +37,10 @@
 #include "flutter/sky/engine/wtf/Noncopyable.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
 #include "flutter/sky/engine/wtf/PassOwnPtr.h"
+#include "flutter/sky/engine/wtf/Vector.h"
 #include "flutter/sky/engine/wtf/text/AtomicString.h"
 #include "flutter/sky/engine/wtf/text/AtomicStringHash.h"
 #include "flutter/sky/engine/wtf/text/CString.h"
-#include "flutter/sky/engine/wtf/Vector.h"
 
 namespace blink {
 

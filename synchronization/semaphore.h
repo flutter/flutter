@@ -7,9 +7,9 @@
 
 #include <memory>
 
+#include "lib/fxl/compiler_specific.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/time/time_delta.h"
-#include "lib/fxl/compiler_specific.h"
 
 namespace flutter {
 

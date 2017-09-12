@@ -27,41 +27,42 @@
 namespace blink {
 
 class Latin1TextIterator {
-public:
-    // The passed in LChar pointer starts at 'currentCharacter'. The iterator operates on the range [currentCharacter, lastCharacter].
-    // 'endCharacter' denotes the maximum length of the UChar array, which might exceed 'lastCharacter'.
-    Latin1TextIterator(const LChar* characters, int currentCharacter, int lastCharacter, int /*endCharacter*/)
-        : m_characters(characters)
-        , m_currentCharacter(currentCharacter)
-        , m_lastCharacter(lastCharacter)
-    {
-    }
+ public:
+  // The passed in LChar pointer starts at 'currentCharacter'. The iterator
+  // operates on the range [currentCharacter, lastCharacter]. 'endCharacter'
+  // denotes the maximum length of the UChar array, which might exceed
+  // 'lastCharacter'.
+  Latin1TextIterator(const LChar* characters,
+                     int currentCharacter,
+                     int lastCharacter,
+                     int /*endCharacter*/)
+      : m_characters(characters),
+        m_currentCharacter(currentCharacter),
+        m_lastCharacter(lastCharacter) {}
 
-    bool consume(UChar32& character, unsigned& clusterLength)
-    {
-        if (m_currentCharacter >= m_lastCharacter)
-            return false;
+  bool consume(UChar32& character, unsigned& clusterLength) {
+    if (m_currentCharacter >= m_lastCharacter)
+      return false;
 
-        character = *m_characters;
-        clusterLength = 1;
-        return true;
-    }
+    character = *m_characters;
+    clusterLength = 1;
+    return true;
+  }
 
-    void advance(unsigned advanceLength)
-    {
-        m_characters += advanceLength;
-        m_currentCharacter += advanceLength;
-    }
+  void advance(unsigned advanceLength) {
+    m_characters += advanceLength;
+    m_currentCharacter += advanceLength;
+  }
 
-    int currentCharacter() const { return m_currentCharacter; }
-    const LChar* characters() const { return m_characters; }
+  int currentCharacter() const { return m_currentCharacter; }
+  const LChar* characters() const { return m_characters; }
 
-private:
-    const LChar* m_characters;
-    int m_currentCharacter;
-    int m_lastCharacter;
+ private:
+  const LChar* m_characters;
+  int m_currentCharacter;
+  int m_lastCharacter;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_LATIN1TEXTITERATOR_H_

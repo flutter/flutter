@@ -1,5 +1,6 @@
 /*
- * Copyright (C) 2003, 2006, 2008, 2009, 2010, 2012 Apple Inc. All rights reserved.
+ * Copyright (C) 2003, 2006, 2008, 2009, 2010, 2012 Apple Inc.
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -23,7 +24,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "flutter/sky/engine/wtf/text/CString.h"
 
 #include <string.h>
@@ -34,98 +34,89 @@ using namespace std;
 
 namespace WTF {
 
-PassRefPtr<CStringBuffer> CStringBuffer::createUninitialized(size_t length)
-{
-    RELEASE_ASSERT(length < (numeric_limits<unsigned>::max() - sizeof(CStringBuffer)));
+PassRefPtr<CStringBuffer> CStringBuffer::createUninitialized(size_t length) {
+  RELEASE_ASSERT(length <
+                 (numeric_limits<unsigned>::max() - sizeof(CStringBuffer)));
 
-    // The +1 is for the terminating NUL character.
-    size_t size = sizeof(CStringBuffer) + length + 1;
-    CStringBuffer* stringBuffer = static_cast<CStringBuffer*>(partitionAllocGeneric(Partitions::getBufferPartition(), size));
-    return adoptRef(new (stringBuffer) CStringBuffer(length));
+  // The +1 is for the terminating NUL character.
+  size_t size = sizeof(CStringBuffer) + length + 1;
+  CStringBuffer* stringBuffer = static_cast<CStringBuffer*>(
+      partitionAllocGeneric(Partitions::getBufferPartition(), size));
+  return adoptRef(new (stringBuffer) CStringBuffer(length));
 }
 
-void CStringBuffer::operator delete(void* ptr)
-{
-    partitionFreeGeneric(Partitions::getBufferPartition(), ptr);
+void CStringBuffer::operator delete(void* ptr) {
+  partitionFreeGeneric(Partitions::getBufferPartition(), ptr);
 }
 
-CString::CString(const char* str)
-{
-    if (!str)
-        return;
+CString::CString(const char* str) {
+  if (!str)
+    return;
 
-    init(str, strlen(str));
+  init(str, strlen(str));
 }
 
-CString::CString(const char* str, size_t length)
-{
-    if (!str) {
-        ASSERT(!length);
-        return;
-    }
+CString::CString(const char* str, size_t length) {
+  if (!str) {
+    ASSERT(!length);
+    return;
+  }
 
-    init(str, length);
+  init(str, length);
 }
 
-void CString::init(const char* str, size_t length)
-{
-    ASSERT(str);
+void CString::init(const char* str, size_t length) {
+  ASSERT(str);
 
-    m_buffer = CStringBuffer::createUninitialized(length);
-    memcpy(m_buffer->mutableData(), str, length);
-    m_buffer->mutableData()[length] = '\0';
+  m_buffer = CStringBuffer::createUninitialized(length);
+  memcpy(m_buffer->mutableData(), str, length);
+  m_buffer->mutableData()[length] = '\0';
 }
 
-char* CString::mutableData()
-{
-    copyBufferIfNeeded();
-    if (!m_buffer)
-        return 0;
-    return m_buffer->mutableData();
+char* CString::mutableData() {
+  copyBufferIfNeeded();
+  if (!m_buffer)
+    return 0;
+  return m_buffer->mutableData();
 }
 
-CString CString::newUninitialized(size_t length, char*& characterBuffer)
-{
-    CString result;
-    result.m_buffer = CStringBuffer::createUninitialized(length);
-    char* bytes = result.m_buffer->mutableData();
-    bytes[length] = '\0';
-    characterBuffer = bytes;
-    return result;
+CString CString::newUninitialized(size_t length, char*& characterBuffer) {
+  CString result;
+  result.m_buffer = CStringBuffer::createUninitialized(length);
+  char* bytes = result.m_buffer->mutableData();
+  bytes[length] = '\0';
+  characterBuffer = bytes;
+  return result;
 }
 
-void CString::copyBufferIfNeeded()
-{
-    if (!m_buffer || m_buffer->hasOneRef())
-        return;
+void CString::copyBufferIfNeeded() {
+  if (!m_buffer || m_buffer->hasOneRef())
+    return;
 
-    RefPtr<CStringBuffer> buffer = m_buffer.release();
-    size_t length = buffer->length();
-    m_buffer = CStringBuffer::createUninitialized(length);
-    memcpy(m_buffer->mutableData(), buffer->data(), length + 1);
+  RefPtr<CStringBuffer> buffer = m_buffer.release();
+  size_t length = buffer->length();
+  m_buffer = CStringBuffer::createUninitialized(length);
+  memcpy(m_buffer->mutableData(), buffer->data(), length + 1);
 }
 
-bool CString::isSafeToSendToAnotherThread() const
-{
-    return !m_buffer || m_buffer->hasOneRef();
+bool CString::isSafeToSendToAnotherThread() const {
+  return !m_buffer || m_buffer->hasOneRef();
 }
 
-bool operator==(const CString& a, const CString& b)
-{
-    if (a.isNull() != b.isNull())
-        return false;
-    if (a.length() != b.length())
-        return false;
-    return !memcmp(a.data(), b.data(), a.length());
+bool operator==(const CString& a, const CString& b) {
+  if (a.isNull() != b.isNull())
+    return false;
+  if (a.length() != b.length())
+    return false;
+  return !memcmp(a.data(), b.data(), a.length());
 }
 
-bool operator==(const CString& a, const char* b)
-{
-    if (a.isNull() != !b)
-        return false;
-    if (!b)
-        return true;
-    return !strcmp(a.data(), b);
+bool operator==(const CString& a, const char* b) {
+  if (a.isNull() != !b)
+    return false;
+  if (!b)
+    return true;
+  return !strcmp(a.data(), b);
 }
 
-} // namespace WTF
+}  // namespace WTF

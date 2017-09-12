@@ -9,20 +9,20 @@
 
 namespace blink {
 
-TEST(FontCacheMobile, fallbackFontForCharacter)
-{
-    // A Latin character in the common locale system font, but not in the
-    // Chinese locale-preferred font.
-    const UChar32 testChar = 228;
+TEST(FontCacheMobile, fallbackFontForCharacter) {
+  // A Latin character in the common locale system font, but not in the
+  // Chinese locale-preferred font.
+  const UChar32 testChar = 228;
 
-    FontDescription fontDescription;
-    fontDescription.setScript(USCRIPT_SIMPLIFIED_HAN);
-    fontDescription.setGenericFamily(FontDescription::StandardFamily);
+  FontDescription fontDescription;
+  fontDescription.setScript(USCRIPT_SIMPLIFIED_HAN);
+  fontDescription.setGenericFamily(FontDescription::StandardFamily);
 
-    FontCache* fontCache = FontCache::fontCache();
-    ASSERT_TRUE(fontCache);
-    RefPtr<SimpleFontData> fontData = fontCache->fallbackFontForCharacter(fontDescription, testChar, 0);
-    EXPECT_TRUE(fontData);
+  FontCache* fontCache = FontCache::fontCache();
+  ASSERT_TRUE(fontCache);
+  RefPtr<SimpleFontData> fontData =
+      fontCache->fallbackFontForCharacter(fontDescription, testChar, 0);
+  EXPECT_TRUE(fontData);
 }
 
-} // namespace blink
+}  // namespace blink

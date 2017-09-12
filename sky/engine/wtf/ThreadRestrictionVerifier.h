@@ -39,49 +39,45 @@
 
 namespace WTF {
 
-// Verifies that a class is used in a way that respects its lack of thread-safety.
-// The default mode is to verify that the object will only be used on a single thread. The
-// thread gets captured when setShared(true) is called.
-// The mode may be changed by calling useMutexMode (or turnOffVerification).
+// Verifies that a class is used in a way that respects its lack of
+// thread-safety. The default mode is to verify that the object will only be
+// used on a single thread. The thread gets captured when setShared(true) is
+// called. The mode may be changed by calling useMutexMode (or
+// turnOffVerification).
 class ThreadRestrictionVerifier {
-public:
-    ThreadRestrictionVerifier()
-        : m_shared(false)
-        , m_owningThread(0)
-    {
-    }
+ public:
+  ThreadRestrictionVerifier() : m_shared(false), m_owningThread(0) {}
 
-    // Indicates that the object may (or may not) be owned by more than one place.
-    void setShared(bool shared)
-    {
-        bool previouslyShared = m_shared;
-        m_shared = shared;
+  // Indicates that the object may (or may not) be owned by more than one place.
+  void setShared(bool shared) {
+    bool previouslyShared = m_shared;
+    m_shared = shared;
 
-        if (!m_shared)
-            return;
+    if (!m_shared)
+      return;
 
-        ASSERT(shared != previouslyShared);
-        // Capture the current thread to verify that subsequent ref/deref happen on this thread.
-        m_owningThread = currentThread();
-    }
+    ASSERT(shared != previouslyShared);
+    // Capture the current thread to verify that subsequent ref/deref happen on
+    // this thread.
+    m_owningThread = currentThread();
+  }
 
-    // Is it OK to use the object at this moment on the current thread?
-    bool isSafeToUse() const
-    {
-        if (!m_shared)
-            return true;
+  // Is it OK to use the object at this moment on the current thread?
+  bool isSafeToUse() const {
+    if (!m_shared)
+      return true;
 
-        return m_owningThread == currentThread();
-    }
+    return m_owningThread == currentThread();
+  }
 
-private:
-    bool m_shared;
+ private:
+  bool m_shared;
 
-    // Used by SingleThreadVerificationMode
-    ThreadIdentifier m_owningThread;
+  // Used by SingleThreadVerificationMode
+  ThreadIdentifier m_owningThread;
 };
 
-}
+}  // namespace WTF
 
-#endif // ENABLE(ASSERT)
+#endif  // ENABLE(ASSERT)
 #endif  // SKY_ENGINE_WTF_THREADRESTRICTIONVERIFIER_H_

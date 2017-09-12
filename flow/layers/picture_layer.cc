@@ -46,7 +46,7 @@ void PictureLayer::Paint(PaintContext& context) {
         raster_cache_result_.destination_rect(),  // destination
         nullptr,                                  // paint
         SkCanvas::kStrict_SrcRectConstraint       // source constraint
-        );
+    );
   } else {
     context.canvas.drawPicture(picture_.get());
   }

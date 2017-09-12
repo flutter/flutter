@@ -44,68 +44,68 @@ namespace blink {
 // Encapsulates stroke painting information.
 // It is pulled out of GraphicsContextState to enable other methods to use it.
 class PLATFORM_EXPORT StrokeData {
-public:
-    StrokeData()
-        : m_style(SolidStroke)
-        , m_thickness(0)
-        , m_color(Color::black)
-        , m_lineCap(SkPaint::kDefault_Cap)
-        , m_lineJoin(SkPaint::kDefault_Join)
-        , m_miterLimit(4)
-    {
-    }
+ public:
+  StrokeData()
+      : m_style(SolidStroke),
+        m_thickness(0),
+        m_color(Color::black),
+        m_lineCap(SkPaint::kDefault_Cap),
+        m_lineJoin(SkPaint::kDefault_Join),
+        m_miterLimit(4) {}
 
-    StrokeStyle style() const { return m_style; }
-    void setStyle(StrokeStyle style) { m_style = style; }
+  StrokeStyle style() const { return m_style; }
+  void setStyle(StrokeStyle style) { m_style = style; }
 
-    float thickness() const { return m_thickness; }
-    void setThickness(float thickness) { m_thickness = thickness; }
+  float thickness() const { return m_thickness; }
+  void setThickness(float thickness) { m_thickness = thickness; }
 
-    Color color() const { return m_color; }
-    void setColor(const Color& color) { m_color = color; }
+  Color color() const { return m_color; }
+  void setColor(const Color& color) { m_color = color; }
 
-    Gradient* gradient() const { return m_gradient.get(); }
-    void setGradient(const PassRefPtr<Gradient> gradient) { m_gradient = gradient; }
-    void clearGradient() { m_gradient.clear(); }
+  Gradient* gradient() const { return m_gradient.get(); }
+  void setGradient(const PassRefPtr<Gradient> gradient) {
+    m_gradient = gradient;
+  }
+  void clearGradient() { m_gradient.clear(); }
 
-    Pattern* pattern() const { return m_pattern.get(); }
-    void setPattern(const PassRefPtr<Pattern> pattern) { m_pattern = pattern; }
-    void clearPattern() { m_pattern.clear(); }
+  Pattern* pattern() const { return m_pattern.get(); }
+  void setPattern(const PassRefPtr<Pattern> pattern) { m_pattern = pattern; }
+  void clearPattern() { m_pattern.clear(); }
 
-    LineCap lineCap() const { return (LineCap)m_lineCap; }
-    void setLineCap(LineCap cap) { m_lineCap = (SkPaint::Cap)cap; }
+  LineCap lineCap() const { return (LineCap)m_lineCap; }
+  void setLineCap(LineCap cap) { m_lineCap = (SkPaint::Cap)cap; }
 
-    LineJoin lineJoin() const { return (LineJoin)m_lineJoin; }
-    void setLineJoin(LineJoin join) { m_lineJoin = (SkPaint::Join)join; }
+  LineJoin lineJoin() const { return (LineJoin)m_lineJoin; }
+  void setLineJoin(LineJoin join) { m_lineJoin = (SkPaint::Join)join; }
 
-    float miterLimit() const { return m_miterLimit; }
-    void setMiterLimit(float miterLimit) { m_miterLimit = miterLimit; }
+  float miterLimit() const { return m_miterLimit; }
+  void setMiterLimit(float miterLimit) { m_miterLimit = miterLimit; }
 
-    void setLineDash(const DashArray&, float);
+  void setLineDash(const DashArray&, float);
 
-    // Sets everything on the paint except the pattern, gradient and color.
-    // If a non-zero length is provided, the number of dashes/dots on a
-    // dashed/dotted line will be adjusted to start and end that length with a
-    // dash/dot.
-    void setupPaint(SkPaint*, int length = 0) const;
+  // Sets everything on the paint except the pattern, gradient and color.
+  // If a non-zero length is provided, the number of dashes/dots on a
+  // dashed/dotted line will be adjusted to start and end that length with a
+  // dash/dot.
+  void setupPaint(SkPaint*, int length = 0) const;
 
-    // Setup any DashPathEffect on the paint. If a non-zero length is provided,
-    // and no line dash has been set, the number of dashes/dots on a dashed/dotted
-    // line will be adjusted to start and end that length with a dash/dot.
-    void setupPaintDashPathEffect(SkPaint*, int) const;
+  // Setup any DashPathEffect on the paint. If a non-zero length is provided,
+  // and no line dash has been set, the number of dashes/dots on a dashed/dotted
+  // line will be adjusted to start and end that length with a dash/dot.
+  void setupPaintDashPathEffect(SkPaint*, int) const;
 
-private:
-    StrokeStyle m_style;
-    float m_thickness;
-    Color m_color;
-    RefPtr<Gradient> m_gradient;
-    RefPtr<Pattern> m_pattern;
-    SkPaint::Cap m_lineCap;
-    SkPaint::Join m_lineJoin;
-    float m_miterLimit;
-    sk_sp<SkPathEffect> m_dash;
+ private:
+  StrokeStyle m_style;
+  float m_thickness;
+  Color m_color;
+  RefPtr<Gradient> m_gradient;
+  RefPtr<Pattern> m_pattern;
+  SkPaint::Cap m_lineCap;
+  SkPaint::Join m_lineJoin;
+  float m_miterLimit;
+  sk_sp<SkPathEffect> m_dash;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_STROKEDATA_H_

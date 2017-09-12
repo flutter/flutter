@@ -37,177 +37,184 @@
 namespace blink {
 
 struct WidthCacheEntry {
-    WidthCacheEntry()
-    {
-        width = std::numeric_limits<float>::quiet_NaN();
-    }
-    bool isValid() const { return !std::isnan(width); }
-    float width;
-    IntRectExtent glyphBounds;
+  WidthCacheEntry() { width = std::numeric_limits<float>::quiet_NaN(); }
+  bool isValid() const { return !std::isnan(width); }
+  float width;
+  IntRectExtent glyphBounds;
 };
 
 class WidthCache {
-private:
-    // Used to optimize small strings as hash table keys. Avoids malloc'ing an out-of-line StringImpl.
-    class SmallStringKey {
-    public:
-        static unsigned capacity() { return s_capacity; }
+ private:
+  // Used to optimize small strings as hash table keys. Avoids malloc'ing an
+  // out-of-line StringImpl.
+  class SmallStringKey {
+   public:
+    static unsigned capacity() { return s_capacity; }
 
-        SmallStringKey()
-            : m_length(s_emptyValueLength)
-        {
-        }
+    SmallStringKey() : m_length(s_emptyValueLength) {}
 
-        SmallStringKey(WTF::HashTableDeletedValueType)
-            : m_length(s_deletedValueLength)
-        {
-        }
+    SmallStringKey(WTF::HashTableDeletedValueType)
+        : m_length(s_deletedValueLength) {}
 
-        template<typename CharacterType> SmallStringKey(CharacterType* characters, unsigned short length)
-            : m_length(length)
-        {
-            ASSERT(length <= s_capacity);
+    template <typename CharacterType>
+    SmallStringKey(CharacterType* characters, unsigned short length)
+        : m_length(length) {
+      ASSERT(length <= s_capacity);
 
-            StringHasher hasher;
+      StringHasher hasher;
 
-            bool remainder = length & 1;
-            length >>= 1;
+      bool remainder = length & 1;
+      length >>= 1;
 
-            unsigned i = 0;
-            while (length--) {
-                m_characters[i] = characters[i];
-                m_characters[i + 1] = characters[i + 1];
-                hasher.addCharactersAssumingAligned(characters[i], characters[i + 1]);
-                i += 2;
-            }
+      unsigned i = 0;
+      while (length--) {
+        m_characters[i] = characters[i];
+        m_characters[i + 1] = characters[i + 1];
+        hasher.addCharactersAssumingAligned(characters[i], characters[i + 1]);
+        i += 2;
+      }
 
-            if (remainder) {
-                m_characters[i] = characters[i];
-                hasher.addCharacter(characters[i]);
-            }
+      if (remainder) {
+        m_characters[i] = characters[i];
+        hasher.addCharacter(characters[i]);
+      }
 
-            m_hash = hasher.hash();
-        }
-
-        const UChar* characters() const { return m_characters; }
-        unsigned short length() const { return m_length; }
-        unsigned hash() const { return m_hash; }
-
-        bool isHashTableDeletedValue() const { return m_length == s_deletedValueLength; }
-        bool isHashTableEmptyValue() const { return m_length == s_emptyValueLength; }
-
-    private:
-        static const unsigned s_capacity = 15;
-        static const unsigned s_emptyValueLength = s_capacity + 1;
-        static const unsigned s_deletedValueLength = s_capacity + 2;
-
-        unsigned m_hash;
-        unsigned short m_length;
-        UChar m_characters[s_capacity];
-    };
-
-    struct SmallStringKeyHash {
-        static unsigned hash(const SmallStringKey& key) { return key.hash(); }
-        static bool equal(const SmallStringKey& a, const SmallStringKey& b) { return a == b; }
-        static const bool safeToCompareToEmptyOrDeleted = true; // Empty and deleted values have lengths that are not equal to any valid length.
-    };
-
-    struct SmallStringKeyHashTraits : WTF::SimpleClassHashTraits<SmallStringKey> {
-        static const bool hasIsEmptyValueFunction = true;
-        static bool isEmptyValue(const SmallStringKey& key) { return key.isHashTableEmptyValue(); }
-        static const bool needsDestruction = false;
-        static const unsigned minimumTableSize = 16;
-    };
-
-    friend bool operator==(const SmallStringKey&, const SmallStringKey&);
-
-public:
-    WidthCache()
-        : m_interval(s_maxInterval)
-        , m_countdown(m_interval)
-    {
+      m_hash = hasher.hash();
     }
 
-    WidthCacheEntry* add(const TextRun& run, WidthCacheEntry entry)
-    {
-        if (static_cast<unsigned>(run.length()) > SmallStringKey::capacity())
-            return 0;
+    const UChar* characters() const { return m_characters; }
+    unsigned short length() const { return m_length; }
+    unsigned hash() const { return m_hash; }
 
-        if (m_countdown > 0) {
-            --m_countdown;
-            return 0;
-        }
-
-        return addSlowCase(run, entry);
+    bool isHashTableDeletedValue() const {
+      return m_length == s_deletedValueLength;
+    }
+    bool isHashTableEmptyValue() const {
+      return m_length == s_emptyValueLength;
     }
 
-    void clear()
-    {
-        m_singleCharMap.clear();
-        m_map.clear();
+   private:
+    static const unsigned s_capacity = 15;
+    static const unsigned s_emptyValueLength = s_capacity + 1;
+    static const unsigned s_deletedValueLength = s_capacity + 2;
+
+    unsigned m_hash;
+    unsigned short m_length;
+    UChar m_characters[s_capacity];
+  };
+
+  struct SmallStringKeyHash {
+    static unsigned hash(const SmallStringKey& key) { return key.hash(); }
+    static bool equal(const SmallStringKey& a, const SmallStringKey& b) {
+      return a == b;
+    }
+    static const bool safeToCompareToEmptyOrDeleted =
+        true;  // Empty and deleted values have lengths that are not equal to
+               // any valid length.
+  };
+
+  struct SmallStringKeyHashTraits : WTF::SimpleClassHashTraits<SmallStringKey> {
+    static const bool hasIsEmptyValueFunction = true;
+    static bool isEmptyValue(const SmallStringKey& key) {
+      return key.isHashTableEmptyValue();
+    }
+    static const bool needsDestruction = false;
+    static const unsigned minimumTableSize = 16;
+  };
+
+  friend bool operator==(const SmallStringKey&, const SmallStringKey&);
+
+ public:
+  WidthCache() : m_interval(s_maxInterval), m_countdown(m_interval) {}
+
+  WidthCacheEntry* add(const TextRun& run, WidthCacheEntry entry) {
+    if (static_cast<unsigned>(run.length()) > SmallStringKey::capacity())
+      return 0;
+
+    if (m_countdown > 0) {
+      --m_countdown;
+      return 0;
     }
 
-private:
-    WidthCacheEntry* addSlowCase(const TextRun& run, WidthCacheEntry entry)
-    {
-        int length = run.length();
-        bool isNewEntry;
-        WidthCacheEntry *value;
-        if (length == 1) {
-            SingleCharMap::AddResult addResult = m_singleCharMap.add(run[0], entry);
-            isNewEntry = addResult.isNewEntry;
-            value = &addResult.storedValue->value;
-        } else {
-            SmallStringKey smallStringKey;
-            if (run.is8Bit())
-                smallStringKey = SmallStringKey(run.characters8(), length);
-            else
-                smallStringKey = SmallStringKey(run.characters16(), length);
+    return addSlowCase(run, entry);
+  }
 
-            Map::AddResult addResult = m_map.add(smallStringKey, entry);
-            isNewEntry = addResult.isNewEntry;
-            value = &addResult.storedValue->value;
-        }
+  void clear() {
+    m_singleCharMap.clear();
+    m_map.clear();
+  }
 
-        // Cache hit: ramp up by sampling the next few words.
-        if (!isNewEntry) {
-            m_interval = s_minInterval;
-            return value;
-        }
+ private:
+  WidthCacheEntry* addSlowCase(const TextRun& run, WidthCacheEntry entry) {
+    int length = run.length();
+    bool isNewEntry;
+    WidthCacheEntry* value;
+    if (length == 1) {
+      SingleCharMap::AddResult addResult = m_singleCharMap.add(run[0], entry);
+      isNewEntry = addResult.isNewEntry;
+      value = &addResult.storedValue->value;
+    } else {
+      SmallStringKey smallStringKey;
+      if (run.is8Bit())
+        smallStringKey = SmallStringKey(run.characters8(), length);
+      else
+        smallStringKey = SmallStringKey(run.characters16(), length);
 
-        // Cache miss: ramp down by increasing our sampling interval.
-        if (m_interval < s_maxInterval)
-            ++m_interval;
-        m_countdown = m_interval;
-
-        if ((m_singleCharMap.size() + m_map.size()) < s_maxSize)
-            return value;
-
-        // No need to be fancy: we're just trying to avoid pathological growth.
-        m_singleCharMap.clear();
-        m_map.clear();
-        return 0;
+      Map::AddResult addResult = m_map.add(smallStringKey, entry);
+      isNewEntry = addResult.isNewEntry;
+      value = &addResult.storedValue->value;
     }
 
-    typedef HashMap<SmallStringKey, WidthCacheEntry, SmallStringKeyHash, SmallStringKeyHashTraits> Map;
-    typedef HashMap<uint32_t, WidthCacheEntry, DefaultHash<uint32_t>::Hash, WTF::UnsignedWithZeroKeyHashTraits<uint32_t> > SingleCharMap;
-    static const int s_minInterval = -3; // A cache hit pays for about 3 cache misses.
-    static const int s_maxInterval = 20; // Sampling at this interval has almost no overhead.
-    static const unsigned s_maxSize = 500000; // Just enough to guard against pathological growth.
+    // Cache hit: ramp up by sampling the next few words.
+    if (!isNewEntry) {
+      m_interval = s_minInterval;
+      return value;
+    }
 
-    int m_interval;
-    int m_countdown;
-    SingleCharMap m_singleCharMap;
-    Map m_map;
+    // Cache miss: ramp down by increasing our sampling interval.
+    if (m_interval < s_maxInterval)
+      ++m_interval;
+    m_countdown = m_interval;
+
+    if ((m_singleCharMap.size() + m_map.size()) < s_maxSize)
+      return value;
+
+    // No need to be fancy: we're just trying to avoid pathological growth.
+    m_singleCharMap.clear();
+    m_map.clear();
+    return 0;
+  }
+
+  typedef HashMap<SmallStringKey,
+                  WidthCacheEntry,
+                  SmallStringKeyHash,
+                  SmallStringKeyHashTraits>
+      Map;
+  typedef HashMap<uint32_t,
+                  WidthCacheEntry,
+                  DefaultHash<uint32_t>::Hash,
+                  WTF::UnsignedWithZeroKeyHashTraits<uint32_t>>
+      SingleCharMap;
+  static const int s_minInterval =
+      -3;  // A cache hit pays for about 3 cache misses.
+  static const int s_maxInterval =
+      20;  // Sampling at this interval has almost no overhead.
+  static const unsigned s_maxSize =
+      500000;  // Just enough to guard against pathological growth.
+
+  int m_interval;
+  int m_countdown;
+  SingleCharMap m_singleCharMap;
+  Map m_map;
 };
 
-inline bool operator==(const WidthCache::SmallStringKey& a, const WidthCache::SmallStringKey& b)
-{
-    if (a.length() != b.length())
-        return false;
-    return WTF::equal(a.characters(), b.characters(), a.length());
+inline bool operator==(const WidthCache::SmallStringKey& a,
+                       const WidthCache::SmallStringKey& b) {
+  if (a.length() != b.length())
+    return false;
+  return WTF::equal(a.characters(), b.characters(), a.length());
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_WIDTHCACHE_H_

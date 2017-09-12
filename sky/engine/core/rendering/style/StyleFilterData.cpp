@@ -27,18 +27,12 @@
 
 namespace blink {
 
-StyleFilterData::StyleFilterData()
-{
+StyleFilterData::StyleFilterData() {}
+
+StyleFilterData::StyleFilterData(const StyleFilterData& o) {}
+
+bool StyleFilterData::operator==(const StyleFilterData& o) const {
+  return true;
 }
 
-StyleFilterData::StyleFilterData(const StyleFilterData& o)
-{
-}
-
-bool StyleFilterData::operator==(const StyleFilterData& o) const
-{
-    return true;
-}
-
-} // namespace blink
-
+}  // namespace blink

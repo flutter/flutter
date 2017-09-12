@@ -30,58 +30,63 @@
 namespace blink {
 
 class PLATFORM_EXPORT ScaleTransformOperation : public TransformOperation {
-public:
-    static PassRefPtr<ScaleTransformOperation> create(double sx, double sy, OperationType type)
-    {
-        return adoptRef(new ScaleTransformOperation(sx, sy, 1, type));
-    }
+ public:
+  static PassRefPtr<ScaleTransformOperation> create(double sx,
+                                                    double sy,
+                                                    OperationType type) {
+    return adoptRef(new ScaleTransformOperation(sx, sy, 1, type));
+  }
 
-    static PassRefPtr<ScaleTransformOperation> create(double sx, double sy, double sz, OperationType type)
-    {
-        return adoptRef(new ScaleTransformOperation(sx, sy, sz, type));
-    }
+  static PassRefPtr<ScaleTransformOperation> create(double sx,
+                                                    double sy,
+                                                    double sz,
+                                                    OperationType type) {
+    return adoptRef(new ScaleTransformOperation(sx, sy, sz, type));
+  }
 
-    double x() const { return m_x; }
-    double y() const { return m_y; }
-    double z() const { return m_z; }
+  double x() const { return m_x; }
+  double y() const { return m_y; }
+  double z() const { return m_z; }
 
-    virtual bool canBlendWith(const TransformOperation& other) const;
+  virtual bool canBlendWith(const TransformOperation& other) const;
 
-private:
-    virtual bool isIdentity() const override { return m_x == 1 &&  m_y == 1 &&  m_z == 1; }
+ private:
+  virtual bool isIdentity() const override {
+    return m_x == 1 && m_y == 1 && m_z == 1;
+  }
 
-    virtual OperationType type() const override { return m_type; }
+  virtual OperationType type() const override { return m_type; }
 
-    virtual bool operator==(const TransformOperation& o) const override
-    {
-        if (!isSameType(o))
-            return false;
-        const ScaleTransformOperation* s = static_cast<const ScaleTransformOperation*>(&o);
-        return m_x == s->m_x && m_y == s->m_y && m_z == s->m_z;
-    }
+  virtual bool operator==(const TransformOperation& o) const override {
+    if (!isSameType(o))
+      return false;
+    const ScaleTransformOperation* s =
+        static_cast<const ScaleTransformOperation*>(&o);
+    return m_x == s->m_x && m_y == s->m_y && m_z == s->m_z;
+  }
 
-    virtual void apply(TransformationMatrix& transform, const FloatSize&) const override
-    {
-        transform.scale3d(m_x, m_y, m_z);
-    }
+  virtual void apply(TransformationMatrix& transform,
+                     const FloatSize&) const override {
+    transform.scale3d(m_x, m_y, m_z);
+  }
 
-    virtual PassRefPtr<TransformOperation> blend(const TransformOperation* from, double progress, bool blendToIdentity = false) override;
+  virtual PassRefPtr<TransformOperation> blend(
+      const TransformOperation* from,
+      double progress,
+      bool blendToIdentity = false) override;
 
-    ScaleTransformOperation(double sx, double sy, double sz, OperationType type)
-        : m_x(sx)
-        , m_y(sy)
-        , m_z(sz)
-        , m_type(type)
-    {
-        ASSERT(type == ScaleX || type == ScaleY || type == ScaleZ || type == Scale || type == Scale3D);
-    }
+  ScaleTransformOperation(double sx, double sy, double sz, OperationType type)
+      : m_x(sx), m_y(sy), m_z(sz), m_type(type) {
+    ASSERT(type == ScaleX || type == ScaleY || type == ScaleZ ||
+           type == Scale || type == Scale3D);
+  }
 
-    double m_x;
-    double m_y;
-    double m_z;
-    OperationType m_type;
+  double m_x;
+  double m_y;
+  double m_z;
+  OperationType m_type;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TRANSFORMS_SCALETRANSFORMOPERATION_H_

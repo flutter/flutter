@@ -18,7 +18,7 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
-*/
+ */
 
 #ifndef SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_
 #define SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_
@@ -26,38 +26,37 @@
 namespace blink {
 
 class HitTestRequest {
-public:
-    enum RequestType {
-        ReadOnly = 1 << 1,
-        Active = 1 << 2,
-        Move = 1 << 3,
-        Release = 1 << 4,
-        IgnoreClipping = 1 << 5,
-        SVGClipContent = 1 << 6,
-        IgnorePointerEventsNone = 1 << 8,
-    };
+ public:
+  enum RequestType {
+    ReadOnly = 1 << 1,
+    Active = 1 << 2,
+    Move = 1 << 3,
+    Release = 1 << 4,
+    IgnoreClipping = 1 << 5,
+    SVGClipContent = 1 << 6,
+    IgnorePointerEventsNone = 1 << 8,
+  };
 
-    typedef unsigned HitTestRequestType;
+  typedef unsigned HitTestRequestType;
 
-    HitTestRequest(HitTestRequestType requestType)
-        : m_requestType(requestType)
-    {
-    }
+  HitTestRequest(HitTestRequestType requestType) : m_requestType(requestType) {}
 
-    bool readOnly() const { return m_requestType & ReadOnly; }
-    bool active() const { return m_requestType & Active; }
-    bool move() const { return m_requestType & Move; }
-    bool release() const { return m_requestType & Release; }
-    bool ignoreClipping() const { return m_requestType & IgnoreClipping; }
-    bool svgClipContent() const { return m_requestType & SVGClipContent; }
-    bool ignorePointerEventsNone() const { return m_requestType & IgnorePointerEventsNone; }
+  bool readOnly() const { return m_requestType & ReadOnly; }
+  bool active() const { return m_requestType & Active; }
+  bool move() const { return m_requestType & Move; }
+  bool release() const { return m_requestType & Release; }
+  bool ignoreClipping() const { return m_requestType & IgnoreClipping; }
+  bool svgClipContent() const { return m_requestType & SVGClipContent; }
+  bool ignorePointerEventsNone() const {
+    return m_requestType & IgnorePointerEventsNone;
+  }
 
-    HitTestRequestType type() const { return m_requestType; }
+  HitTestRequestType type() const { return m_requestType; }
 
-private:
-    HitTestRequestType m_requestType;
+ private:
+  HitTestRequestType m_requestType;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_HITTESTREQUEST_H_

@@ -33,18 +33,20 @@
 #include <stdint.h>
 #include "flutter/sky/engine/wtf/WTFExport.h"
 
-// For portability, we do not use thread-safe statics natively supported by some compilers (e.g. gcc).
-#define AtomicallyInitializedStatic(T, name) \
-    WTF::lockAtomicallyInitializedStaticMutex(); \
-    static T name; \
-    WTF::unlockAtomicallyInitializedStaticMutex();
+// For portability, we do not use thread-safe statics natively supported by some
+// compilers (e.g. gcc).
+#define AtomicallyInitializedStatic(T, name)   \
+  WTF::lockAtomicallyInitializedStaticMutex(); \
+  static T name;                               \
+  WTF::unlockAtomicallyInitializedStaticMutex();
 
 namespace WTF {
 
 typedef uint32_t ThreadIdentifier;
 
 // Called in the thread during initialization.
-// Helpful for platforms where the thread name must be set from within the thread.
+// Helpful for platforms where the thread name must be set from within the
+// thread.
 WTF_EXPORT void initializeCurrentThreadInternal(const char* threadName);
 
 WTF_EXPORT ThreadIdentifier currentThread();
@@ -52,7 +54,7 @@ WTF_EXPORT ThreadIdentifier currentThread();
 WTF_EXPORT void lockAtomicallyInitializedStaticMutex();
 WTF_EXPORT void unlockAtomicallyInitializedStaticMutex();
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::ThreadIdentifier;
 using WTF::currentThread;

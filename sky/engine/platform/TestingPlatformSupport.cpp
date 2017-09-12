@@ -28,55 +28,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #include "flutter/sky/engine/platform/TestingPlatformSupport.h"
 
 namespace blink {
 
-TestingDiscardableMemory::TestingDiscardableMemory(size_t size) : m_data(size), m_isLocked(true)
-{
+TestingDiscardableMemory::TestingDiscardableMemory(size_t size)
+    : m_data(size), m_isLocked(true) {}
+
+TestingDiscardableMemory::~TestingDiscardableMemory() {}
+
+bool TestingDiscardableMemory::lock() {
+  ASSERT(!m_isLocked);
+  m_isLocked = true;
+  return false;
 }
 
-TestingDiscardableMemory::~TestingDiscardableMemory()
-{
+void* TestingDiscardableMemory::data() {
+  ASSERT(m_isLocked);
+  return m_data.data();
 }
 
-bool TestingDiscardableMemory::lock()
-{
-    ASSERT(!m_isLocked);
-    m_isLocked = true;
-    return false;
-}
-
-void* TestingDiscardableMemory::data()
-{
-    ASSERT(m_isLocked);
-    return m_data.data();
-}
-
-void TestingDiscardableMemory::unlock()
-{
-    ASSERT(m_isLocked);
-    m_isLocked = false;
-    // Force eviction to catch clients not correctly checking the return value of lock().
-    memset(m_data.data(), 0, m_data.size());
+void TestingDiscardableMemory::unlock() {
+  ASSERT(m_isLocked);
+  m_isLocked = false;
+  // Force eviction to catch clients not correctly checking the return value of
+  // lock().
+  memset(m_data.data(), 0, m_data.size());
 }
 
 TestingPlatformSupport::TestingPlatformSupport(const Config& config)
-    : m_config(config)
-    , m_oldPlatform(blink::Platform::current())
-{
-    blink::Platform::initialize(this);
+    : m_config(config), m_oldPlatform(blink::Platform::current()) {
+  blink::Platform::initialize(this);
 }
 
-TestingPlatformSupport::~TestingPlatformSupport()
-{
-    blink::Platform::initialize(m_oldPlatform);
+TestingPlatformSupport::~TestingPlatformSupport() {
+  blink::Platform::initialize(m_oldPlatform);
 }
 
-blink::WebDiscardableMemory* TestingPlatformSupport::allocateAndLockDiscardableMemory(size_t bytes)
-{
-    return !m_config.hasDiscardableMemorySupport ? 0 : new TestingDiscardableMemory(bytes);
+blink::WebDiscardableMemory*
+TestingPlatformSupport::allocateAndLockDiscardableMemory(size_t bytes) {
+  return !m_config.hasDiscardableMemorySupport
+             ? 0
+             : new TestingDiscardableMemory(bytes);
 }
 
-} // namespace blink
+}  // namespace blink

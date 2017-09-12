@@ -36,34 +36,34 @@
 namespace blink {
 
 class PLATFORM_EXPORT FontFeature {
-public:
-    FontFeature(const AtomicString& tag, int value);
-    bool operator==(const FontFeature&);
+ public:
+  FontFeature(const AtomicString& tag, int value);
+  bool operator==(const FontFeature&);
 
-    const AtomicString& tag() const { return m_tag; }
-    int value() const { return m_value; }
+  const AtomicString& tag() const { return m_tag; }
+  int value() const { return m_value; }
 
-private:
-    AtomicString m_tag;
-    const int m_value;
+ private:
+  AtomicString m_tag;
+  const int m_value;
 };
 
-class PLATFORM_EXPORT FontFeatureSettings : public RefCounted<FontFeatureSettings> {
-public:
-    static PassRefPtr<FontFeatureSettings> create()
-    {
-        return adoptRef(new FontFeatureSettings());
-    }
-    void append(const FontFeature& feature) { m_list.append(feature); }
-    size_t size() const { return m_list.size(); }
-    const FontFeature& operator[](int index) const { return m_list[index]; }
-    const FontFeature& at(size_t index) const { return m_list.at(index); }
+class PLATFORM_EXPORT FontFeatureSettings
+    : public RefCounted<FontFeatureSettings> {
+ public:
+  static PassRefPtr<FontFeatureSettings> create() {
+    return adoptRef(new FontFeatureSettings());
+  }
+  void append(const FontFeature& feature) { m_list.append(feature); }
+  size_t size() const { return m_list.size(); }
+  const FontFeature& operator[](int index) const { return m_list[index]; }
+  const FontFeature& at(size_t index) const { return m_list.at(index); }
 
-private:
-    FontFeatureSettings();
-    Vector<FontFeature> m_list;
+ private:
+  FontFeatureSettings();
+  Vector<FontFeature> m_list;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTFEATURESETTINGS_H_

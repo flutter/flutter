@@ -32,93 +32,99 @@
 
 namespace blink {
 
-void RenderObjectChildList::destroyLeftoverChildren()
-{
-    while (firstChild())
-        firstChild()->destroy();
+void RenderObjectChildList::destroyLeftoverChildren() {
+  while (firstChild())
+    firstChild()->destroy();
 }
 
-RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner, RenderObject* oldChild, bool notifyRenderer)
-{
-    ASSERT(oldChild->parent() == owner);
+RenderObject* RenderObjectChildList::removeChildNode(RenderObject* owner,
+                                                     RenderObject* oldChild,
+                                                     bool notifyRenderer) {
+  ASSERT(oldChild->parent() == owner);
 
-    if (oldChild->isFloatingOrOutOfFlowPositioned())
-        toRenderBox(oldChild)->removeFloatingOrPositionedChildFromBlockLists();
+  if (oldChild->isFloatingOrOutOfFlowPositioned())
+    toRenderBox(oldChild)->removeFloatingOrPositionedChildFromBlockLists();
 
-    // So that we'll get the appropriate dirty bit set (either that a normal flow child got yanked or
-    // that a positioned child got yanked). We also issue paint invalidations, so that the area exposed when the child
-    // disappears gets paint invalidated properly.
-    if (!owner->documentBeingDestroyed() && notifyRenderer && oldChild->everHadLayout())
-        oldChild->setNeedsLayoutAndPrefWidthsRecalc();
+  // So that we'll get the appropriate dirty bit set (either that a normal flow
+  // child got yanked or that a positioned child got yanked). We also issue
+  // paint invalidations, so that the area exposed when the child disappears
+  // gets paint invalidated properly.
+  if (!owner->documentBeingDestroyed() && notifyRenderer &&
+      oldChild->everHadLayout())
+    oldChild->setNeedsLayoutAndPrefWidthsRecalc();
 
-    // If we have a line box wrapper, delete it.
-    if (oldChild->isBox())
-        toRenderBox(oldChild)->deleteLineBoxWrapper();
+  // If we have a line box wrapper, delete it.
+  if (oldChild->isBox())
+    toRenderBox(oldChild)->deleteLineBoxWrapper();
 
-    if (!owner->documentBeingDestroyed() && notifyRenderer)
-        oldChild->willBeRemovedFromTree();
+  if (!owner->documentBeingDestroyed() && notifyRenderer)
+    oldChild->willBeRemovedFromTree();
 
-    // WARNING: There should be no code running between willBeRemovedFromTree and the actual removal below.
-    // This is needed to avoid race conditions where willBeRemovedFromTree would dirty the tree's structure
-    // and the code running here would force an untimely rebuilding, leaving |oldChild| dangling.
+  // WARNING: There should be no code running between willBeRemovedFromTree and
+  // the actual removal below. This is needed to avoid race conditions where
+  // willBeRemovedFromTree would dirty the tree's structure and the code running
+  // here would force an untimely rebuilding, leaving |oldChild| dangling.
 
-    if (oldChild->previousSibling())
-        oldChild->previousSibling()->setNextSibling(oldChild->nextSibling());
-    if (oldChild->nextSibling())
-        oldChild->nextSibling()->setPreviousSibling(oldChild->previousSibling());
+  if (oldChild->previousSibling())
+    oldChild->previousSibling()->setNextSibling(oldChild->nextSibling());
+  if (oldChild->nextSibling())
+    oldChild->nextSibling()->setPreviousSibling(oldChild->previousSibling());
 
-    if (firstChild() == oldChild)
-        setFirstChild(oldChild->nextSibling());
-    if (lastChild() == oldChild)
-        setLastChild(oldChild->previousSibling());
+  if (firstChild() == oldChild)
+    setFirstChild(oldChild->nextSibling());
+  if (lastChild() == oldChild)
+    setLastChild(oldChild->previousSibling());
 
-    oldChild->setPreviousSibling(0);
-    oldChild->setNextSibling(0);
-    oldChild->setParent(0);
+  oldChild->setPreviousSibling(0);
+  oldChild->setNextSibling(0);
+  oldChild->setParent(0);
 
-    return oldChild;
+  return oldChild;
 }
 
-void RenderObjectChildList::insertChildNode(RenderObject* owner, RenderObject* newChild, RenderObject* beforeChild, bool notifyRenderer)
-{
-    ASSERT(!newChild->parent());
+void RenderObjectChildList::insertChildNode(RenderObject* owner,
+                                            RenderObject* newChild,
+                                            RenderObject* beforeChild,
+                                            bool notifyRenderer) {
+  ASSERT(!newChild->parent());
 
-    while (beforeChild && beforeChild->parent() && beforeChild->parent() != owner)
-        beforeChild = beforeChild->parent();
+  while (beforeChild && beforeChild->parent() && beforeChild->parent() != owner)
+    beforeChild = beforeChild->parent();
 
-    // This should never happen, but if it does prevent render tree corruption
-    // where child->parent() ends up being owner but child->nextSibling()->parent()
-    // is not owner.
-    if (beforeChild && beforeChild->parent() != owner) {
-        ASSERT_NOT_REACHED();
-        return;
-    }
+  // This should never happen, but if it does prevent render tree corruption
+  // where child->parent() ends up being owner but
+  // child->nextSibling()->parent() is not owner.
+  if (beforeChild && beforeChild->parent() != owner) {
+    ASSERT_NOT_REACHED();
+    return;
+  }
 
-    newChild->setParent(owner);
+  newChild->setParent(owner);
 
-    if (firstChild() == beforeChild)
-        setFirstChild(newChild);
+  if (firstChild() == beforeChild)
+    setFirstChild(newChild);
 
-    if (beforeChild) {
-        RenderObject* previousSibling = beforeChild->previousSibling();
-        if (previousSibling)
-            previousSibling->setNextSibling(newChild);
-        newChild->setPreviousSibling(previousSibling);
-        newChild->setNextSibling(beforeChild);
-        beforeChild->setPreviousSibling(newChild);
-    } else {
-        if (lastChild())
-            lastChild()->setNextSibling(newChild);
-        newChild->setPreviousSibling(lastChild());
-        setLastChild(newChild);
-    }
+  if (beforeChild) {
+    RenderObject* previousSibling = beforeChild->previousSibling();
+    if (previousSibling)
+      previousSibling->setNextSibling(newChild);
+    newChild->setPreviousSibling(previousSibling);
+    newChild->setNextSibling(beforeChild);
+    beforeChild->setPreviousSibling(newChild);
+  } else {
+    if (lastChild())
+      lastChild()->setNextSibling(newChild);
+    newChild->setPreviousSibling(lastChild());
+    setLastChild(newChild);
+  }
 
-    if (!owner->documentBeingDestroyed() && notifyRenderer)
-        newChild->insertedIntoTree();
+  if (!owner->documentBeingDestroyed() && notifyRenderer)
+    newChild->insertedIntoTree();
 
-    newChild->setNeedsLayoutAndPrefWidthsRecalc();
-    if (!owner->normalChildNeedsLayout())
-        owner->setChildNeedsLayout(); // We may supply the static position for an absolute positioned child.
+  newChild->setNeedsLayoutAndPrefWidthsRecalc();
+  if (!owner->normalChildNeedsLayout())
+    owner->setChildNeedsLayout();  // We may supply the static position for an
+                                   // absolute positioned child.
 }
 
-} // namespace blink
+}  // namespace blink

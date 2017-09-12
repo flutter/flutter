@@ -26,55 +26,45 @@
 namespace blink {
 
 struct SameSizeAsStyleBoxData : public RefCounted<SameSizeAsStyleBoxData> {
-    Length length[7];
-    unsigned m_zIndex;
-    uint32_t bitfields;
+  Length length[7];
+  unsigned m_zIndex;
+  uint32_t bitfields;
 };
 
-COMPILE_ASSERT(sizeof(StyleBoxData) == sizeof(SameSizeAsStyleBoxData), StyleBoxData_should_not_grow);
+COMPILE_ASSERT(sizeof(StyleBoxData) == sizeof(SameSizeAsStyleBoxData),
+               StyleBoxData_should_not_grow);
 
 StyleBoxData::StyleBoxData()
-    : m_minWidth(RenderStyle::initialMinSize())
-    , m_maxWidth(RenderStyle::initialMaxSize())
-    , m_minHeight(RenderStyle::initialMinSize())
-    , m_maxHeight(RenderStyle::initialMaxSize())
-    , m_zIndex(0)
-    , m_hasAutoZIndex(true)
-    , m_boxSizing(RenderStyle::initialBoxSizing())
-    , m_boxDecorationBreak(DSLICE)
-{
-}
+    : m_minWidth(RenderStyle::initialMinSize()),
+      m_maxWidth(RenderStyle::initialMaxSize()),
+      m_minHeight(RenderStyle::initialMinSize()),
+      m_maxHeight(RenderStyle::initialMaxSize()),
+      m_zIndex(0),
+      m_hasAutoZIndex(true),
+      m_boxSizing(RenderStyle::initialBoxSizing()),
+      m_boxDecorationBreak(DSLICE) {}
 
 StyleBoxData::StyleBoxData(const StyleBoxData& o)
-    : RefCounted<StyleBoxData>()
-    , m_width(o.m_width)
-    , m_height(o.m_height)
-    , m_minWidth(o.m_minWidth)
-    , m_maxWidth(o.m_maxWidth)
-    , m_minHeight(o.m_minHeight)
-    , m_maxHeight(o.m_maxHeight)
-    , m_verticalAlign(o.m_verticalAlign)
-    , m_zIndex(o.m_zIndex)
-    , m_hasAutoZIndex(o.m_hasAutoZIndex)
-    , m_boxSizing(o.m_boxSizing)
-    , m_boxDecorationBreak(o.m_boxDecorationBreak)
-{
+    : RefCounted<StyleBoxData>(),
+      m_width(o.m_width),
+      m_height(o.m_height),
+      m_minWidth(o.m_minWidth),
+      m_maxWidth(o.m_maxWidth),
+      m_minHeight(o.m_minHeight),
+      m_maxHeight(o.m_maxHeight),
+      m_verticalAlign(o.m_verticalAlign),
+      m_zIndex(o.m_zIndex),
+      m_hasAutoZIndex(o.m_hasAutoZIndex),
+      m_boxSizing(o.m_boxSizing),
+      m_boxDecorationBreak(o.m_boxDecorationBreak) {}
+
+bool StyleBoxData::operator==(const StyleBoxData& o) const {
+  return m_width == o.m_width && m_height == o.m_height &&
+         m_minWidth == o.m_minWidth && m_maxWidth == o.m_maxWidth &&
+         m_minHeight == o.m_minHeight && m_maxHeight == o.m_maxHeight &&
+         m_verticalAlign == o.m_verticalAlign && m_zIndex == o.m_zIndex &&
+         m_hasAutoZIndex == o.m_hasAutoZIndex && m_boxSizing == o.m_boxSizing &&
+         m_boxDecorationBreak == o.m_boxDecorationBreak;
 }
 
-bool StyleBoxData::operator==(const StyleBoxData& o) const
-{
-    return m_width == o.m_width
-           && m_height == o.m_height
-           && m_minWidth == o.m_minWidth
-           && m_maxWidth == o.m_maxWidth
-           && m_minHeight == o.m_minHeight
-           && m_maxHeight == o.m_maxHeight
-           && m_verticalAlign == o.m_verticalAlign
-           && m_zIndex == o.m_zIndex
-           && m_hasAutoZIndex == o.m_hasAutoZIndex
-           && m_boxSizing == o.m_boxSizing
-           && m_boxDecorationBreak == o.m_boxDecorationBreak
-            ;
-}
-
-} // namespace blink
+}  // namespace blink

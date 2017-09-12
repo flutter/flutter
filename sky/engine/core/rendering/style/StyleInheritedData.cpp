@@ -26,34 +26,25 @@
 namespace blink {
 
 StyleInheritedData::StyleInheritedData()
-    : horizontal_border_spacing(RenderStyle::initialHorizontalBorderSpacing())
-    , vertical_border_spacing(RenderStyle::initialVerticalBorderSpacing())
-    , line_height(RenderStyle::initialLineHeight())
-    , color(RenderStyle::initialColor())
-{
-}
+    : horizontal_border_spacing(RenderStyle::initialHorizontalBorderSpacing()),
+      vertical_border_spacing(RenderStyle::initialVerticalBorderSpacing()),
+      line_height(RenderStyle::initialLineHeight()),
+      color(RenderStyle::initialColor()) {}
 
-StyleInheritedData::~StyleInheritedData()
-{
-}
+StyleInheritedData::~StyleInheritedData() {}
 
 StyleInheritedData::StyleInheritedData(const StyleInheritedData& o)
-    : RefCounted<StyleInheritedData>()
-    , horizontal_border_spacing(o.horizontal_border_spacing)
-    , vertical_border_spacing(o.vertical_border_spacing)
-    , line_height(o.line_height)
-    , font(o.font)
-    , color(o.color)
-{
+    : RefCounted<StyleInheritedData>(),
+      horizontal_border_spacing(o.horizontal_border_spacing),
+      vertical_border_spacing(o.vertical_border_spacing),
+      line_height(o.line_height),
+      font(o.font),
+      color(o.color) {}
+
+bool StyleInheritedData::operator==(const StyleInheritedData& o) const {
+  return line_height == o.line_height && font == o.font && color == o.color &&
+         horizontal_border_spacing == o.horizontal_border_spacing &&
+         vertical_border_spacing == o.vertical_border_spacing;
 }
 
-bool StyleInheritedData::operator==(const StyleInheritedData& o) const
-{
-    return line_height == o.line_height
-        && font == o.font
-        && color == o.color
-        && horizontal_border_spacing == o.horizontal_border_spacing
-        && vertical_border_spacing == o.vertical_border_spacing;
-}
-
-} // namespace blink
+}  // namespace blink

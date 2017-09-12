@@ -26,23 +26,34 @@
 
 namespace WTF {
 
-template<> struct IntHash<blink::IntSize> {
-    static unsigned hash(const blink::IntSize& key) { return pairIntHash(key.width(), key.height()); }
-    static bool equal(const blink::IntSize& a, const blink::IntSize& b) { return a == b; }
-    static const bool safeToCompareToEmptyOrDeleted = true;
+template <>
+struct IntHash<blink::IntSize> {
+  static unsigned hash(const blink::IntSize& key) {
+    return pairIntHash(key.width(), key.height());
+  }
+  static bool equal(const blink::IntSize& a, const blink::IntSize& b) {
+    return a == b;
+  }
+  static const bool safeToCompareToEmptyOrDeleted = true;
 };
 
-template<> struct DefaultHash<blink::IntSize> {
-    typedef IntHash<blink::IntSize> Hash;
+template <>
+struct DefaultHash<blink::IntSize> {
+  typedef IntHash<blink::IntSize> Hash;
 };
 
-template<> struct HashTraits<blink::IntSize> : GenericHashTraits<blink::IntSize> {
-    static const bool emptyValueIsZero = true;
-    static const bool needsDestruction = false;
-    static void constructDeletedValue(blink::IntSize& slot, bool) { new (NotNull, &slot) blink::IntSize(-1, -1); }
-    static bool isDeletedValue(const blink::IntSize& value) { return value.width() == -1 && value.height() == -1; }
+template <>
+struct HashTraits<blink::IntSize> : GenericHashTraits<blink::IntSize> {
+  static const bool emptyValueIsZero = true;
+  static const bool needsDestruction = false;
+  static void constructDeletedValue(blink::IntSize& slot, bool) {
+    new (NotNull, &slot) blink::IntSize(-1, -1);
+  }
+  static bool isDeletedValue(const blink::IntSize& value) {
+    return value.width() == -1 && value.height() == -1;
+  }
 };
 
-} // namespace WTF
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_PLATFORM_GEOMETRY_INTSIZEHASH_H_

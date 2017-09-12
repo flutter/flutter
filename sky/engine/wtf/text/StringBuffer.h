@@ -37,56 +37,58 @@ namespace WTF {
 
 template <typename CharType>
 class StringBuffer {
-    WTF_MAKE_NONCOPYABLE(StringBuffer);
-public:
-    StringBuffer() { }
+  WTF_MAKE_NONCOPYABLE(StringBuffer);
 
-    explicit StringBuffer(unsigned length)
-    {
-        CharType* characters;
-        m_data = StringImpl::createUninitialized(length, characters);
+ public:
+  StringBuffer() {}
+
+  explicit StringBuffer(unsigned length) {
+    CharType* characters;
+    m_data = StringImpl::createUninitialized(length, characters);
+  }
+
+  ~StringBuffer() {}
+
+  void shrink(unsigned newLength);
+  void resize(unsigned newLength) {
+    if (!m_data) {
+      CharType* characters;
+      m_data = StringImpl::createUninitialized(newLength, characters);
+      return;
     }
-
-    ~StringBuffer()
-    {
+    if (newLength > m_data->length()) {
+      m_data = StringImpl::reallocate(m_data.release(), newLength);
+      return;
     }
+    shrink(newLength);
+  }
 
-    void shrink(unsigned newLength);
-    void resize(unsigned newLength)
-    {
-        if (!m_data) {
-            CharType* characters;
-            m_data = StringImpl::createUninitialized(newLength, characters);
-            return;
-        }
-        if (newLength > m_data->length()) {
-            m_data = StringImpl::reallocate(m_data.release(), newLength);
-            return;
-        }
-        shrink(newLength);
-    }
+  unsigned length() const { return m_data ? m_data->length() : 0; }
+  CharType* characters() {
+    return length() ? const_cast<CharType*>(m_data->getCharacters<CharType>())
+                    : 0;
+  }
 
-    unsigned length() const { return m_data ? m_data->length() : 0; }
-    CharType* characters() { return length() ? const_cast<CharType*>(m_data->getCharacters<CharType>()) : 0; }
+  CharType& operator[](unsigned i) {
+    ASSERT_WITH_SECURITY_IMPLICATION(i < length());
+    return characters()[i];
+  }
 
-    CharType& operator[](unsigned i) { ASSERT_WITH_SECURITY_IMPLICATION(i < length()); return characters()[i]; }
+  PassRefPtr<StringImpl> release() { return m_data.release(); }
 
-    PassRefPtr<StringImpl> release() { return m_data.release(); }
-
-private:
-    RefPtr<StringImpl> m_data;
+ private:
+  RefPtr<StringImpl> m_data;
 };
 
 template <typename CharType>
-void StringBuffer<CharType>::shrink(unsigned newLength)
-{
-    ASSERT(m_data);
-    if (m_data->length() == newLength)
-        return;
-    m_data->truncateAssumingIsolated(newLength);
+void StringBuffer<CharType>::shrink(unsigned newLength) {
+  ASSERT(m_data);
+  if (m_data->length() == newLength)
+    return;
+  m_data->truncateAssumingIsolated(newLength);
 }
 
-} // namespace WTF
+}  // namespace WTF
 
 using WTF::StringBuffer;
 

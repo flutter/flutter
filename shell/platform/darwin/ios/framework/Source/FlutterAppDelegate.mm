@@ -160,9 +160,7 @@
             options:(NSDictionary<UIApplicationOpenURLOptionsKey, id>*)options {
   for (id<FlutterPlugin> plugin in _pluginDelegates) {
     if ([plugin respondsToSelector:_cmd]) {
-      if ([plugin application:application
-                      openURL:url
-                      options:options]) {
+      if ([plugin application:application openURL:url options:options]) {
         return YES;
       }
     }

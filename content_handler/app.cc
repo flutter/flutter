@@ -10,10 +10,10 @@
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
+#include "lib/fsl/tasks/message_loop.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/tasks/task_runner.h"
 #include "lib/icu_data/cpp/icu_data.h"
-#include "lib/fsl/tasks/message_loop.h"
 
 namespace flutter_runner {
 namespace {

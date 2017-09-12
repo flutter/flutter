@@ -31,56 +31,54 @@
 #include "flutter/sky/engine/platform/fonts/FontPlatformData.h"
 
 #include "flutter/sky/engine/platform/fonts/FontCache.h"
-#include "third_party/skia/src/core/SkEndian.h"
 #include "third_party/skia/include/core/SkTypeface.h"
+#include "third_party/skia/src/core/SkEndian.h"
 
 namespace blink {
 
-unsigned FontPlatformData::hash() const
-{
-    unsigned h = SkTypeface::UniqueID(m_typeface.get());
-    h ^= 0x01010101 * ((static_cast<int>(m_orientation) << 2) | (static_cast<int>(m_syntheticBold) << 1) | static_cast<int>(m_syntheticItalic));
+unsigned FontPlatformData::hash() const {
+  unsigned h = SkTypeface::UniqueID(m_typeface.get());
+  h ^= 0x01010101 * ((static_cast<int>(m_orientation) << 2) |
+                     (static_cast<int>(m_syntheticBold) << 1) |
+                     static_cast<int>(m_syntheticItalic));
 
-    // This memcpy is to avoid a reinterpret_cast that breaks strict-aliasing
-    // rules. Memcpy is generally optimized enough so that performance doesn't
-    // matter here.
-    uint32_t textSizeBytes;
-    memcpy(&textSizeBytes, &m_textSize, sizeof(uint32_t));
-    h ^= textSizeBytes;
+  // This memcpy is to avoid a reinterpret_cast that breaks strict-aliasing
+  // rules. Memcpy is generally optimized enough so that performance doesn't
+  // matter here.
+  uint32_t textSizeBytes;
+  memcpy(&textSizeBytes, &m_textSize, sizeof(uint32_t));
+  h ^= textSizeBytes;
 
-    return h;
+  return h;
 }
 
-bool FontPlatformData::fontContainsCharacter(UChar32 character)
-{
-    SkPaint paint;
-    setupPaint(&paint);
-    paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
+bool FontPlatformData::fontContainsCharacter(UChar32 character) {
+  SkPaint paint;
+  setupPaint(&paint);
+  paint.setTextEncoding(SkPaint::kUTF32_TextEncoding);
 
-    uint16_t glyph;
-    paint.textToGlyphs(&character, sizeof(character), &glyph);
-    return glyph;
+  uint16_t glyph;
+  paint.textToGlyphs(&character, sizeof(character), &glyph);
+  return glyph;
 }
 
 #if ENABLE(OPENTYPE_VERTICAL)
-PassRefPtr<OpenTypeVerticalData> FontPlatformData::verticalData() const
-{
-    return FontCache::fontCache()->getVerticalData(typeface()->uniqueID(), *this);
+PassRefPtr<OpenTypeVerticalData> FontPlatformData::verticalData() const {
+  return FontCache::fontCache()->getVerticalData(typeface()->uniqueID(), *this);
 }
 
-PassRefPtr<SharedBuffer> FontPlatformData::openTypeTable(uint32_t table) const
-{
-    RefPtr<SharedBuffer> buffer;
+PassRefPtr<SharedBuffer> FontPlatformData::openTypeTable(uint32_t table) const {
+  RefPtr<SharedBuffer> buffer;
 
-    SkFontTableTag tag = SkEndianSwap32(table);
-    const size_t tableSize = m_typeface->getTableSize(tag);
-    if (tableSize) {
-        Vector<char> tableBuffer(tableSize);
-        m_typeface->getTableData(tag, 0, tableSize, &tableBuffer[0]);
-        buffer = SharedBuffer::adoptVector(tableBuffer);
-    }
-    return buffer.release();
+  SkFontTableTag tag = SkEndianSwap32(table);
+  const size_t tableSize = m_typeface->getTableSize(tag);
+  if (tableSize) {
+    Vector<char> tableBuffer(tableSize);
+    m_typeface->getTableData(tag, 0, tableSize, &tableBuffer[0]);
+    buffer = SharedBuffer::adoptVector(tableBuffer);
+  }
+  return buffer.release();
 }
 #endif
 
-} // namespace blink
+}  // namespace blink

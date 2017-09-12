@@ -34,76 +34,62 @@
 
 namespace blink {
 
-RenderTheme::RenderTheme()
-    : m_hasCustomFocusRingColor(false)
-{
+RenderTheme::RenderTheme() : m_hasCustomFocusRingColor(false) {}
+
+Color RenderTheme::activeSelectionBackgroundColor() const {
+  return platformActiveSelectionBackgroundColor().blendWithWhite();
 }
 
-Color RenderTheme::activeSelectionBackgroundColor() const
-{
-    return platformActiveSelectionBackgroundColor().blendWithWhite();
+Color RenderTheme::inactiveSelectionBackgroundColor() const {
+  return platformInactiveSelectionBackgroundColor().blendWithWhite();
 }
 
-Color RenderTheme::inactiveSelectionBackgroundColor() const
-{
-    return platformInactiveSelectionBackgroundColor().blendWithWhite();
+Color RenderTheme::activeSelectionForegroundColor() const {
+  return platformActiveSelectionForegroundColor();
 }
 
-Color RenderTheme::activeSelectionForegroundColor() const
-{
-    return platformActiveSelectionForegroundColor();
+Color RenderTheme::inactiveSelectionForegroundColor() const {
+  return platformInactiveSelectionForegroundColor();
 }
 
-Color RenderTheme::inactiveSelectionForegroundColor() const
-{
-    return platformInactiveSelectionForegroundColor();
+Color RenderTheme::platformActiveSelectionBackgroundColor() const {
+  // Use a blue color by default if the platform theme doesn't define anything.
+  return Color(0, 0, 255);
 }
 
-Color RenderTheme::platformActiveSelectionBackgroundColor() const
-{
-    // Use a blue color by default if the platform theme doesn't define anything.
-    return Color(0, 0, 255);
+Color RenderTheme::platformActiveSelectionForegroundColor() const {
+  // Use a white color by default if the platform theme doesn't define anything.
+  return Color::white;
 }
 
-Color RenderTheme::platformActiveSelectionForegroundColor() const
-{
-    // Use a white color by default if the platform theme doesn't define anything.
-    return Color::white;
+Color RenderTheme::platformInactiveSelectionBackgroundColor() const {
+  // Use a grey color by default if the platform theme doesn't define anything.
+  // This color matches Firefox's inactive color.
+  return Color(176, 176, 176);
 }
 
-Color RenderTheme::platformInactiveSelectionBackgroundColor() const
-{
-    // Use a grey color by default if the platform theme doesn't define anything.
-    // This color matches Firefox's inactive color.
-    return Color(176, 176, 176);
+Color RenderTheme::platformInactiveSelectionForegroundColor() const {
+  // Use a black color by default.
+  return Color::black;
 }
 
-Color RenderTheme::platformInactiveSelectionForegroundColor() const
-{
-    // Use a black color by default.
-    return Color::black;
+void RenderTheme::setCustomFocusRingColor(const Color& c) {
+  m_customFocusRingColor = c;
+  m_hasCustomFocusRingColor = true;
 }
 
-void RenderTheme::setCustomFocusRingColor(const Color& c)
-{
-    m_customFocusRingColor = c;
-    m_hasCustomFocusRingColor = true;
+Color RenderTheme::focusRingColor() const {
+  return m_hasCustomFocusRingColor ? m_customFocusRingColor
+                                   : theme().platformFocusRingColor();
 }
 
-Color RenderTheme::focusRingColor() const
-{
-    return m_hasCustomFocusRingColor ? m_customFocusRingColor : theme().platformFocusRingColor();
+Color RenderTheme::tapHighlightColor() {
+  return theme().platformTapHighlightColor();
 }
 
-Color RenderTheme::tapHighlightColor()
-{
-    return theme().platformTapHighlightColor();
+RenderTheme& RenderTheme::theme() {
+  DEFINE_STATIC_LOCAL(RenderTheme, renderTheme, ());
+  return renderTheme;
 }
 
-RenderTheme& RenderTheme::theme()
-{
-    DEFINE_STATIC_LOCAL(RenderTheme, renderTheme, ());
-    return renderTheme;
-}
-
-} // namespace blink
+}  // namespace blink

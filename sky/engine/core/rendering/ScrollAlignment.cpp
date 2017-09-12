@@ -24,7 +24,7 @@
  *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  * Alternatively, the contents of this file may be used under the terms
  * of either the Mozilla Public License Version 1.1, found at
@@ -47,98 +47,115 @@
 
 namespace blink {
 
-const ScrollAlignment ScrollAlignment::alignCenterIfNeeded = { ScrollAlignmentNoScroll, ScrollAlignmentCenter, ScrollAlignmentClosestEdge };
-const ScrollAlignment ScrollAlignment::alignToEdgeIfNeeded = { ScrollAlignmentNoScroll, ScrollAlignmentClosestEdge, ScrollAlignmentClosestEdge };
-const ScrollAlignment ScrollAlignment::alignCenterAlways = { ScrollAlignmentCenter, ScrollAlignmentCenter, ScrollAlignmentCenter };
-const ScrollAlignment ScrollAlignment::alignTopAlways = { ScrollAlignmentTop, ScrollAlignmentTop, ScrollAlignmentTop };
+const ScrollAlignment ScrollAlignment::alignCenterIfNeeded = {
+    ScrollAlignmentNoScroll, ScrollAlignmentCenter, ScrollAlignmentClosestEdge};
+const ScrollAlignment ScrollAlignment::alignToEdgeIfNeeded = {
+    ScrollAlignmentNoScroll, ScrollAlignmentClosestEdge,
+    ScrollAlignmentClosestEdge};
+const ScrollAlignment ScrollAlignment::alignCenterAlways = {
+    ScrollAlignmentCenter, ScrollAlignmentCenter, ScrollAlignmentCenter};
+const ScrollAlignment ScrollAlignment::alignTopAlways = {
+    ScrollAlignmentTop, ScrollAlignmentTop, ScrollAlignmentTop};
 
 #define MIN_INTERSECT_FOR_REVEAL 32
 
-LayoutRect ScrollAlignment::getRectToExpose(const LayoutRect& visibleRect, const LayoutRect& exposeRect, const ScrollAlignment& alignX, const ScrollAlignment& alignY)
-{
-    // Determine the appropriate X behavior.
-    ScrollAlignmentBehavior scrollX;
-    LayoutRect exposeRectX(exposeRect.x(), visibleRect.y(), exposeRect.width(), visibleRect.height());
-    LayoutUnit intersectWidth = intersection(visibleRect, exposeRectX).width();
-    if (intersectWidth == exposeRect.width() || intersectWidth >= MIN_INTERSECT_FOR_REVEAL) {
-        // If the rectangle is fully visible, use the specified visible behavior.
-        // If the rectangle is partially visible, but over a certain threshold,
-        // then treat it as fully visible to avoid unnecessary horizontal scrolling
-        scrollX = getVisibleBehavior(alignX);
-    } else if (intersectWidth == visibleRect.width()) {
-        // If the rect is bigger than the visible area, don't bother trying to center. Other alignments will work.
-        scrollX = getVisibleBehavior(alignX);
-        if (scrollX == ScrollAlignmentCenter)
-            scrollX = ScrollAlignmentNoScroll;
-    } else if (intersectWidth > 0) {
-        // If the rectangle is partially visible, but not above the minimum threshold, use the specified partial behavior
-        scrollX = getPartialBehavior(alignX);
-    } else {
-        scrollX = getHiddenBehavior(alignX);
+LayoutRect ScrollAlignment::getRectToExpose(const LayoutRect& visibleRect,
+                                            const LayoutRect& exposeRect,
+                                            const ScrollAlignment& alignX,
+                                            const ScrollAlignment& alignY) {
+  // Determine the appropriate X behavior.
+  ScrollAlignmentBehavior scrollX;
+  LayoutRect exposeRectX(exposeRect.x(), visibleRect.y(), exposeRect.width(),
+                         visibleRect.height());
+  LayoutUnit intersectWidth = intersection(visibleRect, exposeRectX).width();
+  if (intersectWidth == exposeRect.width() ||
+      intersectWidth >= MIN_INTERSECT_FOR_REVEAL) {
+    // If the rectangle is fully visible, use the specified visible behavior.
+    // If the rectangle is partially visible, but over a certain threshold,
+    // then treat it as fully visible to avoid unnecessary horizontal scrolling
+    scrollX = getVisibleBehavior(alignX);
+  } else if (intersectWidth == visibleRect.width()) {
+    // If the rect is bigger than the visible area, don't bother trying to
+    // center. Other alignments will work.
+    scrollX = getVisibleBehavior(alignX);
+    if (scrollX == ScrollAlignmentCenter)
+      scrollX = ScrollAlignmentNoScroll;
+  } else if (intersectWidth > 0) {
+    // If the rectangle is partially visible, but not above the minimum
+    // threshold, use the specified partial behavior
+    scrollX = getPartialBehavior(alignX);
+  } else {
+    scrollX = getHiddenBehavior(alignX);
+  }
+
+  if (scrollX == ScrollAlignmentClosestEdge) {
+    // Closest edge is the right in two cases:
+    // (1) exposeRect to the right of and smaller than visibleRect
+    // (2) exposeRect to the left of and larger than visibleRect
+    if ((exposeRect.maxX() > visibleRect.maxX() &&
+         exposeRect.width() < visibleRect.width()) ||
+        (exposeRect.maxX() < visibleRect.maxX() &&
+         exposeRect.width() > visibleRect.width())) {
+      scrollX = ScrollAlignmentRight;
     }
+  }
 
-    if (scrollX == ScrollAlignmentClosestEdge) {
-        // Closest edge is the right in two cases:
-        // (1) exposeRect to the right of and smaller than visibleRect
-        // (2) exposeRect to the left of and larger than visibleRect
-        if ((exposeRect.maxX() > visibleRect.maxX() && exposeRect.width() < visibleRect.width())
-            || (exposeRect.maxX() < visibleRect.maxX() && exposeRect.width() > visibleRect.width())) {
-            scrollX = ScrollAlignmentRight;
-        }
+  // Given the X behavior, compute the X coordinate.
+  LayoutUnit x;
+  if (scrollX == ScrollAlignmentNoScroll)
+    x = visibleRect.x();
+  else if (scrollX == ScrollAlignmentRight)
+    x = exposeRect.maxX() - visibleRect.width();
+  else if (scrollX == ScrollAlignmentCenter)
+    x = exposeRect.x() + (exposeRect.width() - visibleRect.width()) / 2;
+  else
+    x = exposeRect.x();
+
+  // Determine the appropriate Y behavior.
+  ScrollAlignmentBehavior scrollY;
+  LayoutRect exposeRectY(visibleRect.x(), exposeRect.y(), visibleRect.width(),
+                         exposeRect.height());
+  LayoutUnit intersectHeight = intersection(visibleRect, exposeRectY).height();
+  if (intersectHeight == exposeRect.height()) {
+    // If the rectangle is fully visible, use the specified visible behavior.
+    scrollY = getVisibleBehavior(alignY);
+  } else if (intersectHeight == visibleRect.height()) {
+    // If the rect is bigger than the visible area, don't bother trying to
+    // center. Other alignments will work.
+    scrollY = getVisibleBehavior(alignY);
+    if (scrollY == ScrollAlignmentCenter)
+      scrollY = ScrollAlignmentNoScroll;
+  } else if (intersectHeight > 0) {
+    // If the rectangle is partially visible, use the specified partial behavior
+    scrollY = getPartialBehavior(alignY);
+  } else {
+    scrollY = getHiddenBehavior(alignY);
+  }
+
+  if (scrollY == ScrollAlignmentClosestEdge) {
+    // Closest edge is the bottom in two cases:
+    // (1) exposeRect below and smaller than visibleRect
+    // (2) exposeRect above and larger than visibleRect
+    if ((exposeRect.maxY() > visibleRect.maxY() &&
+         exposeRect.height() < visibleRect.height()) ||
+        (exposeRect.maxY() < visibleRect.maxY() &&
+         exposeRect.height() > visibleRect.height())) {
+      scrollY = ScrollAlignmentBottom;
     }
+  }
 
-    // Given the X behavior, compute the X coordinate.
-    LayoutUnit x;
-    if (scrollX == ScrollAlignmentNoScroll)
-        x = visibleRect.x();
-    else if (scrollX == ScrollAlignmentRight)
-        x = exposeRect.maxX() - visibleRect.width();
-    else if (scrollX == ScrollAlignmentCenter)
-        x = exposeRect.x() + (exposeRect.width() - visibleRect.width()) / 2;
-    else
-        x = exposeRect.x();
+  // Given the Y behavior, compute the Y coordinate.
+  LayoutUnit y;
+  if (scrollY == ScrollAlignmentNoScroll)
+    y = visibleRect.y();
+  else if (scrollY == ScrollAlignmentBottom)
+    y = exposeRect.maxY() - visibleRect.height();
+  else if (scrollY == ScrollAlignmentCenter)
+    y = exposeRect.y() + (exposeRect.height() - visibleRect.height()) / 2;
+  else
+    y = exposeRect.y();
 
-    // Determine the appropriate Y behavior.
-    ScrollAlignmentBehavior scrollY;
-    LayoutRect exposeRectY(visibleRect.x(), exposeRect.y(), visibleRect.width(), exposeRect.height());
-    LayoutUnit intersectHeight = intersection(visibleRect, exposeRectY).height();
-    if (intersectHeight == exposeRect.height()) {
-        // If the rectangle is fully visible, use the specified visible behavior.
-        scrollY = getVisibleBehavior(alignY);
-    } else if (intersectHeight == visibleRect.height()) {
-        // If the rect is bigger than the visible area, don't bother trying to center. Other alignments will work.
-        scrollY = getVisibleBehavior(alignY);
-        if (scrollY == ScrollAlignmentCenter)
-            scrollY = ScrollAlignmentNoScroll;
-    } else if (intersectHeight > 0) {
-        // If the rectangle is partially visible, use the specified partial behavior
-        scrollY = getPartialBehavior(alignY);
-    } else {
-        scrollY = getHiddenBehavior(alignY);
-    }
-
-    if (scrollY == ScrollAlignmentClosestEdge) {
-        // Closest edge is the bottom in two cases:
-        // (1) exposeRect below and smaller than visibleRect
-        // (2) exposeRect above and larger than visibleRect
-        if ((exposeRect.maxY() > visibleRect.maxY() && exposeRect.height() < visibleRect.height())
-            || (exposeRect.maxY() < visibleRect.maxY() && exposeRect.height() > visibleRect.height())) {
-            scrollY = ScrollAlignmentBottom;
-        }
-    }
-
-    // Given the Y behavior, compute the Y coordinate.
-    LayoutUnit y;
-    if (scrollY == ScrollAlignmentNoScroll)
-        y = visibleRect.y();
-    else if (scrollY == ScrollAlignmentBottom)
-        y = exposeRect.maxY() - visibleRect.height();
-    else if (scrollY == ScrollAlignmentCenter)
-        y = exposeRect.y() + (exposeRect.height() - visibleRect.height()) / 2;
-    else
-        y = exposeRect.y();
-
-    return LayoutRect(LayoutPoint(x, y), visibleRect.size());
+  return LayoutRect(LayoutPoint(x, y), visibleRect.size());
 }
 
-}; // namespace blink
+};  // namespace blink

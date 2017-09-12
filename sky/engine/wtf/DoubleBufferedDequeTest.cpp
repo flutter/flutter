@@ -10,43 +10,40 @@ namespace {
 
 typedef testing::Test DoubleBufferedDequeTest;
 
-TEST(DoubleBufferedDequeTest, TestIsEmpty)
-{
-    DoubleBufferedDeque<int> queue;
+TEST(DoubleBufferedDequeTest, TestIsEmpty) {
+  DoubleBufferedDeque<int> queue;
 
-    EXPECT_TRUE(queue.isEmpty());
-    queue.append(1);
-    EXPECT_FALSE(queue.isEmpty());
+  EXPECT_TRUE(queue.isEmpty());
+  queue.append(1);
+  EXPECT_FALSE(queue.isEmpty());
 }
 
-TEST(DoubleBufferedDequeTest, TestIsEmptyAfterSwapBuffers)
-{
-    DoubleBufferedDeque<int> queue;
-    queue.append(1);
+TEST(DoubleBufferedDequeTest, TestIsEmptyAfterSwapBuffers) {
+  DoubleBufferedDeque<int> queue;
+  queue.append(1);
 
-    queue.swapBuffers();
-    EXPECT_TRUE(queue.isEmpty());
+  queue.swapBuffers();
+  EXPECT_TRUE(queue.isEmpty());
 }
 
-TEST(DoubleBufferedDequeTest, TestDoubleBuffering)
-{
-    DoubleBufferedDeque<int> queue;
-    queue.append(1);
-    queue.append(10);
-    queue.append(100);
+TEST(DoubleBufferedDequeTest, TestDoubleBuffering) {
+  DoubleBufferedDeque<int> queue;
+  queue.append(1);
+  queue.append(10);
+  queue.append(100);
 
-    {
-        Deque<int>& deque = queue.swapBuffers();
-        EXPECT_EQ(1, deque.takeFirst());
-        EXPECT_EQ(10, deque.takeFirst());
-        EXPECT_EQ(100, deque.takeFirst());
-    }
-    queue.append(2);
+  {
+    Deque<int>& deque = queue.swapBuffers();
+    EXPECT_EQ(1, deque.takeFirst());
+    EXPECT_EQ(10, deque.takeFirst());
+    EXPECT_EQ(100, deque.takeFirst());
+  }
+  queue.append(2);
 
-    EXPECT_EQ(2, queue.swapBuffers().takeFirst());
-    queue.append(3);
+  EXPECT_EQ(2, queue.swapBuffers().takeFirst());
+  queue.append(3);
 
-    EXPECT_EQ(3, queue.swapBuffers().takeFirst());
+  EXPECT_EQ(3, queue.swapBuffers().takeFirst());
 }
 
-} // namespace
+}  // namespace

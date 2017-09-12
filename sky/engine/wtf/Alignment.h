@@ -21,47 +21,69 @@
 #ifndef SKY_ENGINE_WTF_ALIGNMENT_H_
 #define SKY_ENGINE_WTF_ALIGNMENT_H_
 
+#include <stdint.h>
 #include <algorithm>
 #include <cstddef>
-#include <stdint.h>
 #include "flutter/sky/engine/wtf/Compiler.h"
 
 namespace WTF {
 
 #if COMPILER(GCC)
-    #define WTF_ALIGN_OF(type) __alignof__(type)
-    #define WTF_ALIGNED(variable_type, variable, n) variable_type variable __attribute__((__aligned__(n)))
+#define WTF_ALIGN_OF(type) __alignof__(type)
+#define WTF_ALIGNED(variable_type, variable, n) \
+  variable_type variable __attribute__((__aligned__(n)))
 #else
-    #error WTF_ALIGN macros need alignment control.
+#error WTF_ALIGN macros need alignment control.
 #endif
 
 #if COMPILER(GCC)
-    typedef char __attribute__((__may_alias__)) AlignedBufferChar;
+typedef char __attribute__((__may_alias__)) AlignedBufferChar;
 #else
-    typedef char AlignedBufferChar;
+typedef char AlignedBufferChar;
 #endif
 
-    template<size_t size, size_t alignment> struct AlignedBuffer;
-    template<size_t size> struct AlignedBuffer<size, 1> { AlignedBufferChar buffer[size]; };
-    template<size_t size> struct AlignedBuffer<size, 2> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 2);  };
-    template<size_t size> struct AlignedBuffer<size, 4> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 4);  };
-    template<size_t size> struct AlignedBuffer<size, 8> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 8);  };
-    template<size_t size> struct AlignedBuffer<size, 16> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 16); };
-    template<size_t size> struct AlignedBuffer<size, 32> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 32); };
-    template<size_t size> struct AlignedBuffer<size, 64> { WTF_ALIGNED(AlignedBufferChar, buffer[size], 64); };
+template <size_t size, size_t alignment>
+struct AlignedBuffer;
+template <size_t size>
+struct AlignedBuffer<size, 1> {
+  AlignedBufferChar buffer[size];
+};
+template <size_t size>
+struct AlignedBuffer<size, 2> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 2);
+};
+template <size_t size>
+struct AlignedBuffer<size, 4> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 4);
+};
+template <size_t size>
+struct AlignedBuffer<size, 8> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 8);
+};
+template <size_t size>
+struct AlignedBuffer<size, 16> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 16);
+};
+template <size_t size>
+struct AlignedBuffer<size, 32> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 32);
+};
+template <size_t size>
+struct AlignedBuffer<size, 64> {
+  WTF_ALIGNED(AlignedBufferChar, buffer[size], 64);
+};
 
-    template <size_t size, size_t alignment>
-    void swap(AlignedBuffer<size, alignment>& a, AlignedBuffer<size, alignment>& b)
-    {
-        for (size_t i = 0; i < size; ++i)
-            std::swap(a.buffer[i], b.buffer[i]);
-    }
-
-    template <uintptr_t mask>
-    inline bool isAlignedTo(const void* pointer)
-    {
-        return !(reinterpret_cast<uintptr_t>(pointer) & mask);
-    }
+template <size_t size, size_t alignment>
+void swap(AlignedBuffer<size, alignment>& a,
+          AlignedBuffer<size, alignment>& b) {
+  for (size_t i = 0; i < size; ++i)
+    std::swap(a.buffer[i], b.buffer[i]);
 }
+
+template <uintptr_t mask>
+inline bool isAlignedTo(const void* pointer) {
+  return !(reinterpret_cast<uintptr_t>(pointer) & mask);
+}
+}  // namespace WTF
 
 #endif  // SKY_ENGINE_WTF_ALIGNMENT_H_

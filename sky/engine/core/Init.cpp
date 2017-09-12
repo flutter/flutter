@@ -36,23 +36,21 @@
 
 namespace blink {
 
-void CoreInitializer::init()
-{
-    ASSERT(!m_isInited);
-    m_isInited = true;
+void CoreInitializer::init() {
+  ASSERT(!m_isInited);
+  m_isInited = true;
 
-    // It would make logical sense to do this in WTF::initialize() but there are
-    // ordering dependencies, e.g. about "xmlns".
-    WTF::StringStatics::init();
+  // It would make logical sense to do this in WTF::initialize() but there are
+  // ordering dependencies, e.g. about "xmlns".
+  WTF::StringStatics::init();
 
-    Partitions::init();
+  Partitions::init();
 
-    StringImpl::freezeStaticStrings();
+  StringImpl::freezeStaticStrings();
 }
 
-void CoreInitializer::shutdown()
-{
-    Partitions::shutdown();
+void CoreInitializer::shutdown() {
+  Partitions::shutdown();
 }
 
-} // namespace blink
+}  // namespace blink

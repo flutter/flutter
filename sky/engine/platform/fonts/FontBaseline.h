@@ -30,6 +30,6 @@ namespace blink {
 
 enum FontBaseline { AlphabeticBaseline, IdeographicBaseline };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_FONTBASELINE_H_

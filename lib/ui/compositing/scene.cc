@@ -23,10 +23,9 @@ fxl::RefPtr<Scene> Scene::create(std::unique_ptr<flow::Layer> rootLayer,
                                  uint32_t rasterizerTracingThreshold,
                                  bool checkerboardRasterCacheImages,
                                  bool checkerboardOffscreenLayers) {
-  return fxl::MakeRefCounted<Scene>(std::move(rootLayer),
-                                    rasterizerTracingThreshold,
-                                    checkerboardRasterCacheImages,
-                                    checkerboardOffscreenLayers);
+  return fxl::MakeRefCounted<Scene>(
+      std::move(rootLayer), rasterizerTracingThreshold,
+      checkerboardRasterCacheImages, checkerboardOffscreenLayers);
 }
 
 Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,
@@ -38,8 +37,7 @@ Scene::Scene(std::unique_ptr<flow::Layer> rootLayer,
   m_layerTree->set_rasterizer_tracing_threshold(rasterizerTracingThreshold);
   m_layerTree->set_checkerboard_raster_cache_images(
       checkerboardRasterCacheImages);
-  m_layerTree->set_checkerboard_offscreen_layers(
-      checkerboardOffscreenLayers);
+  m_layerTree->set_checkerboard_offscreen_layers(checkerboardOffscreenLayers);
 }
 
 Scene::~Scene() {}

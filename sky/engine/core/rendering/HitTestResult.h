@@ -17,7 +17,7 @@
  * the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301, USA.
  *
-*/
+ */
 
 #ifndef SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_
 #define SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_
@@ -40,52 +40,64 @@ class Image;
 class RenderObject;
 
 class HitTestResult {
-    DISALLOW_ALLOCATION();
-public:
-    HitTestResult();
-    HitTestResult(const LayoutPoint&);
-    // Pass non-negative padding values to perform a rect-based hit test.
-    HitTestResult(const LayoutPoint& centerPoint, unsigned topPadding, unsigned rightPadding, unsigned bottomPadding, unsigned leftPadding);
-    HitTestResult(const HitTestLocation&);
-    HitTestResult(const HitTestResult&);
-    ~HitTestResult();
-    HitTestResult& operator=(const HitTestResult&);
+  DISALLOW_ALLOCATION();
 
-    bool isOverWidget() const { return m_isOverWidget; }
+ public:
+  HitTestResult();
+  HitTestResult(const LayoutPoint&);
+  // Pass non-negative padding values to perform a rect-based hit test.
+  HitTestResult(const LayoutPoint& centerPoint,
+                unsigned topPadding,
+                unsigned rightPadding,
+                unsigned bottomPadding,
+                unsigned leftPadding);
+  HitTestResult(const HitTestLocation&);
+  HitTestResult(const HitTestResult&);
+  ~HitTestResult();
+  HitTestResult& operator=(const HitTestResult&);
 
-    // Forwarded from HitTestLocation
-    bool isRectBasedTest() const { return m_hitTestLocation.isRectBasedTest(); }
+  bool isOverWidget() const { return m_isOverWidget; }
 
-    // The hit-tested point in the coordinates of the main frame.
-    const LayoutPoint& pointInMainFrame() const { return m_hitTestLocation.point(); }
-    IntPoint roundedPointInMainFrame() const { return roundedIntPoint(pointInMainFrame()); }
+  // Forwarded from HitTestLocation
+  bool isRectBasedTest() const { return m_hitTestLocation.isRectBasedTest(); }
 
-    // The hit-tested point in the coordinates of the inner node.
-    const LayoutPoint& localPoint() const { return m_localPoint; }
-    void setLocalPoint(const LayoutPoint& p) { m_localPoint = p; }
+  // The hit-tested point in the coordinates of the main frame.
+  const LayoutPoint& pointInMainFrame() const {
+    return m_hitTestLocation.point();
+  }
+  IntPoint roundedPointInMainFrame() const {
+    return roundedIntPoint(pointInMainFrame());
+  }
 
-    RenderObject* renderer() const;
+  // The hit-tested point in the coordinates of the inner node.
+  const LayoutPoint& localPoint() const { return m_localPoint; }
+  void setLocalPoint(const LayoutPoint& p) { m_localPoint = p; }
 
-    const HitTestLocation& hitTestLocation() const { return m_hitTestLocation; }
+  RenderObject* renderer() const;
 
-    bool isSelected() const;
-    Image* image() const;
-    IntRect imageRect() const;
-    bool isMisspelled() const;
-    bool isContentEditable() const;
+  const HitTestLocation& hitTestLocation() const { return m_hitTestLocation; }
 
-    void append(const HitTestResult&);
+  bool isSelected() const;
+  Image* image() const;
+  IntRect imageRect() const;
+  bool isMisspelled() const;
+  bool isContentEditable() const;
 
-private:
-    HitTestLocation m_hitTestLocation;
+  void append(const HitTestResult&);
 
-    // FIXME: Nothing changes this to a value different from m_hitTestLocation!
-    LayoutPoint m_pointInInnerNodeFrame; // The hit-tested point in innerNode frame coordinates.
-    LayoutPoint m_localPoint; // A point in the local coordinate space of m_innerNonSharedNode's renderer. Allows us to efficiently
-                              // determine where inside the renderer we hit on subsequent operations.
-    bool m_isOverWidget; // Returns true if we are over a widget.
+ private:
+  HitTestLocation m_hitTestLocation;
+
+  // FIXME: Nothing changes this to a value different from m_hitTestLocation!
+  LayoutPoint m_pointInInnerNodeFrame;  // The hit-tested point in innerNode
+                                        // frame coordinates.
+  LayoutPoint m_localPoint;  // A point in the local coordinate space of
+                             // m_innerNonSharedNode's renderer. Allows us to
+                             // efficiently determine where inside the renderer
+                             // we hit on subsequent operations.
+  bool m_isOverWidget;       // Returns true if we are over a widget.
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_HITTESTRESULT_H_

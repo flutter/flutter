@@ -30,31 +30,36 @@
 
 namespace blink {
 
-PassRefPtr<TransformOperation> PerspectiveTransformOperation::blend(const TransformOperation* from, double progress, bool blendToIdentity)
-{
-    if (from && !from->isSameType(*this))
-        return this;
+PassRefPtr<TransformOperation> PerspectiveTransformOperation::blend(
+    const TransformOperation* from,
+    double progress,
+    bool blendToIdentity) {
+  if (from && !from->isSameType(*this))
+    return this;
 
-    if (blendToIdentity) {
-        double p = blink::blend(m_p, 1., progress); // FIXME: this seems wrong. https://bugs.webkit.org/show_bug.cgi?id=52700
-        return PerspectiveTransformOperation::create(clampToPositiveInteger(p));
-    }
+  if (blendToIdentity) {
+    double p = blink::blend(
+        m_p, 1., progress);  // FIXME: this seems wrong.
+                             // https://bugs.webkit.org/show_bug.cgi?id=52700
+    return PerspectiveTransformOperation::create(clampToPositiveInteger(p));
+  }
 
-    const PerspectiveTransformOperation* fromOp = static_cast<const PerspectiveTransformOperation*>(from);
+  const PerspectiveTransformOperation* fromOp =
+      static_cast<const PerspectiveTransformOperation*>(from);
 
-    TransformationMatrix fromT;
-    TransformationMatrix toT;
-    fromT.applyPerspective(fromOp ? fromOp->m_p : 0);
-    toT.applyPerspective(m_p);
-    toT.blend(fromT, progress);
-    TransformationMatrix::DecomposedType decomp;
-    toT.decompose(decomp);
+  TransformationMatrix fromT;
+  TransformationMatrix toT;
+  fromT.applyPerspective(fromOp ? fromOp->m_p : 0);
+  toT.applyPerspective(m_p);
+  toT.blend(fromT, progress);
+  TransformationMatrix::DecomposedType decomp;
+  toT.decompose(decomp);
 
-    if (decomp.perspectiveZ) {
-        double val = -1.0 / decomp.perspectiveZ;
-        return PerspectiveTransformOperation::create(clampToPositiveInteger(val));
-    }
-    return PerspectiveTransformOperation::create(0);
+  if (decomp.perspectiveZ) {
+    double val = -1.0 / decomp.perspectiveZ;
+    return PerspectiveTransformOperation::create(clampToPositiveInteger(val));
+  }
+  return PerspectiveTransformOperation::create(0);
 }
 
-} // namespace blink
+}  // namespace blink

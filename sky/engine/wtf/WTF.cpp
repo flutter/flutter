@@ -42,46 +42,41 @@ bool s_shutdown;
 bool Partitions::s_initialized;
 PartitionAllocatorGeneric Partitions::m_bufferAllocator;
 
-void initialize()
-{
-    // WTF, and Blink in general, cannot handle being re-initialized, even if shutdown first.
-    // Make that explicit here.
-    ASSERT(!s_initialized);
-    ASSERT(!s_shutdown);
+void initialize() {
+  // WTF, and Blink in general, cannot handle being re-initialized, even if
+  // shutdown first. Make that explicit here.
+  ASSERT(!s_initialized);
+  ASSERT(!s_shutdown);
+  s_initialized = true;
+  Partitions::initialize();
+  initializeThreading();
+}
+
+void shutdown() {
+  ASSERT(s_initialized);
+  ASSERT(!s_shutdown);
+  s_shutdown = true;
+  Partitions::shutdown();
+}
+
+bool isShutdown() {
+  return s_shutdown;
+}
+
+void Partitions::initialize() {
+  static int lock = 0;
+  // Guard against two threads hitting here in parallel.
+  spinLockLock(&lock);
+  if (!s_initialized) {
+    m_bufferAllocator.init();
     s_initialized = true;
-    Partitions::initialize();
-    initializeThreading();
+  }
+  spinLockUnlock(&lock);
 }
 
-void shutdown()
-{
-    ASSERT(s_initialized);
-    ASSERT(!s_shutdown);
-    s_shutdown = true;
-    Partitions::shutdown();
+void Partitions::shutdown() {
+  fastMallocShutdown();
+  m_bufferAllocator.shutdown();
 }
 
-bool isShutdown()
-{
-    return s_shutdown;
-}
-
-void Partitions::initialize()
-{
-    static int lock = 0;
-    // Guard against two threads hitting here in parallel.
-    spinLockLock(&lock);
-    if (!s_initialized) {
-        m_bufferAllocator.init();
-        s_initialized = true;
-    }
-    spinLockUnlock(&lock);
-}
-
-void Partitions::shutdown()
-{
-    fastMallocShutdown();
-    m_bufferAllocator.shutdown();
-}
-
-} // namespace WTF
+}  // namespace WTF

@@ -44,16 +44,12 @@ namespace blink {
 class SimpleFontData;
 class GlyphPageTreeNode;
 
-// Holds the glyph index and the corresponding SimpleFontData information for a given
-// character.
+// Holds the glyph index and the corresponding SimpleFontData information for a
+// given character.
 struct GlyphData {
-    GlyphData(Glyph g = 0, const SimpleFontData* f = 0)
-        : glyph(g)
-        , fontData(f)
-    {
-    }
-    Glyph glyph;
-    const SimpleFontData* fontData;
+  GlyphData(Glyph g = 0, const SimpleFontData* f = 0) : glyph(g), fontData(f) {}
+  Glyph glyph;
+  const SimpleFontData* fontData;
 };
 
 // A GlyphPage contains a fixed-size set of GlyphData mappings for a contiguous
@@ -65,154 +61,158 @@ struct GlyphData {
 // although multiple nodes may reference it as their "page" if they are supposed
 // to be overriding the parent's node, but provide no additional information.
 class PLATFORM_EXPORT GlyphPage : public RefCounted<GlyphPage> {
-public:
-    static PassRefPtr<GlyphPage> createForMixedFontData(GlyphPageTreeNode* owner)
-    {
-        void* slot = fastMalloc(sizeof(GlyphPage) + sizeof(SimpleFontData*) * GlyphPage::size);
-        return adoptRef(new (slot) GlyphPage(owner));
+ public:
+  static PassRefPtr<GlyphPage> createForMixedFontData(
+      GlyphPageTreeNode* owner) {
+    void* slot = fastMalloc(sizeof(GlyphPage) +
+                            sizeof(SimpleFontData*) * GlyphPage::size);
+    return adoptRef(new (slot) GlyphPage(owner));
+  }
+
+  static PassRefPtr<GlyphPage> createForSingleFontData(
+      GlyphPageTreeNode* owner,
+      const SimpleFontData* fontData) {
+    ASSERT(fontData);
+    return adoptRef(new GlyphPage(owner, fontData));
+  }
+
+  PassRefPtr<GlyphPage> createCopiedSystemFallbackPage(
+      GlyphPageTreeNode* owner) const {
+    RefPtr<GlyphPage> page = GlyphPage::createForMixedFontData(owner);
+    memcpy(page->m_glyphs, m_glyphs, sizeof(m_glyphs));
+    if (hasPerGlyphFontData())
+      memcpy(page->m_perGlyphFontData, m_perGlyphFontData,
+             sizeof(SimpleFontData*) * GlyphPage::size);
+    else {
+      for (size_t i = 0; i < GlyphPage::size; ++i) {
+        page->m_perGlyphFontData[i] = m_glyphs[i] ? m_fontDataForAllGlyphs : 0;
+      }
+    }
+    page->m_customFontToLoad = m_customFontToLoad;
+    return page.release();
+  }
+
+  ~GlyphPage() {}
+
+  static const unsigned char sizeBits = 8;
+  static const size_t size =
+      (1 << GlyphPage::sizeBits);  // Covers Latin-1 in a single page.
+  static unsigned indexForCharacter(UChar32 c) { return c & 0xFF; }
+
+  ALWAYS_INLINE GlyphData glyphDataForCharacter(UChar32 c) const {
+    unsigned index = indexForCharacter(c);
+    if (const CustomFontData* customData = customFontToLoadAt(index))
+      customData->beginLoadIfNeeded();
+    return glyphDataForIndex(index);
+  }
+
+  ALWAYS_INLINE GlyphData glyphDataForIndex(unsigned index) const {
+    ASSERT_WITH_SECURITY_IMPLICATION(index < size);
+    Glyph glyph = m_glyphs[index];
+    if (hasPerGlyphFontData())
+      return GlyphData(glyph, m_perGlyphFontData[index]);
+    return GlyphData(glyph, glyph ? m_fontDataForAllGlyphs : 0);
+  }
+
+  ALWAYS_INLINE Glyph glyphForCharacter(UChar32 c) const {
+    return glyphAt(indexForCharacter(c));
+  }
+
+  ALWAYS_INLINE Glyph glyphAt(unsigned index) const {
+    ASSERT_WITH_SECURITY_IMPLICATION(index < size);
+    return m_glyphs[index];
+  }
+
+  void setGlyphDataForCharacter(UChar32 c, Glyph g, const SimpleFontData* f) {
+    setGlyphDataForIndex(indexForCharacter(c), g, f);
+  }
+
+  void setGlyphDataForIndex(unsigned index,
+                            Glyph glyph,
+                            const SimpleFontData* fontData) {
+    ASSERT_WITH_SECURITY_IMPLICATION(index < size);
+    m_glyphs[index] = glyph;
+    setCustomFontToLoad(index, 0);
+
+    if (hasPerGlyphFontData()) {
+      m_perGlyphFontData[index] = fontData;
+    } else {
+      // A single-font GlyphPage already assigned m_fontDataForAllGlyphs in the
+      // constructor.
+      ASSERT(!glyph || fontData == m_fontDataForAllGlyphs);
+    }
+  }
+
+  void setGlyphDataForIndex(unsigned index, const GlyphData& glyphData) {
+    setGlyphDataForIndex(index, glyphData.glyph, glyphData.fontData);
+  }
+
+  const CustomFontData* customFontToLoadAt(unsigned index) const {
+    ASSERT_WITH_SECURITY_IMPLICATION(index < size);
+    return m_customFontToLoad ? m_customFontToLoad->at(index) : 0;
+  }
+
+  void setCustomFontToLoad(unsigned index,
+                           const CustomFontData* customFontToLoad) {
+    if (!m_customFontToLoad) {
+      if (!customFontToLoad)
+        return;
+      m_customFontToLoad = CustomDataPage::create();
+    }
+    ASSERT_WITH_SECURITY_IMPLICATION(index < size);
+    m_customFontToLoad->set(index, customFontToLoad);
+  }
+
+  void removeFontDataFromSystemFallbackPage(const SimpleFontData* fontData) {
+    // This method should only be called on the system fallback page, which is
+    // never single-font.
+    ASSERT(hasPerGlyphFontData());
+    for (size_t i = 0; i < size; ++i) {
+      if (m_perGlyphFontData[i] == fontData) {
+        m_glyphs[i] = 0;
+        m_perGlyphFontData[i] = 0;
+      }
+    }
+  }
+
+  GlyphPageTreeNode* owner() const { return m_owner; }
+
+ private:
+  explicit GlyphPage(GlyphPageTreeNode* owner,
+                     const SimpleFontData* fontDataForAllGlyphs = 0)
+      : m_fontDataForAllGlyphs(fontDataForAllGlyphs), m_owner(owner) {
+    memset(m_glyphs, 0, sizeof(m_glyphs));
+    if (hasPerGlyphFontData())
+      memset(m_perGlyphFontData, 0, sizeof(SimpleFontData*) * GlyphPage::size);
+  }
+
+  bool hasPerGlyphFontData() const { return !m_fontDataForAllGlyphs; }
+
+  class CustomDataPage : public RefCounted<CustomDataPage> {
+   public:
+    static RefPtr<CustomDataPage> create() {
+      return adoptRef(new CustomDataPage());
+    }
+    const CustomFontData* at(size_t index) const { return m_customData[index]; }
+    void set(size_t index, const CustomFontData* data) {
+      m_customData[index] = data;
     }
 
-    static PassRefPtr<GlyphPage> createForSingleFontData(GlyphPageTreeNode* owner, const SimpleFontData* fontData)
-    {
-        ASSERT(fontData);
-        return adoptRef(new GlyphPage(owner, fontData));
-    }
+   private:
+    CustomDataPage() { memset(m_customData, 0, sizeof(m_customData)); }
+    const CustomFontData* m_customData[size];
+  };
 
-    PassRefPtr<GlyphPage> createCopiedSystemFallbackPage(GlyphPageTreeNode* owner) const
-    {
-        RefPtr<GlyphPage> page = GlyphPage::createForMixedFontData(owner);
-        memcpy(page->m_glyphs, m_glyphs, sizeof(m_glyphs));
-        if (hasPerGlyphFontData())
-            memcpy(page->m_perGlyphFontData, m_perGlyphFontData, sizeof(SimpleFontData*) * GlyphPage::size);
-        else {
-            for (size_t i = 0; i < GlyphPage::size; ++i) {
-                page->m_perGlyphFontData[i] = m_glyphs[i] ? m_fontDataForAllGlyphs : 0;
-            }
-        }
-        page->m_customFontToLoad = m_customFontToLoad;
-        return page.release();
-    }
+  const SimpleFontData* m_fontDataForAllGlyphs;
+  GlyphPageTreeNode* m_owner;
+  RefPtr<CustomDataPage> m_customFontToLoad;
+  Glyph m_glyphs[size];
 
-    ~GlyphPage() { }
-
-    static const unsigned char sizeBits = 8;
-    static const size_t size = (1 << GlyphPage::sizeBits); // Covers Latin-1 in a single page.
-    static unsigned indexForCharacter(UChar32 c) { return c & 0xFF; }
-
-    ALWAYS_INLINE GlyphData glyphDataForCharacter(UChar32 c) const
-    {
-        unsigned index = indexForCharacter(c);
-        if (const CustomFontData* customData = customFontToLoadAt(index))
-            customData->beginLoadIfNeeded();
-        return glyphDataForIndex(index);
-    }
-
-    ALWAYS_INLINE GlyphData glyphDataForIndex(unsigned index) const
-    {
-        ASSERT_WITH_SECURITY_IMPLICATION(index < size);
-        Glyph glyph = m_glyphs[index];
-        if (hasPerGlyphFontData())
-            return GlyphData(glyph, m_perGlyphFontData[index]);
-        return GlyphData(glyph, glyph ? m_fontDataForAllGlyphs : 0);
-    }
-
-    ALWAYS_INLINE Glyph glyphForCharacter(UChar32 c) const
-    {
-        return glyphAt(indexForCharacter(c));
-    }
-
-    ALWAYS_INLINE Glyph glyphAt(unsigned index) const
-    {
-        ASSERT_WITH_SECURITY_IMPLICATION(index < size);
-        return m_glyphs[index];
-    }
-
-    void setGlyphDataForCharacter(UChar32 c, Glyph g, const SimpleFontData* f)
-    {
-        setGlyphDataForIndex(indexForCharacter(c), g, f);
-    }
-
-    void setGlyphDataForIndex(unsigned index, Glyph glyph, const SimpleFontData* fontData)
-    {
-        ASSERT_WITH_SECURITY_IMPLICATION(index < size);
-        m_glyphs[index] = glyph;
-        setCustomFontToLoad(index, 0);
-
-        if (hasPerGlyphFontData()) {
-            m_perGlyphFontData[index] = fontData;
-        } else {
-            // A single-font GlyphPage already assigned m_fontDataForAllGlyphs in the constructor.
-            ASSERT(!glyph || fontData == m_fontDataForAllGlyphs);
-        }
-    }
-
-    void setGlyphDataForIndex(unsigned index, const GlyphData& glyphData)
-    {
-        setGlyphDataForIndex(index, glyphData.glyph, glyphData.fontData);
-    }
-
-    const CustomFontData* customFontToLoadAt(unsigned index) const
-    {
-        ASSERT_WITH_SECURITY_IMPLICATION(index < size);
-        return m_customFontToLoad ? m_customFontToLoad->at(index) : 0;
-    }
-
-    void setCustomFontToLoad(unsigned index, const CustomFontData* customFontToLoad)
-    {
-        if (!m_customFontToLoad) {
-            if (!customFontToLoad)
-                return;
-            m_customFontToLoad = CustomDataPage::create();
-        }
-        ASSERT_WITH_SECURITY_IMPLICATION(index < size);
-        m_customFontToLoad->set(index, customFontToLoad);
-    }
-
-    void removeFontDataFromSystemFallbackPage(const SimpleFontData* fontData)
-    {
-        // This method should only be called on the system fallback page, which is never single-font.
-        ASSERT(hasPerGlyphFontData());
-        for (size_t i = 0; i < size; ++i) {
-            if (m_perGlyphFontData[i] == fontData) {
-                m_glyphs[i] = 0;
-                m_perGlyphFontData[i] = 0;
-            }
-        }
-    }
-
-    GlyphPageTreeNode* owner() const { return m_owner; }
-
-private:
-    explicit GlyphPage(GlyphPageTreeNode* owner, const SimpleFontData* fontDataForAllGlyphs = 0)
-        : m_fontDataForAllGlyphs(fontDataForAllGlyphs)
-        , m_owner(owner)
-    {
-        memset(m_glyphs, 0, sizeof(m_glyphs));
-        if (hasPerGlyphFontData())
-            memset(m_perGlyphFontData, 0, sizeof(SimpleFontData*) * GlyphPage::size);
-    }
-
-    bool hasPerGlyphFontData() const { return !m_fontDataForAllGlyphs; }
-
-    class CustomDataPage : public RefCounted<CustomDataPage> {
-    public:
-        static RefPtr<CustomDataPage> create() { return adoptRef(new CustomDataPage()); }
-        const CustomFontData* at(size_t index) const { return m_customData[index]; }
-        void set(size_t index, const CustomFontData* data) { m_customData[index] = data; }
-    private:
-        CustomDataPage() { memset(m_customData, 0, sizeof(m_customData)); }
-        const CustomFontData* m_customData[size];
-    };
-
-    const SimpleFontData* m_fontDataForAllGlyphs;
-    GlyphPageTreeNode* m_owner;
-    RefPtr<CustomDataPage> m_customFontToLoad;
-    Glyph m_glyphs[size];
-
-    // NOTE: This array has (GlyphPage::size) elements if m_fontDataForAllGlyphs is null.
-    const SimpleFontData* m_perGlyphFontData[0];
+  // NOTE: This array has (GlyphPage::size) elements if m_fontDataForAllGlyphs
+  // is null.
+  const SimpleFontData* m_perGlyphFontData[0];
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHPAGE_H_

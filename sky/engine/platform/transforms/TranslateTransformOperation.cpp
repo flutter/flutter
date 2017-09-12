@@ -23,29 +23,36 @@
 
 namespace blink {
 
-PassRefPtr<TransformOperation> TranslateTransformOperation::blend(const TransformOperation* from, double progress, bool blendToIdentity)
-{
-    if (from && !from->canBlendWith(*this))
-        return this;
+PassRefPtr<TransformOperation> TranslateTransformOperation::blend(
+    const TransformOperation* from,
+    double progress,
+    bool blendToIdentity) {
+  if (from && !from->canBlendWith(*this))
+    return this;
 
-    const Length zeroLength(0, Fixed);
-    if (blendToIdentity)
-        return TranslateTransformOperation::create(zeroLength.blend(m_x, progress, ValueRangeAll), zeroLength.blend(m_y, progress, ValueRangeAll), blink::blend(0., m_z, progress), m_type);
+  const Length zeroLength(0, Fixed);
+  if (blendToIdentity)
+    return TranslateTransformOperation::create(
+        zeroLength.blend(m_x, progress, ValueRangeAll),
+        zeroLength.blend(m_y, progress, ValueRangeAll),
+        blink::blend(0., m_z, progress), m_type);
 
-    const TranslateTransformOperation* fromOp = static_cast<const TranslateTransformOperation*>(from);
-    Length fromX = fromOp ? fromOp->m_x : zeroLength;
-    Length fromY = fromOp ? fromOp->m_y : zeroLength;
-    double fromZ = fromOp ? fromOp->m_z : 0;
-    return TranslateTransformOperation::create(m_x.blend(fromX, progress, ValueRangeAll), m_y.blend(fromY, progress, ValueRangeAll), blink::blend(fromZ, m_z, progress), m_type);
+  const TranslateTransformOperation* fromOp =
+      static_cast<const TranslateTransformOperation*>(from);
+  Length fromX = fromOp ? fromOp->m_x : zeroLength;
+  Length fromY = fromOp ? fromOp->m_y : zeroLength;
+  double fromZ = fromOp ? fromOp->m_z : 0;
+  return TranslateTransformOperation::create(
+      m_x.blend(fromX, progress, ValueRangeAll),
+      m_y.blend(fromY, progress, ValueRangeAll),
+      blink::blend(fromZ, m_z, progress), m_type);
 }
 
-bool TranslateTransformOperation::canBlendWith(const TransformOperation& other) const
-{
-    return other.type() == Translate
-        || other.type() == TranslateX
-        || other.type() == TranslateY
-        || other.type() == TranslateZ
-        || other.type() == Translate3D;
+bool TranslateTransformOperation::canBlendWith(
+    const TransformOperation& other) const {
+  return other.type() == Translate || other.type() == TranslateX ||
+         other.type() == TranslateY || other.type() == TranslateZ ||
+         other.type() == Translate3D;
 }
 
-} // namespace blink
+}  // namespace blink

@@ -36,85 +36,100 @@
 namespace blink {
 
 enum StrokeStyle {
-    NoStroke,
-    SolidStroke,
-    DottedStroke,
-    DashedStroke,
-    DoubleStroke,
-    WavyStroke,
+  NoStroke,
+  SolidStroke,
+  DottedStroke,
+  DashedStroke,
+  DoubleStroke,
+  WavyStroke,
 };
 
 enum InterpolationQuality {
-    InterpolationNone = kNone_SkFilterQuality,
-    InterpolationLow = kLow_SkFilterQuality,
-    InterpolationMedium = kMedium_SkFilterQuality,
-    InterpolationHigh = kHigh_SkFilterQuality,
+  InterpolationNone = kNone_SkFilterQuality,
+  InterpolationLow = kLow_SkFilterQuality,
+  InterpolationMedium = kMedium_SkFilterQuality,
+  InterpolationHigh = kHigh_SkFilterQuality,
 #if USE(LOW_QUALITY_IMAGE_INTERPOLATION)
-    InterpolationDefault = InterpolationLow,
+  InterpolationDefault = InterpolationLow,
 #else
-    InterpolationDefault = InterpolationHigh,
+  InterpolationDefault = InterpolationHigh,
 #endif
 };
 
 enum CompositeOperator {
-    CompositeClear,
-    CompositeCopy,
-    CompositeSourceOver,
-    CompositeSourceIn,
-    CompositeSourceOut,
-    CompositeSourceAtop,
-    CompositeDestinationOver,
-    CompositeDestinationIn,
-    CompositeDestinationOut,
-    CompositeDestinationAtop,
-    CompositeXOR,
-    CompositePlusDarker,
-    CompositePlusLighter,
-    CompositeDifference
+  CompositeClear,
+  CompositeCopy,
+  CompositeSourceOver,
+  CompositeSourceIn,
+  CompositeSourceOut,
+  CompositeSourceAtop,
+  CompositeDestinationOver,
+  CompositeDestinationIn,
+  CompositeDestinationOut,
+  CompositeDestinationAtop,
+  CompositeXOR,
+  CompositePlusDarker,
+  CompositePlusLighter,
+  CompositeDifference
 };
 
 enum GradientSpreadMethod {
-    SpreadMethodPad,
-    SpreadMethodReflect,
-    SpreadMethodRepeat
+  SpreadMethodPad,
+  SpreadMethodReflect,
+  SpreadMethodRepeat
 };
 
 enum LineCap {
-    ButtCap = SkPaint::kButt_Cap,
-    RoundCap = SkPaint::kRound_Cap,
-    SquareCap = SkPaint::kSquare_Cap
+  ButtCap = SkPaint::kButt_Cap,
+  RoundCap = SkPaint::kRound_Cap,
+  SquareCap = SkPaint::kSquare_Cap
 };
 
 enum LineJoin {
-    MiterJoin = SkPaint::kMiter_Join,
-    RoundJoin = SkPaint::kRound_Join,
-    BevelJoin = SkPaint::kBevel_Join
+  MiterJoin = SkPaint::kMiter_Join,
+  RoundJoin = SkPaint::kRound_Join,
+  BevelJoin = SkPaint::kBevel_Join
 };
 
 enum HorizontalAlignment { AlignLeft, AlignRight, AlignHCenter };
 
-enum TextBaseline { AlphabeticTextBaseline, TopTextBaseline, MiddleTextBaseline, BottomTextBaseline, IdeographicTextBaseline, HangingTextBaseline };
+enum TextBaseline {
+  AlphabeticTextBaseline,
+  TopTextBaseline,
+  MiddleTextBaseline,
+  BottomTextBaseline,
+  IdeographicTextBaseline,
+  HangingTextBaseline
+};
 
-enum TextAlign { StartTextAlign, EndTextAlign, LeftTextAlign, CenterTextAlign, RightTextAlign };
+enum TextAlign {
+  StartTextAlign,
+  EndTextAlign,
+  LeftTextAlign,
+  CenterTextAlign,
+  RightTextAlign
+};
 
 enum TextDrawingMode {
-    TextModeFill      = 1 << 0,
-    TextModeStroke    = 1 << 1,
+  TextModeFill = 1 << 0,
+  TextModeStroke = 1 << 1,
 };
 typedef unsigned TextDrawingModeFlags;
 
 // FIXME(sky): Remove this enum.
 enum ColorFilterObsolete {
-    ColorFilterNone,
+  ColorFilterNone,
 };
 
 enum WindRule {
-    RULE_NONZERO = SkPath::kWinding_FillType,
-    RULE_EVENODD = SkPath::kEvenOdd_FillType
+  RULE_NONZERO = SkPath::kWinding_FillType,
+  RULE_EVENODD = SkPath::kEvenOdd_FillType
 };
 
 PLATFORM_EXPORT String compositeOperatorName(CompositeOperator, WebBlendMode);
-PLATFORM_EXPORT bool parseCompositeAndBlendOperator(const String&, CompositeOperator&, WebBlendMode&);
+PLATFORM_EXPORT bool parseCompositeAndBlendOperator(const String&,
+                                                    CompositeOperator&,
+                                                    WebBlendMode&);
 
 PLATFORM_EXPORT String lineCapName(LineCap);
 PLATFORM_EXPORT bool parseLineCap(const String&, LineCap&);
@@ -128,6 +143,6 @@ PLATFORM_EXPORT bool parseTextAlign(const String&, TextAlign&);
 PLATFORM_EXPORT String textBaselineName(TextBaseline);
 PLATFORM_EXPORT bool parseTextBaseline(const String&, TextBaseline&);
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_GRAPHICS_GRAPHICSTYPES_H_

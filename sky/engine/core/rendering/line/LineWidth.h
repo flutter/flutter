@@ -42,45 +42,61 @@ enum IndentTextOrNot { DoNotIndentText, IndentText };
 enum WhitespaceTreatment { ExcludeWhitespace, IncludeWhitespace };
 
 class LineWidth {
-public:
-    LineWidth(RenderParagraph&, bool isFirstLine, IndentTextOrNot shouldIndentText);
+ public:
+  LineWidth(RenderParagraph&,
+            bool isFirstLine,
+            IndentTextOrNot shouldIndentText);
 
-    bool fitsOnLine() const { return currentWidth() <= (m_availableWidth + LayoutUnit::epsilon()); }
-    bool fitsOnLine(float extra) const { return currentWidth() + extra <= (m_availableWidth + LayoutUnit::epsilon()); }
-    bool fitsOnLine(float extra, WhitespaceTreatment whitespaceTreatment) const
-    {
-        return currentWidth() - (whitespaceTreatment == ExcludeWhitespace ? trailingWhitespaceWidth() : 0) + extra <= (m_availableWidth + LayoutUnit::epsilon());
-    }
+  bool fitsOnLine() const {
+    return currentWidth() <= (m_availableWidth + LayoutUnit::epsilon());
+  }
+  bool fitsOnLine(float extra) const {
+    return currentWidth() + extra <= (m_availableWidth + LayoutUnit::epsilon());
+  }
+  bool fitsOnLine(float extra, WhitespaceTreatment whitespaceTreatment) const {
+    return currentWidth() -
+               (whitespaceTreatment == ExcludeWhitespace
+                    ? trailingWhitespaceWidth()
+                    : 0) +
+               extra <=
+           (m_availableWidth + LayoutUnit::epsilon());
+  }
 
-    float currentWidth() const { return m_committedWidth + m_uncommittedWidth; }
-    // FIXME: We should eventually replace these three functions by ones that work on a higher abstraction.
-    float uncommittedWidth() const { return m_uncommittedWidth; }
-    float committedWidth() const { return m_committedWidth; }
-    float availableWidth() const { return m_availableWidth; }
-    float trailingWhitespaceWidth() const { return m_trailingWhitespaceWidth; }
+  float currentWidth() const { return m_committedWidth + m_uncommittedWidth; }
+  // FIXME: We should eventually replace these three functions by ones that work
+  // on a higher abstraction.
+  float uncommittedWidth() const { return m_uncommittedWidth; }
+  float committedWidth() const { return m_committedWidth; }
+  float availableWidth() const { return m_availableWidth; }
+  float trailingWhitespaceWidth() const { return m_trailingWhitespaceWidth; }
 
-    void updateAvailableWidth();
-    void addUncommittedWidth(float delta) { m_uncommittedWidth += delta; }
-    void commit();
-    void fitBelowFloats(bool isFirstLine = false);
-    void setTrailingWhitespaceWidth(float width) { m_trailingWhitespaceWidth = width; }
+  void updateAvailableWidth();
+  void addUncommittedWidth(float delta) { m_uncommittedWidth += delta; }
+  void commit();
+  void fitBelowFloats(bool isFirstLine = false);
+  void setTrailingWhitespaceWidth(float width) {
+    m_trailingWhitespaceWidth = width;
+  }
 
-    bool shouldIndentText() const { return m_shouldIndentText == IndentText; }
+  bool shouldIndentText() const { return m_shouldIndentText == IndentText; }
 
-private:
-    void computeAvailableWidthFromLeftAndRight();
-    void updateLineDimension(LayoutUnit newLineTop, LayoutUnit newLineWidth, const float& newLineLeft, const float& newLineRight);
+ private:
+  void computeAvailableWidthFromLeftAndRight();
+  void updateLineDimension(LayoutUnit newLineTop,
+                           LayoutUnit newLineWidth,
+                           const float& newLineLeft,
+                           const float& newLineRight);
 
-    RenderParagraph& m_block;
-    float m_uncommittedWidth;
-    float m_committedWidth;
-    float m_trailingWhitespaceWidth;
-    float m_left;
-    float m_right;
-    float m_availableWidth;
-    IndentTextOrNot m_shouldIndentText;
+  RenderParagraph& m_block;
+  float m_uncommittedWidth;
+  float m_committedWidth;
+  float m_trailingWhitespaceWidth;
+  float m_left;
+  float m_right;
+  float m_availableWidth;
+  IndentTextOrNot m_shouldIndentText;
 };
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_LINE_LINEWIDTH_H_

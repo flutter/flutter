@@ -4,6 +4,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FlutterNavigationController: UINavigationController
+@interface FlutterNavigationController : UINavigationController
 
 @end

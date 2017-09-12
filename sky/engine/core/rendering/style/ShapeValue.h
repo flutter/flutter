@@ -37,81 +37,64 @@
 namespace blink {
 
 class ShapeValue : public RefCounted<ShapeValue> {
-public:
-    enum ShapeValueType {
-        // The Auto value is defined by a null ShapeValue*
-        Box,
-        Image
-    };
+ public:
+  enum ShapeValueType {
+    // The Auto value is defined by a null ShapeValue*
+    Box,
+    Image
+  };
 
-    static PassRefPtr<ShapeValue> createBoxShapeValue(CSSBoxType cssBox)
-    {
-        return adoptRef(new ShapeValue(cssBox));
-    }
+  static PassRefPtr<ShapeValue> createBoxShapeValue(CSSBoxType cssBox) {
+    return adoptRef(new ShapeValue(cssBox));
+  }
 
-    static PassRefPtr<ShapeValue> createImageValue(PassRefPtr<StyleImage> image)
-    {
-        return adoptRef(new ShapeValue(image));
-    }
+  static PassRefPtr<ShapeValue> createImageValue(PassRefPtr<StyleImage> image) {
+    return adoptRef(new ShapeValue(image));
+  }
 
-    ShapeValueType type() const { return m_type; }
+  ShapeValueType type() const { return m_type; }
 
-    StyleImage* image() const { return m_image.get(); }
-    bool isImageValid() const
-    {
-        if (!image())
-            return false;
-        return image()->isGeneratedImage();
-    }
-    void setImage(PassRefPtr<StyleImage> image)
-    {
-        ASSERT(type() == Image);
-        if (m_image != image)
-            m_image = image;
-    }
-    CSSBoxType cssBox() const { return m_cssBox; }
+  StyleImage* image() const { return m_image.get(); }
+  bool isImageValid() const {
+    if (!image())
+      return false;
+    return image()->isGeneratedImage();
+  }
+  void setImage(PassRefPtr<StyleImage> image) {
+    ASSERT(type() == Image);
+    if (m_image != image)
+      m_image = image;
+  }
+  CSSBoxType cssBox() const { return m_cssBox; }
 
-    bool operator==(const ShapeValue& other) const;
+  bool operator==(const ShapeValue& other) const;
 
-private:
-    ShapeValue(ShapeValueType type)
-        : m_type(type)
-        , m_cssBox(BoxMissing)
-    {
-    }
-    ShapeValue(PassRefPtr<StyleImage> image)
-        : m_type(Image)
-        , m_image(image)
-        , m_cssBox(ContentBox)
-    {
-    }
-    ShapeValue(CSSBoxType cssBox)
-        : m_type(Box)
-        , m_cssBox(cssBox)
-    {
-    }
+ private:
+  ShapeValue(ShapeValueType type) : m_type(type), m_cssBox(BoxMissing) {}
+  ShapeValue(PassRefPtr<StyleImage> image)
+      : m_type(Image), m_image(image), m_cssBox(ContentBox) {}
+  ShapeValue(CSSBoxType cssBox) : m_type(Box), m_cssBox(cssBox) {}
 
-    ShapeValueType m_type;
-    RefPtr<StyleImage> m_image;
-    CSSBoxType m_cssBox;
+  ShapeValueType m_type;
+  RefPtr<StyleImage> m_image;
+  CSSBoxType m_cssBox;
 };
 
-inline bool ShapeValue::operator==(const ShapeValue& other) const
-{
-    if (type() != other.type())
-        return false;
-
-    switch (type()) {
-    case Box:
-        return cssBox() == other.cssBox();
-    case Image:
-        return image() == other.image();
-    }
-
-    ASSERT_NOT_REACHED();
+inline bool ShapeValue::operator==(const ShapeValue& other) const {
+  if (type() != other.type())
     return false;
+
+  switch (type()) {
+    case Box:
+      return cssBox() == other.cssBox();
+    case Image:
+      return image() == other.image();
+  }
+
+  ASSERT_NOT_REACHED();
+  return false;
 }
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_CORE_RENDERING_STYLE_SHAPEVALUE_H_

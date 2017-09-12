@@ -31,18 +31,26 @@
 
 namespace blink {
 
-inline bool requiresContextForWordBoundary(UChar32 ch)
-{
-    return WTF::Unicode::hasLineBreakingPropertyComplexContext(ch);
+inline bool requiresContextForWordBoundary(UChar32 ch) {
+  return WTF::Unicode::hasLineBreakingPropertyComplexContext(ch);
 }
 
-PLATFORM_EXPORT int endOfFirstWordBoundaryContext(const UChar* characters, int length);
-PLATFORM_EXPORT int startOfLastWordBoundaryContext(const UChar* characters, int length);
+PLATFORM_EXPORT int endOfFirstWordBoundaryContext(const UChar* characters,
+                                                  int length);
+PLATFORM_EXPORT int startOfLastWordBoundaryContext(const UChar* characters,
+                                                   int length);
 
-PLATFORM_EXPORT void findWordBoundary(const UChar*, int len, int position, int* start, int* end);
+PLATFORM_EXPORT void findWordBoundary(const UChar*,
+                                      int len,
+                                      int position,
+                                      int* start,
+                                      int* end);
 PLATFORM_EXPORT int findWordEndBoundary(const UChar*, int len, int position);
-PLATFORM_EXPORT int findNextWordFromIndex(const UChar*, int len, int position, bool forward);
+PLATFORM_EXPORT int findNextWordFromIndex(const UChar*,
+                                          int len,
+                                          int position,
+                                          bool forward);
 
-}
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_TEXT_TEXTBOUNDARIES_H_

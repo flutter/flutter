@@ -39,79 +39,77 @@ namespace blink {
 class SimpleFontData;
 
 class GlyphBuffer {
-public:
-    GlyphBuffer() { }
+ public:
+  GlyphBuffer() {}
 
-    bool isEmpty() const { return m_fontData.isEmpty(); }
-    bool hasOffsets() const { return !m_offsets.isEmpty(); }
-    unsigned size() const { return m_fontData.size(); }
+  bool isEmpty() const { return m_fontData.isEmpty(); }
+  bool hasOffsets() const { return !m_offsets.isEmpty(); }
+  unsigned size() const { return m_fontData.size(); }
 
-    void clear()
-    {
-        m_fontData.clear();
-        m_glyphs.clear();
-        m_advances.clear();
-        m_offsets.clear();
-    }
+  void clear() {
+    m_fontData.clear();
+    m_glyphs.clear();
+    m_advances.clear();
+    m_offsets.clear();
+  }
 
-    const Glyph* glyphs(unsigned from) const { return m_glyphs.data() + from; }
-    const float* advances(unsigned from) const { return m_advances.data() + from; }
-    const FloatSize* offsets(unsigned from) const { return m_offsets.data() + from; }
+  const Glyph* glyphs(unsigned from) const { return m_glyphs.data() + from; }
+  const float* advances(unsigned from) const {
+    return m_advances.data() + from;
+  }
+  const FloatSize* offsets(unsigned from) const {
+    return m_offsets.data() + from;
+  }
 
-    const SimpleFontData* fontDataAt(unsigned index) const { return m_fontData[index]; }
+  const SimpleFontData* fontDataAt(unsigned index) const {
+    return m_fontData[index];
+  }
 
-    Glyph glyphAt(unsigned index) const
-    {
-        return m_glyphs[index];
-    }
+  Glyph glyphAt(unsigned index) const { return m_glyphs[index]; }
 
-    float advanceAt(unsigned index) const
-    {
-        return m_advances[index];
-    }
+  float advanceAt(unsigned index) const { return m_advances[index]; }
 
-    void add(Glyph glyph, const SimpleFontData* font, float width)
-    {
-        // should not mix offset/advance-only glyphs
-        ASSERT(!hasOffsets());
+  void add(Glyph glyph, const SimpleFontData* font, float width) {
+    // should not mix offset/advance-only glyphs
+    ASSERT(!hasOffsets());
 
-        m_fontData.append(font);
-        m_glyphs.append(glyph);
-        m_advances.append(width);
-    }
+    m_fontData.append(font);
+    m_glyphs.append(glyph);
+    m_advances.append(width);
+  }
 
-    void add(Glyph glyph, const SimpleFontData* font, const FloatSize& offset, float advance)
-    {
-        // should not mix offset/advance-only glyphs
-        ASSERT(size() == m_offsets.size());
+  void add(Glyph glyph,
+           const SimpleFontData* font,
+           const FloatSize& offset,
+           float advance) {
+    // should not mix offset/advance-only glyphs
+    ASSERT(size() == m_offsets.size());
 
-        m_fontData.append(font);
-        m_glyphs.append(glyph);
-        m_offsets.append(offset);
-        m_advances.append(advance);
-    }
+    m_fontData.append(font);
+    m_glyphs.append(glyph);
+    m_offsets.append(offset);
+    m_advances.append(advance);
+  }
 
-    void reverse()
-    {
-        m_fontData.reverse();
-        m_glyphs.reverse();
-        m_advances.reverse();
-    }
+  void reverse() {
+    m_fontData.reverse();
+    m_glyphs.reverse();
+    m_advances.reverse();
+  }
 
-    void expandLastAdvance(float width)
-    {
-        ASSERT(!isEmpty());
-        float& lastAdvance = m_advances.last();
-        lastAdvance += width;
-    }
+  void expandLastAdvance(float width) {
+    ASSERT(!isEmpty());
+    float& lastAdvance = m_advances.last();
+    lastAdvance += width;
+  }
 
-private:
-    Vector<const SimpleFontData*, 2048> m_fontData;
-    Vector<Glyph, 2048> m_glyphs;
-    Vector<float, 2048> m_advances;
-    Vector<FloatSize, 1024> m_offsets;
+ private:
+  Vector<const SimpleFontData*, 2048> m_fontData;
+  Vector<Glyph, 2048> m_glyphs;
+  Vector<float, 2048> m_advances;
+  Vector<FloatSize, 1024> m_offsets;
 };
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_GLYPHBUFFER_H_

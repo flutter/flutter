@@ -37,71 +37,80 @@
 namespace blink {
 
 // We currently do not support bitmap fonts on windows.
-// Instead of trying to construct a bitmap font and then going down the fallback path map
-// certain common bitmap fonts to their truetype equivalent up front.
-inline const AtomicString& adjustFamilyNameToAvoidUnsupportedFonts(const AtomicString& familyName)
-{
-    return familyName;
+// Instead of trying to construct a bitmap font and then going down the fallback
+// path map certain common bitmap fonts to their truetype equivalent up front.
+inline const AtomicString& adjustFamilyNameToAvoidUnsupportedFonts(
+    const AtomicString& familyName) {
+  return familyName;
 }
 
-inline const AtomicString& alternateFamilyName(const AtomicString& familyName)
-{
-    // Alias Courier <-> Courier New
-    DEFINE_STATIC_LOCAL(AtomicString, courier, ("Courier", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(AtomicString, courierNew, ("Courier New", AtomicString::ConstructFromLiteral));
-    if (equalIgnoringCase(familyName, courier))
-        return courierNew;
-    // On Windows, Courier New (truetype font) is always present and
-    // Courier is a bitmap font. So, we don't want to map Courier New to
-    // Courier.
-    if (equalIgnoringCase(familyName, courierNew))
-        return courier;
+inline const AtomicString& alternateFamilyName(const AtomicString& familyName) {
+  // Alias Courier <-> Courier New
+  DEFINE_STATIC_LOCAL(AtomicString, courier,
+                      ("Courier", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(AtomicString, courierNew,
+                      ("Courier New", AtomicString::ConstructFromLiteral));
+  if (equalIgnoringCase(familyName, courier))
+    return courierNew;
+  // On Windows, Courier New (truetype font) is always present and
+  // Courier is a bitmap font. So, we don't want to map Courier New to
+  // Courier.
+  if (equalIgnoringCase(familyName, courierNew))
+    return courier;
 
-    // Alias Times and Times New Roman.
-    DEFINE_STATIC_LOCAL(AtomicString, times, ("Times", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(AtomicString, timesNewRoman, ("Times New Roman", AtomicString::ConstructFromLiteral));
-    if (equalIgnoringCase(familyName, times))
-        return timesNewRoman;
-    if (equalIgnoringCase(familyName, timesNewRoman))
-        return times;
+  // Alias Times and Times New Roman.
+  DEFINE_STATIC_LOCAL(AtomicString, times,
+                      ("Times", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(AtomicString, timesNewRoman,
+                      ("Times New Roman", AtomicString::ConstructFromLiteral));
+  if (equalIgnoringCase(familyName, times))
+    return timesNewRoman;
+  if (equalIgnoringCase(familyName, timesNewRoman))
+    return times;
 
-    // Alias Arial and Helvetica
-    DEFINE_STATIC_LOCAL(AtomicString, arial, ("Arial", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(AtomicString, helvetica, ("Helvetica", AtomicString::ConstructFromLiteral));
-    if (equalIgnoringCase(familyName, arial))
-        return helvetica;
-    if (equalIgnoringCase(familyName, helvetica))
-        return arial;
+  // Alias Arial and Helvetica
+  DEFINE_STATIC_LOCAL(AtomicString, arial,
+                      ("Arial", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(AtomicString, helvetica,
+                      ("Helvetica", AtomicString::ConstructFromLiteral));
+  if (equalIgnoringCase(familyName, arial))
+    return helvetica;
+  if (equalIgnoringCase(familyName, helvetica))
+    return arial;
 
-    return emptyAtom;
+  return emptyAtom;
 }
 
+inline const AtomicString getFallbackFontFamily(
+    const FontDescription& description) {
+  DEFINE_STATIC_LOCAL(const AtomicString, sansStr,
+                      ("sans-serif", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(const AtomicString, serifStr,
+                      ("serif", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(const AtomicString, monospaceStr,
+                      ("monospace", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(const AtomicString, cursiveStr,
+                      ("cursive", AtomicString::ConstructFromLiteral));
+  DEFINE_STATIC_LOCAL(const AtomicString, fantasyStr,
+                      ("fantasy", AtomicString::ConstructFromLiteral));
 
-inline const AtomicString getFallbackFontFamily(const FontDescription& description)
-{
-    DEFINE_STATIC_LOCAL(const AtomicString, sansStr, ("sans-serif", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, serifStr, ("serif", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, monospaceStr, ("monospace", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, cursiveStr, ("cursive", AtomicString::ConstructFromLiteral));
-    DEFINE_STATIC_LOCAL(const AtomicString, fantasyStr, ("fantasy", AtomicString::ConstructFromLiteral));
-
-    switch (description.genericFamily()) {
+  switch (description.genericFamily()) {
     case FontDescription::SansSerifFamily:
-        return sansStr;
+      return sansStr;
     case FontDescription::SerifFamily:
-        return serifStr;
+      return serifStr;
     case FontDescription::MonospaceFamily:
-        return monospaceStr;
+      return monospaceStr;
     case FontDescription::CursiveFamily:
-        return cursiveStr;
+      return cursiveStr;
     case FontDescription::FantasyFamily:
-        return fantasyStr;
+      return fantasyStr;
     default:
-        // Let the caller use the system default font.
-        return emptyAtom;
-    }
+      // Let the caller use the system default font.
+      return emptyAtom;
+  }
 }
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_ALTERNATEFONTFAMILY_H_

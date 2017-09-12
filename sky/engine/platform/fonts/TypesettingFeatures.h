@@ -29,12 +29,12 @@
 namespace blink {
 
 enum TypesettingFeature {
-    Kerning = 1 << 0,
-    Ligatures = 1 << 1,
+  Kerning = 1 << 0,
+  Ligatures = 1 << 1,
 };
 
 typedef unsigned TypesettingFeatures;
 
-} // namespace blink
+}  // namespace blink
 
 #endif  // SKY_ENGINE_PLATFORM_FONTS_TYPESETTINGFEATURES_H_
