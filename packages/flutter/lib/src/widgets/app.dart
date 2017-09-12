@@ -299,6 +299,21 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   Locale _locale;
 
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
+    // Android devices (Java really) report 3 deprecated language codes, see
+    // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4140555
+    // and https://developer.android.com/reference/java/util/Locale.html
+    switch(newLocale.languageCode) {
+      case 'iw':
+        newLocale = new Locale('he', newLocale.countryCode); // Hebrew
+        break;
+      case 'ji':
+        newLocale = new Locale('yi', newLocale.countryCode); // Yiddish
+        break;
+      case 'in':
+        newLocale = new Locale('id', newLocale.countryCode); // Indonesian
+        break;
+    }
+
     if (widget.localeResolutionCallback != null) {
       final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
       if (locale != null)

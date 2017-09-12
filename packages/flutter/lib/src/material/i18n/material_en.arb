@@ -29,9 +29,48 @@
     "type": "text"
   },
 
+  "nextPageTooltip": "Next page",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the [PaginatedDataTables]'s 'next page' button.",
+    "type": "text"
+  },
+
+  "previousPageTooltip": "Previous page",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the PaginatedDataTables's 'previous page' button.",
+    "type": "text"
+  },
+
+  "showMenuTooltip": "Show menu",
+  "@showMenuTooltip": {
+    "description": "The default PopupMenuButton tooltip",
+    "type": "text"
+  },
+
   "licensesPageTitle": "Licenses",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page.",
+    "type": "text"
+  },
+
+  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "@pageRowInfoTitle": {
+    "description": "Title for the [PaginatedDataTable]'s row info footer",
+    "type": "text"
+  },
+
+  "rowsPerPageTitle": "Rows per page:",
+  "@rowsPerPageTitle": {
+    "description": "Title for the [PaginatedDataTable]'s 'rows per page' footer.",
+    "type": "text"
+  },
+
+  "selectedRowCountTitleZero": "No items selected",
+  "selectedRowCountTitleOne": "1 item selected",
+  "selectedRowCountTitleOther": "$selectedRowCount items selected",
+  "@selectedRowCountTitle": {
+    "description": "Title for the PaginatedDataTable's selected row count header",
     "type": "text"
   },
 
