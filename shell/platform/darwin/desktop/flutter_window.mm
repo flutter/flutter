@@ -53,7 +53,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
 }
 
 - (void)setupPlatformView {
-  FTL_DCHECK(_platformView == nullptr) << "The platform view must not already be set.";
+  FXL_DCHECK(_platformView == nullptr) << "The platform view must not already be set.";
 
   _platformView = std::make_shared<shell::PlatformViewMac>(self.renderSurface);
   _platformView->Attach();
@@ -130,7 +130,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
     case blink::PointerData::Change::kAdd:
     case blink::PointerData::Change::kRemove:
     case blink::PointerData::Change::kHover:
-      FTL_DCHECK(!_mouseIsDown);
+      FXL_DCHECK(!_mouseIsDown);
       break;
   }
 
