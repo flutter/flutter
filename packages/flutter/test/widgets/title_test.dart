@@ -49,8 +49,7 @@ void main() {
           (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
-    SystemChannels.platform.setMockMethodCallHandler((
-        MethodCall methodCall) async {
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       log.add(methodCall);
     });
 
@@ -61,7 +60,7 @@ void main() {
 
     expect(log, equals(<MethodCall>[new MethodCall(
         'SystemChrome.setApplicationSwitcherDescription',
-        <String, dynamic>{"label": "", "primaryColor": 4278255360}
+        <String, dynamic>{'label': '', 'primaryColor': 4278255360},
     )]));
   });
 }
