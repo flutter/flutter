@@ -13,7 +13,7 @@
 #include "flutter/content_handler/app.h"
 #include "flutter/content_handler/runtime_holder.h"
 #include "lib/fxl/logging.h"
-#include "lib/mtl/vmo/vector.h"
+#include "lib/fsl/vmo/vector.h"
 
 namespace flutter_runner {
 
@@ -32,7 +32,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
   }
 
   std::vector<char> bundle;
-  if (!mtl::VectorFromVmo(std::move(application->data), &bundle)) {
+  if (!fsl::VectorFromVmo(std::move(application->data), &bundle)) {
     FXL_LOG(ERROR) << "Failed to receive bundle.";
     return;
   }

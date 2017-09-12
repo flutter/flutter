@@ -40,7 +40,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
     return;
   }
 
-  event_handler_key_ = mtl::MessageLoop::GetCurrent()->AddHandler(
+  event_handler_key_ = fsl::MessageLoop::GetCurrent()->AddHandler(
       this, release_event_.get(), MX_EVENT_SIGNALED);
 
   // Probably not necessary as the events should be in the unsignalled state
@@ -53,7 +53,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
 VulkanSurface::~VulkanSurface() {
   ASSERT_IS_GPU_THREAD;
   if (event_handler_key_ != 0) {
-    mtl::MessageLoop::GetCurrent()->RemoveHandler(event_handler_key_);
+    fsl::MessageLoop::GetCurrent()->RemoveHandler(event_handler_key_);
     event_handler_key_ = 0;
   }
 }

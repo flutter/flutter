@@ -25,7 +25,7 @@
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
-#include "lib/mtl/vmo/vector.h"
+#include "lib/fsl/vmo/vector.h"
 #include "lib/zip/create_unzipper.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
@@ -127,7 +127,7 @@ void RuntimeHolder::Init(
     }
 
     mx::vmo dylib_vmo;
-    if (!mtl::VmoFromVector(dylib_blob, &dylib_vmo)) {
+    if (!fsl::VmoFromVector(dylib_blob, &dylib_vmo)) {
       FXL_LOG(ERROR) << "Failed to load app dylib";
       return;
     }

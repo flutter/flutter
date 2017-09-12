@@ -13,7 +13,7 @@
 #include "lib/fxl/macros.h"
 #include "lib/fxl/tasks/task_runner.h"
 #include "lib/icu_data/cpp/icu_data.h"
-#include "lib/mtl/tasks/message_loop.h"
+#include "lib/fsl/tasks/message_loop.h"
 
 namespace flutter_runner {
 namespace {
@@ -21,7 +21,7 @@ namespace {
 static App* g_app = nullptr;
 
 void QuitMessageLoop() {
-  mtl::MessageLoop::GetCurrent()->QuitNow();
+  fsl::MessageLoop::GetCurrent()->QuitNow();
 }
 
 std::string GetLabelFromURL(const std::string& url) {
@@ -37,8 +37,8 @@ App::App() {
   g_app = this;
   context_ = app::ApplicationContext::CreateFromStartupInfo();
 
-  gpu_thread_ = std::make_unique<mtl::Thread>();
-  io_thread_ = std::make_unique<mtl::Thread>();
+  gpu_thread_ = std::make_unique<fsl::Thread>();
+  io_thread_ = std::make_unique<fsl::Thread>();
 
   auto gpu_thread_success = gpu_thread_->Run();
   auto io_thread_success = io_thread_->Run();
@@ -46,7 +46,7 @@ App::App() {
   FXL_CHECK(gpu_thread_success) << "Must be able to create the GPU thread";
   FXL_CHECK(io_thread_success) << "Must be able to create the IO thread";
 
-  auto ui_task_runner = mtl::MessageLoop::GetCurrent()->task_runner();
+  auto ui_task_runner = fsl::MessageLoop::GetCurrent()->task_runner();
   auto gpu_task_runner = gpu_thread_->TaskRunner();
   auto io_task_runner = io_thread_->TaskRunner();
 

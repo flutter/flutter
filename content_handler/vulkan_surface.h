@@ -10,8 +10,8 @@
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 #include "lib/fxl/macros.h"
-#include "lib/mtl/tasks/message_loop.h"
-#include "lib/mtl/tasks/message_loop_handler.h"
+#include "lib/fsl/tasks/message_loop.h"
+#include "lib/fsl/tasks/message_loop_handler.h"
 #include "mx/event.h"
 #include "mx/vmo.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -20,7 +20,7 @@
 namespace flutter_runner {
 
 class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
-                      public mtl::MessageLoopHandler {
+                      public fsl::MessageLoopHandler {
  public:
   VulkanSurface(vulkan::VulkanProcTable& p_vk,
                 sk_sp<GrContext> context,
@@ -66,12 +66,12 @@ private:
   mx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
   mx::event release_event_;
-  mtl::MessageLoop::HandlerKey event_handler_key_ = 0;
+  fsl::MessageLoop::HandlerKey event_handler_key_ = 0;
   std::function<void(void)> pending_on_writes_committed_;
   size_t age_ = 0;
   bool valid_ = false;
 
-  // |mtl::MessageLoopHandler|
+  // |fsl::MessageLoopHandler|
   void OnHandleReady(mx_handle_t handle,
                      mx_signals_t pending,
                      uint64_t count) override;

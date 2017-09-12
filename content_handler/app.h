@@ -13,7 +13,7 @@
 #include "flutter/content_handler/application_controller_impl.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/synchronization/waitable_event.h"
-#include "lib/mtl/threading/thread.h"
+#include "lib/fsl/threading/thread.h"
 
 namespace flutter_runner {
 
@@ -48,8 +48,8 @@ class App : public app::ApplicationRunner {
   void UpdateProcessLabel();
 
   std::unique_ptr<app::ApplicationContext> context_;
-  std::unique_ptr<mtl::Thread> gpu_thread_;
-  std::unique_ptr<mtl::Thread> io_thread_;
+  std::unique_ptr<fsl::Thread> gpu_thread_;
+  std::unique_ptr<fsl::Thread> io_thread_;
   fidl::BindingSet<app::ApplicationRunner> runner_bindings_;
   std::unordered_map<ApplicationControllerImpl*,
                      std::unique_ptr<ApplicationControllerImpl>>

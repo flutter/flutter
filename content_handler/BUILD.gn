@@ -61,7 +61,7 @@ template("flutter_content_handler") {
              "//garnet/public/dart-pkg/fuchsia",
              "//garnet/public/lib/fxl",
              "//garnet/public/lib/icu_data/cpp",
-             "//garnet/public/lib/mtl",
+             "//garnet/public/lib/fsl",
              "//garnet/public/lib/zip",
              "//lib/tonic",
              "//magenta/system/ulib/trace-provider",

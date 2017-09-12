@@ -43,7 +43,7 @@
 
 #if defined(OS_FUCHSIA)
 
-#include "lib/mtl/tasks/message_loop.h"  // nogncheck
+#include "lib/fsl/tasks/message_loop.h"  // nogncheck
 
 #else  // defined(OS_FUCHSIA)
 
@@ -63,11 +63,11 @@ void didProcessTask() {
 #if defined(OS_FUCHSIA)
 
 void addMessageLoopObservers() {
-  mtl::MessageLoop::GetCurrent()->SetAfterTaskCallback(didProcessTask);
+  fsl::MessageLoop::GetCurrent()->SetAfterTaskCallback(didProcessTask);
 }
 
 void removeMessageLoopObservers() {
-  mtl::MessageLoop::GetCurrent()->ClearAfterTaskCallback();
+  fsl::MessageLoop::GetCurrent()->ClearAfterTaskCallback();
 }
 
 #else  // defined(OS_FUCHSIA)

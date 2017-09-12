@@ -14,7 +14,7 @@
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 #include "lib/fxl/macros.h"
-#include "lib/mtl/tasks/message_loop.h"
+#include "lib/fsl/tasks/message_loop.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
 
 namespace flutter_runner {
