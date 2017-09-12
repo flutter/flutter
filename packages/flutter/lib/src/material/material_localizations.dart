@@ -116,7 +116,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
-  Locale locale;
+  final Locale locale;
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -141,11 +141,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return text;
   }
 
-  NumberFormat get _integerFormat {
-    String localeName = _localeName;
+  String _formatInteger(int n) {
+    final String localeName = _localeName;
     if (!NumberFormat.localeExists(localeName))
-      localeName = 'en';
-    return new NumberFormat.decimalPattern(localeName);
+      return n.toString();
+    return new NumberFormat.decimalPattern(localeName).format(n);
+
   }
 
   @override
@@ -180,12 +181,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     String text = rowCountIsApproximate ? _nameToValue['pageRowsInfoTitleApproximate'] : null;
     text ??= _nameToValue['pageRowsInfoTitle'];
     assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
-    final NumberFormat integer = _integerFormat;
     // TODO(hansmuller): this could be more efficient.
     return text
-      .replaceFirst(r'$firstRow', integer.format(firstRow))
-      .replaceFirst(r'$lastRow', integer.format(lastRow))
-      .replaceFirst(r'$rowCount', integer.format(rowCount));
+      .replaceFirst(r'$firstRow', _formatInteger(firstRow))
+      .replaceFirst(r'$lastRow', _formatInteger(lastRow))
+      .replaceFirst(r'$rowCount', _formatInteger(rowCount));
   }
 
   @override
@@ -194,7 +194,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String selectedRowCountTitle(int selectedRowCount) {
     return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
-      .replaceFirst(r'$selectedRowCount', _integerFormat.format(selectedRowCount));
+      .replaceFirst(r'$selectedRowCount', _formatInteger(selectedRowCount));
   }
 
   @override
