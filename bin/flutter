@@ -87,7 +87,12 @@ FLUTTER_TOOL_ARGS="--assert-initializer $FLUTTER_TOOL_ARGS"
       LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_bot"
     fi
     LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_install"
-    (cd "$FLUTTER_TOOLS_DIR"; PUB_ENVIRONMENT=$LOCAL_PUB_ENV "$PUB" upgrade --verbosity=error --no-packages-dir)
+    while : ; do
+      cd "$FLUTTER_TOOLS_DIR"
+      PUB_ENVIRONMENT="$LOCAL_PUB_ENV" "$PUB" upgrade --verbosity=error --no-packages-dir && break
+      echo Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
+      sleep 5
+    done
     "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
     echo $REVISION > "$STAMP_PATH"
   fi
