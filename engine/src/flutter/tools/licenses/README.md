@@ -1,4 +1,4 @@
-To update the golden license files, run the following in this directory:
+To update the golden license files, make sure you've rebased your branch to the latest upstream master and then run the following in this directory:
 
 ```
 pub get
