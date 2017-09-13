@@ -84,6 +84,11 @@ DEF_SWITCH(TraceStartup,
            "trace-startup",
            "Trace early application lifecycle. Automatically switches to an "
            "endless trace buffer.")
+DEF_SWITCH(TraceSkia,
+           "trace-skia",
+           "Trace Skia calls. This is useful when debugging the GPU threed."
+           "By default, Skia tracing is not enable to reduce the number of "
+           "traced events")
 DEF_SWITCH(UseTestFonts,
            "use-test-fonts",
            "Running tests that layout and measure text will not yield "

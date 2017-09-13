@@ -9,6 +9,7 @@
 
 #include <vector>
 
+#include "dart/runtime/include/dart_tools_api.h"
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/utils/SkEventTracer.h"
 #include "third_party/skia/src/core/SkTraceEventCommon.h"
@@ -18,8 +19,10 @@ namespace skia {
 class FlutterEventTracer : public SkEventTracer {
  public:
   static constexpr const char* kSkiaTag = "skia";
+  static constexpr uint8_t kYes = 1;
+  static constexpr uint8_t kNo = 0;
 
-  FlutterEventTracer() = default;
+  FlutterEventTracer(bool enabled) : enabled_(enabled ? kYes : kNo){};
 
   SkEventTracer::Handle addTraceEvent(char phase,
                                       const uint8_t* category_enabled_flag,
@@ -62,8 +65,7 @@ class FlutterEventTracer : public SkEventTracer {
   }
 
   const uint8_t* getCategoryGroupEnabled(const char* name) override {
-    static const uint8_t kYes = 1;
-    return &kYes;
+    return &enabled_;
   }
 
   const char* getCategoryGroupName(
@@ -71,14 +73,33 @@ class FlutterEventTracer : public SkEventTracer {
     return kSkiaTag;
   }
 
+  void enable() { enabled_ = kYes; }
+
  private:
+  uint8_t enabled_;
   FXL_DISALLOW_COPY_AND_ASSIGN(FlutterEventTracer);
 };
 
+bool enableSkiaTracingCallback(const char* method,
+                               const char** param_keys,
+                               const char** param_values,
+                               intptr_t num_params,
+                               void* user_data,
+                               const char** json_object) {
+  FlutterEventTracer* tracer = static_cast<FlutterEventTracer*>(user_data);
+  tracer->enable();
+  *json_object = strdup("{\"type\":\"Success\"}");
+  return true;
+}
+
 }  // namespace skia
 
-void InitSkiaEventTracer() {
+void InitSkiaEventTracer(bool enabled) {
+  skia::FlutterEventTracer* tracer = new skia::FlutterEventTracer(enabled);
+  Dart_RegisterRootServiceRequestCallback("_flutter.enableSkiaTracing",
+                                          skia::enableSkiaTracingCallback,
+                                          static_cast<void*>(tracer));
   // Initialize the binding to Skia's tracing events. Skia will
   // take ownership of and clean up the memory allocated here.
-  SkEventTracer::SetInstance(new skia::FlutterEventTracer());
+  SkEventTracer::SetInstance(tracer);
 }
