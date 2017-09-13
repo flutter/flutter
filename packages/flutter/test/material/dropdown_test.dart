@@ -169,12 +169,12 @@ void main() {
     // Positions a DropdownButton at the left and right edges of the screen,
     // forcing it to be sized down to the viewport width
     final String value = 'foo';
-    UniqueKey itemKey = new UniqueKey();
+    final UniqueKey itemKey = new UniqueKey();
     await tester.pumpWidget(
       new MaterialApp(
         home: new Material(
           child: new ListView(
-            children: [
+            children: <Widget>[
               new DropdownButton<String>(
                 value: value,
                 items: <DropdownMenuItem<String>>[
