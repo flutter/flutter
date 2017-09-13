@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' show ProcessResult;
+import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -15,6 +15,7 @@ import '../src/context.dart';
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
 
 void main() {
   final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
@@ -176,5 +177,88 @@ void main() {
         Xcode: () => mockXcode,
       }
     );
+  });
+
+  group('launchDeviceLogTool', () {
+    MockXcode mockXcode;
+    MockProcessManager mockProcessManager;
+    IOSSimulator deviceUnderTest;
+
+    setUp(() {
+      mockXcode = new MockXcode();
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+        .thenReturn(new Future<Process>.value(new MockProcess()));
+      deviceUnderTest = new IOSSimulator('x', name: 'iPhone SE');
+    });
+
+    testUsingContext('uses tail on Xcode versions prior to Xcode 9', () async {
+      when(mockXcode.xcodeMajorVersion).thenReturn(8);
+      when(mockXcode.xcodeMinorVersion).thenReturn(2);
+
+      launchDeviceLogTool(deviceUnderTest);
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('tail'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Xcode: () => mockXcode,
+    });
+
+    testUsingContext('uses /usr/bin/log on Xcode 9 and above', () async {
+      when(mockXcode.xcodeMajorVersion).thenReturn(9);
+      when(mockXcode.xcodeMinorVersion).thenReturn(0);
+
+      launchDeviceLogTool(deviceUnderTest);
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('/usr/bin/log'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Xcode: () => mockXcode,
+    });
+  });
+
+  group('launchSystemLogTool', () {
+    MockXcode mockXcode;
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockXcode = new MockXcode();
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+        .thenReturn(new Future<Process>.value(new MockProcess()));
+    });
+
+    testUsingContext('uses tail on Xcode versions prior to Xcode 9', () async {
+      when(mockXcode.xcodeMajorVersion).thenReturn(8);
+      when(mockXcode.xcodeMinorVersion).thenReturn(2);
+
+      launchSystemLogTool();
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('tail'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Xcode: () => mockXcode,
+    });
+
+    testUsingContext('uses /usr/bin/log on Xcode 9 and above', () async {
+      when(mockXcode.xcodeMajorVersion).thenReturn(9);
+      when(mockXcode.xcodeMinorVersion).thenReturn(0);
+
+      launchSystemLogTool();
+      verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Xcode: () => mockXcode,
+    });
   });
 }
