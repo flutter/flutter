@@ -5,6 +5,6 @@
 #ifndef FLUTTER_SHELL_COMMON_SKIA_EVENT_TRACER_IMPL_H_
 #define FLUTTER_SHELL_COMMON_SKIA_EVENT_TRACER_IMPL_H_
 
-void InitSkiaEventTracer();
+void InitSkiaEventTracer(bool enabled);
 
 #endif  // FLUTTER_SHELL_COMMON_SKIA_EVENT_TRACER_IMPL_H_
