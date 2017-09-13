@@ -30,6 +30,7 @@ class NavigationToolbar extends StatelessWidget {
     this.middle,
     this.trailing,
     this.centerMiddle: true,
+    this.middleMargin,
   }) : assert(centerMiddle != null),
        super(key: key);
 
@@ -46,6 +47,9 @@ class NavigationToolbar extends StatelessWidget {
   /// Whether to align the [middle] widget to the center of this widget or
   /// next to the [leading] widget when false.
   final bool centerMiddle;
+
+  /// The margin between the [leading] and [middle] widgets.
+  final double middleMargin;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,7 @@ class NavigationToolbar extends StatelessWidget {
     return new CustomMultiChildLayout(
       delegate: new _ToolbarLayout(
         centerMiddle: centerMiddle,
+        requestedMiddleMargin: middleMargin,
         textDirection: textDirection,
       ),
       children: children,
@@ -83,14 +88,21 @@ const double _kMiddleMargin = 16.0;
 class _ToolbarLayout extends MultiChildLayoutDelegate {
   _ToolbarLayout({
     this.centerMiddle,
+    double requestedMiddleMargin,
     @required this.textDirection,
-  }) : assert(textDirection != null);
+  }) : assert(textDirection != null),
+       middleMargin = requestedMiddleMargin ?? _kMiddleMargin;
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
   // If true the middle widget is centered within the toolbar (not within the horizontal
   // space between the leading and trailing widgets).
   final bool centerMiddle;
+
+  /// The margin between leading and middle widgets.
+  ///
+  /// Defaults to [_kMiddleMargin].
+  final double middleMargin;
 
   final TextDirection textDirection;
 
@@ -137,11 +149,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
-      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - _kMiddleMargin * 2.0, 0.0);
+      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleMargin * 2.0, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
-      final double middleStartMargin = hasChild(_ToolbarSlot.leading) ? leadingWidth + _kMiddleMargin : 0.0;
+      final double middleStartMargin = leadingWidth + middleMargin;
       double middleStart = middleStartMargin;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing
