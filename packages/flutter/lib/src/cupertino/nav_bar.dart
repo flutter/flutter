@@ -116,7 +116,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   Widget build(BuildContext context) {
     assert(
       !largeTitle || middle is Text,
-      "largeTitle mode is only possible when 'middle' is a Text widget",
+      "largeTitle mode is only possible when 'middle' is a Text widget"
     );
 
     if (!largeTitle) {
