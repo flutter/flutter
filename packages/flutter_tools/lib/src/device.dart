@@ -317,6 +317,7 @@ class DebuggingOptions {
   DebuggingOptions.enabled(this.buildInfo, {
     this.startPaused: false,
     this.enableSoftwareRendering: false,
+    this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
     this.diagnosticPort
@@ -327,6 +328,7 @@ class DebuggingOptions {
     useTestFonts = false,
     startPaused = false,
     enableSoftwareRendering = false,
+    traceSkia = false,
     observatoryPort = null,
     diagnosticPort = null;
 
@@ -335,6 +337,7 @@ class DebuggingOptions {
   final BuildInfo buildInfo;
   final bool startPaused;
   final bool enableSoftwareRendering;
+  final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;
   final int diagnosticPort;

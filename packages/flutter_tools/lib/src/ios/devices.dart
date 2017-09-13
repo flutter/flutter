@@ -214,6 +214,9 @@ class IOSDevice extends Device {
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
 
+    if (debuggingOptions.traceSkia)
+      launchArguments.add('--trace-skia');
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
