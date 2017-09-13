@@ -135,6 +135,10 @@ class HotRunner extends ResidentRunner {
 
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
+      // VM must have accepted the kernel binary, there will be no reload
+      // report, so we let incremental compiler know that source code was accepted.
+      if (device.generator != null)
+        device.generator.accept();
       for (FlutterView view in device.views)
         printTrace('Connected to $view.');
     }
@@ -334,6 +338,10 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'DevFS synchronization failed');
     // Check if the isolate is paused and resume it.
     for (FlutterDevice device in flutterDevices) {
+      // VM must have accepted the kernel binary, there will be no reload
+      // report, so we let incremental compiler know that source code was accepted.
+      if (device.generator != null)
+        device.generator.accept();
       for (FlutterView view in device.views) {
         if (view.uiIsolate != null) {
           // Reload the isolate.
@@ -495,6 +503,8 @@ class HotRunner extends ResidentRunner {
           device.updateReloadStatus(validateReloadReport(firstReport,
             printErrors: false));
           retrieveFirstReloadReport.complete(firstReport);
+        }, onError: (dynamic error, StackTrace stack) {
+          retrieveFirstReloadReport.completeError(error, stack);
         });
       }
 

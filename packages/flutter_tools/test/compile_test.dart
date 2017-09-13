@@ -121,30 +121,68 @@ void main() {
     testUsingContext('compile and recompile', () async {
       final BufferLogger logger = context[Logger];
 
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
-        new Future<List<int>>.value(UTF8.encode(
-          'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
-        ))
-      ));
-
+      final StreamController<List<int>> streamController = new StreamController<List<int>>();
+      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      streamController.add(UTF8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
 
-      final String output = await generator.recompile(
-        null /* mainPath */,
-        <String>['/path/to/main.dart']
-      );
-      final String recompileCommand = verify(mockFrontendServerStdIn.writeln(captureThat(startsWith('recompile ')))).captured[0];
-      final String token = recompileCommand.split(' ')[1];
-      verify(mockFrontendServerStdIn.writeln('/path/to/main.dart'));
-      verify(mockFrontendServerStdIn.writeln(token));
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+        'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
+
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
-      expect(output, equals('/path/to/main.dart.dill'));
+      expect(logger.traceText, equals(
+        'compile debug message: line0\ncompile debug message: line1\n'
+        'compile debug message: line1\ncompile debug message: line2\n'
+      ));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('compile and recompile twice', () async {
+      final BufferLogger logger = context[Logger];
+
+      final StreamController<List<int>> streamController = new StreamController<List<int>>();
+      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      streamController.add(UTF8.encode(
+        'result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'
+      ));
+      await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
+      verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
+
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+        'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
+      await _recompile(streamController, generator, mockFrontendServerStdIn,
+        'result abc\nline2\nline3\nabc /path/to/main.dart.dill\n');
+
+      verifyNoMoreInteractions(mockFrontendServerStdIn);
+      expect(logger.traceText, equals(
+        'compile debug message: line0\ncompile debug message: line1\n'
+        'compile debug message: line1\ncompile debug message: line2\n'
+        'compile debug message: line2\ncompile debug message: line3\n'
+      ));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
   });
+}
+
+Future<Null> _recompile(StreamController<List<int>> streamController,
+  ResidentCompiler generator, MockStdIn mockFrontendServerStdIn,
+  String mockCompilerOutput) async {
+  // Put content into the output stream after generator.recompile gets
+  // going few lines below, resets completer.
+  new Future<List<int>>(() {
+    streamController.add(UTF8.encode(mockCompilerOutput));
+  });
+  final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
+  expect(output, equals('/path/to/main.dart.dill'));
+  final String recompileCommand = verify(
+    mockFrontendServerStdIn.writeln(captureThat(startsWith('recompile ')))
+  ).captured[0];
+  final String token1 = recompileCommand.split(' ')[1];
+  verify(mockFrontendServerStdIn.writeln('/path/to/main.dart'));
+  verify(mockFrontendServerStdIn.writeln(token1));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
