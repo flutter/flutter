@@ -8,6 +8,8 @@
   "nextPageTooltip": "Próxima página",
   "previousPageTooltip": "Página anterior",
   "showMenuTooltip": "Mostrar menu",
+  "aboutListTileTitle": "Sobre $applicationName",
+  "licensesPagePoweredByTitle": "Distribuído por Flutter",
   "licensesPageTitle": "Licenças",
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de cerca de $rowCount",

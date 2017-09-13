@@ -111,6 +111,7 @@ void main() {
       expect(localizations.nextPageTooltip, isNotNull);
       expect(localizations.previousPageTooltip, isNotNull);
       expect(localizations.showMenuTooltip, isNotNull);
+      expect(localizations.licensesPagePoweredByTitle, isNotNull);
       expect(localizations.licensesPageTitle, isNotNull);
       expect(localizations.rowsPerPageTitle, isNotNull);
       expect(localizations.cancelButtonLabel, isNotNull);
@@ -122,6 +123,9 @@ void main() {
       expect(localizations.pasteButtonLabel, isNotNull);
       expect(localizations.selectAllButtonLabel, isNotNull);
       expect(localizations.viewLicensesButtonLabel, isNotNull);
+
+      expect(localizations.aboutListTileTitle("FOO"), isNotNull);
+      expect(localizations.aboutListTileTitle("FOO"), contains("FOO"));
 
       expect(localizations.selectedRowCountTitle(0), isNotNull);
       expect(localizations.selectedRowCountTitle(1), isNotNull);

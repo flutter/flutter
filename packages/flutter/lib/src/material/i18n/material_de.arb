@@ -8,11 +8,12 @@
   "nextPageTooltip": "Nächste Seite",
   "previousPageTooltip": "Vorherige Seite",
   "showMenuTooltip": "Menü anzeigen",
+  "aboutListTileTitle": "Über $applicationName",
+  "licensesPagePoweredByTitle": "Angetrieben durch Flutter",
   "licensesPageTitle": "Lizenzen",
   "pageRowsInfoTitle": "$firstRow–$lastRow von $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow von etwa $rowCount",
   "rowsPerPageTitle": "Zeilen pro Seite:",
-
   "selectedRowCountTitleZero": "Keine Objekte ausgewählt",
   "selectedRowCountTitleOne": "1 Objekt ausgewählt",
   "selectedRowCountTitleOther": "$selectedRowCount Objekte ausgewählt",

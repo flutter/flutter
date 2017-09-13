@@ -53,6 +53,18 @@
     "type": "text"
   },
 
+  "aboutListTileTitle": "About $applicationName",
+  "@aboutListTileTitle": {
+    "description": "The default title for AboutListTile",
+    "type": "text"
+  },
+
+  "licensesPagePoweredByTitle": "Powered by Flutter",
+  "@licensesPagePoweredByTitle": {
+    "description": "The Powered by Flutter subtitle for the [LicensePage] widget.",
+    "type": "text"
+  },
+
   "licensesPageTitle": "Licenses",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page.",

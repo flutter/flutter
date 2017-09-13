@@ -8,6 +8,8 @@
   "nextPageTooltip": "اگلا صفحہ",
   "previousPageTooltip": "سابقہ ​​صفحہ",
   "showMenuTooltip": "مینو دکھائیں",
+  "aboutListTileTitle": "کے بارے میں $applicationName",
+  "licensesPagePoweredByTitle": "Flutter کے ذریعہ",
   "licensesPageTitle": "لائسنس",
   "pageRowsInfoTitle": "$firstRow–$lastRow کے $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow میں سے $rowCount تقریبا",

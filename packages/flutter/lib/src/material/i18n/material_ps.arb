@@ -8,6 +8,8 @@
   "nextPageTooltip": "بله پاڼه",
   "previousPageTooltip": "مخکینی مخ",
   "showMenuTooltip": "غورنۍ ښودل",
+  "aboutListTileTitle": "د $applicationName په اړه",
+  "licensesPagePoweredByTitle": "د Flutter لخوا اداره کول",
   "licensesPageTitle": "جوازونه",
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",

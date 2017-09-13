@@ -109,7 +109,8 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     return new ListTile(
       leading: icon,
-      title: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
+      title: child ??
+        new Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
       onTap: () {
         showAboutDialog(
           context: context,
@@ -421,13 +422,14 @@ class _LicensePageState extends State<LicensePage> {
   Widget build(BuildContext context) {
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> contents = <Widget>[
       new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
       new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 18.0),
       new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
       new Container(height: 18.0),
-      new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      new Text(localizations.licensesPagePoweredByTitle, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 24.0),
     ];
     contents.addAll(_licenses);
@@ -441,7 +443,7 @@ class _LicensePageState extends State<LicensePage> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(MaterialLocalizations.of(context).licensesPageTitle),
+        title: new Text(localizations.licensesPageTitle),
       ),
       body: new DefaultTextStyle(
         style: Theme.of(context).textTheme.caption,
