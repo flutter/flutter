@@ -269,8 +269,8 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The margin between title and leading content. This margin is applied
-  /// even if there is no leading content. If you want title to take all the
+  /// The margin between [title] and [leading] content. This margin is applied
+  /// even if there is no leading content. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
   /// Defaults to the specification in [NavigationToolbar].
@@ -855,8 +855,8 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The margin between title and leading content. This margin is applied
-  /// even if there is no leading content. If you want title to take all the
+  /// The margin between [title] and [leading] content. This margin is applied
+  /// even if there is no leading content. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
   /// Defaults to the specification in [NavigationToolbar].

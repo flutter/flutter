@@ -183,6 +183,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
     return oldDelegate.centerMiddle != centerMiddle
+        || oldDelegate.middleMargin != middleMargin
         || oldDelegate.textDirection != textDirection;
   }
 }
