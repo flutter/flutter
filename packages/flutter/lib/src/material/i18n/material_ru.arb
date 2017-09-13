@@ -12,7 +12,6 @@
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow около $rowCount",
   "rowsPerPageTitle": "Строки на страницу:",
   "aboutListTileTitle": "O $applicationName",
-  "licensesPagePoweredByTitle": "Питаться от Flutter",
   "licensesPageTitle": "Лицензии",
   "selectedRowCountTitleOther": "$selectedRowCount выбранные предметы",
   "cancelButtonLabel": "ОТМЕНА",

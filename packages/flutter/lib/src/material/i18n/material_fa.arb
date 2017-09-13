@@ -9,7 +9,6 @@
   "previousPageTooltip": "صفحه قبلی",
   "showMenuTooltip": "نمایش منو",
   "aboutListTileTitle": "درباره $applicationName",
-  "licensesPagePoweredByTitle": "توسط Flutter طراحی شده است",
   "licensesPageTitle": "مجوز",
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",

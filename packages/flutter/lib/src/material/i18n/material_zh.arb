@@ -9,7 +9,6 @@
   "previousPageTooltip": "上一页",
   "showMenuTooltip": "显示菜单",
   "aboutListTileTitle": "关于$applicationName",
-  "licensesPagePoweredByTitle": "由Flutter提供支持",
   "licensesPageTitle": "许可证",
   "pageRowsInfoTitle": "$rowCount中的$firstRow-$lastRow",
   "pageRowsInfoTitleApproximate": "约$rowCount中的$firstRow-$lastRow",

@@ -9,7 +9,6 @@
   "previousPageTooltip": "前のページ",
   "showMenuTooltip": "メニューを表示",
   "aboutListTileTitle": "$applicationNameについて",
-  "licensesPagePoweredByTitle": "搭載Flutter",
   "licensesPageTitle": "ライセンス",
   "pageRowsInfoTitle": "$rowCount行中の$firstRow–$lastRow",
   "pageRowsInfoTitleApproximate": "約$rowCount行中の$firstRow–$lastRow",

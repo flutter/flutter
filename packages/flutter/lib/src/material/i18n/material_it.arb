@@ -9,7 +9,6 @@
   "previousPageTooltip": "Pagina precedente",
   "showMenuTooltip": "Mostra il menu",
   "aboutListTileTitle": "A proposito di $applicationName",
-  "licensesPagePoweredByTitle": "Offerto da Flutter",
   "licensesPageTitle": "Licenze",
   "pageRowsInfoTitle": "$firstRow–$lastRow di $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow di circa $rowCount",

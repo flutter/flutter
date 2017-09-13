@@ -429,7 +429,7 @@ class _LicensePageState extends State<LicensePage> {
       new Container(height: 18.0),
       new Text(widget.applicationLegalese ?? '', style: Theme.of(context).textTheme.caption, textAlign: TextAlign.center),
       new Container(height: 18.0),
-      new Text(localizations.licensesPagePoweredByTitle, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
+      new Text('Powered by Flutter', style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
       new Container(height: 24.0),
     ];
     contents.addAll(_licenses);

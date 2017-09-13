@@ -9,7 +9,6 @@
   "previousPageTooltip": "پويون صفحو",
   "showMenuTooltip": "ڏيکاريو",
   "aboutListTileTitle": "$applicationName بابت",
-  "licensesPagePoweredByTitle": "وي طرفان Flutter",
   "licensesPageTitle": "لائسنس",
   "pageRowsInfoTitle": "$firstRow–$lastRow جي $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow کان $rowCount تقريبن",

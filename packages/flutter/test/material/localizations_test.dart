@@ -111,7 +111,6 @@ void main() {
       expect(localizations.nextPageTooltip, isNotNull);
       expect(localizations.previousPageTooltip, isNotNull);
       expect(localizations.showMenuTooltip, isNotNull);
-      expect(localizations.licensesPagePoweredByTitle, isNotNull);
       expect(localizations.licensesPageTitle, isNotNull);
       expect(localizations.rowsPerPageTitle, isNotNull);
       expect(localizations.cancelButtonLabel, isNotNull);

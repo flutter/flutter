@@ -9,7 +9,6 @@
   "previousPageTooltip": "الصفحة السابقة",
   "showMenuTooltip": "قائمة العرض",
   "aboutListTileTitle": "حول $applicationName",
-  "licensesPagePoweredByTitle": "بويرد بي Flutter",
   "licensesPageTitle": "التّراخيص",
   "pageRowsInfoTitle": "$firstRow–$lastRow أو $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow من حوالي $rowCount",

@@ -44,9 +44,6 @@ abstract class MaterialLocalizations {
   /// The default title for AboutListTile.
   String aboutListTileTitle(String applicationName);
 
-  /// The "Powered by Flutter" subtitle for the [LicensePage] widget.
-  String get licensesPagePoweredByTitle;
-
   /// Title for the [LicensePage] widget.
   String get licensesPageTitle;
 
@@ -197,9 +194,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String text = _nameToValue['aboutListTileTitle'];
     return text.replaceFirst(r'$applicationName', applicationName);
   }
-
-  @override
-  String get licensesPagePoweredByTitle => _nameToValue['licensesPagePoweredByTitle'];
 
   @override
   String get licensesPageTitle => _nameToValue['licensesPageTitle'];

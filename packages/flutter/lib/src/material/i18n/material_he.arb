@@ -9,7 +9,6 @@
   "previousPageTooltip": "עמוד קודם",
   "showMenuTooltip": "הצג תפריט",
   "aboutListTileTitle": "על $applicationName",
-  "licensesPagePoweredByTitle": "מופעל על ידי Flutter",
   "licensesPageTitle": "רישיונות",
   "pageRowsInfoTitle": "$firstRow–$lastRow מתוך $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow מתוך כ $rowCount",
