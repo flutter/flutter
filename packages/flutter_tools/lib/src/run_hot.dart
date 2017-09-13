@@ -135,8 +135,8 @@ class HotRunner extends ResidentRunner {
 
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
-      // VM has to accept the kernel binary, there will be no reload report,
-      // so we let incremental compiler know that source code was accepted.
+      // VM must have accepted the kernel binary, there will be no reload
+      // report, so we let incremental compiler know that source code was accepted.
       if (device.generator != null)
         device.generator.accept();
       for (FlutterView view in device.views)
@@ -338,8 +338,8 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(1, 'DevFS synchronization failed');
     // Check if the isolate is paused and resume it.
     for (FlutterDevice device in flutterDevices) {
-      // VM has to accept the kernel binary, there will be no reload report,
-      // so we let incremental compiler know that source code was accepted.
+      // VM must have accepted the kernel binary, there will be no reload
+      // report, so we let incremental compiler know that source code was accepted.
       if (device.generator != null)
         device.generator.accept();
       for (FlutterView view in device.views) {
