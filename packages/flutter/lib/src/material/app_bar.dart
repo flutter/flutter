@@ -708,6 +708,7 @@ class SliverAppBar extends StatefulWidget {
        assert(primary != null),
        assert(floating != null),
        assert(pinned != null),
+       assert(!pinned || !floating || bottom != null, 'A pinned and floating app bar must have a bottom widget.'),
        assert(snap != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
        super(key: key);
