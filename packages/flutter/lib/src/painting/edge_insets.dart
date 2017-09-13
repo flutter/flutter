@@ -264,6 +264,13 @@ abstract class EdgeInsetsGeometry {
 /// Typically used for an offset from each of the four sides of a box. For
 /// example, the padding inside a box can be represented using this class.
 ///
+/// The [EdgeInsets] class specifies offsets in terms of visual edges, left,
+/// top, right, and bottom. These values are not affected by the
+/// [TextDirection]. To support both left-to-right and right-to-left layouts,
+/// consider using [EdgeInsetsDirectional], which is expressed in terms of
+/// _start_, top, _end_, and bottom, where start and end are resolved in terms
+/// of a [TextDirection] (typically obtained from the ambient [Directionality]).
+///
 /// ## Sample code
 ///
 /// Here are some examples of how to create [EdgeInsets] instances:
