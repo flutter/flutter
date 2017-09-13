@@ -22,6 +22,9 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
+  /// The default spacing around the [middle] widget.
+  static const double kMiddleSpacing = 16.0;
+
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
@@ -30,8 +33,9 @@ class NavigationToolbar extends StatelessWidget {
     this.middle,
     this.trailing,
     this.centerMiddle: true,
-    this.middleSpacing,
+    this.middleSpacing: kMiddleSpacing,
   }) : assert(centerMiddle != null),
+       assert(middleSpacing != null),
        super(key: key);
 
   /// Widget to place at the start of the horizontal toolbar.
@@ -50,7 +54,7 @@ class NavigationToolbar extends StatelessWidget {
 
   /// The spacing between the [leading] and [middle] widgets.
   ///
-  /// Defaults to material specification.
+  /// Defaults to [kMiddleSpacing].
   final double middleSpacing;
 
   @override
@@ -71,7 +75,7 @@ class NavigationToolbar extends StatelessWidget {
     return new CustomMultiChildLayout(
       delegate: new _ToolbarLayout(
         centerMiddle: centerMiddle,
-        requestedMiddleSpacing: middleSpacing,
+        middleSpacing: middleSpacing,
         textDirection: textDirection,
       ),
       children: children,
@@ -85,15 +89,13 @@ enum _ToolbarSlot {
   trailing,
 }
 
-const double _kMiddleSpacing = 16.0;
-
 class _ToolbarLayout extends MultiChildLayoutDelegate {
   _ToolbarLayout({
     this.centerMiddle,
-    double requestedMiddleSpacing,
+    @required this.middleSpacing,
     @required this.textDirection,
-  }) : assert(textDirection != null),
-       middleSpacing = requestedMiddleSpacing ?? _kMiddleSpacing;
+  }) : assert(middleSpacing != null),
+       assert(textDirection != null);
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -102,8 +104,6 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   final bool centerMiddle;
 
   /// The spacing between leading and middle widgets.
-  ///
-  /// Defaults to [_kMiddleSpacing].
   final double middleSpacing;
 
   final TextDirection textDirection;

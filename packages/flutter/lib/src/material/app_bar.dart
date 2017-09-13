@@ -148,12 +148,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
-    this.titleSpacing,
+    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation != null),
        assert(primary != null),
+       assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
@@ -273,7 +274,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// is no [leading] content or [actions]. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
-  /// Defaults to the Material specification.
+  /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
@@ -712,7 +713,7 @@ class SliverAppBar extends StatefulWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
-    this.titleSpacing,
+    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
     this.expandedHeight,
     this.floating: false,
     this.pinned: false,
@@ -720,6 +721,7 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
+       assert(titleSpacing != null),
        assert(floating != null),
        assert(pinned != null),
        assert(!pinned || !floating || bottom != null, 'A pinned and floating app bar must have a bottom widget.'),
@@ -859,7 +861,7 @@ class SliverAppBar extends StatefulWidget {
   /// is no [leading] content or [actions]. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
-  /// Defaults to the Material specification.
+  /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
   /// The size of the app bar when it is fully expanded.
