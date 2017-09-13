@@ -101,8 +101,14 @@ abstract class FractionalOffsetGeometry {
 
   /// Linearly interpolate between two [FractionalOffsetGeometry] objects.
   ///
-  /// If either is null, this function interpolates from [FractionalOffset.center], and
-  /// the result is an object of the same type as the non-null argument.
+  /// If either is null, this function interpolates from the origin of the
+  /// coordinate system of the other and the result is an object of the same
+  /// type as the non-null argument. For example, if the non-null value is a
+  /// [FractionalOffset] or an object representing a combination of a
+  /// [FractionalOffset] and a [FractionalOffsetDirectional], the null value is
+  /// treated as [FractionalOffset.topLeft]. Otherwise, if the non-null value is
+  /// a [FractionalOffsetDirectional], the null value is treated as a
+  /// [FractionalOffset.stopStart].
   ///
   /// If [lerp] is applied to two objects of the same type ([FractionalOffset] or
   /// [FractionalOffsetDirectional]), an object of that type will be returned (though
@@ -118,16 +124,16 @@ abstract class FractionalOffsetGeometry {
       return FractionalOffsetDirectional.lerp(a, b, t);
     if (a == null) {
       return new _SchrodingersFractionalOffset(
-        ui.lerpDouble(0.5, b._dxForRTL, t),
-        ui.lerpDouble(0.5, b._dxForLTR, t),
-        ui.lerpDouble(0.5, b._dy, t),
+        ui.lerpDouble(0.0, b._dxForRTL, t),
+        ui.lerpDouble(0.0, b._dxForLTR, t),
+        ui.lerpDouble(0.0, b._dy, t),
       );
     }
     if (b == null) {
       return new _SchrodingersFractionalOffset(
-        ui.lerpDouble(a._dxForRTL, 0.5, t),
-        ui.lerpDouble(a._dxForLTR, 0.5, t),
-        ui.lerpDouble(a._dy, 0.5, t),
+        ui.lerpDouble(a._dxForRTL, 0.0, t),
+        ui.lerpDouble(a._dxForLTR, 0.0, t),
+        ui.lerpDouble(a._dy, 0.0, t),
       );
     }
     return new _SchrodingersFractionalOffset(
@@ -364,14 +370,14 @@ class FractionalOffset extends FractionalOffsetGeometry {
 
   /// Linearly interpolate between two [FractionalOffset]s.
   ///
-  /// If either is null, this function interpolates from [FractionalOffset.center].
+  /// If either is null, this function interpolates from [FractionalOffset.topLeft].
   static FractionalOffset lerp(FractionalOffset a, FractionalOffset b, double t) {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new FractionalOffset(ui.lerpDouble(0.5, b.dx, t), ui.lerpDouble(0.5, b.dy, t));
+      return new FractionalOffset(ui.lerpDouble(0.0, b.dx, t), ui.lerpDouble(0.0, b.dy, t));
     if (b == null)
-      return new FractionalOffset(ui.lerpDouble(a.dx, 0.5, t), ui.lerpDouble(a.dy, 0.5, t));
+      return new FractionalOffset(ui.lerpDouble(a.dx, 0.0, t), ui.lerpDouble(a.dy, 0.0, t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
   }
 
@@ -549,14 +555,14 @@ class FractionalOffsetDirectional extends FractionalOffsetGeometry {
 
   /// Linearly interpolate between two [FractionalOffsetDirectional]s.
   ///
-  /// If either is null, this function interpolates from [FractionalOffset.center].
+  /// If either is null, this function interpolates from [FractionalOffsetDirectional.topStart].
   static FractionalOffsetDirectional lerp(FractionalOffsetDirectional a, FractionalOffsetDirectional b, double t) {
     if (a == null && b == null)
       return null;
     if (a == null)
-      return new FractionalOffsetDirectional(ui.lerpDouble(0.5, b.start, t), ui.lerpDouble(0.5, b.dy, t));
+      return new FractionalOffsetDirectional(ui.lerpDouble(0.0, b.start, t), ui.lerpDouble(0.0, b.dy, t));
     if (b == null)
-      return new FractionalOffsetDirectional(ui.lerpDouble(a.start, 0.5, t), ui.lerpDouble(a.dy, 0.5, t));
+      return new FractionalOffsetDirectional(ui.lerpDouble(a.start, 0.0, t), ui.lerpDouble(a.dy, 0.0, t));
     return new FractionalOffsetDirectional(ui.lerpDouble(a.start, b.start, t), ui.lerpDouble(a.dy, b.dy, t));
   }
 
