@@ -549,7 +549,7 @@ class _PrefixedStringBuilder {
 
     if (s == '\n') {
       // Edge case to avoid adding trailing whitespace when the caller did
-      // not explicitly add trailing trailing whitespace.
+      // not explicitly add trailing whitespace.
       if (_buffer.isEmpty) {
         _buffer.write(prefixLineOne.trimRight());
       } else if (_atLineStart) {
@@ -810,6 +810,11 @@ abstract class DiagnosticsNode {
 
   /// Returns a string representation of this node and its descendants.
   ///
+  /// `prefixLineOne` will be added to the front of the first line of the
+  /// output. `prefixOtherLines` will be added to the front of each other line.
+  /// If `prefixOtherLines` is null, the `prefixLineOne` is used for every line.
+  /// By default, there is no prefix.
+  ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.
   ///
@@ -835,8 +840,10 @@ abstract class DiagnosticsNode {
     if (prefixOtherLines.isEmpty)
       prefixOtherLines += config.prefixOtherLinesRootNode;
 
-    final _PrefixedStringBuilder builder =  new _PrefixedStringBuilder(
-        prefixLineOne, prefixOtherLines);
+    final _PrefixedStringBuilder builder = new _PrefixedStringBuilder(
+      prefixLineOne,
+      prefixOtherLines,
+    );
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
     if (description == null || description.isEmpty) {
@@ -856,8 +863,9 @@ abstract class DiagnosticsNode {
       builder.write(description);
     }
 
-    final List<DiagnosticsNode> properties =
-        getProperties().where((DiagnosticsNode n) => !n.isFiltered(minLevel)).toList();
+    final List<DiagnosticsNode> properties = getProperties().where(
+      (DiagnosticsNode n) => !n.isFiltered(minLevel)
+    ).toList();
 
     if (properties.isNotEmpty || children.isNotEmpty || emptyBodyDescription != null)
       builder.write(config.afterDescriptionIfBody);
@@ -2321,6 +2329,11 @@ abstract class DiagnosticableTree extends Diagnosticable {
   }
 
   /// Returns a string representation of this node and its descendants.
+  ///
+  /// `prefixLineOne` will be added to the front of the first line of the
+  /// output. `prefixOtherLines` will be added to the front of each other line.
+  /// If `prefixOtherLines` is null, the `prefixLineOne` is used for every line.
+  /// By default, there is no prefix.
   ///
   /// `minLevel` specifies the minimum [DiagnosticLevel] for properties included
   /// in the output.

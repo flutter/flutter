@@ -48,13 +48,12 @@ class Tooltip extends StatefulWidget {
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
-    @required this.child,
+    this.child,
   }) : assert(message != null),
        assert(height != null),
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
-       assert(child != null),
        super(key: key);
 
   /// The text to display in the tooltip.
