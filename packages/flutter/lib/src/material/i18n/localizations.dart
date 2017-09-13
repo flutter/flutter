@@ -51,7 +51,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "previousPageTooltip": r"Vorherige Seite",
     "showMenuTooltip": r"Menü anzeigen",
     "aboutListTileTitle": r"Über $applicationName",
-    "licensesPagePoweredByTitle": r"Angetrieben durch Flutter",
+    "licensesPagePoweredByTitle": r"Mit Flutter gebaut",
     "licensesPageTitle": r"Lizenzen",
     "pageRowsInfoTitle": r"$firstRow–$lastRow von $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow von etwa $rowCount",
