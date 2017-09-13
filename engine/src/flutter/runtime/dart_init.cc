@@ -129,7 +129,11 @@ void IsolateShutdownCallback(void* callback_data) {
     Dart_Handle sticky_error = Dart_GetStickyError();
     FXL_CHECK(LogIfError(sticky_error));
   }
-  tonic::DartState* dart_state = static_cast<tonic::DartState*>(callback_data);
+  UIDartState* dart_state = static_cast<UIDartState*>(callback_data);
+  IsolateClient *isolate_client_ = dart_state->isolate_client();
+  if (isolate_client_) {
+    isolate_client_->WillShutDownIsolate(dart_state->isolate());
+  }
   delete dart_state;
 }
 
