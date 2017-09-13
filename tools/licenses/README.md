@@ -3,6 +3,7 @@ To update the golden license files, make sure you've rebased your branch to the 
 ```
 pub get
 gclient sync
+rm -rf ../../../out/licenses
 dart lib/main.dart --src ../../.. --out ../../../out/licenses --golden ../../travis/licenses_golden
 ```
 
