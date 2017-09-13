@@ -190,13 +190,13 @@ void main() {
     expect(tester.getTopRight(find.text('X')).dx, 800.0 - 16.0);
   });
 
-  testWidgets('AppBar titleMargin:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            titleMargin: 32.0,
+            titleSpacing: 32.0,
             title: const Text('X'),
           ),
         ),

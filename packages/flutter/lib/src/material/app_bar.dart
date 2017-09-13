@@ -148,7 +148,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
-    this.titleMargin,
+    this.titleSpacing,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
   }) : assert(automaticallyImplyLeading != null),
@@ -269,12 +269,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The margin between [title] and [leading] content. This margin is applied
+  /// The spacing between [title] and [leading] content. This spacing is applied
   /// even if there is no leading content. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
   /// Defaults to the specification in [NavigationToolbar].
-  final double titleMargin;
+  final double titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
   ///
@@ -401,7 +401,7 @@ class _AppBarState extends State<AppBar> {
         middle: title,
         trailing: actions,
         centerMiddle: widget._getEffectiveCenterTitle(themeData),
-        middleMargin: widget.titleMargin,
+        middleSpacing: widget.titleSpacing,
       ),
     );
 
@@ -537,7 +537,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.textTheme,
     @required this.primary,
     @required this.centerTitle,
-    @required this.titleMargin,
+    @required this.titleSpacing,
     @required this.expandedHeight,
     @required this.collapsedHeight,
     @required this.topPadding,
@@ -561,7 +561,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TextTheme textTheme;
   final bool primary;
   final bool centerTitle;
-  final double titleMargin;
+  final double titleSpacing;
   final double expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -603,7 +603,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
-        titleMargin: titleMargin,
+        titleSpacing: titleSpacing,
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
       ),
@@ -627,7 +627,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || textTheme != oldDelegate.textTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
-        || titleMargin != oldDelegate.titleMargin
+        || titleSpacing != oldDelegate.titleSpacing
         || expandedHeight != oldDelegate.expandedHeight
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
@@ -712,7 +712,7 @@ class SliverAppBar extends StatefulWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
-    this.titleMargin,
+    this.titleSpacing,
     this.expandedHeight,
     this.floating: false,
     this.pinned: false,
@@ -855,12 +855,12 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The margin between [title] and [leading] content. This margin is applied
+  /// The spacing between [title] and [leading] content. This spacing is applied
   /// even if there is no leading content. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
   /// Defaults to the specification in [NavigationToolbar].
-  final double titleMargin;
+  final double titleSpacing;
 
   /// The size of the app bar when it is fully expanded.
   ///
@@ -960,7 +960,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         textTheme: widget.textTheme,
         primary: widget.primary,
         centerTitle: widget.centerTitle,
-        titleMargin: widget.titleMargin,
+        titleSpacing: widget.titleSpacing,
         expandedHeight: widget.expandedHeight,
         collapsedHeight: collapsedHeight,
         topPadding: topPadding,

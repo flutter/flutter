@@ -30,7 +30,7 @@ class NavigationToolbar extends StatelessWidget {
     this.middle,
     this.trailing,
     this.centerMiddle: true,
-    this.middleMargin,
+    this.middleSpacing,
   }) : assert(centerMiddle != null),
        super(key: key);
 
@@ -48,8 +48,8 @@ class NavigationToolbar extends StatelessWidget {
   /// next to the [leading] widget when false.
   final bool centerMiddle;
 
-  /// The margin between the [leading] and [middle] widgets.
-  final double middleMargin;
+  /// The spacing between the [leading] and [middle] widgets.
+  final double middleSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -69,7 +69,7 @@ class NavigationToolbar extends StatelessWidget {
     return new CustomMultiChildLayout(
       delegate: new _ToolbarLayout(
         centerMiddle: centerMiddle,
-        requestedMiddleMargin: middleMargin,
+        requestedMiddleSpacing: middleSpacing,
         textDirection: textDirection,
       ),
       children: children,
@@ -83,15 +83,15 @@ enum _ToolbarSlot {
   trailing,
 }
 
-const double _kMiddleMargin = 16.0;
+const double _kMiddleSpacing = 16.0;
 
 class _ToolbarLayout extends MultiChildLayoutDelegate {
   _ToolbarLayout({
     this.centerMiddle,
-    double requestedMiddleMargin,
+    double requestedMiddleSpacing,
     @required this.textDirection,
   }) : assert(textDirection != null),
-       middleMargin = requestedMiddleMargin ?? _kMiddleMargin;
+       middleSpacing = requestedMiddleSpacing ?? _kMiddleSpacing;
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -99,10 +99,10 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   // space between the leading and trailing widgets).
   final bool centerMiddle;
 
-  /// The margin between leading and middle widgets.
+  /// The spacing between leading and middle widgets.
   ///
-  /// Defaults to [_kMiddleMargin].
-  final double middleMargin;
+  /// Defaults to [_kMiddleSpacing].
+  final double middleSpacing;
 
   final TextDirection textDirection;
 
@@ -149,11 +149,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
-      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleMargin * 2.0, 0.0);
+      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleSpacing * 2.0, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
-      final double middleStartMargin = leadingWidth + middleMargin;
+      final double middleStartMargin = leadingWidth + middleSpacing;
       double middleStart = middleStartMargin;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing
@@ -183,7 +183,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
     return oldDelegate.centerMiddle != centerMiddle
-        || oldDelegate.middleMargin != middleMargin
+        || oldDelegate.middleSpacing != middleSpacing
         || oldDelegate.textDirection != textDirection;
   }
 }
