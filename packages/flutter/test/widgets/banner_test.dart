@@ -4,8 +4,10 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/widgets.dart';
-import 'package:test/test.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 class TestCanvas implements Canvas {
   final List<Invocation> invocations = <Invocation>[];
@@ -17,11 +19,16 @@ class TestCanvas implements Canvas {
 }
 
 void main() {
+  // the textDirection values below are intentionally sometimes different and
+  // sometimes the same as the layoutDirection, to make sure that they don't
+  // affect the layout.
+
   test('A Banner with a location of topStart paints in the top left (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
-      textDirection: TextDirection.ltr,
-      location: BannerLocation.topStart
+      textDirection: TextDirection.rtl,
+      location: BannerLocation.topStart,
+      layoutDirection: TextDirection.ltr,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -47,8 +54,9 @@ void main() {
   test('A Banner with a location of topStart paints in the top right (RTL)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.ltr,
       location: BannerLocation.topStart,
+      layoutDirection: TextDirection.rtl,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -75,7 +83,8 @@ void main() {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.topEnd
+      location: BannerLocation.topEnd,
+      layoutDirection: TextDirection.ltr,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -103,6 +112,7 @@ void main() {
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.topEnd,
+      layoutDirection: TextDirection.rtl,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -129,7 +139,8 @@ void main() {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
       textDirection: TextDirection.ltr,
-      location: BannerLocation.bottomStart
+      location: BannerLocation.bottomStart,
+      layoutDirection: TextDirection.ltr,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -157,6 +168,7 @@ void main() {
       message: 'foo',
       textDirection: TextDirection.rtl,
       location: BannerLocation.bottomStart,
+      layoutDirection: TextDirection.rtl,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -182,8 +194,9 @@ void main() {
   test('A Banner with a location of bottomEnd paints in the bottom right (LTR)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
-      textDirection: TextDirection.ltr,
-      location: BannerLocation.bottomEnd
+      textDirection: TextDirection.rtl,
+      location: BannerLocation.bottomEnd,
+      layoutDirection: TextDirection.ltr,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -209,8 +222,9 @@ void main() {
   test('A Banner with a location of bottomEnd paints in the bottom left (RTL)', () {
     final BannerPainter bannerPainter = new BannerPainter(
       message: 'foo',
-      textDirection: TextDirection.rtl,
+      textDirection: TextDirection.ltr,
       location: BannerLocation.bottomEnd,
+      layoutDirection: TextDirection.rtl,
     );
 
     final TestCanvas canvas = new TestCanvas();
@@ -233,4 +247,34 @@ void main() {
     expect(rotateCommand.positionalArguments[0], equals(math.PI / 4.0));
   });
 
+  testWidgets('Banner widget', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Banner(message: 'Hello', location: BannerLocation.topEnd),
+      ),
+    );
+    expect(find.byType(CustomPaint), paints
+      ..save
+      ..translate(x: 800.0, y: 0.0)
+      ..rotate(angle: math.PI / 4.0)
+      ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
+      ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
+      ..paragraph(offset: const Offset(-40.0, 29.0))
+      ..restore
+    );
+  });
+
+  testWidgets('Banner widget in MaterialApp', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(home: const Placeholder()));
+    expect(find.byType(CheckedModeBanner), paints
+      ..save
+      ..translate(x: 800.0, y: 0.0)
+      ..rotate(angle: math.PI / 4.0)
+      ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0x7f000000), hasMaskFilter: true)
+      ..rect(rect: new Rect.fromLTRB(-40.0, 28.0, 40.0, 40.0), color: const Color(0xa0b71c1c), hasMaskFilter: false)
+      ..paragraph(offset: const Offset(-40.0, 24.0))
+      ..restore
+    );
+  });
 }

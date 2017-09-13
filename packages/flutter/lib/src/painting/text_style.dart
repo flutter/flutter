@@ -521,7 +521,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, hidden: true));
+      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');
@@ -529,15 +529,15 @@ class TextStyle extends Diagnosticable {
       // Intentionally collide with the property 'decoration' added below.
       // Tools that show hidden properties could choose the first property
       // matching the name to disambiguate.
-      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, hidden: true));
+      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
       if (decoration != null)
         decorationDescription.add('$decoration');
       assert(decorationDescription.isNotEmpty);
       styles.add(new MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
     }
 
-    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.hidden);
-    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, hidden: !styleSpecified && inherit));
+    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
+    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
     for (DiagnosticsNode style in styles)
       properties.add(style);
 

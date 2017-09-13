@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'semantics_tester.dart';
@@ -194,6 +195,63 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
     expect(tester.getTopLeft(find.byWidget(semantics[1])).dy, kToolbarHeight);
+  });
+
+  testWidgets('scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
+    final List<dynamic> messages = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      messages.add(message);
+    });
+
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> textWidgets = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      textWidgets.add(new Text('$i'));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(children: textWidgets),
+    ));
+
+    await flingUp(tester);
+
+    expect(messages, isNot(hasLength(0)));
+    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+
+    messages.clear();
+    await flingDown(tester);
+
+    expect(messages, isNot(hasLength(0)));
+    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+
+    semantics.dispose();
+  });
+
+  testWidgets('Semantics tree is populated mid-scroll', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> children = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      children.add(new Container(
+        child: new Text('Item $i'),
+        height: 40.0,
+      ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(children: children),
+      ),
+    );
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(const Offset(0.0, -40.0));
+    await tester.pump();
+
+    expect(semantics, includesNodeWith(label: 'Item 1'));
+    expect(semantics, includesNodeWith(label: 'Item 2'));
+    expect(semantics, includesNodeWith(label: 'Item 3'));
+
+    semantics.dispose();
   });
 }
 

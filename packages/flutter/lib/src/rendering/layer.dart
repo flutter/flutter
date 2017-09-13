@@ -107,8 +107,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Object>('owner', owner, hidden: parent != null, defaultValue: null));
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
+    description.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 

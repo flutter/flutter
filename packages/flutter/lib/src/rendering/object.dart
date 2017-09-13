@@ -547,45 +547,52 @@ typedef void RenderObjectVisitor(RenderObject child);
 typedef void LayoutCallback<T extends Constraints>(T constraints);
 
 class _SemanticsGeometry {
-  _SemanticsGeometry() : transform = new Matrix4.identity();
+  _SemanticsGeometry() : _transform = new Matrix4.identity();
+
   _SemanticsGeometry.withClipFrom(_SemanticsGeometry other) {
-    clipRect = other?.clipRect;
-    transform = new Matrix4.identity();
+    _clipRect = other?._clipRect;
+    _transform = new Matrix4.identity();
   }
+
   _SemanticsGeometry.copy(_SemanticsGeometry other) {
     if (other != null) {
-      clipRect = other.clipRect;
-      transform = new Matrix4.copy(other.transform);
+      _clipRect = other._clipRect;
+      _transform = new Matrix4.copy(other._transform);
     } else {
-      transform = new Matrix4.identity();
+      _transform = new Matrix4.identity();
     }
   }
-  Rect clipRect;
+
+  Rect _clipRect;
+
   Rect _intersectClipRect(Rect other) {
-    if (clipRect == null)
+    if (_clipRect == null)
       return other;
     if (other == null)
-      return clipRect;
-    return clipRect.intersect(other);
+      return _clipRect;
+    return _clipRect.intersect(other);
   }
-  Matrix4 transform;
+
+  Matrix4 _transform;
+
   void applyAncestorChain(List<RenderObject> ancestorChain) {
     for (int index = ancestorChain.length-1; index > 0; index -= 1) {
       final RenderObject parent = ancestorChain[index];
       final RenderObject child = ancestorChain[index-1];
-      clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
-      if (clipRect != null) {
-        if (clipRect.isEmpty) {
-          clipRect = Rect.zero;
+      _clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
+      if (_clipRect != null) {
+        if (_clipRect.isEmpty) {
+          _clipRect = Rect.zero;
         } else {
           final Matrix4 clipTransform = new Matrix4.identity();
           parent.applyPaintTransform(child, clipTransform);
-          clipRect = MatrixUtils.inverseTransformRect(clipTransform, clipRect);
+          _clipRect = MatrixUtils.inverseTransformRect(clipTransform, _clipRect);
         }
       }
-      parent.applyPaintTransform(child, transform);
+      parent.applyPaintTransform(child, _transform);
     }
   }
+
   void updateSemanticsNode({
     @required RenderObject rendering,
     @required SemanticsNode semantics,
@@ -595,9 +602,9 @@ class _SemanticsGeometry {
     assert(semantics != null);
     assert(parentSemantics != null);
     assert(parentSemantics.wasAffectedByClip != null);
-    semantics.transform = transform;
-    if (clipRect != null) {
-      semantics.rect = clipRect.intersect(rendering.semanticBounds);
+    semantics.transform = _transform;
+    if (_clipRect != null) {
+      semantics.rect = _clipRect.intersect(rendering.semanticBounds);
       semantics.wasAffectedByClip = true;
     } else {
       semantics.rect = rendering.semanticBounds;
@@ -1463,7 +1470,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       renderObject: this,
       informationCollector: (StringBuffer information) {
         information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow('\n  ')}');
+        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
         final List<String> descendants = <String>[];
         const int maxDepth = 5;
         int depth = 0;
@@ -2319,7 +2326,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           'Tried to paint a RenderObject reentrantly.\n'
           'The following RenderObject was already being painted when it was '
           'painted again:\n'
-          '  ${toStringShallow("\n    ")}\n'
+          '  ${toStringShallow(joiner: "\n    ")}\n'
           'Since this typically indicates an infinite recursion, it is '
           'disallowed.'
         );
@@ -2342,7 +2349,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           'updated.\n'
           'The following RenderObject was marked as having dirty compositing '
           'bits at the time that it was painted:\n'
-          '  ${toStringShallow("\n    ")}\n'
+          '  ${toStringShallow(joiner: "\n    ")}\n'
           'A RenderObject that still has dirty compositing bits cannot be '
           'painted because this indicates that the tree has not yet been '
           'properly configured for creating the layer tree.\n'
@@ -2833,17 +2840,25 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   @override
-  String toString() => toStringShort();
+  String toString({ DiagnosticLevel minLevel }) => toStringShort();
 
   /// Returns a description of the tree rooted at this node.
   /// If the prefix argument is provided, then every line in the output
   /// will be prefixed by that string.
   @override
-  String toStringDeep([String prefixLineOne = '', String prefixOtherLines = '']) {
+  String toStringDeep({
+    String prefixLineOne: '',
+    String prefixOtherLines: '',
+    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+  }) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
 
-    final String result = super.toStringDeep(prefixLineOne, prefixOtherLines);
+    final String result = super.toStringDeep(
+      prefixLineOne: prefixLineOne,
+      prefixOtherLines: prefixOtherLines,
+      minLevel: minLevel,
+    );
 
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
@@ -2855,10 +2870,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// This includes the same information for this RenderObject as given by
   /// [toStringDeep], but does not recurse to any children.
   @override
-  String toStringShallow([String joiner = '; ']) {
+  String toStringShallow({
+    String joiner: '; ',
+    DiagnosticLevel minLevel: DiagnosticLevel.debug,
+  }) {
     final RenderObject debugPreviousActiveLayout = _debugActiveLayout;
     _debugActiveLayout = null;
-    final String result = super.toStringShallow(joiner);
+    final String result = super.toStringShallow(joiner: joiner, minLevel: minLevel);
     _debugActiveLayout = debugPreviousActiveLayout;
     return result;
   }
@@ -2866,9 +2884,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
-    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, ifNull: 'MISSING'));
-    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, ifNull: 'MISSING'));
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
+    description.add(new DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
+    description.add(new DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
     description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));

@@ -16,6 +16,7 @@ import 'data_table_source.dart';
 import 'dropdown.dart';
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'progress_indicator.dart';
 import 'theme.dart';
 
@@ -286,9 +287,10 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   Widget build(BuildContext context) {
     // TODO(ianh): This whole build function doesn't handle RTL yet.
     final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     // HEADER
     final List<Widget> headerWidgets = <Widget>[];
-    double leftPadding = 24.0;
+    double startPadding = 24.0;
     if (_selectedRowCount == 0) {
       headerWidgets.add(new Expanded(child: widget.header));
       if (widget.header is ButtonBar) {
@@ -298,20 +300,19 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         // pixels internally on each side, yet we want the left edge of the
         // inside of the button to line up with the 24.0 left inset.
         // TODO(ianh): Better magic. See https://github.com/flutter/flutter/issues/4460
-        leftPadding = 12.0;
+        startPadding = 12.0;
       }
-    } else if (_selectedRowCount == 1) {
-      // TODO(ianh): Real l10n.
-      headerWidgets.add(const Expanded(child: const Text('1 item selected')));
     } else {
-      headerWidgets.add(new Expanded(child: new Text('$_selectedRowCount items selected')));
+      headerWidgets.add(new Expanded(
+        child: new Text(localizations.selectedRowCountTitle(_selectedRowCount)),
+      ));
     }
     if (widget.actions != null) {
       headerWidgets.addAll(
         widget.actions.map<Widget>((Widget action) {
           return new Padding(
             // 8.0 is the default padding of an icon button
-            padding: const EdgeInsets.only(left: 24.0 - 8.0 * 2.0),
+            padding: const EdgeInsetsDirectional.only(start: 24.0 - 8.0 * 2.0),
             child: action,
           );
         }).toList()
@@ -332,7 +333,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         })
         .toList();
       footerWidgets.addAll(<Widget>[
-        const Text('Rows per page:'),
+        new Text(localizations.rowsPerPageTitle),
         new DropdownButtonHideUnderline(
           child: new DropdownButton<int>(
             items: availableRowsPerPage,
@@ -347,20 +348,25 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     footerWidgets.addAll(<Widget>[
       new Container(width: 32.0),
       new Text(
-        '${_firstRowIndex + 1}\u2013${_firstRowIndex + widget.rowsPerPage} ${ _rowCountApproximate ? "of about" : "of" } $_rowCount'
+        localizations.pageRowsInfoTitle(
+          _firstRowIndex + 1,
+          _firstRowIndex + widget.rowsPerPage,
+          _rowCount,
+          _rowCountApproximate
+        )
       ),
       new Container(width: 32.0),
       new IconButton(
         icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
-        tooltip: 'Previous page',
+        tooltip: localizations.previousPageTooltip,
         onPressed: _firstRowIndex <= 0 ? null : _handlePrevious
       ),
       new Container(width: 24.0),
       new IconButton(
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
-        tooltip: 'Next page',
+        tooltip: localizations.nextPageTooltip,
         onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext
       ),
       new Container(width: 14.0),
@@ -384,7 +390,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               child: new ButtonTheme.bar(
                 child: new Container(
                   height: 64.0,
-                  padding: new EdgeInsets.fromLTRB(leftPadding, 0.0, 14.0, 0.0),
+                  padding: new EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
                   // TODO(ianh): This decoration will prevent ink splashes from being visible.
                   // Instead, we should have a widget that prints the decoration on the material.
                   // See https://github.com/flutter/flutter/issues/3782

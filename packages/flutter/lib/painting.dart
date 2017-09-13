@@ -18,6 +18,8 @@
 library painting;
 
 export 'src/painting/basic_types.dart';
+export 'src/painting/border.dart';
+export 'src/painting/border_radius.dart';
 export 'src/painting/box_fit.dart';
 export 'src/painting/box_painter.dart';
 export 'src/painting/colors.dart';

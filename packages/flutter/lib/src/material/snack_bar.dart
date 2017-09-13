@@ -222,7 +222,7 @@ class SnackBar extends StatelessWidget {
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(
-            alignment: FractionalOffset.topLeft,
+            alignment: FractionalOffsetDirectional.topStart,
             heightFactor: heightAnimation.value,
             child: child
           );

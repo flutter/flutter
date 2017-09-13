@@ -20,10 +20,9 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+            builder: (BuildContext context) {
               return const CupertinoScaffold(
                 // Default nav bar is translucent.
                 navigationBar: const CupertinoNavigationBar(
@@ -47,10 +46,9 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+            builder: (BuildContext context) {
               return new CupertinoScaffold.tabbed(
                 navigationBar: const CupertinoNavigationBar(
                   backgroundColor: CupertinoColors.white,
@@ -77,10 +75,9 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+            builder: (BuildContext context) {
               return new CupertinoScaffold.tabbed(
                 navigationBar: const CupertinoNavigationBar(
                   backgroundColor: CupertinoColors.white,
@@ -142,10 +139,9 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+            builder: (BuildContext context) {
               return new CupertinoScaffold.tabbed(
                   navigationBar: const CupertinoNavigationBar(
                     backgroundColor: CupertinoColors.white,

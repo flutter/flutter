@@ -1281,7 +1281,7 @@ class RenderTable extends RenderBox {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
-    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, hidden: _columnWidths.isEmpty));
+    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
     description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));

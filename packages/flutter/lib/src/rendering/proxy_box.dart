@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1038,6 +1039,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
               fontSize: 14.0,
             ),
           ),
+          textDirection: TextDirection.rtl, // doesn't matter, it's one character
         )
         ..layout();
       return true;
@@ -2293,7 +2295,8 @@ class RenderCustomPaint extends RenderProxyBox {
     int debugPreviousCanvasSaveCount;
     canvas.save();
     assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; });
-    canvas.translate(offset.dx, offset.dy);
+    if (offset != Offset.zero)
+      canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
     assert(() {
       // This isn't perfect. For example, we can't catch the case of
@@ -2980,6 +2983,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
+  }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
@@ -3016,6 +3026,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   void _annotate(SemanticsNode node) {
+    _annotatedNode = node;
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);

@@ -113,9 +113,10 @@ class _CupertinoScaffoldState extends State<CupertinoScaffold> {
   /// Pad the given middle widget with or without top and bottom offsets depending
   /// on whether the middle widget should slide behind translucent bars.
   Widget _padMiddle(Widget middle) {
-    double topPadding = MediaQuery.of(context).padding.top;
+    double topPadding = 0.0;
     if (widget.navigationBar is CupertinoNavigationBar) {
       final CupertinoNavigationBar top = widget.navigationBar;
+      topPadding += MediaQuery.of(context).padding.top;
       if (top.opaque)
         topPadding += top.preferredSize.height;
     }
