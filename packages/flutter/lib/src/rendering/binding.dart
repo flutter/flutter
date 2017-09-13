@@ -283,9 +283,7 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
   @override
   Future<Null> performReassemble() async {
     await super.performReassemble();
-    Timeline.startSync('Dirty Render Tree', arguments: const <String, String>{
-      'mode': 'basic'
-    });
+    Timeline.startSync('Dirty Render Tree', arguments: timelineWhitelistArguments);
     try {
       renderView.reassemble();
     } finally {
