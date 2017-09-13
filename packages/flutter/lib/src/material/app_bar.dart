@@ -269,11 +269,11 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The spacing between [title] and [leading] content. This spacing is applied
-  /// even if there is no leading content. If you want [title] to take all the
+  /// The spacing around [title] content. This spacing is applied even if there
+  /// is no [leading] content or [actions]. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
-  /// Defaults to the specification in [NavigationToolbar].
+  /// Defaults to the Material specification.
   final double titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
@@ -855,11 +855,11 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
-  /// The spacing between [title] and [leading] content. This spacing is applied
-  /// even if there is no leading content. If you want [title] to take all the
+  /// The spacing around [title] content. This spacing is applied even if there
+  /// is no [leading] content or [actions]. If you want [title] to take all the
   /// space available, set this value to 0.0.
   ///
-  /// Defaults to the specification in [NavigationToolbar].
+  /// Defaults to the Material specification.
   final double titleSpacing;
 
   /// The size of the app bar when it is fully expanded.

@@ -49,6 +49,8 @@ class NavigationToolbar extends StatelessWidget {
   final bool centerMiddle;
 
   /// The spacing between the [leading] and [middle] widgets.
+  ///
+  /// Defaults to material specification.
   final double middleSpacing;
 
   @override

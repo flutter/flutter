@@ -206,6 +206,25 @@ void main() {
     expect(tester.getTopLeft(find.text('X')).dx, 32.0);
   });
 
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              centerTitle: false,
+              titleSpacing: 32.0,
+              title: const Text('X'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 32.0);
+  });
+
   testWidgets(
     'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
