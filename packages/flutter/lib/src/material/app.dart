@@ -276,7 +276,10 @@ class MaterialApp extends StatefulWidget {
   /// ```
   ///
   /// Constructing a [MaterialApp] with a `FooLocalizationsDelegate` overrides
-  /// the automatically included delegate for [MaterialLocalizations].
+  /// the automatically included delegate for [MaterialLocalizations] because
+  /// only the first delegate of each [LocalizationsDelegate.type] is used and
+  /// the automatically included delegates are added to the end of the app's
+  /// [localizationsDelegates] list.
   ///
   /// ```dart
   /// new MaterialApp(
