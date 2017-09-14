@@ -157,22 +157,25 @@ void main() {
     expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 0.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: const Text('X'),
+            title: const Placeholder(key: const Key('X')),
           ),
         ),
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).dx, 0.0);
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopLeft(titleWidget).dx, 16.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopRight(titleWidget).dx, 800 - 16.0 - 4.0);
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 0.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Directionality(
@@ -180,14 +183,58 @@ void main() {
           child: new Scaffold(
             appBar: new AppBar(
               centerTitle: false,
-              title: const Text('X'),
+              title: const Placeholder(key: const Key('X')),
             ),
           ),
         ),
       ),
     );
 
-    expect(tester.getTopRight(find.text('X')).dx, 800.0);
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopRight(titleWidget).dx, 800.0 - 16.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopLeft(titleWidget).dx, 16.0 + 4.0);
+  });
+
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            centerTitle: false,
+            titleSpacing: 32.0,
+            title: const Placeholder(key: const Key('X')),
+          ),
+        ),
+      ),
+    );
+
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopLeft(titleWidget).dx, 32.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopRight(titleWidget).dx, 800 - 32.0 - 4.0);
+  });
+
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              centerTitle: false,
+              titleSpacing: 32.0,
+              title: const Placeholder(key: const Key('X')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopRight(titleWidget).dx, 800.0 - 32.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopLeft(titleWidget).dx, 32.0 + 4.0);
   });
 
   testWidgets(

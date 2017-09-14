@@ -22,6 +22,7 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
+
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
@@ -30,8 +31,13 @@ class NavigationToolbar extends StatelessWidget {
     this.middle,
     this.trailing,
     this.centerMiddle: true,
+    this.middleSpacing: kMiddleSpacing,
   }) : assert(centerMiddle != null),
+       assert(middleSpacing != null),
        super(key: key);
+
+  /// The default spacing around the [middle] widget in dp.
+  static const double kMiddleSpacing = 16.0;
 
   /// Widget to place at the start of the horizontal toolbar.
   final Widget leading;
@@ -46,6 +52,11 @@ class NavigationToolbar extends StatelessWidget {
   /// Whether to align the [middle] widget to the center of this widget or
   /// next to the [leading] widget when false.
   final bool centerMiddle;
+
+  /// The spacing around the [middle] widget on horizontal axis.
+  ///
+  /// Defaults to [kMiddleSpacing].
+  final double middleSpacing;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +76,7 @@ class NavigationToolbar extends StatelessWidget {
     return new CustomMultiChildLayout(
       delegate: new _ToolbarLayout(
         centerMiddle: centerMiddle,
+        middleSpacing: middleSpacing,
         textDirection: textDirection,
       ),
       children: children,
@@ -78,19 +90,22 @@ enum _ToolbarSlot {
   trailing,
 }
 
-const double _kMiddleMargin = 16.0;
-
 class _ToolbarLayout extends MultiChildLayoutDelegate {
   _ToolbarLayout({
     this.centerMiddle,
+    @required this.middleSpacing,
     @required this.textDirection,
-  }) : assert(textDirection != null);
+  }) : assert(middleSpacing != null),
+       assert(textDirection != null);
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
   // If true the middle widget is centered within the toolbar (not within the horizontal
   // space between the leading and trailing widgets).
   final bool centerMiddle;
+
+  /// The spacing around middle widget on horizontal axis.
+  final double middleSpacing;
 
   final TextDirection textDirection;
 
@@ -137,11 +152,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
-      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - _kMiddleMargin * 2.0, 0.0);
+      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleSpacing * 2.0, 0.0);
       final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
-      final double middleStartMargin = hasChild(_ToolbarSlot.leading) ? leadingWidth + _kMiddleMargin : 0.0;
+      final double middleStartMargin = leadingWidth + middleSpacing;
       double middleStart = middleStartMargin;
       final double middleY = (size.height - middleSize.height) / 2.0;
       // If the centered middle will not fit between the leading and trailing
@@ -171,6 +186,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
     return oldDelegate.centerMiddle != centerMiddle
+        || oldDelegate.middleSpacing != middleSpacing
         || oldDelegate.textDirection != textDirection;
   }
 }

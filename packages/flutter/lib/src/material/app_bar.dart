@@ -148,11 +148,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
+    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
     this.toolbarOpacity: 1.0,
     this.bottomOpacity: 1.0,
   }) : assert(automaticallyImplyLeading != null),
        assert(elevation != null),
        assert(primary != null),
+       assert(titleSpacing != null),
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
@@ -267,6 +269,13 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
+
+  /// The spacing around [title] content on the horizontal axis. This spacing is
+  /// applied even if there is no [leading] content or [actions]. If you want
+  /// [title] to take all the space available, set this value to 0.0.
+  ///
+  /// Defaults to [NavigationToolbar.kMiddleSpacing].
+  final double titleSpacing;
 
   /// How opaque the toolbar part of the app bar is.
   ///
@@ -393,6 +402,7 @@ class _AppBarState extends State<AppBar> {
         middle: title,
         trailing: actions,
         centerMiddle: widget._getEffectiveCenterTitle(themeData),
+        middleSpacing: widget.titleSpacing,
       ),
     );
 
@@ -528,6 +538,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.textTheme,
     @required this.primary,
     @required this.centerTitle,
+    @required this.titleSpacing,
     @required this.expandedHeight,
     @required this.collapsedHeight,
     @required this.topPadding,
@@ -551,6 +562,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final TextTheme textTheme;
   final bool primary;
   final bool centerTitle;
+  final double titleSpacing;
   final double expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -592,6 +604,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         textTheme: textTheme,
         primary: primary,
         centerTitle: centerTitle,
+        titleSpacing: titleSpacing,
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
       ),
@@ -615,6 +628,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         || textTheme != oldDelegate.textTheme
         || primary != oldDelegate.primary
         || centerTitle != oldDelegate.centerTitle
+        || titleSpacing != oldDelegate.titleSpacing
         || expandedHeight != oldDelegate.expandedHeight
         || topPadding != oldDelegate.topPadding
         || pinned != oldDelegate.pinned
@@ -699,6 +713,7 @@ class SliverAppBar extends StatefulWidget {
     this.textTheme,
     this.primary: true,
     this.centerTitle,
+    this.titleSpacing: NavigationToolbar.kMiddleSpacing,
     this.expandedHeight,
     this.floating: false,
     this.pinned: false,
@@ -706,6 +721,7 @@ class SliverAppBar extends StatefulWidget {
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
+       assert(titleSpacing != null),
        assert(floating != null),
        assert(pinned != null),
        assert(!pinned || !floating || bottom != null, 'A pinned and floating app bar must have a bottom widget.'),
@@ -841,6 +857,13 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to being adapted to the current [TargetPlatform].
   final bool centerTitle;
 
+  /// The spacing around [title] content on the horizontal axis. This spacing is
+  /// applied even if there is no [leading] content or [actions]. If you want
+  /// [title] to take all the space available, set this value to 0.0.
+  ///
+  /// Defaults to [NavigationToolbar.kMiddleSpacing].
+  final double titleSpacing;
+
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -939,6 +962,7 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
         textTheme: widget.textTheme,
         primary: widget.primary,
         centerTitle: widget.centerTitle,
+        titleSpacing: widget.titleSpacing,
         expandedHeight: widget.expandedHeight,
         collapsedHeight: collapsedHeight,
         topPadding: topPadding,
