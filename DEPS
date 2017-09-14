@@ -30,7 +30,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '7b56ef96e2cc77150738366566357912c442ff5b',
+  'dart_revision': 'd9a26967e0b73191b158fcdff2dc8bc303c06a1b',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': 'daf66909019d2aaec1721fc39d94ea648a9fdc1d',
@@ -47,7 +47,7 @@ vars = {
   'dart_csslib_tag': '0.13.3+1',
   'dart_dart2js_info_tag': '0.5.4+2',
   'dart_dart_style_tag': '1.0.7',
-  'dart_dartdoc_tag': 'v0.13.0+2',
+  'dart_dartdoc_tag': 'v0.13.0+3',
   'dart_fixnum_tag': '0.10.5',
   'dart_glob_tag': '1.1.3',
   'dart_html_tag': '0.13.1',
@@ -61,7 +61,7 @@ vars = {
   'dart_linter_tag': '0.1.35',
   'dart_logging_tag': '0.11.3+1',
   'dart_markdown_tag': '0.11.3',
-  'dart_matcher_tag': '0.12.0+2',
+  'dart_matcher_tag': '0.12.1+3',
   'dart_mime_rev': '75890811d4af5af080351ba8a2853ad4c8df98dd',
   'dart_mockito_tag': '2.0.2',
   'dart_mustache4dart_tag': 'v1.1.0',
@@ -88,7 +88,7 @@ vars = {
   'dart_stack_trace_tag': '1.7.2',
   'dart_stream_channel_tag': '1.6.1',
   'dart_string_scanner_tag': '1.0.1',
-  'dart_test_tag': '0.12.18+1',
+  'dart_test_tag': '0.12.24+2',
   'dart_tuple_tag': 'v1.0.1',
   'dart_typed_data_tag': '1.1.3',
   'dart_usage_tag': '3.3.0',
@@ -113,7 +113,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'de172163aa58c29ae9b729031c08e14da605c432',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '1717079f32b03a3019f7ef7f9d5c2481d1af31e6',
 
    # Fuchsia compatibility
    #
@@ -122,10 +122,10 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/garnet':
-   Var('fuchsia_git') + '/garnet' + '@' + '954225c071a8e44e83e9b0da4d3972771a5ed03a',
+   Var('fuchsia_git') + '/garnet' + '@' + '1ec17c0bdae1e2981902e837f6ea7162ff0cad84',
 
   'src/lib/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + 'ce1c9992ddefb940f549e6a9f94252ef2963dd2e',
+   Var('fuchsia_git') + '/tonic' + '@' + '124cc47529d884bb72f4911212b3f09e6b9f330b',
 
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '296537bc48d380adf21567c5d736ab79f5363d22',
