@@ -242,24 +242,22 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get viewLicensesButtonLabel => _nameToValue['viewLicensesButtonLabel'];
 
   @override
-  String get anteMeridiemAbbreviation => _nameToValue["anteMeridiemAbbreviation"];
+  String get anteMeridiemAbbreviation => _nameToValue['anteMeridiemAbbreviation'];
 
   @override
-  String get postMeridiemAbbreviation => _nameToValue["postMeridiemAbbreviation"];
+  String get postMeridiemAbbreviation => _nameToValue['postMeridiemAbbreviation'];
 
-  /// Converts the ICU short time pattern provided for key "timeOfDayFormat"
-  /// in the [localizations] map into one of [TimeOfDayFormat] enum values.
+  /// The [TimeOfDayFormat] corresponding to one of the following supported
+  /// patterns:
   ///
-  /// The pattern must be one of the following supported patterns:
-  ///
-  ///  * HH:mm
-  ///  * HH.mm
-  ///  * HH 'h' mm
-  ///  * HH:mm น.
-  ///  * H:mm
-  ///  * h:mm a
-  ///  * a h:mm
-  ///  * ah:mm
+  ///  * `HH:mm`
+  ///  * `HH.mm`
+  ///  * `HH 'h' mm`
+  ///  * `HH:mm น.`
+  ///  * `H:mm`
+  ///  * `h:mm a`
+  ///  * `a h:mm`
+  ///  * `ah:mm`
   ///
   /// See also:
   ///
@@ -267,15 +265,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///    short time pattern used in locale en_US
   @override
   TimeOfDayFormat get timeOfDayFormat {
-    final String icuShortTimePattern = _nameToValue["timeOfDayFormat"];
+    final String icuShortTimePattern = _nameToValue['timeOfDayFormat'];
 
     assert(() {
       if (!_icuTimeOfDayToEnum.containsKey(icuShortTimePattern)) {
         throw new FlutterError(
-            '"$icuShortTimePattern" is not one of the ICU short time patterns '
-                'supported by the material library. Here is the list of supported '
-                'patterns:\n  ' +
-                _icuTimeOfDayToEnum.keys.join('\n  ')
+          '"$icuShortTimePattern" is not one of the ICU short time patterns '
+          'supported by the material library. Here is the list of supported '
+          'patterns:\n  ' +
+          _icuTimeOfDayToEnum.keys.join('\n  ')
         );
       }
       return true;
