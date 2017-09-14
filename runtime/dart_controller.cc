@@ -49,8 +49,6 @@ DartController::DartController()
 
 DartController::~DartController() {
   if (ui_dart_state_) {
-    ui_dart_state_->set_isolate_client(nullptr);
-
     // Don't use a tonic::DartIsolateScope here since we never exit the isolate.
     Dart_EnterIsolate(ui_dart_state_->isolate());
     // Clear the message notify callback.
@@ -217,10 +215,6 @@ void DartController::CreateIsolateFor(
                                                std::move(ui_class_provider));
   }
   Dart_ExitIsolate();
-}
-
-void DartController::IsolateShuttingDown() {
-  ui_dart_state_ = nullptr;
 }
 
 }  // namespace blink
