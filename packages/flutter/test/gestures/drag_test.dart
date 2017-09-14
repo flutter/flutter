@@ -159,6 +159,7 @@ void main() {
     expect(updatedTimestamp, const Duration(milliseconds: 200));
 
     tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
+    expect(updatedTimestamp, const Duration(milliseconds: 300));
 
     drag.dispose();
   });

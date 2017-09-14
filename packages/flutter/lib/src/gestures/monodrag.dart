@@ -164,7 +164,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       final Offset delta = _pendingDragOffset;
       final Duration timestamp = _lastPendingEventTimestamp;
       _pendingDragOffset = Offset.zero;
-      _lastPendingEventTimestamp = Duration.ZERO;
+      _lastPendingEventTimestamp = null;
       if (onStart != null) {
         invokeCallback<Null>('onStart', () => onStart(new DragStartDetails( // ignore: STRONG_MODE_INVALID_CAST_FUNCTION_EXPR, https://github.com/dart-lang/sdk/issues/27504
           sourceTimeStamp: timestamp,
