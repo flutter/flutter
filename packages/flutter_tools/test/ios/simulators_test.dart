@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' show ProcessResult;
+import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -15,6 +15,7 @@ import '../src/context.dart';
 class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockProcess extends Mock implements Process {}
 
 void main() {
   final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
@@ -176,5 +177,70 @@ void main() {
         Xcode: () => mockXcode,
       }
     );
+  });
+
+  group('launchDeviceLogTool', () {
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+        .thenReturn(new Future<Process>.value(new MockProcess()));
+    });
+
+    testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      await launchDeviceLogTool(device);
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('tail'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      await launchDeviceLogTool(device);
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('/usr/bin/log'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('launchSystemLogTool', () {
+    MockProcessManager mockProcessManager;
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+        .thenReturn(new Future<Process>.value(new MockProcess()));
+    });
+
+    testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      await launchSystemLogTool(device);
+      expect(
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
+        contains('tail'),
+      );
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      await launchSystemLogTool(device);
+      verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
+    },
+    overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 }
