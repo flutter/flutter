@@ -103,4 +103,33 @@ void main() {
     await tester.tap(find.text('Sublist'));
     expect(didChangeOpen, isFalse);
   });
+
+  testWidgets('trailing override', (WidgetTester tester) async {
+    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+      '/': (_) {
+        return new Material(
+          child: new SingleChildScrollView(
+            child: new Column(
+              children: <Widget>[
+                const ListTile(title: const Text('Top')),
+                new ExpansionTile(
+                  title: const Text('Sublist'),
+                  children: <Widget>[
+                    const ListTile(title: const Text('0')),
+                    const ListTile(title: const Text('1'))
+                  ],
+                  trailing: const Icon(Icons.inbox),
+                ),
+                const ListTile(title: const Text('Bottom'))
+              ]
+            )
+          )
+        );
+      }
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    expect(find.byIcon(Icons.inbox), findsOneWidget);
+    expect(find.byIcon(Icons.expand_more), findsNothing);
+  });
 }
