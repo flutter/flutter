@@ -169,7 +169,7 @@ void main() {
       ),
     );
 
-    var titleWidget = find.byKey(const Key('X'));
+    final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopLeft(titleWidget).dx, 16.0);
     // 4.0 is due to AppBar right padding.
     expect(tester.getTopRight(titleWidget).dx, 800 - 16.0 - 4.0);
@@ -190,7 +190,7 @@ void main() {
       ),
     );
 
-    var titleWidget = find.byKey(const Key('X'));
+    final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopRight(titleWidget).dx, 800.0 - 16.0);
     // 4.0 is due to AppBar right padding.
     expect(tester.getTopLeft(titleWidget).dx, 16.0 + 4.0);
@@ -209,7 +209,7 @@ void main() {
       ),
     );
 
-    var titleWidget = find.byKey(const Key('X'));
+    final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopLeft(titleWidget).dx, 32.0);
     // 4.0 is due to AppBar right padding.
     expect(tester.getTopRight(titleWidget).dx, 800 - 32.0 - 4.0);
@@ -231,7 +231,7 @@ void main() {
       ),
     );
 
-    var titleWidget = find.byKey(const Key('X'));
+    final Finder titleWidget = find.byKey(const Key('X'));
     expect(tester.getTopRight(titleWidget).dx, 800.0 - 32.0);
     // 4.0 is due to AppBar right padding.
     expect(tester.getTopLeft(titleWidget).dx, 32.0 + 4.0);
