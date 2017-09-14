@@ -180,23 +180,17 @@ void main() {
   });
 
   group('launchDeviceLogTool', () {
-    MockXcode mockXcode;
     MockProcessManager mockProcessManager;
-    IOSSimulator deviceUnderTest;
 
     setUp(() {
-      mockXcode = new MockXcode();
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
         .thenReturn(new Future<Process>.value(new MockProcess()));
-      deviceUnderTest = new IOSSimulator('x', name: 'iPhone SE');
     });
 
-    testUsingContext('uses tail on Xcode versions prior to Xcode 9', () async {
-      when(mockXcode.xcodeMajorVersion).thenReturn(8);
-      when(mockXcode.xcodeMinorVersion).thenReturn(2);
-
-      launchDeviceLogTool(deviceUnderTest);
+    testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
@@ -204,14 +198,11 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Xcode: () => mockXcode,
     });
 
-    testUsingContext('uses /usr/bin/log on Xcode 9 and above', () async {
-      when(mockXcode.xcodeMajorVersion).thenReturn(9);
-      when(mockXcode.xcodeMinorVersion).thenReturn(0);
-
-      launchDeviceLogTool(deviceUnderTest);
+    testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      await launchDeviceLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('/usr/bin/log'),
@@ -219,26 +210,21 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Xcode: () => mockXcode,
     });
   });
 
   group('launchSystemLogTool', () {
-    MockXcode mockXcode;
     MockProcessManager mockProcessManager;
 
     setUp(() {
-      mockXcode = new MockXcode();
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
         .thenReturn(new Future<Process>.value(new MockProcess()));
     });
 
-    testUsingContext('uses tail on Xcode versions prior to Xcode 9', () async {
-      when(mockXcode.xcodeMajorVersion).thenReturn(8);
-      when(mockXcode.xcodeMinorVersion).thenReturn(2);
-
-      launchSystemLogTool();
+    testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      await launchSystemLogTool(device);
       expect(
         verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
@@ -246,19 +232,15 @@ void main() {
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Xcode: () => mockXcode,
     });
 
-    testUsingContext('uses /usr/bin/log on Xcode 9 and above', () async {
-      when(mockXcode.xcodeMajorVersion).thenReturn(9);
-      when(mockXcode.xcodeMinorVersion).thenReturn(0);
-
-      launchSystemLogTool();
+    testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
+      final IOSSimulator device = new IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      await launchSystemLogTool(device);
       verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
-      Xcode: () => mockXcode,
     });
   });
 }

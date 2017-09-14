@@ -486,21 +486,33 @@ class IOSSimulator extends Device {
   }
 }
 
+final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
+
 /// Launches the device log reader process on the host.
-Future<Process> launchDeviceLogTool(IOSSimulator device) {
-  // Versions of Xcode prior to Xcode 9 tail the simulator syslog file.
-  if (xcode.xcodeMajorVersion < 9)
+Future<Process> launchDeviceLogTool(IOSSimulator device) async {
+  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
+  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
+
+  // Versions of iOS prior to iOS 11 log to the simulator syslog file.
+  if (majorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', device.logFilePath]);
 
-  // Xcode 9 and above use /usr/bin/log to tail process logs.
+  // For iOS 11 and above, use /usr/bin/log to tail process logs.
+  // Run in interactive mode (via script), otherwise /usr/bin/log buffers in 4k chunks. (radar: 34420207)
   return runCommand(<String>[
     'script', '/dev/null', '/usr/bin/log', 'stream', '--style', 'syslog', '--predicate', 'processImagePath CONTAINS "${device.id}"',
   ]);
 }
 
-Future<Process> launchSystemLogTool() {
-  if (xcode.xcodeMajorVersion < 9)
+Future<Process> launchSystemLogTool(IOSSimulator device) async {
+  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
+  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
+
+  // Versions of iOS prior to 11 tail the simulator syslog file.
+  if (majorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+
+  // For iOS 11 and later, all relevant detail is in the device log.
   return null;
 }
 
@@ -538,7 +550,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
     // Track system.log crashes.
     // ReportCrash[37965]: Saved crash report for FlutterRunner[37941]...
-    _systemProcess = await launchSystemLogTool();
+    _systemProcess = await launchSystemLogTool(device);
     if (_systemProcess != null) {
       _systemProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
       _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
