@@ -114,48 +114,6 @@ class TimeOfDay {
   String toString() => '$hourLabel:$minuteLabel';
 }
 
-/// The list of time of day formats supported by this library encoded as ICU
-/// "Short Time" patterns.
-///
-/// The time picker invoked via [showTimePicker] has configurations optimized
-/// for these formats. Any other formats will default to [h_colon_mm_space_a].
-/// The time picker get the value from [MaterialLocalizations.timeOfDayFormat].
-abstract class TimeOfDayFormats {
-  // Patterns using HH.
-
-  /// One of the reusable time patterns and also the default format.
-  ///
-  /// This format is used as a fallback when the value of
-  /// [MaterialLocalizations.timeOfDayFormat] is not supported, i.e. not one of
-  /// the patterns listed in this class.
-  static const String HH_colon_mm = 'HH:mm';
-
-  /// The 'HH.mm' pattern.
-  static const String HH_dot_mm = 'HH.mm';
-
-  /// The "HH 'h' mm" pattern.
-  static const String frenchCanadian = "HH 'h' mm";
-
-  /// The 'HH:mm น.' pattern.
-  static const String thai = 'HH:mm น.';
-
-  // Patterns using H.
-
-  /// The 'H:mm' pattern.
-  static const String H_colon_mm = 'H:mm';
-
-  // Patterns using h.
-
-  /// The 'h:mm a' pattern.
-  static const String h_colon_mm_space_a = 'h:mm a';
-
-  /// The 'a h:mm' pattern.
-  static const String a_space_h_colon_mm = 'a h:mm';
-
-  /// The 'ah:mm' pattern.
-  static const String a_h_colon_mm = 'ah:mm';
-}
-
 enum _TimePickerMode { hour, minute }
 
 const double _kTimePickerHeaderPortraitHeight = 96.0;
@@ -440,28 +398,27 @@ class _MinuteControl extends StatelessWidget {
   }
 }
 
-_TimePickerHourFormat _getHourFormat(String formatString) {
-  switch (formatString) {
-    case TimeOfDayFormats.h_colon_mm_space_a:
-    case TimeOfDayFormats.a_space_h_colon_mm:
-    case TimeOfDayFormats.a_h_colon_mm:
+_TimePickerHourFormat _getHourFormat(TimeOfDayFormat format) {
+  switch (format) {
+    case TimeOfDayFormat.h_colon_mm_space_a:
+    case TimeOfDayFormat.a_space_h_colon_mm:
       return _TimePickerHourFormat.h;
-    case TimeOfDayFormats.H_colon_mm:
+    case TimeOfDayFormat.H_colon_mm:
       return _TimePickerHourFormat.H;
-    case TimeOfDayFormats.HH_dot_mm:
-    case TimeOfDayFormats.HH_colon_mm:
-    case TimeOfDayFormats.frenchCanadian:
-    default:
+    case TimeOfDayFormat.HH_dot_mm:
+    case TimeOfDayFormat.HH_colon_mm:
+    case TimeOfDayFormat.frenchCanadian:
       return _TimePickerHourFormat.HH;
   }
+
+  return null;
 }
 
 /// Provides time picker header layout configuration for the given
-/// [formatString] passing [context] to each widget in the configuration.
+/// [timeOfDayFormat] passing [context] to each widget in the configuration.
 ///
-/// If the [formatString] is not one of those listed in [TimeOfDayFormats],
-/// defaults to the configuration corresponding to [TimeOfDayFormats.HH_colon_mm].
-_TimePickerHeaderFormat _buildHeaderFormat(String formatString, _TimePickerFragmentContext context) {
+/// [timeOfDayFormat] and [context] must not be `null`.
+_TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _TimePickerFragmentContext context) {
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour(_TimePickerHourFormat hourFormat) {
     return new _TimePickerHeaderFragment(
@@ -531,8 +488,8 @@ _TimePickerHeaderFormat _buildHeaderFormat(String formatString, _TimePickerFragm
     return new _TimePickerHeaderPiece(pivotIndex, fragments, bottomMargin: bottomMargin);
   }
 
-  switch (formatString) {
-    case TimeOfDayFormats.h_colon_mm_space_a:
+  switch (timeOfDayFormat) {
+    case TimeOfDayFormat.h_colon_mm_space_a:
       return format(
         0,
         piece(
@@ -546,22 +503,21 @@ _TimePickerHeaderFormat _buildHeaderFormat(String formatString, _TimePickerFragm
           fragment1: dayPeriod(),
         ),
       );
-    case TimeOfDayFormats.H_colon_mm:
+    case TimeOfDayFormat.H_colon_mm:
       return format(0, piece(
         pivotIndex: 1,
         fragment1: hour(_TimePickerHourFormat.H),
         fragment2: string(_TimePickerHeaderId.colon, ':'),
         fragment3: minute(),
       ));
-    case TimeOfDayFormats.HH_dot_mm:
+    case TimeOfDayFormat.HH_dot_mm:
       return format(0, piece(
         pivotIndex: 1,
         fragment1: hour(_TimePickerHourFormat.HH),
         fragment2: string(_TimePickerHeaderId.dot, '.'),
         fragment3: minute(),
       ));
-    case TimeOfDayFormats.a_space_h_colon_mm:
-    case TimeOfDayFormats.a_h_colon_mm:
+    case TimeOfDayFormat.a_space_h_colon_mm:
       return format(
         1,
         piece(
@@ -575,16 +531,14 @@ _TimePickerHeaderFormat _buildHeaderFormat(String formatString, _TimePickerFragm
           fragment3: minute(),
         ),
       );
-    case TimeOfDayFormats.frenchCanadian:
+    case TimeOfDayFormat.frenchCanadian:
       return format(0, piece(
         pivotIndex: 1,
         fragment1: hour(_TimePickerHourFormat.HH),
         fragment2: string(_TimePickerHeaderId.hString, 'h'),
         fragment3: minute(),
       ));
-    case TimeOfDayFormats.HH_colon_mm:
-    case TimeOfDayFormats.thai:
-    default:
+    case TimeOfDayFormat.HH_colon_mm:
       return format(0, piece(
         pivotIndex: 1,
         fragment1: hour(_TimePickerHourFormat.HH),
@@ -592,6 +546,8 @@ _TimePickerHeaderFormat _buildHeaderFormat(String formatString, _TimePickerFragm
         fragment3: minute(),
       ));
   }
+
+  return null;
 }
 
 class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
@@ -746,7 +702,7 @@ class _TimePickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final String timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
+    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
 
     EdgeInsets padding;
     double height;
@@ -1235,7 +1191,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final String timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
+    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
 
     final Widget picker = new Padding(
       padding: const EdgeInsets.all(16.0),

@@ -10,7 +10,7 @@ import 'package:intl/intl.dart' as intl;
 
 import 'i18n/localizations.dart';
 
-/// Defines the localized resource values used by the Material widgts.
+/// Defines the localized resource values used by the Material widgets.
 ///
 /// See also:
 ///
@@ -86,18 +86,11 @@ abstract class MaterialLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
-  /// The pattern used to format time of day.
+  /// The format used to lay out the time picker.
   ///
-  /// This should match a "Short Time" pattern as defined by ICU, such as
-  /// "HH:mm" and "h:mm a".
-  ///
-  /// See also:
-  ///
-  ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
-  ///    short time pattern used in locale en_US
-  ///  * [TimeOfDayFormats] contains patterns implemented by Flutter's material
-  ///    library.
-  String get timeOfDayFormat;
+  /// The documentation for [TimeOfDayFormat] enum values provides details on
+  /// each supported layout.
+  TimeOfDayFormat get timeOfDayFormat;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -118,19 +111,16 @@ abstract class MaterialLocalizations {
 
 /// Localized strings for the material widgets.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
-  /// Construct an object that defines the material widgets' localized strings
+  /// Constructs an object that defines the material widgets' localized strings
   /// for the given `locale`.
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
   factory DefaultMaterialLocalizations(Locale locale) {
     assert(locale != null);
-    final Map<String, String> englishLocalizations = localizations['en'];
-    assert(englishLocalizations != null);
 
     final Map<String, String> result = <String, String>{};
-    result.addAll(englishLocalizations);
-    if (locale.languageCode != 'en' && localizations.containsKey(locale.languageCode))
+    if (localizations.containsKey(locale.languageCode))
       result.addAll(localizations[locale.languageCode]);
     if (localizations.containsKey(locale.toString()))
       result.addAll(localizations[locale.toString()]);
@@ -257,8 +247,42 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String get postMeridiemAbbreviation => _nameToValue["postMeridiemAbbreviation"];
 
+  /// Converts the ICU short time pattern provided for key "timeOfDayFormat"
+  /// in the [localizations] map into one of [TimeOfDayFormat] enum values.
+  ///
+  /// The pattern must be one of the following supported patterns:
+  ///
+  ///  * HH:mm
+  ///  * HH.mm
+  ///  * HH 'h' mm
+  ///  * HH:mm น.
+  ///  * H:mm
+  ///  * h:mm a
+  ///  * a h:mm
+  ///  * ah:mm
+  ///
+  /// See also:
+  ///
+  ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
+  ///    short time pattern used in locale en_US
   @override
-  String get timeOfDayFormat => _nameToValue["timeOfDayFormat"];
+  TimeOfDayFormat get timeOfDayFormat {
+    final String icuShortTimePattern = _nameToValue["timeOfDayFormat"];
+
+    assert(() {
+      if (!_icuTimeOfDayToEnum.containsKey(icuShortTimePattern)) {
+        throw new FlutterError(
+            '"$icuShortTimePattern" is not one of the ICU short time patterns '
+                'supported by the material library. Here is the list of supported '
+                'patterns:\n  ' +
+                _icuTimeOfDayToEnum.keys.join('\n  ')
+        );
+      }
+      return true;
+    });
+
+    return _icuTimeOfDayToEnum[icuShortTimePattern];
+  }
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.
@@ -268,4 +292,67 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   static Future<MaterialLocalizations> load(Locale locale) {
     return new SynchronousFuture<MaterialLocalizations>(new DefaultMaterialLocalizations(locale));
   }
+}
+
+const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{
+  'HH:mm': TimeOfDayFormat.HH_colon_mm,
+  'HH.mm': TimeOfDayFormat.HH_dot_mm,
+  "HH 'h' mm": TimeOfDayFormat.frenchCanadian,
+  'HH:mm น.': TimeOfDayFormat.HH_colon_mm,
+  'H:mm': TimeOfDayFormat.H_colon_mm,
+  'h:mm a': TimeOfDayFormat.h_colon_mm_space_a,
+  'a h:mm': TimeOfDayFormat.a_space_h_colon_mm,
+  'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
+};
+
+/// Determines how the time picker invoked using [showTimePicker] formats and
+/// lays out the time controls.
+///
+/// The time picker provides layout configurations optimized for each of the
+/// enum values.
+enum TimeOfDayFormat {
+  /// Corresponds to the ICU 'HH:mm' pattern.
+  ///
+  /// This format uses 24-hour two-digit zero-padded hours. Controls are always
+  /// laid out horizontally. Hours are separated from minutes by one colon
+  /// character.
+  HH_colon_mm,
+
+  /// Corresponds to the ICU 'HH.mm' pattern.
+  ///
+  /// This format uses 24-hour two-digit zero-padded hours. Controls are always
+  /// laid out horizontally. Hours are separated from minutes by one dot
+  /// character.
+  HH_dot_mm,
+
+  /// Corresponds to the ICU "HH 'h' mm" pattern used in Canadian French.
+  ///
+  /// This format uses 24-hour two-digit zero-padded hours. Controls are always
+  /// laid out horizontally. Hours are separated from minutes by letter 'h'.
+  frenchCanadian,
+
+  /// Corresponds to the ICU 'H:mm' pattern.
+  ///
+  /// This format uses 24-hour non-padded variable-length hours. Controls are
+  /// always laid out horizontally. Hours are separated from minutes by one
+  /// colon character.
+  H_colon_mm,
+
+  /// Corresponds to the ICU 'h:mm a' pattern.
+  ///
+  /// This format uses 12-hour non-padded variable-length hours with a day
+  /// period. Controls are laid out horizontally in portrait mode. In landscape
+  /// mode, the day period appears vertically after (consistent with the ambient
+  /// [TextDirection]) hour-minute indicator. Hours are separated from minutes
+  /// by one colon character.
+  h_colon_mm_space_a,
+
+  /// Corresponds to the ICU 'a h:mm' pattern.
+  ///
+  /// This format uses 12-hour non-padded variable-length hours with a day
+  /// period. Controls are laid out horizontally in portrait mode. In landscape
+  /// mode, the day period appears vertically before (consistent with the
+  /// ambient [TextDirection]) hour-minute indicator. Hours are separated from
+  /// minutes by one colon character.
+  a_space_h_colon_mm,
 }
