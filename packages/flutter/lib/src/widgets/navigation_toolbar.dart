@@ -22,8 +22,6 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
-  /// The default spacing around the [middle] widget.
-  static const double kMiddleSpacing = 16.0;
 
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
@@ -37,6 +35,9 @@ class NavigationToolbar extends StatelessWidget {
   }) : assert(centerMiddle != null),
        assert(middleSpacing != null),
        super(key: key);
+
+  /// The default spacing around the [middle] widget in dp.
+  static const double kMiddleSpacing = 16.0;
 
   /// Widget to place at the start of the horizontal toolbar.
   final Widget leading;
@@ -52,7 +53,7 @@ class NavigationToolbar extends StatelessWidget {
   /// next to the [leading] widget when false.
   final bool centerMiddle;
 
-  /// The spacing between the [leading] and [middle] widgets.
+  /// The spacing around the [middle] widget on horizontal axis.
   ///
   /// Defaults to [kMiddleSpacing].
   final double middleSpacing;
@@ -103,7 +104,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
   // space between the leading and trailing widgets).
   final bool centerMiddle;
 
-  /// The spacing between leading and middle widgets.
+  /// The spacing around middle widget on horizontal axis.
   final double middleSpacing;
 
   final TextDirection textDirection;
