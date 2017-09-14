@@ -81,7 +81,7 @@ void main() {
             builder: (BuildContext context) {
               return const CupertinoNavigationBar(
                 leading: const _ExpectStyles(color: const Color(0xFF001122), index: 0x000001),
-                middle: const _ExpectStyles(color: const Color(0xFF000000), index: 0x000100),
+                middle: const _ExpectStyles(color: const Color(0xFF000000), letterSpacing: -0.72, index: 0x000100),
                 trailing: const _ExpectStyles(color: const Color(0xFF001122), index: 0x010000),
                 actionsForegroundColor: const Color(0xFF001122),
               );
@@ -129,9 +129,8 @@ void main() {
                 child: new CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
-                    const CupertinoNavigationBar(
-                      middle: const Text('Title'),
-                      largeTitle: true,
+                    const CupertinoSliverNavigationBar(
+                      largeTitle: const Text('Title'),
                     ),
                     new SliverToBoxAdapter(
                       child: new Container(
@@ -204,12 +203,85 @@ void main() {
     // The OverflowBox is squished with the text in it.
     expect(tester.getSize(find.widgetWithText(OverflowBox, 'Title')).height, 0.0);
   });
+
+  testWidgets('Small title can be overriden', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new CupertinoScaffold(
+                child: new CustomScrollView(
+                  controller: scrollController,
+                  slivers: <Widget>[
+                    const CupertinoSliverNavigationBar(
+                      middle: const Text('Different title'),
+                      largeTitle: const Text('Title'),
+                    ),
+                    new SliverToBoxAdapter(
+                      child: new Container(
+                        height: 1200.0,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(scrollController.offset, 0.0);
+    expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
+    expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
+
+    expect(find.text('Title'), findsOneWidget);
+    expect(find.text('Different title'), findsOneWidget);
+
+    RenderOpacity largeTitleOpacity =
+        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
+    // Large title initially visible.
+    expect(
+      largeTitleOpacity.opacity,
+      1.0
+    );
+    // Middle widget not even wrapped with RenderOpacity, i.e. is always visible.
+    expect(
+      tester.element(find.text('Different title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>()),
+      isNull,
+    );
+
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 + 56.0 - 8.0); // Static part + extension - padding.
+
+    scrollController.jumpTo(600.0);
+    await tester.pump(); // Once to trigger the opacity animation.
+    await tester.pump(const Duration(milliseconds: 300));
+
+    largeTitleOpacity =
+        tester.element(find.text('Title')).ancestorRenderObjectOfType(const TypeMatcher<RenderOpacity>());
+    // Large title no longer visible.
+    expect(
+      largeTitleOpacity.opacity,
+      0.0
+    );
+
+    // The persistent toolbar doesn't move or change size.
+    expect(tester.getTopLeft(find.byType(NavigationToolbar)).dy, 0.0);
+    expect(tester.getSize(find.byType(NavigationToolbar)).height, 44.0);
+
+    expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {
-  const _ExpectStyles({ this.color, this.index });
+  const _ExpectStyles({ this.color, this.letterSpacing, this.index });
 
   final Color color;
+  final double letterSpacing;
   final int index;
 
   @override
@@ -217,7 +289,7 @@ class _ExpectStyles extends StatelessWidget {
     final TextStyle style = DefaultTextStyle.of(context).style;
     expect(style.color, color);
     expect(style.fontSize, 17.0);
-    expect(style.letterSpacing, -0.24);
+    expect(style.letterSpacing, letterSpacing ?? -0.24);
     count += index;
     return new Container();
   }

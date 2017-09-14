@@ -29,9 +29,10 @@ const Color _kDefaultNavBarBackgroundColor = const Color(0xCCF8F8F8);
 const Color _kDefaultNavBarBorderColor = const Color(0x4C000000);
 
 const TextStyle _kLargeTitleTextStyle = const TextStyle(
+  fontFamily: '.SF UI Text',
   fontSize: 34.0,
-  fontWeight: FontWeight.bold,
-  letterSpacing: 0.41,
+  fontWeight: FontWeight.w700,
+  letterSpacing: -1.4,
   color: CupertinoColors.black,
 );
 
@@ -49,13 +50,13 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
-/// Enabling [largeTitle] will create a scrollable second row showing the title
-/// in a larger font introduced in iOS 11. The [middle] widget must be a text
-/// and the [CupertinoNavigationBar] must be placed in a sliver group in this case.
+/// See also:
+///
+///  * [CupertinoSliverNavigationBar] for a nav bar to be placed in a sliver and
+///    that supports iOS 11 style large titles.
 //
 // TODO(xster): document automatic addition of a CupertinoBackButton.
 // TODO(xster): add sample code using icons.
-// TODO(xster): document integration into a CupertinoScaffold.
 class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
@@ -65,7 +66,6 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
-    this.largeTitle: false,
   }) : assert(middle != null, 'There must be a middle widget, usually a title.'),
        super(key: key);
 
@@ -98,50 +98,115 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   /// True if the nav bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
-  /// Use iOS 11 style large title navigation bars.
-  ///
-  /// When true, the navigation bar will split into 2 sections. The static
-  /// top 44px section will be wrapped in a SliverPersistentHeader and a
-  /// second scrollable section behind it will show and replace the `middle`
-  /// text in a larger font when scrolled down.
-  ///
-  /// Navigation bars with large titles must be used in a sliver group such
-  /// as [CustomScrollView].
-  final bool largeTitle;
-
   @override
-  Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
+  Size get preferredSize {
+    return opaque ? const Size.fromHeight(_kNavBarPersistentHeight) : Size.zero;
+  }
 
   @override
   Widget build(BuildContext context) {
-    assert(
-      !largeTitle || middle is Text,
-      "largeTitle mode is only possible when 'middle' is a Text widget"
+    return _wrapWithBackground(
+      backgroundColor: backgroundColor,
+      child: new _CupertinoPersistentNavigationBar(
+        leading: leading,
+        middle: middle,
+        trailing: trailing,
+        actionsForegroundColor: actionsForegroundColor,
+      ),
     );
+  }
+}
 
-    if (!largeTitle) {
-      return _wrapWithBackground(
+/// An iOS-styled navigation bar with iOS 11 style large titles using slivers.
+///
+/// The [CupertinoSliverNavigationBar] must be placed in a sliver group such
+/// as the [CustomScrollView].
+///
+/// This navigation bar consists of 2 sections, a pinned static section built
+/// using [CupertinoNavigationBar] on top and a sliding section containing
+/// iOS 11 style large titles below it.
+///
+/// It should be placed at top of the screen and automatically accounts for
+/// the OS's status bar.
+///
+/// Minimally, a [largeTitle] [Text] will appear in the middle of the app bar
+/// when the sliver is collapsed and transfer to the slidable below in larger font
+/// when the sliver is expanded.
+///
+/// For advanced uses, an optional [middle] widget can be supplied to show a different
+/// widget in the middle of the nav bar when the sliver is collapsed.
+///
+/// See also:
+///
+///  * [CupertinoNavigationBar] a static iOS nav bar that doesn't have a slidable
+///    large title section.
+class CupertinoSliverNavigationBar extends StatelessWidget {
+  const CupertinoSliverNavigationBar({
+    Key key,
+    @required this.largeTitle,
+    this.leading,
+    this.middle,
+    this.trailing,
+    this.backgroundColor: _kDefaultNavBarBackgroundColor,
+    this.actionsForegroundColor: CupertinoColors.activeBlue,
+  }) : assert(largeTitle != null, 'There must be a largeTitle Text'),
+       super(key: key);
+
+  /// The navigation bar's title.
+  ///
+  /// This text will appear in the top static navigation bar when collapsed and
+  /// in the bottom slidable in a larger font when expanded.
+  final Text largeTitle;
+
+  /// Widget to place at the start of the static nav bar. Normally a back button
+  /// for a normal page or a cancel button for full page dialogs.
+  ///
+  /// This widget is visible in both collapsed and expanded states.
+  final Widget leading;
+
+  /// An override widget to place in the middle of the static nav bar.
+  ///
+  /// This widget is visible in both collapsed and expanded states. The text
+  /// supplied in [largeTitle] will no longer appear in collapsed state.
+  final Widget middle;
+
+  /// Widget to place at the end of the static nav bar. Normally additional actions
+  /// taken on the page such as a search or edit function.
+  ///
+  /// This widget is visible in both collapsed and expanded states.
+  final Widget trailing;
+
+  // TODO(xster): implement support for double row nav bars.
+
+  /// The background color of the nav bar. If it contains transparency, the
+  /// tab bar will automatically produce a blurring effect to the content
+  /// behind it.
+  final Color backgroundColor;
+
+  /// Default color used for text and icons of the [leading] and [trailing]
+  /// widgets in the nav bar.
+  ///
+  /// The default color for text in the [middle] slot is always black, as per
+  /// iOS standard design.
+  final Color actionsForegroundColor;
+
+  /// True if the nav bar's background color has no transparency.
+  bool get opaque => backgroundColor.alpha == 0xFF;
+
+  @override
+  Widget build(BuildContext context) {
+    return new SliverPersistentHeader(
+      pinned: true, // iOS navigation bars are always pinned.
+      delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
+        persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
+        title: largeTitle,
+        leading: leading,
+        middle: middle,
+        trailing: trailing,
         backgroundColor: backgroundColor,
-        child: new _CupertinoPersistentNavigationBar(
-          leading: leading,
-          middle: middle,
-          trailing: trailing,
-          actionsForegroundColor: actionsForegroundColor,
-        ),
-      );
-    } else {
-      return new SliverPersistentHeader(
-        pinned: true, // iOS navigation bars are always pinned.
-        delegate: new _CupertinoLargeTitleNavigationBarSliverDelegate(
-          persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
-          leading: leading,
-          middle: middle,
-          trailing: trailing,
-          backgroundColor: backgroundColor,
-          actionsForegroundColor: actionsForegroundColor,
-        ),
-      );
-    }
+        actionsForegroundColor: actionsForegroundColor,
+      ),
+    );
   }
 }
 
@@ -206,6 +271,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   @override
   Widget build(BuildContext context) {
     final TextStyle actionsStyle = new TextStyle(
+      fontFamily: '.SF UI Text',
       fontSize: 17.0,
       letterSpacing: -0.24,
       color: actionsForegroundColor,
@@ -224,7 +290,11 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
     final Widget styledMiddle = middle == null ? null : DefaultTextStyle.merge(
-      style: actionsStyle.copyWith(color: CupertinoColors.black),
+      style: actionsStyle.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.72,
+        color: CupertinoColors.black,
+      ),
       child: middle,
     );
 
@@ -268,8 +338,9 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDelegate {
   const _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
+    @required this.title,
     this.leading,
-    @required this.middle,
+    this.middle,
     this.trailing,
     this.backgroundColor,
     this.actionsForegroundColor,
@@ -277,9 +348,11 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
 
   final double persistentHeight;
 
+  final Text title;
+
   final Widget leading;
 
-  final Text middle;
+  final Widget middle;
 
   final Widget trailing;
 
@@ -300,9 +373,11 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
     final _CupertinoPersistentNavigationBar persistentNavigationBar =
         new _CupertinoPersistentNavigationBar(
       leading: leading,
-      middle: middle,
+      middle: middle ?? title,
       trailing: trailing,
-      middleVisible: !showLargeTitle,
+      // If middle widget exists, always show it. Otherwise, show title
+      // when collapsed.
+      middleVisible: middle != null ? null : !showLargeTitle,
       actionsForegroundColor: actionsForegroundColor,
     );
 
@@ -336,7 +411,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
                     child: new AnimatedOpacity(
                       opacity: showLargeTitle ? 1.0 : 0.0,
                       duration: _kNavBarTitleFadeDuration,
-                      child: middle,
+                      child: title,
                     )
                   ),
                 ),
