@@ -13,6 +13,7 @@ void main() {
   // See https://flutter.io/testing/ for more info.
   enableFlutterDriverExtension();
 {{/withDriverTest}}
+  // Code directly inside of main() is NOT hot reloadable.
   runApp(new MyApp());
 }
 
