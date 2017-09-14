@@ -58,7 +58,7 @@ class DragStartDetails {
   /// Recorded timestamp of the source pointer event that triggered the drag
   /// event.
   ///
-  /// Could be null if triggered from proxied events such as accessibility etc.
+  /// Could be null if triggered from proxied events such as accessibility.
   final Duration sourceTimeStamp;
 
   /// The global position at which the pointer contacted the screen.
