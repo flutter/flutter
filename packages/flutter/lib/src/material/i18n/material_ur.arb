@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "کھولیں نیویگیشن مینو",
   "backButtonTooltip": "واپس",
   "closeButtonTooltip": "بند کریں",
@@ -20,5 +21,7 @@
   "okButtonLabel": "ٹھیک ہے",
   "pasteButtonLabel": "چسپاں",
   "selectAllButtonLabel": "تکاپیمام منتخب کریں",
-  "viewLicensesButtonLabel": "لائسنس دیکھیں"
+  "viewLicensesButtonLabel": "لائسنس دیکھیں",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM"
 }

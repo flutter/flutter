@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "HH:mm",
   "openAppDrawerTooltip": "د پرانیستی نیینګ مینو",
   "backButtonTooltip": "شاته",
   "closeButtonTooltip": "بنده",

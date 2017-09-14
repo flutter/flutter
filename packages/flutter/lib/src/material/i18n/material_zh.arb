@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "ah:mm",
   "openAppDrawerTooltip": "打开导航菜单",
   "backButtonTooltip": "返回",
   "closeButtonTooltip": "关闭",
@@ -20,5 +21,11 @@
   "okButtonLabel": "确定",
   "pasteButtonLabel": "粘贴",
   "selectAllButtonLabel": "全选",
-  "viewLicensesButtonLabel": "查看许可证"
+  "viewLicensesButtonLabel": "查看许可证",
+  "backButtonTooltip": "背部",
+  "closeButtonTooltip": "关",
+  "nextMonthTooltip": "-下月就29了。",
+  "previousMonthTooltip": "前一个月",
+  "anteMeridiemAbbreviation": "上午",
+  "postMeridiemAbbreviation": "下午"
 }

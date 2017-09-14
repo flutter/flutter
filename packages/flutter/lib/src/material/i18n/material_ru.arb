@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "Открыть меню навигации",
   "backButtonTooltip": "назад",
   "closeButtonTooltip": "Закрыть",

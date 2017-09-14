@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "افتح قائمة التنقل",
   "backButtonTooltip": "الى الخلف",
   "closeButtonTooltip": "إغلا",
@@ -20,5 +21,7 @@
   "okButtonLabel": "حسنا",
   "pasteButtonLabel": "عجين",
   "selectAllButtonLabel": "اختر الكل",
-  "viewLicensesButtonLabel": "عرض التراخيص"
+  "viewLicensesButtonLabel": "عرض التراخيص",
+  "anteMeridiemAbbreviation": "ص",
+  "postMeridiemAbbreviation": "م"
 }

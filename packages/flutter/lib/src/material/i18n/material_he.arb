@@ -1,4 +1,5 @@
 {
+  "timeOfDayFormat": "H:mm",
   "openAppDrawerTooltip": "פתח תפריט ניווט",
   "backButtonTooltip": "אחורה",
   "closeButtonTooltip": "סגור",
