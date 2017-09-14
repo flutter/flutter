@@ -3,11 +3,33 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+class FooMaterialLocalizations extends DefaultMaterialLocalizations {
+  FooMaterialLocalizations(Locale locale) : super(locale);
+
+  @override
+  String get backButtonTooltip => 'foo';
+}
+
+class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const FooMaterialLocalizationsDelegate();
+
+  @override
+  Future<FooMaterialLocalizations> load(Locale locale) {
+    return new SynchronousFuture<FooMaterialLocalizations>(new FooMaterialLocalizations(locale));
+  }
+
+  @override
+  bool shouldReload(FooMaterialLocalizationsDelegate old) => false;
+}
 
 Widget buildFrame({
   Locale locale,
+  Iterable<LocalizationsDelegate<dynamic>> delegates,
   WidgetBuilder buildContent,
+  LocaleResolutionCallback localeResolutionCallback,
   Iterable<Locale> supportedLocales: const <Locale>[
     const Locale('en', 'US'),
     const Locale('es', 'es'),
@@ -16,6 +38,8 @@ Widget buildFrame({
   return new MaterialApp(
     color: const Color(0xFFFFFFFF),
     locale: locale,
+    localizationsDelegates: delegates,
+    localeResolutionCallback: localeResolutionCallback,
     supportedLocales: supportedLocales,
     onGenerateRoute: (RouteSettings settings) {
       return new MaterialPageRoute<Null>(
@@ -131,6 +155,101 @@ void main() {
     expect(localizations.selectedRowCountTitle(1), '1 artículo seleccionado');
     expect(localizations.selectedRowCountTitle(2), '2 artículos seleccionados');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 artículos seleccionados');
+  });
+
+  testWidgets('Localizations.override widget tracks parent\'s locale', (WidgetTester tester) async {
+    Widget buildLocaleFrame(Locale locale) {
+      return buildFrame(
+        locale: locale,
+        buildContent: (BuildContext context) {
+          return new Localizations.override(
+            context: context,
+            child: new Builder(
+              builder: (BuildContext context) {
+                // No MaterialLocalizations are defined for the first Localizations
+                // ancestor, so we should get the values from the default one, i.e.
+                // the one created by WidgetsApp via the LocalizationsDelegate
+                // provided by MaterialApp.
+                return new Text(MaterialLocalizations.of(context).backButtonTooltip);
+              },
+            ),
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
+    expect(find.text('Back'), findsOneWidget);
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('de', 'DE')));
+    expect(find.text('Zurück'), findsOneWidget);
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('zh', 'CN')));
+    expect(find.text('返回'), findsOneWidget);
+  });
+
+  testWidgets('Localizations.override widget with hardwired locale', (WidgetTester tester) async {
+    Widget buildLocaleFrame(Locale locale) {
+      return buildFrame(
+        locale: locale,
+        buildContent: (BuildContext context) {
+          return new Localizations.override(
+            context: context,
+            locale: const Locale('en', 'US'),
+            child: new Builder(
+              builder: (BuildContext context) {
+                // No MaterialLocalizations are defined for the Localizations.override
+                // ancestor, so we should get all values from the default one, i.e.
+                // the one created by WidgetsApp via the LocalizationsDelegate
+                // provided by MaterialApp.
+                return new Text(MaterialLocalizations.of(context).backButtonTooltip);
+              },
+            ),
+          );
+        }
+      );
+    }
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('en', 'US')));
+    expect(find.text('Back'), findsOneWidget);
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('de', 'DE')));
+    expect(find.text('Back'), findsOneWidget);
+
+    await tester.pumpWidget(buildLocaleFrame(const Locale('zh', 'CN')));
+    expect(find.text('Back'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp overrides MaterialLocalizations', (WidgetTester tester) async {
+    final Key textKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      buildFrame(
+        // Accept whatever locale we're given
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        delegates: <FooMaterialLocalizationsDelegate>[
+          const FooMaterialLocalizationsDelegate(),
+        ],
+        buildContent: (BuildContext context) {
+          // Should always be 'foo', no matter what the locale is
+          return new Text(
+            MaterialLocalizations.of(context).backButtonTooltip,
+            key: textKey,
+          );
+        }
+      )
+    );
+
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'foo');
+
+    await tester.binding.setLocale('zh', 'CN');
+    await tester.pump();
+    expect(find.text('foo'), findsOneWidget);
+
+    await tester.binding.setLocale('de', 'DE');
+    await tester.pump();
+    expect(find.text('foo'), findsOneWidget);
+
   });
 
   testWidgets('deprecated Android/Java locales are modernized', (WidgetTester tester) async {
