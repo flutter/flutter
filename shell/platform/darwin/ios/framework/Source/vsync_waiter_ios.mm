@@ -47,10 +47,8 @@
 }
 
 - (void)onDisplayLink:(CADisplayLink*)link {
-  // fxl::TimePoint and CATimeInterval both use mach_absolute_time.
   fxl::TimePoint frame_start_time = fxl::TimePoint::Now();
-  fxl::TimePoint frame_target_time =
-      fxl::TimePoint::FromEpochDelta(fxl::TimeDelta::FromSecondsF(link.targetTimestamp));
+  fxl::TimePoint frame_target_time = frame_start_time + fxl::TimeDelta::FromSecondsF(link.duration);
 
   _displayLink.paused = YES;
 
