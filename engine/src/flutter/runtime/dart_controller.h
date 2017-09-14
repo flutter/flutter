@@ -35,8 +35,6 @@ class DartController {
 
   UIDartState* dart_state() const { return ui_dart_state_; }
 
-  void IsolateShuttingDown();
-
  private:
   bool SendStartMessage(Dart_Handle root_library);
 
