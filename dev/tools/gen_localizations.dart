@@ -75,8 +75,9 @@ String generateLocalizationsMap() {
 /// This variable is used by [MaterialLocalizations].
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
 
-  final String lastLocale = localeToResources.keys.last;
-  for (String locale in localeToResources.keys.toList()..sort()) {
+  final List<String> sortedLocales = localeToResources.keys.toList()..sort();
+  final String lastLocale = sortedLocales.last;
+  for (String locale in sortedLocales) {
     output.writeln('  "$locale": const <String, String>{');
 
     final Map<String, String> resources = localeToResources[locale];

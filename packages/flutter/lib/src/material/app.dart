@@ -245,7 +245,8 @@ class MaterialApp extends StatefulWidget {
   /// For example: to add support to [MaterialLocalizations] for a
   /// locale it doesn't already support, say `const Locale('foo', 'BR')`,
   /// one could just extend [DefaultMaterialLocalizations]:
-  /// ```
+  ///
+  /// ```dart
   /// class FooLocalizations extends DefaultMaterialLocalizations {
   ///   FooLocalizations(Locale locale) : super(locale);
   ///   @override
@@ -261,7 +262,8 @@ class MaterialApp extends StatefulWidget {
   /// A `FooLocalizationsDelegate` is essentially just a method that constructs
   /// a `FooLocalizations` object. We return a [SynchronousFuture] here because
   /// no asynchronous work takes place upon "loading" the localizations object.
-  /// ```
+  ///
+  /// ```dart
   /// class FooLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   ///   const FooLocalizationsDelegate();
   ///   @override
@@ -275,7 +277,8 @@ class MaterialApp extends StatefulWidget {
   ///
   /// Constructing a [MaterialApp] with a `FooLocalizationsDelegate` overrides
   /// the automatically included delegate for [MaterialLocalizations].
-  /// ```
+  ///
+  /// ```dart
   /// new MaterialApp(
   ///   localizationsDelegates: [
   ///     const FooLocalizationsDelegate(),

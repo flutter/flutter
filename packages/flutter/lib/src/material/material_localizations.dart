@@ -116,24 +116,20 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  factory DefaultMaterialLocalizations(Locale locale) {
+  DefaultMaterialLocalizations(this.locale) {
     assert(locale != null);
 
-    final Map<String, String> result = <String, String>{};
     if (localizations.containsKey(locale.languageCode))
-      result.addAll(localizations[locale.languageCode]);
-    if (localizations.containsKey(locale.toString()))
-      result.addAll(localizations[locale.toString()]);
-    return new DefaultMaterialLocalizations._(locale, result);
+      _nameToValue.addAll(localizations[locale.languageCode]);
+    if (localizations.containsKey(_localeName))
+      _nameToValue.addAll(localizations[_localeName]);
   }
-
-  DefaultMaterialLocalizations._(this.locale, this._nameToValue);
 
   /// The locale for which the values of this class's localized resources
   /// have been translated.
   final Locale locale;
 
-  final Map<String, String> _nameToValue;
+  final Map<String, String> _nameToValue = <String, String>{};
 
   String get _localeName {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();

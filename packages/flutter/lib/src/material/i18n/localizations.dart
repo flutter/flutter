@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart lib/src/material/i18n material
+// dart dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -393,7 +393,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
   "zh": const <String, String>{
     "timeOfDayFormat": r"ah:mm",
     "openAppDrawerTooltip": r"打开导航菜单",
-    "backButtonTooltip": r"背部",
+    "backButtonTooltip": r"返回",
     "closeButtonTooltip": r"关",
     "nextMonthTooltip": r"-下月就29了。",
     "previousMonthTooltip": r"前一个月",
@@ -418,4 +418,3 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "postMeridiemAbbreviation": r"下午"
   }
 };
-

@@ -325,14 +325,16 @@ class Localizations extends StatefulWidget {
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
-  /// This factory constructor is used for the - usually rare - situtation where part
+  /// This factory constructor is used for the (usually rare) situtation where part
   /// of an app should be localized for a different locale than the one defined
-  /// for the device, or a different list of [LocalizationsDelegate]s than the
-  /// list defined by [WidgetsApp.localizationsDelegates].
+  /// for the device, or if its localizations should come from a different list
+  /// of [LocalizationsDelegate]s than the list defined by
+  /// [WidgetsApp.localizationsDelegates].
   ///
   /// For example you could specify that `myWidget` was only to be localized for
   /// the US English locale:
-  /// ```
+  ///
+  /// ```dart
   /// Widget build(BuildContext context) {
   ///   return new Localizations.override(
   ///     context: context,
@@ -347,7 +349,7 @@ class Localizations extends StatefulWidget {
   ///
   /// To override the [Localizations.locale] or [Localizations.delegates] for an
   /// entire app, specify [WidgetsApp.locale] or [WidgetsApp.localizationsDelegates]
-  /// (or specify the same parameters for [MateialApp]).
+  /// (or specify the same parameters for [MaterialApp]).
   factory Localizations.override({
     Key key,
     @required BuildContext context,
