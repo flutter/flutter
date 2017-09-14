@@ -182,6 +182,10 @@ static bool StringEndsWith(const std::string& string,
          0;
 }
 
+static void ReleaseFetchedBytes(uint8_t* buffer) {
+  free(buffer);
+}
+
 Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
                                           char** error) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
@@ -269,8 +273,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
       std::vector<uint8_t> platform_data;
       zip_asset_store->GetAsBuffer(kPlatformKernelAssetKey, &platform_data);
       if (!platform_data.empty()) {
-        kernel_platform =
-            Dart_ReadKernelBinary(platform_data.data(), platform_data.size());
+        kernel_platform = Dart_ReadKernelBinary(
+            platform_data.data(), platform_data.size(), ReleaseFetchedBytes);
         FXL_DCHECK(kernel_platform != NULL);
       }
     }
@@ -305,8 +309,8 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
 
     if (!kernel_data.empty()) {
       // We are running kernel code.
-      FXL_CHECK(!LogIfError(Dart_LoadKernel(
-          Dart_ReadKernelBinary(kernel_data.data(), kernel_data.size()))));
+      FXL_CHECK(!LogIfError(Dart_LoadKernel(Dart_ReadKernelBinary(
+          kernel_data.data(), kernel_data.size(), ReleaseFetchedBytes))));
     } else if (!snapshot_data.empty()) {
       // We are running from a script snapshot.
       FXL_CHECK(!LogIfError(Dart_LoadScriptFromSnapshot(snapshot_data.data(),

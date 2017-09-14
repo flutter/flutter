@@ -102,11 +102,12 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
 
 static void CopyVectorBytes(const std::vector<uint8_t>& vector,
                             uint8_t*& bytes) {
-  if (bytes) {
-    free(bytes);
-  }
   bytes = (uint8_t*)malloc(vector.size());
   memcpy(bytes, vector.data(), vector.size());
+}
+
+static void ReleaseFetchedBytes(uint8_t* buffer) {
+  free(buffer);
 }
 
 tonic::DartErrorHandleType DartController::RunFromKernel(
@@ -117,8 +118,8 @@ tonic::DartErrorHandleType DartController::RunFromKernel(
   uint8_t* kernel_bytes = nullptr;
   CopyVectorBytes(kernel, kernel_bytes);
 
-  Dart_Handle result =
-      Dart_LoadKernel(Dart_ReadKernelBinary(kernel_bytes, kernel.size()));
+  Dart_Handle result = Dart_LoadKernel(
+      Dart_ReadKernelBinary(kernel_bytes, kernel.size(), ReleaseFetchedBytes));
   LogIfError(result);
   tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
   if (SendStartMessage(Dart_RootLibrary())) {
@@ -183,7 +184,8 @@ void DartController::CreateIsolateFor(
 
     isolate = Dart_CreateIsolateFromKernel(
         script_uri.c_str(), "main",
-        Dart_ReadKernelBinary(platform_kernel_bytes, platform_kernel.size()),
+        Dart_ReadKernelBinary(platform_kernel_bytes, platform_kernel.size(),
+                              ReleaseFetchedBytes),
         nullptr /* flags */, static_cast<tonic::DartState*>(state.get()),
         &error);
   } else {
