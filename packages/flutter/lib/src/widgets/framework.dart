@@ -2224,7 +2224,7 @@ class BuildOwner {
       _debugBuilding = true;
       return true;
     });
-    Timeline.startSync('Build');
+    Timeline.startSync('Build', arguments: timelineWhitelistArguments);
     try {
       _scheduledFlushDirtyElements = true;
       if (callback != null) {
@@ -2341,7 +2341,7 @@ class BuildOwner {
   /// After the current call stack unwinds, a microtask that notifies listeners
   /// about changes to global keys will run.
   void finalizeTree() {
-    Timeline.startSync('Finalize tree');
+    Timeline.startSync('Finalize tree', arguments: timelineWhitelistArguments);
     try {
       lockState(() {
         _inactiveElements._unmountAll(); // this unregisters the GlobalKeys

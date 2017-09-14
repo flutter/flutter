@@ -28,3 +28,9 @@ bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debug
   });
   return true;
 }
+
+/// Arguments to whitelist [Timeline] events in order to be shown in the
+/// developer centric version of the Observatory Timeline.
+const Map<String, String> timelineWhitelistArguments = const <String, String>{
+  'mode': 'basic'
+};

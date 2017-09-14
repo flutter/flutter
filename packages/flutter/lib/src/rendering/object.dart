@@ -126,7 +126,7 @@ class PaintingContext {
   void paintChild(RenderObject child, Offset offset) {
     assert(() {
       if (debugProfilePaintsEnabled)
-        Timeline.startSync('${child.runtimeType}');
+        Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
       return true;
     });
 
@@ -1075,7 +1075,7 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
-    Timeline.startSync('Layout');
+    Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
     _debugDoingLayout = true;
     try {
       // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
@@ -1146,7 +1146,7 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
-    Timeline.startSync('Paint');
+    Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
     _debugDoingPaint = true;
     try {
       final List<RenderObject> dirtyNodes = _nodesNeedingPaint;
