@@ -110,14 +110,17 @@ class WidgetsApp extends StatefulWidget {
 
   /// A one-line description used by the device to identify the app for the user.
   ///
+  /// The title is used by the device to identify the app for the user. On
+  /// Android the titles appear above the task manager's app snapshots which are
+  /// displayed when the user presses the "recent apps" button. Similarly, on
+  /// iOS the titles appear in the App Switcher when the user double presses the
+  /// home button.
+  ///
   /// To provide a localized title instead, use [onGenerateTitle].
   final String title;
 
   /// If non-null this callback function is called to produce the app's
   /// title string, otherwise [title] is used.
-  ///
-  /// The title is a one-line description used by the device to identify the
-  /// app for the user.
   ///
   /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
   /// [Localizations] widget so that this callback can be used to produce a
@@ -487,6 +490,9 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: new Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
+        // This Builder exists to provide a context below the Localizations widget.
+        // The onGenerateCallback() can refer to Localizations via its context
+        // parameter.
         child: new Builder(
           builder: (BuildContext context) {
             String title = widget.title;
