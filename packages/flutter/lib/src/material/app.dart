@@ -408,7 +408,6 @@ class _MaterialAppState extends State<MaterialApp> {
     return null;
   }
 
-
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
