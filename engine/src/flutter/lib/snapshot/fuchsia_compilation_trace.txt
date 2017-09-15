@@ -4072,11 +4072,11 @@ package:lib.fidl.dart/core.dart,Channel,write
 package:lib.fidl.dart/core.dart,Channel,queryAndRead
 package:lib.fidl.dart/core.dart,Channel,close
 package:lib.fidl.dart/core.dart,::,get:ERR_INVALID_ARGS
-package:lib.fidl.dart/core.dart,::,get:MX_TIME_INFINITE
-package:lib.fidl.dart/core.dart,::,get:MX_OBJECT_SIGNAL_0
-package:lib.fidl.dart/core.dart,::,get:MX_OBJECT_SIGNAL_2
-package:lib.fidl.dart/core.dart,::,get:MX_SIGNAL_READABLE
-package:lib.fidl.dart/core.dart,::,get:MX_SIGNAL_PEER_CLOSED
+package:lib.fidl.dart/core.dart,::,get:ZX_TIME_INFINITE
+package:lib.fidl.dart/core.dart,::,get:ZX_OBJECT_SIGNAL_0
+package:lib.fidl.dart/core.dart,::,get:ZX_OBJECT_SIGNAL_2
+package:lib.fidl.dart/core.dart,::,get:ZX_SIGNAL_READABLE
+package:lib.fidl.dart/core.dart,::,get:ZX_SIGNAL_PEER_CLOSED
 package:lib.app.dart/app.dart,ApplicationContext,ApplicationContext.
 package:lib.app.dart/app.dart,ApplicationContext,get:environment
 package:lib.app.dart/app.dart,ApplicationContext,get:launcher

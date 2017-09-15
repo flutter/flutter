@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include <mx/eventpair.h>
+#include <zx/eventpair.h>
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "flutter/flow/scene_update_context.h"
@@ -71,7 +71,7 @@ class ExportNode {
 
   // Member variables can only be read or modified on Rasterizer thread.
   SceneUpdateContext* scene_update_context_ = nullptr;
-  mx::eventpair export_token_;
+  zx::eventpair export_token_;
   std::unique_ptr<scenic_lib::EntityNode> node_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(ExportNode);
