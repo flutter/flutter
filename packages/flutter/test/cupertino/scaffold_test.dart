@@ -45,6 +45,7 @@ void main() {
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
                 tabBar: new CupertinoTabBar(
+                  backgroundColor: CupertinoColors.white,
                   items: <BottomNavigationBarItem>[
                     const BottomNavigationBarItem(
                       icon: const ImageIcon(const TestImageProvider(24, 24)),

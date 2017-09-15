@@ -68,7 +68,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     // The main content being at the bottom is added to the stack first.
     stacked.add(
       new Padding(
-        padding: new EdgeInsets.only(bottom: widget.tabBar.opaque ? 0.0 : widget.tabBar.preferredSize.height),
+        padding: new EdgeInsets.only(bottom: widget.tabBar.opaque ? widget.tabBar.preferredSize.height : 0.0),
         child: new _TabView(
           currentTabIndex: _currentPage,
           tabNumber: widget.tabBar.items.length,
