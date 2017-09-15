@@ -27,7 +27,7 @@ void main() {
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
                 tabBar: _buildTabBar(),
-                rootTabPageBuilder: (BuildContext context, int index) {
+                tabBuilder: (BuildContext context, int index) {
                   return new CustomPaint(
                     child: new Text('Page ${index + 1}'),
                     painter: new TestCallbackPainter(
@@ -89,7 +89,7 @@ void main() {
             builder: (BuildContext context) {
               return new CupertinoTabScaffold(
                   tabBar: _buildTabBar(),
-                  rootTabPageBuilder: (BuildContext context, int index) {
+                  tabBuilder: (BuildContext context, int index) {
                     tabsBuilt.add(index);
                     return new Text('Page ${index + 1}');
                   }

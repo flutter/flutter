@@ -11,12 +11,12 @@ import 'bottom_tab_bar.dart';
 /// The scaffold lays out the tab bar at the bottom and the content between or
 /// behind the tab bar.
 ///
-/// A [tabBar] and a [rootTabPageBuilder] are required. The [CupertinoTabScaffold]
+/// A [tabBar] and a [tabBuilder] are required. The [CupertinoTabScaffold]
 /// will automatically listen to the provided [CupertinoTabBar]'s tap callbacks
 /// to change the active tab.
 ///
-/// Tabs' contents are built with the provided [rootTabPageBuilder] at the active
-/// tab index. [rootTabPageBuilder] must be able to build the same number of
+/// Tabs' contents are built with the provided [tabBuilder] at the active
+/// tab index. [tabBuilder] must be able to build the same number of
 /// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
 /// and its animations disabled.
 // TODO(xster): describe navigator handlings.
@@ -25,9 +25,9 @@ class CupertinoTabScaffold extends StatefulWidget {
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
-    @required this.rootTabPageBuilder,
+    @required this.tabBuilder,
   }) : assert(tabBar != null),
-       assert(rootTabPageBuilder != null),
+       assert(tabBuilder != null),
        super(key: key);
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
@@ -52,7 +52,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// tree [Offstage] and its animations disabled.
   ///
   /// Content can slide under the [tabBar] when it's translucent.
-  final IndexedWidgetBuilder rootTabPageBuilder;
+  final IndexedWidgetBuilder tabBuilder;
 
   @override
   _CupertinoTabScaffoldState createState() => new _CupertinoTabScaffoldState();
@@ -72,7 +72,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         child: new _TabView(
           currentTabIndex: _currentPage,
           tabNumber: widget.tabBar.items.length,
-          rootTabPageBuilder: widget.rootTabPageBuilder,
+          tabBuilder: widget.tabBuilder,
         )
       ),
     );
@@ -109,14 +109,14 @@ class _TabView extends StatefulWidget {
   _TabView({
     @required this.currentTabIndex,
     @required this.tabNumber,
-    @required this.rootTabPageBuilder,
+    @required this.tabBuilder,
   }) : assert(currentTabIndex != null),
        assert(tabNumber != null && tabNumber > 0),
-       assert(rootTabPageBuilder != null);
+       assert(tabBuilder != null);
 
   final int currentTabIndex;
   final int tabNumber;
-  final IndexedWidgetBuilder rootTabPageBuilder;
+  final IndexedWidgetBuilder tabBuilder;
 
   @override
   _TabViewState createState() => new _TabViewState();
@@ -139,7 +139,7 @@ class _TabViewState extends State<_TabView> {
 
         // TODO(xster): lazily replace empty tabs with Navigators instead.
         if (active || tabs[index] != null)
-          tabs[index] = widget.rootTabPageBuilder(context, index);
+          tabs[index] = widget.tabBuilder(context, index);
 
         return new Offstage(
           offstage: !active,

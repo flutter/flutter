@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../services/mocks_for_image_cache.dart';
 
+/// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -55,7 +56,7 @@ void main() {
                     ),
                   ],
                 ),
-                rootTabPageBuilder: (BuildContext context, int index) {
+                tabBuilder: (BuildContext context, int index) {
                   return index == 0
                       ? new CupertinoPageScaffold(
                         navigationBar: const CupertinoNavigationBar(
