@@ -203,7 +203,9 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // with which to dismiss the menu.
     //   -- https://material.google.com/components/menus.html#menus-simple-menus
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
-    final double width = buttonRect.width + 8.0;
+    // The width of a menu should be at most the view width. This ensures that
+    // the menu does not extend past the left and right edges of the screen.
+    final double width = math.min(constraints.maxWidth, buttonRect.width + 8.0);
     return new BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -225,9 +227,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       }
       return true;
     });
-
-    final double width = buttonRect.width + 8.0;
-    return new Offset(buttonRect.left.clamp(0.0, size.width - width), menuTop);
+    return new Offset(buttonRect.left.clamp(0.0, size.width - childSize.width), menuTop);
   }
 
   @override
