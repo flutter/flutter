@@ -8,6 +8,7 @@
   "nextPageTooltip": "下一页",
   "previousPageTooltip": "上一页",
   "showMenuTooltip": "显示菜单",
+  "aboutListTileTitle": "关于$applicationName",
   "licensesPageTitle": "许可证",
   "pageRowsInfoTitle": "$rowCount中的$firstRow-$lastRow",
   "pageRowsInfoTitleApproximate": "约$rowCount中的$firstRow-$lastRow",

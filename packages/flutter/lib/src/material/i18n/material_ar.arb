@@ -8,6 +8,7 @@
   "nextPageTooltip": "الصفحة التالية",
   "previousPageTooltip": "الصفحة السابقة",
   "showMenuTooltip": "قائمة العرض",
+  "aboutListTileTitle": "حول $applicationName",
   "licensesPageTitle": "التّراخيص",
   "pageRowsInfoTitle": "$firstRow–$lastRow أو $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow من حوالي $rowCount",

@@ -8,6 +8,7 @@
   "nextPageTooltip": "بله پاڼه",
   "previousPageTooltip": "مخکینی مخ",
   "showMenuTooltip": "غورنۍ ښودل",
+  "aboutListTileTitle": "د $applicationName په اړه",
   "licensesPageTitle": "جوازونه",
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",

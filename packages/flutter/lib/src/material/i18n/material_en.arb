@@ -53,6 +53,12 @@
     "type": "text"
   },
 
+  "aboutListTileTitle": "About $applicationName",
+  "@aboutListTileTitle": {
+    "description": "The default title for AboutListTile",
+    "type": "text"
+  },
+
   "licensesPageTitle": "Licenses",
   "@licensesPageTitle": {
     "description": "The title for the Flutter licenses page.",

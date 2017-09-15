@@ -11,6 +11,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow из $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow около $rowCount",
   "rowsPerPageTitle": "Строки на страницу:",
+  "aboutListTileTitle": "O $applicationName",
   "licensesPageTitle": "Лицензии",
   "selectedRowCountTitleOther": "$selectedRowCount выбранные предметы",
   "cancelButtonLabel": "ОТМЕНА",

@@ -8,6 +8,7 @@
   "nextPageTooltip": "اڳيون پيج",
   "previousPageTooltip": "پويون صفحو",
   "showMenuTooltip": "ڏيکاريو",
+  "aboutListTileTitle": "$applicationName بابت",
   "licensesPageTitle": "لائسنس",
   "pageRowsInfoTitle": "$firstRow–$lastRow جي $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow کان $rowCount تقريبن",
