@@ -1,4 +1,4 @@
-Signature: 6acb5ec35f946b04626e9b127e818708
+Signature: 1dbfd20015aaf7761e4f14c34f720089
 
 UNUSED LICENSES:
 
@@ -1499,6 +1499,8 @@ FILE: ../../../dart/runtime/bin/error_exit.h
 FILE: ../../../dart/runtime/bin/gzip.cc
 FILE: ../../../dart/runtime/bin/gzip.h
 FILE: ../../../dart/runtime/bin/isolate_data.cc
+FILE: ../../../dart/runtime/bin/main_options.cc
+FILE: ../../../dart/runtime/bin/main_options.h
 FILE: ../../../dart/runtime/bin/namespace.cc
 FILE: ../../../dart/runtime/bin/namespace.h
 FILE: ../../../dart/runtime/bin/namespace_android.cc
@@ -1507,6 +1509,8 @@ FILE: ../../../dart/runtime/bin/namespace_linux.cc
 FILE: ../../../dart/runtime/bin/namespace_macos.cc
 FILE: ../../../dart/runtime/bin/namespace_patch.dart
 FILE: ../../../dart/runtime/bin/namespace_win.cc
+FILE: ../../../dart/runtime/bin/options.cc
+FILE: ../../../dart/runtime/bin/options.h
 FILE: ../../../dart/runtime/bin/secure_socket_filter.cc
 FILE: ../../../dart/runtime/bin/secure_socket_filter.h
 FILE: ../../../dart/runtime/bin/secure_socket_utils.cc
@@ -1593,6 +1597,7 @@ FILE: ../../../dart/runtime/vm/timeline_win.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../dart/runtime/vm/zone_text_buffer.h
 FILE: ../../../dart/sdk/lib/internal/linked_list.dart
+FILE: ../../../dart/sdk/lib/io/embedder_config.dart
 FILE: ../../../dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../dart/sdk/lib/io/sync_socket.dart
 FILE: ../../../dart/sdk/lib/vmservice/named_lookup.dart

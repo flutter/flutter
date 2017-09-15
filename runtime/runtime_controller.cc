@@ -88,19 +88,22 @@ void RuntimeController::NotifyIdle(int64_t deadline) {
 
 void RuntimeController::DispatchPlatformMessage(
     fxl::RefPtr<PlatformMessage> message) {
-  TRACE_EVENT0("flutter", "RuntimeController::DispatchPlatformMessage");
+  TRACE_EVENT1("flutter", "RuntimeController::DispatchPlatformMessage", "mode",
+               "basic");
   GetWindow()->DispatchPlatformMessage(std::move(message));
 }
 
 void RuntimeController::DispatchPointerDataPacket(
     const PointerDataPacket& packet) {
-  TRACE_EVENT0("flutter", "RuntimeController::DispatchPointerDataPacket");
+  TRACE_EVENT1("flutter", "RuntimeController::DispatchPointerDataPacket",
+               "mode", "basic");
   GetWindow()->DispatchPointerDataPacket(packet);
 }
 
 void RuntimeController::DispatchSemanticsAction(int32_t id,
                                                 SemanticsAction action) {
-  TRACE_EVENT0("flutter", "RuntimeController::DispatchSemanticsAction");
+  TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
+               "basic");
   GetWindow()->DispatchSemanticsAction(id, action);
 }
 

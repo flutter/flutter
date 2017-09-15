@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/vsync_waiter_android.h"
 
+#include <cmath>
 #include <utility>
 
 #include "flutter/common/threads.h"
@@ -59,8 +60,16 @@ static void OnNativeVsync(JNIEnv* env,
   // Vsync" checkbox in the timeline can be enabled.
   // See: https://github.com/catapult-project/catapult/blob/2091404475cbba9b786
   // 442979b6ec631305275a6/tracing/tracing/extras/vsync/vsync_auditor.html#L26
-  TRACE_EVENT0("flutter", "VSYNC");
-  TRACE_EVENT_INSTANT0("flutter", "VSYNC");
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+  TRACE_EVENT1("flutter", "VSYNC", "mode", "basic");
+#else
+  {
+    constexpr size_t num_chars = sizeof(jlong) * CHAR_BIT * 3.4 + 2;
+    char deadline[num_chars];
+    sprintf(deadline, "%lld", frameTargetTimeNanos / 1000);  // microseconds
+    TRACE_EVENT2("flutter", "VSYNC", "mode", "basic", "deadline", deadline);
+  }
+#endif
   fxl::WeakPtr<VsyncWaiterAndroid>* weak =
       reinterpret_cast<fxl::WeakPtr<VsyncWaiterAndroid>*>(cookie);
   VsyncWaiterAndroid* waiter = weak->get();
