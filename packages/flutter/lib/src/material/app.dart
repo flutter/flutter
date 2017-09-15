@@ -135,8 +135,7 @@ class MaterialApp extends StatefulWidget {
 
   /// A one-line description used by the device to identify the app for the user.
   ///
-  /// The title is used by the device to identify the app for the user. On
-  /// Android the titles appear above the task manager's app snapshots which are
+  /// On Android the titles appear above the task manager's app snapshots which are
   /// displayed when the user presses the "recent apps" button. Similarly, on
   /// iOS the titles appear in the App Switcher when the user double presses the
   /// home button.
