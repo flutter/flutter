@@ -103,6 +103,36 @@ class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizat
   bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
 }
 
+// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
+class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const DefaultWidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
+}
+
+class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
+  OnlyRTLDefaultWidgetsLocalizations(Locale locale) : super(locale);
+
+  @override
+  TextDirection get textDirection => TextDirection.rtl;
+}
+
+class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const OnlyRTLDefaultWidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) {
+    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations(locale));
+  }
+
+  @override
+  bool shouldReload(OnlyRTLDefaultWidgetsLocalizationsDelegate old) => false;
+}
+
 Widget buildFrame({
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates,
@@ -504,15 +534,116 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('zh_CN'), findsOneWidget);
   });
-}
 
-// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
-class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const DefaultWidgetsLocalizationsDelegate();
+  testWidgets('Localizations.override widget tracks parent\'s locale and delegates', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        // Accept whatever locale we're given
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        buildContent: (BuildContext context) {
+          return new Localizations.override(
+            context: context,
+            child: new Builder(
+              builder: (BuildContext context) {
+                final Locale locale = Localizations.localeOf(context);
+                final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
+                return new Text('$locale $direction');
+              },
+            ),
+          );
+        }
+      )
+    );
 
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+    // Initial WidgetTester locale is new Locale('', '')
+    await tester.pumpAndSettle();
+    expect(find.text('_ TextDirection.ltr'), findsOneWidget);
 
-  @override
-  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
+    await tester.binding.setLocale('en', 'CA');
+    await tester.pumpAndSettle();
+    expect(find.text('en_CA TextDirection.ltr'), findsOneWidget);
+
+    await tester.binding.setLocale('ar', 'EG');
+    await tester.pumpAndSettle();
+    expect(find.text('ar_EG TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('da', 'DA');
+    await tester.pumpAndSettle();
+    expect(find.text('da_DA TextDirection.ltr'), findsOneWidget);
+  });
+
+  testWidgets('Localizations.override widget overrides parent\'s DefaultWidgetLocalizations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        // Accept whatever locale we're given
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        buildContent: (BuildContext context) {
+          return new Localizations.override(
+            context: context,
+            delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
+              // Override: no matter what the locale, textDirection is always RTL.
+              const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
+            ],
+            child: new Builder(
+              builder: (BuildContext context) {
+                final Locale locale = Localizations.localeOf(context);
+                final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
+                return new Text('$locale $direction');
+              },
+            ),
+          );
+        }
+      )
+    );
+
+    // Initial WidgetTester locale is new Locale('', '')
+    await tester.pumpAndSettle();
+    expect(find.text('_ TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('en', 'CA');
+    await tester.pumpAndSettle();
+    expect(find.text('en_CA TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('ar', 'EG');
+    await tester.pumpAndSettle();
+    expect(find.text('ar_EG TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('da', 'DA');
+    await tester.pumpAndSettle();
+    expect(find.text('da_DA TextDirection.rtl'), findsOneWidget);
+  });
+
+  testWidgets('WidgetsApp overrides DefaultWidgetLocalizations', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildFrame(
+        // Accept whatever locale we're given
+        localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        delegates: <OnlyRTLDefaultWidgetsLocalizationsDelegate>[
+          const OnlyRTLDefaultWidgetsLocalizationsDelegate(),
+        ],
+        buildContent: (BuildContext context) {
+          final Locale locale = Localizations.localeOf(context);
+          final TextDirection direction = WidgetsLocalizations.of(context).textDirection;
+          return new Text('$locale $direction');
+        }
+      )
+    );
+
+    // Initial WidgetTester locale is new Locale('', '')
+    await tester.pumpAndSettle();
+    expect(find.text('_ TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('en', 'CA');
+    await tester.pumpAndSettle();
+    expect(find.text('en_CA TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('ar', 'EG');
+    await tester.pumpAndSettle();
+    expect(find.text('ar_EG TextDirection.rtl'), findsOneWidget);
+
+    await tester.binding.setLocale('da', 'DA');
+    await tester.pumpAndSettle();
+    expect(find.text('da_DA TextDirection.rtl'), findsOneWidget);
+  });
+
 }

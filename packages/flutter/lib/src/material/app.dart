@@ -234,6 +234,61 @@ class MaterialApp extends StatefulWidget {
   ///
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
+  ///
+  /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
+  /// are included automatically. Apps can provide their own versions of these
+  /// localizations by creating implementations of
+  /// [LocalizationsDelegate<WidgetLocalizations>] or
+  /// [LocalizationsDelegate<MaterialLocalizations>] whose load methods return
+  /// custom versions of [WidgetLocalizations] or [MaterialLocalizations].
+  ///
+  /// For example: to add support to [MaterialLocalizations] for a
+  /// locale it doesn't already support, say `const Locale('foo', 'BR')`,
+  /// one could just extend [DefaultMaterialLocalizations]:
+  ///
+  /// ```dart
+  /// class FooLocalizations extends DefaultMaterialLocalizations {
+  ///   FooLocalizations(Locale locale) : super(locale);
+  ///   @override
+  ///   String get okButtonLabel {
+  ///     if (locale == const Locale('foo', 'BR'))
+  ///       return 'foo';
+  ///     return super.okButtonLabel;
+  ///   }
+  /// }
+  ///
+  /// ```
+  ///
+  /// A `FooLocalizationsDelegate` is essentially just a method that constructs
+  /// a `FooLocalizations` object. We return a [SynchronousFuture] here because
+  /// no asynchronous work takes place upon "loading" the localizations object.
+  ///
+  /// ```dart
+  /// class FooLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  ///   const FooLocalizationsDelegate();
+  ///   @override
+  ///   Future<FooLocalizations> load(Locale locale) {
+  ///     return new SynchronousFuture(new FooLocalizations(locale));
+  ///   }
+  ///   @override
+  ///   bool shouldReload(FooLocalizationsDelegate old) => false;
+  /// }
+  /// ```
+  ///
+  /// Constructing a [MaterialApp] with a `FooLocalizationsDelegate` overrides
+  /// the automatically included delegate for [MaterialLocalizations] because
+  /// only the first delegate of each [LocalizationsDelegate.type] is used and
+  /// the automatically included delegates are added to the end of the app's
+  /// [localizationsDelegates] list.
+  ///
+  /// ```dart
+  /// new MaterialApp(
+  ///   localizationsDelegates: [
+  ///     const FooLocalizationsDelegate(),
+  ///   ],
+  ///   // ...
+  /// )
+  /// ```
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
 
   /// This callback is responsible for choosing the app's locale
@@ -379,11 +434,14 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   // Combine the Localizations for Material with the ones contributed
-  // by the localizationsDelegates parameter, if any.
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    yield const _MaterialLocalizationsDelegate(); // TODO(ianh): make this configurable
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
+    yield const _MaterialLocalizationsDelegate();
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {

@@ -383,11 +383,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   }
 
   // Combine the Localizations for Widgets with the ones contributed
-  // by the localizationsDelegates parameter, if any.
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _WidgetsLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    yield const _WidgetsLocalizationsDelegate(); // TODO(ianh): make this configurable
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
+    yield const _WidgetsLocalizationsDelegate();
   }
 
   @override

@@ -38,9 +38,19 @@ class _Pending {
 // This is more complicated than just applying Future.wait to input
 // because some of the input.values may be SynchronousFutures. We don't want
 // to Future.wait for the synchronous futures.
-Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> delegates) {
+Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> allDelegates) {
   final Map<Type, dynamic> output = <Type, dynamic>{};
   List<_Pending> pendingList;
+
+  // Only load the first delegate for each delgate type.
+  final Set<Type> types = new Set<Type>();
+  final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
+  for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
+    if (!types.contains(delegate.type)) {
+      types.add(delegate.type);
+      delegates.add(delegate);
+    }
+  }
 
   for (LocalizationsDelegate<dynamic> delegate in delegates) {
     final Future<dynamic> inputValue = delegate.load(locale);
@@ -227,6 +237,9 @@ class _LocalizationsScope extends InheritedWidget {
 /// class _MyDelegate extends LocalizationsDelegate<MyLocalizations> {
 ///   @override
 ///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
+///
+///  @override
+///  bool shouldReload(MyLocalizationsDelegate old) => false;
 ///}
 /// ```
 ///
@@ -298,8 +311,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// One could choose another approach for loading localized resources and looking them up while
 /// still conforming to the structure of this example.
 class Localizations extends StatefulWidget {
-  /// Create a widget from which ambient localizations (translated strings)
-  /// can be obtained.
+  /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
     Key key,
     @required this.locale,
@@ -309,6 +321,51 @@ class Localizations extends StatefulWidget {
     assert(locale != null);
     assert(delegates != null);
     assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
+  }
+
+  /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
+  ///
+  /// This factory constructor is used for the (usually rare) situtation where part
+  /// of an app should be localized for a different locale than the one defined
+  /// for the device, or if its localizations should come from a different list
+  /// of [LocalizationsDelegate]s than the list defined by
+  /// [WidgetsApp.localizationsDelegates].
+  ///
+  /// For example you could specify that `myWidget` was only to be localized for
+  /// the US English locale:
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new Localizations.override(
+  ///     context: context,
+  ///     locale: const Locale('en', 'US'),
+  ///     child: myWidget,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The `locale` and `delegates` parameters default to the [Localizations.locale]
+  /// and [Localizations.delegates] values from the nearest [Localizations] ancestor.
+  ///
+  /// To override the [Localizations.locale] or [Localizations.delegates] for an
+  /// entire app, specify [WidgetsApp.locale] or [WidgetsApp.localizationsDelegates]
+  /// (or specify the same parameters for [MaterialApp]).
+  factory Localizations.override({
+    Key key,
+    @required BuildContext context,
+    Locale locale,
+    List<LocalizationsDelegate<dynamic>> delegates,
+    Widget child,
+  }) {
+    final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(context);
+    if (delegates != null)
+      mergedDelegates.insertAll(0, delegates);
+    return new Localizations(
+      key: key,
+      locale: locale ?? Localizations.localeOf(context),
+      delegates: mergedDelegates,
+      child: child,
+    );
   }
 
   /// The resources returned by [Localizations.of] will be specific to this locale.
@@ -326,7 +383,17 @@ class Localizations extends StatefulWidget {
   static Locale localeOf(BuildContext context) {
     assert(context != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    assert(scope != null, 'a Localizations ancestor was not found');
     return scope.localizationsState.locale;
+  }
+
+  // There doesn't appear to be a need to make this public. See the
+  // Localizations.override factory constructor.
+  static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
+    assert(context != null);
+    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    assert(scope != null, 'a Localizations ancestor was not found');
+    return new List<LocalizationsDelegate<dynamic>>.from(scope.localizationsState.widget.delegates);
   }
 
   /// Returns the 'type' localized resources for the widget tree that
@@ -345,6 +412,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    assert(scope != null, 'a Localizations ancestor was not found');
     return scope.localizationsState.resourcesFor<T>(type);
   }
 

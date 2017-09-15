@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart lib/src/material/i18n material
+// dart dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -36,7 +36,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"اختر الكل",
     "viewLicensesButtonLabel": r"عرض التراخيص",
     "anteMeridiemAbbreviation": r"ص",
-    "postMeridiemAbbreviation": r"م"
+    "postMeridiemAbbreviation": r"م",
   },
   "de": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -63,7 +63,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"EINFÜGEN",
     "selectAllButtonLabel": r"ALLES AUSWÄHLEN",
-    "viewLicensesButtonLabel": r"LIZENZEN ANZEIGEN"
+    "viewLicensesButtonLabel": r"LIZENZEN ANZEIGEN",
   },
   "en": const <String, String>{
     "timeOfDayFormat": r"h:mm a",
@@ -92,16 +92,16 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"SELECT ALL",
     "viewLicensesButtonLabel": r"VIEW LICENSES",
     "anteMeridiemAbbreviation": r"AM",
-    "postMeridiemAbbreviation": r"PM"
+    "postMeridiemAbbreviation": r"PM",
   },
   "en_GB": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "en_IE": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "en_ZA": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "es": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -128,10 +128,10 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"PEGAR",
     "selectAllButtonLabel": r"SELECCIONAR TODO",
-    "viewLicensesButtonLabel": r"VER LICENCIAS"
+    "viewLicensesButtonLabel": r"VER LICENCIAS",
   },
   "es_US": const <String, String>{
-    "timeOfDayFormat": r"h:mm a"
+    "timeOfDayFormat": r"h:mm a",
   },
   "fa": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -156,7 +156,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"تایید",
     "pasteButtonLabel": r"چسباندن",
     "selectAllButtonLabel": r"انتخاب همه",
-    "viewLicensesButtonLabel": r"مشاهده مجوز"
+    "viewLicensesButtonLabel": r"مشاهده مجوز",
   },
   "fr": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -183,10 +183,10 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"COLLER",
     "selectAllButtonLabel": r"TOUT SÉLECTIONNER",
-    "viewLicensesButtonLabel": r"AFFICHER LES LICENCES"
+    "viewLicensesButtonLabel": r"AFFICHER LES LICENCES",
   },
   "fr_CA": const <String, String>{
-    "timeOfDayFormat": r"HH 'h' mm"
+    "timeOfDayFormat": r"HH 'h' mm",
   },
   "he": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -211,7 +211,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"בסדר",
     "pasteButtonLabel": r"הדבק",
     "selectAllButtonLabel": r"בחר הכל",
-    "viewLicensesButtonLabel": r"ראה רישיונות"
+    "viewLicensesButtonLabel": r"ראה רישיונות",
   },
   "it": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -236,7 +236,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"INCOLLA",
     "selectAllButtonLabel": r"SELEZIONA TUTTO",
-    "viewLicensesButtonLabel": r"VEDI LE LICENZE"
+    "viewLicensesButtonLabel": r"VEDI LE LICENZE",
   },
   "ja": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -261,7 +261,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"貼付け",
     "selectAllButtonLabel": r"全選択",
-    "viewLicensesButtonLabel": r"ライセンス表記"
+    "viewLicensesButtonLabel": r"ライセンス表記",
   },
   "ps": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -286,7 +286,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"سمه ده",
     "pasteButtonLabel": r"پیټ کړئ",
     "selectAllButtonLabel": r"غوره کړئ",
-    "viewLicensesButtonLabel": r"لیدلس وګورئ"
+    "viewLicensesButtonLabel": r"لیدلس وګورئ",
   },
   "pt": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -311,7 +311,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"COLAR",
     "selectAllButtonLabel": r"SELECIONAR TUDO",
-    "viewLicensesButtonLabel": r"VER LICENÇAS"
+    "viewLicensesButtonLabel": r"VER LICENÇAS",
   },
   "ru": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -336,7 +336,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"ОК",
     "pasteButtonLabel": r"Паст",
     "selectAllButtonLabel": r"Выбрать все",
-    "viewLicensesButtonLabel": r"ПРОСМОТРЕТЬ ЛИЦЕНЗИИ"
+    "viewLicensesButtonLabel": r"ПРОСМОТРЕТЬ ЛИЦЕНЗИИ",
   },
   "sd": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -361,7 +361,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"ٺيڪ آهي",
     "pasteButtonLabel": r"پيسٽ ڪريو",
     "selectAllButtonLabel": r"سڀ چونڊيو",
-    "viewLicensesButtonLabel": r"لائسنس ڏسو"
+    "viewLicensesButtonLabel": r"لائسنس ڏسو",
   },
   "ur": const <String, String>{
     "timeOfDayFormat": r"h:mm a",
@@ -388,12 +388,12 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"تکاپیمام منتخب کریں",
     "viewLicensesButtonLabel": r"لائسنس دیکھیں",
     "anteMeridiemAbbreviation": r"AM",
-    "postMeridiemAbbreviation": r"PM"
+    "postMeridiemAbbreviation": r"PM",
   },
   "zh": const <String, String>{
     "timeOfDayFormat": r"ah:mm",
     "openAppDrawerTooltip": r"打开导航菜单",
-    "backButtonTooltip": r"背部",
+    "backButtonTooltip": r"返回",
     "closeButtonTooltip": r"关",
     "nextMonthTooltip": r"-下月就29了。",
     "previousMonthTooltip": r"前一个月",
@@ -415,7 +415,6 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"全选",
     "viewLicensesButtonLabel": r"查看许可证",
     "anteMeridiemAbbreviation": r"上午",
-    "postMeridiemAbbreviation": r"下午"
-  }
+    "postMeridiemAbbreviation": r"下午",
+  },
 };
-
