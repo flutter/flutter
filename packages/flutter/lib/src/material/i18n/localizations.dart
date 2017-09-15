@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
+// dart dev/tools/gen_localizations.dart lib/src/material/i18n material
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -327,27 +327,27 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
   "ru": const <String, String>{
     "timeOfDayFormat": r"H:mm",
     "openAppDrawerTooltip": r"Открыть меню навигации",
-    "backButtonTooltip": r"назад",
+    "backButtonTooltip": r"Назад",
     "closeButtonTooltip": r"Закрыть",
-    "nextMonthTooltip": r"В следующем месяце",
+    "nextMonthTooltip": r"Следующий месяц",
     "previousMonthTooltip": r"Предыдущий месяц",
     "nextPageTooltip": r"Следущая страница",
     "previousPageTooltip": r"Предыдущая страница",
     "showMenuTooltip": r"Показать меню",
     "pageRowsInfoTitle": r"$firstRow–$lastRow из $rowCount",
-    "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow около $rowCount",
+    "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow из примерно $rowCount",
     "rowsPerPageTitle": r"Строки на страницу:",
     "aboutListTileTitle": r"O $applicationName",
     "licensesPageTitle": r"Лицензии",
-    "selectedRowCountTitleOther": r"$selectedRowCount выбранные предметы",
-    "cancelButtonLabel": r"ОТМЕНА",
+    "selectedRowCountTitleOther": r"Выбранно $selectedRowCount строк",
+    "cancelButtonLabel": r"ОТМЕНИТЬ",
     "closeButtonLabel": r"ЗАКРЫТЬ",
-    "continueButtonLabel": r"ПРОДОЛЖАТЬ",
-    "copyButtonLabel": r"копия",
-    "cutButtonLabel": r"порез",
+    "continueButtonLabel": r"ПРОДОЛЖИТЬ",
+    "copyButtonLabel": r"СКОПИРОВАТЬ",
+    "cutButtonLabel": r"ВЫРЕЗАТЬ",
     "okButtonLabel": r"ОК",
-    "pasteButtonLabel": r"Паст",
-    "selectAllButtonLabel": r"Выбрать все",
+    "pasteButtonLabel": r"ВСТАВИТЬ",
+    "selectAllButtonLabel": r"ВЫБРАТЬ ВСЁ",
     "viewLicensesButtonLabel": r"ПРОСМОТРЕТЬ ЛИЦЕНЗИИ",
   },
   "sd": const <String, String>{
@@ -433,3 +433,4 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "postMeridiemAbbreviation": r"下午",
   },
 };
+
