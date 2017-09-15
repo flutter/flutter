@@ -85,6 +85,7 @@ class MaterialApp extends StatefulWidget {
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
     this.title: '',
+    this.onGenerateTitle,
     this.color,
     this.theme,
     this.home,
@@ -132,8 +133,29 @@ class MaterialApp extends StatefulWidget {
        ),
        super(key: key);
 
-  /// A one-line description of this app for use in the window manager.
+  /// A one-line description used by the device to identify the app for the user.
+  ///
+  /// On Android the titles appear above the task manager's app snapshots which are
+  /// displayed when the user presses the "recent apps" button. Similarly, on
+  /// iOS the titles appear in the App Switcher when the user double presses the
+  /// home button.
+  ///
+  /// To provide a localized title instead, use [onGenerateTitle].
+  ///
+  /// This value is passed unmodified to [WidgetsApp.title].
   final String title;
+
+  /// If non-null this function is called to produce the app's
+  /// title string, otherwise [title] is used.
+  ///
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// [Localizations] widget so that this callback can be used to produce a
+  /// localized title.
+  ///
+  /// This callback function must not return null.
+  ///
+  /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
+  final GenerateAppTitle onGenerateTitle;
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
@@ -320,7 +342,7 @@ class MaterialApp extends StatefulWidget {
   /// configure this list to match the locales they support.
   ///
   /// This list must not null. It's default value is just
-  /// `[const Locale('en', 'US')]`. It is simply passed along to the
+  /// `[const Locale('en', 'US')]`. It is passed along unmodified to the
   /// [WidgetsApp] built by this widget.
   ///
   /// The order of the list matters. By default, if the device's locale doesn't
@@ -508,6 +530,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
         title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
         textStyle: _errorTextStyle,
         // blue is the primary color of the default theme
         color: widget.color ?? theme?.primaryColor ?? Colors.blue,

@@ -34,6 +34,16 @@ export 'dart:ui' show Locale;
 /// parameter is just the value of [WidgetApp.supportedLocales].
 typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
 
+/// The signature of [WidgetsApp.onGenerateTitle].
+///
+/// Used to generate a value for the app's [Title.title], which the device uses
+/// to identify the app for the user. The `context` includes the [WidgetApp]'s
+/// [Localizations] widget so that this method can be used to produce a
+/// localized title.
+///
+/// This function must not return null.
+typedef String GenerateAppTitle(BuildContext context);
+
 // Delegate that fetches the default (English) strings.
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
@@ -71,6 +81,7 @@ class WidgetsApp extends StatefulWidget {
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.title: '',
+    this.onGenerateTitle,
     this.textStyle,
     @required this.color,
     this.navigatorObservers: const <NavigatorObserver>[],
@@ -99,8 +110,25 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowWidgetInspector != null),
        super(key: key);
 
-  /// A one-line description of this app for use in the window manager.
+  /// A one-line description used by the device to identify the app for the user.
+  ///
+  /// On Android the titles appear above the task manager's app snapshots which are
+  /// displayed when the user presses the "recent apps" button. Similarly, on
+  /// iOS the titles appear in the App Switcher when the user double presses the
+  /// home button.
+  ///
+  /// To provide a localized title instead, use [onGenerateTitle].
   final String title;
+
+  /// If non-null this callback function is called to produce the app's
+  /// title string, otherwise [title] is used.
+  ///
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// [Localizations] widget so that this callback can be used to produce a
+  /// localized title.
+  ///
+  /// This callback function must not return null.
+  final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
   final TextStyle textStyle;
@@ -465,10 +493,22 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       child: new Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
-        child: new Title(
-          title: widget.title,
-          color: widget.color,
-          child: result,
+        // This Builder exists to provide a context below the Localizations widget.
+        // The onGenerateCallback() can refer to Localizations via its context
+        // parameter.
+        child: new Builder(
+          builder: (BuildContext context) {
+            String title = widget.title;
+            if (widget.onGenerateTitle != null) {
+              title = widget.onGenerateTitle(context);
+              assert(title != null, 'onGenerateTitle must return a non-null String');
+            }
+            return new Title(
+              title: title,
+              color: widget.color,
+              child: result,
+            );
+          },
         ),
       ),
     );
