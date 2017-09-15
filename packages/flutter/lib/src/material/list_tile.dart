@@ -388,9 +388,8 @@ class ListTile extends StatelessWidget {
     final List<Widget> children = <Widget>[];
 
     IconThemeData iconThemeData;
-    if (leading != null || trailing != null) {
+    if (leading != null || trailing != null)
       iconThemeData = new IconThemeData(color: _iconColor(theme, tileTheme));
-    }
 
     if (leading != null) {
       children.add(IconTheme.merge(
