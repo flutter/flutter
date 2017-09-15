@@ -60,6 +60,7 @@ export 'src/rendering/sliver_padding.dart';
 export 'src/rendering/sliver_persistent_header.dart';
 export 'src/rendering/stack.dart';
 export 'src/rendering/table.dart';
+export 'src/rendering/table_border.dart';
 export 'src/rendering/tweens.dart';
 export 'src/rendering/view.dart';
 export 'src/rendering/viewport.dart';

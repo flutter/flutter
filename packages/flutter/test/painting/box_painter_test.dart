@@ -70,7 +70,18 @@ void main() {
     expect(
       new Border.all(width: 4.0).toString(),
       equals(
-        'Border(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid), BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
+        'Border.all(BorderSide(Color(0xff000000), 4.0, BorderStyle.solid))',
+      ),
+    );
+    expect(
+      const Border(
+        top: const BorderSide(width: 3.0),
+        right: const BorderSide(width: 3.0),
+        bottom: const BorderSide(width: 3.0),
+        left: const BorderSide(width: 3.0),
+      ).toString(),
+      equals(
+        'Border.all(BorderSide(Color(0xff000000), 3.0, BorderStyle.solid))',
       ),
     );
   });

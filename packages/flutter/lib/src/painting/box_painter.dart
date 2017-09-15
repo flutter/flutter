@@ -580,7 +580,7 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
   }
 }
 
-/// Paints an image into the given rectangle in the canvas.
+/// Paints an image into the given rectangle on the canvas.
 ///
 ///  * `canvas`: The canvas onto which the image will be painted.
 ///  * `rect`: The region of the canvas into which the image will be painted.
@@ -612,6 +612,12 @@ Iterable<Rect> _generateImageTileRects(Rect outputRect, Rect fundamentalRect, Im
 ///    `alignment` is [FractionalOffset.bottomRight], the image will be as large
 ///    as possible within `rect` and placed with its bottom right corner at the
 ///    bottom right corner of `rect`.
+///
+/// See also:
+///
+///  * [paintBorder], which paints a border around a rectangle on a canvas.
+///  * [DecorationImage], which holds a configuration for calling this function.
+///  * [BoxDecoration], which uses this function to paint a [DecorationImage].
 void paintImage({
   @required Canvas canvas,
   @required Rect rect,

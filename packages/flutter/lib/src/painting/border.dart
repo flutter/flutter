@@ -337,114 +337,36 @@ class Border {
   /// If you specify a rectangular box shape (BoxShape.rectangle), then you may
   /// specify a [BorderRadius]. If a border radius is specified, there is the
   /// requirement that the border [isUniform].
+  ///
+  /// See also:
+  ///
+  ///  * [paintBorder], which is used if the border is not uniform.
   void paint(Canvas canvas, Rect rect, {
     BoxShape shape: BoxShape.rectangle,
     BorderRadius borderRadius,
   }) {
     if (isUniform) {
-      if (borderRadius != null) {
-        assert(shape == BoxShape.rectangle, 'A borderRadius can only be given for rectangular boxes.');
-        _paintBorderWithRadius(canvas, rect, borderRadius);
-        return;
-      }
       if (shape == BoxShape.circle) {
-        assert(borderRadius == null);
-        _paintBorderWithCircle(canvas, rect);
+        assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+        _paintUniformBorderWithCircle(canvas, rect);
         return;
       }
+      if (borderRadius != null) {
+        _paintUniformBorderWithRadius(canvas, rect, borderRadius);
+        return;
+      }
+      _paintUniformBorderWithRectangle(canvas, rect);
+      return;
     }
 
-    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.'); // TODO(abarth): Support non-uniform rounded borders.
-    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.'); // TODO(ianh): Support non-uniform borders on circles.
+    assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
+    assert(shape == BoxShape.rectangle, 'A border can only be drawn as a circle if it is uniform.');
 
-    assert(top != null);
-    assert(right != null);
-    assert(bottom != null);
-    assert(left != null);
-
-    final Paint paint = new Paint()
-      ..strokeWidth = 0.0; // used for hairline borders
-    Path path;
-
-    switch (top.style) {
-      case BorderStyle.solid:
-        paint.color = top.color;
-        path = new Path();
-        path.moveTo(rect.left, rect.top);
-        path.lineTo(rect.right, rect.top);
-        if (top.width == 0.0) {
-          paint.style = PaintingStyle.stroke;
-        } else {
-          paint.style = PaintingStyle.fill;
-          path.lineTo(rect.right - right.width, rect.top + top.width);
-          path.lineTo(rect.left + left.width, rect.top + top.width);
-        }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
-    }
-
-    switch (right.style) {
-      case BorderStyle.solid:
-        paint.color = right.color;
-        path = new Path();
-        path.moveTo(rect.right, rect.top);
-        path.lineTo(rect.right, rect.bottom);
-        if (right.width == 0.0) {
-          paint.style = PaintingStyle.stroke;
-        } else {
-          paint.style = PaintingStyle.fill;
-          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
-          path.lineTo(rect.right - right.width, rect.top + top.width);
-        }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
-    }
-
-    switch (bottom.style) {
-      case BorderStyle.solid:
-        paint.color = bottom.color;
-        path = new Path();
-        path.moveTo(rect.right, rect.bottom);
-        path.lineTo(rect.left, rect.bottom);
-        if (bottom.width == 0.0) {
-          paint.style = PaintingStyle.stroke;
-        } else {
-          paint.style = PaintingStyle.fill;
-          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
-          path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
-        }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
-    }
-
-    switch (left.style) {
-      case BorderStyle.solid:
-        paint.color = left.color;
-        path = new Path();
-        path.moveTo(rect.left, rect.bottom);
-        path.lineTo(rect.left, rect.top);
-        if (left.width == 0.0) {
-          paint.style = PaintingStyle.stroke;
-        } else {
-          paint.style = PaintingStyle.fill;
-          path.lineTo(rect.left + left.width, rect.top + top.width);
-          path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
-        }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
-    }
+    paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
   }
 
-  void _paintBorderWithRadius(Canvas canvas, Rect rect,
-                              BorderRadius borderRadius) {
+  void _paintUniformBorderWithRadius(Canvas canvas, Rect rect,
+                                     BorderRadius borderRadius) {
     assert(isUniform);
     final Paint paint = new Paint()
       ..color = top.color;
@@ -461,7 +383,7 @@ class Border {
     }
   }
 
-  void _paintBorderWithCircle(Canvas canvas, Rect rect) {
+  void _paintUniformBorderWithCircle(Canvas canvas, Rect rect) {
     assert(isUniform);
     final double width = top.width;
     final Paint paint = new Paint()
@@ -470,6 +392,16 @@ class Border {
       ..style = PaintingStyle.stroke;
     final double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(rect.center, radius, paint);
+  }
+
+  void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect) {
+    assert(isUniform);
+    final double width = top.width;
+    final Paint paint = new Paint()
+      ..color = top.color
+      ..strokeWidth = width
+      ..style = PaintingStyle.stroke;
+    canvas.drawRect(rect.inflate(width / 2.0), paint);
   }
 
   @override
@@ -489,5 +421,124 @@ class Border {
   int get hashCode => hashValues(top, right, bottom, left);
 
   @override
-  String toString() => 'Border($top, $right, $bottom, $left)';
+  String toString() {
+    if (isUniform)
+      return 'Border.all($top)';
+    return 'Border($top, $right, $bottom, $left)';
+  }
+}
+
+/// Paints a border around the given rectangle on the canvas.
+///
+/// The four sides can be independently specified. They are painted in the order
+/// top, right, bottom, left. This is only notable if the widths of the borders
+/// and the size of the given rectangle are such that the border sides will
+/// overlap each other. No effort is made to optimize the rendering of uniform
+/// borders (where all the borders have the same configuration); to render a
+/// uniform border, consider using [Canvas.drawRect] directly.
+///
+/// The arguments must not be null.
+///
+/// See also:
+///
+///  * [paintImage], which paints an image in a rectangle on a canvas.
+///  * [Border], which uses this function to paint its border when the border is
+///    not uniform.
+///  * [BoxDecoration], which describes its border using the [Border] class.
+void paintBorder(Canvas canvas, Rect rect, {
+  BorderSide top: BorderSide.none,
+  BorderSide right: BorderSide.none,
+  BorderSide bottom: BorderSide.none,
+  BorderSide left: BorderSide.none,
+}) {
+  assert(canvas != null);
+  assert(rect != null);
+  assert(top != null);
+  assert(right != null);
+  assert(bottom != null);
+  assert(left != null);
+
+  // We draw the borders as filled shapes, unless the borders are hairline
+  // borders, in which case we use PaintingStyle.stroke, with the stroke width
+  // specified here.
+  final Paint paint = new Paint()
+    ..strokeWidth = 0.0;
+
+  final Path path = new Path();
+
+  switch (top.style) {
+    case BorderStyle.solid:
+      paint.color = top.color;
+      path.reset();
+      path.moveTo(rect.left, rect.top);
+      path.lineTo(rect.right, rect.top);
+      if (top.width == 0.0) {
+        paint.style = PaintingStyle.stroke;
+      } else {
+        paint.style = PaintingStyle.fill;
+        path.lineTo(rect.right - right.width, rect.top + top.width);
+        path.lineTo(rect.left + left.width, rect.top + top.width);
+      }
+      canvas.drawPath(path, paint);
+      break;
+    case BorderStyle.none:
+      break;
+  }
+
+  switch (right.style) {
+    case BorderStyle.solid:
+      paint.color = right.color;
+      path.reset();
+      path.moveTo(rect.right, rect.top);
+      path.lineTo(rect.right, rect.bottom);
+      if (right.width == 0.0) {
+        paint.style = PaintingStyle.stroke;
+      } else {
+        paint.style = PaintingStyle.fill;
+        path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+        path.lineTo(rect.right - right.width, rect.top + top.width);
+      }
+      canvas.drawPath(path, paint);
+      break;
+    case BorderStyle.none:
+      break;
+  }
+
+  switch (bottom.style) {
+    case BorderStyle.solid:
+      paint.color = bottom.color;
+      path.reset();
+      path.moveTo(rect.right, rect.bottom);
+      path.lineTo(rect.left, rect.bottom);
+      if (bottom.width == 0.0) {
+        paint.style = PaintingStyle.stroke;
+      } else {
+        paint.style = PaintingStyle.fill;
+        path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+        path.lineTo(rect.right - right.width, rect.bottom - bottom.width);
+      }
+      canvas.drawPath(path, paint);
+      break;
+    case BorderStyle.none:
+      break;
+  }
+
+  switch (left.style) {
+    case BorderStyle.solid:
+      paint.color = left.color;
+      path.reset();
+      path.moveTo(rect.left, rect.bottom);
+      path.lineTo(rect.left, rect.top);
+      if (left.width == 0.0) {
+        paint.style = PaintingStyle.stroke;
+      } else {
+        paint.style = PaintingStyle.fill;
+        path.lineTo(rect.left + left.width, rect.top + top.width);
+        path.lineTo(rect.left + left.width, rect.bottom - bottom.width);
+      }
+      canvas.drawPath(path, paint);
+      break;
+    case BorderStyle.none:
+      break;
+  }
 }
