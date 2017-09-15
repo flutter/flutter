@@ -24,7 +24,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
 
   FXL_DCHECK(session_);
 
-  mx::vmo exported_vmo;
+  zx::vmo exported_vmo;
   if (!AllocateDeviceMemory(std::move(context), size, exported_vmo)) {
     FXL_DLOG(INFO) << "Could not allocate device memory.";
     return;
@@ -41,7 +41,7 @@ VulkanSurface::VulkanSurface(vulkan::VulkanProcTable& p_vk,
   }
 
   event_handler_key_ = fsl::MessageLoop::GetCurrent()->AddHandler(
-      this, release_event_.get(), MX_EVENT_SIGNALED);
+      this, release_event_.get(), ZX_EVENT_SIGNALED);
 
   // Probably not necessary as the events should be in the unsignalled state
   // already.
@@ -77,13 +77,13 @@ GrBackendSemaphore VulkanSurface::GetAcquireSemaphore() const {
 }
 
 vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
-    const mx::event& event) const {
+    const zx::event& event) const {
   VkResult result;
   VkSemaphore semaphore;
 
-  mx::event semaphore_event;
-  mx_status_t status = event.duplicate(MX_RIGHT_SAME_RIGHTS, &semaphore_event);
-  if (status != MX_OK) {
+  zx::event semaphore_event;
+  zx_status_t status = event.duplicate(ZX_RIGHT_SAME_RIGHTS, &semaphore_event);
+  if (status != ZX_OK) {
     FXL_DLOG(ERROR) << "failed to duplicate semaphore event";
     return vulkan::VulkanHandle<VkSemaphore>();
   }
@@ -120,7 +120,7 @@ vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
 }
 
 bool VulkanSurface::CreateFences() {
-  if (mx::event::create(0, &acquire_event_) != MX_OK) {
+  if (zx::event::create(0, &acquire_event_) != ZX_OK) {
     return false;
   }
 
@@ -130,7 +130,7 @@ bool VulkanSurface::CreateFences() {
     return false;
   }
 
-  if (mx::event::create(0, &release_event_) != MX_OK) {
+  if (zx::event::create(0, &release_event_) != ZX_OK) {
     return false;
   }
 
@@ -139,7 +139,7 @@ bool VulkanSurface::CreateFences() {
 
 bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
                                          const SkISize& size,
-                                         mx::vmo& exported_vmo) {
+                                         zx::vmo& exported_vmo) {
   if (size.isEmpty()) {
     return false;
   }
@@ -230,12 +230,12 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
         VK_SUCCESS) {
       return false;
     }
-    exported_vmo.reset(static_cast<mx_handle_t>(vmo_handle));
+    exported_vmo.reset(static_cast<zx_handle_t>(vmo_handle));
   }
 
   // Assert that the VMO size was sufficient.
   size_t vmo_size = 0;
-  if (exported_vmo.get_size(&vmo_size) != MX_OK ||
+  if (exported_vmo.get_size(&vmo_size) != ZX_OK ||
       vmo_size < memory_reqs.size) {
     return false;
   }
@@ -284,7 +284,7 @@ bool VulkanSurface::SetupSkiaSurface(sk_sp<GrContext> context,
 }
 
 bool VulkanSurface::PushSessionImageSetupOps(scenic_lib::Session* session,
-                                             mx::vmo exported_vmo) {
+                                             zx::vmo exported_vmo) {
   if (sk_surface_ == nullptr) {
     return false;
   }
@@ -325,10 +325,10 @@ size_t VulkanSurface::AdvanceAndGetAge() {
 }
 
 bool VulkanSurface::FlushSessionAcquireAndReleaseEvents() {
-  mx::event acquire, release;
+  zx::event acquire, release;
 
-  if (acquire_event_.duplicate(MX_RIGHT_SAME_RIGHTS, &acquire) != MX_OK ||
-      release_event_.duplicate(MX_RIGHT_SAME_RIGHTS, &release) != MX_OK) {
+  if (acquire_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &acquire) != ZX_OK ||
+      release_event_.duplicate(ZX_RIGHT_SAME_RIGHTS, &release) != ZX_OK) {
     return false;
   }
 
@@ -358,8 +358,8 @@ void VulkanSurface::SignalWritesFinished(
 void VulkanSurface::Reset() {
   ASSERT_IS_GPU_THREAD;
 
-  if (acquire_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK ||
-      release_event_.signal(MX_EVENT_SIGNALED, 0u) != MX_OK) {
+  if (acquire_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK ||
+      release_event_.signal(ZX_EVENT_SIGNALED, 0u) != ZX_OK) {
     valid_ = false;
     FXL_DLOG(ERROR)
         << "Could not reset fences. The surface is no longer valid.";
@@ -381,11 +381,11 @@ void VulkanSurface::Reset() {
   }
 }
 
-void VulkanSurface::OnHandleReady(mx_handle_t handle,
-                                  mx_signals_t pending,
+void VulkanSurface::OnHandleReady(zx_handle_t handle,
+                                  zx_signals_t pending,
                                   uint64_t count) {
   ASSERT_IS_GPU_THREAD;
-  FXL_DCHECK(pending & MX_EVENT_SIGNALED);
+  FXL_DCHECK(pending & ZX_EVENT_SIGNALED);
   FXL_DCHECK(handle == release_event_.get());
   Reset();
 }

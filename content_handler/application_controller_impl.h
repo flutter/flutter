@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#include <mxio/namespace.h>
+#include <fdio/namespace.h>
 
 #include "dart/runtime/include/dart_api.h"
 #include "lib/app/fidl/application_controller.fidl.h"
@@ -54,7 +54,7 @@ class ApplicationControllerImpl : public app::ApplicationController,
   void StartRuntimeIfReady();
   void SendReturnCode(int32_t return_code);
 
-  mxio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
+  fdio_ns_t* SetupNamespace(const app::FlatNamespacePtr& flat);
 
   App* app_;
   fidl::Binding<app::ApplicationController> binding_;

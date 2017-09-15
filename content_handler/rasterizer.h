@@ -11,7 +11,7 @@
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/fidl/session.fidl.h"
-#include "magenta/system/ulib/mx/include/mx/eventpair.h"
+#include "zircon/system/ulib/zx/include/zx/eventpair.h"
 
 namespace flutter_runner {
 
@@ -23,7 +23,7 @@ class Rasterizer {
 
   virtual void SetScene(
       fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
-      mx::eventpair import_token,
+      zx::eventpair import_token,
       fxl::Closure metrics_changed_callback) = 0;
 
   virtual void Draw(std::unique_ptr<flow::LayerTree> layer_tree,

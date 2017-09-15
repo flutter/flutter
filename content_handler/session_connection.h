@@ -14,14 +14,14 @@
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/client/resources.h"
 #include "lib/ui/scenic/client/session.h"
-#include "magenta/system/ulib/mx/include/mx/eventpair.h"
+#include "zircon/system/ulib/zx/include/zx/eventpair.h"
 
 namespace flutter_runner {
 
 class SessionConnection {
  public:
   SessionConnection(scenic::SceneManagerPtr scene_manager,
-                    mx::eventpair import_token);
+                    zx::eventpair import_token);
 
   ~SessionConnection();
 

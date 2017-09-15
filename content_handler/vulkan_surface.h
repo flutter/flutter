@@ -12,10 +12,10 @@
 #include "lib/fsl/tasks/message_loop_handler.h"
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/client/resources.h"
-#include "mx/event.h"
-#include "mx/vmo.h"
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/vk/GrVkBackendContext.h"
+#include "zx/event.h"
+#include "zx/vmo.h"
 
 namespace flutter_runner {
 
@@ -63,22 +63,22 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   vulkan::VulkanHandle<VkDeviceMemory> vk_memory_;
   sk_sp<SkSurface> sk_surface_;
   std::unique_ptr<scenic_lib::Image> session_image_;
-  mx::event acquire_event_;
+  zx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
-  mx::event release_event_;
+  zx::event release_event_;
   fsl::MessageLoop::HandlerKey event_handler_key_ = 0;
   std::function<void(void)> pending_on_writes_committed_;
   size_t age_ = 0;
   bool valid_ = false;
 
   // |fsl::MessageLoopHandler|
-  void OnHandleReady(mx_handle_t handle,
-                     mx_signals_t pending,
+  void OnHandleReady(zx_handle_t handle,
+                     zx_signals_t pending,
                      uint64_t count) override;
 
   bool AllocateDeviceMemory(sk_sp<GrContext> context,
                             const SkISize& size,
-                            mx::vmo& exported_vmo);
+                            zx::vmo& exported_vmo);
 
   bool SetupSkiaSurface(sk_sp<GrContext> context,
                         const SkISize& size,
@@ -88,12 +88,12 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   bool CreateFences();
 
   bool PushSessionImageSetupOps(scenic_lib::Session* session,
-                                mx::vmo exported_vmo);
+                                zx::vmo exported_vmo);
 
   void Reset();
 
   vulkan::VulkanHandle<VkSemaphore> SemaphoreFromEvent(
-      const mx::event& event) const;
+      const zx::event& event) const;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanSurface);
 };

@@ -5,8 +5,8 @@
 #include "flutter/content_handler/runtime_holder.h"
 
 #include <dlfcn.h>
-#include <magenta/dlfcn.h>
-#include <mxio/namespace.h>
+#include <fdio/namespace.h>
+#include <zircon/dlfcn.h>
 #include <utility>
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
@@ -94,7 +94,7 @@ RuntimeHolder::~RuntimeHolder() {
 }
 
 void RuntimeHolder::Init(
-    mxio_ns_t* namespc,
+    fdio_ns_t* namespc,
     std::unique_ptr<app::ApplicationContext> context,
     fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
     std::vector<char> bundle) {
@@ -126,7 +126,7 @@ void RuntimeHolder::Init(
       return;
     }
 
-    mx::vmo dylib_vmo;
+    zx::vmo dylib_vmo;
     if (!fsl::VmoFromVector(dylib_blob, &dylib_vmo)) {
       FXL_LOG(ERROR) << "Failed to load app dylib";
       return;
@@ -184,9 +184,9 @@ void RuntimeHolder::CreateView(
   }
 
   // Create the view.
-  mx::eventpair import_token, export_token;
-  mx_status_t status = mx::eventpair::create(0u, &import_token, &export_token);
-  if (status != MX_OK) {
+  zx::eventpair import_token, export_token;
+  zx_status_t status = zx::eventpair::create(0u, &import_token, &export_token);
+  if (status != ZX_OK) {
     FXL_LOG(ERROR) << "Could not create an event pair.";
     return;
   }

@@ -8,7 +8,7 @@
 namespace flutter_runner {
 
 SessionConnection::SessionConnection(scenic::SceneManagerPtr scene_manager,
-                                     mx::eventpair import_token)
+                                     zx::eventpair import_token)
     : session_(scene_manager.get()),
       root_node_(&session_),
       surface_producer_(std::make_unique<VulkanSurfaceProducer>(&session_)),

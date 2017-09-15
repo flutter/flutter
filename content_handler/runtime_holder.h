@@ -5,8 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 #define FLUTTER_CONTENT_HANDLER_RUNTIME_HOLDER_H_
 
-#include <mx/channel.h>
-#include <mxio/namespace.h>
+#include <fdio/namespace.h>
+#include <zx/channel.h>
 
 #include <unordered_set>
 
@@ -41,7 +41,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   RuntimeHolder();
   ~RuntimeHolder();
 
-  void Init(mxio_ns_t* namespc,
+  void Init(fdio_ns_t* namespc,
             std::unique_ptr<app::ApplicationContext> context,
             fidl::InterfaceRequest<app::ServiceProvider> outgoing_services,
             std::vector<char> bundle);
@@ -98,7 +98,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void OnRedrawFrame();
   void Invalidate();
 
-  mxio_ns_t* namespc_;
+  fdio_ns_t* namespc_;
   std::unique_ptr<app::ApplicationContext> context_;
   fidl::InterfaceRequest<app::ServiceProvider> outgoing_services_;
   std::vector<char> root_bundle_data_;

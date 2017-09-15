@@ -64,7 +64,7 @@ template("flutter_content_handler") {
              "//garnet/public/lib/fsl",
              "//garnet/public/lib/zip",
              "//lib/tonic",
-             "//magenta/system/ulib/trace-provider",
+             "//zircon/system/ulib/trace-provider",
              "//magma:vulkan",
              "//third_party/rapidjson",
              "//third_party/skia",

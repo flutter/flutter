@@ -5,9 +5,9 @@
 #include "flutter/content_handler/vulkan_rasterizer.h"
 
 #include <fcntl.h>
-#include <magenta/device/vfs.h>
-#include <mxio/watcher.h>
+#include <fdio/watcher.h>
 #include <unistd.h>
+#include <zircon/device/vfs.h>
 
 #include <chrono>
 #include <thread>
@@ -21,14 +21,14 @@ namespace flutter_runner {
 
 constexpr char kDisplayDriverClass[] = "/dev/class/display";
 
-static mx_status_t DriverWatcher(int dirfd,
+static zx_status_t DriverWatcher(int dirfd,
                                  int event,
                                  const char* fn,
                                  void* cookie) {
   if (event == WATCH_EVENT_ADD_FILE && !strcmp(fn, "000")) {
-    return MX_ERR_STOP;
+    return ZX_ERR_STOP;
   }
-  return MX_OK;
+  return ZX_OK;
 }
 
 bool WaitForFirstDisplayDriver() {
@@ -38,9 +38,9 @@ bool WaitForFirstDisplayDriver() {
     return false;
   }
 
-  mx_status_t status = mxio_watch_directory(
-      fd.get(), DriverWatcher, mx_deadline_after(MX_SEC(1)), nullptr);
-  return status == MX_ERR_STOP;
+  zx_status_t status = fdio_watch_directory(
+      fd.get(), DriverWatcher, zx_deadline_after(ZX_SEC(1)), nullptr);
+  return status == ZX_ERR_STOP;
 }
 
 VulkanRasterizer::VulkanRasterizer() : compositor_context_(nullptr) {
@@ -55,7 +55,7 @@ bool VulkanRasterizer::IsValid() const {
 
 void VulkanRasterizer::SetScene(
     fidl::InterfaceHandle<scenic::SceneManager> scene_manager,
-    mx::eventpair import_token,
+    zx::eventpair import_token,
     fxl::Closure metrics_changed_callback) {
   ASSERT_IS_GPU_THREAD;
   FXL_DCHECK(valid_ && !session_connection_);

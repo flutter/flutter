@@ -152,14 +152,14 @@ void App::UpdateProcessLabel() {
     label = base_label_;
   } else {
     std::string suffix = " (+" + std::to_string(controllers_.size() - 1) + ")";
-    if (base_label_.size() + suffix.size() <= MX_MAX_NAME_LEN - 1) {
+    if (base_label_.size() + suffix.size() <= ZX_MAX_NAME_LEN - 1) {
       label = base_label_ + suffix;
     } else {
-      label = base_label_.substr(0, MX_MAX_NAME_LEN - 1 - suffix.size() - 3) +
+      label = base_label_.substr(0, ZX_MAX_NAME_LEN - 1 - suffix.size() - 3) +
               "..." + suffix;
     }
   }
-  mx::process::self().set_property(MX_PROP_NAME, label.c_str(), label.size());
+  zx::process::self().set_property(ZX_PROP_NAME, label.c_str(), label.size());
 }
 
 }  // namespace flutter_runner
