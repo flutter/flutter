@@ -60,9 +60,10 @@
   TRACE_EVENT1("flutter", "VSYNC", "mode", "basic");
 #else
   {
-    constexpr size_t num_chars = sizeof(fxl::TimePoint) * CHAR_BIT * 3.4 + 2;
+    fxl::TimeDelta delta = frame_target_time.ToEpochDelta();
+    constexpr size_t num_chars = sizeof(int64_t) * CHAR_BIT * 3.4 + 2;
     char deadline[num_chars];
-    sprintf(deadline, "%lld", frame_target_time / 1000);  // microseconds
+    sprintf(deadline, "%lld", delta.ToMicroseconds());
     TRACE_EVENT2("flutter", "VSYNC", "mode", "basic", "deadline", deadline);
   }
 #endif
