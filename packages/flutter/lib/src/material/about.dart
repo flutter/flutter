@@ -445,13 +445,19 @@ class _LicensePageState extends State<LicensePage> {
       appBar: new AppBar(
         title: new Text(localizations.licensesPageTitle),
       ),
-      body: new DefaultTextStyle(
-        style: Theme.of(context).textTheme.caption,
-        child: new Scrollbar(
-          child: new ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-            shrinkWrap: true,
-            children: contents,
+      // All of the licenses page text is English. We don't want localized text
+      // or text direction.
+      body: new Localizations.override(
+        locale: const Locale('en', 'US'),
+        context: context,
+        child: new DefaultTextStyle(
+          style: Theme.of(context).textTheme.caption,
+          child: new Scrollbar(
+            child: new ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+              shrinkWrap: true,
+              children: contents,
+            ),
           ),
         ),
       ),
