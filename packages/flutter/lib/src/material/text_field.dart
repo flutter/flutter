@@ -66,8 +66,10 @@ class TextField extends StatefulWidget {
   /// null.
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
-  /// the number of lines. By default, it is 1, meaning this is a single-line
-  /// text field. If it is not null, it must be greater than zero.
+  /// the number of lines. By default, it is one, meaning this is a single-line
+  /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
+  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard type
+  /// is used.
   ///
   /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
   /// [autocorrect] arguments must not be null.
@@ -76,7 +78,7 @@ class TextField extends StatefulWidget {
     this.controller,
     this.focusNode,
     this.decoration: const InputDecoration(),
-    this.keyboardType: TextInputType.text,
+    TextInputType keyboardType: TextInputType.text,
     this.style,
     this.textAlign: TextAlign.start,
     this.autofocus: false,
@@ -92,6 +94,7 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
+       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
        super(key: key);
 
   /// Controls the text being edited.
@@ -115,7 +118,9 @@ class TextField extends StatefulWidget {
 
   /// The type of keyboard to use for editing the text.
   ///
-  /// Defaults to [TextInputType.text]. Cannot be null.
+  /// Defaults to [TextInputType.text]. Must not be null. If
+  /// [maxLines] is not one, then [keyboardType] is ignored, and the
+  /// [TextInputType.multiline] keyboard type is used.
   final TextInputType keyboardType;
 
   /// The style to use for the text being edited.

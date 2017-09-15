@@ -141,11 +141,14 @@ class EditableText extends StatefulWidget {
   /// Creates a basic text input control.
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
-  /// the number of lines. By default, it is 1, meaning this is a single-line
-  /// text field. If it is not null, it must be greater than zero.
+  /// the number of lines. By default, it is one, meaning this is a single-line
+  /// text field. [maxLines] must not be set to zero.
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], and [textAlign]
-  /// arguments must not be null.
+  /// If [maxLines] is not one, then [keyboardType] will be ignored, and the
+  /// keyboard type [TextInputType.multiline] will be used.
+  ///
+  /// The [controller], [focusNode], [style], [cursorColor], [textAlign], and
+  /// [keyboardType] arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -161,7 +164,7 @@ class EditableText extends StatefulWidget {
     this.autofocus: false,
     this.selectionColor,
     this.selectionControls,
-    this.keyboardType,
+    TextInputType keyboardType: TextInputType.text,
     this.onChanged,
     this.onSubmitted,
     this.onSelectionChanged,
@@ -175,6 +178,8 @@ class EditableText extends StatefulWidget {
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
+       assert(keyboardType != null),
+       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
        inputFormatters = maxLines == 1
            ? (
                <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
@@ -194,7 +199,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable autocorrection.
+  /// Whether to enable auto-correction.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -376,10 +381,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   @override
   void performAction(TextInputAction action) {
-    widget.controller.clearComposing();
-    widget.focusNode.unfocus();
-    if (widget.onSubmitted != null)
-      widget.onSubmitted(_value.text);
+    switch (action) {
+      case TextInputAction.done:
+        widget.controller.clearComposing();
+        widget.focusNode.unfocus();
+        if (widget.onSubmitted != null)
+          widget.onSubmitted(_value.text);
+        break;
+      case TextInputAction.newline:
+        // Do nothing for a "newline" action: the newline is already inserted.
+        break;
+    }
   }
 
   void _updateRemoteEditingValueIfNeeded() {
@@ -419,7 +431,15 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (!_hasInputConnection) {
       final TextEditingValue localValue = _value;
       _lastKnownRemoteTextEditingValue = localValue;
-      _textInputConnection = TextInput.attach(this, new TextInputConfiguration(inputType: widget.keyboardType, obscureText: widget.obscureText, autocorrect: widget.autocorrect))
+      _textInputConnection = TextInput.attach(this,
+          new TextInputConfiguration(
+              inputType: widget.keyboardType,
+              obscureText: widget.obscureText,
+              autocorrect: widget.autocorrect,
+              inputAction: widget.keyboardType == TextInputType.multiline
+                  ? TextInputAction.newline
+                  : TextInputAction.done
+          ))
         ..setEditingState(localValue);
     }
     _textInputConnection.show();
