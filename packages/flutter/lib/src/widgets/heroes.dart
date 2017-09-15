@@ -115,7 +115,9 @@ class Hero extends StatefulWidget {
               'There are multiple heroes that share the same tag within a subtree.\n'
               'Within each subtree for which heroes are to be animated (typically a PageRoute subtree), '
               'each Hero must have a unique non-null tag.\n'
-              'In this case, multiple heroes had the tag "$tag".'
+              'In this case, multiple heroes had the following tag: $tag\n'
+              'Here is the subtree for one of the offending heroes:\n'
+              '${element.toStringDeep(prefixLineOne: "# ")}'
             );
           }
           return true;
@@ -131,6 +133,12 @@ class Hero extends StatefulWidget {
 
   @override
   _HeroState createState() => new _HeroState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Object>('tag', tag));
+  }
 }
 
 class _HeroState extends State<Hero> {
