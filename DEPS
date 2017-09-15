@@ -19,6 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
+  'dart_git': 'https://dart.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'skia_git': 'https://skia.googlesource.com',
   'github_git': 'https://github.com',
@@ -154,7 +155,7 @@ deps = {
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '08cb956852a5ccdba7f9c941728bb833529ba3c6',
 
   'src/dart':
-   Var('chromium_git') + '/external/github.com/dart-lang/sdk.git' + '@' + Var('dart_revision'),
+   Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
 
   'src/third_party/boringssl':
    Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
