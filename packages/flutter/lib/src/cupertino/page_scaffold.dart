@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'nav_bar.dart';
 
 /// Implements a single iOS application page's layout.
@@ -39,8 +40,9 @@ class CupertinoPageScaffold extends StatelessWidget {
     final List<Widget> stacked = <Widget>[];
     double topPadding = 0.0;
     if (navigationBar != null) {
-      topPadding += MediaQuery.of(context).padding.top;
       topPadding += navigationBar.preferredSize.height;
+      if (topPadding > 0.0)
+        topPadding += MediaQuery.of(context).padding.top;
     }
 
     // The main content being at the bottom is added to the stack first.
@@ -56,8 +58,11 @@ class CupertinoPageScaffold extends StatelessWidget {
       ));
     }
 
-    return new Stack(
-      children: stacked,
+    return new DecoratedBox(
+      decoration: const BoxDecoration(color: CupertinoColors.white),
+      child: new Stack(
+        children: stacked,
+      ),
     );
   }
 }
