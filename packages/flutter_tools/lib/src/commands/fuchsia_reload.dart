@@ -27,6 +27,8 @@ import '../vmservice.dart';
 // $ flutter fuchsia_reload -f ~/fuchsia -a 192.168.1.39 \
 //       -g //lib/flutter/examples/flutter_gallery:flutter_gallery
 
+final String ipv4Loopback = InternetAddress.LOOPBACK_IP_V4.address;
+
 class FuchsiaReloadCommand extends FlutterCommand {
   FuchsiaReloadCommand() {
     addBuildModeFlags(defaultToRelease: false);
@@ -89,46 +91,64 @@ class FuchsiaReloadCommand extends FlutterCommand {
     _validateArguments();
 
     // Find the network ports used on the device by VM service instances.
-    final List<int> servicePorts = await _getServicePorts();
-    if (servicePorts.isEmpty)
+    final List<int> deviceServicePorts = await _getServicePorts();
+    if (deviceServicePorts.isEmpty)
       throwToolExit('Couldn\'t find any running Observatory instances.');
-    for (int port in servicePorts)
+    for (int port in deviceServicePorts)
       printTrace('Fuchsia service port: $port');
 
-    if (_list) {
-      await _listVMs(servicePorts);
-      return;
+    // Set up ssh tunnels to forward the device ports to local ports.
+    final List<_PortForwarder> forwardedPorts = await _forwardPorts(
+        deviceServicePorts);
+    // Wrap everything in try/finally to make sure we kill the ssh processes
+    // doing the port forwarding.
+    try {
+      final List<int> servicePorts = forwardedPorts.map(
+          (_PortForwarder pf) => pf.port).toList();
+
+      if (_list) {
+        await _listVMs(servicePorts);
+        // Port forwarding stops when the command ends. Keep the program running
+        // until directed by the user so that Observatory URLs that we print
+        // continue to work.
+        printStatus('Press Enter to exit.');
+        await stdin.first;
+        return;
+      }
+
+      // Check that there are running VM services on the returned
+      // ports, and find the Isolates that are running the target app.
+      final String isolateName = '$_binaryName\$main$_isolateNumber';
+      final List<int> targetPorts = await _filterPorts(
+          servicePorts, isolateName);
+      if (targetPorts.isEmpty)
+        throwToolExit('No VMs found running $_binaryName.');
+      for (int port in targetPorts)
+        printTrace('Found $_binaryName at $port');
+
+      // Set up a device and hot runner and attach the hot runner to the first
+      // vm service we found.
+      final List<String> fullAddresses = targetPorts.map(
+        (int p) => '$ipv4Loopback:$p'
+      ).toList();
+      final List<Uri> observatoryUris = fullAddresses.map(
+        (String a) => Uri.parse('http://$a')
+      ).toList();
+      final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0]);
+      final FlutterDevice flutterDevice = new FlutterDevice(device);
+      flutterDevice.observatoryUris = observatoryUris;
+      final HotRunner hotRunner = new HotRunner(
+        <FlutterDevice>[flutterDevice],
+        debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
+        target: _target,
+        projectRootPath: _fuchsiaProjectPath,
+        packagesFilePath: _dotPackagesPath
+      );
+      printStatus('Connecting to $_binaryName');
+      await hotRunner.attach(viewFilter: isolateName);
+    } finally {
+      await Future.wait(forwardedPorts.map((_PortForwarder pf) => pf.stop()));
     }
-
-    // Check that there are running VM services on the returned
-    // ports, and find the Isolates that are running the target app.
-    final String isolateName = '$_binaryName\$main$_isolateNumber';
-    final List<int> targetPorts = await _filterPorts(servicePorts, isolateName);
-    if (targetPorts.isEmpty)
-      throwToolExit('No VMs found running $_binaryName.');
-    for (int port in targetPorts)
-      printTrace('Found $_binaryName at $port');
-
-    // Set up a device and hot runner and attach the hot runner to the first
-    // vm service we found.
-    final List<String> fullAddresses = targetPorts.map(
-      (int p) => '$_address:$p'
-    ).toList();
-    final List<Uri> observatoryUris = fullAddresses.map(
-      (String a) => Uri.parse('http://$a')
-    ).toList();
-    final FuchsiaDevice device = new FuchsiaDevice(fullAddresses[0]);
-    final FlutterDevice flutterDevice = new FlutterDevice(device);
-    flutterDevice.observatoryUris = observatoryUris;
-    final HotRunner hotRunner = new HotRunner(
-      <FlutterDevice>[flutterDevice],
-      debuggingOptions: new DebuggingOptions.enabled(getBuildInfo()),
-      target: _target,
-      projectRootPath: _fuchsiaProjectPath,
-      packagesFilePath: _dotPackagesPath
-    );
-    printStatus('Connecting to $_binaryName');
-    await hotRunner.attach(viewFilter: isolateName);
   }
 
   // A cache of VMService connections.
@@ -136,7 +156,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   VMService _getVMService(int port) {
     if (!_vmServiceCache.containsKey(port)) {
-      final String addr = 'http://$_address:$port';
+      final String addr = 'http://$ipv4Loopback:$port';
       final Uri uri = Uri.parse(addr);
       final VMService vmService = VMService.connect(uri);
       _vmServiceCache[port] = vmService;
@@ -148,7 +168,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     bool connected = true;
     Socket s;
     try {
-      s = await Socket.connect("$_address", port);
+      s = await Socket.connect(ipv4Loopback, port);
     } catch (_) {
       connected = false;
     }
@@ -343,6 +363,13 @@ class FuchsiaReloadCommand extends FlutterCommand {
     return <String>[path, name];
   }
 
+  Future<List<_PortForwarder>> _forwardPorts(List<int> remotePorts) {
+    final String config = '$_fuchsiaRoot/out/$_buildType/ssh-keys/ssh_config';
+    return Future.wait(remotePorts.map((int remotePort) {
+      return _PortForwarder.start(config, _address, remotePort);
+    }));
+  }
+
   Future<List<int>> _getServicePorts() async {
     final FuchsiaDeviceCommandRunner runner =
         new FuchsiaDeviceCommandRunner(_address, _fuchsiaRoot, _buildType);
@@ -372,6 +399,77 @@ class FuchsiaReloadCommand extends FlutterCommand {
   }
 }
 
+// Instances of this class represent a running ssh tunnel from the host to a
+// VM service running on a Fuchsia device. [process] is the ssh process running
+// the tunnel and [port] is the local port.
+class _PortForwarder {
+  final String _remoteAddress;
+  final int _remotePort;
+  final int _localPort;
+  final Process _process;
+  final String _sshConfig;
+
+  _PortForwarder._(this._remoteAddress,
+                   this._remotePort,
+                   this._localPort,
+                   this._process,
+                   this._sshConfig);
+
+  int get port => _localPort;
+
+  static Future<_PortForwarder> start(String sshConfig,
+                                      String address,
+                                      int remotePort) async {
+    final int localPort = await _potentiallyAvailablePort();
+    if (localPort == 0) {
+      printStatus(
+          '_PortForwarder failed to find a local port for $address:$remotePort');
+      return new _PortForwarder._(null, 0, 0, null, null);
+    }
+    final List<String> command = <String>[
+        'ssh', '-F', sshConfig, '-nNT',
+        '-L', '$localPort:$ipv4Loopback:$remotePort', address];
+    printTrace("_PortForwarder running '${command.join(' ')}'");
+    final Process process = await processManager.start(command);
+    process.exitCode.then((int c) {
+      printTrace("'${command.join(' ')}' exited with exit code $c");
+    });
+    printTrace('Set up forwarding from $localPort to $address:$remotePort');
+    return new _PortForwarder._(address, remotePort, localPort, process, sshConfig);
+  }
+
+  Future<Null> stop() async {
+    // Kill the original ssh process if it is still around.
+    if (_process != null) {
+      printTrace('_PortForwarder killing ${_process.pid} for port $_localPort');
+      _process.kill();
+    }
+    // Cancel the forwarding request.
+    final List<String> command = <String>[
+        'ssh', '-F', _sshConfig, '-O', 'cancel',
+        '-L', '$_localPort:$ipv4Loopback:$_remotePort', _remoteAddress];
+    final ProcessResult result = await processManager.run(command);
+    printTrace(command.join(' '));
+    if (result.exitCode != 0) {
+      printTrace("Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
+    }
+  }
+
+  static Future<int> _potentiallyAvailablePort() async {
+    int port = 0;
+    ServerSocket s;
+    try {
+      s = await ServerSocket.bind(ipv4Loopback, 0);
+      port = s.port;
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('_potentiallyAvailablePort failed: $e');
+    }
+    if (s != null)
+      await s.close();
+    return port;
+  }
+}
 
 class FuchsiaDeviceCommandRunner {
   // TODO(zra): Get rid of _address and instead use
@@ -384,10 +482,9 @@ class FuchsiaDeviceCommandRunner {
 
   Future<List<String>> run(String command) async {
     final String config = '$_fuchsiaRoot/out/$_buildType/ssh-keys/ssh_config';
-    final List<String> args = <String>['-F', config, _address, command];
-    printTrace('ssh ${args.join(' ')}');
-    final ProcessResult result =
-        await processManager.run(<String>['ssh', '-F', config, _address, command]);
+    final List<String> args = <String>['ssh', '-F', config, _address, command];
+    printTrace(args.join(' '));
+    final ProcessResult result = await processManager.run(args);
     if (result.exitCode != 0) {
       printStatus("Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
       return null;
