@@ -122,7 +122,18 @@ class _FrontendCompiler implements CompilerInterface {
       ..strongMode = false
       ..target = new FlutterTarget(new TargetFlags())
       ..onError = (CompilationMessage message) {
-        _outputStream.writeln("$message");
+        final StringBuffer outputMessage = new StringBuffer()
+          ..write(_severityName(message.severity))
+          ..write(': ');
+        if (message.span != null) {
+          outputMessage.writeln(message.span.message(message.message));
+        } else {
+          outputMessage.writeln(message.message);
+        }
+        if (message.tip != null) {
+          outputMessage.writeln(message.tip);
+        }
+        _outputStream.write(outputMessage);
       };
     Program program;
     if (options['incremental']) {
@@ -186,6 +197,21 @@ class _FrontendCompiler implements CompilerInterface {
     if (!path.endsWith('/'))
       path = '$path/';
     return Uri.base.resolve(path);
+  }
+
+  static String _severityName(Severity severity) {
+    switch (severity) {
+      case Severity.error:
+        return "Error";
+      case Severity.internalProblem:
+        return "Internal problem";
+      case Severity.nit:
+        return "Nit";
+      case Severity.warning:
+        return "Warning";
+      default:
+        return severity.toString();
+    }
   }
 }
 
