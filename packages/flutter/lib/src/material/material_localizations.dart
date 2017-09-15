@@ -41,7 +41,7 @@ abstract class MaterialLocalizations {
   /// The default [PopupMenuButton] tooltip.
   String get showMenuTooltip;
 
-  /// The default title for AboutListTile.
+  /// The default title for [AboutListTile].
   String aboutListTileTitle(String applicationName);
 
   /// Title for the [LicensePage] widget.
