@@ -153,6 +153,8 @@ class MaterialApp extends StatefulWidget {
   /// [Localizations] widget so that this callback can be used to produce a
   /// localized title.
   ///
+  /// This callback function must not return null.
+  ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
 

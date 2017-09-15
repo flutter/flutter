@@ -40,6 +40,8 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// to identify the app for the user. The `context` includes the [WidgetApp]'s
 /// [Localizations] widget so that this method can be used to produce a
 /// localized title.
+///
+/// This function must not return null.
 typedef String GenerateAppTitle(BuildContext context);
 
 // Delegate that fetches the default (English) strings.
@@ -125,6 +127,8 @@ class WidgetsApp extends StatefulWidget {
   /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
   /// [Localizations] widget so that this callback can be used to produce a
   /// localized title.
+  ///
+  /// This callback function must not return null.
   final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
