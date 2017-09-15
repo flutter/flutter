@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 class LifecycleWatcher extends StatefulWidget {
+  const LifecycleWatcher({ Key key }) : super(key: key);
+
   @override
   _LifecycleWatcherState createState() => new _LifecycleWatcherState();
 }
@@ -42,7 +44,12 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
 
 
 void main() {
-  runApp(new Center(
-    child: new LifecycleWatcher()
-  ));
+  runApp(
+    const Directionality(
+      textDirection: TextDirection.ltr,
+      child: const Center(
+        child: const LifecycleWatcher(),
+      ),
+    ),
+  );
 }
