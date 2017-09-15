@@ -58,19 +58,13 @@ void main() {
 
     await tester.pumpWidget(buildFrame(new Border.all()));
     expect(find.byKey(key), paints
-      ..path(color: black, style: PaintingStyle.fill)
-      ..path(color: black, style: PaintingStyle.fill)
-      ..path(color: black, style: PaintingStyle.fill)
-      ..path(color: black, style: PaintingStyle.fill));
+      ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 1.0));
 
     await tester.pumpWidget(buildFrame(new Border.all(width: 0.0)));
     expect(find.byKey(key), paints
-      ..path(color: black, style: PaintingStyle.stroke)
-      ..path(color: black, style: PaintingStyle.stroke)
-      ..path(color: black, style: PaintingStyle.stroke)
-      ..path(color: black, style: PaintingStyle.stroke));
+      ..rect(color: black, style: PaintingStyle.stroke, strokeWidth: 0.0));
 
-    final Color green = const Color(0xFF000000);
+    final Color green = const Color(0xFF00FF00);
     final BorderSide greenSide = new BorderSide(color: green, width: 10.0);
 
     await tester.pumpWidget(buildFrame(new Border(top: greenSide)));
@@ -84,6 +78,15 @@ void main() {
 
     await tester.pumpWidget(buildFrame(new Border(bottom: greenSide)));
     expect(find.byKey(key), paints..path(color: green, style: PaintingStyle.fill));
+
+    final Color blue = const Color(0xFF0000FF);
+    final BorderSide blueSide = new BorderSide(color: blue, width: 0.0);
+
+    await tester.pumpWidget(buildFrame(new Border(top: blueSide, right: greenSide, bottom: greenSide)));
+    expect(find.byKey(key), paints
+      ..path() // There's not much point checking the arguments to these calls because paintBorder
+      ..path() // reuses the same Paint object each time, configured differently, and so they will
+      ..path()); // all appear to have the same settings here (that of the last call).
   });
 
 
@@ -95,9 +98,9 @@ void main() {
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(
-        child: new GestureDetector( 
-            behavior: HitTestBehavior.deferToChild,
-            child: new Container(
+        child: new GestureDetector(
+          behavior: HitTestBehavior.deferToChild,
+          child: new Container(
             key: key,
             width: 100.0,
             height: 50.0,
@@ -121,7 +124,7 @@ void main() {
 
     await tester.tapAt(const Offset(449.0, 324.0));
     expect(itemsTapped, <int>[1,1,1]);
-  
+
   });
 
   testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
@@ -132,7 +135,7 @@ void main() {
     Widget buildFrame(Border border) {
       itemsTapped = <int>[];
       return new Center(
-        child: new GestureDetector( 
+        child: new GestureDetector(
             behavior: HitTestBehavior.deferToChild,
             child: new Container(
             key: key,
@@ -161,7 +164,7 @@ void main() {
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1,1]);
-  
+
   });
 
 }

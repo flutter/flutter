@@ -13,6 +13,12 @@ class RecordedInvocation {
   const RecordedInvocation(this.invocation, { this.stack });
 
   /// The method that was called and its arguments.
+  ///
+  /// The arguments preserve identity, but not value. Thus, if two invocations
+  /// were made with the same [Paint] object, but with that object configured
+  /// differently each time, then they will both have the same object as their
+  /// argument, and inspecting that object will return the object's current
+  /// values (mostly likely those passed to the second call).
   final Invocation invocation;
 
   /// The stack trace at the time of the method call.
