@@ -110,7 +110,9 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   final bool largeTitle;
 
   @override
-  Size get preferredSize => const Size.fromHeight(_kNavBarPersistentHeight);
+  Size get preferredSize {
+    return opaque ? const Size.fromHeight(_kNavBarPersistentHeight) : Size.zero;
+  }
 
   @override
   Widget build(BuildContext context) {
