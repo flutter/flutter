@@ -132,8 +132,22 @@ class MaterialApp extends StatefulWidget {
        ),
        super(key: key);
 
-  /// A one-line description of this app for use in the window manager.
+  /// A one-line description used by the device to identify the app for the user.
+  ///
+  /// To provide a localized title instead, use [onGenerateTitle].
+  ///
+  /// This value is simply passed along to [WidgetsApp.title].
   final String title;
+
+  /// If non-null this function is called to produce the app's
+  /// title string, otherwise [title] is used.
+  ///
+  /// The device uses the title string to identify the app for the user. The
+  /// `context` includes the [WidgetApp]'s [Localizations] widget so that this
+  /// callback can be used to produce a localized title.
+  ///
+  /// This value is simply passed along to [WidgetsApp.onGenerateTitle].
+  GenerateAppTitle onGenerateTitle;
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
@@ -508,6 +522,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
         title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
         textStyle: _errorTextStyle,
         // blue is the primary color of the default theme
         color: widget.color ?? theme?.primaryColor ?? Colors.blue,
