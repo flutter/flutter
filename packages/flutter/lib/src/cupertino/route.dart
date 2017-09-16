@@ -69,6 +69,8 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 ///
 ///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform
 ///    appropriate transition.
+///  * [CupertinoPageScaffold] typical content of a [CupertinoPageRoute] implementing
+///    iOS style layout with navigation bar on top.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
   ///

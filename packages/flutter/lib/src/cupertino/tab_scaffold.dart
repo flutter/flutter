@@ -19,8 +19,62 @@ import 'bottom_tab_bar.dart';
 /// tab index. [tabBuilder] must be able to build the same number of
 /// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
 /// and its animations disabled.
-// TODO(xster): describe navigator handlings.
-// TODO(xster): add an example.
+///
+/// Use [CupertinoTab] as the content of each tab to support tabs with parallel
+/// navigation state and history.
+///
+/// ## Sample code
+///
+/// A sample code implementing a typical iOS information architecture with tabs.
+///
+/// ```dart
+/// new CupertinoTabScaffold(
+///   tabBar: new CupertinoTabBar(
+///     items: ...
+///   ),
+///   tabBuilder: (BuildContext context, int index) {
+///     return new CupertinoTab(
+///       home: new CupertinoPageScaffold(
+///         navigationBar: new CupertinoNavigationBar(
+///           middle: new Text('Page 1 of tab $index'),
+///         ),
+///         child: new Builder(builder: (BuildContext context) {
+///           // A new builder to make sure we get the Navigator of the tab
+///           // rather than the root navigator.
+///           new Center(
+///             child: new Button(
+///               child: const Text('Next page'),
+///               onPressed: () {
+///                 Navigator.of(context).push(
+///                   new CupertinoPageRoute<null>(
+///                     builder: (BuildContext context) {
+///                       return new CupertinoPageScaffold(
+///                         navigationBar: new CupertinoNavigationBar(
+///                           middle: new Text('Page 2 of tab $index'),
+///                         ),
+///                         child: ...
+///                       );
+///                     },
+///                   ),
+///                 );
+///               },
+///             ),
+///           ),
+///         }),
+///       ),
+///     );
+///   },
+/// );
+/// ```
+///
+/// See also:
+///
+///  * [CupertinoTabBar] bottom tab bars inserted in the scaffold.
+///  * [CupertinoTab] a typical root content of each tap that holds its own
+///    [Navigator] stack.
+///  * [CupertinoPageRoute] a route hosting modal pages with iOS style transitions.
+///  * [CupertinoPageScaffold] typical contents of an iOS modal page implementing
+///    layout with a navigation bar on top.
 class CupertinoTabScaffold extends StatefulWidget {
   const CupertinoTabScaffold({
     Key key,
@@ -47,6 +101,10 @@ class CupertinoTabScaffold extends StatefulWidget {
   final CupertinoTabBar tabBar;
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
+  ///
+  /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTab]
+  /// in order to achieve the parallel hierarchies information architecture seen
+  /// on iOS apps with tab bars.
   ///
   /// When the tab becomes inactive, its content is still cached in the widget
   /// tree [Offstage] and its animations disabled.
@@ -137,7 +195,6 @@ class _TabViewState extends State<_TabView> {
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
 
-        // TODO(xster): lazily replace empty tabs with Navigators instead.
         if (active || tabs[index] != null)
           tabs[index] = widget.tabBuilder(context, index);
 

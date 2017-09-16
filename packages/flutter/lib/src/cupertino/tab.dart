@@ -7,6 +7,37 @@ import 'package:flutter/widgets.dart';
 
 import 'route.dart';
 
+/// A single tab with its own [Navigator] state and history.
+///
+/// A typical tab used as the content of each tab in a [CupertinoTabScaffold]
+/// where multiple tabs with parallel navigation states and history can
+/// co-exist.
+///
+/// [CupertinoTab] configures the top-level [Navigator] to search for routes
+/// in the following order:
+///
+///  1. For the `/` route, the [home] property, if non-null, is used.
+///
+///  2. Otherwise, the [routes] table is used, if it has an entry for the route,
+///     including `/` if [home] is not specified.
+///
+///  3. Otherwise, [onGenerateRoute] is called, if provided. It should return a
+///     non-null value for any _valid_ route not handled by [home] and [routes].
+///
+///  4. Finally if all else fails [onUnknownRoute] is called.
+///
+/// These navigation properties is not shared with any sibling [CupertinoTab]
+/// nor any ancestor or descendent [Navigator] instances.
+///
+/// Be sure to acquire a [BuildContext] that belongs to the [CupertinoTab] (such
+/// as by using a [Builder]) to ensure that [Navigator.of] calls uses this
+/// [CupertinoTab]'s [Navigator] rather than that of its parent.
+///
+/// See also:
+///
+///  * [CupertinoTabScaffold] a typical host that supports switching between tabs.
+///  * [CupertinoPageRoute] a typical modal page route pushed onto the [CupertinoTab]'s
+///    [Navigator].
 class CupertinoTab extends StatelessWidget {
   const CupertinoTab({
     Key key,

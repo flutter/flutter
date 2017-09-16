@@ -29,8 +29,11 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 ///
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
-//
-// TODO(xster): document using with a CupertinoScaffold.
+///
+/// See also:
+///
+///  * [CupertinoTabScaffold] which hosts the [CupertinoTabBar] at the bottom.
+///  * [BottomNavigationBarItem] typical item in a [CupertinoTabBar].
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   CupertinoTabBar({

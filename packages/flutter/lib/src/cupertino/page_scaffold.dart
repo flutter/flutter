@@ -12,7 +12,11 @@ import 'nav_bar.dart';
 ///
 /// The scaffold lays out the navigation bar on top and the content between or
 /// behind the navigation bar.
-// TODO(xster): add an example.
+///
+/// See also:
+///
+///  * [CupertinoPageRoute] a modal page route that typically hosts a [CupertinoPageRoute]
+///    with support for iOS style page transitions.
 class CupertinoPageScaffold extends StatelessWidget {
   const CupertinoPageScaffold({
     Key key,

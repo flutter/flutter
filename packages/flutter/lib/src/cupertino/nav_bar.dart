@@ -52,10 +52,13 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 /// Enabling [largeTitle] will create a scrollable second row showing the title
 /// in a larger font introduced in iOS 11. The [middle] widget must be a text
 /// and the [CupertinoNavigationBar] must be placed in a sliver group in this case.
+///
+/// See also:
+///
+///  * [CupertinoPageScaffold] page layout helper typically hosting the [CupertinoNavigationBar].
 //
 // TODO(xster): document automatic addition of a CupertinoBackButton.
 // TODO(xster): add sample code using icons.
-// TODO(xster): document integration into a CupertinoScaffold.
 class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
