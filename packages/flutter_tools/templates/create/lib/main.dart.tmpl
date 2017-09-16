@@ -13,6 +13,8 @@ void main() {
   // See https://flutter.io/testing/ for more info.
   enableFlutterDriverExtension();
 {{/withDriverTest}}
+  // To rerun the main() function, which only runs once on startup,
+  // use a hot _restart_ (rather than a hot reload).
   runApp(new MyApp());
 }
 
