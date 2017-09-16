@@ -114,7 +114,7 @@ class CupertinoTab extends StatelessWidget {
     WidgetBuilder builder;
     if (name == Navigator.defaultRouteName && home != null)
       builder = (BuildContext context) => home;
-    else
+    else if (routes != null)
       builder = routes[name];
     if (builder != null) {
       return new CupertinoPageRoute<dynamic>(
