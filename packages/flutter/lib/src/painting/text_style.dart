@@ -124,7 +124,7 @@ import 'basic_types.dart';
 ///
 /// ### Custom Fonts
 ///
-/// Custom fonts can be declared in the `pubspec.yaml` file as shown below.
+/// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
 ///
 ///```yaml
 /// flutter:
@@ -153,7 +153,7 @@ import 'basic_types.dart';
 /// [FontStyle] class and can be used in the [fontStyle] argument.
 ///
 /// To select a custom font create [TextStyle] using the [fontFamily]
-/// argument as shown in the example below.
+/// argument as shown in the example below:
 ///
 /// ```dart
 /// const textStyle = const TextStyle(fontFamily: 'Raleway');
@@ -162,25 +162,26 @@ import 'basic_types.dart';
 /// To use a font family defined in a package, the [package] argument must be
 /// provided. For instance, suppose the font declaration above is in the
 /// `pubspec.yaml` of a package named `my_package` which the app depends on.
-/// Then, creating the TextStyle is done as follows.
+/// Then creating the TextStyle is done as follows:
 ///
 /// ```dart
 /// const textStyle = const TextStyle(
 ///   fontFamily: 'Raleway',
 ///   package: 'my_package',
-///);
+/// );
 /// ```
 ///
 /// This is also how the package itself should create the style.
 ///
-/// A package can also provide a font file in its `lib/` folder which the app
-/// can use when declaring a font. Suppose a package named 'my_package' has:
+/// A package can also provide font files in its `lib/` folder which will not
+/// automatically be included in the app. Instead the app can use these
+/// selectively when declaring a font. Suppose a package named `my_package` has:
 ///
 /// ```
 /// lib/fonts/Raleway-Medium.ttf
 /// ```
 ///
-/// Then, the app can declare a font like in the example below.
+/// Then the app can declare a font like in the example below:
 ///
 ///```yaml
 /// flutter:
