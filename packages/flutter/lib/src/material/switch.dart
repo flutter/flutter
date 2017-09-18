@@ -46,17 +46,17 @@ class Switch extends StatefulWidget {
   ///
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
-  const Switch(
-      {Key key,
-      @required this.value,
-      @required this.onChanged,
-      this.activeColor,
-      this.activeTrackColor,
-      this.inactiveThumbColor,
-      this.inactiveTrackColor,
-      this.activeThumbImage,
-      this.inactiveThumbImage})
-      : super(key: key);
+  const Switch({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage
+  }) : super(key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -94,33 +94,17 @@ class Switch extends StatefulWidget {
 
   /// The color to use on the track when this switch is on.
   ///
-  /// Defaults to accent color of the current [Theme] withAlpha(0x80).
+  /// Defaults to accent color of the current [Theme] with the opacity set at 50%.
   final Color activeTrackColor;
 
   /// The color to use on the thumb when this switch is off.
   ///
-  /// Defaults to:
-  /// if the brightness of current [Theme] is dark and [onChanged] callback is
-  /// not null: grey with shade400;
-  /// if the brightness of current [Theme] is dark and [onChanged] callback is
-  /// null: grey with shade800;
-  /// if the brightness of current [Theme] is not dark and [onChanged] callback
-  /// is not null: grey with shade50;
-  /// if the brightness of current [Theme] is not dark and [onChanged] callback
-  /// is null: grey with shade400.
+  /// Defaults to the colors described in the Material design specification.
   final Color inactiveThumbColor;
 
   /// The color to use on the track when this switch is off.
   ///
-  /// Defaults to:
-  /// if the brightness of current [Theme] is dark and [onChanged] callback is
-  /// not null: white30;
-  /// if the brightness of current [Theme] is dark and [onChanged] callback is
-  /// null: white10;
-  /// if the brightness of current [Theme] is not dark and [onChanged] callback
-  /// is not null: black26;
-  /// if the brightness of current [Theme] is not dark and [onChanged] callback
-  /// is null: black12.
+  /// Defaults to the colors described in the Material design specification.
   final Color inactiveTrackColor;
 
   /// An image to use on the thumb of this switch when the switch is on.
@@ -148,21 +132,16 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
-    final Color activeTrackColor =
-        widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
+    final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
     if (widget.onChanged != null) {
-      inactiveThumbColor = widget.inactiveThumbColor ??
-          (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
-      inactiveTrackColor = widget.inactiveTrackColor ??
-          (isDark ? Colors.white30 : Colors.black26);
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : Colors.black26);
     } else {
-      inactiveThumbColor = widget.inactiveThumbColor ??
-          (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
-      inactiveTrackColor = widget.inactiveTrackColor ??
-          (isDark ? Colors.white10 : Colors.black12);
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
 
     return new _SwitchRenderObjectWidget(

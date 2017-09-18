@@ -110,8 +110,6 @@ void main() {
       ),
     );
 
-    expect(value, isFalse);
-
     await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
 
     expect(value, isFalse);
@@ -129,5 +127,38 @@ void main() {
     await tester.drag(find.byType(Switch), const Offset(30.0, 0.0));
 
     expect(value, isFalse);
+  });
+
+  testWidgets('Switch can be set color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new Material(
+              child: new Center(
+                child: new Switch(
+                  value: false,
+                  onChanged: null,
+                  activeColor: Colors.red[500],
+                  activeTrackColor: Colors.green[500],
+                  inactiveThumbColor: Colors.yellow[500],
+                  inactiveTrackColor: Colors.blue[500],
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(tester.widget<Switch>(find.byType(Switch)).activeColor,
+        Colors.red[500]);
+    expect(tester.widget<Switch>(find.byType(Switch)).activeTrackColor,
+        Colors.green[500]);
+    expect(tester.widget<Switch>(find.byType(Switch)).inactiveThumbColor,
+        Colors.yellow[500]);
+    expect(tester.widget<Switch>(find.byType(Switch)).inactiveTrackColor,
+        Colors.blue[500]);
   });
 }
