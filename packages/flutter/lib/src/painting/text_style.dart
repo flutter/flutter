@@ -124,8 +124,7 @@ import 'basic_types.dart';
 ///
 /// ### Custom Fonts
 ///
-/// It is possible to use a different font which is declared in the
-/// [pubspec.yaml] like in the example below.
+/// Custom fonts can be declared in the `pubspec.yaml` file as shown below.
 ///
 ///```yaml
 /// flutter:
@@ -145,16 +144,16 @@ import 'basic_types.dart';
 ///```
 ///
 /// The `family` determines the name of the font, which you can use in the
-/// [`fontFamily`] argument. The `asset` is a path to the font file, relative to
+/// [fontFamily] argument. The `asset` is a path to the font file, relative to
 /// the [pubspec.yaml] file. The `weight` property specifies the weight of the
-/// outlines in the file as an integer multiple of 100 between 100 and 900. This
-/// corresponds to the [FontWeight] class and can be used in the [fontWeight]
-/// argument. The `style` property specfies whether the outlines in the file are
-/// `italic` or `normal`. These values correspond to the [FontStyle] class and
-/// can be used in the [fontStyle] argument.
+/// glyph outlines in the file as an integer multiple of 100 between 100 and 900.
+/// This corresponds to the [FontWeight] class and can be used in the
+/// [fontWeight] argument. The `style` property specfies whether the outlines in
+/// the file are `italic` or `normal`. These values correspond to the
+/// [FontStyle] class and can be used in the [fontStyle] argument.
 ///
-/// To select a different font create [TextStyle] using the [fontFamily]
-/// argument.
+/// To select a custom font create [TextStyle] using the [fontFamily]
+/// argument as shown in the example below.
 ///
 /// ```dart
 /// const textStyle = const TextStyle(fontFamily: 'Raleway');
@@ -162,13 +161,13 @@ import 'basic_types.dart';
 ///
 /// To use a font family defined in a package, the [package] argument must be
 /// provided. For instance, suppose the font declaration above is in the
-/// [pubspec.yaml] of a package named 'my_package' which the app depends on.
+/// `pubspec.yaml` of a package named `my_package` which the app depends on.
 /// Then, creating the TextStyle is done as follows.
 ///
 /// ```dart
 /// const textStyle = const TextStyle(
 ///   fontFamily: 'Raleway',
-///   package: 'my_package'
+///   package: 'my_package',
 ///);
 /// ```
 ///
@@ -223,7 +222,6 @@ class TextStyle extends Diagnosticable {
     this.package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null);
-
 
 
   /// Whether null values are replaced with their value in an ancestor text

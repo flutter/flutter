@@ -118,7 +118,7 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     // Add assets from packages.
-    List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
+    final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
     for (String packageName in packageMap.map.keys) {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
@@ -385,7 +385,7 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   return new DevFSStringContent(JSON.encode(json));
 }
 
-List<Map<String, dynamic>>_parseFonts(
+List<Map<String, dynamic>> _parseFonts(
   Map<String, dynamic> manifestDescriptor,
   bool usesMaterialDesign,
   bool includeDefaultFonts,
@@ -428,17 +428,16 @@ List<Map<String, dynamic>> _parsePackageFonts(
       } else {
         assert(key == 'fonts');
         final List<Map<String, dynamic>> parsedAssets = <Map<String, dynamic>>[];
-        for(Map<String, dynamic> assetProperties in fontFamily[key]) {
+        for (Map<String, dynamic> assetProperties in fontFamily[key]) {
           final Map<String, dynamic> parsedAssetProperties = <String, dynamic>{};
           for (String property in assetProperties.keys) {
             if (property == 'asset') {
               final String assetPath = assetProperties[property];
               if (assetPath.startsWith('packages') &&
-                  !fs.isFileSync(packageMap.map[packageName].resolve('../$assetPath').path)) {
+                  !fs.isFileSync(packageMap.map[packageName].resolve('../$assetPath').path))
                 parsedAssetProperties[property] = assetProperties[property];
-              } else {
+              else
                 parsedAssetProperties[property] = 'packages/$packageName/${assetProperties[property]}';
-              }
             } else {
               assert(property == 'style' || property == 'weight');
               parsedAssetProperties[property] = assetProperties[property];

@@ -93,7 +93,7 @@ $fontsSection
   }
 
   group('AssetBundle fonts from packages', () {
-    testUsingContext('App includes no fontmanifest or fonts when neither app nor package defines fonts', () async {
+    testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -102,10 +102,11 @@ $fontsSection
 
       final AssetBundle bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 2); // LICENSE, AssetManifest
       expect(bundle.entries.containsKey('FontManifest.json'), false);
     }, overrides: contextOverrides);
 
-    testUsingContext('App font uses font file from package.', () async {
+    testUsingContext('App font uses font file from package', () async {
       establishFlutterRoot();
 
       final String fontsSection = '''
@@ -130,7 +131,7 @@ $fontsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext('App font uses a local font file and a package font file.', () async {
+    testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
 
       final String fontsSection = '''
@@ -139,9 +140,9 @@ $fontsSection
            - asset: packages/test_package/bar
            - asset: a/bar
 ''';
-      writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection,);
+      writePubspecFile('pubspec.yaml', 'test', fontsSection: fontsSection);
       writePackagesFile('test_package:p/p/lib/');
-      writePubspecFile('p/p/pubspec.yaml', 'test_package',);
+      writePubspecFile('p/p/pubspec.yaml', 'test_package');
 
       final String packageFont = 'bar';
       writeFontAsset('p/p/lib/', packageFont);
@@ -155,10 +156,11 @@ $fontsSection
         <String>[localFont],
         <String>[packageFont],
         <String>['test_package'],
-        expectedFontManifest,);
+        expectedFontManifest,
+      );
     }, overrides: contextOverrides);
 
-    testUsingContext('App uses package font with own font file.', () async {
+    testUsingContext('App uses package font with own font file', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -188,7 +190,7 @@ $fontsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext('App uses package font with a font file from another package.', () async {
+    testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -219,7 +221,7 @@ $fontsSection
       );
     }, overrides: contextOverrides);
 
-    testUsingContext('App uses package font with properties ans own font file', () async {
+    testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
 
       writePubspecFile('pubspec.yaml', 'test');
@@ -289,5 +291,6 @@ $fontsSection
   });
 }
 
-Map<Type, Generator> get contextOverrides =>
-    <Type, Generator>{FileSystem: () => new MemoryFileSystem()};
+Map<Type, Generator> get contextOverrides {
+  return <Type, Generator>{FileSystem: () => new MemoryFileSystem()};
+}

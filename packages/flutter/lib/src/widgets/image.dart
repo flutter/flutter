@@ -233,12 +233,12 @@ class Image extends StatefulWidget {
   /// Assets used by the package itself should also be displayed using the
   /// [package] argument as above.
   ///
-  /// If the desired asset is specified in the [pubspec.yaml] of the package, it
+  /// If the desired asset is specified in the `pubspec.yaml` of the package, it
   /// is bundled automatically with the app. In particular, assets used by the
-  /// package itself must be specified in its [pubspec.yaml].
+  /// package itself must be specified in its `pubspec.yaml`.
   ///
   /// A package can also choose to have assets in its 'lib/' folder that are not
-  /// specified in its [pubspec.yaml]. In this case for those images to be
+  /// specified in its `pubspec.yaml`. In this case for those images to be
   /// bundled, the app has to specify which ones to include. For instance a
   /// package named `fancy_backgrounds` could have:
   ///
@@ -248,7 +248,7 @@ class Image extends StatefulWidget {
   /// lib/backgrounds/background3.png
   ///```
   ///
-  /// To include, say the first image, the [pubspec.yaml] of the app should
+  /// To include, say the first image, the `pubspec.yaml` of the app should
   /// specify it in the assets section:
   ///
   /// ```yaml
