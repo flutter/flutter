@@ -40,11 +40,13 @@ void PictureLayer::Paint(PaintContext& context) {
   context.canvas.translate(offset_.x(), offset_.y());
 
   if (raster_cache_result_.is_valid()) {
+    SkPaint paint;
+    paint.setFilterQuality(kLow_SkFilterQuality);
     context.canvas.drawImageRect(
         raster_cache_result_.image(),             // image
         raster_cache_result_.source_rect(),       // source
         raster_cache_result_.destination_rect(),  // destination
-        nullptr,                                  // paint
+        &paint,                                   // paint
         SkCanvas::kStrict_SrcRectConstraint       // source constraint
     );
   } else {
