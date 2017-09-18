@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
 import '../../../rendering/touch_input.dart' as demo;
 
 void main() {
   test('layers smoketest for rendering/touch_input.dart', () {
+    FlutterError.onError = (FlutterErrorDetails details) { throw details.exception; };
     demo.main();
   });
 }
