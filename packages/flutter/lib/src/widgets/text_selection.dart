@@ -75,7 +75,7 @@ abstract class TextSelectionControls {
   ///
   /// The top left corner of this widget is positioned at the bottom of the
   /// selection position.
-  Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
+  Widget buildHandle(BuildContext context, TextSelectionHandleType type);
 
   /// Builds a toolbar near a text selection.
   ///
@@ -506,11 +506,7 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
             new Positioned(
               left: point.dx,
               top: point.dy,
-              child: widget.selectionControls.buildHandle(
-                context,
-                type,
-                widget.renderObject.size.height / widget.renderObject.maxLines,
-              ),
+              child: widget.selectionControls.buildHandle(context, type),
             ),
           ],
         ),
