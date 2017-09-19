@@ -122,6 +122,76 @@ import 'basic_types.dart';
 /// )
 /// ```
 ///
+/// ### Custom Fonts
+///
+/// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
+///
+///```yaml
+/// flutter:
+///   fonts:
+///     - family: Raleway
+///       fonts:
+///         - asset: fonts/Raleway-Regular.ttf
+///         - asset: fonts/Raleway-Medium.ttf
+///           weight: 500
+///         - asset: assets/fonts/Raleway-SemiBold.ttf
+///           weight: 600
+///      - family: Schyler
+///        fonts:
+///          - asset: fonts/Schyler-Regular.ttf
+///          - asset: fonts/Schyler-Italic.ttf
+///            style: italic
+///```
+///
+/// The `family` property determines the name of the font, which you can use in
+/// the [fontFamily] argument. The `asset` property is a path to the font file,
+/// relative to the [pubspec.yaml] file. The `weight` property specifies the
+/// weight of the glyph outlines in the file as an integer multiple of 100
+/// between 100 and 900. This corresponds to the [FontWeight] class and can be
+/// used in the [fontWeight] argument. The `style` property specfies whether the
+/// outlines in the file are `italic` or `normal`. These values correspond to
+/// the [FontStyle] class and can be used in the [fontStyle] argument.
+///
+/// To select a custom font, create [TextStyle] using the [fontFamily]
+/// argument as shown in the example below:
+///
+/// ```dart
+/// const TextStyle(fontFamily: 'Raleway')
+/// ```
+///
+/// To use a font family defined in a package, the [package] argument must be
+/// provided. For instance, suppose the font declaration above is in the
+/// `pubspec.yaml` of a package named `my_package` which the app depends on.
+/// Then creating the TextStyle is done as follows:
+///
+/// ```dart
+/// const TextStyle(fontFamily: 'Raleway', package: 'my_package')
+/// ```
+///
+/// This is also how the package itself should create the style.
+///
+/// A package can also provide font files in its `lib/` folder which will not
+/// automatically be included in the app. Instead the app can use these
+/// selectively when declaring a font. Suppose a package named `my_package` has:
+///
+/// ```
+/// lib/fonts/Raleway-Medium.ttf
+/// ```
+///
+/// Then the app can declare a font like in the example below:
+///
+///```yaml
+/// flutter:
+///   fonts:
+///     - family: Raleway
+///       fonts:
+///         - asset: assets/fonts/Raleway-Regular.ttf
+///         - asset: packages/my_package/fonts/Raleway-Medium.ttf
+///           weight: 500
+///```
+///
+/// The `lib/` is implied, so it should not be included in the asset path.
+///
 /// See also:
 ///
 ///  * [Text], the widget for showing text in a single style.
@@ -136,7 +206,7 @@ class TextStyle extends Diagnosticable {
   const TextStyle({
     this.inherit: true,
     this.color,
-    this.fontFamily,
+    String fontFamily,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -147,7 +217,10 @@ class TextStyle extends Diagnosticable {
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
-  }) : assert(inherit != null);
+    this.package,
+  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+       assert(inherit != null);
+
 
   /// Whether null values are replaced with their value in an ancestor text
   /// style (e.g., in a [TextSpan] tree).
@@ -162,6 +235,10 @@ class TextStyle extends Diagnosticable {
 
   /// The name of the font to use when painting the text (e.g., Roboto).
   final String fontFamily;
+
+  /// The name of the package from which the font is included. See the
+  /// documentation for the [TextStyle] class itself for details.
+  final String package;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
   ///

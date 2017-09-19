@@ -121,7 +121,9 @@ void main() {
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(new ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, lineHeight: 123.0)));
     expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, lineHeight: 123.0x, ellipsis: unspecified)');
+  });
 
+  test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
     expect(ps6, equals(new ui.ParagraphStyle(textDirection: TextDirection.ltr)));
     expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: unspecified, lineHeight: unspecified, ellipsis: unspecified)');
@@ -129,5 +131,17 @@ void main() {
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
     expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl)));
     expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: unspecified, lineHeight: unspecified, ellipsis: unspecified)');
+  });
+
+  test('TextStyle using package font', () {
+    final TextStyle s6 = const TextStyle(fontFamily: 'test');
+    expect(s6.fontFamily, 'test');
+    expect(s6.package, isNull);
+    expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+
+    final TextStyle s7 = const TextStyle(fontFamily: 'test', package: 'p');
+    expect(s7.fontFamily, 'packages/p/test');
+    expect(s7.package, 'p');
+    expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
   });
 }

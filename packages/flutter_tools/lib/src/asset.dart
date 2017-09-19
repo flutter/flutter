@@ -118,6 +118,7 @@ class AssetBundle {
         manifestDescriptor['uses-material-design'];
 
     // Add assets from packages.
+    final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
     for (String packageName in packageMap.map.keys) {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
@@ -127,16 +128,28 @@ class AssetBundle {
           continue;
         final int result = await _validateFlutterManifest(packageManifest);
         if (result == 0) {
-          final Map<String, dynamic> packageManifestDescriptor = packageManifest;
+          Map<String, dynamic> packageManifestDescriptor = packageManifest;
           // Skip the app itself.
           if (packageManifestDescriptor['name'] == appName)
             continue;
           if (packageManifestDescriptor.containsKey('flutter')) {
+            packageManifestDescriptor = packageManifestDescriptor['flutter'];
             final String packageBasePath = fs.path.dirname(packageManifestPath);
             assetVariants.addAll(_parseAssets(
               packageMap,
-              packageManifestDescriptor['flutter'],
+              packageManifestDescriptor,
               packageBasePath,
+              packageName: packageName,
+            ));
+
+            final bool packageUsesMaterialDesign =
+                packageManifestDescriptor.containsKey('uses-material-design') &&
+                packageManifestDescriptor['uses-material-design'];
+            fonts.addAll(_parseFonts(
+              packageManifestDescriptor,
+              packageUsesMaterialDesign,
+              includeDefaultFonts,
+              packageMap,
               packageName: packageName,
             ));
           }
@@ -179,10 +192,15 @@ class AssetBundle {
 
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
 
-    final DevFSContent fontManifest =
-        _createFontManifest(manifestDescriptor, usesMaterialDesign, includeDefaultFonts);
-    if (fontManifest != null)
-      entries[_kFontManifestJson] = fontManifest;
+    fonts.addAll(_parseFonts(
+      manifestDescriptor,
+      usesMaterialDesign,
+      includeDefaultFonts,
+      packageMap,
+    ));
+
+    if (fonts.isNotEmpty)
+      entries[_kFontManifestJson] = new DevFSStringContent(JSON.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
     entries[_kLICENSE] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
@@ -367,18 +385,73 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
   return new DevFSStringContent(JSON.encode(json));
 }
 
-DevFSContent _createFontManifest(Map<String, dynamic> manifestDescriptor,
-                             bool usesMaterialDesign,
-                             bool includeDefaultFonts) {
+List<Map<String, dynamic>> _parseFonts(
+  Map<String, dynamic> manifestDescriptor,
+  bool usesMaterialDesign,
+  bool includeDefaultFonts,
+  PackageMap packageMap, {
+  String packageName
+}) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
   if (usesMaterialDesign && includeDefaultFonts) {
     fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
   }
   if (manifestDescriptor != null && manifestDescriptor.containsKey('fonts'))
-    fonts.addAll(manifestDescriptor['fonts']);
-  if (fonts.isEmpty)
-    return null;
-  return new DevFSStringContent(JSON.encode(fonts));
+    if (packageName == null) {
+      fonts.addAll(manifestDescriptor['fonts']);
+    } else {
+      fonts.addAll(_parsePackageFonts(
+        manifestDescriptor['fonts'],
+        packageName,
+        packageMap,
+      ));
+    }
+  return fonts;
+}
+
+/// Prefixes family names and asset paths of fonts included from packages with
+/// 'packages/<package_name>
+///
+/// (e.g., replace {"fonts":[{"asset":"a/bar"}],"family":"bar"} by
+/// {"fonts":[{"asset":"packages/foo/a/bar"}],"family":"packages/foo/bar"})
+List<Map<String, dynamic>> _parsePackageFonts(
+  List<Map<String, dynamic>> manifestDescriptor,
+  String packageName,
+  PackageMap packageMap,
+) {
+  final List<Map<String, dynamic>> parsedFonts = <Map<String, dynamic>>[];
+  for (Map<String, dynamic> fontFamily in manifestDescriptor) {
+    final Map<String, dynamic> parsedFontFamily = <String, dynamic>{};
+    for (String key in fontFamily.keys) {
+      if (key == 'family') {
+        parsedFontFamily[key] = 'packages/$packageName/${fontFamily[key]}';
+      } else {
+        assert(key == 'fonts');
+        final List<Map<String, dynamic>> parsedAssets = <Map<String, dynamic>>[];
+        for (Map<String, dynamic> assetProperties in fontFamily[key]) {
+          final Map<String, dynamic> parsedAssetProperties = <String, dynamic>{};
+          for (String property in assetProperties.keys) {
+            if (property == 'asset') {
+              final String assetPath = assetProperties[property];
+              if (assetPath.startsWith('packages') &&
+                  !fs.isFileSync(packageMap.map[packageName].resolve('../$assetPath').path))
+                parsedAssetProperties[property] = assetProperties[property];
+              else
+                parsedAssetProperties[property] = 'packages/$packageName/${assetProperties[property]}';
+            } else {
+              assert(property == 'style' || property == 'weight');
+              parsedAssetProperties[property] = assetProperties[property];
+            }
+          }
+          parsedAssets.add(parsedAssetProperties);
+        }
+        parsedFontFamily[key] = parsedAssets;
+      }
+    }
+    parsedFonts.add(parsedFontFamily);
+  }
+
+  return parsedFonts;
 }
 
 // Given an assets directory like this:
