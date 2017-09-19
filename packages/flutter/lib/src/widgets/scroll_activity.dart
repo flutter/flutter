@@ -220,7 +220,7 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 class ScrollDragController implements Drag {
   /// Maximum amount of time the drag can remain stationary before losing
   /// the momentum carried from a previous scroll activity.
-  static const int momentumRetainStationaryThresholdMs = 20;
+  static const Duration momentumRetainStationaryThreshold = const Duration(milliseconds: 20);
 
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
@@ -235,7 +235,8 @@ class ScrollDragController implements Drag {
        assert(details != null),
        _delegate = delegate,
        _lastDetails = details,
-       _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0;
+       _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
+       _lastNonStationaryTimestamp = details.sourceTimeStamp;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -248,7 +249,7 @@ class ScrollDragController implements Drag {
   /// drag began.
   final double carriedVelocity;
 
-  Stopwatch _stationaryStartWatch;
+  Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
@@ -268,20 +269,15 @@ class ScrollDragController implements Drag {
     _lastDetails = details;
     double offset = details.primaryDelta;
     if (offset == 0.0) {
-      if (_retainMomentum) {
-        _stationaryStartWatch ??= new Stopwatch();
-        if (_stationaryStartWatch.isRunning) {
-          // If the drag motion is stationary for too long, previous momentum is lost.
-          if (_stationaryStartWatch.elapsedMilliseconds > momentumRetainStationaryThresholdMs)
-            _retainMomentum = false;
-        } else {
-          _stationaryStartWatch.start();
-        }
+      if (_retainMomentum &&
+          (details.sourceTimeStamp == null || // If drag event has no timestamp, we lose momentum.
+              details.sourceTimeStamp - _lastNonStationaryTimestamp > momentumRetainStationaryThreshold )) {
+        // If pointer is stationary for too long, we lose momentum.
+        _retainMomentum = false;
       }
       return;
     } else {
-      _stationaryStartWatch?.stop();
-      _stationaryStartWatch?.reset();
+      _lastNonStationaryTimestamp = details.sourceTimeStamp;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
