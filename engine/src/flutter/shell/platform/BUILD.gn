@@ -14,6 +14,7 @@ group("platform") {
   } else if (is_linux) {
     deps = [
       "linux",
+      "embedder",
     ]
   } else if (is_win) {
     print("Shell currently not supported on Windows.")

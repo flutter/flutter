@@ -30,6 +30,9 @@ def get_out_dir(args):
     if args.ios_cpu != 'arm64':
         target_dir.append(args.ios_cpu)
 
+    if args.linux_cpu is not None:
+      target_dir.append(args.linux_cpu)
+
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
@@ -107,6 +110,8 @@ def to_gn_args(args):
             gn_args['target_cpu'] = 'x64'
         else:
             gn_args['target_cpu'] = args.ios_cpu
+    elif args.target_os == 'linux':
+      gn_args['target_cpu'] = args.linux_cpu
     else:
         # Building host artifacts
         gn_args['target_cpu'] = 'x64'
@@ -186,12 +191,13 @@ def parse_args(args):
 
   parser.add_argument('--runtime-mode', type=str, choices=['debug', 'profile', 'release'], default='debug')
 
-  parser.add_argument('--target-os', type=str, choices=['android', 'ios'])
+  parser.add_argument('--target-os', type=str, choices=['android', 'ios', 'linux'])
   parser.add_argument('--android', dest='target_os', action='store_const', const='android')
   parser.add_argument('--android-cpu', type=str, choices=['arm', 'x64', 'x86', 'arm64'], default='arm')
   parser.add_argument('--ios', dest='target_os', action='store_const', const='ios')
   parser.add_argument('--ios-cpu', type=str, choices=['arm', 'arm64'], default='arm64')
   parser.add_argument('--simulator', action='store_true', default=False)
+  parser.add_argument('--linux-cpu', type=str, choices=['x64', 'x86', 'arm64'])
 
   parser.add_argument('--goma', default=True, action='store_true')
   parser.add_argument('--no-goma', dest='goma', action='store_false')
