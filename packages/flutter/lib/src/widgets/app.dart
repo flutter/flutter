@@ -495,7 +495,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         );
       }
       return true;
-    }());
+    });
 
     return new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
