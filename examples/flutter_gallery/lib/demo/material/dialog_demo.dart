@@ -182,7 +182,7 @@ class DialogDemoState extends State<DialogDemo> {
                 if (value != null && value != _selectedTime) {
                   _selectedTime = value;
                   _scaffoldKey.currentState.showSnackBar(new SnackBar(
-                    content: new Text('You selected: $value')
+                    content: new Text('You selected: ${value.format(context)}')
                   ));
                 }
               });

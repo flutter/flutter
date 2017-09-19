@@ -82,6 +82,7 @@ export 'src/material/text_form_field.dart';
 export 'src/material/text_selection.dart';
 export 'src/material/theme.dart';
 export 'src/material/theme_data.dart';
+export 'src/material/time.dart';
 export 'src/material/time_picker.dart';
 export 'src/material/toggleable.dart';
 export 'src/material/tooltip.dart';

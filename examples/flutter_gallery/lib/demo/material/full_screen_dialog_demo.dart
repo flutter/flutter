@@ -82,7 +82,7 @@ class DateTimeItem extends StatelessWidget {
               },
               child: new Row(
                 children: <Widget>[
-                  new Text('$time'),
+                  new Text('${time.format(context)}'),
                   const Icon(Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )

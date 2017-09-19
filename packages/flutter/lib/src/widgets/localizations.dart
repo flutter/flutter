@@ -330,7 +330,7 @@ class Localizations extends StatefulWidget {
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
-  /// This factory constructor is used for the (usually rare) situtation where part
+  /// This factory constructor is used for the (usually rare) situation where part
   /// of an app should be localized for a different locale than the one defined
   /// for the device, or if its localizations should come from a different list
   /// of [LocalizationsDelegate]s than the list defined by
