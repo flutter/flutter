@@ -100,15 +100,15 @@ vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
     return vulkan::VulkanHandle<VkSemaphore>();
   }
 
-  VkImportSemaphoreFdInfoKHR import_info = {
-      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR,
+  VkImportSemaphoreFuchsiaHandleInfoKHR import_info = {
+      .sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FUCHSIA_HANDLE_INFO_KHR,
       .pNext = nullptr,
       .semaphore = semaphore,
-      .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT_KHR,
-      .fd = semaphore_event.release()};
+      .handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_FUCHSIA_FENCE_BIT_KHR,
+      .handle = static_cast<uint32_t>(semaphore_event.release())};
 
-  result = VK_CALL_LOG_ERROR(
-      vk_.ImportSemaphoreFdKHR(backend_context_->fDevice, &import_info));
+  result = VK_CALL_LOG_ERROR(vk_.ImportSemaphoreFuchsiaHandleKHR(
+      backend_context_->fDevice, &import_info));
   if (result != VK_SUCCESS) {
     return vulkan::VulkanHandle<VkSemaphore>();
   }
