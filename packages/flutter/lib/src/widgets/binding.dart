@@ -148,6 +148,53 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeMetrics() { }
 
+  /// Called when the platform's text scale factor changes.
+  ///
+  /// This typically happens as the result of the user changing system
+  /// preferences, and it should affect all of the text sizes in the
+  /// application.
+  ///
+  /// ```dart
+  /// class TextScaleFactorReactor extends StatefulWidget {
+  ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
+  ///
+  ///   @override
+  ///   _TextScaleFactorReactorState createState() => new _TextScaleFactorReactorState();
+  /// }
+  ///
+  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   double _lastTextScaleFactor;
+  ///
+  ///   @override
+  ///   void didChangeTextScaleFactor() {
+  ///     setState(() { _lastTextScaleFactor = ui.window.textScaleFactor; });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Text('Last scale factor: _lastTextScaleFactor');
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.of], which provides a similar service with less
+  ///    boilerplate.
+  void didChangeTextScaleFactor() { }
+
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
@@ -295,6 +342,16 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     super.handleMetricsChanged();
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeMetrics();
+  }
+
+  /// Called when the platform text scale factor changes.
+  ///
+  /// See [Window.onTextScaleFactorChanged].
+  @override
+  void handleTextScaleFactorChanged() {
+    super.handleTextScaleFactorChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangeTextScaleFactor();
   }
 
   /// Called when the system locale changes.
