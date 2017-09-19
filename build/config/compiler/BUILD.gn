@@ -362,6 +362,12 @@ config("compiler") {
   if (is_linux) {
     cflags += [ "-pthread" ]
     ldflags += [ "-pthread" ]
+
+    if (current_cpu == "arm64") {
+      cflags += [ "--target=aarch64-linux" ]
+      ldflags += [ "--target=aarch64-linux" ]
+      cflags += [ "-DBORINGSSL_CLANG_SUPPORTS_DOT_ARCH" ]
+    }
   }
 
   # Clang-specific compiler flags setup.
