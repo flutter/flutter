@@ -502,7 +502,8 @@ class HotRunner extends ResidentRunner {
           // `validateReloadReport` is called again.
           device.updateReloadStatus(validateReloadReport(firstReport,
             printErrors: false));
-          retrieveFirstReloadReport.complete(firstReport);
+          if (!retrieveFirstReloadReport.isCompleted)
+            retrieveFirstReloadReport.complete(firstReport);
         }, onError: (dynamic error, StackTrace stack) {
           retrieveFirstReloadReport.completeError(error, stack);
         });
