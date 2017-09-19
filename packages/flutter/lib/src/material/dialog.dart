@@ -462,7 +462,10 @@ Future<T> showDialog<T>({
   @required Widget child,
 }) {
   return Navigator.push(context, new _DialogRoute<T>(
-    child: child,
+    child: new Localizations.override(
+      context: context,
+      child: child,
+    ),
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
   ));
