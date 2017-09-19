@@ -212,12 +212,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       case HourFormat.HH:
         return _cachedTwoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
-        return _cachedDecimalFormat.format(timeOfDay.hour);
+        return formatDecimal(timeOfDay.hour);
       case HourFormat.h:
         int hourOfPeriod = timeOfDay.hourOfPeriod;
         if (hourOfPeriod == 0)
           hourOfPeriod = 12;
-        return _cachedDecimalFormat.format(hourOfPeriod);
+        return formatDecimal(hourOfPeriod);
     }
     return null;
   }
@@ -225,6 +225,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String formatMinute(TimeOfDay timeOfDay) {
     return _cachedTwoDigitZeroPaddedFormat.format(timeOfDay.minute);
+  }
+
+  /// Formats a [number] using local decimal number format.
+  ///
+  /// Prints locale-appropriate thousands separator, if necessary.
+  String formatDecimal(int number) {
+    return _cachedDecimalFormat.format(number);
   }
 
   @override
@@ -239,14 +246,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     //   no matter what date the day falls in.
     switch (timeOfDayFormat) {
       case TimeOfDayFormat.h_colon_mm_space_a:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${formatDayPeriod(timeOfDay)}';
+        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_colon_mm:
         return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.HH_dot_mm:
         return '${formatHour(timeOfDay)}.${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
+        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.frenchCanadian:
         return '${formatHour(timeOfDay)} h ${formatMinute(timeOfDay)}';
     }
@@ -254,7 +261,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return null;
   }
 
-  String formatDayPeriod(TimeOfDay timeOfDay) {
+  String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
       case DayPeriod.am:
         return anteMeridiemAbbreviation;
@@ -304,9 +311,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
     // TODO(hansmuller): this could be more efficient.
     return text
-      .replaceFirst(r'$firstRow', _cachedDecimalFormat.format(firstRow))
-      .replaceFirst(r'$lastRow', _cachedDecimalFormat.format(lastRow))
-      .replaceFirst(r'$rowCount', _cachedDecimalFormat.format(rowCount));
+      .replaceFirst(r'$firstRow', formatDecimal(firstRow))
+      .replaceFirst(r'$lastRow', formatDecimal(lastRow))
+      .replaceFirst(r'$rowCount', formatDecimal(rowCount));
   }
 
   @override
@@ -315,7 +322,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String selectedRowCountTitle(int selectedRowCount) {
     return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
-      .replaceFirst(r'$selectedRowCount', _cachedDecimalFormat.format(selectedRowCount));
+      .replaceFirst(r'$selectedRowCount', formatDecimal(selectedRowCount));
   }
 
   @override
