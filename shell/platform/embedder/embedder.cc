@@ -232,3 +232,33 @@ FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
 
   return kSuccess;
 }
+
+FlutterResult FlutterEngineSendPlatformMessage(
+    FlutterEngine engine,
+    const FlutterPlatformMessage* flutter_message) {
+  if (engine == nullptr || flutter_message == nullptr) {
+    return kInvalidArguments;
+  }
+
+  if (SAFE_ACCESS(flutter_message, channel, nullptr) == nullptr ||
+      SAFE_ACCESS(flutter_message, message, nullptr) == nullptr) {
+    return kInvalidArguments;
+  }
+
+  auto holder = reinterpret_cast<PlatformViewHolder*>(engine);
+
+  auto message = fxl::MakeRefCounted<blink::PlatformMessage>(
+      flutter_message->channel,
+      std::vector<uint8_t>(
+          flutter_message->message,
+          flutter_message->message + flutter_message->message_size),
+      nullptr);
+
+  blink::Threads::UI()->PostTask(
+      [ weak_engine = holder->view()->engine().GetWeakPtr(), message ] {
+        if (auto engine = weak_engine) {
+          engine->DispatchPlatformMessage(message);
+        }
+      });
+  return kSuccess;
+}
