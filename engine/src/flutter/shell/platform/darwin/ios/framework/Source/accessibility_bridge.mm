@@ -297,8 +297,8 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   std::vector<SemanticsObject*>* children = [_semanticsObject children];
   for (size_t i = 0; i < children->size(); i++) {
     SemanticsObject* child = (*children)[i];
-    if (![child hasChildren] && child == element ||
-        [child hasChildren] && [child accessibilityContainer] == element)
+    if ((![child hasChildren] && child == element) ||
+        ([child hasChildren] && [child accessibilityContainer] == element))
       return i + 1;
   }
   return NSNotFound;
