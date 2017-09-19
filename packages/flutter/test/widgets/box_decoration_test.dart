@@ -89,6 +89,99 @@ void main() {
       ..path()); // all appear to have the same settings here (that of the last call).
   });
 
+  testWidgets('BoxDecoration paints its border correctly', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/12165
+    await tester.pumpWidget(
+      new Column(
+        children: <Widget>[
+          new Container(
+            // There's not currently a way to verify that this paints the same size as the others,
+            // so the pattern below just asserts that there's four paths but doesn't check the geometry.
+            width: 100.0,
+            height: 100.0,
+            decoration: const BoxDecoration(
+              border: const Border(
+                top: const BorderSide(
+                  width: 10.0,
+                  color: const Color(0xFFEEEEEE),
+                ),
+                left: const BorderSide(
+                  width: 10.0,
+                  color: const Color(0xFFFFFFFF),
+                ),
+                right: const BorderSide(
+                  width: 10.0,
+                  color: const Color(0xFFFFFFFF),
+                ),
+                bottom: const BorderSide(
+                  width: 10.0,
+                  color: const Color(0xFFFFFFFF),
+                ),
+              ),
+            ),
+          ),
+          new Container(
+            width: 100.0,
+            height: 100.0,
+            decoration: new BoxDecoration(
+              border: new Border.all(
+                width: 10.0,
+                color: const Color(0xFFFFFFFF),
+              ),
+            ),
+          ),
+          new Container(
+            width: 100.0,
+            height: 100.0,
+            decoration: new BoxDecoration(
+              border: new Border.all(
+                width: 10.0,
+                color: const Color(0xFFFFFFFF),
+              ),
+              borderRadius: const BorderRadius.only(
+                topRight: const Radius.circular(10.0),
+              ),
+            ),
+          ),
+          new Container(
+            width: 100.0,
+            height: 100.0,
+            decoration: new BoxDecoration(
+              border: new Border.all(
+                width: 10.0,
+                color: const Color(0xFFFFFFFF),
+              ),
+              shape: BoxShape.circle,
+            ),
+          ),
+        ],
+      ),
+    );
+    expect(find.byType(Column), paints
+      ..path()
+      ..path()
+      ..path()
+      ..path()
+      ..rect(rect: new Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
+      ..drrect(
+        outer: new RRect.fromLTRBAndCorners(
+          350.0, 200.0, 450.0, 300.0,
+          topLeft: Radius.zero,
+          topRight: const Radius.circular(10.0),
+          bottomRight: Radius.zero,
+          bottomLeft: Radius.zero,
+        ),
+        inner: new RRect.fromLTRBAndCorners(
+          360.0, 210.0, 440.0, 290.0,
+          topLeft: const Radius.circular(-10.0),
+          topRight: Radius.zero,
+          bottomRight: const Radius.circular(-10.0),
+          bottomLeft: const Radius.circular(-10.0),
+        ),
+      )
+      ..circle(x: 400.0, y: 350.0, radius: 45.0)
+    );
+  });
 
   testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
 

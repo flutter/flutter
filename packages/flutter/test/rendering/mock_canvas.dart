@@ -176,6 +176,24 @@ abstract class PaintPattern {
   /// arguments as they were seen by the method.
   void rrect({ RRect rrect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
+  /// Indicates that a rounded rectangle outline is expected next.
+  ///
+  /// The next call to [Canvas.drawRRect] is examined. Any arguments that are
+  /// passed to this method are compared to the actual [Canvas.drawRRect] call's
+  /// arguments and any mismatches result in failure.
+  ///
+  /// If no call to [Canvas.drawRRect] was made, then this results in failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawRRect] call are ignored.
+  ///
+  /// The [Paint]-related arguments (`color`, `strokeWidth`, `hasMaskFilter`,
+  /// `style`) are compared against the state of the [Paint] object after the
+  /// painting has completed, not at the time of the call. If the same [Paint]
+  /// object is reused multiple times, then this may not match the actual
+  /// arguments as they were seen by the method.
+  void drrect({ RRect outer, RRect inner, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+
   /// Indicates that a circle is expected next.
   ///
   /// The next circle is examined. Any arguments that are passed to this method
@@ -425,6 +443,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
+  void drrect({ RRect outer, RRect inner, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _DRRectPaintPredicate(outer: outer, inner: inner, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  }
+
+  @override
   void circle({ double x, double y, double radius, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
     _predicates.add(new _CirclePaintPredicate(x: x, y: y, radius: radius, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
@@ -631,6 +654,51 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
   }
 }
 
+class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
+  _TwoParameterPaintPredicate(Symbol symbol, String name, {
+    @required this.expected1,
+    @required this.expected2,
+    @required Color color,
+    @required double strokeWidth,
+    @required bool hasMaskFilter,
+    @required PaintingStyle style
+  }) : super(
+    symbol, name, 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style);
+
+  final T1 expected1;
+
+  final T2 expected2;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final T1 actual1 = arguments[0];
+    if (expected1 != null && actual1 != expected1)
+      throw 'It called $methodName with its first argument (a $T1), $actual1, which was not exactly the expected $T1 ($expected1).';
+    final T2 actual2 = arguments[1];
+    if (expected2 != null && actual2 != expected2)
+      throw 'It called $methodName with its second argument (a $T2), $actual2, which was not exactly the expected $T2 ($expected2).';
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (expected1 != null) {
+      if (expected1.toString().contains(T1.toString())) {
+        description.add('$expected1');
+      } else {
+        description.add('$T1: $expected1');
+      }
+    }
+    if (expected2 != null) {
+      if (expected2.toString().contains(T2.toString())) {
+        description.add('$expected2');
+      } else {
+        description.add('$T2: $expected2');
+      }
+    }
+  }
+}
 
 class _RectPaintPredicate extends _OneParameterPaintPredicate<Rect> {
   _RectPaintPredicate({ Rect rect, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
@@ -649,6 +717,19 @@ class _RRectPaintPredicate extends _OneParameterPaintPredicate<RRect> {
     #drawRRect,
     'a rounded rectangle',
     expected: rrect,
+    color: color,
+    strokeWidth: strokeWidth,
+    hasMaskFilter: hasMaskFilter,
+    style: style,
+  );
+}
+
+class _DRRectPaintPredicate extends _TwoParameterPaintPredicate<RRect, RRect> {
+  _DRRectPaintPredicate({ RRect inner, RRect outer, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawDRRect,
+    'a rounded rectangle outline',
+    expected1: outer,
+    expected2: inner,
     color: color,
     strokeWidth: strokeWidth,
     hasMaskFilter: hasMaskFilter,
