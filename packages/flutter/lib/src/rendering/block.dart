@@ -98,7 +98,7 @@ class RenderListBody extends RenderBox
         'axis. You probably want to put the RenderListBody inside a '
         'RenderViewport with a matching main axis.'
       );
-    });
+    }());
     assert(() {
       switch (mainAxis) {
         case Axis.horizontal:
@@ -123,7 +123,7 @@ class RenderListBody extends RenderBox
         'for example, a RenderIntrinsicWidth or RenderIntrinsicHeight object. '
         'This is relatively expensive, however.' // (that's why we don't do it automatically)
       );
-    });
+    }());
     final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
     double position = 0.0;
     RenderBox child = firstChild;

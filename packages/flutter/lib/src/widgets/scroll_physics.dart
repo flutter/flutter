@@ -369,7 +369,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
         );
       }
       return true;
-    });
+    }());
     if (value < position.pixels && position.pixels <= position.minScrollExtent) // underscroll
       return value - position.pixels;
     if (position.maxScrollExtent <= position.pixels && position.pixels < value) // overscroll

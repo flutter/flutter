@@ -271,7 +271,7 @@ class GestureArenaManager {
         debugPrint('Gesture arena ${pointer.toString().padRight(4)} ❙ $message${ count != null ? " with $count member$s." : ""}');
       }
       return true;
-    });
+    }());
     return true;
   }
 }

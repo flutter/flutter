@@ -201,7 +201,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         child = childAfter(child);
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -567,7 +567,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         child = childAfter(child);
       }
       return true;
-    });
+    }());
     return true;
   }
 

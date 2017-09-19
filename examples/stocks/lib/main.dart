@@ -114,7 +114,7 @@ class StocksAppState extends State<StocksApp> {
       debugPaintPointersEnabled = _configuration.debugShowPointers;
       debugRepaintRainbowEnabled = _configuration.debugShowRainbow;
       return true;
-    });
+    }());
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,

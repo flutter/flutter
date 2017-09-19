@@ -209,7 +209,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
           );
         }
         return true;
-      });
+      }());
       final double oldPixels = _pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
@@ -351,7 +351,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 

@@ -226,7 +226,7 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
         assert(menuTop + menuHeight <= size.height);
       }
       return true;
-    });
+    }());
     return new Offset(buttonRect.left.clamp(0.0, size.width - childSize.width), menuTop);
   }
 

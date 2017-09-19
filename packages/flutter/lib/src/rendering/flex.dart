@@ -705,7 +705,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
             '  https://github.com/flutter/flutter/issues/new'
           );
-        });
+        }());
         totalFlex += childParentData.flex;
       } else {
         BoxConstraints innerConstraints;
@@ -798,7 +798,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             if (textBaseline == null)
               throw new FlutterError('To use FlexAlignItems.baseline, you must also specify which baseline to use using the "baseline" argument.');
             return true;
-          });
+          }());
           final double distance = child.getDistanceToBaseline(textBaseline, onlyReal: true);
           if (distance != null)
             maxBaselineDistance = math.max(maxBaselineDistance, distance);
@@ -1017,7 +1017,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       }
 
       return true;
-    });
+    }());
   }
 
   @override

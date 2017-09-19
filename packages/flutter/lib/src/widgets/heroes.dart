@@ -121,7 +121,7 @@ class Hero extends StatefulWidget {
             );
           }
           return true;
-        });
+        }());
         final _HeroState heroState = hero.state;
         result[tag] = heroState;
       }
@@ -310,7 +310,7 @@ class _HeroFlight {
         case _HeroFlightType.push:
           return initial.value == 0.0 && initial.status == AnimationStatus.forward;
       }
-    });
+    }());
 
     manifest = initialManifest;
 

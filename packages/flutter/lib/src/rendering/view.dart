@@ -195,7 +195,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
         if (debugRepaintRainbowEnabled || debugRepaintTextRainbowEnabled)
           debugCurrentRepaintColor = debugCurrentRepaintColor.withHue(debugCurrentRepaintColor.hue + 2.0);
         return true;
-      });
+      }());
     } finally {
       Timeline.finishSync();
     }
@@ -218,7 +218,7 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
     assert(() {
       description.add(new DiagnosticsNode.message('debug mode enabled - ${Platform.operatingSystem}'));
       return true;
-    });
+    }());
     description.add(new DiagnosticsProperty<Size>('window size', ui.window.physicalSize, tooltip: 'in physical pixels'));
     description.add(new DoubleProperty('device pixel ratio', ui.window.devicePixelRatio, tooltip: 'physical pixels per logical pixel'));
     description.add(new DiagnosticsProperty<ViewConfiguration>('configuration', configuration, tooltip: 'in logical pixels'));

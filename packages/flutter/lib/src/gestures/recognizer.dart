@@ -98,7 +98,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
           debugPrint('$prefix$this calling $name callback.${ report?.isNotEmpty == true ? " $report" : "" }');
         }
         return true;
-      });
+      }());
       result = callback();
     } catch (exception, stack) {
       FlutterError.reportError(new FlutterErrorDetails(

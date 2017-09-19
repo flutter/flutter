@@ -467,13 +467,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         ancestor = ancestor.parent;
       assert(!_newChildren.any((SemanticsNode child) => child == ancestor));
       return true;
-    });
+    }());
     assert(() {
       final Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
       for (SemanticsNode child in _newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
-    });
+    }());
   }
 
   /// Contains the children in inverse hit test order (i.e. paint order).

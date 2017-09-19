@@ -101,7 +101,7 @@ class PaintingContext {
         includedChild: true,
       );
       return true;
-    });
+    }());
     if (child._layer == null) {
       assert(debugAlsoPaintedParent);
       child._layer = new OffsetLayer();
@@ -112,7 +112,7 @@ class PaintingContext {
     assert(() {
       child._layer.debugCreator = child.debugCreator ?? child.runtimeType;
       return true;
-    });
+    }());
     final PaintingContext childContext = new PaintingContext._(child._layer, child.paintBounds);
     child._paintWithContext(childContext, Offset.zero);
     childContext._stopRecordingIfNeeded();
@@ -128,7 +128,7 @@ class PaintingContext {
       if (debugProfilePaintsEnabled)
         Timeline.startSync('${child.runtimeType}', arguments: timelineWhitelistArguments);
       return true;
-    });
+    }());
 
     if (child.isRepaintBoundary) {
       _stopRecordingIfNeeded();
@@ -141,7 +141,7 @@ class PaintingContext {
       if (debugProfilePaintsEnabled)
         Timeline.finishSync();
       return true;
-    });
+    }());
   }
 
   void _compositeChild(RenderObject child, Offset offset) {
@@ -162,7 +162,7 @@ class PaintingContext {
         );
         child._layer.debugCreator = child.debugCreator ?? child;
         return true;
-      });
+      }());
     }
     child._layer.offset = offset;
     _appendLayer(child._layer);
@@ -187,7 +187,7 @@ class PaintingContext {
         assert(_canvas == null);
       }
       return true;
-    });
+    }());
     return hasCanvas;
   }
 
@@ -236,7 +236,7 @@ class PaintingContext {
         canvas.drawRect(canvasBounds, paint);
       }
       return true;
-    });
+    }());
     _currentLayer.picture = _recorder.endRecording();
     _currentLayer = null;
     _recorder = null;
@@ -633,7 +633,7 @@ abstract class _SemanticsFragment {
          for (_SemanticsFragment child in children)
            assert(seenChildren.add(child)); // check for duplicate adds
          return true;
-       }),
+       }()),
        _ancestorChain = <RenderObject>[renderObjectOwner],
        _children = children ?? const <_SemanticsFragment>[];
 
@@ -691,7 +691,7 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; });
+    assert(() { _debugCompiled = true; return true; }());
     final SemanticsNode node = renderObjectOwner._semantics;
     assert(node != null);
     if (geometry != null) {
@@ -715,7 +715,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
     assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; });
+    assert(() { _debugCompiled = true; return true; }());
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
     final List<SemanticsNode> children = <SemanticsNode>[];
     for (_SemanticsFragment child in _children) {
@@ -906,7 +906,7 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
     SemanticsNode parentSemantics
   }) sync* {
     assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; });
+    assert(() { _debugCompiled = true; return true; }());
     assert(geometry != null);
     geometry.applyAncestorChain(_ancestorChain);
     for (_SemanticsFragment child in _children) {
@@ -964,7 +964,7 @@ class SemanticsHandle {
         );
       }
       return true;
-    });
+    }());
     if (_owner != null) {
       if (listener != null)
         _owner.semanticsOwner.removeListener(listener);
@@ -1235,7 +1235,7 @@ class PipelineOwner {
       return;
     Timeline.startSync('Semantics');
     assert(_semanticsOwner != null);
-    assert(() { _debugDoingSemantics = true; return true; });
+    assert(() { _debugDoingSemantics = true; return true; }());
     try {
       final List<RenderObject> nodesToProcess = _nodesNeedingSemantics.toList()
         ..sort((RenderObject a, RenderObject b) => a.depth - b.depth);
@@ -1247,7 +1247,7 @@ class PipelineOwner {
       _semanticsOwner.sendSemanticsUpdate();
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
-      assert(() { _debugDoingSemantics = false; return true; });
+      assert(() { _debugDoingSemantics = false; return true; }());
       Timeline.finishSync();
     }
   }
@@ -1562,7 +1562,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         node = node.parent;
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -1611,7 +1611,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       result = _needsLayout;
       return true;
-    });
+    }());
     return result;
   }
   bool _needsLayout = true;
@@ -1710,7 +1710,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           if (debugPrintMarkNeedsLayoutStacks)
             debugPrintStack(label: 'markNeedsLayout() called for $this');
           return true;
-        });
+        }());
         owner._nodesNeedingLayout.add(this);
         owner.requestVisualUpdate();
       }
@@ -1775,7 +1775,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       _debugCanParentUseSize = false;
       return true;
-    });
+    }());
     owner._nodesNeedingLayout.add(this);
   }
 
@@ -1793,7 +1793,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (debugPrintLayouts)
         debugPrint('Laying out (without resize) $this');
       return true;
-    });
+    }());
     try {
       performLayout();
       markNeedsSemanticsUpdate();
@@ -1805,7 +1805,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugDoingThisLayout = false;
       _debugMutationsLocked = false;
       return true;
-    });
+    }());
     _needsLayout = false;
     markNeedsPaint();
   }
@@ -1875,7 +1875,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       _debugCanParentUseSize = parentUsesSize;
       return true;
-    });
+    }());
     if (!_needsLayout && constraints == _constraints && relayoutBoundary == _relayoutBoundary) {
       assert(() {
         // in case parentUsesSize changed since the last invocation, set size
@@ -1889,7 +1889,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         _debugDoingThisLayout = false;
         _debugDoingThisResize = false;
         return true;
-      });
+      }());
       return;
     }
     _constraints = constraints;
@@ -1901,16 +1901,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (debugPrintLayouts)
         debugPrint('Laying out (${sizedByParent ? "with separate resize" : "with resize allowed"}) $this');
       return true;
-    });
+    }());
     if (sizedByParent) {
-      assert(() { _debugDoingThisResize = true; return true; });
+      assert(() { _debugDoingThisResize = true; return true; }());
       try {
         performResize();
-        assert(() { debugAssertDoesMeetConstraints(); return true; });
+        assert(() { debugAssertDoesMeetConstraints(); return true; }());
       } catch (e, stack) {
         _debugReportException('performResize', e, stack);
       }
-      assert(() { _debugDoingThisResize = false; return true; });
+      assert(() { _debugDoingThisResize = false; return true; }());
     }
     RenderObject debugPreviousActiveLayout;
     assert(() {
@@ -1918,11 +1918,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       debugPreviousActiveLayout = _debugActiveLayout;
       _debugActiveLayout = this;
       return true;
-    });
+    }());
     try {
       performLayout();
       markNeedsSemanticsUpdate();
-      assert(() { debugAssertDoesMeetConstraints(); return true; });
+      assert(() { debugAssertDoesMeetConstraints(); return true; }());
     } catch (e, stack) {
       _debugReportException('performLayout', e, stack);
     }
@@ -1931,7 +1931,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugDoingThisLayout = false;
       _debugMutationsLocked = false;
       return true;
-    });
+    }());
     _needsLayout = false;
     markNeedsPaint();
   }
@@ -2112,7 +2112,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       result = _layer;
       return true;
-    });
+    }());
     return result;
   }
 
@@ -2147,7 +2147,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (parent is RenderObject)
         return parent._needsCompositing;
       return true;
-    });
+    }());
     // parent is fine (or there isn't one), but we are dirty
     if (owner != null)
       owner._nodesNeedingCompositingBitsUpdate.add(this);
@@ -2199,7 +2199,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       result = _needsPaint;
       return true;
-    });
+    }());
     return result;
   }
   bool _needsPaint = true;
@@ -2228,7 +2228,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack(label: 'markNeedsPaint() called for $this');
         return true;
-      });
+      }());
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
       assert(_layer != null);
@@ -2249,7 +2249,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (debugPrintMarkNeedsPaintStacks)
           debugPrintStack(label: 'markNeedsPaint() called for $this (root of render tree)');
         return true;
-      });
+      }());
       // If we're the root of the render tree (probably a RenderView),
       // then we have to paint ourselves, since nobody else can paint
       // us. We don't add ourselves to _nodesNeedingPaint in this
@@ -2332,7 +2332,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         );
       }
       return true;
-    });
+    }());
     // If we still need layout, then that means that we were skipped in the
     // layout phase and therefore don't need painting. We might not know that
     // yet (that is, our layer might not have been detached yet), because the
@@ -2357,7 +2357,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         );
       }
       return true;
-    });
+    }());
     RenderObject debugLastActivePaint;
     assert(() {
       _debugDoingThisPaint = true;
@@ -2365,7 +2365,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugActivePaint = this;
       assert(!isRepaintBoundary || _layer != null);
       return true;
-    });
+    }());
     _needsPaint = false;
     try {
       paint(context, offset);
@@ -2379,7 +2379,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _debugActivePaint = debugLastActivePaint;
       _debugDoingThisPaint = false;
       return true;
-    });
+    }());
   }
 
   /// The bounds within which this render object will paint.
@@ -2534,7 +2534,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(() {
       result = _semantics;
       return true;
-    });
+    }());
     return result;
   }
 
@@ -2947,7 +2947,7 @@ abstract class RenderObjectWithChildMixin<ChildType extends RenderObject> extend
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -3084,7 +3084,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 

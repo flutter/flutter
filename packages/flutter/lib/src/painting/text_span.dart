@@ -275,7 +275,7 @@ class TextSpan extends DiagnosticableTree {
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 

@@ -138,7 +138,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
         'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
         'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
       );
-    });
+    }());
     child?.layout(
       constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
       parentUsesSize: true,

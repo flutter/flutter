@@ -302,7 +302,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
         debugPaintPadding(context.canvas, outerRect, innerRect);
       }
       return true;
-    });
+    }());
   }
 
   @override

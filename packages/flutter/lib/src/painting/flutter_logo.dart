@@ -162,7 +162,7 @@ class FlutterLogoDecoration extends Decoration {
     assert(debugAssertIsValid());
     if (a is! FlutterLogoDecoration)
       return lerp(null, this, t);
-    assert(a.debugAssertIsValid);
+    assert(a.debugAssertIsValid());
     return lerp(a, this, t);
   }
 

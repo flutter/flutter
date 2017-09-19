@@ -326,7 +326,7 @@ class RenderFlow extends RenderBox
         );
       }
       return true;
-    });
+    }());
     _lastPaintOrder.add(i);
     childParentData._transform = transform;
 

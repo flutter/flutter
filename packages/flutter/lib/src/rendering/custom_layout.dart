@@ -120,7 +120,7 @@ abstract class MultiChildLayoutDelegate {
         );
       }
       return true;
-    });
+    }());
     child.layout(constraints, parentUsesSize: true);
     return child.size;
   }
@@ -146,7 +146,7 @@ abstract class MultiChildLayoutDelegate {
         );
       }
       return true;
-    });
+    }());
     final MultiChildLayoutParentData childParentData = child.parentData;
     childParentData.offset = offset;
   }
@@ -167,7 +167,7 @@ abstract class MultiChildLayoutDelegate {
       debugPreviousChildrenNeedingLayout = _debugChildrenNeedingLayout;
       _debugChildrenNeedingLayout = new Set<RenderBox>();
       return true;
-    });
+    }());
 
     try {
       _idToChild = <Object, RenderBox>{};
@@ -183,12 +183,12 @@ abstract class MultiChildLayoutDelegate {
             );
           }
           return true;
-        });
+        }());
         _idToChild[childParentData.id] = child;
         assert(() {
           _debugChildrenNeedingLayout.add(child);
           return true;
-        });
+        }());
         child = childParentData.nextSibling;
       }
       performLayout(size);
@@ -209,13 +209,13 @@ abstract class MultiChildLayoutDelegate {
           }
         }
         return true;
-      });
+      }());
     } finally {
       _idToChild = previousIdToChild;
       assert(() {
         _debugChildrenNeedingLayout = debugPreviousChildrenNeedingLayout;
         return true;
-      });
+      }());
     }
   }
 

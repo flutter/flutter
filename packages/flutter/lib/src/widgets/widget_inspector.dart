@@ -406,7 +406,7 @@ class _InspectorOverlayLayer extends Layer {
     assert(() {
       inDebugMode = true;
       return true;
-    });
+    }());
     if (inDebugMode == false) {
       throw new FlutterError(
         'The inspector should never be used in production mode due to the '

@@ -136,7 +136,7 @@ class CupertinoTabView extends StatelessWidget {
         );
       }
       return true;
-    });
+    }());
     final Route<dynamic> result = onUnknownRoute(settings);
     assert(() {
       if (result == null) {
@@ -148,7 +148,7 @@ class CupertinoTabView extends StatelessWidget {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 }

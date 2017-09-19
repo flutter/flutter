@@ -331,7 +331,7 @@ List<GalleryItem> _buildGalleryItems() {
       ),
     );
     return true;
-  });
+  }());
 
   return galleryItems;
 }

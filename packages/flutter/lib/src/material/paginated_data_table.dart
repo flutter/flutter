@@ -85,7 +85,7 @@ class PaginatedDataTable extends StatefulWidget {
          if (onRowsPerPageChanged != null)
            assert(availableRowsPerPage != null && availableRowsPerPage.contains(rowsPerPage));
          return true;
-       }),
+       }()),
        assert(source != null),
        super(key: key);
 
