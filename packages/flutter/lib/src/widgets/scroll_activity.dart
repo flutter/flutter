@@ -218,10 +218,6 @@ class HoldScrollActivity extends ScrollActivity implements ScrollHoldController 
 ///  * [DragScrollActivity], which is the activity the scroll view performs
 ///    while a drag is underway.
 class ScrollDragController implements Drag {
-  /// Maximum amount of time the drag can remain stationary before losing
-  /// the momentum carried from a previous scroll activity.
-  static const Duration momentumRetainStationaryThreshold = const Duration(milliseconds: 20);
-
   /// Creates an object that scrolls a scroll view as the user drags their
   /// finger across the screen.
   ///
@@ -251,6 +247,10 @@ class ScrollDragController implements Drag {
 
   Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
+
+  /// Maximum amount of time interval the drag can have consecutive stationary pointer
+  /// update events before losing the momentum carried from a previous scroll activity.
+  static const Duration momentumRetainStationaryThreshold = const Duration(milliseconds: 20);
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
