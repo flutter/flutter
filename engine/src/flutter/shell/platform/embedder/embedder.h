@@ -94,6 +94,14 @@ typedef struct {
   double y;
 } FlutterPointerEvent;
 
+typedef struct {
+  // The size of this struct. Must be sizeof(FlutterPlatformMessage).
+  size_t struct_size;
+  const char* channel;
+  const uint8_t* message;
+  const size_t message_size;
+} FlutterPlatformMessage;
+
 FLUTTER_EXPORT
 FlutterResult FlutterEngineRun(size_t version,
                                const FlutterRendererConfig* config,
@@ -113,6 +121,11 @@ FLUTTER_EXPORT
 FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
                                             const FlutterPointerEvent* events,
                                             size_t events_count);
+
+FLUTTER_EXPORT
+FlutterResult FlutterEngineSendPlatformMessage(
+    FlutterEngine engine,
+    const FlutterPlatformMessage* message);
 
 #if defined(__cplusplus)
 }  // extern "C"
