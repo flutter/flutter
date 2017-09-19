@@ -51,10 +51,52 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 }  // namespace
 
+/**
+ * Represents a semantics object that has children and hence has to be presented to the OS as a
+ * UIAccessibilityContainer.
+ *
+ * The SemanticsObject class cannot implement the UIAccessibilityContainer protocol because an
+ * object that returns YES for isAccessibilityElement cannot also implement
+ * UIAccessibilityContainer.
+ *
+ * With the help of SemanticsObjectContainer, the hierarchy of semantic objects received from
+ * the framework, such as:
+ *
+ * SemanticsObject1
+ *     SemanticsObject2
+ *         SemanticsObject3
+ *         SemanticsObject4
+ *
+ * is translated into the following hierarchy, which is understood by iOS:
+ *
+ * SemanticsObjectContainer1
+ *     SemanticsObject1
+ *     SemanticsObjectContainer2
+ *         SemanticsObject2
+ *         SemanticsObject3
+ *         SemanticsObject4
+ *
+ * From Flutter's view of the world (the first tree seen above), we construct iOS's view of the
+ * world (second tree) as follows: We replace each SemanticsObjects that has children with a
+ * SemanticsObjectContainer, which has the original SemanticsObject and its children as children.
+ *
+ * SemanticsObjects have semantic information attached to them which is interpreted by
+ * VoiceOver (they return YES for isAccessibilityElement). The SemanticsObjectContainers are just
+ * there for structure and they don't provide any semantic information to VoiceOver (they return
+ * NO for isAccessibilityElement).
+ */
+@interface SemanticsObjectContainer : NSObject
+- (instancetype)init __attribute__((unavailable("Use initWithSemanticsObject instead")));
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
+                                 bridge:(shell::AccessibilityBridge*)bridge
+    NS_DESIGNATED_INITIALIZER;
+@end
+
 @implementation SemanticsObject {
   shell::AccessibilityBridge* _bridge;
   blink::SemanticsNode _node;
   std::vector<SemanticsObject*> _children;
+  SemanticsObjectContainer* _container;
 }
 
 #pragma mark - Override base class designated initializers
@@ -91,10 +133,16 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   return &_children;
 }
 
+- (BOOL)hasChildren {
+  return _children.size() != 0;
+}
+
 - (void)dealloc {
   _bridge = nullptr;
   _children.clear();
   [_parent release];
+  if (_container != nil)
+    [_container release];
   [super dealloc];
 }
 
@@ -158,28 +206,12 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 #pragma mark - UIAccessibilityElement protocol
 
 - (id)accessibilityContainer {
-  return (_uid == kRootNodeId) ? _bridge->view() : _parent;
-}
-
-#pragma mark - UIAccessibilityContainer overrides
-
-- (NSInteger)accessibilityElementCount {
-  return (NSInteger)_children.size();
-}
-
-- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
-  if (index < 0 || index >= (NSInteger)_children.size()) {
-    return nil;
+  if ([self hasChildren]) {
+    if (_container == nil)
+      _container = [[SemanticsObjectContainer alloc] initWithSemanticsObject:self bridge:_bridge];
+    return _container;
   }
-  return _children[index];
-}
-
-- (NSInteger)indexOfAccessibilityElement:(id)element {
-  auto it = std::find(_children.begin(), _children.end(), element);
-  if (it == _children.end()) {
-    return NSNotFound;
-  }
-  return it - _children.begin();
+  return [_parent accessibilityContainer];
 }
 
 #pragma mark - UIAccessibilityAction overrides
@@ -213,14 +245,79 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   return YES;
 }
 
-- (BOOL)accessibilityPerformEscape {
-  // TODO(tvolkert): Implement
+@end
+
+@implementation SemanticsObjectContainer {
+  SemanticsObject* _semanticsObject;
+  shell::AccessibilityBridge* _bridge;
+}
+
+#pragma mark - initializers
+
+// Method declared as unavailable in the interface
+- (instancetype)init {
+  [self release];
+  [super doesNotRecognizeSelector:_cmd];
+  return nil;
+}
+
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)semanticsObject
+                                 bridge:(shell::AccessibilityBridge*)bridge {
+  FXL_DCHECK(semanticsObject != nil) << "semanticsObject must be set";
+  self = [super init];
+
+  if (self) {
+    _semanticsObject = semanticsObject;
+    _bridge = bridge;
+  }
+
+  return self;
+}
+
+#pragma mark - UIAccessibilityContainer overrides
+
+- (NSInteger)accessibilityElementCount {
+  return (NSInteger)[_semanticsObject children]->size() + 1;
+}
+
+- (nullable id)accessibilityElementAtIndex:(NSInteger)index {
+  if (index < 0 || index >= [self accessibilityElementCount])
+    return nil;
+  if (index == 0)
+    return _semanticsObject;
+  SemanticsObject* child = (*[_semanticsObject children])[index - 1];
+  if ([child hasChildren])
+    return [child accessibilityContainer];
+  return child;
+}
+
+- (NSInteger)indexOfAccessibilityElement:(id)element {
+  if (element == _semanticsObject)
+    return 0;
+  std::vector<SemanticsObject*>* children = [_semanticsObject children];
+  for (size_t i = 0; i < children->size(); i++) {
+    SemanticsObject* child = (*children)[i];
+    if (![child hasChildren] && child == element ||
+        [child hasChildren] && [child accessibilityContainer] == element)
+      return i + 1;
+  }
+  return NSNotFound;
+}
+
+#pragma mark - UIAccessibilityElement protocol
+
+- (BOOL)isAccessibilityElement {
   return NO;
 }
 
-- (BOOL)accessibilityPerformMagicTap {
-  // TODO(tvolkert): Implement
-  return NO;
+- (CGRect)accessibilityFrame {
+  return [_semanticsObject accessibilityFrame];
+}
+
+- (id)accessibilityContainer {
+  return ([_semanticsObject uid] == kRootNodeId)
+             ? _bridge->view()
+             : [[_semanticsObject parent] accessibilityContainer];
 }
 
 @end
@@ -269,7 +366,7 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
 
   if (root) {
     if (!view_.accessibilityElements) {
-      view_.accessibilityElements = @[ root ];
+      view_.accessibilityElements = @[ [root accessibilityContainer] ];
     }
   } else {
     view_.accessibilityElements = nil;
