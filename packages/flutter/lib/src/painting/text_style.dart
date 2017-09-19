@@ -156,7 +156,7 @@ import 'basic_types.dart';
 /// argument as shown in the example below:
 ///
 /// ```dart
-/// const textStyle = const TextStyle(fontFamily: 'Raleway');
+/// const TextStyle(fontFamily: 'Raleway')
 /// ```
 ///
 /// To use a font family defined in a package, the [package] argument must be
@@ -165,10 +165,7 @@ import 'basic_types.dart';
 /// Then creating the TextStyle is done as follows:
 ///
 /// ```dart
-/// const textStyle = const TextStyle(
-///   fontFamily: 'Raleway',
-///   package: 'my_package',
-/// );
+/// const TextStyle(fontFamily: 'Raleway', package: 'my_package')
 /// ```
 ///
 /// This is also how the package itself should create the style.
