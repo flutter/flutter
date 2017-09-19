@@ -130,7 +130,11 @@ FlutterResult FlutterEngineRun(size_t version,
     packages = std::move(packages)                       //
   ] {
     if (auto engine = weak_engine) {
-      engine->RunBundleAndSource(assets, main, packages);
+      if (main.empty()) {
+        engine->RunBundle(assets);
+      } else {
+        engine->RunBundleAndSource(assets, main, packages);
+      }
     }
   });
 
