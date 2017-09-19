@@ -217,10 +217,6 @@ void Paragraph::Layout(double width, bool force) {
   minikin::MinikinPaint minikin_paint;
   minikin::Layout layout;
 
-  // Disable ligatures
-  // TODO(garyq): Re-enable ligatures.
-  minikin_paint.fontFeatureSettings += "-liga,-clig,";
-
   SkTextBlobBuilder builder;
 
   // Reset member variables so Layout still works when called more than once
@@ -395,6 +391,7 @@ void Paragraph::Layout(double width, bool force) {
 
       const size_t glyph_count = layout.nGlyphs();
       size_t blob_start = 0;
+      size_t character_index = 0;
 
       // Each blob.
       buffers = std::vector<const SkTextBlobBuilder::RunBuffer*>();
@@ -440,7 +437,25 @@ void Paragraph::Layout(double width, bool force) {
               current_x_position + previous_run_x_position + letter_spacing);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
-          current_x_position += layout.getCharAdvance(glyph_index);
+          float glyph_advance = layout.getCharAdvance(character_index);
+          current_x_position += glyph_advance;
+
+          // The glyph may be a ligature.  Determine how many input characters
+          // are joined into this glyph.
+          size_t ligature_end = character_index + 1;
+          for (; ligature_end < text_count; ++ligature_end) {
+            if (layout.getCharAdvance(ligature_end) != 0)
+              break;
+          }
+          size_t ligature_width = ligature_end - character_index;
+          prev_char_advance = glyph_advance / ligature_width;
+          // Compute positions for the additional characters in the ligature.
+          for (size_t i = 1; i < ligature_width; ++i) {
+            glyph_single_line_position_x.push_back(
+                glyph_single_line_position_x.back() + prev_char_advance);
+          }
+          character_index += ligature_width;
+
           // Check if the current Glyph is a whitespace and handle multiple
           // whitespaces in a row.
           if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
@@ -453,8 +468,6 @@ void Paragraph::Layout(double width, bool force) {
           } else {
             whitespace_ended = true;
           }
-
-          prev_char_advance = layout.getCharAdvance(glyph_index);
         }
         blob_start += blob_length;
         previous_run_x_position += current_x_position + letter_spacing;
