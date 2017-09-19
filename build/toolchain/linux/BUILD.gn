@@ -93,7 +93,7 @@ gcc_toolchain("clang_arm64") {
     prefix = rebase_path("//third_party/llvm-allocated-type/Linux_x64/bin",
                          root_build_dir)
   } else {
-    prefix = rebase_path("//buildtools/toolchain/clang+llvm-x86_64-linux/bin",
+    prefix = rebase_path("//buildtools/linux-x64/clang/bin",
                          root_build_dir)
   }
   cc = "${compiler_prefix}$prefix/clang"
