@@ -131,8 +131,8 @@ import 'basic_types.dart';
 ///   fonts:
 ///     - family: Raleway
 ///       fonts:
-///         - asset: assets/fonts/Raleway-Regular.ttf
-///         - asset: assets/fonts/Raleway-Medium.ttf
+///         - asset: fonts/Raleway-Regular.ttf
+///         - asset: fonts/Raleway-Medium.ttf
 ///           weight: 500
 ///         - asset: assets/fonts/Raleway-SemiBold.ttf
 ///           weight: 600
@@ -143,16 +143,16 @@ import 'basic_types.dart';
 ///            style: italic
 ///```
 ///
-/// The `family` determines the name of the font, which you can use in the
-/// [fontFamily] argument. The `asset` is a path to the font file, relative to
-/// the [pubspec.yaml] file. The `weight` property specifies the weight of the
-/// glyph outlines in the file as an integer multiple of 100 between 100 and 900.
-/// This corresponds to the [FontWeight] class and can be used in the
-/// [fontWeight] argument. The `style` property specfies whether the outlines in
-/// the file are `italic` or `normal`. These values correspond to the
-/// [FontStyle] class and can be used in the [fontStyle] argument.
+/// The `family` property determines the name of the font, which you can use in
+/// the [fontFamily] argument. The `asset` property is a path to the font file,
+/// relative to the [pubspec.yaml] file. The `weight` property specifies the
+/// weight of the glyph outlines in the file as an integer multiple of 100
+/// between 100 and 900. This corresponds to the [FontWeight] class and can be
+/// used in the [fontWeight] argument. The `style` property specfies whether the
+/// outlines in the file are `italic` or `normal`. These values correspond to
+/// the [FontStyle] class and can be used in the [fontStyle] argument.
 ///
-/// To select a custom font create [TextStyle] using the [fontFamily]
+/// To select a custom font, create [TextStyle] using the [fontFamily]
 /// argument as shown in the example below:
 ///
 /// ```dart
