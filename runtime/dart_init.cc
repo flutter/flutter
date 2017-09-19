@@ -24,6 +24,7 @@
 #include "flutter/lib/ui/dart_runtime_hooks.h"
 #include "flutter/lib/ui/dart_ui.h"
 #include "flutter/lib/ui/ui_dart_state.h"
+#include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/runtime/start_up.h"
 #include "lib/fxl/arraysize.h"
@@ -129,7 +130,11 @@ void IsolateShutdownCallback(void* callback_data) {
     Dart_Handle sticky_error = Dart_GetStickyError();
     FXL_CHECK(LogIfError(sticky_error));
   }
-  tonic::DartState* dart_state = static_cast<tonic::DartState*>(callback_data);
+  UIDartState* dart_state = static_cast<UIDartState*>(callback_data);
+  IsolateClient* isolate_client = dart_state->isolate_client();
+  if (isolate_client) {
+    isolate_client->WillShutDownIsolate(dart_state->isolate());
+  }
   delete dart_state;
 }
 
@@ -188,11 +193,13 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   // No VM-service in release mode.
   return nullptr;
 #else   // FLUTTER_RUNTIME_MODE
-  tonic::DartState* dart_state = new tonic::DartState();
-  Dart_Isolate isolate = Dart_CreateIsolate(
-      script_uri, "main", g_default_isolate_snapshot_data,
-      g_default_isolate_snapshot_instructions, nullptr, dart_state, error);
+  UIDartState* dart_state = new UIDartState(nullptr, nullptr);
+  Dart_Isolate isolate =
+      Dart_CreateIsolate(script_uri, "main", g_default_isolate_snapshot_data,
+                         g_default_isolate_snapshot_instructions, nullptr,
+                         static_cast<tonic::DartState*>(dart_state), error);
   FXL_CHECK(isolate) << error;
+  dart_state->set_debug_name_prefix(script_uri);
   dart_state->SetIsolate(isolate);
   FXL_CHECK(Dart_IsServiceIsolate(isolate));
   FXL_CHECK(!LogIfError(

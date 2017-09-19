@@ -20,6 +20,7 @@ class Window;
 class IsolateClient {
  public:
   virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate) = 0;
+  virtual void WillShutDownIsolate(Dart_Isolate isolate) = 0;
 
  protected:
   virtual ~IsolateClient();
@@ -35,6 +36,9 @@ class UIDartState : public tonic::DartState {
   UIDartState* CreateForChildIsolate();
 
   IsolateClient* isolate_client() { return isolate_client_; }
+  void set_isolate_client(IsolateClient* isolate_client) {
+    isolate_client_ = isolate_client;
+  }
   Dart_Port main_port() const { return main_port_; }
   const std::string& debug_name() const { return debug_name_; }
   Window* window() const { return window_.get(); }
