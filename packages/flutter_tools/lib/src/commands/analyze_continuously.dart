@@ -172,7 +172,8 @@ class AnalysisServer {
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
-    _process.exitCode.whenComplete(() => _process = null);
+    // This callback hookup can't throw.
+    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
     errorStream.listen(printError);

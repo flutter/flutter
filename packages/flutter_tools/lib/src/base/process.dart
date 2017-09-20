@@ -9,6 +9,7 @@ import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
+import 'utils.dart';
 
 typedef String StringConverter(String string);
 
@@ -156,12 +157,15 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await Future.wait(<Future<Null>>[
+  await waitGroup<Null>(<Future<Null>>[
     stdoutSubscription.asFuture<Null>(),
     stderrSubscription.asFuture<Null>(),
   ]);
-  stdoutSubscription.cancel();
-  stderrSubscription.cancel();
+
+  await waitGroup<Null>(<Future<Null>>[
+    stdoutSubscription.cancel(),
+    stderrSubscription.cancel(),
+  ]);
 
   return await process.exitCode;
 }

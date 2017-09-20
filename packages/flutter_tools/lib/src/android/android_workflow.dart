@@ -11,6 +11,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
@@ -189,9 +190,12 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         <String>[sdkManagerPath, '--licenses'],
         environment: sdkManagerEnv,
     );
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
-    process.stdin.addStream(stdin);
+
+    waitGroup<Null>(<Future<Null>>[
+      stdout.addStream(process.stdout),
+      stderr.addStream(process.stderr),
+      process.stdin.addStream(stdin),
+    ]);
 
     final int exitCode = await process.exitCode;
     return exitCode == 0;
