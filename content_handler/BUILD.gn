@@ -65,7 +65,8 @@ template("flutter_content_handler") {
              "//garnet/public/lib/zip",
              "//lib/tonic",
              "//zircon/system/ulib/trace-provider",
-             "//magma:vulkan",
+             # TODO(abarth): This library should be public in garnet.
+             "//garnet/lib/magma:vulkan",
              "//third_party/rapidjson",
              "//third_party/skia",
            ] + extra_deps
