@@ -241,16 +241,18 @@ class ScrollDragController implements Drag {
   /// Called when [dispose] is called.
   final VoidCallback onDragCanceled;
 
-  /// Velocity that was present from a previous [ScrollActivity] when this
-  /// drag began.
+  /// Velocity that was present from a previous [ScrollActivity] when this drag
+  /// began.
   final double carriedVelocity;
 
   Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
 
-  /// Maximum amount of time interval the drag can have consecutive stationary pointer
-  /// update events before losing the momentum carried from a previous scroll activity.
-  static const Duration momentumRetainStationaryThreshold = const Duration(milliseconds: 20);
+  /// Maximum amount of time interval the drag can have consecutive stationary
+  /// pointer update events before losing the momentum carried from a previous
+  /// scroll activity.
+  static const Duration momentumRetainStationaryThreshold =
+      const Duration(milliseconds: 20);
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 

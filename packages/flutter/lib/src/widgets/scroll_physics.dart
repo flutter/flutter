@@ -195,7 +195,7 @@ class ScrollPhysics {
   /// Scroll fling velocity magnitudes will be clamped to this value.
   double get maxFlingVelocity => parent?.maxFlingVelocity ?? kMaxFlingVelocity;
 
-  /// Calculate velocity carried on repeated flings.
+  /// Returns the velocity carried on repeated flings.
   ///
   /// The function is applied to the existing scroll velocity when another
   /// scroll drag is applied in the same direction.
