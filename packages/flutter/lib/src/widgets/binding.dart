@@ -133,7 +133,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Last size: $_lastSize');
+  ///     return new Text('Current size: $_lastSize');
   ///   }
   /// }
   /// ```
@@ -184,7 +184,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Last scale factor: _lastTextScaleFactor');
+  ///     return new Text('Current scale factor: _lastTextScaleFactor');
   ///   }
   /// }
   /// ```
