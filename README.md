@@ -2,6 +2,8 @@
 
 A new mobile app SDK to help developers and designers build modern mobile apps for iOS and Android. Flutter is an alpha, open-source project.
 
+> Language switch: [中文](https://github.com/flutter/flutter/blob/master/README_CN.md).
+
 ### Documentation
 
 * **Main site: [flutter.io][]**
