@@ -278,9 +278,9 @@ $fontsSection
       writeFontAsset('p/p/', font);
 
       final String expectedFontManifest =
-          '[{"fonts":[{"asset":"packages/test_package/a/bar"}],'
-          '"family":"packages/test_package/foo"},'
-          '{"fonts":[{"asset":"a/bar"}],"family":"foo"}]';
+          '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
+          '{"fonts":[{"asset":"packages/test_package/a/bar"}],'
+          '"family":"packages/test_package/foo"}]';
       await buildAndVerifyFonts(
         <String>[font],
         <String>[font],
