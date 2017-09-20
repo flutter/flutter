@@ -206,11 +206,12 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 #pragma mark - UIAccessibilityElement protocol
 
 - (id)accessibilityContainer {
-  if ([self hasChildren]) {
+  if ([self hasChildren] || _uid == kRootNodeId) {
     if (_container == nil)
       _container = [[SemanticsObjectContainer alloc] initWithSemanticsObject:self bridge:_bridge];
     return _container;
   }
+  NSAssert(_parent != nil, @"Illegal access to non-existent parent of root semantics node");
   return [_parent accessibilityContainer];
 }
 
