@@ -240,8 +240,6 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   if (!_node.HasAction(action))
     return NO;
   _bridge->DispatchSemanticsAction(_uid, action);
-  // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
-  UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, nil);
   return YES;
 }
 
@@ -320,6 +318,12 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
              : [[_semanticsObject parent] accessibilityContainer];
 }
 
+#pragma mark - UIAccessibilityAction overrides
+
+- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
+  return [_semanticsObject accessibilityScroll:direction];
+}
+
 @end
 
 #pragma mark - AccessibilityBridge impl
@@ -327,10 +331,19 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 namespace shell {
 
 AccessibilityBridge::AccessibilityBridge(UIView* view, PlatformViewIOS* platform_view)
-    : view_(view), platform_view_(platform_view), objects_([[NSMutableDictionary alloc] init]) {}
+    : view_(view), platform_view_(platform_view), objects_([[NSMutableDictionary alloc] init]) {
+  accessibility_channel_.reset([[FlutterBasicMessageChannel alloc]
+         initWithName:@"flutter/accessibility"
+      binaryMessenger:platform_view->binary_messenger()
+                codec:[FlutterStandardMessageCodec sharedInstance]]);
+  [accessibility_channel_.get() setMessageHandler:^(id message, FlutterReply reply) {
+    HandleEvent((NSDictionary*)message);
+  }];
+}
 
 AccessibilityBridge::~AccessibilityBridge() {
   view_.accessibilityElements = nil;
+  [accessibility_channel_.get() setMessageHandler:nil];
 }
 
 void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> nodes) {
@@ -375,28 +388,10 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
   NSMutableArray<NSNumber*>* doomed_uids = [NSMutableArray arrayWithArray:[objects_.get() allKeys]];
   if (root)
     VisitObjectsRecursivelyAndRemove(root, doomed_uids);
-
-  bool focused_object_doomed = false;
-  for (NSNumber* uid in doomed_uids) {
-    SemanticsObject* object = objects_.get()[uid];
-    if ([object accessibilityElementIsFocused]) {
-      focused_object_doomed = true;
-      break;
-    }
-  }
-
   [objects_ removeObjectsForKeys:doomed_uids];
 
-  if (focused_object_doomed) {
-    // Previously focused element is no longer in the tree.
-    // Passing `nil` as argument to let iOS figure out what to focus next.
-    // TODO(goderbauer): Figure out which element should be focused next and post
-    //     UIAccessibilityLayoutChangedNotification with that element instead.
-    UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, nil);
-  } else {
-    // Passing `nil` as argument to keep focus where it is.
-    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
-  }
+  // TODO(goderbauer): figure out which node to focus next.
+  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
@@ -417,6 +412,16 @@ void AccessibilityBridge::VisitObjectsRecursivelyAndRemove(SemanticsObject* obje
   [doomed_uids removeObject:@(object.uid)];
   for (SemanticsObject* child : *[object children])
     VisitObjectsRecursivelyAndRemove(child, doomed_uids);
+}
+
+void AccessibilityBridge::HandleEvent(NSDictionary<NSString*, id>* annotatedEvent) {
+  NSString* type = annotatedEvent[@"type"];
+  if ([type isEqualToString:@"scroll"]) {
+    // TODO(tvolkert): provide meaningful string (e.g. "page 2 of 5")
+    UIAccessibilityPostNotification(UIAccessibilityPageScrolledNotification, @"");
+  } else {
+    NSCAssert(NO, @"Invalid event type %@", type);
+  }
 }
 
 }  // namespace shell

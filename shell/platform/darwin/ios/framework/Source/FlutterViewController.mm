@@ -127,8 +127,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
-  _platformView =
-      std::make_shared<shell::PlatformViewIOS>(reinterpret_cast<CAEAGLLayer*>(self.view.layer));
+  _platformView = std::make_shared<shell::PlatformViewIOS>(
+      reinterpret_cast<CAEAGLLayer*>(self.view.layer), self);
 
   _platformView->Attach(
       // First frame callback.

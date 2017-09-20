@@ -17,10 +17,11 @@
 
 namespace shell {
 
-PlatformViewIOS::PlatformViewIOS(CALayer* layer)
+PlatformViewIOS::PlatformViewIOS(CALayer* layer, NSObject<FlutterBinaryMessenger>* binaryMessenger)
     : PlatformView(std::make_unique<GPURasterizer>(std::make_unique<ProcessInfoMac>())),
       ios_surface_(IOSSurface::Create(surface_config_, layer)),
-      weak_factory_(this) {}
+      weak_factory_(this),
+      binary_messenger_(binaryMessenger) {}
 
 PlatformViewIOS::~PlatformViewIOS() = default;
 
