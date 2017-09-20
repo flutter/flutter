@@ -392,7 +392,6 @@ class Localizations extends StatefulWidget {
     return scope.localizationsState.locale;
   }
 
-<<<<<<< HEAD
   // There doesn't appear to be a need to make this public. See the
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
@@ -404,13 +403,6 @@ class Localizations extends StatefulWidget {
 
   /// Returns the 'type' localized resources for the widget tree that
   /// corresponds to [BuildContext] `context`.
-=======
-  /// Returns the localized resources object of the given `type` for the widget
-  /// tree that corresponds to the given `context`.
-  ///
-  /// Returns `null` if no resources object of the given `type` exists within
-  /// the given `context`.
->>>>>>> introduce localized text geometry in MaterialLocalizations
   ///
   /// This method is typically used by a static factory method on the `type`
   /// class. For example Flutter's MaterialLocalizations class looks up Material
@@ -425,12 +417,8 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-<<<<<<< HEAD
     assert(scope != null, 'a Localizations ancestor was not found');
     return scope.localizationsState.resourcesFor<T>(type);
-=======
-    return scope?.localizationsState?.resourcesFor<T>(type);
->>>>>>> introduce localized text geometry in MaterialLocalizations
   }
 
   @override
