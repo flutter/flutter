@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'basic_types.dart';
 import 'box_fit.dart';
 import 'decoration.dart';
+import 'edge_insets.dart';
 import 'fractional_offset.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
