@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -304,5 +305,19 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
+  });
+
+  testWidgets('reacts to changing the text scale', (WidgetTester tester) async {
+    double textScaleFactor;
+    ui.TestingHooks.updateTextScaleFactor(1.5);
+    await tester.pumpWidget(new MaterialApp(
+      home: new Builder(builder:(BuildContext context) {
+        textScaleFactor = MediaQuery.of(context).textScaleFactor;
+        return new Container();
+      }),
+    ));
+
+    expect(textScaleFactor, isNotNull);
+    expect(textScaleFactor, equals(1.5));
   });
 }
