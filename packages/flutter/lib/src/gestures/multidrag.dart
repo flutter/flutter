@@ -45,6 +45,8 @@ abstract class MultiDragPointerState {
   Offset get pendingDelta => _pendingDelta;
   Offset _pendingDelta = Offset.zero;
 
+  Duration _lastPendingEventTimestamp;
+
   GestureArenaEntry _arenaEntry;
   void _setArenaEntry(GestureArenaEntry entry) {
     assert(_arenaEntry == null);
@@ -68,12 +70,14 @@ abstract class MultiDragPointerState {
       assert(pendingDelta == null);
       // Call client last to avoid reentrancy.
       _client.update(new DragUpdateDetails(
+        sourceTimeStamp: event.timeStamp,
         delta: event.delta,
         globalPosition: event.position,
       ));
     } else {
       assert(pendingDelta != null);
       _pendingDelta += event.delta;
+      _lastPendingEventTimestamp = event.timeStamp;
       checkForResolutionAfterMove();
     }
   }
@@ -101,6 +105,7 @@ abstract class MultiDragPointerState {
     assert(_client == null);
     assert(pendingDelta != null);
     _pendingDelta = null;
+    _lastPendingEventTimestamp = null;
     _arenaEntry = null;
   }
 
@@ -111,10 +116,12 @@ abstract class MultiDragPointerState {
     assert(pendingDelta != null);
     _client = client;
     final DragUpdateDetails details = new DragUpdateDetails(
+      sourceTimeStamp: _lastPendingEventTimestamp,
       delta: pendingDelta,
       globalPosition: initialPosition,
     );
     _pendingDelta = null;
+    _lastPendingEventTimestamp = null;
     // Call client last to avoid reentrancy.
     _client.update(details);
   }
@@ -131,6 +138,7 @@ abstract class MultiDragPointerState {
     } else {
       assert(pendingDelta != null);
       _pendingDelta = null;
+      _lastPendingEventTimestamp = null;
     }
   }
 
@@ -145,6 +153,7 @@ abstract class MultiDragPointerState {
     } else {
       assert(pendingDelta != null);
       _pendingDelta = null;
+      _lastPendingEventTimestamp = null;
     }
   }
 
