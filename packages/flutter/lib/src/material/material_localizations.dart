@@ -121,6 +121,9 @@ abstract class MaterialLocalizations {
   /// Formats [timeOfDay] according to the value of [timeOfDayFormat].
   String formatTimeOfDay(TimeOfDay timeOfDay);
 
+  /// Full unabbreviated year format, e.g. 2017 rather than 17.
+  String formatYear(DateTime date);
+
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
   ///
@@ -153,6 +156,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     if (localizations.containsKey(_localeName))
       _nameToValue.addAll(localizations[_localeName]);
 
+    if (intl.DateFormat.localeExists(_localeName)) {
+      _fullYearFormat = new intl.DateFormat.y(_localeName);
+    } else if (intl.DateFormat.localeExists(locale.languageCode)) {
+      _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
+    } else {
+      _fullYearFormat = new intl.DateFormat.y();
+    }
+
     if (intl.NumberFormat.localeExists(_localeName)) {
       _decimalFormat = new intl.NumberFormat.decimalPattern(_localeName);
       _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', _localeName);
@@ -182,6 +193,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// If the number is less than 10, zero-pads it.
   intl.NumberFormat _twoDigitZeroPaddedFormat;
+
+  /// Full unabbreviated year format, e.g. 2017 rather than 17.
+  intl.DateFormat _fullYearFormat;
 
   static String _computeLocaleName(Locale locale) {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -223,6 +237,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   @override
   String formatMinute(TimeOfDay timeOfDay) {
     return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
+  }
+
+  @override
+  String formatYear(DateTime date) {
+    return _fullYearFormat.format(date);
   }
 
   /// Formats a [number] using local decimal number format.

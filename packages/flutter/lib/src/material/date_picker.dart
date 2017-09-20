@@ -83,6 +83,7 @@ class _DatePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
@@ -130,7 +131,7 @@ class _DatePickerHeader extends StatelessWidget {
     Widget yearButton = new _DateHeaderButton(
       color: backgroundColor,
       onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-      child: new Text(new intl.DateFormat('yyyy').format(selectedDate), style: yearStyle),
+      child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
     );
     Widget dayButton = new _DateHeaderButton(
       color: backgroundColor,
@@ -893,6 +894,8 @@ Future<DateTime> showDatePicker({
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate,
   DatePickerMode initialDatePickerMode: DatePickerMode.day,
+  Locale locale,
+  TextDirection textDirection,
 }) async {
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
@@ -902,7 +905,31 @@ Future<DateTime> showDatePicker({
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
   assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
-  return await showDialog(
+
+  Widget child = new _DatePickerDialog(
+    initialDate: initialDate,
+    firstDate: firstDate,
+    lastDate: lastDate,
+    selectableDayPredicate: selectableDayPredicate,
+    initialDatePickerMode: initialDatePickerMode,
+  );
+
+  if (locale != null) {
+    child = new Localizations.override(
+      context: context,
+      locale: locale,
+      child: child,
+    );
+  }
+
+  if (textDirection != null) {
+    child = new Directionality(
+      textDirection: textDirection,
+      child: child,
+    );
+  }
+
+  return await showDialog<DateTime>(
     context: context,
     child: new _DatePickerDialog(
       initialDate: initialDate,
