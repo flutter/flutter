@@ -398,7 +398,7 @@ class Border {
       ..color = top.color
       ..strokeWidth = width
       ..style = PaintingStyle.stroke;
-    canvas.drawRect(rect.inflate(width / 2.0), paint);
+    canvas.drawRect(rect.deflate(width / 2.0), paint);
   }
 
   @override
