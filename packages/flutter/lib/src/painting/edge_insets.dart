@@ -12,14 +12,16 @@ import 'basic_types.dart';
 /// resolution.
 ///
 /// A property or argument of this type accepts classes created either with [new
-/// EdgeInsets.fromLTRB] and its variants, or [new EdgeInsetsDirectional].
+/// EdgeInsets.fromLTRB] and its variants, or [new
+/// EdgeInsetsDirectional.fromSTEB] and its variants.
 ///
-/// To convert a [EdgeInsetsGeometry] object of indeterminate type into a
+/// To convert an [EdgeInsetsGeometry] object of indeterminate type into a
 /// [EdgeInsets] object, call the [resolve] method.
 ///
 /// See also:
 ///
 ///  * [Padding], a widget that describes margins using [EdgeInsetsGeometry].
+@immutable
 abstract class EdgeInsetsGeometry {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -164,11 +166,17 @@ abstract class EdgeInsetsGeometry {
   /// Integer divides the [EdgeInsetsGeometry] object in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
+  ///
+  /// This operator may have unexpected results when applied to a mixture of
+  /// [EdgeInsets] and [EdgeInsetsDirectional] objects.
   EdgeInsetsGeometry operator ~/(double other);
 
   /// Computes the remainder in each dimension by the given factor.
   ///
   /// This operator returns an object of the same type as the operand.
+  ///
+  /// This operator may have unexpected results when applied to a mixture of
+  /// [EdgeInsets] and [EdgeInsetsDirectional] objects.
   EdgeInsetsGeometry operator %(double other);
 
   /// Linearly interpolate between two [EdgeInsetsGeometry] objects.
@@ -202,7 +210,7 @@ abstract class EdgeInsetsGeometry {
     );
   }
 
-  /// Convert this instance into a [EdgeInsets], which uses literal coordinates
+  /// Convert this instance into an [EdgeInsets], which uses literal coordinates
   /// (i.e. the `left` coordinate being explicitly a distance from the left, and
   /// the `right` coordinate being explicitly a distance from the right).
   ///
@@ -299,7 +307,6 @@ abstract class EdgeInsetsGeometry {
 ///  * [EdgeInsetsDirectional], which (for properties and arguments that accept
 ///    the type [EdgeInsetsGeometry]) allows the horizontal insets to be
 ///    specified in a [TextDirection]-aware manner.
-@immutable
 class EdgeInsets extends EdgeInsetsGeometry {
   /// Creates insets from offsets from the left, top, right, and bottom.
   const EdgeInsets.fromLTRB(this.left, this.top, this.right, this.bottom);
@@ -356,6 +363,9 @@ class EdgeInsets extends EdgeInsetsGeometry {
       top = padding.top / devicePixelRatio,
       right = padding.right / devicePixelRatio,
       bottom = padding.bottom / devicePixelRatio;
+
+  /// An [EdgeInsets] with zero offsets in each direction.
+  static const EdgeInsets zero = const EdgeInsets.only();
 
   /// The offset from the left.
   final double left;
@@ -547,9 +557,6 @@ class EdgeInsets extends EdgeInsetsGeometry {
     );
   }
 
-  /// An [EdgeInsets] with zero offsets in each direction.
-  static const EdgeInsets zero = const EdgeInsets.only();
-
   @override
   EdgeInsets resolve(TextDirection direction) => this;
 }
@@ -584,6 +591,12 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
     this.end: 0.0,
     this.bottom: 0.0
   });
+
+  /// An [EdgeInsetsDirectional] with zero offsets in each direction.
+  ///
+  /// Consider using [EdgeInsets.zero] instead, since that object has the same
+  /// effect, but will be cheaper to [resolve].
+  static const EdgeInsetsDirectional zero = const EdgeInsetsDirectional.only();
 
   /// The offset from the start side, the side from which the user will start
   /// reading text.
@@ -748,12 +761,6 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
       ui.lerpDouble(a.bottom, b.bottom, t),
     );
   }
-
-  /// An [EdgeInsetsDirectional] with zero offsets in each direction.
-  ///
-  /// Consider using [EdgeInsets.zero] instead, since that object has the same
-  /// effect, but will be cheaper to [resolve].
-  static const EdgeInsetsDirectional zero = const EdgeInsetsDirectional.only();
 
   @override
   EdgeInsets resolve(TextDirection direction) {
