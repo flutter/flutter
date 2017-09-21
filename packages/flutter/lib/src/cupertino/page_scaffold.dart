@@ -34,13 +34,15 @@ class CupertinoPageScaffold extends StatelessWidget {
   /// Content can slide under the [navigationBar] when they're translucent.
   final Widget child;
 
-
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
     double topPadding = 0.0;
     if (navigationBar != null) {
       topPadding += navigationBar.preferredSize.height;
+      // If the navigation bar has a preferred size, pad it and the OS status
+      // bar as well. Otherwise, let the content extend to the complete top
+      // of the page.
       if (topPadding > 0.0)
         topPadding += MediaQuery.of(context).padding.top;
     }
@@ -52,8 +54,10 @@ class CupertinoPageScaffold extends StatelessWidget {
     ));
 
     if (navigationBar != null) {
-      stacked.add(new Align(
-        alignment: FractionalOffset.topCenter,
+      stacked.add(new Positioned(
+        top: 0.0,
+        left: 0.0,
+        right: 0.0,
         child: navigationBar,
       ));
     }

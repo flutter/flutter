@@ -84,15 +84,15 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         // our own listener to update the _currentPage on top of a possibly user
         // provided callback.
         child: widget.tabBar.copyWith(
-            currentIndex: _currentPage,
-            onTap: (int newIndex) {
-              setState(() {
-                _currentPage = newIndex;
-              });
-              // Chain the user's original callback.
-              if (widget.tabBar.onTap != null)
-                widget.tabBar.onTap(newIndex);
-            }
+          currentIndex: _currentPage,
+          onTap: (int newIndex) {
+            setState(() {
+              _currentPage = newIndex;
+            });
+            // Chain the user's original callback.
+            if (widget.tabBar.onTap != null)
+              widget.tabBar.onTap(newIndex);
+          }
         ),
       ));
     }
@@ -134,6 +134,7 @@ class _TabViewState extends State<_TabView> {
   @override
   Widget build(BuildContext context) {
     return new Stack(
+      fit: StackFit.expand,
       children: new List<Widget>.generate(widget.tabNumber, (int index) {
         final bool active = index == widget.currentTabIndex;
 
