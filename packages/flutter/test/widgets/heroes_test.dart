@@ -1199,7 +1199,8 @@ void main() {
     await tester.pump(duration * 0.1);
     expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x0, epsilon));
 
-    // TODO: show that a different path is in fact taken upon a normal reverse
+    // Below: show that a different pop Hero path is in fact taken after
+    // a completed push transition.
 
     // Complete the pop transition and we're back to showing /.
     await tester.pumpAndSettle();
