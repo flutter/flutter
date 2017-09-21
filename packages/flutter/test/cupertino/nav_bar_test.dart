@@ -101,7 +101,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return const CupertinoScaffold(
+              return const CupertinoPageScaffold(
                 navigationBar: const CupertinoNavigationBar(
                   middle: const Text('Title'),
                 ),
@@ -125,7 +125,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoScaffold(
+              return new CupertinoPageScaffold(
                 child: new CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
@@ -213,7 +213,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoScaffold(
+              return new CupertinoPageScaffold(
                 child: new CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
