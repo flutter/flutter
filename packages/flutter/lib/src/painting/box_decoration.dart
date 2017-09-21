@@ -206,7 +206,7 @@ class BoxDecoration extends Decoration {
   ///  * [Decoration.lerp], which can interpolate between any two types of
   ///    [Decoration]s, not just [BoxDecoration]s.
   ///  * [lerpFrom] and [lerpTo], which are used to implement [Decoration.lerp]
-  ///     and which use [BoxDecoration.lerp] when interpolating two
+  ///    and which use [BoxDecoration.lerp] when interpolating two
   ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
     if (a == null && b == null)

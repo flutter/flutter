@@ -28,7 +28,7 @@ class RoundedRectangleBorder extends ShapeBorder {
   /// Creates a rounded rectangle border.
   ///
   /// The arguments must not be null.
-  RoundedRectangleBorder({
+  const RoundedRectangleBorder({
     this.side: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
   }) : assert(side != null),
