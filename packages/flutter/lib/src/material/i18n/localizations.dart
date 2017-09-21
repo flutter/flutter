@@ -21,6 +21,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"الصفحة التالية",
     "previousPageTooltip": r"الصفحة السابقة",
     "showMenuTooltip": r"قائمة العرض",
+    "aboutListTileTitle": r"حول $applicationName",
     "licensesPageTitle": r"التّراخيص",
     "pageRowsInfoTitle": r"$firstRow–$lastRow أو $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow من حوالي $rowCount",
@@ -36,7 +37,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"اختر الكل",
     "viewLicensesButtonLabel": r"عرض التراخيص",
     "anteMeridiemAbbreviation": r"ص",
-    "postMeridiemAbbreviation": r"م"
+    "postMeridiemAbbreviation": r"م",
   },
   "de": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -48,6 +49,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Nächste Seite",
     "previousPageTooltip": r"Vorherige Seite",
     "showMenuTooltip": r"Menü anzeigen",
+    "aboutListTileTitle": r"Über $applicationName",
     "licensesPageTitle": r"Lizenzen",
     "pageRowsInfoTitle": r"$firstRow–$lastRow von $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow von etwa $rowCount",
@@ -63,7 +65,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"EINFÜGEN",
     "selectAllButtonLabel": r"ALLES AUSWÄHLEN",
-    "viewLicensesButtonLabel": r"LIZENZEN ANZEIGEN"
+    "viewLicensesButtonLabel": r"LIZENZEN ANZEIGEN",
   },
   "en": const <String, String>{
     "timeOfDayFormat": r"h:mm a",
@@ -75,6 +77,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Next page",
     "previousPageTooltip": r"Previous page",
     "showMenuTooltip": r"Show menu",
+    "aboutListTileTitle": r"About $applicationName",
     "licensesPageTitle": r"Licenses",
     "pageRowsInfoTitle": r"$firstRow–$lastRow of $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow of about $rowCount",
@@ -92,16 +95,16 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"SELECT ALL",
     "viewLicensesButtonLabel": r"VIEW LICENSES",
     "anteMeridiemAbbreviation": r"AM",
-    "postMeridiemAbbreviation": r"PM"
+    "postMeridiemAbbreviation": r"PM",
   },
   "en_GB": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "en_IE": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "en_ZA": const <String, String>{
-    "timeOfDayFormat": r"HH:mm"
+    "timeOfDayFormat": r"HH:mm",
   },
   "es": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -113,6 +116,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Siguiente página",
     "previousPageTooltip": r"Pagina anterior",
     "showMenuTooltip": r"Muestrame el menu",
+    "aboutListTileTitle": r"Desarrollado por $applicationName",
     "licensesPageTitle": r"Licencias",
     "pageRowsInfoTitle": r"$firstRow–$lastRow de $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow de aproximadamente $rowCount",
@@ -128,10 +132,10 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"PEGAR",
     "selectAllButtonLabel": r"SELECCIONAR TODO",
-    "viewLicensesButtonLabel": r"VER LICENCIAS"
+    "viewLicensesButtonLabel": r"VER LICENCIAS",
   },
   "es_US": const <String, String>{
-    "timeOfDayFormat": r"h:mm a"
+    "timeOfDayFormat": r"h:mm a",
   },
   "fa": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -143,6 +147,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"صفحه بعد",
     "previousPageTooltip": r"صفحه قبلی",
     "showMenuTooltip": r"نمایش منو",
+    "aboutListTileTitle": r"درباره $applicationName",
     "licensesPageTitle": r"مجوز",
     "pageRowsInfoTitle": r"$firstRow–$lastRow از $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow از حدود $rowCount",
@@ -156,7 +161,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"تایید",
     "pasteButtonLabel": r"چسباندن",
     "selectAllButtonLabel": r"انتخاب همه",
-    "viewLicensesButtonLabel": r"مشاهده مجوز"
+    "viewLicensesButtonLabel": r"مشاهده مجوز",
   },
   "fr": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -168,6 +173,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Page suivante",
     "previousPageTooltip": r"Page précédente",
     "showMenuTooltip": r"Afficher le menu",
+    "aboutListTileTitle": r"À propos de $applicationName",
     "licensesPageTitle": r"Licences",
     "pageRowsInfoTitle": r"$firstRow–$lastRow de $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow d'environ $rowCount",
@@ -183,10 +189,10 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"COLLER",
     "selectAllButtonLabel": r"TOUT SÉLECTIONNER",
-    "viewLicensesButtonLabel": r"AFFICHER LES LICENCES"
+    "viewLicensesButtonLabel": r"AFFICHER LES LICENCES",
   },
   "fr_CA": const <String, String>{
-    "timeOfDayFormat": r"HH 'h' mm"
+    "timeOfDayFormat": r"HH 'h' mm",
   },
   "he": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -198,6 +204,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"עמוד הבא",
     "previousPageTooltip": r"עמוד קודם",
     "showMenuTooltip": r"הצג תפריט",
+    "aboutListTileTitle": r"על $applicationName",
     "licensesPageTitle": r"רישיונות",
     "pageRowsInfoTitle": r"$firstRow–$lastRow מתוך $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow מתוך כ $rowCount",
@@ -211,7 +218,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"בסדר",
     "pasteButtonLabel": r"הדבק",
     "selectAllButtonLabel": r"בחר הכל",
-    "viewLicensesButtonLabel": r"ראה רישיונות"
+    "viewLicensesButtonLabel": r"ראה רישיונות",
   },
   "it": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -223,6 +230,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Pagina successiva",
     "previousPageTooltip": r"Pagina precedente",
     "showMenuTooltip": r"Mostra il menu",
+    "aboutListTileTitle": r"A proposito di $applicationName",
     "licensesPageTitle": r"Licenze",
     "pageRowsInfoTitle": r"$firstRow–$lastRow di $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow di circa $rowCount",
@@ -236,7 +244,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"INCOLLA",
     "selectAllButtonLabel": r"SELEZIONA TUTTO",
-    "viewLicensesButtonLabel": r"VEDI LE LICENZE"
+    "viewLicensesButtonLabel": r"VEDI LE LICENZE",
   },
   "ja": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -248,6 +256,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"次のページ",
     "previousPageTooltip": r"前のページ",
     "showMenuTooltip": r"メニューを表示",
+    "aboutListTileTitle": r"$applicationNameについて",
     "licensesPageTitle": r"ライセンス",
     "pageRowsInfoTitle": r"$rowCount行中の$firstRow–$lastRow",
     "pageRowsInfoTitleApproximate": r"約$rowCount行中の$firstRow–$lastRow",
@@ -261,7 +270,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"貼付け",
     "selectAllButtonLabel": r"全選択",
-    "viewLicensesButtonLabel": r"ライセンス表記"
+    "viewLicensesButtonLabel": r"ライセンス表記",
   },
   "ps": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -273,6 +282,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"بله پاڼه",
     "previousPageTooltip": r"مخکینی مخ",
     "showMenuTooltip": r"غورنۍ ښودل",
+    "aboutListTileTitle": r"د $applicationName په اړه",
     "licensesPageTitle": r"جوازونه",
     "pageRowsInfoTitle": r"$firstRow–$lastRow د $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow څخه $rowCount د",
@@ -286,7 +296,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"سمه ده",
     "pasteButtonLabel": r"پیټ کړئ",
     "selectAllButtonLabel": r"غوره کړئ",
-    "viewLicensesButtonLabel": r"لیدلس وګورئ"
+    "viewLicensesButtonLabel": r"لیدلس وګورئ",
   },
   "pt": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -298,6 +308,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"Próxima página",
     "previousPageTooltip": r"Página anterior",
     "showMenuTooltip": r"Mostrar menu",
+    "aboutListTileTitle": r"Sobre $applicationName",
     "licensesPageTitle": r"Licenças",
     "pageRowsInfoTitle": r"$firstRow–$lastRow de $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow de cerca de $rowCount",
@@ -311,32 +322,33 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"OK",
     "pasteButtonLabel": r"COLAR",
     "selectAllButtonLabel": r"SELECIONAR TUDO",
-    "viewLicensesButtonLabel": r"VER LICENÇAS"
+    "viewLicensesButtonLabel": r"VER LICENÇAS",
   },
   "ru": const <String, String>{
     "timeOfDayFormat": r"H:mm",
     "openAppDrawerTooltip": r"Открыть меню навигации",
-    "backButtonTooltip": r"назад",
+    "backButtonTooltip": r"Назад",
     "closeButtonTooltip": r"Закрыть",
-    "nextMonthTooltip": r"В следующем месяце",
+    "nextMonthTooltip": r"Следующий месяц",
     "previousMonthTooltip": r"Предыдущий месяц",
     "nextPageTooltip": r"Следущая страница",
     "previousPageTooltip": r"Предыдущая страница",
     "showMenuTooltip": r"Показать меню",
     "pageRowsInfoTitle": r"$firstRow–$lastRow из $rowCount",
-    "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow около $rowCount",
+    "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow из примерно $rowCount",
     "rowsPerPageTitle": r"Строки на страницу:",
+    "aboutListTileTitle": r"O $applicationName",
     "licensesPageTitle": r"Лицензии",
-    "selectedRowCountTitleOther": r"$selectedRowCount выбранные предметы",
-    "cancelButtonLabel": r"ОТМЕНА",
+    "selectedRowCountTitleOther": r"Выбранно $selectedRowCount строк",
+    "cancelButtonLabel": r"ОТМЕНИТЬ",
     "closeButtonLabel": r"ЗАКРЫТЬ",
-    "continueButtonLabel": r"ПРОДОЛЖАТЬ",
-    "copyButtonLabel": r"копия",
-    "cutButtonLabel": r"порез",
+    "continueButtonLabel": r"ПРОДОЛЖИТЬ",
+    "copyButtonLabel": r"СКОПИРОВАТЬ",
+    "cutButtonLabel": r"ВЫРЕЗАТЬ",
     "okButtonLabel": r"ОК",
-    "pasteButtonLabel": r"Паст",
-    "selectAllButtonLabel": r"Выбрать все",
-    "viewLicensesButtonLabel": r"ПРОСМОТРЕТЬ ЛИЦЕНЗИИ"
+    "pasteButtonLabel": r"ВСТАВИТЬ",
+    "selectAllButtonLabel": r"ВЫБРАТЬ ВСЁ",
+    "viewLicensesButtonLabel": r"ПРОСМОТРЕТЬ ЛИЦЕНЗИИ",
   },
   "sd": const <String, String>{
     "timeOfDayFormat": r"HH:mm",
@@ -348,6 +360,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"اڳيون پيج",
     "previousPageTooltip": r"پويون صفحو",
     "showMenuTooltip": r"ڏيکاريو",
+    "aboutListTileTitle": r"$applicationName بابت",
     "licensesPageTitle": r"لائسنس",
     "pageRowsInfoTitle": r"$firstRow–$lastRow جي $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow کان $rowCount تقريبن",
@@ -361,7 +374,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "okButtonLabel": r"ٺيڪ آهي",
     "pasteButtonLabel": r"پيسٽ ڪريو",
     "selectAllButtonLabel": r"سڀ چونڊيو",
-    "viewLicensesButtonLabel": r"لائسنس ڏسو"
+    "viewLicensesButtonLabel": r"لائسنس ڏسو",
   },
   "ur": const <String, String>{
     "timeOfDayFormat": r"h:mm a",
@@ -373,6 +386,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "nextPageTooltip": r"اگلا صفحہ",
     "previousPageTooltip": r"سابقہ ​​صفحہ",
     "showMenuTooltip": r"مینو دکھائیں",
+    "aboutListTileTitle": r"کے بارے میں $applicationName",
     "licensesPageTitle": r"لائسنس",
     "pageRowsInfoTitle": r"$firstRow–$lastRow کے $rowCount",
     "pageRowsInfoTitleApproximate": r"$firstRow–$lastRow میں سے $rowCount تقریبا",
@@ -388,18 +402,19 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"تکاپیمام منتخب کریں",
     "viewLicensesButtonLabel": r"لائسنس دیکھیں",
     "anteMeridiemAbbreviation": r"AM",
-    "postMeridiemAbbreviation": r"PM"
+    "postMeridiemAbbreviation": r"PM",
   },
   "zh": const <String, String>{
     "timeOfDayFormat": r"ah:mm",
     "openAppDrawerTooltip": r"打开导航菜单",
-    "backButtonTooltip": r"背部",
+    "backButtonTooltip": r"返回",
     "closeButtonTooltip": r"关",
     "nextMonthTooltip": r"-下月就29了。",
     "previousMonthTooltip": r"前一个月",
     "nextPageTooltip": r"下一页",
     "previousPageTooltip": r"上一页",
     "showMenuTooltip": r"显示菜单",
+    "aboutListTileTitle": r"关于$applicationName",
     "licensesPageTitle": r"许可证",
     "pageRowsInfoTitle": r"$rowCount中的$firstRow-$lastRow",
     "pageRowsInfoTitleApproximate": r"约$rowCount中的$firstRow-$lastRow",
@@ -415,7 +430,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectAllButtonLabel": r"全选",
     "viewLicensesButtonLabel": r"查看许可证",
     "anteMeridiemAbbreviation": r"上午",
-    "postMeridiemAbbreviation": r"下午"
-  }
+    "postMeridiemAbbreviation": r"下午",
+  },
 };
 

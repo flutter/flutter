@@ -8,6 +8,7 @@
   "nextPageTooltip": "Próxima página",
   "previousPageTooltip": "Página anterior",
   "showMenuTooltip": "Mostrar menu",
+  "aboutListTileTitle": "Sobre $applicationName",
   "licensesPageTitle": "Licenças",
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de cerca de $rowCount",

@@ -396,6 +396,6 @@ $assetsSection
   });
 }
 
-Map<Type, Generator> get contextOverrides => <Type, Generator>{
-  FileSystem: () => new MemoryFileSystem()
-};
+Map<Type, Generator> get contextOverrides {
+  return <Type, Generator>{FileSystem: () => new MemoryFileSystem()};
+}

@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'table_border.dart';
 
 /// Parent data used by [RenderTable] for its children.
 class TableCellParentData extends BoxParentData {
@@ -309,130 +310,6 @@ class MinColumnWidth extends TableColumnWidth {
 
   @override
   String toString() => '$runtimeType($a, $b)';
-}
-
-/// Border specification for [RenderTable].
-///
-/// This is like [Border], with the addition of two sides: the inner
-/// horizontal borders and the inner vertical borders.
-class TableBorder extends Border {
-  /// Creates a border for a table.
-  ///
-  /// All the sides of the border default to [BorderSide.none].
-  const TableBorder({
-    BorderSide top: BorderSide.none,
-    BorderSide right: BorderSide.none,
-    BorderSide bottom: BorderSide.none,
-    BorderSide left: BorderSide.none,
-    this.horizontalInside: BorderSide.none,
-    this.verticalInside: BorderSide.none
-  }) : super(
-    top: top,
-    right: right,
-    bottom: bottom,
-    left: left
-  );
-
-  /// A uniform border with all sides the same color and width.
-  factory TableBorder.all({
-    Color color: const Color(0xFF000000),
-    double width: 1.0
-  }) {
-    final BorderSide side = new BorderSide(color: color, width: width);
-    return new TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
-  }
-
-  /// Creates a border for a table where all the interior sides use the same
-  /// styling and all the exterior sides use the same styling.
-  factory TableBorder.symmetric({
-    BorderSide inside: BorderSide.none,
-    BorderSide outside: BorderSide.none
-  }) {
-    return new TableBorder(
-      top: outside,
-      right: outside,
-      bottom: outside,
-      left: outside,
-      horizontalInside: inside,
-      verticalInside: inside
-    );
-  }
-
-  /// The horizontal interior sides of this border.
-  final BorderSide horizontalInside;
-
-  /// The vertical interior sides of this border.
-  final BorderSide verticalInside;
-
-  @override
-  bool get isUniform {
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
-    if (!super.isUniform)
-      return false;
-
-    final Color topColor = top.color;
-    if (horizontalInside.color != topColor ||
-        verticalInside.color != topColor)
-      return false;
-
-    final double topWidth = top.width;
-    if (horizontalInside.width != topWidth ||
-        verticalInside.width != topWidth)
-      return false;
-
-    final BorderStyle topStyle = top.style;
-    if (horizontalInside.style != topStyle ||
-        verticalInside.style != topStyle)
-      return false;
-
-    return true;
-  }
-
-  @override
-  TableBorder scale(double t) {
-    return new TableBorder(
-      top: top.copyWith(width: t * top.width),
-      right: right.copyWith(width: t * right.width),
-      bottom: bottom.copyWith(width: t * bottom.width),
-      left: left.copyWith(width: t * left.width),
-      horizontalInside: horizontalInside.copyWith(width: t * horizontalInside.width),
-      verticalInside: verticalInside.copyWith(width: t * verticalInside.width)
-    );
-  }
-
-  /// Linearly interpolate between two table borders.
-  static TableBorder lerp(TableBorder a, TableBorder b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b.scale(t);
-    if (b == null)
-      return a.scale(1.0 - t);
-    return new TableBorder(
-      top: BorderSide.lerp(a.top, b.top, t),
-      right: BorderSide.lerp(a.right, b.right, t),
-      bottom: BorderSide.lerp(a.bottom, b.bottom, t),
-      left: BorderSide.lerp(a.left, b.left, t),
-      horizontalInside: BorderSide.lerp(a.horizontalInside, b.horizontalInside, t),
-      verticalInside: BorderSide.lerp(a.verticalInside, b.verticalInside, t)
-    );
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (super != other)
-      return false;
-    final TableBorder typedOther = other;
-    return horizontalInside == typedOther.horizontalInside &&
-           verticalInside == typedOther.verticalInside;
-  }
-
-  @override
-  int get hashCode => hashValues(super.hashCode, horizontalInside, verticalInside);
-
-  @override
-  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside)';
 }
 
 /// Vertical alignment options for cells in [RenderTable] objects.
@@ -1240,41 +1117,9 @@ class RenderTable extends RenderBox {
         context.paintChild(child, childParentData.offset + offset);
       }
     }
-    canvas = context.canvas;
-    final Rect bounds = offset & size;
-    if (border != null) {
-      switch (border.verticalInside.style) {
-        case BorderStyle.solid:
-          final Paint paint = new Paint()
-            ..color = border.verticalInside.color
-            ..strokeWidth = border.verticalInside.width
-            ..style = PaintingStyle.stroke;
-          final Path path = new Path();
-          for (int x = 1; x < columns; x += 1) {
-            path.moveTo(bounds.left + _columnLefts[x], bounds.top);
-            path.lineTo(bounds.left + _columnLefts[x], bounds.bottom);
-          }
-          canvas.drawPath(path, paint);
-          break;
-        case BorderStyle.none: break;
-      }
-      switch (border.horizontalInside.style) {
-        case BorderStyle.solid:
-          final Paint paint = new Paint()
-            ..color = border.horizontalInside.color
-            ..strokeWidth = border.horizontalInside.width
-            ..style = PaintingStyle.stroke;
-          final Path path = new Path();
-          for (int y = 1; y < rows; y += 1) {
-            path.moveTo(bounds.left, bounds.top + _rowTops[y]);
-            path.lineTo(bounds.right, bounds.top + _rowTops[y]);
-          }
-          canvas.drawPath(path, paint);
-          break;
-        case BorderStyle.none: break;
-      }
-      border.paint(canvas, bounds);
-    }
+    assert(_rows == _rowTops.length - 1);
+    assert(_columns == _columnLefts.length);
+    border?.paint(context.canvas, offset & size, rows: _rowTops, columns: _columnLefts);
   }
 
   @override

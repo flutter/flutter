@@ -502,7 +502,8 @@ class HotRunner extends ResidentRunner {
           // `validateReloadReport` is called again.
           device.updateReloadStatus(validateReloadReport(firstReport,
             printErrors: false));
-          retrieveFirstReloadReport.complete(firstReport);
+          if (!retrieveFirstReloadReport.isCompleted)
+            retrieveFirstReloadReport.complete(firstReport);
         }, onError: (dynamic error, StackTrace stack) {
           retrieveFirstReloadReport.completeError(error, stack);
         });
@@ -549,8 +550,12 @@ class HotRunner extends ResidentRunner {
       reassembleTimer.start();
     // Reload the isolate.
     for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views)
+      printTrace('Sending reload events to ${device.device.name}');
+      for (FlutterView view in device.views) {
+        printTrace('Sending reload event to "${view.uiIsolate.name}"');
         await view.uiIsolate.reload();
+      }
+      await device.refreshViews();
     }
     // We are now running from source.
     _runningFromSnapshot = false;

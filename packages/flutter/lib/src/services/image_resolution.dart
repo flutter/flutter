@@ -60,7 +60,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 ///
 /// When fetching an image provided by the app itself, use the [assetName]
 /// argument to name the asset to choose. For instance, consider the structure
-/// above. First, the [pubspec.yaml] of the project should specify its assets in
+/// above. First, the `pubspec.yaml` of the project should specify its assets in
 /// the `flutter` section:
 ///
 /// ```yaml
@@ -87,12 +87,12 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// Assets used by the package itself should also be fetched using the [package]
 /// argument as above.
 ///
-/// If the desired asset is specified in the [pubspec.yaml] of the package, it
+/// If the desired asset is specified in the `pubspec.yaml` of the package, it
 /// is bundled automatically with the app. In particular, assets used by the
-/// package itself must be specified in its [pubspec.yaml].
+/// package itself must be specified in its `pubspec.yaml`.
 ///
 /// A package can also choose to have assets in its 'lib/' folder that are not
-/// specified in its [pubspec.yaml]. In this case for those images to be
+/// specified in its `pubspec.yaml`. In this case for those images to be
 /// bundled, the app has to specify which ones to include. For instance a
 /// package named `fancy_backgrounds` could have:
 ///
@@ -102,7 +102,7 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// lib/backgrounds/background3.png
 ///```
 ///
-/// To include, say the first image, the [pubspec.yaml] of the app should specify
+/// To include, say the first image, the `pubspec.yaml` of the app should specify
 /// it in the `assets` section:
 ///
 /// ```yaml

@@ -70,15 +70,15 @@ void main() {
     // Analyze in the current directory - no arguments
     testUsingContext('flutter analyze working directory with errors', () async {
 
-      // Break the code to produce the "The parameter 'child' is required" hint
+      // Break the code to produce the "The parameter 'onPressed' is required" hint
       // that is upgraded to a warning in package:flutter/analysis_options_user.yaml
       // to assert that we are using the default Flutter analysis options.
       // Also insert a statement that should not trigger a lint here
       // but will trigger a lint later on when an analysis_options.yaml is added.
       String source = await libMain.readAsString();
       source = source.replaceFirst(
-        'child: new Icon(Icons.add),',
-        '// child: new Icon(Icons.add),',
+        'onPressed: _incrementCounter,',
+        '// onPressed: _incrementCounter,',
       );
       source = source.replaceFirst(
         '_counter++;',
@@ -92,8 +92,9 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          'warning $analyzerSeparator The parameter \'child\' is required',
-          '1 issue found.',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          '2 issues found.',
         ],
         toolExit: true,
       );
@@ -106,8 +107,9 @@ void main() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          'warning $analyzerSeparator The parameter \'child\' is required',
-          '1 issue found.',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
+          '2 issues found.',
         ],
         toolExit: true,
       );
@@ -132,9 +134,10 @@ void main() {
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
-          'warning $analyzerSeparator The parameter \'child\' is required',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '2 issues found.',
+          '3 issues found.',
         ],
         toolExit: true,
       );
@@ -181,9 +184,10 @@ void bar() {
         arguments: <String>['analyze', libMain.path],
         statusTextContains: <String>[
           'Analyzing',
-          'warning $analyzerSeparator The parameter \'child\' is required',
+          'warning $analyzerSeparator The parameter \'onPressed\' is required',
+          'hint $analyzerSeparator The method \'_incrementCounter\' isn\'t used',
           'lint $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-          '2 issues found.',
+          '3 issues found.',
         ],
         toolExit: true,
       );

@@ -53,11 +53,17 @@ class BouncingScrollSimulation extends Simulation {
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
-        _springSimulation = _overscrollSimulation(trailingExtent, _frictionSimulation.dx(_springTime));
+        _springSimulation = _overscrollSimulation(
+          trailingExtent,
+          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+        );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation.timeAtX(leadingExtent);
-        _springSimulation = _underscrollSimulation(leadingExtent, _frictionSimulation.dx(_springTime));
+        _springSimulation = _underscrollSimulation(
+          leadingExtent,
+          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+        );
         assert(_springTime.isFinite);
       } else {
         _springTime = double.INFINITY;
@@ -65,6 +71,10 @@ class BouncingScrollSimulation extends Simulation {
     }
     assert(_springTime != null);
   }
+
+  /// The maximum velocity that can be transfered from the inertia of a ballistic
+  /// scroll into overscroll.
+  static const double maxSpringTransferVelocity = 5000.0;
 
   /// When [x] falls below this value the simulation switches from an internal friction
   /// model to a spring model which causes [x] to "spring" back to [leadingExtent].

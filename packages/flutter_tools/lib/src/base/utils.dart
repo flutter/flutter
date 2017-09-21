@@ -256,3 +256,14 @@ class Poller {
     _timer = null;
   }
 }
+
+/// Returns a [Future] that completes when all given [Future]s complete.
+///
+/// Uses [Future.wait] but removes null elements from the provided
+/// `futures` iterable first.
+///
+/// The returned [Future<List>] will be shorter than the given `futures` if
+/// it contains nulls.
+Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
+  return Future.wait<T>(futures.where((Future<T> future) => future != null));
+}

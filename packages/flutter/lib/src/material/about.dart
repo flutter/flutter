@@ -109,7 +109,8 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterial(context));
     return new ListTile(
       leading: icon,
-      title: child ?? new Text('About ${applicationName ?? _defaultApplicationName(context)}'),
+      title: child ??
+        new Text(MaterialLocalizations.of(context).aboutListTileTitle(applicationName ?? _defaultApplicationName(context))),
       onTap: () {
         showAboutDialog(
           context: context,
@@ -421,6 +422,7 @@ class _LicensePageState extends State<LicensePage> {
   Widget build(BuildContext context) {
     final String name = widget.applicationName ?? _defaultApplicationName(context);
     final String version = widget.applicationVersion ?? _defaultApplicationVersion(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final List<Widget> contents = <Widget>[
       new Text(name, style: Theme.of(context).textTheme.headline, textAlign: TextAlign.center),
       new Text(version, style: Theme.of(context).textTheme.body1, textAlign: TextAlign.center),
@@ -441,15 +443,21 @@ class _LicensePageState extends State<LicensePage> {
     }
     return new Scaffold(
       appBar: new AppBar(
-        title: new Text(MaterialLocalizations.of(context).licensesPageTitle),
+        title: new Text(localizations.licensesPageTitle),
       ),
-      body: new DefaultTextStyle(
-        style: Theme.of(context).textTheme.caption,
-        child: new Scrollbar(
-          child: new ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
-            shrinkWrap: true,
-            children: contents,
+      // All of the licenses page text is English. We don't want localized text
+      // or text direction.
+      body: new Localizations.override(
+        locale: const Locale('en', 'US'),
+        context: context,
+        child: new DefaultTextStyle(
+          style: Theme.of(context).textTheme.caption,
+          child: new Scrollbar(
+            child: new ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 12.0),
+              shrinkWrap: true,
+              children: contents,
+            ),
           ),
         ),
       ),

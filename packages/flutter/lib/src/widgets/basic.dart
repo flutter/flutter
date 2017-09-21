@@ -4102,9 +4102,7 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    description.add(new IterableProperty<String>('listeners', listeners));
+    description.add(new IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     description.add(new EnumProperty<HitTestBehavior>('behavior', behavior));
   }
 }
