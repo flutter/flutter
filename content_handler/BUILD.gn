@@ -61,17 +61,17 @@ template("flutter_content_handler") {
              "//flutter/runtime",
              "//flutter/sky/engine/platform",
              "//flutter/vulkan",
+             # TODO(abarth): This library should be public in garnet.
+             "//garnet/lib/magma:vulkan",
              "//garnet/public/dart-pkg/fuchsia",
              "//garnet/public/lib/fxl",
              "//garnet/public/lib/icu_data/cpp",
              "//garnet/public/lib/fsl",
              "//garnet/public/lib/zip",
-             "//lib/tonic",
              "//zircon/system/ulib/trace-provider",
-             # TODO(abarth): This library should be public in garnet.
-             "//garnet/lib/magma:vulkan",
              "//third_party/rapidjson",
              "//third_party/skia",
+             "//topaz/lib/tonic",
            ] + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the

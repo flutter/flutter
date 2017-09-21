@@ -36,13 +36,13 @@ static_library("core") {
     "//flutter/glue",
     "//flutter/sky/engine/wtf",
     "//garnet/public/lib/fxl",
-    "//lib/tonic",
     "//third_party/libpng",
     "//third_party/skia",
     "//third_party/zlib",
+    "//topaz/lib/tonic",
   ]
 
   if (flutter_runtime_mode != "release") {
-    public_deps += [ "//lib/tonic/debugger" ]
+    public_deps += [ "//topaz/lib/tonic/debugger" ]
   }
 }
