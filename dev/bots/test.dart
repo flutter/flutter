@@ -263,7 +263,6 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
   // Verify there's one libPath/*.dart for each srcPath/*/.
-  <String>[];
   final List<String> packages = new Directory(libPath).listSync()
     .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')
     .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))

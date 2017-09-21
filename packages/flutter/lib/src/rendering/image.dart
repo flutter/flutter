@@ -128,7 +128,7 @@ class RenderImage extends RenderBox {
   set colorBlendMode(BlendMode value) {
     if (value == _colorBlendMode)
       return;
-    _colorBlendMode;
+    _colorBlendMode = value;
     _updateColorFilter();
     markNeedsPaint();
   }

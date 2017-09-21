@@ -201,4 +201,11 @@ void main() {
     expect(image.size.width, equals(75.0));
     expect(image.size.height, equals(75.0));
   });
+
+  test('update image colorBlendMode', () {
+    final RenderImage image = new RenderImage();
+    expect(image.colorBlendMode, isNull);
+    image.colorBlendMode = BlendMode.color;
+    expect(image.colorBlendMode, BlendMode.color);
+  });
 }
