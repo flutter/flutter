@@ -104,7 +104,7 @@ void main() {
                 tabBuilder: (BuildContext context, int index) {
                   // For 1-indexed readability.
                   ++index;
-                  return new CupertinoTab(
+                  return new CupertinoTabView(
                     builder: (BuildContext context) {
                       return new CupertinoPageScaffold(
                         navigationBar: new CupertinoNavigationBar(

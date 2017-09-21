@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 
 import 'route.dart';
 
-/// A single tab with its own [Navigator] state and history.
+/// A single tab view with its own [Navigator] state and history.
 ///
-/// A typical tab used as the content of each tab view in a [CupertinoTabScaffold]
+/// A typical tab view used as the content of each tab in a [CupertinoTabScaffold]
 /// where multiple tabs with parallel navigation states and history can
 /// co-exist.
 ///
-/// [CupertinoTab] configures the top-level [Navigator] to search for routes
+/// [CupertinoTabView] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
 ///  1. For the `/` route, the [builder] property, if non-null, is used.
@@ -26,16 +26,16 @@ import 'route.dart';
 ///
 ///  4. Finally if all else fails [onUnknownRoute] is called.
 ///
-/// These navigation properties are not shared with any sibling [CupertinoTab]
+/// These navigation properties are not shared with any sibling [CupertinoTabView]
 /// nor any ancestor or descendent [Navigator] instances.
 ///
 /// See also:
 ///
 ///  * [CupertinoTabScaffold] a typical host that supports switching between tabs.
-///  * [CupertinoPageRoute] a typical modal page route pushed onto the [CupertinoTab]'s
+///  * [CupertinoPageRoute] a typical modal page route pushed onto the [CupertinoTabView]'s
 ///    [Navigator].
-class CupertinoTab extends StatelessWidget {
-  const CupertinoTab({
+class CupertinoTabView extends StatelessWidget {
+  const CupertinoTabView({
     Key key,
     this.builder,
     this.routes,
@@ -45,21 +45,21 @@ class CupertinoTab extends StatelessWidget {
   }) : assert(navigatorObservers != null),
        super(key: key);
 
-  /// The widget builder for the default route of the tab
+  /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).
   ///
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
   final WidgetBuilder builder;
 
-  /// This tab's routing table.
+  /// This tab view's routing table.
   ///
-  /// When a named route is pushed with [Navigator.pushNamed] inside this tab,
+  /// When a named route is pushed with [Navigator.pushNamed] inside this tab view,
   /// the route name is looked up in this map. If the name is present,
   /// the associated [WidgetBuilder] is used to construct a [CupertinoPageRoute]
   /// that performs an appropriate transition to the new route.
   ///
-  /// If the tab only has one page, then you can specify it using [builder] instead.
+  /// If the tab view only has one page, then you can specify it using [builder] instead.
   ///
   /// If [builder] is specified, then it implies an entry in this table for the
   /// [Navigator.defaultRouteName] route (`/`), and it is an error to
@@ -73,7 +73,7 @@ class CupertinoTab extends StatelessWidget {
   /// descendent [Navigator]s.
   final Map<String, WidgetBuilder> routes;
 
-  /// The route generator callback used when the tab is navigated to a named route.
+  /// The route generator callback used when the tab view is navigated to a named route.
   ///
   /// This is used if [routes] does not contain the requested route.
   final RouteFactory onGenerateRoute;
@@ -88,7 +88,7 @@ class CupertinoTab extends StatelessWidget {
   /// message.
   final RouteFactory onUnknownRoute;
 
-  /// The list of observers for the [Navigator] created in this tab.
+  /// The list of observers for the [Navigator] created in this tab view.
   ///
   /// This list of observers is not shared with ancestor or descendent [Navigator]s.
   final List<NavigatorObserver> navigatorObservers;

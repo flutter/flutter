@@ -14,7 +14,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTab(
+              return new CupertinoTabView(
                 builder: (BuildContext context) => const Text('home'),
               );
             },
@@ -34,7 +34,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTab(
+              return new CupertinoTabView(
                 routes: <String, WidgetBuilder>{
                   '/': (BuildContext context) => const Text('first route'),
                 },
@@ -56,7 +56,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTab(
+              return new CupertinoTabView(
                 builder: (BuildContext context) {
                   return new CupertinoButton(
                     child: const Text('go to second page'),
@@ -90,7 +90,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTab(
+              return new CupertinoTabView(
                 onGenerateRoute: (RouteSettings settings) {
                   if (settings.name == Navigator.defaultRouteName) {
                     return new CupertinoPageRoute<Null>(
@@ -120,7 +120,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoTab(
+              return new CupertinoTabView(
                 onUnknownRoute: (RouteSettings settings) {
                   unknownForRouteCalled = settings.name;
                 },

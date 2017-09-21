@@ -20,7 +20,7 @@ import 'bottom_tab_bar.dart';
 /// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
 /// and its animations disabled.
 ///
-/// Use [CupertinoTab] as the content of each tab to support tabs with parallel
+/// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
 /// navigation state and history.
 ///
 /// ## Sample code
@@ -35,7 +35,7 @@ import 'bottom_tab_bar.dart';
 ///     ],
 ///   ),
 ///   tabBuilder: (BuildContext context, int index) {
-///     return new CupertinoTab(
+///     return new CupertinoTabView(
 ///       builder: (BuildContext context) {
 ///         return new CupertinoPageScaffold(
 ///           navigationBar: new CupertinoNavigationBar(
@@ -75,7 +75,7 @@ import 'bottom_tab_bar.dart';
 /// See also:
 ///
 ///  * [CupertinoTabBar] bottom tab bars inserted in the scaffold.
-///  * [CupertinoTab] a typical root content of each tap that holds its own
+///  * [CupertinoTabView] a typical root content of each tap that holds its own
 ///    [Navigator] stack.
 ///  * [CupertinoPageRoute] a route hosting modal pages with iOS style transitions.
 ///  * [CupertinoPageScaffold] typical contents of an iOS modal page implementing
@@ -107,7 +107,7 @@ class CupertinoTabScaffold extends StatefulWidget {
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
-  /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTab]
+  /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTabView]
   /// in order to achieve the parallel hierarchies information architecture seen
   /// on iOS apps with tab bars.
   ///
