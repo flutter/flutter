@@ -50,8 +50,13 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 /// If the given [backgroundColor]'s opacity is not 1.0 (which is the case by
 /// default), it will produce a blurring effect to the content behind it.
 ///
+/// Enabling [largeTitle] will create a scrollable second row showing the title
+/// in a larger font introduced in iOS 11. The [middle] widget must be a text
+/// and the [CupertinoNavigationBar] must be placed in a sliver group in this case.
+///
 /// See also:
 ///
+///  * [CupertinoPageScaffold] page layout helper typically hosting the [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a nav bar to be placed in a sliver and
 ///    that supports iOS 11 style large titles.
 //

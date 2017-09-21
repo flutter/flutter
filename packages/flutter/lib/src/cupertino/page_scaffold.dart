@@ -12,7 +12,11 @@ import 'nav_bar.dart';
 ///
 /// The scaffold lays out the navigation bar on top and the content between or
 /// behind the navigation bar.
-// TODO(xster): add an example.
+///
+/// See also:
+///
+///  * [CupertinoPageRoute] a modal page route that typically hosts a [CupertinoPageRoute]
+///    with support for iOS style page transitions.
 class CupertinoPageScaffold extends StatelessWidget {
   const CupertinoPageScaffold({
     Key key,
@@ -37,20 +41,30 @@ class CupertinoPageScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
+    Widget childWithMediaQuery = child;
+
     double topPadding = 0.0;
     if (navigationBar != null) {
       topPadding += navigationBar.preferredSize.height;
       // If the navigation bar has a preferred size, pad it and the OS status
       // bar as well. Otherwise, let the content extend to the complete top
       // of the page.
-      if (topPadding > 0.0)
-        topPadding += MediaQuery.of(context).padding.top;
+      if (topPadding > 0.0) {
+        final EdgeInsets mediaQueryPadding = MediaQuery.of(context).padding;
+        topPadding += mediaQueryPadding.top;
+        childWithMediaQuery = new MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            padding: mediaQueryPadding.copyWith(top: 0.0),
+          ),
+          child: child,
+        );
+      }
     }
 
     // The main content being at the bottom is added to the stack first.
     stacked.add(new Padding(
       padding: new EdgeInsets.only(top: topPadding),
-      child: child,
+      child: childWithMediaQuery,
     ));
 
     if (navigationBar != null) {
