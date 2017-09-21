@@ -42,7 +42,10 @@ class CoverageCollector extends TestWatcher {
 
     final int pid = process.pid;
     int exitCode;
-    process.exitCode.then<Null>((int code) {
+    // Synchronization is enforced by the API contract. Error handling
+    // synchronization is done in the code below where `exitCode` is checked.
+    // Callback cannot throw.
+    process.exitCode.then<Null>((int code) { // ignore: unawaited_futures
       exitCode = code;
     });
     if (exitCode != null)

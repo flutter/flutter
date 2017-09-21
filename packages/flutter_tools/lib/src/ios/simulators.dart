@@ -237,7 +237,7 @@ class IOSSimulator extends Device {
   Future<bool> installApp(ApplicationPackage app) async {
     try {
       final IOSApp iosApp = app;
-      SimControl.instance.install(id, iosApp.simulatorBundlePath);
+      await SimControl.instance.install(id, iosApp.simulatorBundlePath);
       return true;
     } catch (e) {
       return false;
@@ -382,7 +382,7 @@ class IOSSimulator extends Device {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      observatoryDiscovery.cancel();
+      await observatoryDiscovery.cancel();
     }
   }
 
@@ -556,7 +556,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       _systemProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onSystemLine);
     }
 
-    _deviceProcess.exitCode.whenComplete(() {
+    // We don't want to wait for the process or its callback. Best effort
+    // cleanup in the callback.
+    _deviceProcess.exitCode.whenComplete(() { // ignore: unawaited_futures
       if (_linesController.hasListener)
         _linesController.close();
     });
