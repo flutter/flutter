@@ -173,7 +173,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 

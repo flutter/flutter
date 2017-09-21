@@ -284,7 +284,7 @@ class AnimationController extends Animation<double>
         );
       }
       return true;
-    });
+    }());
     _direction = _AnimationDirection.forward;
     if (from != null)
       value = from;
@@ -312,7 +312,7 @@ class AnimationController extends Animation<double>
         );
       }
       return true;
-    });
+    }());
     _direction = _AnimationDirection.reverse;
     if (from != null)
       value = from;
@@ -349,7 +349,7 @@ class AnimationController extends Animation<double>
           );
         }
         return true;
-      });
+      }());
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
       simulationDuration = this.duration * remainingFraction;
@@ -399,7 +399,7 @@ class AnimationController extends Animation<double>
         );
       }
       return true;
-    });
+    }());
     return animateWith(new _RepeatingSimulation(min, max, period));
   }
 
@@ -483,7 +483,7 @@ class AnimationController extends Animation<double>
         );
       }
       return true;
-    });
+    }());
     _ticker.dispose();
     _ticker = null;
     super.dispose();

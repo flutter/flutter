@@ -73,14 +73,14 @@ class _FrameCallbackEntry {
             );
           }
           return true;
-        });
+        }());
         debugStack = debugCurrentCallbackStack;
       } else {
         // TODO(ianh): trim the frames from this library, so that the call to scheduleFrameCallback is the top one
         debugStack = StackTrace.current;
       }
       return true;
-    });
+    }());
   }
 
   final FrameCallback callback;
@@ -363,7 +363,7 @@ abstract class SchedulerBinding extends BindingBase {
         ));
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -399,7 +399,7 @@ abstract class SchedulerBinding extends BindingBase {
         debugPrint('No transient callback is currently executing.');
       }
       return true;
-    });
+    }());
   }
 
   final List<FrameCallback> _persistentCallbacks = <FrameCallback>[];
@@ -503,7 +503,7 @@ abstract class SchedulerBinding extends BindingBase {
       if (debugPrintScheduleFrameStacks)
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
-    });
+    }());
     ui.window.scheduleFrame();
     _hasScheduledFrame = true;
   }
@@ -610,7 +610,7 @@ abstract class SchedulerBinding extends BindingBase {
           debugPrint(_debugBanner);
       }
       return true;
-    });
+    }());
 
     assert(schedulerPhase == SchedulerPhase.idle);
     _hasScheduledFrame = false;
@@ -667,7 +667,7 @@ abstract class SchedulerBinding extends BindingBase {
           debugPrint('▀' * _debugBanner.length);
         _debugBanner = null;
         return true;
-      });
+      }());
       _currentFrameTimeStamp = null;
     }
 
@@ -708,7 +708,7 @@ abstract class SchedulerBinding extends BindingBase {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     // TODO(ianh): Consider using a Zone instead to track the current callback registration stack
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; }());
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -727,7 +727,7 @@ abstract class SchedulerBinding extends BindingBase {
         }
       ));
     }
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());
   }
 }
 

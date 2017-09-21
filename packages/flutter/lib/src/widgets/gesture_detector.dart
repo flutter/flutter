@@ -185,7 +185,7 @@ class GestureDetector extends StatelessWidget {
            }
          }
          return true;
-       }),
+       }()),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -524,7 +524,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         );
       }
       return true;
-    });
+    }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
@@ -554,7 +554,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         );
       }
       return true;
-    });
+    }());
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       semanticsGestureHandler.validActions = actions;

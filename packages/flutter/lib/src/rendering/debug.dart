@@ -203,7 +203,7 @@ void debugPaintPadding(Canvas canvas, Rect outerRect, Rect innerRect, { double o
       canvas.drawRect(outerRect, paint);
     }
     return true;
-  });
+  }());
 }
 
 /// Returns true if none of the rendering library debug variables have been changed.
@@ -234,6 +234,6 @@ bool debugAssertAllRenderVarsUnset(String reason, { bool debugCheckIntrinsicSize
       throw new FlutterError(reason);
     }
     return true;
-  });
+  }());
   return true;
 }

@@ -111,7 +111,7 @@ class Table extends RenderObjectWidget {
            );
          }
          return true;
-       }),
+       }()),
        assert(() {
          if (children.any((TableRow row1) => row1.key != null && children.any((TableRow row2) => row1 != row2 && row1.key == row2.key))) {
            throw new FlutterError(
@@ -120,7 +120,7 @@ class Table extends RenderObjectWidget {
            );
          }
          return true;
-       }),
+       }()),
        assert(() {
          if (children.isNotEmpty) {
            final int cellCount = children.first.children.length;
@@ -133,7 +133,7 @@ class Table extends RenderObjectWidget {
            }
          }
          return true;
-       }),
+       }()),
        _rowDecorations = children.any((TableRow row) => row.decoration != null)
                               ? children.map<Decoration>((TableRow row) => row.decoration).toList(growable: false)
                               : null,
@@ -149,7 +149,7 @@ class Table extends RenderObjectWidget {
         );
       }
       return true;
-    });
+    }());
   }
 
   /// The rows of the table.
@@ -243,7 +243,7 @@ class _TableElement extends RenderObjectElement {
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
     assert(!_debugWillReattachChildren);
-    assert(() { _debugWillReattachChildren = true; return true; });
+    assert(() { _debugWillReattachChildren = true; return true; }());
     _children = widget.children.map((TableRow row) {
       return new _TableElementRow(
         key: row.key,
@@ -253,7 +253,7 @@ class _TableElement extends RenderObjectElement {
         }).toList(growable: false)
       );
     }).toList(growable: false);
-    assert(() { _debugWillReattachChildren = false; return true; });
+    assert(() { _debugWillReattachChildren = false; return true; }());
     _updateRenderObjectChildren();
   }
 
@@ -278,7 +278,7 @@ class _TableElement extends RenderObjectElement {
           return true;
       }
       return false;
-    });
+    }());
     final TableCellParentData childParentData = child.parentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
@@ -288,7 +288,7 @@ class _TableElement extends RenderObjectElement {
   @override
   void update(Table newWidget) {
     assert(!_debugWillReattachChildren);
-    assert(() { _debugWillReattachChildren = true; return true; });
+    assert(() { _debugWillReattachChildren = true; return true; }());
     final Map<LocalKey, List<Element>> oldKeyedRows = new Map<LocalKey, List<Element>>.fromIterable(
       _children.where((_TableElementRow row) => row.key != null),
       key:   (_TableElementRow row) => row.key,
@@ -316,7 +316,7 @@ class _TableElement extends RenderObjectElement {
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
     for (List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
-    assert(() { _debugWillReattachChildren = false; return true; });
+    assert(() { _debugWillReattachChildren = false; return true; }());
     _children = newChildren;
     _updateRenderObjectChildren();
     _forgottenChildren.clear();

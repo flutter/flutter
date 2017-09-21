@@ -260,7 +260,7 @@ class BoxConstraints extends Constraints {
       if (size is _DebugSize)
         result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
       return true;
-    });
+    }());
     return result;
   }
 
@@ -271,7 +271,7 @@ class BoxConstraints extends Constraints {
   /// separately provided widths and heights.
   Size constrain(Size size) {
     Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
     return result;
   }
 
@@ -294,7 +294,7 @@ class BoxConstraints extends Constraints {
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
       Size result = smallest;
-      assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+      assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
       return result;
     }
 
@@ -325,7 +325,7 @@ class BoxConstraints extends Constraints {
     }
 
     Size result = new Size(constrainWidth(width), constrainHeight(height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
     return result;
   }
 
@@ -495,7 +495,7 @@ class BoxConstraints extends Constraints {
       }
       assert(isNormalized);
       return true;
-    });
+    }());
     return isNormalized;
   }
 
@@ -1038,7 +1038,7 @@ abstract class RenderBox extends RenderObject {
       if (RenderObject.debugCheckingIntrinsics)
         shouldCache = false;
       return true;
-    });
+    }());
     if (shouldCache) {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
       return _cachedIntrinsicDimensions.putIfAbsent(
@@ -1085,7 +1085,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
   }
 
@@ -1224,7 +1224,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
   }
 
@@ -1300,7 +1300,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
   }
 
@@ -1373,7 +1373,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
   }
 
@@ -1443,7 +1443,7 @@ abstract class RenderBox extends RenderObject {
         assert(_size == this._size);
       }
       return true;
-    });
+    }());
     return _size;
   }
   Size _size;
@@ -1481,13 +1481,13 @@ abstract class RenderBox extends RenderObject {
         'The RenderBox in question is:\n'
         '  $this'
       );
-    });
+    }());
     assert(() {
       value = debugAdoptSize(value);
       return true;
-    });
+    }());
     _size = value;
-    assert(() { debugAssertDoesMeetConstraints(); return true; });
+    assert(() { debugAssertDoesMeetConstraints(); return true; }());
   }
 
   /// Claims ownership of the given [Size].
@@ -1549,7 +1549,7 @@ abstract class RenderBox extends RenderObject {
       }
       result = new _DebugSize(value, this, debugCanParentUseSize);
       return true;
-    });
+    }());
     return result;
   }
 
@@ -1594,7 +1594,7 @@ abstract class RenderBox extends RenderObject {
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       assert(parent == this.parent);
       return false;
-    });
+    }());
     assert(_debugSetDoingBaseline(true));
     final double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
@@ -1752,7 +1752,7 @@ abstract class RenderBox extends RenderObject {
         }
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -1793,7 +1793,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
   }
 
   /// Determines the set of render objects located at the given position.
@@ -1840,7 +1840,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     if (_size.contains(position)) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
@@ -1901,7 +1901,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     final BoxParentData childParentData = child.parentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
@@ -2004,7 +2004,7 @@ abstract class RenderBox extends RenderObject {
         markNeedsPaint();
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -2018,7 +2018,7 @@ abstract class RenderBox extends RenderObject {
       if (debugPaintPointersEnabled)
         debugPaintPointers(context, offset);
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a border around this render box.
@@ -2033,7 +2033,7 @@ abstract class RenderBox extends RenderObject {
        ..color = const Color(0xFF00FFFF);
       context.canvas.drawRect((offset & size).deflate(0.5), paint);
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a line for each baseline.
@@ -2065,7 +2065,7 @@ abstract class RenderBox extends RenderObject {
         context.canvas.drawPath(path, paint);
       }
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a rectangle if this render box has counted more
@@ -2084,7 +2084,7 @@ abstract class RenderBox extends RenderObject {
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
-    });
+    }());
   }
 
   @override

@@ -405,7 +405,7 @@ class CurvedAnimation extends Animation<double> with AnimationWithParentMixin<do
           );
         }
         return true;
-      });
+      }());
       return t;
     }
     return activeCurve.transform(t);

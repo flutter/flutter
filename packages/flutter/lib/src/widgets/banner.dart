@@ -343,7 +343,7 @@ class CheckedModeBanner extends StatelessWidget {
         location: BannerLocation.topEnd,
       );
       return true;
-    });
+    }());
     return result;
   }
 
@@ -354,7 +354,7 @@ class CheckedModeBanner extends StatelessWidget {
     assert(() {
       message = '"SLOW MODE"';
       return true;
-    });
+    }());
     description.add(new DiagnosticsNode.message(message));
   }
 }

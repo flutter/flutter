@@ -202,7 +202,7 @@ class RenderPadding extends RenderShiftedBox {
       final Rect outerRect = offset & size;
       debugPaintPadding(context.canvas, outerRect, child != null ? _resolvedPadding.deflateRect(outerRect) : null);
       return true;
-    });
+    }());
   }
 
   @override
@@ -422,7 +422,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
-    });
+    }());
   }
 
   @override

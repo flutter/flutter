@@ -222,7 +222,7 @@ class FlutterError extends AssertionError {
       // In checked mode, we ignore the "silent" flag.
       reportError = true;
       return true;
-    });
+    }());
     if (!reportError && !forceReport)
       return;
     if (_errorCount == 0 || forceReport) {

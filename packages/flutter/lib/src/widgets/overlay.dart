@@ -251,7 +251,7 @@ class Overlay extends StatefulWidget {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -331,7 +331,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
           break;
       }
       return true;
-    });
+    }());
     return result;
   }
 

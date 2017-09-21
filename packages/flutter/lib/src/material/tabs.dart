@@ -546,7 +546,7 @@ class _TabBarState extends State<TabBar> {
         );
       }
       return true;
-    });
+    }());
     if (newController == _controller)
       return;
 
@@ -855,7 +855,7 @@ class _TabBarViewState extends State<TabBarView> {
         );
       }
       return true;
-    });
+    }());
     if (newController == _controller)
       return;
 
@@ -1113,7 +1113,7 @@ class TabPageSelector extends StatelessWidget {
         );
       }
       return true;
-    });
+    }());
     final Animation<double> animation = new CurvedAnimation(
       parent: tabController.animation,
       curve: Curves.fastOutSlowIn,

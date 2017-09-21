@@ -113,7 +113,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
       );
     }
     return true;
-  });
+  }());
   return false;
 }
 
@@ -135,7 +135,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
     if (nonUniqueKey != null)
       throw new FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
-  });
+  }());
   return false;
 }
 
@@ -165,7 +165,7 @@ bool debugCheckHasTable(BuildContext context) {
       );
     }
     return true;
-  });
+  }());
   return true;
 }
 
@@ -198,7 +198,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
       );
     }
     return true;
-  });
+  }());
   return true;
 }
 
@@ -220,7 +220,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
       );
     }
     return true;
-  });
+  }());
 }
 
 /// Returns true if none of the widget library debug variables have been changed.
@@ -241,6 +241,6 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
       throw new FlutterError(reason);
     }
     return true;
-  });
+  }());
   return true;
 }

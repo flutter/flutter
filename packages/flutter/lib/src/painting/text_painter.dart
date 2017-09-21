@@ -367,7 +367,7 @@ class TextPainter {
         );
       }
       return true;
-    });
+    }());
     canvas.drawParagraph(_paragraph, offset);
   }
 

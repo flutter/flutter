@@ -115,7 +115,7 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
     print('│                                                        ');
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
-  });
+  }());
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = new WidgetTester._(binding);

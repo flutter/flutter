@@ -163,7 +163,7 @@ abstract class MultiDragPointerState {
   void dispose() {
     _arenaEntry?.resolve(GestureDisposition.rejected);
     _arenaEntry = null;
-    assert(() { _pendingDelta = null; return true; });
+    assert(() { _pendingDelta = null; return true; }());
   }
 }
 

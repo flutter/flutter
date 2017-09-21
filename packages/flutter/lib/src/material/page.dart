@@ -134,7 +134,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 

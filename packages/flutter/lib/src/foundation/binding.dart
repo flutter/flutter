@@ -77,7 +77,7 @@ abstract class BindingBase {
   @mustCallSuper
   void initInstances() {
     assert(!_debugInitialized);
-    assert(() { _debugInitialized = true; return true; });
+    assert(() { _debugInitialized = true; return true; }());
   }
 
   /// Called when the binding is initialized, to register service
@@ -145,8 +145,8 @@ abstract class BindingBase {
         }
       );
       return true;
-    });
-    assert(() { _debugServiceExtensionsRegistered = true; return true; });
+    }());
+    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
   }
 
   /// Whether [lockEvents] is currently locking events.

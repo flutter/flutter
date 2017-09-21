@@ -842,7 +842,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       assert(slot == childParentData.index);
       return true;
-    });
+    }());
   }
 
   @override

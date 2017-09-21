@@ -626,7 +626,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
           'https://material.google.com/components/steppers.html#steppers-usage\n'
         );
       return true;
-    });
+    }());
     assert(widget.type != null);
     switch (widget.type) {
       case StepperType.vertical:

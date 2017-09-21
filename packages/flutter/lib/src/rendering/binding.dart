@@ -86,7 +86,7 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
           }
       );
       return true;
-    });
+    }());
 
     registerSignalServiceExtension(
       name: 'debugDumpRenderTree',

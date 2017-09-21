@@ -282,7 +282,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
         );
       }
       return true;
-    });
+    }());
 
     return _icuTimeOfDayToEnum[icuShortTimePattern];
   }
