@@ -307,16 +307,27 @@ void main() {
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
   });
 
-  testWidgets('reacts to changing the text scale', (WidgetTester tester) async {
+  testWidgets('Reacts to changing the text scale', (WidgetTester tester) async {
     double textScaleFactor;
-    ui.TestingHooks.updateTextScaleFactor(1.5);
     await tester.pumpWidget(new MaterialApp(
       home: new Builder(builder:(BuildContext context) {
         textScaleFactor = MediaQuery.of(context).textScaleFactor;
         return new Container();
       }),
     ));
+    expect(textScaleFactor, isNotNull);
+    expect(textScaleFactor, equals(1.0));
+    textScaleFactor = null;
 
+    // Now simulate a message from the engine that the text scale factor has changed.
+    ui.TestingHooks.updateTextScaleFactor(1.5);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Builder(builder:(BuildContext context) {
+        textScaleFactor = MediaQuery.of(context).textScaleFactor;
+        return new Container();
+      }),
+    ));
     expect(textScaleFactor, isNotNull);
     expect(textScaleFactor, equals(1.5));
   });
