@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "HH:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Pashto time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Pashto time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "د پرانیستی نیینګ مینو",
   "backButtonTooltip": "شاته",
   "closeButtonTooltip": "بنده",
@@ -13,6 +15,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",
   "rowsPerPageTitle": "د هرې پاڼې پاڼې:",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount توکي غوره شوي",
   "cancelButtonLabel": "لغوه کول",
   "closeButtonLabel": "تړل",

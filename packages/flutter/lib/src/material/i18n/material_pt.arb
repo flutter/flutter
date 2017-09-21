@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "HH:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Portuguese time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Portuguese time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "Abrir menu de navegação",
   "backButtonTooltip": "Costas",
   "closeButtonTooltip": "Fechar",
@@ -13,6 +15,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow de $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow de cerca de $rowCount",
   "rowsPerPageTitle": "Linhas por página:",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount selecionados",
   "cancelButtonLabel": "CANCELAR",
   "closeButtonLabel": "FECHAR",

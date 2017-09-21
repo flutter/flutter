@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "HH:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "French time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "French time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "Ouvrir le menu de navigation",
   "backButtonTooltip": "Retour",
   "closeButtonTooltip": "Fermer",

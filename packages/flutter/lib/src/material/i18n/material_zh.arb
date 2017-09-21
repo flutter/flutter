@@ -13,6 +13,8 @@
   "pageRowsInfoTitle": "$rowCount中的$firstRow-$lastRow",
   "pageRowsInfoTitleApproximate": "约$rowCount中的$firstRow-$lastRow",
   "rowsPerPageTitle": "每页行数：",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount行所选",
   "cancelButtonLabel": "取消",
   "continueButtonLabel": "继续",

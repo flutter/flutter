@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "H:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Russian time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Russian time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "Открыть меню навигации",
   "backButtonTooltip": "Назад",
   "closeButtonTooltip": "Закрыть",
@@ -13,7 +15,9 @@
   "rowsPerPageTitle": "Строки на страницу:",
   "aboutListTileTitle": "O $applicationName",
   "licensesPageTitle": "Лицензии",
-  "selectedRowCountTitleOther": "Выбранно $selectedRowCount строк",
+  "selectedRowCountTitleZero": "Строки не выбраны",
+  "selectedRowCountTitleOne": "Выбрана 1 строка",
+  "selectedRowCountTitleOther": "Выбрано $selectedRowCount строк",
   "cancelButtonLabel": "ОТМЕНИТЬ",
   "closeButtonLabel": "ЗАКРЫТЬ",
   "continueButtonLabel": "ПРОДОЛЖИТЬ",

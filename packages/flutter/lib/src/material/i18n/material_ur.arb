@@ -13,6 +13,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow کے $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow میں سے $rowCount تقریبا",
   "rowsPerPageTitle": "رویوں فی صفحہ:",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount منتخب کردہ اشیاء",
   "cancelButtonLabel": "منسوخ کریں",
   "closeButtonLabel": "بند کریں",

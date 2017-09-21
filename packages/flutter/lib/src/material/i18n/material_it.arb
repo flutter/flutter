@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "HH:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Italian time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Italian time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "Apri il menu di navigazione",
   "backButtonTooltip": "Indietro",
   "closeButtonTooltip": "Chiudi",
@@ -13,6 +15,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow di $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow di circa $rowCount",
   "rowsPerPageTitle": "Righe per pagina:",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount selezionati",
   "cancelButtonLabel": "ANNULLA",
   "closeButtonLabel": "CHIUDI",

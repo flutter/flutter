@@ -13,6 +13,8 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow أو $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow من حوالي $rowCount",
   "rowsPerPageTitle": "الصفوف في الصفحة:",
+  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
+  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount العناصر المحددة",
   "cancelButtonLabel": "إلغاء",
   "closeButtonLabel": "أغلاق",
