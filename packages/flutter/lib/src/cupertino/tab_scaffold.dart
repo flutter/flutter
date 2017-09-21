@@ -69,7 +69,7 @@ import 'bottom_tab_bar.dart';
 ///       },
 ///     );
 ///   },
-/// );
+/// )
 /// ```
 ///
 /// See also:
