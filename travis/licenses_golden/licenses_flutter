@@ -9280,6 +9280,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: engine
 ORIGIN: ../../../garnet/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../flutter/content_handler/accessibility_bridge.cc
+FILE: ../../../flutter/content_handler/accessibility_bridge.h
 FILE: ../../../flutter/content_handler/vulkan_surface.cc
 FILE: ../../../flutter/content_handler/vulkan_surface.h
 FILE: ../../../flutter/content_handler/vulkan_surface_pool.cc

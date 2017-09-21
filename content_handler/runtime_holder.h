@@ -13,6 +13,7 @@
 #include "dart-pkg/fuchsia/sdk_ext/fuchsia.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
+#include "flutter/content_handler/accessibility_bridge.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/lib/ui/window/viewport_metrics.h"
 #include "flutter/runtime/runtime_controller.h"
@@ -30,6 +31,7 @@
 #include "lib/ui/views/fidl/view_manager.fidl.h"
 
 namespace flutter_runner {
+
 class Rasterizer;
 
 class RuntimeHolder : public blink::RuntimeDelegate,
@@ -123,6 +125,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   int32_t return_code_ = 0;
 
   fxl::WeakPtrFactory<RuntimeHolder> weak_factory_;
+
+  std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
 };

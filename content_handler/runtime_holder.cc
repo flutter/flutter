@@ -13,6 +13,7 @@
 #include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
+#include "flutter/content_handler/accessibility_bridge.h"
 #include "flutter/content_handler/rasterizer.h"
 #include "flutter/content_handler/service_protocol_hooks.h"
 #include "flutter/lib/snapshot/snapshot.h"
@@ -160,6 +161,8 @@ void RuntimeHolder::Init(
     blink::SetRegisterNativeServiceProtocolExtensionHook(
         ServiceProtocolHooks::RegisterHooks);
   }
+
+  accessibility_bridge_ = std::make_unique<AccessibilityBridge>(context_.get());
 }
 
 void RuntimeHolder::CreateView(
@@ -338,7 +341,9 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   }));
 }
 
-void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {}
+void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
+  accessibility_bridge_->UpdateSemantics(update);
+}
 
 void RuntimeHolder::HandlePlatformMessage(
     fxl::RefPtr<blink::PlatformMessage> message) {

@@ -18,6 +18,8 @@ template("flutter_content_handler") {
     libs = []
 
     sources = [
+      "accessibility_bridge.cc",
+      "accessibility_bridge.h",
       "app.cc",
       "app.h",
       "application_controller_impl.cc",
@@ -48,6 +50,7 @@ template("flutter_content_handler") {
              "//garnet/public/lib/ui/scenic:client",
              "//garnet/public/lib/ui/input/fidl",
              "//garnet/public/lib/ui/views/fidl",
+             "//apps/maxwell/services/context",
              "//dart/runtime/bin:libdart_builtin",
              "//dart/runtime/platform:libdart_platform",
              "//flutter/assets",
