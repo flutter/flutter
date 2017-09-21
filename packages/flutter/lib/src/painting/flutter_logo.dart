@@ -40,19 +40,24 @@ class FlutterLogoDecoration extends Decoration {
   /// controls whether and where to draw the "Flutter" label. If one is shown,
   /// the [textColor] controls the color of the label.
   ///
-  /// The [lightColor], [darkColor], [textColor], and [style] arguments must not
-  /// be null.
+  /// The [lightColor], [darkColor], [textColor], [style], and [margin]
+  /// arguments must not be null.
   const FlutterLogoDecoration({
     this.lightColor: const Color(0xFF42A5F5), // Colors.blue[400]
     this.darkColor: const Color(0xFF0D47A1), // Colors.blue[900]
     this.textColor: const Color(0xFF616161),
     this.style: FlutterLogoStyle.markOnly,
     this.margin: EdgeInsets.zero,
-  }) : _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
+  }) : assert(lightColor != null),
+       assert(darkColor != null),
+       assert(textColor != null),
+       assert(style != null),
+       assert(margin != null),
+       _position = style == FlutterLogoStyle.markOnly ? 0.0 : style == FlutterLogoStyle.horizontal ? 1.0 : -1.0, // ignore: CONST_EVAL_TYPE_BOOL_NUM_STRING
        // (see https://github.com/dart-lang/sdk/issues/26980 for details about that ignore statement)
        _opacity = 1.0;
 
-  const FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this._position, this._opacity, this.margin);
+  const FlutterLogoDecoration._(this.lightColor, this.darkColor, this.textColor, this.style, this.margin, this._position, this._opacity);
 
   /// The lighter of the two colors used to paint the logo.
   ///
@@ -86,13 +91,13 @@ class FlutterLogoDecoration extends Decoration {
   // set the internal _position property.
   final FlutterLogoStyle style;
 
+  /// How far to inset the logo from the edge of the container.
+  final EdgeInsets margin;
+
   // The following are set when lerping, to represent states that can't be
   // represented by the constructor.
   final double _position; // -1.0 for stacked, 1.0 for horizontal, 0.0 for no logo
   final double _opacity; // 0.0 .. 1.0
-
-  /// How far to inset the logo from the edge of the container.
-  final EdgeInsets margin;
 
   bool get _inTransition => _opacity != 1.0 || (_position != -1.0 && _position != 0.0 && _position != 1.0);
 
@@ -102,12 +107,12 @@ class FlutterLogoDecoration extends Decoration {
         && darkColor != null
         && textColor != null
         && style != null
+        && margin != null
         && _position != null
         && _position.isFinite
         && _opacity != null
         && _opacity >= 0.0
-        && _opacity <= 1.0
-        && margin != null);
+        && _opacity <= 1.0);
     return true;
   }
 
@@ -130,9 +135,9 @@ class FlutterLogoDecoration extends Decoration {
         b.darkColor,
         b.textColor,
         b.style,
+        b.margin * t,
         b._position,
         b._opacity * t.clamp(0.0, 1.0),
-        b.margin * t,
       );
     }
     if (b == null) {
@@ -141,9 +146,9 @@ class FlutterLogoDecoration extends Decoration {
         a.darkColor,
         a.textColor,
         a.style,
+        a.margin * t,
         a._position,
         a._opacity * (1.0 - t).clamp(0.0, 1.0),
-        a.margin * t,
       );
     }
     return new FlutterLogoDecoration._(
@@ -151,9 +156,9 @@ class FlutterLogoDecoration extends Decoration {
       Color.lerp(a.darkColor, b.darkColor, t),
       Color.lerp(a.textColor, b.textColor, t),
       t < 0.5 ? a.style : b.style,
+      EdgeInsets.lerp(a.margin, b.margin, t),
       a._position + (b._position - a._position) * t,
       (a._opacity + (b._opacity - a._opacity) * t).clamp(0.0, 1.0),
-      EdgeInsets.lerp(a.margin, b.margin, t),
     );
   }
 
