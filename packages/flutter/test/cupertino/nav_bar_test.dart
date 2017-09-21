@@ -213,7 +213,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return new CupertinoScaffold(
+              return new CupertinoPageScaffold(
                 child: new CustomScrollView(
                   controller: scrollController,
                   slivers: <Widget>[
