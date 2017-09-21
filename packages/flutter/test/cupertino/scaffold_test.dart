@@ -105,43 +105,41 @@ void main() {
                   // For 1-indexed readability.
                   ++index;
                   return new CupertinoTab(
-                    home: new Builder(
-                      builder: (BuildContext context) {
-                        return new CupertinoPageScaffold(
-                          navigationBar: new CupertinoNavigationBar(
-                            middle: new Text('Page 1 of tab $index'),
-                          ),
-                          child: new Center(
-                            child: new CupertinoButton(
-                              child: const Text('Next'),
-                              onPressed: () {
-                                Navigator.of(context).push(
-                                  new CupertinoPageRoute<Null>(
-                                    builder: (BuildContext context) {
-                                      return new CupertinoPageScaffold(
-                                        navigationBar: new CupertinoNavigationBar(
-                                          middle: new Text('Page 2 of tab $index'),
+                    builder: (BuildContext context) {
+                      return new CupertinoPageScaffold(
+                        navigationBar: new CupertinoNavigationBar(
+                          middle: new Text('Page 1 of tab $index'),
+                        ),
+                        child: new Center(
+                          child: new CupertinoButton(
+                            child: const Text('Next'),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                new CupertinoPageRoute<Null>(
+                                  builder: (BuildContext context) {
+                                    return new CupertinoPageScaffold(
+                                      navigationBar: new CupertinoNavigationBar(
+                                        middle: new Text('Page 2 of tab $index'),
+                                      ),
+                                      child: new Center(
+                                        child: new CupertinoButton(
+                                          child: const Text('Back'),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          },
                                         ),
-                                        child: new Center(
-                                          child: new CupertinoButton(
-                                            child: const Text('Back'),
-                                            onPressed: (){
-                                              Navigator.of(context).pop();
-                                            },
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                );
-                              },
-                            ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   );
-                }
+                },
               );
             },
           );

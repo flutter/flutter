@@ -30,29 +30,34 @@ import 'bottom_tab_bar.dart';
 /// ```dart
 /// new CupertinoTabScaffold(
 ///   tabBar: new CupertinoTabBar(
-///     items: ...
+///     items: <BottomNavigationBarItem> [
+///       // ...
+///     ],
 ///   ),
 ///   tabBuilder: (BuildContext context, int index) {
 ///     return new CupertinoTab(
-///       home: new CupertinoPageScaffold(
-///         navigationBar: new CupertinoNavigationBar(
-///           middle: new Text('Page 1 of tab $index'),
-///         ),
-///         child: new Builder(builder: (BuildContext context) {
-///           // A new builder to make sure we get the Navigator of the tab
-///           // rather than the root navigator.
-///           new Center(
-///             child: new Button(
+///       builder: (BuildContext context) {
+///         return new CupertinoPageScaffold(
+///           navigationBar: new CupertinoNavigationBar(
+///             middle: new Text('Page 1 of tab $index'),
+///           ),
+///           child: new Center(
+///             child: new CupertinoButton(
 ///               child: const Text('Next page'),
 ///               onPressed: () {
 ///                 Navigator.of(context).push(
-///                   new CupertinoPageRoute<null>(
+///                   new CupertinoPageRoute<Null>(
 ///                     builder: (BuildContext context) {
 ///                       return new CupertinoPageScaffold(
 ///                         navigationBar: new CupertinoNavigationBar(
 ///                           middle: new Text('Page 2 of tab $index'),
 ///                         ),
-///                         child: ...
+///                         child: new Center(
+///                           child: new CupertinoButton(
+///                             child: const Text('Back'),
+///                             onPressed: () { Navigator.of(context).pop(); },
+///                           ),
+///                         ),
 ///                       );
 ///                     },
 ///                   ),
@@ -60,8 +65,8 @@ import 'bottom_tab_bar.dart';
 ///               },
 ///             ),
 ///           ),
-///         }),
-///       ),
+///         );
+///       },
 ///     );
 ///   },
 /// );

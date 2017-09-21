@@ -94,6 +94,12 @@ void main() {
     expect(const EdgeInsetsDirectional.only(top: 1.0).add(const EdgeInsets.only(top: 2.0)), const EdgeInsets.only(top: 3.0));
   });
 
+  test('EdgeInsets copyWith', () {
+    final EdgeInsets sourceEdgeInsets = const EdgeInsets.only(left: 1.0, top: 2.0, bottom: 3.0, right: 4.0);
+    final EdgeInsets copy = sourceEdgeInsets.copyWith(left: 5.0, top: 6.0);
+    expect(copy, const EdgeInsets.only(left: 5.0, top: 6.0, bottom: 3.0, right: 4.0));
+  });
+
   test('EdgeInsetsGeometry.lerp(...)', () {
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(end: 10.0), null, 0.5), const EdgeInsetsDirectional.only(end: 5.0));
     expect(EdgeInsetsGeometry.lerp(const EdgeInsetsDirectional.only(start: 10.0), null, 0.5), const EdgeInsetsDirectional.only(start: 5.0));

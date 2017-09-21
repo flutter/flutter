@@ -14,8 +14,8 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              return const CupertinoTab(
-                home: const Text('home'),
+              return new CupertinoTab(
+                builder: (BuildContext context) => const Text('home'),
               );
             },
           );
@@ -57,16 +57,14 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return new CupertinoTab(
-                home: new Builder(
-                  builder: (BuildContext context) {
-                    return new CupertinoButton(
-                      child: const Text('go to second page'),
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('/2');
-                      },
-                    );
-                  }
-                ),
+                builder: (BuildContext context) {
+                  return new CupertinoButton(
+                    child: const Text('go to second page'),
+                    onPressed: () {
+                      Navigator.of(context).pushNamed('/2');
+                    },
+                  );
+                },
                 routes: <String, WidgetBuilder>{
                   '/2': (BuildContext context) => const Text('second named route'),
                 },

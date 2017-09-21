@@ -9,29 +9,25 @@ import 'route.dart';
 
 /// A single tab with its own [Navigator] state and history.
 ///
-/// A typical tab used as the content of each tab in a [CupertinoTabScaffold]
+/// A typical tab used as the content of each tab view in a [CupertinoTabScaffold]
 /// where multiple tabs with parallel navigation states and history can
 /// co-exist.
 ///
 /// [CupertinoTab] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
-///  1. For the `/` route, the [home] property, if non-null, is used.
+///  1. For the `/` route, the [builder] property, if non-null, is used.
 ///
 ///  2. Otherwise, the [routes] table is used, if it has an entry for the route,
-///     including `/` if [home] is not specified.
+///     including `/` if [builder] is not specified.
 ///
 ///  3. Otherwise, [onGenerateRoute] is called, if provided. It should return a
-///     non-null value for any _valid_ route not handled by [home] and [routes].
+///     non-null value for any _valid_ route not handled by [builder] and [routes].
 ///
 ///  4. Finally if all else fails [onUnknownRoute] is called.
 ///
-/// These navigation properties is not shared with any sibling [CupertinoTab]
+/// These navigation properties are not shared with any sibling [CupertinoTab]
 /// nor any ancestor or descendent [Navigator] instances.
-///
-/// Be sure to acquire a [BuildContext] that belongs to the [CupertinoTab] (such
-/// as by using a [Builder]) to ensure that [Navigator.of] calls uses this
-/// [CupertinoTab]'s [Navigator] rather than that of its parent.
 ///
 /// See also:
 ///
@@ -41,19 +37,20 @@ import 'route.dart';
 class CupertinoTab extends StatelessWidget {
   const CupertinoTab({
     Key key,
-    this.home,
+    this.builder,
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
-    this.navigatorObservers,
-  }) : super(key: key);
+    this.navigatorObservers: const <NavigatorObserver>[],
+  }) : assert(navigatorObservers != null),
+       super(key: key);
 
-  /// The widget for the default route of the tab ([Navigator.defaultRouteName],
-  /// which is `/`).
+  /// The widget builder for the default route of the tab
+  /// ([Navigator.defaultRouteName], which is `/`).
   ///
-  /// If [home] is specified, then [routes] must not include an entry for `/`,
-  /// as [home] takes its place.
-  final Widget home;
+  /// If a [builder] is specified, then [routes] must not include an entry for `/`,
+  /// as [builder] takes its place.
+  final WidgetBuilder builder;
 
   /// This tab's routing table.
   ///
@@ -62,18 +59,14 @@ class CupertinoTab extends StatelessWidget {
   /// the associated [WidgetBuilder] is used to construct a [CupertinoPageRoute]
   /// that performs an appropriate transition to the new route.
   ///
-  /// If the tab only has one page, then you can specify it using [home] instead.
+  /// If the tab only has one page, then you can specify it using [builder] instead.
   ///
-  /// When pushing named routes from [home] via [Navigator.of], be sure to use
-  /// the [BuildContext] of this tab rather than this tab's ancestors by using
-  /// a [Builder] widget.
-  ///
-  /// If [home] is specified, then it implies an entry in this table for the
+  /// If [builder] is specified, then it implies an entry in this table for the
   /// [Navigator.defaultRouteName] route (`/`), and it is an error to
   /// redundantly provide such a route in the [routes] table.
   ///
   /// If a route is requested that is not specified in this table (or by
-  /// [home]), then the [onGenerateRoute] callback is called to build the page
+  /// [builder]), then the [onGenerateRoute] callback is called to build the page
   /// instead.
   ///
   /// This routing table is not shared with any routing tables of ancestor or
@@ -105,20 +98,20 @@ class CupertinoTab extends StatelessWidget {
     return new Navigator(
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
-      observers: navigatorObservers ?? const <NavigatorObserver>[], // Can't be null.
+      observers: navigatorObservers,
     );
   }
 
   Route<dynamic> _onGenerateRoute(RouteSettings settings) {
     final String name = settings.name;
-    WidgetBuilder builder;
-    if (name == Navigator.defaultRouteName && home != null)
-      builder = (BuildContext context) => home;
+    WidgetBuilder routeBuilder;
+    if (name == Navigator.defaultRouteName && builder != null)
+      routeBuilder = builder;
     else if (routes != null)
-      builder = routes[name];
-    if (builder != null) {
+      routeBuilder = routes[name];
+    if (routeBuilder != null) {
       return new CupertinoPageRoute<dynamic>(
-        builder: builder,
+        builder: routeBuilder,
         settings: settings,
       );
     }
@@ -133,11 +126,11 @@ class CupertinoTab extends StatelessWidget {
         throw new FlutterError(
           'Could not find a generator for route $settings in the $runtimeType.\n'
           'Generators for routes are searched for in the following order:\n'
-          ' 1. For the "/" route, the "home" property, if non-null, is used.\n'
+          ' 1. For the "/" route, the "builder" property, if non-null, is used.\n'
           ' 2. Otherwise, the "routes" table is used, if it has an entry for '
           'the route.\n'
           ' 3. Otherwise, onGenerateRoute is called. It should return a '
-          'non-null value for any valid route not handled by "home" and "routes".\n'
+          'non-null value for any valid route not handled by "builder" and "routes".\n'
           ' 4. Finally if all else fails onUnknownRoute is called.\n'
           'Unfortunately, onUnknownRoute was not set.'
         );

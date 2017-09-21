@@ -559,6 +559,22 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   @override
   EdgeInsets resolve(TextDirection direction) => this;
+
+  /// Creates a copy of this EdgeInsets but with the given fields replaced
+  /// with the new values.
+  EdgeInsets copyWith({
+    double left,
+    double top,
+    double right,
+    double bottom,
+}) {
+    return new EdgeInsets.only(
+      left: left ?? this.left,
+      top: top ?? this.top,
+      right: right ?? this.right,
+      bottom: bottom ?? this.bottom,
+    );
+  }
 }
 
 /// An immutable set of offsets in each of the four cardinal directions, but
