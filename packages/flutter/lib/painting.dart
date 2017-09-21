@@ -22,6 +22,7 @@ export 'src/painting/border.dart';
 export 'src/painting/border_radius.dart';
 export 'src/painting/box_fit.dart';
 export 'src/painting/box_painter.dart';
+export 'src/painting/box_shadow.dart';
 export 'src/painting/colors.dart';
 export 'src/painting/decoration.dart';
 export 'src/painting/edge_insets.dart';
