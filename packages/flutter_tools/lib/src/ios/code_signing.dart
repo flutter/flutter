@@ -142,11 +142,12 @@ Future<String> getCodeSigningIdentityDevelopmentTeam({BuildableIOSApp iosApp, bo
       ..close();
 
   final String opensslOutput = await UTF8.decodeStream(opensslProcess.stdout);
-  opensslProcess.stderr.drain<String>();
+  // Fire and forget discard of the stderr stream so we don't hold onto resources.
+  // Don't care about the result.
+  opensslProcess.stderr.drain<String>(); // ignore: unawaited_futures
 
-  if (await opensslProcess.exitCode != 0) {
+  if (await opensslProcess.exitCode != 0)
     return null;
-  }
 
   return _certificateOrganizationalUnitExtractionPattern
       .firstMatch(opensslOutput)
