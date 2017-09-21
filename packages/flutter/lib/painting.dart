@@ -28,6 +28,7 @@ export 'src/painting/edge_insets.dart';
 export 'src/painting/flutter_logo.dart';
 export 'src/painting/fractional_offset.dart';
 export 'src/painting/gradient.dart';
+export 'src/painting/image.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';
