@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 
 import 'material_localizations.dart';
 import 'theme_data.dart';
+import 'typography.dart';
 
 export 'theme_data.dart' show Brightness, ThemeData;
 
@@ -129,13 +130,10 @@ class Theme extends StatelessWidget {
       return inheritedTheme.theme.data;
     }
 
-    final ThemeData baseTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
+    final ThemeData colorTheme = (inheritedTheme != null) ? inheritedTheme.theme.data : _kFallbackTheme;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-
-    if (localizations?.localTextGeometry == null)
-      return baseTheme;
-
-    return ThemeData.localize(baseTheme, localizations.localTextGeometry);
+    final TextTheme geometryTheme = localizations?.localTextGeometry ?? MaterialTextGeometry.englishLike;
+    return ThemeData.localize(colorTheme, geometryTheme);
   }
 
   @override

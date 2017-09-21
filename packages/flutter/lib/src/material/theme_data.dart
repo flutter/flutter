@@ -247,14 +247,26 @@ class ThemeData {
        assert(platform != null);
 
   /// A default light blue theme.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.light() => new ThemeData(brightness: Brightness.light);
 
   /// A default dark theme with a teal accent color.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark() => new ThemeData(brightness: Brightness.dark);
 
-  /// The default theme. Same as [new ThemeData.light].
+  /// The default color theme. Same as [new ThemeData.light].
   ///
   /// This is used by [Theme.of] when no theme has been specified.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
+  ///
+  /// Most applications would use [Theme.of], which provides correct localized
+  /// text geometry.
   factory ThemeData.fallback() => new ThemeData.light();
 
   /// The brightness of the overall theme of the application. Used by widgets
