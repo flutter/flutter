@@ -93,10 +93,10 @@ source_set("ui") {
     "//flutter/glue",
     "//flutter/sky/engine",
     "//flutter/third_party/txt",
-    "//lib/tonic",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",
+    "//topaz/lib/tonic",
   ]
   if (is_fuchsia) {
     deps += [ "//garnet/public/dart-pkg/zircon" ]

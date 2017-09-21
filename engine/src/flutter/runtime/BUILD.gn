@@ -79,11 +79,11 @@ source_set("runtime") {
     "//flutter/lib/io",
     "//flutter/lib/ui",
     "//flutter/sky/engine/platform",
+    "//flutter/third_party/txt",
     "//garnet/public/lib/fxl",
-    "//lib/tonic",
     "//third_party/rapidjson",
     "//third_party/skia",
-    "//flutter/third_party/txt",
+    "//topaz/lib/tonic",
   ]
 
   defines = []
@@ -96,7 +96,7 @@ source_set("runtime") {
   }
 
   if (flutter_runtime_mode != "release") {
-    deps += [ "//lib/tonic/debugger" ]
+    deps += [ "//topaz/lib/tonic/debugger" ]
   }
 
   # In AOT mode, precompiled snapshots contain the instruction buffer.

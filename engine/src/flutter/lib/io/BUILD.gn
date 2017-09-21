@@ -12,6 +12,6 @@ source_set("io") {
     "//dart/runtime:dart_api",
     "//dart/runtime/bin:embedded_dart_io",
     "//garnet/public/lib/fxl",
-    "//lib/tonic/converter",
+    "//topaz/lib/tonic/converter",
   ]
 }
