@@ -7,6 +7,7 @@ environment:
   sdk: '>=1.19.0 <2.0.0'
 
 dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
   archive: 1.0.31
   args: 0.13.7
   cli_util: 0.1.2+1
@@ -34,16 +35,13 @@ dependencies:
   yaml: 2.1.12
 
   # We depend on very specific internal implementation details of the
-  # 'test' package, which change between versions, so here we pin it
-  # precisely. When changing this, also update the pubspec.yaml files
-  # for the flutter_test and devicelab packages. All other packages
-  # should depend on flutter_test to transitively get the pinned
-  # version.
+  # 'test' package, which change between versions, so when upgrading
+  # this, make sure the tests are still running correctly.
   test: 0.12.24+2
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
-  analyzer: 0.31.0-alpha.0
-  front_end: 0.1.0-alpha.5
+  analyzer: any
+  front_end: any
 
 dev_dependencies:
   collection: 1.14.3

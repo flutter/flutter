@@ -71,10 +71,10 @@ own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 Running the analyzer
 --------------------
 
-When editing Flutter code, it's important to check the code with the analyzer. There are two
-main ways to run it. In either case you will want to run `flutter update-packages --upgrade`
-first, or you will get version conflict issues or bogus error messages about core clases like
-Offset from `dart:ui`.
+When editing Flutter code, it's important to check the code with the
+analyzer. There are two main ways to run it. In either case you will
+want to run `flutter update-packages` first, or you will get bogus
+error messages about core classes like Offset from `dart:ui`.
 
 For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options_repo.yaml` file
 at the root of the repository for its configuration.
