@@ -1,4 +1,4 @@
-Signature: 103c293e19f43dfead2e1afb179ce5d1
+Signature: 8eca905f6459bd8f4b9e084803ed1934
 
 UNUSED LICENSES:
 
@@ -3901,7 +3901,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ====================================================================================================
 LIBRARY: freetype2
-ORIGIN: ../../../third_party/freetype2/docs/FXL.TXT
+ORIGIN: ../../../third_party/freetype2/docs/FTL.TXT
 TYPE: LicenseType.freetype
 FILE: ../../../third_party/freetype2/.mailmap
 FILE: ../../../third_party/freetype2/Jamfile
@@ -3936,9 +3936,9 @@ FILE: ../../../third_party/freetype2/include/ftgxval.h
 FILE: ../../../third_party/freetype2/include/ftgzip.h
 FILE: ../../../third_party/freetype2/include/ftimage.h
 FILE: ../../../third_party/freetype2/include/ftincrem.h
-FILE: ../../../third_party/freetype2/include/fxlcdfil.h
-FILE: ../../../third_party/freetype2/include/fxlist.h
-FILE: ../../../third_party/freetype2/include/fxlzw.h
+FILE: ../../../third_party/freetype2/include/ftlcdfil.h
+FILE: ../../../third_party/freetype2/include/ftlist.h
+FILE: ../../../third_party/freetype2/include/ftlzw.h
 FILE: ../../../third_party/freetype2/include/ftmac.h
 FILE: ../../../third_party/freetype2/include/ftmm.h
 FILE: ../../../third_party/freetype2/include/ftmodapi.h
@@ -4062,7 +4062,7 @@ FILE: ../../../third_party/freetype2/src/base/ftgloadr.c
 FILE: ../../../third_party/freetype2/src/base/ftglyph.c
 FILE: ../../../third_party/freetype2/src/base/ftgxval.c
 FILE: ../../../third_party/freetype2/src/base/ftinit.c
-FILE: ../../../third_party/freetype2/src/base/fxlcdfil.c
+FILE: ../../../third_party/freetype2/src/base/ftlcdfil.c
 FILE: ../../../third_party/freetype2/src/base/ftmac.c
 FILE: ../../../third_party/freetype2/src/base/ftmm.c
 FILE: ../../../third_party/freetype2/src/base/ftobjs.c
@@ -4194,7 +4194,7 @@ FILE: ../../../third_party/freetype2/src/gxvalid/gxvtrak.c
 FILE: ../../../third_party/freetype2/src/gzip/Jamfile
 FILE: ../../../third_party/freetype2/src/gzip/ftgzip.c
 FILE: ../../../third_party/freetype2/src/lzw/Jamfile
-FILE: ../../../third_party/freetype2/src/lzw/fxlzw.c
+FILE: ../../../third_party/freetype2/src/lzw/ftlzw.c
 FILE: ../../../third_party/freetype2/src/lzw/ftzopen.c
 FILE: ../../../third_party/freetype2/src/lzw/ftzopen.h
 FILE: ../../../third_party/freetype2/src/otvalid/Jamfile
@@ -4461,7 +4461,7 @@ Legal Terms
   herein, subject to the following conditions:
 
     o Redistribution of  source code  must retain this  license file
-      (`FXL.TXT') unaltered; any  additions, deletions or changes to
+      (`FTL.TXT') unaltered; any  additions, deletions or changes to
       the original  files must be clearly  indicated in accompanying
       documentation.   The  copyright   notices  of  the  unaltered,
       original  files must  be  preserved in  all  copies of  source
@@ -4517,7 +4517,7 @@ Legal Terms
 
     http://www.freetype.org
 
---- end of FXL.TXT ---
+--- end of FTL.TXT ---
 ====================================================================================================
 
 ====================================================================================================
@@ -12508,8 +12508,6 @@ ORIGIN: ../../../third_party/libpng/LICENSE
 TYPE: LicenseType.libpng
 FILE: ../../../third_party/libpng/contrib/intel/intel_sse.patch
 FILE: ../../../third_party/libpng/pngprefix.h
-FILE: ../../../third_party/skia/third_party/libpng/contrib/intel/intel_sse.patch
-FILE: ../../../third_party/skia/third_party/libpng/pngprefix.h
 ----------------------------------------------------------------------------------------------------
 <THIS BLOCK INTENTIONALLY LEFT BLANK>
 ====================================================================================================
@@ -12546,34 +12544,6 @@ FILE: ../../../third_party/libpng/pngwio.c
 FILE: ../../../third_party/libpng/pngwrite.c
 FILE: ../../../third_party/libpng/pngwtran.c
 FILE: ../../../third_party/libpng/pngwutil.c
-FILE: ../../../third_party/skia/third_party/libpng/arm/arm_init.c
-FILE: ../../../third_party/skia/third_party/libpng/arm/filter_neon.S
-FILE: ../../../third_party/skia/third_party/libpng/arm/filter_neon_intrinsics.c
-FILE: ../../../third_party/skia/third_party/libpng/contrib/intel/filter_sse2_intrinsics.c
-FILE: ../../../third_party/skia/third_party/libpng/contrib/intel/intel_init.c
-FILE: ../../../third_party/skia/third_party/libpng/contrib/intel/intel_sse.patch
-FILE: ../../../third_party/skia/third_party/libpng/png.c
-FILE: ../../../third_party/skia/third_party/libpng/pngconf.h
-FILE: ../../../third_party/skia/third_party/libpng/pngdebug.h
-FILE: ../../../third_party/skia/third_party/libpng/pngerror.c
-FILE: ../../../third_party/skia/third_party/libpng/pngget.c
-FILE: ../../../third_party/skia/third_party/libpng/pnginfo.h
-FILE: ../../../third_party/skia/third_party/libpng/pnglibconf.h
-FILE: ../../../third_party/skia/third_party/libpng/pngmem.c
-FILE: ../../../third_party/skia/third_party/libpng/pngpread.c
-FILE: ../../../third_party/skia/third_party/libpng/pngpriv.h
-FILE: ../../../third_party/skia/third_party/libpng/pngread.c
-FILE: ../../../third_party/skia/third_party/libpng/pngrio.c
-FILE: ../../../third_party/skia/third_party/libpng/pngrtran.c
-FILE: ../../../third_party/skia/third_party/libpng/pngrutil.c
-FILE: ../../../third_party/skia/third_party/libpng/pngset.c
-FILE: ../../../third_party/skia/third_party/libpng/pngstruct.h
-FILE: ../../../third_party/skia/third_party/libpng/pngtest.c
-FILE: ../../../third_party/skia/third_party/libpng/pngtrans.c
-FILE: ../../../third_party/skia/third_party/libpng/pngwio.c
-FILE: ../../../third_party/skia/third_party/libpng/pngwrite.c
-FILE: ../../../third_party/skia/third_party/libpng/pngwtran.c
-FILE: ../../../third_party/skia/third_party/libpng/pngwutil.c
 ----------------------------------------------------------------------------------------------------
 <THIS BLOCK INTENTIONALLY LEFT BLANK>
 ====================================================================================================

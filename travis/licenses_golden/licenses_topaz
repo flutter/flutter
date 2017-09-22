@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../lib/ftl/LICENSE
+ORIGIN: ../../../topaz/lib/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.cc
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.h
@@ -102,7 +102,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../lib/ftl/LICENSE
+ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../topaz/lib/tonic/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../topaz/lib/tonic/dart_args.h
 FILE: ../../../topaz/lib/tonic/dart_binding_macros.h

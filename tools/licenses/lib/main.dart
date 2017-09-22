@@ -1797,6 +1797,7 @@ class RepositorySkiaThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'giflib' // contains nothing that ends up in the binary executable
         && entry.name != 'freetype' // we use our own version
+        && entry.name != 'libpng' // we use our own version
         && entry.name != 'lua' // not linked in
         && entry.name != 'yasm' // build tool (assembler)
         && super.shouldRecurse(entry);
@@ -1808,8 +1809,6 @@ class RepositorySkiaThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryReachOutDirectory(this, entry, new Set<String>.from(const <String>['ktx.h', 'ktx.cpp']), 2);
     if (entry.name == 'libmicrohttpd')
       return new RepositoryReachOutDirectory(this, entry, new Set<String>.from(const <String>['MHD_config.h']), 2);
-    if (entry.name == 'libpng')
-      return new RepositoryLibPngDirectory(this, entry);
     if (entry.name == 'libwebp')
       return new RepositorySkiaLibWebPDirectory(this, entry);
     if (entry.name == 'libsdl')
@@ -2074,13 +2073,6 @@ class RepositoryDartDirectory extends RepositoryDirectory {
   }
 }
 
-class RepositoryRootLibDirectory extends RepositoryDirectory {
-  RepositoryRootLibDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
-
-  @override
-  bool get subdirectoriesAreLicenseRoots => true;
-}
-
 class RepositoryFlutterDirectory extends RepositoryDirectory {
   RepositoryFlutterDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -2243,8 +2235,6 @@ class RepositoryRoot extends RepositoryDirectory {
       throw '//base is no longer part of this client: remove it';
     if (entry.name == 'third_party')
       return new RepositoryRootThirdPartyDirectory(this, entry);
-    if (entry.name == 'lib')
-      return new RepositoryRootLibDirectory(this, entry);
     if (entry.name == 'dart')
       return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'flutter')
