@@ -17,102 +17,12 @@ import 'feedback.dart';
 import 'flat_button.dart';
 import 'material_localizations.dart';
 import 'theme.dart';
+import 'time.dart';
 import 'typography.dart';
 
 const Duration _kDialAnimateDuration = const Duration(milliseconds: 200);
 const double _kTwoPi = 2 * math.PI;
-const int _kHoursPerDay = 24;
-const int _kHoursPerPeriod = 12;
-const int _kMinutesPerHour = 60;
 const Duration _kVibrateCommitDelay = const Duration(milliseconds: 100);
-
-/// Whether the [TimeOfDay] is before or after noon.
-enum DayPeriod {
-  /// Ante meridiem (before noon).
-  am,
-
-  /// Post meridiem (after noon).
-  pm,
-}
-
-/// A value representing a time during the day.
-@immutable
-class TimeOfDay {
-  /// Creates a time of day.
-  ///
-  /// The [hour] argument must be between 0 and 23, inclusive. The [minute]
-  /// argument must be between 0 and 59, inclusive.
-  const TimeOfDay({ @required this.hour, @required this.minute });
-
-  /// Creates a time of day based on the given time.
-  ///
-  /// The [hour] is set to the time's hour and the [minute] is set to the time's
-  /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
-
-  /// Creates a time of day based on the current time.
-  ///
-  /// The [hour] is set to the current hour and the [minute] is set to the
-  /// current minute in the local time zone.
-  factory TimeOfDay.now() { return new TimeOfDay.fromDateTime(new DateTime.now()); }
-
-  /// Returns a new TimeOfDay with the hour and/or minute replaced.
-  TimeOfDay replacing({ int hour, int minute }) {
-    assert(hour == null || (hour >= 0 && hour < _kHoursPerDay));
-    assert(minute == null || (minute >= 0 && minute < _kMinutesPerHour));
-    return new TimeOfDay(hour: hour ?? this.hour, minute: minute ?? this.minute);
-  }
-
-  /// The selected hour, in 24 hour time from 0..23.
-  final int hour;
-
-  /// The selected minute.
-  final int minute;
-
-  /// Whether this time of day is before or after noon.
-  DayPeriod get period => hour < _kHoursPerPeriod ? DayPeriod.am : DayPeriod.pm;
-
-  /// Which hour of the current period (e.g., am or pm) this time is.
-  int get hourOfPeriod => hour - periodOffset;
-
-  String _addLeadingZeroIfNeeded(int value) {
-    if (value < 10)
-      return '0$value';
-    return value.toString();
-  }
-
-  /// A string representing the hour, in 24 hour time (e.g., '04' or '18').
-  String get hourLabel => _addLeadingZeroIfNeeded(hour);
-
-  /// A string representing the minute (e.g., '07').
-  String get minuteLabel => _addLeadingZeroIfNeeded(minute);
-
-  /// A string representing the hour of the current period (e.g., '4' or '6').
-  String get hourOfPeriodLabel {
-    final int hourOfPeriod = this.hourOfPeriod;
-    if (hourOfPeriod == 0)
-      return '12';
-    return hourOfPeriod.toString();
-  }
-
-  /// The hour at which the current period starts.
-  int get periodOffset => period == DayPeriod.am ? 0 : _kHoursPerPeriod;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other is! TimeOfDay)
-      return false;
-    final TimeOfDay typedOther = other;
-    return typedOther.hour == hour
-        && typedOther.minute == minute;
-  }
-
-  @override
-  int get hashCode => hashValues(hour, minute);
-
-  @override
-  String toString() => '$hourLabel:$minuteLabel';
-}
 
 enum _TimePickerMode { hour, minute }
 
@@ -179,19 +89,6 @@ class _TimePickerFragmentContext {
   final TextStyle inactiveStyle;
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
-}
-
-/// Describes how hours are formatted.
-enum _TimePickerHourFormat {
-  /// Zero-padded two-digit 24-hour format ranging from "00" to "23".
-  HH,
-
-  /// Non-padded variable-length 24-hour format ranging from "0" to "23".
-  H,
-
-  /// Non-padded variable-length hour in day period format ranging from "1" to
-  /// "12".
-  h,
 }
 
 /// Contains the [widget] and layout properties of an atom of time information,
@@ -287,7 +184,7 @@ class _DayPeriodControl extends StatelessWidget {
   final _TimePickerFragmentContext fragmentContext;
 
   void _handleChangeDayPeriod() {
-    final int newHour = (fragmentContext.selectedTime.hour + _kHoursPerPeriod) % _kHoursPerDay;
+    final int newHour = (fragmentContext.selectedTime.hour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
     fragmentContext.onTimeChange(fragmentContext.selectedTime.replacing(hour: newHour));
   }
 
@@ -331,31 +228,19 @@ class _HourControl extends StatelessWidget {
   });
 
   final _TimePickerFragmentContext fragmentContext;
-  final _TimePickerHourFormat hourFormat;
+  final HourFormat hourFormat;
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextStyle hourStyle = fragmentContext.mode == _TimePickerMode.hour
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
-      child: new Text(_formatHour(), style: hourStyle),
+      child: new Text(localizations.formatHour(fragmentContext.selectedTime), style: hourStyle),
     );
-  }
-
-  String _formatHour() {
-    assert(hourFormat != null);
-    switch (hourFormat) {
-      case _TimePickerHourFormat.HH:
-        return fragmentContext.selectedTime.hourLabel;
-      case _TimePickerHourFormat.H:
-        return fragmentContext.selectedTime.hour.toString();
-      case _TimePickerHourFormat.h:
-        return fragmentContext.selectedTime.hourOfPeriodLabel;
-    }
-    return null;
   }
 }
 
@@ -387,31 +272,16 @@ class _MinuteControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextStyle minuteStyle = fragmentContext.mode == _TimePickerMode.minute
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
-      child: new Text(fragmentContext.selectedTime.minuteLabel, style: minuteStyle),
+      child: new Text(localizations.formatMinute(fragmentContext.selectedTime), style: minuteStyle),
     );
   }
-}
-
-_TimePickerHourFormat _getHourFormat(TimeOfDayFormat format) {
-  switch (format) {
-    case TimeOfDayFormat.h_colon_mm_space_a:
-    case TimeOfDayFormat.a_space_h_colon_mm:
-      return _TimePickerHourFormat.h;
-    case TimeOfDayFormat.H_colon_mm:
-      return _TimePickerHourFormat.H;
-    case TimeOfDayFormat.HH_dot_mm:
-    case TimeOfDayFormat.HH_colon_mm:
-    case TimeOfDayFormat.frenchCanadian:
-      return _TimePickerHourFormat.HH;
-  }
-
-  return null;
 }
 
 /// Provides time picker header layout configuration for the given
@@ -420,7 +290,7 @@ _TimePickerHourFormat _getHourFormat(TimeOfDayFormat format) {
 /// [timeOfDayFormat] and [context] must not be `null`.
 _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _TimePickerFragmentContext context) {
   // Creates an hour fragment.
-  _TimePickerHeaderFragment hour(_TimePickerHourFormat hourFormat) {
+  _TimePickerHeaderFragment hour(HourFormat hourFormat) {
     return new _TimePickerHeaderFragment(
       layoutId: _TimePickerHeaderId.hour,
       widget: new _HourControl(fragmentContext: context, hourFormat: hourFormat),
@@ -494,7 +364,7 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
         0,
         piece(
           pivotIndex: 1,
-          fragment1: hour(_TimePickerHourFormat.h),
+          fragment1: hour(HourFormat.h),
           fragment2: string(_TimePickerHeaderId.colon, ':'),
           fragment3: minute(),
         ),
@@ -506,14 +376,14 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
     case TimeOfDayFormat.H_colon_mm:
       return format(0, piece(
         pivotIndex: 1,
-        fragment1: hour(_TimePickerHourFormat.H),
+        fragment1: hour(HourFormat.H),
         fragment2: string(_TimePickerHeaderId.colon, ':'),
         fragment3: minute(),
       ));
     case TimeOfDayFormat.HH_dot_mm:
       return format(0, piece(
         pivotIndex: 1,
-        fragment1: hour(_TimePickerHourFormat.HH),
+        fragment1: hour(HourFormat.HH),
         fragment2: string(_TimePickerHeaderId.dot, '.'),
         fragment3: minute(),
       ));
@@ -526,7 +396,7 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
         ),
         piece(
           pivotIndex: 1,
-          fragment1: hour(_TimePickerHourFormat.h),
+          fragment1: hour(HourFormat.h),
           fragment2: string(_TimePickerHeaderId.colon, ':'),
           fragment3: minute(),
         ),
@@ -534,14 +404,14 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
     case TimeOfDayFormat.frenchCanadian:
       return format(0, piece(
         pivotIndex: 1,
-        fragment1: hour(_TimePickerHourFormat.HH),
+        fragment1: hour(HourFormat.HH),
         fragment2: string(_TimePickerHeaderId.hString, 'h'),
         fragment3: minute(),
       ));
     case TimeOfDayFormat.HH_colon_mm:
       return format(0, piece(
         pivotIndex: 1,
-        fragment1: hour(_TimePickerHourFormat.HH),
+        fragment1: hour(HourFormat.HH),
         fragment2: string(_TimePickerHeaderId.colon, ':'),
         fragment3: minute(),
       ));
@@ -801,26 +671,65 @@ enum _DialRing {
   inner,
 }
 
-List<TextPainter> _initHours(TextTheme textTheme, _DialRing ring, bool is24h) {
-  const List<String> amHours = const <String>[
-    '12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'
-  ];
-  const List<String> pmHours = const <String>[
-    '00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'
-  ];
-  switch (ring) {
-    case _DialRing.outer:
-      return _initPainters(textTheme, is24h ? pmHours : amHours);
-    case _DialRing.inner:
-      return is24h ? _initPainters(textTheme, amHours) : null;
-  }
-  return null;
+const List<TimeOfDay> _amHours = const <TimeOfDay>[
+  const TimeOfDay(hour: 0, minute: 0),
+  const TimeOfDay(hour: 1, minute: 0),
+  const TimeOfDay(hour: 2, minute: 0),
+  const TimeOfDay(hour: 3, minute: 0),
+  const TimeOfDay(hour: 4, minute: 0),
+  const TimeOfDay(hour: 5, minute: 0),
+  const TimeOfDay(hour: 6, minute: 0),
+  const TimeOfDay(hour: 7, minute: 0),
+  const TimeOfDay(hour: 8, minute: 0),
+  const TimeOfDay(hour: 9, minute: 0),
+  const TimeOfDay(hour: 10, minute: 0),
+  const TimeOfDay(hour: 11, minute: 0),
+];
+
+const List<TimeOfDay> _pmHours = const <TimeOfDay>[
+  const TimeOfDay(hour: 12, minute: 0),
+  const TimeOfDay(hour: 13, minute: 0),
+  const TimeOfDay(hour: 14, minute: 0),
+  const TimeOfDay(hour: 15, minute: 0),
+  const TimeOfDay(hour: 16, minute: 0),
+  const TimeOfDay(hour: 17, minute: 0),
+  const TimeOfDay(hour: 18, minute: 0),
+  const TimeOfDay(hour: 19, minute: 0),
+  const TimeOfDay(hour: 20, minute: 0),
+  const TimeOfDay(hour: 21, minute: 0),
+  const TimeOfDay(hour: 22, minute: 0),
+  const TimeOfDay(hour: 23, minute: 0),
+];
+
+List<TextPainter> _init24HourInnerRing(TextTheme textTheme, MaterialLocalizations localizations) {
+  return _initPainters(textTheme, _amHours.map(localizations.formatHour).toList());
 }
 
-List<TextPainter> _initMinutes(TextTheme textTheme) {
-  return _initPainters(textTheme, <String>[
-    '00', '05', '10', '15', '20', '25', '30', '35', '40', '45', '50', '55'
-  ]);
+List<TextPainter> _init24HourOuterRing(TextTheme textTheme, MaterialLocalizations localizations) {
+  return _initPainters(textTheme, _pmHours.map(localizations.formatHour).toList());
+}
+
+List<TextPainter> _init12HourOuterRing(TextTheme textTheme, MaterialLocalizations localizations) {
+  return _initPainters(textTheme, _amHours.map(localizations.formatHour).toList());
+}
+
+const List<TimeOfDay> _minuteMarkerValues = const <TimeOfDay>[
+  const TimeOfDay(hour: 0, minute: 0),
+  const TimeOfDay(hour: 0, minute: 5),
+  const TimeOfDay(hour: 0, minute: 10),
+  const TimeOfDay(hour: 0, minute: 15),
+  const TimeOfDay(hour: 0, minute: 20),
+  const TimeOfDay(hour: 0, minute: 25),
+  const TimeOfDay(hour: 0, minute: 30),
+  const TimeOfDay(hour: 0, minute: 35),
+  const TimeOfDay(hour: 0, minute: 40),
+  const TimeOfDay(hour: 0, minute: 45),
+  const TimeOfDay(hour: 0, minute: 50),
+  const TimeOfDay(hour: 0, minute: 55),
+];
+
+List<TextPainter> _initMinutes(TextTheme textTheme, MaterialLocalizations localizations) {
+  return _initPainters(textTheme, _minuteMarkerValues.map(localizations.formatMinute).toList());
 }
 
 class _DialPainter extends CustomPainter {
@@ -992,21 +901,21 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   double _getThetaForTime(TimeOfDay time) {
     final double fraction = (widget.mode == _TimePickerMode.hour) ?
-        (time.hour / _kHoursPerPeriod) % _kHoursPerPeriod :
-        (time.minute / _kMinutesPerHour) % _kMinutesPerHour;
+        (time.hour / TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerPeriod :
+        (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
     return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
   TimeOfDay _getTimeForTheta(double theta) {
     final double fraction = (0.25 - (theta % _kTwoPi) / _kTwoPi) % 1.0;
     if (widget.mode == _TimePickerMode.hour) {
-      int newHour = (fraction * _kHoursPerPeriod).round() % _kHoursPerPeriod;
+      int newHour = (fraction * TimeOfDay.hoursPerPeriod).round() % TimeOfDay.hoursPerPeriod;
       if (widget.is24h) {
         if (_activeRing == _DialRing.outer) {
           if (newHour != 0)
-            newHour = (newHour + _kHoursPerPeriod) % _kHoursPerDay;
+            newHour = (newHour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
         } else if (newHour == 0) {
-          newHour = _kHoursPerPeriod;
+          newHour = TimeOfDay.hoursPerPeriod;
         }
       } else {
         newHour = newHour + widget.selectedTime.periodOffset;
@@ -1014,7 +923,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       return widget.selectedTime.replacing(hour: newHour);
     } else {
       return widget.selectedTime.replacing(
-        minute: (fraction * _kMinutesPerHour).round() % _kMinutesPerHour
+        minute: (fraction * TimeOfDay.minutesPerHour).round() % TimeOfDay.minutesPerHour
       );
     }
   }
@@ -1076,6 +985,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -1094,15 +1004,20 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     List<TextPainter> secondaryInnerLabels;
     switch (widget.mode) {
       case _TimePickerMode.hour:
-        primaryOuterLabels = _initHours(theme.textTheme, _DialRing.outer, widget.is24h);
-        secondaryOuterLabels = _initHours(theme.accentTextTheme, _DialRing.outer, widget.is24h);
-        primaryInnerLabels = _initHours(theme.textTheme, _DialRing.inner, widget.is24h);
-        secondaryInnerLabels = _initHours(theme.accentTextTheme, _DialRing.inner, widget.is24h);
+        if (widget.is24h) {
+          primaryOuterLabels = _init24HourOuterRing(theme.textTheme, localizations);
+          secondaryOuterLabels = _init24HourOuterRing(theme.accentTextTheme, localizations);
+          primaryInnerLabels = _init24HourInnerRing(theme.textTheme, localizations);
+          secondaryInnerLabels = _init24HourInnerRing(theme.accentTextTheme, localizations);
+        } else {
+          primaryOuterLabels = _init12HourOuterRing(theme.textTheme, localizations);
+          secondaryOuterLabels = _init12HourOuterRing(theme.accentTextTheme, localizations);
+        }
         break;
       case _TimePickerMode.minute:
-        primaryOuterLabels = _initMinutes(theme.textTheme);
+        primaryOuterLabels = _initMinutes(theme.textTheme, localizations);
         primaryInnerLabels = null;
-        secondaryOuterLabels = _initMinutes(theme.accentTextTheme);
+        secondaryOuterLabels = _initMinutes(theme.accentTextTheme, localizations);
         secondaryInnerLabels = null;
         break;
     }
@@ -1191,7 +1106,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat;
 
     final Widget picker = new Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1199,14 +1115,13 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         aspectRatio: 1.0,
         child: new _Dial(
           mode: _mode,
-          is24h: _getHourFormat(timeOfDayFormat) != _TimePickerHourFormat.h,
+          is24h: hourFormat(of: timeOfDayFormat) != HourFormat.h,
           selectedTime: _selectedTime,
           onChanged: _handleTimeChanged,
         )
       )
     );
 
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget actions = new ButtonTheme.bar(
       child: new ButtonBar(
         children: <Widget>[
@@ -1309,6 +1224,6 @@ Future<TimeOfDay> showTimePicker({
   assert(initialTime != null);
   return await showDialog(
     context: context,
-    child: new _TimePickerDialog(initialTime: initialTime)
+    child: new _TimePickerDialog(initialTime: initialTime),
   );
 }

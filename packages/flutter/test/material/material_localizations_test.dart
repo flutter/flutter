@@ -32,6 +32,119 @@ void main() {
     final LocalizationTrackerState innerTracker = tester.state(find.byKey(const ValueKey<String>('inner')));
     expect(innerTracker.captionFontSize, 13.0);
   });
+
+  group(DefaultMaterialLocalizations, () {
+    test('uses exact locale when exists', () {
+      final DefaultMaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('pt', 'PT'));
+      expect(localizations.formatDecimal(10000), '10\u00A0000');
+    });
+
+    test('falls back to language code when exact locale is missing', () {
+      final DefaultMaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('pt', 'XX'));
+      expect(localizations.formatDecimal(10000), '10.000');
+    });
+
+    test('falls back to default format when neither language code nor exact locale are available', () {
+      final DefaultMaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('xx', 'XX'));
+      expect(localizations.formatDecimal(10000), '10,000');
+    });
+
+    group('formatHour', () {
+      test('formats h', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('en', 'US'));
+        expect(localizations.formatHour(const TimeOfDay(hour: 10, minute: 0)), '10');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '8');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('ar', ''));
+        expect(localizations.formatHour(const TimeOfDay(hour: 10, minute: 0)), '١٠');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '٨');
+      });
+
+      test('formats HH', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('de', ''));
+        expect(localizations.formatHour(const TimeOfDay(hour: 9, minute: 0)), '09');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '20');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('en', 'GB'));
+        expect(localizations.formatHour(const TimeOfDay(hour: 9, minute: 0)), '09');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '20');
+      });
+
+      test('formats H', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('es', ''));
+        expect(localizations.formatHour(const TimeOfDay(hour: 9, minute: 0)), '9');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '20');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('fa', ''));
+        expect(localizations.formatHour(const TimeOfDay(hour: 9, minute: 0)), '۹');
+        expect(localizations.formatHour(const TimeOfDay(hour: 20, minute: 0)), '۲۰');
+      });
+    });
+
+    group('formatMinute', () {
+      test('formats English', () {
+        final DefaultMaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('en', 'US'));
+        expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '32');
+      });
+
+      test('formats Arabic', () {
+        final DefaultMaterialLocalizations localizations = new DefaultMaterialLocalizations(const Locale('ar', ''));
+        expect(localizations.formatMinute(const TimeOfDay(hour: 1, minute: 32)), '٣٢');
+      });
+    });
+
+    group('formatTimeOfDay', () {
+      test('formats ${TimeOfDayFormat.h_colon_mm_space_a}', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('ar', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '٩:٣٢ ص');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('en', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '9:32 AM');
+      });
+
+      test('formats ${TimeOfDayFormat.HH_colon_mm}', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('de', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '09:32');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('en', 'ZA'));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '09:32');
+      });
+
+      test('formats ${TimeOfDayFormat.H_colon_mm}', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('es', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '9:32');
+
+        localizations = new DefaultMaterialLocalizations(const Locale('ja', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '9:32');
+      });
+
+      test('formats ${TimeOfDayFormat.frenchCanadian}', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('fr', 'CA'));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '09 h 32');
+      });
+
+      test('formats ${TimeOfDayFormat.a_space_h_colon_mm}', () {
+        DefaultMaterialLocalizations localizations;
+
+        localizations = new DefaultMaterialLocalizations(const Locale('zh', ''));
+        expect(localizations.formatTimeOfDay(const TimeOfDay(hour: 9, minute: 32)), '上午 9:32');
+      });
+    });
+  });
 }
 
 class LocalizationTracker extends StatefulWidget {
