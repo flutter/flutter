@@ -9,6 +9,7 @@ import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart' as intl;
 
 import 'i18n/localizations.dart';
+import 'typography.dart';
 
 /// Defines the localized resource values used by the Material widgets.
 ///
@@ -94,6 +95,19 @@ abstract class MaterialLocalizations {
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
   TimeOfDayFormat get timeOfDayFormat;
+
+  /// Provides geometric text preferences for the current locale.
+  ///
+  /// This text theme is incomplete. For example, it lacks text color
+  /// information. This theme must be merged with another text theme that
+  /// provides the missing values. The text styles provided by this theme have
+  /// their [TextStyle.inherit] property set to `true`.
+  ///
+  /// Typically a complete theme is obtained via [Theme.of], which can be
+  /// localized using the [Localizations] widget.
+  ///
+  /// See also: https://material.io/guidelines/style/typography.html
+  TextTheme get localTextGeometry;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -286,6 +300,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
     return _icuTimeOfDayToEnum[icuShortTimePattern];
   }
+
+  /// Looks up text geometry defined in [MaterialTextGeometry].
+  @override
+  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_nameToValue["scriptCategory"]);
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.

@@ -1,4 +1,5 @@
 {
+  "scriptCategory": "English-like",
   "timeOfDayFormat": "H:mm",
   "@anteMeridiemAbbreviation": { "notUsed": "Standard Spanish time format does not use a.m. indicator" },
   "@postMeridiemAbbreviation": { "notUsed": "Standard Spanish time format does not use p.m. indicator" },

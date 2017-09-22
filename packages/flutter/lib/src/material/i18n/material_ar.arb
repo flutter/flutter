@@ -1,4 +1,5 @@
 {
+  "scriptCategory": "tall",
   "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "افتح قائمة التنقل",
   "backButtonTooltip": "الى الخلف",

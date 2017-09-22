@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -789,8 +789,11 @@ void main() {
   });
 
   testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
-    final ThemeData themeData = new ThemeData(
-      hintColor: Colors.blue[500],
+    final ThemeData themeData = ThemeData.localize(
+      new ThemeData(
+        hintColor: Colors.blue[500],
+      ),
+      MaterialTextGeometry.forScriptCategory(MaterialTextGeometry.englishLikeCategory),
     );
 
     await tester.pumpWidget(

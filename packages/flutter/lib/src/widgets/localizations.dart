@@ -401,10 +401,13 @@ class Localizations extends StatefulWidget {
     return new List<LocalizationsDelegate<dynamic>>.from(scope.localizationsState.widget.delegates);
   }
 
-  /// Returns the 'type' localized resources for the widget tree that
-  /// corresponds to [BuildContext] `context`.
+  /// Returns the localized resources object of the given `type` for the widget
+  /// tree that corresponds to the given `context`.
   ///
-  /// This method is typically used by a static factory method on the 'type'
+  /// Returns `null` if no resources object of the given `type` exists within
+  /// the given `context`.
+  ///
+  /// This method is typically used by a static factory method on the `type`
   /// class. For example Flutter's MaterialLocalizations class looks up Material
   /// resources with a method defined like this:
   ///
@@ -417,8 +420,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    assert(scope != null, 'a Localizations ancestor was not found');
-    return scope.localizationsState.resourcesFor<T>(type);
+    return scope?.localizationsState?.resourcesFor<T>(type);
   }
 
   @override

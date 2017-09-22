@@ -53,7 +53,9 @@ void main() {
       )
     );
 
-    expect(Theme.of(capturedContext), equals(new ThemeData.fallback()));
+    final dynamic localizedTheme = Theme.of(capturedContext);
+    expect('${localizedTheme.runtimeType}', '_LocalizedThemeData');
+    expect(localizedTheme.delegate, equals(new ThemeData.fallback()));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
