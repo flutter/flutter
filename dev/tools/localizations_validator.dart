@@ -24,7 +24,26 @@ void validateLocalizations(
   bool explainMissingKeys = false;
   for (final String locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale];
-    final Set<String> keys = new Set<String>.from(resources.keys);
+
+    // Whether `key` corresponds to one of the plural variations of a key with
+    // the same prefix and suffix "Other".
+    //
+    // Many languages require only a subset of these variations, so we do not
+    // require them so long as the "Other" variation exists.
+    bool isPluralVariation(String key) {
+      final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
+      final Match pluralMatch = pluralRegexp.firstMatch(key);
+      
+      if (pluralMatch == null)
+        return false;
+
+      final String prefix = pluralMatch[1];
+      return resources.containsKey('${prefix}Other');
+    }
+
+    final Set<String> keys = new Set<String>.from(
+      resources.keys.where((String key) => !isPluralVariation(key))
+    );
 
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)
@@ -37,20 +56,6 @@ void validateLocalizations(
     if (locale.length == 2) {
       final Map<String, dynamic> attributes = localeToAttributes[locale];
       final List<String> missingKeys = <String>[];
-
-      // Whether `key` corresponds to one of the plural variations. Many
-      // languages require only a subset of these variations, so we do not
-      // require them so long as the "Other" variation exists.
-      bool isPluralVariation(String key) {
-        final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
-        final Match pluralMatch = pluralRegexp.firstMatch(key);
-        
-        if (pluralMatch == null)
-          return false;
-
-        final String prefix = pluralMatch[1];
-        return resources.containsKey('${prefix}Other');
-      }
 
       for (final String missingKey in canonicalKeys.difference(keys)) {
         final dynamic attribute = attributes[missingKey];
