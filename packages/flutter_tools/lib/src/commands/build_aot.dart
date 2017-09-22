@@ -37,7 +37,17 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2', negatable: false);
+      ..addFlag('preview-dart-2', negatable: false)
+      ..addOption('extra-front-end-options',
+        allowMultiple: true,
+        splitCommas: true,
+        hide: true,
+      )
+      ..addOption('extra-gen-snapshot-options',
+        allowMultiple: true,
+        splitCommas: true,
+        hide: true,
+      );
   }
 
   @override
@@ -67,6 +77,8 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter'],
       previewDart2: argResults['preview-dart-2'],
+      extraFrontEndOptions: argResults['extra-front-end-options'],
+      extraGenSnapshotOptions: argResults['extra-gen-snapshot-options'],
     );
     status?.stop();
 
@@ -95,6 +107,8 @@ Future<String> buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
+  List<String> extraFrontEndOptions: null,
+  List<String> extraGenSnapshotOptions: null,
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -105,6 +119,8 @@ Future<String> buildAotSnapshot(
       outputPath: outputPath,
       interpreter: interpreter,
       previewDart2: previewDart2,
+      extraFrontEndOptions: extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
   } on String catch (error) {
     // Catch the String exceptions thrown from the `runCheckedSync` methods below.
@@ -121,6 +137,8 @@ Future<String> _buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
+  List<String> extraFrontEndOptions: null,
+  List<String> extraGenSnapshotOptions: null,
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
@@ -220,6 +238,10 @@ Future<String> _buildAotSnapshot(
     '--causal_async_stacks',
   ];
 
+  if (extraGenSnapshotOptions != null) {
+    genSnapshotCmd.addAll(extraGenSnapshotOptions);
+  }
+
   if (!interpreter) {
     genSnapshotCmd.add('--embedder_entry_points_manifest=$vmEntryPoints');
     genSnapshotCmd.add('--embedder_entry_points_manifest=$ioEntryPoints');
@@ -280,6 +302,7 @@ Future<String> _buildAotSnapshot(
     mainPath = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
+      extraFrontEndOptions: extraFrontEndOptions,
     );
   }
 

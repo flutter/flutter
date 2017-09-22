@@ -149,7 +149,13 @@ abstract class FlutterCommand extends Command<Null> {
         : null,
       previewDart2: argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
-        : false);
+        : false,
+      extraFrontEndOptions: argParser.options.containsKey('extra-front-end-options')
+          ? argResults['extra-front-end-options']
+          : null,
+      extraGenSnapshotOptions: argParser.options.containsKey('extra-gen-snapshot-options')
+          ? argResults['extra-gen-snapshot-options']
+          : null);
   }
 
   void setupApplicationPackages() {

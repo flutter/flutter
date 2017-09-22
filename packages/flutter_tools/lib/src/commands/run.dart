@@ -155,6 +155,9 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the\n'
             'results out to "refresh_benchmark.json", and exit. This flag is\n'
             'intended for use in generating automated flutter benchmarks.');
+
+    argParser.addOption('extra-front-end-options', hide: true);
+    argParser.addOption('extra-gen-snapshot-options', hide: true);
   }
 
   List<Device> devices;
