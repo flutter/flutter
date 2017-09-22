@@ -221,9 +221,13 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///
 /// See also:
 ///
+///  * [MaterialRectCenterArcTween], which interpolates a rect along a circular
+///    arc between the begin and end [Rect]'s centers.
 ///  * [Tween], for a discussion on how to use interpolation objects.
 ///  * [MaterialPointArcTween], the analogue for [Offset] interporation.
 ///  * [RectTween], which does a linear rectangle interpolation.
+///  * [Hero.createRectTween], which can be used to specify the tween that defines
+///    a hero's path.
 class MaterialRectArcTween extends RectTween {
   /// Creates a [Tween] for animating [Rect]s along a circular arc.
   ///
@@ -321,5 +325,91 @@ class MaterialRectArcTween extends RectTween {
   @override
   String toString() {
     return '$runtimeType($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+  }
+}
+
+/// A [Tween] that interpolates a [Rect] by moving it along a circular
+/// arc from [begin.center] to [end.center] while interpoloting the rectangle's
+/// width and height.
+///
+/// The arc that defines that center of the interpolated rectangle as it morphs
+/// from [begin] to [end] is a [MaterialPointArcTween].
+///
+/// See also:
+///
+///  * [MaterialRectArcTween], A [Tween] that interpolates a [Rect] by having
+///    its opposite corners follow circular arcs.
+///  * [Tween], for a discussion on how to use interpolation objects.
+///  * [MaterialPointArcTween], the analogue for [Offset] interporation.
+///  * [RectTween], which does a linear rectangle interpolation.
+///  * [Hero.createRectTween], which can be used to specify the tween that defines
+///    a hero's path.
+class MaterialRectCenterArcTween extends RectTween {
+  /// Creates a [Tween] for animating [Rect]s along a circular arc.
+  ///
+  /// The [begin] and [end] properties must be non-null before the tween is
+  /// first used, but the arguments can be null if the values are going to be
+  /// filled in later.
+  MaterialRectCenterArcTween({
+    Rect begin,
+    Rect end,
+  }) : super(begin: begin, end: end);
+
+  bool _dirty = true;
+
+  void _initialize() {
+    assert(begin != null);
+    assert(end != null);
+    _centerArc = new MaterialPointArcTween(
+      begin: begin.center,
+      end: end.center,
+    );
+    _dirty = false;
+  }
+
+  /// If [begin] and [end] are non-null, returns a tween that interpolates
+  /// along a circular arc between [begin.center] and [end.center].
+  MaterialPointArcTween get centerArc {
+    if (begin == null || end == null)
+      return null;
+    if (_dirty)
+      _initialize();
+    return _centerArc;
+  }
+  MaterialPointArcTween _centerArc;
+
+  @override
+  set begin(Rect value) {
+    if (value != begin) {
+      super.begin = value;
+      _dirty = true;
+    }
+  }
+
+  @override
+  set end(Rect value) {
+    if (value != end) {
+      super.end = value;
+      _dirty = true;
+    }
+  }
+
+  @override
+  Rect lerp(double t) {
+    if (_dirty)
+      _initialize();
+    if (t == 0.0)
+      return begin;
+    if (t == 1.0)
+      return end;
+    final Offset center = _centerArc.lerp(t);
+    final double width = lerpDouble(begin.width, end.width, t);
+    final double height = lerpDouble(begin.height, end.height, t);
+    return new Rect.fromLTWH(center.dx - width / 2.0, center.dy - height / 2.0, width, height);
+  }
+
+  @override
+  String toString() {
+    return '$runtimeType($begin \u2192 $end; centerArc=$centerArc)';
   }
 }

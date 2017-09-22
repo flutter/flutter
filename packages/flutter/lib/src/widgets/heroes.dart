@@ -80,6 +80,7 @@ class Hero extends StatefulWidget {
   const Hero({
     Key key,
     @required this.tag,
+    this.createRectTween,
     @required this.child,
   }) : assert(tag != null),
        assert(child != null),
@@ -89,6 +90,19 @@ class Hero extends StatefulWidget {
   /// the tag of a hero on a [PageRoute] that we're navigating to or from, then
   /// a hero animation will be triggered.
   final Object tag;
+
+  /// Defines how the destination hero's bounds change as it flies from the starting
+  /// route to the destination route.
+  ///
+  /// A hero flight begins with the destination hero's [child] aligned with the
+  /// starting hero's child. The [RectTween] returned by this callback is used
+  /// to compute the hero's bounds as the flight animation's value goes from 0.0
+  /// to 1.0.
+  ///
+  /// If this property is null, the default, then the value of
+  /// [HeroController.createRectTween] is used. The [HeroController] created by
+  /// [MaterialApp] creates a [MaterialArcRectTween].
+  final CreateRectTween createRectTween;
 
   /// The widget subtree that will "fly" from one route to another during a
   /// [Navigator] push or pop transition.
@@ -230,8 +244,9 @@ class _HeroFlight {
   bool _aborted = false;
 
   RectTween _doCreateRectTween(Rect begin, Rect end) {
-    if (manifest.createRectTween != null)
-      return manifest.createRectTween(begin, end);
+    final CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
+    if (createRectTween != null)
+      return createRectTween(begin, end);
     return new RectTween(begin: begin, end: end);
   }
 

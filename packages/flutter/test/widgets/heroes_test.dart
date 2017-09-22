@@ -1005,4 +1005,119 @@ void main() {
     expect(find.text('456'), findsOneWidget);
 
   });
+
+  testWidgets('Hero createRectTween', (WidgetTester tester) async {
+    RectTween createRectTween(Rect begin, Rect end) {
+      return new MaterialRectCenterArcTween(begin: begin, end: end);
+    }
+
+    final Map<String, WidgetBuilder> createRectTweenHeroRoutes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => new Material(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: new Container(height: 100.0, width: 100.0, key: firstKey),
+            ),
+            new FlatButton(
+              child: const Text('two'),
+              onPressed: () { Navigator.pushNamed(context, '/two'); }
+            ),
+          ]
+        )
+      ),
+      '/two': (BuildContext context) => new Material(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            new SizedBox(
+              height: 200.0,
+              child: new FlatButton(
+                child: const Text('pop'),
+                onPressed: () { Navigator.pop(context); }
+              ),
+            ),
+            new Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: new Container(height: 200.0, width: 100.0, key: secondKey),
+            ),
+          ],
+        ),
+      ),
+    };
+
+    await tester.pumpWidget(new MaterialApp(routes: createRectTweenHeroRoutes));
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
+
+    final double epsilon = 0.001;
+    final Duration duration = const Duration(milliseconds: 300);
+    final Curve curve = Curves.fastOutSlowIn;
+    final MaterialPointArcTween pushCenterTween = new MaterialPointArcTween(
+      begin: const Offset(50.0, 50.0),
+      end: const Offset(400.0, 300.0),
+    );
+
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Verify that the center of the secondKey Hero flies along the
+    // pushCenterTween arc for the push /two flight.
+
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(50.0, 50.0));
+
+    await tester.pump(duration * 0.25);
+    Offset actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    Offset predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.25));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.5));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(secondKey));
+    predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.75));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0, 300.0));
+
+    // Verify that the center of the firstKey Hero flies along the
+    // pushCenterTween arc for the pop /two flight.
+
+    await tester.tap(find.text('pop'));
+    await tester.pump(); // begin navigation
+
+    final MaterialPointArcTween popCenterTween = new MaterialPointArcTween(
+      begin: const Offset(400.0, 300.0),
+      end: const Offset(50.0, 50.0),
+    );
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(400.0, 300.0));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.25));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.5));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pump(duration * 0.25);
+    actualHeroCenter = tester.getCenter(find.byKey(firstKey));
+    predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.75));
+    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
+  });
+
+
 }
