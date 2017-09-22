@@ -206,6 +206,7 @@ class _LocalizationsScope extends InheritedWidget {
     Key key,
     @required this.locale,
     @required this.localizationsState,
+    @required this.loadGeneration,
     Widget child,
   }) : super(key: key, child: child) {
     assert(localizationsState != null);
@@ -214,10 +215,14 @@ class _LocalizationsScope extends InheritedWidget {
   final Locale locale;
   final _LocalizationsState localizationsState;
 
+  /// A monotonically increasing number that changes after localizations
+  /// delegates have finished loading new data. When this number changes, it
+  /// triggers inherited widget notifications.
+  final int loadGeneration;
+
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    // Changes in Localizations.locale trigger a load(), see _LocalizationsState.didUpdateWidget()
-    return false;
+    return loadGeneration != old.loadGeneration;
   }
 }
 
@@ -431,6 +436,11 @@ class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
   Map<Type, dynamic> _typeToResources = <Type, dynamic>{};
 
+  /// A monotonically increasing number that increases after localizations
+  /// delegates have finished loading new data, triggering inherited widget
+  /// notifications.
+  int _loadGeneration = 0;
+
   Locale get locale => _locale;
   Locale _locale;
 
@@ -494,9 +504,8 @@ class _LocalizationsState extends State<Localizations> {
         setState(() {
           _typeToResources = value;
           _locale = locale;
+          _loadGeneration += 1;
         });
-        final InheritedElement scopeElement = _localizedResourcesScopeKey.currentContext;
-        scopeElement?.dispatchDidChangeDependencies();
       });
     }
   }
@@ -521,6 +530,7 @@ class _LocalizationsState extends State<Localizations> {
       key: _localizedResourcesScopeKey,
       locale: _locale,
       localizationsState: this,
+      loadGeneration: _loadGeneration,
       child: new Directionality(
         textDirection: _textDirection,
         child: widget.child,
