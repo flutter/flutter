@@ -1180,9 +1180,12 @@ void main() {
     // Pop route /twoInset before the push transition from / to /twoInset has finished.
     await tester.tap(find.text('pop'));
 
-    // We expect the hero to take the same path as it did flying
-    // from / to /twoInset as it does now, flying from
-    // '/twoInset' back to /.
+
+    // We expect the hero to take the same path as it did flying from /
+    // to /twoInset as it does now, flying from '/twoInset' back to /. The most
+    // important checks below are the first (x4) and last (x0): the hero should
+    // not jump from where it was when the push transition was interrupted by a
+    // pop, and it should end up where the push started.
 
     await tester.pump();
     expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x4, epsilon));

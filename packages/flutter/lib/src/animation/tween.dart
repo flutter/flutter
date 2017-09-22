@@ -178,7 +178,7 @@ class Tween<T extends dynamic> extends Animatable<T> {
   String toString() => '$runtimeType($begin \u2192 $end)';
 }
 
-/// An [Tween] that evaluates its [parent] in reverse.
+/// A [Tween] that evaluates its [parent] in reverse.
 class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent) : assert(parent != null), super(begin: parent.end, end: parent.begin);

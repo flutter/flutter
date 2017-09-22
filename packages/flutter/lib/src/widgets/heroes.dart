@@ -257,22 +257,22 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: manifest.toHero.widget,
       builder: (BuildContext context, Widget child) {
-        final RenderBox finalHeroBox = manifest.toHero.context?.findRenderObject();
-        if (_aborted || finalHeroBox == null || !finalHeroBox.attached) {
-          // The finalHero no longer exists or it's no longer the flight's destination.
+        final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject();
+        if (_aborted || toHeroBox == null || !toHeroBox.attached) {
+          // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
           if (_heroOpacity.isCompleted) {
             _heroOpacity = new Tween<double>(begin: 1.0, end: 0.0)
               .chain(new CurveTween(curve: new Interval(_proxyAnimation.value, 1.0)))
               .animate(_proxyAnimation);
           }
-        } else if (finalHeroBox.hasSize) {
-          // The finalHero has been laid out. If it's no longer where the hero animation is
+        } else if (toHeroBox.hasSize) {
+          // The toHero has been laid out. If it's no longer where the hero animation is
           // supposed to end up then recreate the heroRect tween.
           final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject();
-          final Offset finalHeroOrigin = finalHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-          if (finalHeroOrigin != heroRect.end.topLeft) {
-            final Rect heroRectEnd = finalHeroOrigin & heroRect.end.size;
+          final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
+          if (toHeroOrigin != heroRect.end.topLeft) {
+            final Rect heroRectEnd = toHeroOrigin & heroRect.end.size;
             heroRect = _doCreateRectTween(heroRect.begin, heroRectEnd);
           }
         }
@@ -382,6 +382,7 @@ class _HeroFlight {
         newManifest.toHero.startFlight();
         heroRect = _doCreateRectTween(heroRect.end, _globalBoundingBoxFor(newManifest.toHero.context));
       } else {
+        // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
         heroRect = _doCreateRectTween(heroRect.end, heroRect.begin);
       }
     } else {
