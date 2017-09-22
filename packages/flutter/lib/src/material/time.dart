@@ -17,7 +17,18 @@ enum DayPeriod {
   pm,
 }
 
-/// A value representing a time during the day.
+/// A value representing a time during the day, independent of the date that
+/// day might fall on or the time zone.
+///
+/// The time is represented by [hour] and [minute] pair.
+///
+/// See also:
+///
+///  * [showTimePicker], which returns this type.
+///  * [MaterialLocalizations], which provides methods for formatting values of
+///    this type according to the chosen [Locale].
+///  * [DateTime], which represents date and time, and is subject to eras and
+///    time zones.
 @immutable
 class TimeOfDay {
   /// The number of hours in one day, i.e. 24.
@@ -170,7 +181,7 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({@required TimeOfDayFormat of}) {
+HourFormat hourFormat({ @required TimeOfDayFormat of }) {
   switch (of) {
     case TimeOfDayFormat.h_colon_mm_space_a:
     case TimeOfDayFormat.a_space_h_colon_mm:

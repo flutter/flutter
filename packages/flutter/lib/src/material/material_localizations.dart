@@ -154,14 +154,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
       _nameToValue.addAll(localizations[_localeName]);
 
     if (intl.NumberFormat.localeExists(_localeName)) {
-      _cachedDecimalFormat = new intl.NumberFormat.decimalPattern(_localeName);
-      _cachedTwoDigitZeroPaddedFormat = new intl.NumberFormat('00', _localeName);
+      _decimalFormat = new intl.NumberFormat.decimalPattern(_localeName);
+      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', _localeName);
     } else if (intl.NumberFormat.localeExists(locale.languageCode)) {
-      _cachedDecimalFormat = new intl.NumberFormat.decimalPattern(locale.languageCode);
-      _cachedTwoDigitZeroPaddedFormat = new intl.NumberFormat('00', locale.languageCode);
+      _decimalFormat = new intl.NumberFormat.decimalPattern(locale.languageCode);
+      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', locale.languageCode);
     } else {
-      _cachedDecimalFormat = new intl.NumberFormat.decimalPattern();
-      _cachedTwoDigitZeroPaddedFormat = new intl.NumberFormat('00');
+      _decimalFormat = new intl.NumberFormat.decimalPattern();
+      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00');
     }
   }
 
@@ -175,13 +175,13 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// Formats numbers using variable length format with no zero padding.
   ///
-  /// See also [_cachedTwoDigitZeroPaddedFormat].
-  intl.NumberFormat _cachedDecimalFormat;
+  /// See also [_twoDigitZeroPaddedFormat].
+  intl.NumberFormat _decimalFormat;
 
   /// Formats numbers as two-digits.
   ///
-  /// If the number is less than 10, zero pads it.
-  intl.NumberFormat _cachedTwoDigitZeroPaddedFormat;
+  /// If the number is less than 10, zero-pads it.
+  intl.NumberFormat _twoDigitZeroPaddedFormat;
 
   static String _computeLocaleName(Locale locale) {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -210,28 +210,26 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatHour(TimeOfDay timeOfDay) {
     switch (hourFormat(of: timeOfDayFormat)) {
       case HourFormat.HH:
-        return _cachedTwoDigitZeroPaddedFormat.format(timeOfDay.hour);
+        return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
         return formatDecimal(timeOfDay.hour);
       case HourFormat.h:
-        int hourOfPeriod = timeOfDay.hourOfPeriod;
-        if (hourOfPeriod == 0)
-          hourOfPeriod = 12;
-        return formatDecimal(hourOfPeriod);
+        final int hour = timeOfDay.hourOfPeriod;
+        return formatDecimal(hour == 0 ? 12 : hour);
     }
     return null;
   }
 
   @override
   String formatMinute(TimeOfDay timeOfDay) {
-    return _cachedTwoDigitZeroPaddedFormat.format(timeOfDay.minute);
+    return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
   }
 
   /// Formats a [number] using local decimal number format.
   ///
-  /// Prints locale-appropriate thousands separator, if necessary.
+  /// Inserts locale-appropriate thousands separator, if necessary.
   String formatDecimal(int number) {
-    return _cachedDecimalFormat.format(number);
+    return _decimalFormat.format(number);
   }
 
   @override
@@ -243,7 +241,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     //   formatting of the time of day.
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
-    //   no matter what date the day falls in.
+    //   no matter what date the day falls on.
     switch (timeOfDayFormat) {
       case TimeOfDayFormat.h_colon_mm_space_a:
         return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
