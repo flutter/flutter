@@ -25,11 +25,7 @@ abstract class Gradient {
   const Gradient();
 
   /// Creates a [Shader] for this gradient to fill the given rect.
-  ///
-  /// If the gradient's configuration is text-direction-dependent, for example
-  /// it uses [FractionalOffsetDirection] objects instead of [FractionalOffset]
-  /// objects, then the `textDirection` argument must not be null.
-  Shader createShader(Rect rect, { TextDirection textDirection });
+  Shader createShader(Rect rect);
 }
 
 /// A 2D linear gradient.
@@ -95,37 +91,21 @@ class LinearGradient extends Gradient {
        assert(colors != null),
        assert(tileMode != null);
 
-  /// The offset at which stop 0.0 of the gradient is placed.
-  ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  /// The offset from coordinate (0.0,0.0) at which stop 0.0 of the
+  /// gradient is placed, in a coordinate space that maps the top left
+  /// of the paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
   ///
   /// For example, a begin offset of (0.0,0.5) is half way down the
   /// left side of the box.
-  ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
-  /// left in left-to-right contexts and the right in right-to-left contexts. If
-  /// a text-direction-dependent value is provided here, then the [createShader]
-  /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry begin;
+  final FractionalOffset begin;
 
-  /// The offset at which stop 1.0 of the gradient is placed.
+  /// The offset from coordinate (0.0,0.0) at which stop 1.0 of the
+  /// gradient is placed, in a coordinate space that maps the top left
+  /// of the paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
   ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
-  ///
-  /// For example, a begin offset of (1.0,0.5) is half way down the
+  /// For example, an end offset of (1.0,0.5) is half way down the
   /// right side of the box.
-  ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
-  /// left in left-to-right contexts and the right in right-to-left contexts. If
-  /// a text-direction-dependent value is provided here, then the [createShader]
-  /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry end;
+  final FractionalOffset end;
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -164,20 +144,16 @@ class LinearGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection }) {
+  Shader createShader(Rect rect) {
     return new ui.Gradient.linear(
-      begin.resolve(textDirection).withinRect(rect),
-      end.resolve(textDirection).withinRect(rect),
+      begin.withinRect(rect),
+      end.withinRect(rect),
       colors, stops, tileMode,
     );
   }
 
-  /// Returns a new [LinearGradient] with its properties (in particular the
-  /// colors) scaled by the given factor.
-  ///
-  /// If the factor is 1.0 or greater, then the gradient is returned unmodified.
-  /// If the factor is 0.0 or less, then the gradient is fully transparent.
-  /// Values in between scale the opacity of the colors.
+  /// Returns a new [LinearGradient] with its properties scaled by the given
+  /// factor.
   LinearGradient scale(double factor) {
     return new LinearGradient(
       begin: begin,
@@ -192,7 +168,7 @@ class LinearGradient extends Gradient {
   ///
   /// If either gradient is null, this function linearly interpolates from a
   /// a gradient that matches the other gradient in [begin], [end], [stops] and
-  /// [tileMode] and with the same [colors] but transparent (using [scale]).
+  /// [tileMode] and with the same [colors] but transparent.
   ///
   /// If neither gradient is null, they must have the same number of [colors].
   static LinearGradient lerp(LinearGradient a, LinearGradient b, double t) {
@@ -202,7 +178,11 @@ class LinearGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    assert(a.colors.length == b.colors.length, 'Cannot interpolate between two gradients with a different number of colors.');
+    // Interpolation is only possible when the lengths of colors and stops are
+    // the same or stops is null for one.
+    // TODO(xster): lerp unsimilar LinearGradients in the future by scaling
+    // lists of LinearGradients.
+    assert(a.colors.length == b.colors.length);
     assert(a.stops == null || b.stops == null || a.stops.length == b.stops.length);
     final List<Color> interpolatedColors = <Color>[];
     for (int i = 0; i < a.colors.length; i += 1)
@@ -215,8 +195,8 @@ class LinearGradient extends Gradient {
       interpolatedStops = a.stops ?? b.stops;
     }
     return new LinearGradient(
-      begin: FractionalOffsetGeometry.lerp(a.begin, b.begin, t),
-      end: FractionalOffsetGeometry.lerp(a.end, b.end, t),
+      begin: FractionalOffset.lerp(a.begin, b.begin, t),
+      end: FractionalOffset.lerp(a.end, b.end, t),
       colors: interpolatedColors,
       stops: interpolatedStops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode,
@@ -260,7 +240,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($begin, $end, $colors, $stops, $tileMode)';
+    return 'LinearGradient($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 
@@ -339,17 +319,7 @@ class RadialGradient extends Gradient {
   ///
   /// For example, an offset of (0.5,0.5) will place the radial
   /// gradient in the center of the box.
-  ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
-  ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
-  /// left in left-to-right contexts and the right in right-to-left contexts. If
-  /// a text-direction-dependent value is provided here, then the [createShader]
-  /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry center;
+  final FractionalOffset center;
 
   /// The radius of the gradient, as a fraction of the shortest side
   /// of the paint box.
@@ -398,11 +368,11 @@ class RadialGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection }) {
+  Shader createShader(Rect rect) {
     return new ui.Gradient.radial(
-      center.resolve(textDirection).withinRect(rect),
+      center.withinRect(rect),
       radius * rect.shortestSide,
-      colors, stops, tileMode,
+      colors, stops, tileMode
     );
   }
 
@@ -443,6 +413,6 @@ class RadialGradient extends Gradient {
 
   @override
   String toString() {
-    return '$runtimeType($center, $radius, $colors, $stops, $tileMode)';
+    return 'RadialGradient($center, $radius, $colors, $stops, $tileMode)';
   }
 }
