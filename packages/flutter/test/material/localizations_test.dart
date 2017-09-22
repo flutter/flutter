@@ -25,6 +25,18 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
   bool shouldReload(FooMaterialLocalizationsDelegate old) => false;
 }
 
+/// A localizations delegate that does not contain any useful data, and is only
+/// used to trigger didChangeDependencies upon locale change.
+class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
+  @override
+  Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
+
+  @override
+  bool shouldReload(_DummyLocalizationsDelegate old) => true;
+}
+
+class DummyLocalizations {}
+
 Widget buildFrame({
   Locale locale,
   Iterable<LocalizationsDelegate<dynamic>> delegates,
@@ -294,6 +306,7 @@ void main() {
   });
 
   testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
+    // PageView calls ScrollPosition.dispose() during didChangeDependencies.
     await tester.pumpWidget(new MaterialApp(
       supportedLocales: const <Locale>[
         const Locale('en', 'US'),
@@ -302,7 +315,6 @@ void main() {
       localizationsDelegates: <_DummyLocalizationsDelegate>[
         new _DummyLocalizationsDelegate(),
       ],
-      // PageView calls ScrollPosition.dispose() during didChangeDependencies.
       home: new PageView(),
     ));
 
@@ -311,13 +323,3 @@ void main() {
     await tester.pumpWidget(new Container());
   });
 }
-
-class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
-  @override
-  Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
-
-  @override
-  bool shouldReload(_DummyLocalizationsDelegate old) => false;
-}
-
-class DummyLocalizations {}

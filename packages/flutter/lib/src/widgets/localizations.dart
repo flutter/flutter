@@ -215,9 +215,9 @@ class _LocalizationsScope extends InheritedWidget {
   final Locale locale;
   final _LocalizationsState localizationsState;
 
-  /// A monotonically increasing number that changes when localization delegates
-  /// load new data. When this number changes, it triggers inherited widget
-  /// notifications.
+  /// A monotonically increasing number that changes after localizations
+  /// delegates have finished loading new data. When this number changes, it
+  /// triggers inherited widget notifications.
   final int loadGeneration;
 
   @override
@@ -436,9 +436,10 @@ class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
   Map<Type, dynamic> _typeToResources = <Type, dynamic>{};
 
-  /// A monotonically increasing number that increases every time delegates load
-  /// new data, triggering inherited widget notifications.
-  int _loadGeneration;
+  /// A monotonically increasing number that increases after localizations
+  /// delegates have finished loading new data, triggering inherited widget
+  /// notifications.
+  int _loadGeneration = 0;
 
   Locale get locale => _locale;
   Locale _locale;
@@ -447,7 +448,6 @@ class _LocalizationsState extends State<Localizations> {
   void initState() {
     super.initState();
     load(widget.locale);
-    _loadGeneration = 0;
   }
 
   bool _anyDelegatesShouldReload(Localizations old) {

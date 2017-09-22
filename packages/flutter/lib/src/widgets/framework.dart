@@ -3287,13 +3287,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void didChangeDependencies() {
     assert(_active); // otherwise markNeedsBuild is a no-op
+    _debugCheckOwnerBuildTargetExists('didChangeDependencies');
+    markNeedsBuild();
+  }
+
+  void _debugCheckOwnerBuildTargetExists(String methodName) {
     assert(() {
       if (owner._debugCurrentBuildTarget == null) {
         throw new FlutterError(
-          'didChangeDependencies for ${widget.runtimeType} was called at an '
-          'inappropriate time. It may only be called while the widgets are '
-          'being built. A possible cause of this error is when '
-          'didChangeDependencies is called during one of:\n'
+          '$methodName for ${widget.runtimeType} was called at an '
+          'inappropriate time.\n'
+          '\n'
+          'It may only be called while the widgets are being built. A possible '
+          'cause of this error is when $methodName is called during '
+          'one of:\n'
           '\n'
           ' * network I/O event\n'
           ' * file I/O event\n'
@@ -3303,7 +3310,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     });
-    markNeedsBuild();
   }
 
   /// Returns a description of what caused this element to be created.
@@ -3968,22 +3974,7 @@ class InheritedElement extends ProxyElement {
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDidChangeDependencies() {
-    assert(() {
-      if (owner._debugCurrentBuildTarget == null) {
-        throw new FlutterError(
-          'dispatchDidChangeDependencies for ${widget.runtimeType} was called '
-          'at an inappropriate time. It may only be called while the widgets '
-          'are being built. A possible cause of this error is when '
-          'dispatchDidChangeDependencies is called during one of:\n'
-          '\n'
-          ' * network I/O event\n'
-          ' * file I/O event\n'
-          ' * timer\n'
-          ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
-        );
-      }
-      return true;
-    });
+    _debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies');
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
