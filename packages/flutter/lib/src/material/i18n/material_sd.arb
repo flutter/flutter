@@ -15,8 +15,6 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow جي $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow کان $rowCount تقريبن",
   "rowsPerPageTitle": "رني پاسي وارو صفحو",
-  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
-  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount شيون چونڊيل",
   "cancelButtonLabel": "منسوخ ڪيو",
   "closeButtonLabel": "بند ڪريو",

@@ -24,9 +24,7 @@ void validateLocalizations(
   bool explainMissingKeys = false;
   for (final String locale in localeToResources.keys) {
     final Map<String, String> resources = localeToResources[locale];
-    final Set<String> keys = new Set<String>.from(
-      resources.keys.map<String>((String key) => key.startsWith('@') ? key.substring(1) : key)
-    );
+    final Set<String> keys = new Set<String>.from(resources.keys);
 
     // Make sure keys are valid (i.e. they also exist in the canonical
     // localizations)
@@ -39,9 +37,25 @@ void validateLocalizations(
     if (locale.length == 2) {
       final Map<String, dynamic> attributes = localeToAttributes[locale];
       final List<String> missingKeys = <String>[];
+
+      // Whether `key` corresponds to one of the plural variations. Many
+      // languages require only a subset of these variations, so we do not
+      // require them so long as the "Other" variation exists.
+      bool isPluralVariation(String key) {
+        final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
+        final Match pluralMatch = pluralRegexp.firstMatch(key);
+        
+        if (pluralMatch == null)
+          return false;
+
+        final String prefix = pluralMatch[1];
+        return resources.containsKey('${prefix}Other');
+      }
+
       for (final String missingKey in canonicalKeys.difference(keys)) {
         final dynamic attribute = attributes[missingKey];
-        if (attribute is! Map || !attribute.containsKey('notUsed'))
+        final bool intentionallyOmitted = attribute is Map && attribute.containsKey('notUsed');
+        if (!intentionallyOmitted && !isPluralVariation(missingKey))
           missingKeys.add(missingKey);
       }
       if (missingKeys.isNotEmpty) {

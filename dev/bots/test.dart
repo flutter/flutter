@@ -251,6 +251,8 @@ Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
     print(
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
       '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
+      '${bold}Command:$red $commandDescription$reset\n'
+      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
       '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
     );
     exit(1);

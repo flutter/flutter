@@ -15,8 +15,6 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",
   "rowsPerPageTitle": "ردیف در صفحه:",
-  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
-  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount آیتم های انتخاب شده",
   "cancelButtonLabel": "لغو",
   "closeButtonLabel": "بستن",

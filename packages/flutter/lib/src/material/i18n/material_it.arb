@@ -15,8 +15,6 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow di $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow di circa $rowCount",
   "rowsPerPageTitle": "Righe per pagina:",
-  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
-  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount selezionati",
   "cancelButtonLabel": "ANNULLA",
   "closeButtonLabel": "CHIUDI",

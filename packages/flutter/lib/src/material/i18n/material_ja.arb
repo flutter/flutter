@@ -15,8 +15,6 @@
   "pageRowsInfoTitle": "$rowCount行中の$firstRow–$lastRow",
   "pageRowsInfoTitleApproximate": "約$rowCount行中の$firstRow–$lastRow",
   "rowsPerPageTitle": "1ページあたりの行数：",
-  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
-  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount個のアイテムが選択されています",
   "cancelButtonLabel": "キャンセル",
   "closeButtonLabel": "閉じる",

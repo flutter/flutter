@@ -15,8 +15,6 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow מתוך $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow מתוך כ $rowCount",
   "rowsPerPageTitle": "שורות לעמוד:",
-  "@selectedRowCountTitleZero": { "notUsed": "TODO: translate or explain why omitted" },
-  "@selectedRowCountTitleOne": { "notUsed": "TODO: translate or explain why omitted" },
   "selectedRowCountTitleOther": "$selectedRowCount פריטים שנבחרו",
   "cancelButtonLabel": "ביטול",
   "closeButtonLabel": "סגור",
