@@ -341,11 +341,11 @@ TEST_F(ParagraphTest, LeftAlignParagraph) {
             paragraph->GetParagraphStyle().text_align);
 
   // Tests for GetGlyphPositionAtCoordinate()
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 1), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 35), 68ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 70), 134ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 35), 134ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 1).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 35).position, 68ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 70).position, 134ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(2000, 35).position, 134ull);
 
   ASSERT_TRUE(Snapshot());
 }
@@ -884,28 +884,34 @@ TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateParagraph) {
   // the original text because the final trailing whitespaces are sometimes not
   // drawn (namely, when using "justify" alignment) and therefore are not active
   // glyphs.
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-10000, -10000), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-1, -1), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1), 1ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(300, 2), 10ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.2), 10ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(302, 2.6), 10ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.1), 10ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20), 18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(450, 20), 16ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90), 36ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90), 18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80), 0ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 90), 18ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 180), 36ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180), 54ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 180), 38ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270), 54ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 90), 19ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000), 77ull);
-  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(85, 10000), 74ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-10000, -10000).position,
+            0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-1, -1).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(0, 0).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(3, 3).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 1).position, 1ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(300, 2).position, 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.2).position, 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(302, 2.6).position, 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(301, 2.1).position, 10ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 20).position,
+            18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(450, 20).position, 16ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(100000, 90).position,
+            36ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(-100000, 90).position,
+            18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(20, -80).position, 0ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 90).position, 18ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 180).position, 36ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 180).position,
+            54ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(70, 180).position, 38ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(1, 270).position, 54ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(35, 90).position, 19ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(10000, 10000).position,
+            77ull);
+  ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(85, 10000).position, 74ull);
 }
 
 TEST_F(ParagraphTest, GetRectsForRangeParagraph) {

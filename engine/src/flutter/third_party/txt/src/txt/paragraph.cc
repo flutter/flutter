@@ -223,14 +223,10 @@ void Paragraph::Layout(double width, bool force) {
   lines_ = 0;
   line_widths_ = std::vector<double>();
   line_heights_ = std::vector<double>();
-  line_heights_.push_back(0);
   records_ = std::vector<PaintRecord>();
 
-  // Set padding elements to have a minimum point.
-  glyph_position_x_ = std::vector<std::vector<double>>();
-  glyph_position_x_.push_back(std::vector<double>());
-  std::vector<double> glyph_single_line_position_x;
-  glyph_single_line_position_x.push_back(0);
+  glyph_position_x_ = std::vector<std::vector<GlyphPosition>>();
+  std::vector<GlyphPosition> glyph_single_line_position_x;
   // Track the x of the previous run to maintain accurate xposition when
   // multiple SkTextBlobs make up a single line.
   double previous_run_x_position = 0.0f;
@@ -290,14 +286,14 @@ void Paragraph::Layout(double width, bool force) {
           break;
         case TextAlign::right: {
           for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
-            glyph_position_x_[y_index][i] +=
+            glyph_position_x_[y_index][i].start +=
                 width_ - breaker_.getWidths()[y_index];
           }
           break;
         }
         case TextAlign::center: {
           for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
-            glyph_position_x_[y_index][i] +=
+            glyph_position_x_[y_index][i].start +=
                 (width_ - breaker_.getWidths()[y_index]) / 2;
           }
           break;
@@ -433,12 +429,9 @@ void Paragraph::Layout(double width, bool force) {
                                ? 0
                                : layout.getX(glyph_index) - current_x_position;
           buffers.back()->pos[pos_index] = current_x_position + letter_spacing;
-          glyph_single_line_position_x.push_back(
-              current_x_position + previous_run_x_position + letter_spacing);
           buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
 
           float glyph_advance = layout.getCharAdvance(character_index);
-          current_x_position += glyph_advance;
 
           // The glyph may be a ligature.  Determine how many input characters
           // are joined into this glyph.
@@ -448,13 +441,21 @@ void Paragraph::Layout(double width, bool force) {
               break;
           }
           size_t ligature_width = ligature_end - character_index;
-          prev_char_advance = glyph_advance / ligature_width;
+          float subglyph_advance = glyph_advance / ligature_width;
+          glyph_single_line_position_x.emplace_back(
+              current_x_position + previous_run_x_position + letter_spacing,
+              subglyph_advance);
+
           // Compute positions for the additional characters in the ligature.
           for (size_t i = 1; i < ligature_width; ++i) {
-            glyph_single_line_position_x.push_back(
-                glyph_single_line_position_x.back() + prev_char_advance);
+            glyph_single_line_position_x.emplace_back(
+                glyph_single_line_position_x.back().start + subglyph_advance,
+                subglyph_advance);
           }
+
+          current_x_position += glyph_advance;
           character_index += ligature_width;
+          prev_char_advance = subglyph_advance;
 
           // Check if the current Glyph is a whitespace and handle multiple
           // whitespaces in a row.
@@ -514,9 +515,6 @@ void Paragraph::Layout(double width, bool force) {
         line_heights_.push_back(
             (line_heights_.empty() ? 0 : line_heights_.back()) +
             roundf(max_line_spacing + max_descent));
-        glyph_single_line_position_x.push_back(
-            glyph_single_line_position_x.back() + prev_char_advance);
-        glyph_single_line_position_x.push_back(FLT_MAX);
         glyph_position_x_.push_back(glyph_single_line_position_x);
         prev_max_descent = max_descent;
         line_widths_.push_back(line_width);
@@ -533,8 +531,7 @@ void Paragraph::Layout(double width, bool force) {
         line_width = 0.0f;
         break_index += 1;
         lines_++;
-        glyph_single_line_position_x = std::vector<double>();
-        glyph_single_line_position_x.push_back(0);
+        glyph_single_line_position_x.clear();
       } else {
         x += layout.getAdvance();
       }
@@ -542,19 +539,6 @@ void Paragraph::Layout(double width, bool force) {
       layout_start = layout_end;
     }
   }
-  // Handle last line tasks.
-  y += roundf(max_line_spacing + prev_max_descent);
-  postprocess_line();
-  if (line_width != 0)
-    line_widths_.push_back(line_width);
-
-  // Finalize measurements
-  line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
-                          roundf(max_line_spacing + max_descent));
-  glyph_single_line_position_x.push_back(glyph_single_line_position_x.back() +
-                                         prev_char_advance);
-  glyph_single_line_position_x.push_back(FLT_MAX);
-  glyph_position_x_.push_back(glyph_single_line_position_x);
 
   // Remove justification on the last line.
   if (paragraph_style_.text_align == TextAlign::justify &&
@@ -650,7 +634,7 @@ size_t Paragraph::TextSize() const {
 }
 
 double Paragraph::GetHeight() const {
-  return line_heights_[line_heights_.size() - 2];
+  return line_heights_.size() ? line_heights_.back() : 0;
 }
 
 double Paragraph::GetLayoutWidth() const {
@@ -878,59 +862,60 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
 }
 
 SkRect Paragraph::GetCoordinatesForGlyphPosition(size_t pos) const {
-  size_t remainder = fmin(pos, text_.size());
-  remainder++;
-  size_t line = 1;
-  for (line = 1; line < line_heights_.size() - 1; ++line) {
-    if (remainder > glyph_position_x_[line].size() - 3) {
-      remainder -= glyph_position_x_[line].size() - 3;
+  size_t remainder = fmin(pos, text_.size() - 1);
+  size_t line;
+  for (line = 0; line < glyph_position_x_.size(); ++line) {
+    if (remainder >= glyph_position_x_[line].size()) {
+      remainder -= glyph_position_x_[line].size();
     } else {
       break;
     }
   }
-  return SkRect::MakeLTRB(glyph_position_x_[line][remainder],
-                          line_heights_[line - 1],
-                          remainder < glyph_position_x_[line].size() - 2
-                              ? glyph_position_x_[line][remainder + 1]
-                              : line_widths_[line - 1],
+  const std::vector<GlyphPosition>& line_glyph_position =
+      glyph_position_x_[line];
+  double glyph_end = (remainder < line_glyph_position.size() - 1)
+                         ? line_glyph_position[remainder + 1].start
+                         : line_glyph_position[remainder].glyph_end();
+  return SkRect::MakeLTRB(line_glyph_position[remainder].start,
+                          line > 0 ? line_heights_[line - 1] : 0, glyph_end,
                           line_heights_[line]);
 }
 
-size_t Paragraph::GetGlyphPositionAtCoordinate(
+Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
     double dx,
     double dy,
     bool using_glyph_center_as_boundary) const {
+  if (line_heights_.empty())
+    return PositionWithAffinity(0, DOWNSTREAM);
+
   size_t offset = 0;
-  size_t y_index = 1;
-  size_t prev_count = 0;
-  for (y_index = 1; y_index < line_heights_.size() - 2; ++y_index) {
-    if (dy < line_heights_[y_index]) {
-      offset += prev_count;
-      prev_count = glyph_position_x_[y_index - 1].size() - 3;
+  size_t y_index;
+  for (y_index = 0; y_index < line_heights_.size() - 1; ++y_index) {
+    if (dy < line_heights_[y_index])
       break;
-    } else {
-      offset += prev_count;
-      prev_count = glyph_position_x_[y_index].size() - 3;
-    }
+    offset += glyph_position_x_[y_index].size();
   }
-  if (y_index == line_heights_.size() - 2)
-    offset += prev_count;
-  prev_count = 0;
-  for (size_t x_index = 1; x_index < glyph_position_x_[y_index].size() - 1;
-       ++x_index) {
-    if (dx < glyph_position_x_[y_index][x_index] -
-                 (using_glyph_center_as_boundary
-                      ? (glyph_position_x_[y_index][x_index] -
-                         glyph_position_x_[y_index][x_index - 1]) /
-                            2.0f
-                      : 0)) {
+
+  const std::vector<GlyphPosition>& line_glyph_position =
+      glyph_position_x_[y_index];
+  size_t x_index;
+  for (x_index = 0; x_index < line_glyph_position.size(); ++x_index) {
+    double glyph_end = (x_index < line_glyph_position.size() - 1)
+                           ? line_glyph_position[x_index + 1].start
+                           : line_glyph_position[x_index].glyph_end();
+    double boundary;
+    if (using_glyph_center_as_boundary) {
+      boundary = (line_glyph_position[x_index].start + glyph_end) / 2.0f;
+    } else {
+      boundary = glyph_end;
+    }
+
+    if (dx < boundary)
       break;
-    } else {
-      offset += prev_count;
-      prev_count = 1;
-    }
+
+    offset++;
   }
-  return offset;
+  return PositionWithAffinity(offset, x_index > 0 ? UPSTREAM : DOWNSTREAM);
 }
 
 SkIPoint Paragraph::GetWordBoundary(size_t offset) const {

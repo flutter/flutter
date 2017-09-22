@@ -54,6 +54,15 @@ class Paragraph {
 
   ~Paragraph();
 
+  enum Affinity { UPSTREAM, DOWNSTREAM };
+
+  struct PositionWithAffinity {
+    const size_t position;
+    const Affinity affinity;
+
+    PositionWithAffinity(size_t p, Affinity a) : position(p), affinity(a) {}
+  };
+
   // Minikin Layout doLayout() and LineBreaker addStyleRun() has an
   // O(N^2) (according to benchmarks) time complexity where N is the total
   // number of characters. However, this is not significant for reasonably sized
@@ -116,7 +125,7 @@ class Paragraph {
   // typical use-case for this is when the cursor is meant to be on either side
   // of any given character. This allows the transition border to be middle of
   // each character.
-  size_t GetGlyphPositionAtCoordinate(
+  PositionWithAffinity GetGlyphPositionAtCoordinate(
       double dx,
       double dy,
       bool using_glyph_center_as_boundary = false) const;
@@ -180,9 +189,18 @@ class Paragraph {
   // TODO(garyq): Can we access this info without redundantly storing it here?
   std::vector<double> line_widths_;
   std::vector<double> line_heights_;
-  // Holds the laid out x positions of each glyph, as well as padding to make
-  // math on it simpler.
-  std::vector<std::vector<double>> glyph_position_x_;
+
+  struct GlyphPosition {
+    double start;
+    double advance;
+
+    GlyphPosition(double s, double a) : start(s), advance(a) {}
+
+    double glyph_end() const { return start + advance; }
+  };
+
+  // Holds the laid out x positions of each glyph.
+  std::vector<std::vector<GlyphPosition>> glyph_position_x_;
 
   // Set of glyph IDs that correspond to whitespace.
   std::set<GlyphID> whitespace_set_;
