@@ -1,5 +1,6 @@
 name: flutter_automated_tests
 dependencies:
+  args: ^0.13.7
   flutter:
     sdk: flutter
   flutter_test:

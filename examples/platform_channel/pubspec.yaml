@@ -1,6 +1,7 @@
 name: platform_channel
 
 dependencies:
+  args: ^0.13.7
   flutter:
     sdk: flutter
 

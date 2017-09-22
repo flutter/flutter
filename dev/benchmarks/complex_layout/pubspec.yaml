@@ -2,6 +2,7 @@ name: complex_layout
 description: A benchmark of a relatively complex layout.
 
 dependencies:
+  args: ^0.13.7
   flutter:
     sdk: flutter
   flutter_driver:

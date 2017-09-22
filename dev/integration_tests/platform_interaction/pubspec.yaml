@@ -2,6 +2,7 @@ name: platform_interaction
 description: Integration test for platform interactions.
 
 dependencies:
+  args: ^0.13.7
   flutter:
     sdk: flutter
   flutter_driver:

@@ -1,6 +1,7 @@
 name: hello_world
 
 dependencies:
+  args: ^0.13.7
   flutter:
     sdk: flutter
 
