@@ -244,7 +244,7 @@ class _HeroFlight {
   bool _aborted = false;
 
   RectTween _doCreateRectTween(Rect begin, Rect end) {
-    CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
+    final CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
     if (createRectTween != null)
       return createRectTween(begin, end);
     return new RectTween(begin: begin, end: end);

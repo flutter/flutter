@@ -367,8 +367,10 @@ class MaterialRectCenterArcTween extends RectTween {
     _dirty = false;
   }
 
+  /// If [begin] and [end] are non-null, returns a tween that interpolates
+  /// along a circular arc between [begin.center] and [end.center].
   MaterialPointArcTween get centerArc {
-    if (begin == null)
+    if (begin == null || end == null)
       return null;
     if (_dirty)
       _initialize();

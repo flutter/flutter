@@ -1093,7 +1093,7 @@ void main() {
     await tester.tap(find.text('pop'));
     await tester.pump(); // begin navigation
 
-    final popCenterTween = new MaterialPointArcTween(
+    final MaterialPointArcTween popCenterTween = new MaterialPointArcTween(
       begin: const Offset(400.0, 300.0),
       end: const Offset(50.0, 50.0),
     );
