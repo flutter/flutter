@@ -3287,6 +3287,22 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @mustCallSuper
   void didChangeDependencies() {
     assert(_active); // otherwise markNeedsBuild is a no-op
+    assert(() {
+      if (owner._debugCurrentBuildTarget == null) {
+        throw new FlutterError(
+          'didChangeDependencies for ${widget.runtimeType} was called at an '
+          'inappropriate time. It may only be called while the widgets are '
+          'being built. A possible cause of this error is when '
+          'didChangeDependencies is called during one of:\n'
+          '\n'
+          ' * network I/O event\n'
+          ' * file I/O event\n'
+          ' * timer\n'
+          ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
+        );
+      }
+      return true;
+    });
     markNeedsBuild();
   }
 
@@ -3952,6 +3968,22 @@ class InheritedElement extends ProxyElement {
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDidChangeDependencies() {
+    assert(() {
+      if (owner._debugCurrentBuildTarget == null) {
+        throw new FlutterError(
+          'dispatchDidChangeDependencies for ${widget.runtimeType} was called '
+          'at an inappropriate time. It may only be called while the widgets '
+          'are being built. A possible cause of this error is when '
+          'dispatchDidChangeDependencies is called during one of:\n'
+          '\n'
+          ' * network I/O event\n'
+          ' * file I/O event\n'
+          ' * timer\n'
+          ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
+        );
+      }
+      return true;
+    });
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant

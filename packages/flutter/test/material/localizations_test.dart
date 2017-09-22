@@ -293,4 +293,31 @@ void main() {
     expect(tester.widget<Text>(find.byKey(textKey)).data, 'id_JV');
   });
 
+  testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      supportedLocales: const <Locale>[
+        const Locale('en', 'US'),
+        const Locale('es', 'ES'),
+      ],
+      localizationsDelegates: <_DummyLocalizationsDelegate>[
+        new _DummyLocalizationsDelegate(),
+      ],
+      // PageView calls ScrollPosition.dispose() during didChangeDependencies.
+      home: new PageView(),
+    ));
+
+    await tester.binding.setLocale('es', 'US');
+    await tester.pump();
+    await tester.pumpWidget(new Container());
+  });
 }
+
+class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
+  @override
+  Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
+
+  @override
+  bool shouldReload(_DummyLocalizationsDelegate old) => false;
+}
+
+class DummyLocalizations {}
