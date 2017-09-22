@@ -59,7 +59,7 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
-    List<String> extraFrontEndOptions: null}) async {
+    List<String> extraFrontEndOptions}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );

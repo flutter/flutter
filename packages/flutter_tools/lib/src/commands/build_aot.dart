@@ -107,8 +107,8 @@ Future<String> buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
-  List<String> extraFrontEndOptions: null,
-  List<String> extraGenSnapshotOptions: null,
+  List<String> extraFrontEndOptions,
+  List<String> extraGenSnapshotOptions,
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -137,8 +137,8 @@ Future<String> _buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
-  List<String> extraFrontEndOptions: null,
-  List<String> extraGenSnapshotOptions: null,
+  List<String> extraFrontEndOptions,
+  List<String> extraGenSnapshotOptions,
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
