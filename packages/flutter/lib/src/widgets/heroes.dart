@@ -18,7 +18,7 @@ import 'transitions.dart';
 /// This is typically used with a [HeroController] to provide an animation for
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
-typedef RectTween CreateRectTween(Rect begin, Rect end);
+typedef Tween<Rect> CreateRectTween(Rect begin, Rect end);
 
 typedef void _OnFlightEnded(_HeroFlight flight);
 
@@ -95,7 +95,7 @@ class Hero extends StatefulWidget {
   /// route to the destination route.
   ///
   /// A hero flight begins with the destination hero's [child] aligned with the
-  /// starting hero's child. The [RectTween] returned by this callback is used
+  /// starting hero's child. The [Tween<Rect>] returned by this callback is used
   /// to compute the hero's bounds as the flight animation's value goes from 0.0
   /// to 1.0.
   ///
@@ -236,14 +236,14 @@ class _HeroFlight {
 
   final _OnFlightEnded onFlightEnded;
 
-  RectTween heroRect;
+  Tween<Rect> heroRect;
   Animation<double> _heroOpacity = kAlwaysCompleteAnimation;
   ProxyAnimation _proxyAnimation;
   _HeroFlightManifest manifest;
   OverlayEntry overlayEntry;
   bool _aborted = false;
 
-  RectTween _doCreateRectTween(Rect begin, Rect end) {
+  Tween<Rect> _doCreateRectTween(Rect begin, Rect end) {
     final CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
     if (createRectTween != null)
       return createRectTween(begin, end);
@@ -268,11 +268,11 @@ class _HeroFlight {
           }
         } else if (toHeroBox.hasSize) {
           // The toHero has been laid out. If it's no longer where the hero animation is
-          // supposed to end up (heroRect.end) then recreate the heroRect tween.
-          final RenderBox routeBox = manifest.toRoute.subtreeContext?.findRenderObject();
-          final Offset heroOriginEnd = toHeroBox.localToGlobal(Offset.zero, ancestor: routeBox);
-          if (heroOriginEnd != heroRect.end.topLeft) {
-            final Rect heroRectEnd = heroOriginEnd & heroRect.end.size;
+          // supposed to end up then recreate the heroRect tween.
+          final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject();
+          final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
+          if (toHeroOrigin != heroRect.end.topLeft) {
+            final Rect heroRectEnd = toHeroOrigin & heroRect.end.size;
             heroRect = _doCreateRectTween(heroRect.begin, heroRectEnd);
           }
         }
@@ -359,9 +359,13 @@ class _HeroFlight {
       assert(manifest.fromRoute == newManifest.toRoute);
       assert(manifest.toRoute == newManifest.fromRoute);
 
+      // The same heroRect tween is used in reverse, rather than creating
+      // a new heroRect with _doCreateRectTween(heroRect.end, heroRect.begin).
+      // That's because tweens like MaterialRectArcTween may create a different
+      // path for swapped begin and end parameters. We want the pop flight
+      // path to be the same (in reverse) as the push flight path.
       _proxyAnimation.parent = new ReverseAnimation(newManifest.animation);
-
-      heroRect = _doCreateRectTween(heroRect.end, heroRect.begin);
+      heroRect = new ReverseTween<Rect>(heroRect);
     } else if (manifest.type == _HeroFlightType.pop && newManifest.type == _HeroFlightType.push) {
       // A pop flight was interrupted by a push.
       assert(newManifest.animation.status == AnimationStatus.forward);
@@ -378,6 +382,7 @@ class _HeroFlight {
         newManifest.toHero.startFlight();
         heroRect = _doCreateRectTween(heroRect.end, _globalBoundingBoxFor(newManifest.toHero.context));
       } else {
+        // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
         heroRect = _doCreateRectTween(heroRect.end, heroRect.begin);
       }
     } else {
@@ -425,7 +430,7 @@ class HeroController extends NavigatorObserver {
   /// Creates a hero controller with the given [RectTween] constructor if any.
   ///
   /// The [createRectTween] argument is optional. If null, the controller uses a
-  /// linear [RectTween].
+  /// linear [Tween<Rect>].
   HeroController({ this.createRectTween });
 
   /// Used to create [RectTween]s that interpolate the position of heros in flight.

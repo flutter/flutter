@@ -26,6 +26,10 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
           child: const Text('two'),
           onPressed: () { Navigator.pushNamed(context, '/two'); }
         ),
+        new FlatButton(
+          child: const Text('twoInset'),
+          onPressed: () { Navigator.pushNamed(context, '/twoInset'); }
+        ),
       ]
     )
   ),
@@ -47,6 +51,34 @@ final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       ]
     )
   ),
+  // This route is the same as /two except that Hero 'a' is shifted to the right by
+  // 50 pixels. When the hero's in-flight bounds between / and /twoInset are animated
+  // using MaterialRectArcTween (the default) they'll follow a different path
+  // then when the flight starts at /twoInset and returns to /.
+  '/twoInset': (BuildContext context) => new Material(
+    child: new ListView(
+      key: routeTwoKey,
+      children: <Widget>[
+        new FlatButton(
+          child: const Text('pop'),
+          onPressed: () { Navigator.pop(context); }
+        ),
+        new Container(height: 150.0, width: 150.0),
+        new Card(
+          child: new Padding(
+            padding: const EdgeInsets.only(left: 50.0),
+            child: new Hero(tag: 'a', child: new Container(height: 150.0, width: 150.0, key: secondKey))
+          ),
+        ),
+        new Container(height: 150.0, width: 150.0),
+        new FlatButton(
+          child: const Text('three'),
+          onPressed: () { Navigator.push(context, new ThreeRoute()); },
+        ),
+      ]
+    )
+  ),
+
 };
 
 class ThreeRoute extends MaterialPageRoute<Null> {
@@ -1119,5 +1151,96 @@ void main() {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
   });
 
+  testWidgets('Pop interrupts push, reverses flight', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(routes: routes));
+    await tester.tap(find.text('twoInset'));
+    await tester.pump(); // begin navigation from / to /twoInset.
 
+    final double epsilon = 0.001;
+    final Duration duration = const Duration(milliseconds: 300);
+
+    await tester.pump();
+    final double x0 = tester.getTopLeft(find.byKey(secondKey)).dx;
+
+    // Flight begins with the secondKey Hero widget lined up with the firstKey widget.
+    expect(x0, 4.0);
+
+    await tester.pump(duration * 0.1);
+    final double x1 = tester.getTopLeft(find.byKey(secondKey)).dx;
+
+    await tester.pump(duration * 0.1);
+    final double x2 = tester.getTopLeft(find.byKey(secondKey)).dx;
+
+    await tester.pump(duration * 0.1);
+    final double x3 = tester.getTopLeft(find.byKey(secondKey)).dx;
+
+    await tester.pump(duration * 0.1);
+    final double x4 = tester.getTopLeft(find.byKey(secondKey)).dx;
+
+    // Pop route /twoInset before the push transition from / to /twoInset has finished.
+    await tester.tap(find.text('pop'));
+
+
+    // We expect the hero to take the same path as it did flying from /
+    // to /twoInset as it does now, flying from '/twoInset' back to /. The most
+    // important checks below are the first (x4) and last (x0): the hero should
+    // not jump from where it was when the push transition was interrupted by a
+    // pop, and it should end up where the push started.
+
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x4, epsilon));
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x3, epsilon));
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x2, epsilon));
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x1, epsilon));
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, closeTo(x0, epsilon));
+
+    // Below: show that a different pop Hero path is in fact taken after
+    // a completed push transition.
+
+    // Complete the pop transition and we're back to showing /.
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(firstKey)).dx, 4.0); // Card contents are inset by 4.0.
+
+    // Push /twoInset and wait for the transition to finish.
+    await tester.tap(find.text('twoInset'));
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(find.byKey(secondKey)).dx, 54.0);
+
+    // Start the pop transition from /twoInset to /.
+    await tester.tap(find.text('pop'));
+    await tester.pump();
+
+    // Now the firstKey widget is the flying hero widget and it starts
+    // out lined up with the secondKey widget.
+    await tester.pump();
+    expect(tester.getTopLeft(find.byKey(firstKey)).dx, 54.0);
+
+    // x0-x4 are the top left x coordinates for the beginning 40% of
+    // the incoming flight. Advance the outgoing flight to the same
+    // place.
+    await tester.pump(duration * 0.6);
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(firstKey)).dx, isNot(closeTo(x4, epsilon)));
+
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(firstKey)).dx, isNot(closeTo(x3, epsilon)));
+
+    // At this point the flight path arcs do start to get pretty close so
+    // there's no point in comparing them.
+    await tester.pump(duration * 0.1);
+
+    // After the remaining 40% of the incoming flight is complete, we
+    // expect to end up where the outgoing flight started.
+    await tester.pump(duration * 0.1);
+    expect(tester.getTopLeft(find.byKey(firstKey)).dx, x0);
+  });
 }
