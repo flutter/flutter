@@ -67,7 +67,7 @@
 
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
-  "@pageRowInfoTitle": {
+  "@pageRowsInfoTitle": {
     "description": "Title for the [PaginatedDataTable]'s row info footer",
     "type": "text"
   },

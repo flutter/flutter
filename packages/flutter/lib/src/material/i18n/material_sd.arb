@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "HH:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Sindhi time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Sindhi time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "اوپن جي مينڊيٽ مينيو",
   "backButtonTooltip": "پوئتي",
   "closeButtonTooltip": "بند ڪريو",

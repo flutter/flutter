@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart lib/src/material/i18n material
+// dart dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -136,6 +136,8 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
   },
   "es_US": const <String, String>{
     "timeOfDayFormat": r"h:mm a",
+    "anteMeridiemAbbreviation": r"AM",
+    "postMeridiemAbbreviation": r"PM",
   },
   "fa": const <String, String>{
     "timeOfDayFormat": r"H:mm",
@@ -339,7 +341,9 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "rowsPerPageTitle": r"Строки на страницу:",
     "aboutListTileTitle": r"O $applicationName",
     "licensesPageTitle": r"Лицензии",
-    "selectedRowCountTitleOther": r"Выбранно $selectedRowCount строк",
+    "selectedRowCountTitleZero": r"Строки не выбраны",
+    "selectedRowCountTitleOne": r"Выбрана 1 строка",
+    "selectedRowCountTitleOther": r"Выбрано $selectedRowCount строк",
     "cancelButtonLabel": r"ОТМЕНИТЬ",
     "closeButtonLabel": r"ЗАКРЫТЬ",
     "continueButtonLabel": r"ПРОДОЛЖИТЬ",

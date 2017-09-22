@@ -1,3 +1,5 @@
 {
-  "timeOfDayFormat": "h:mm a"
+  "timeOfDayFormat": "h:mm a",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM"
 }

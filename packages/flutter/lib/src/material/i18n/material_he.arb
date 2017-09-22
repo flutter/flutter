@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "H:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Hebrew time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Hebrew time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "פתח תפריט ניווט",
   "backButtonTooltip": "אחורה",
   "closeButtonTooltip": "סגור",

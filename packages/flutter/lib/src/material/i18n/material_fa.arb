@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "H:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Farsi time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Farsi time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "منوی ناوبری را باز کنید",
   "backButtonTooltip": "بازگشت",
   "closeButtonTooltip": "بستن",

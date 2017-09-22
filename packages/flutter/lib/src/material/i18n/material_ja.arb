@@ -1,5 +1,7 @@
 {
   "timeOfDayFormat": "H:mm",
+  "@anteMeridiemAbbreviation": { "notUsed": "Japanese time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Japanese time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "ナビゲーションメニューを開く",
   "backButtonTooltip": "戻る",
   "closeButtonTooltip": "閉じる",
