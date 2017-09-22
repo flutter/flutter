@@ -50,7 +50,7 @@ template("flutter_content_handler") {
              "//garnet/public/lib/ui/scenic:client",
              "//garnet/public/lib/ui/input/fidl",
              "//garnet/public/lib/ui/views/fidl",
-             "//apps/maxwell/services/context",
+             "//peridot/public/lib/context/fidl",
              "//dart/runtime/bin:libdart_builtin",
              "//dart/runtime/platform:libdart_platform",
              "//flutter/assets",
