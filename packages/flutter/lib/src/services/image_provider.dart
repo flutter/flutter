@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
-import 'dart:ui' show Size, Locale, hashValues;
+import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -36,8 +36,9 @@ class ImageConfiguration {
     this.bundle,
     this.devicePixelRatio,
     this.locale,
+    this.textDirection,
     this.size,
-    this.platform
+    this.platform,
   });
 
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -48,15 +49,17 @@ class ImageConfiguration {
     AssetBundle bundle,
     double devicePixelRatio,
     Locale locale,
+    TextDirection textDirection,
     Size size,
-    String platform
+    String platform,
   }) {
     return new ImageConfiguration(
       bundle: bundle ?? this.bundle,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       locale: locale ?? this.locale,
+      textDirection: textDirection ?? this.textDirection,
       size: size ?? this.size,
-      platform: platform ?? this.platform
+      platform: platform ?? this.platform,
     );
   }
 
@@ -69,6 +72,9 @@ class ImageConfiguration {
 
   /// The language and region for which to select the image.
   final Locale locale;
+
+  /// The reading direction of the language for which to select the image.
+  final TextDirection textDirection;
 
   /// The size at which the image will be rendered.
   final Size size;
@@ -92,6 +98,7 @@ class ImageConfiguration {
     return typedOther.bundle == bundle
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.locale == locale
+        && typedOther.textDirection == textDirection
         && typedOther.size == size
         && typedOther.platform == platform;
   }
@@ -120,6 +127,12 @@ class ImageConfiguration {
       if (hasArguments)
         result.write(', ');
       result.write('locale: $locale');
+      hasArguments = true;
+    }
+    if (textDirection != null) {
+      if (hasArguments)
+        result.write(', ');
+      result.write('textDirection: $textDirection');
       hasArguments = true;
     }
     if (size != null) {

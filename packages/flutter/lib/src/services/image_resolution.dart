@@ -224,8 +224,9 @@ class AssetImage extends AssetBundleImageProvider {
     final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
     for (String candidate in candidates)
       mapping[_parseScale(candidate)] = candidate;
-    // TODO(ianh): implement support for config.locale, config.size, config.platform
-    // (then document this over in the Image.asset docs)
+    // TODO(ianh): implement support for config.locale, config.textDirection,
+    // config.size, config.platform (then document this over in the Image.asset
+    // docs)
     return _findNearest(mapping, config.devicePixelRatio);
   }
 

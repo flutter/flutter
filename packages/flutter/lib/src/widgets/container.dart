@@ -71,7 +71,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     return new RenderDecoratedBox(
       decoration: decoration,
       position: position,
-      configuration: createLocalImageConfiguration(context)
+      configuration: createLocalImageConfiguration(context),
     );
   }
 

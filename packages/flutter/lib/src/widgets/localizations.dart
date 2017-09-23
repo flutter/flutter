@@ -385,9 +385,16 @@ class Localizations extends StatefulWidget {
 
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
-  static Locale localeOf(BuildContext context) {
+  ///
+  /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
+  /// method will throw an exception, unless the `nullOk` argument is set to
+  /// true, in which case it returns null.
+  static Locale localeOf(BuildContext context, { bool nullOk: false }) {
     assert(context != null);
+    assert(nullOk != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    if (nullOk && scope == null)
+      return null;
     assert(scope != null, 'a Localizations ancestor was not found');
     return scope.localizationsState.locale;
   }

@@ -37,22 +37,26 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
        _padding = padding,
        _textDirection = textDirection {
     this.child = child;
-    _applyUpdate();
   }
 
-  // The resolved absolute insets.
   EdgeInsets _resolvedPadding;
 
-  void _applyUpdate() {
-    final EdgeInsets resolvedPadding = padding.resolve(textDirection);
-    assert(resolvedPadding.isNonNegative);
-    if (_resolvedPadding != resolvedPadding) {
-      _resolvedPadding = resolvedPadding;
-      markNeedsLayout();
-    }
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
+    _resolvedPadding = padding.resolve(textDirection);
+    assert(_resolvedPadding.isNonNegative);
+  }
+
+  void _markNeedResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.
+  ///
+  /// If this is set to an [EdgeInsetsDirectional] object, then [textDirection]
+  /// must not be null.
   EdgeInsetsGeometry get padding => _padding;
   EdgeInsetsGeometry _padding;
   set padding(EdgeInsetsGeometry value) {
@@ -61,17 +65,20 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     if (_padding == value)
       return;
     _padding = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   /// The text direction with which to resolve [padding].
+  ///
+  /// This may be changed to null, but only after the [padding] has been changed
+  /// to a value that does not depend on the direction.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   /// The padding in the scroll direction on the side nearest the 0.0 scroll direction.
@@ -82,6 +89,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     assert(constraints != null);
     assert(constraints.axisDirection != null);
     assert(constraints.growthDirection != null);
+    assert(_resolvedPadding != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         return _resolvedPadding.bottom;
@@ -103,6 +111,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     assert(constraints != null);
     assert(constraints.axisDirection != null);
     assert(constraints.growthDirection != null);
+    assert(_resolvedPadding != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
         return _resolvedPadding.top;
@@ -125,6 +134,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   double get mainAxisPadding {
     assert(constraints != null);
     assert(constraints.axis != null);
+    assert(_resolvedPadding != null);
     return _resolvedPadding.along(constraints.axis);
   }
 
@@ -137,6 +147,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
   double get crossAxisPadding {
     assert(constraints != null);
     assert(constraints.axis != null);
+    assert(_resolvedPadding != null);
     switch (constraints.axis) {
       case Axis.horizontal:
         return _resolvedPadding.vertical;
@@ -154,6 +165,8 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
 
   @override
   void performLayout() {
+    _resolve();
+    assert(_resolvedPadding != null);
     final double beforePadding = this.beforePadding;
     final double afterPadding = this.afterPadding;
     final double mainAxisPadding = this.mainAxisPadding;
@@ -248,6 +261,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     assert(constraints != null);
     assert(constraints.axisDirection != null);
     assert(constraints.growthDirection != null);
+    assert(_resolvedPadding != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
       case AxisDirection.up:
       case AxisDirection.down:

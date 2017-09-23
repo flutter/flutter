@@ -161,8 +161,8 @@ class AnimatedList extends StatefulWidget {
   /// AnimatedListState animatedList = AnimatedList.of(context);
   /// ```
   static AnimatedListState of(BuildContext context, { bool nullOk: false }) {
-    assert(nullOk != null);
     assert(context != null);
+    assert(nullOk != null);
     final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
     if (nullOk || result != null)
       return result;
