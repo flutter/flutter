@@ -359,6 +359,7 @@ class RenderTable extends RenderBox {
     int rows,
     Map<int, TableColumnWidth> columnWidths,
     TableColumnWidth defaultColumnWidth: const FlexColumnWidth(1.0),
+    @required TextDirection textDirection,
     TableBorder border,
     List<Decoration> rowDecorations,
     ImageConfiguration configuration: ImageConfiguration.empty,
@@ -370,7 +371,9 @@ class RenderTable extends RenderBox {
        assert(rows == null || rows >= 0),
        assert(rows == null || children == null),
        assert(defaultColumnWidth != null),
-       assert(configuration != null) {
+       assert(textDirection != null),
+       assert(configuration != null),
+       _textDirection = textDirection {
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = <RenderBox>[]..length = _columns * _rows;
@@ -486,6 +489,17 @@ class RenderTable extends RenderBox {
     if (defaultColumnWidth == value)
       return;
     _defaultColumnWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The direction in which the columns are ordered.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     markNeedsLayout();
   }
 
@@ -977,6 +991,8 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
+    final int rows = this.rows;
+    final int columns = this.columns;
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
@@ -986,12 +1002,25 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = new List<double>(columns);
-    _rowTops.clear();
-    positions[0] = 0.0;
-    for (int x = 1; x < columns; x += 1)
-      positions[x] = positions[x-1] + widths[x-1];
-    _columnLefts = positions;
+    double tableWidth;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        positions[columns - 1] = 0.0;
+        for (int x = columns - 2; x >= 0; x -= 1)
+          positions[x] = positions[x+1] + widths[x+1];
+        _columnLefts = positions.reversed.toList();
+        tableWidth = positions.first + widths.first;
+        break;
+      case TextDirection.ltr:
+        positions[0] = 0.0;
+        for (int x = 1; x < columns; x += 1)
+          positions[x] = positions[x-1] + widths[x-1];
+        _columnLefts = positions;
+        tableWidth = positions.last + widths.last;
+        break;
+    }
     assert(!positions.any((double value) => value == null));
+    _rowTops.clear();
     _baselineDistance = null;
     // then, lay out each row
     double rowTop = 0.0;
@@ -1070,7 +1099,7 @@ class RenderTable extends RenderBox {
       rowTop += rowHeight;
     }
     _rowTops.add(rowTop);
-    size = constraints.constrain(new Size(positions.last + widths.last, rowTop));
+    size = constraints.constrain(new Size(tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
   }
 
@@ -1119,7 +1148,13 @@ class RenderTable extends RenderBox {
     }
     assert(_rows == _rowTops.length - 1);
     assert(_columns == _columnLefts.length);
-    border?.paint(context.canvas, offset & size, rows: _rowTops, columns: _columnLefts);
+    if (border != null) {
+      // The border rect might not fill the entire height of this render object
+      // if the rows underflow. We always force the columns to fill the width of
+      // the render object, which means the columns cannot underflow.
+      final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, _rowTops.last);
+      border?.paint(context.canvas, borderRect, rows: _rowTops, columns: _columnLefts);
+    }
   }
 
   @override

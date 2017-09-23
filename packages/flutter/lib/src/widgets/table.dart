@@ -7,6 +7,7 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'image.dart';
@@ -97,6 +98,7 @@ class Table extends RenderObjectWidget {
     this.children: const <TableRow>[],
     this.columnWidths,
     this.defaultColumnWidth: const FlexColumnWidth(1.0),
+    this.textDirection,
     this.border,
     this.defaultVerticalAlignment: TableCellVerticalAlignment.top,
     this.textBaseline
@@ -179,6 +181,11 @@ class Table extends RenderObjectWidget {
   /// `columnWidths[i]` is null.
   final TableColumnWidth defaultColumnWidth;
 
+  /// The direction in which the columns are ordered.
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
+
   /// The style to use when painting the boundary and interior divisions of the table.
   final TableBorder border;
 
@@ -200,6 +207,7 @@ class Table extends RenderObjectWidget {
       rows: children.length,
       columnWidths: columnWidths,
       defaultColumnWidth: defaultColumnWidth,
+      textDirection: textDirection ?? Directionality.of(context),
       border: border,
       rowDecorations: _rowDecorations,
       configuration: createLocalImageConfiguration(context),
@@ -215,6 +223,7 @@ class Table extends RenderObjectWidget {
     renderObject
       ..columnWidths = columnWidths
       ..defaultColumnWidth = defaultColumnWidth
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..border = border
       ..rowDecorations = _rowDecorations
       ..configuration = createLocalImageConfiguration(context)
