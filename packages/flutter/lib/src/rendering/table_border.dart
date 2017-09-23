@@ -154,33 +154,30 @@ class TableBorder {
   ///
   /// Uniform borders are more efficient to paint than more complex borders.
   ///
-  /// The `rows` argument specifies the vertical positions of the rows,
-  /// specified in terms of the top of each row, in order from top to bottom,
-  /// relative to the given rectangle, with an additional entry for the bottom
-  /// of the last row (so the first entry should be zero and the last entry
-  /// should be `rect.height`).
+  /// The `rows` argument specifies the vertical positions between the rows,
+  /// relative to the given rectangle. For example, if the table contained two
+  /// rows of height 100.0 each, then `rows` would contain a single value,
+  /// 100.0, which is the vertical position between the two rows (relative to
+  /// the top edge of `rect`).
   ///
-  /// The `columns` argument has slightly different semantics; it specifies the
-  /// horizontal positions of the columns, specified in terms of the _left_ edge
-  /// of each row, relative to the given rectangle, in left-to-right order (so
-  /// the first entry should be zero). There is no extra entry for the right
-  /// edge of the last column.
+  /// The `columns` argument specifies the horizontal positions between the
+  /// columns, relative to the given rectangle. For example, if the table
+  /// contained two columns of height 100.0 each, then `columns` would contain a
+  /// single value, 100.0, which is the vertical position between the two
+  /// columns (relative to the left edge of `rect`).
   ///
-  /// There must be at least one row and at least one column, so the `rows` list
-  /// should at a minimum have two values, and the `columns` argument one value.
-  ///
-  /// The [verticalInside] border is only drawn if there are at least columns
-  /// rows. The [horizontalInside] border is only drawn if there are at least
-  /// two rows. The vertical borders are drawn below the horizontal borders.
+  /// The [verticalInside] border is only drawn if there are at least two
+  /// columns. The [horizontalInside] border is only drawn if there are at least
+  /// two rows. The horizontal borders are drawn after the vertical borders.
   ///
   /// The outer borders (in the order [top], [right], [bottom], [left], with
-  /// [left] above the others) are painted above the inner borders.
+  /// [left] above the others) are painted after the inner borders.
   ///
   /// The paint order is particularly notable in the case of
   /// partially-transparent borders.
   void paint(Canvas canvas, Rect rect, {
-    @required List<double> rows,
-    @required List<double> columns,
+    @required Iterable<double> rows,
+    @required Iterable<double> columns,
   }) {
     // properties can't be null
     assert(top != null);
@@ -194,13 +191,9 @@ class TableBorder {
     assert(canvas != null);
     assert(rect != null);
     assert(rows != null);
-    assert(rows.length >= 2);
-    assert(rows.first == 0.0);
-    assert(rows.last == rect.height);
+    assert(rows.isEmpty || (rows.first > 0.0 && rows.last < rect.height));
     assert(columns != null);
-    assert(columns.isNotEmpty);
-    assert(columns.first == 0.0);
-    assert(columns.last < rect.width);
+    assert(columns.isEmpty || (columns.first > 0.0 && columns.last < rect.width));
 
     final Paint paint = new Paint();
     final Path path = new Path();
@@ -212,9 +205,9 @@ class TableBorder {
           ..strokeWidth = verticalInside.width
           ..style = PaintingStyle.stroke;
         path.reset();
-        for (int x = 1; x < columns.length; x += 1) {
-          path.moveTo(rect.left + columns[x], rect.top);
-          path.lineTo(rect.left + columns[x], rect.bottom);
+        for (double x in columns) {
+          path.moveTo(rect.left + x, rect.top);
+          path.lineTo(rect.left + x, rect.bottom);
         }
         canvas.drawPath(path, paint);
         break;
@@ -229,9 +222,9 @@ class TableBorder {
           ..strokeWidth = horizontalInside.width
           ..style = PaintingStyle.stroke;
         path.reset();
-        for (int y = 1; y < rows.length; y += 1) {
-          path.moveTo(rect.left, rect.top + rows[y]);
-          path.lineTo(rect.right, rect.top + rows[y]);
+        for (double y in rows) {
+          path.moveTo(rect.left, rect.top + y);
+          path.lineTo(rect.right, rect.top + y);
         }
         canvas.drawPath(path, paint);
         break;
