@@ -10,11 +10,11 @@ import 'basic_types.dart';
 
 const double _kScreenEdgeMargin = 10.0;
 
-/// Position a box either above or bellow a target box specified in the global
+/// Position a box either above or below a target box specified in the global
 /// coordinate system.
 ///
-/// The target box is specified by [size] and [target] and the box being
-/// positioned is specified by [childSize]. [verticalOffset] is the amount of
+/// The target box is specified by `size` and `target` and the box being
+/// positioned is specified by `childSize`. `verticalOffset` is the amount of
 /// vertical distance between the boxes.
 ///
 /// Used by [Tooltip] to position a tooltip relative to its parent.

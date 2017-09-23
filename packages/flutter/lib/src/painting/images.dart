@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'border.dart';
+import 'borders.dart';
 import 'box_fit.dart';
 import 'fractional_offset.dart';
 
