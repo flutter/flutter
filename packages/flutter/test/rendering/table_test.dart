@@ -16,7 +16,7 @@ RenderBox sizedBox(double width, double height) {
 void main() {
   test('Table control test; tight', () {
     RenderTable table;
-    layout(table = new RenderTable());
+    layout(table = new RenderTable(textDirection: TextDirection.ltr));
 
     expect(table.size.width, equals(800.0));
     expect(table.size.height, equals(600.0));
@@ -41,7 +41,7 @@ void main() {
 
   test('Table control test; loose', () {
     RenderTable table;
-    layout(new RenderPositionedBox(child: table = new RenderTable()));
+    layout(new RenderPositionedBox(child: table = new RenderTable(textDirection: TextDirection.ltr)));
 
     expect(table.size, equals(const Size(0.0, 0.0)));
   });
@@ -52,8 +52,9 @@ void main() {
       columns: 5,
       rows: 5,
       defaultColumnWidth: const IntrinsicColumnWidth(),
+      textDirection: TextDirection.ltr,
       defaultVerticalAlignment: TableCellVerticalAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic
+      textBaseline: TextBaseline.alphabetic,
     )));
 
     expect(table.size, equals(const Size(0.0, 0.0)));
@@ -143,7 +144,8 @@ void main() {
     RenderBox child;
     table = new RenderTable(
       columns: 5,
-      rows: 5
+      rows: 5,
+      textDirection: TextDirection.ltr,
     );
     table.setChild(4, 4, child = sizedBox(10.0, 10.0));
 
@@ -159,7 +161,7 @@ void main() {
     final RenderBox child1 = new RenderPositionedBox();
     final RenderBox child2 = new RenderPositionedBox();
     final RenderBox child3 = new RenderPositionedBox();
-    table = new RenderTable();
+    table = new RenderTable(textDirection: TextDirection.ltr);
     table.setFlatChildren(3, <RenderBox>[child1, new RenderPositionedBox(), child2,
                                          new RenderPositionedBox(), child3, new RenderPositionedBox()]);
     expect(table.rows, equals(2));

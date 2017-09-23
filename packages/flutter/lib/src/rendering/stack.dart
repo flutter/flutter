@@ -298,7 +298,7 @@ class RenderStack extends RenderBox
   RenderStack({
     List<RenderBox> children,
     FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
-    @required TextDirection textDirection,
+    TextDirection textDirection,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip,
   }) : assert(alignment != null),
@@ -569,7 +569,7 @@ class RenderIndexedStack extends RenderStack {
   RenderIndexedStack({
     List<RenderBox> children,
     FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
-    @required TextDirection textDirection,
+    TextDirection textDirection,
     int index: 0,
   }) : _index = index, super(
     children: children,

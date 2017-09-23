@@ -583,7 +583,7 @@ class DataTable extends StatelessWidget {
 
     return new Table(
       columnWidths: tableColumns.asMap(),
-      children: tableRows
+      children: tableRows,
     );
   }
 }

@@ -198,9 +198,9 @@ class TableBorder {
     assert(rows.first == 0.0);
     assert(rows.last == rect.height);
     assert(columns != null);
-    assert(columns.length >= 2);
+    assert(columns.isNotEmpty);
     assert(columns.first == 0.0);
-    assert(columns.last == rect.width);
+    assert(columns.last < rect.width);
 
     final Paint paint = new Paint();
     final Path path = new Path();
