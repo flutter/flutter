@@ -432,7 +432,6 @@ class ListTile extends StatelessWidget {
         data: iconThemeData,
         child: new Container(
           margin: const EdgeInsetsDirectional.only(start: 16.0),
-          width: 40.0,
           alignment: FractionalOffsetDirectional.centerEnd,
           child: trailing,
         ),
