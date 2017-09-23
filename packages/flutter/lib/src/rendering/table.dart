@@ -973,7 +973,7 @@ class RenderTable extends RenderBox {
 
   // cache the table geometry for painting purposes
   final List<double> _rowTops = <double>[];
-  List<double> _columnLefts;
+  Iterable<double> _columnLefts;
 
   /// Returns the position and dimensions of the box that the given
   /// row covers, in this render object's coordinate space (so the
@@ -1008,7 +1008,7 @@ class RenderTable extends RenderBox {
         positions[columns - 1] = 0.0;
         for (int x = columns - 2; x >= 0; x -= 1)
           positions[x] = positions[x+1] + widths[x+1];
-        _columnLefts = positions.reversed.toList();
+        _columnLefts = positions.reversed;
         tableWidth = positions.first + widths.first;
         break;
       case TextDirection.ltr:
@@ -1153,7 +1153,9 @@ class RenderTable extends RenderBox {
       // if the rows underflow. We always force the columns to fill the width of
       // the render object, which means the columns cannot underflow.
       final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, _rowTops.last);
-      border?.paint(context.canvas, borderRect, rows: _rowTops, columns: _columnLefts);
+      final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 2);
+      final Iterable<double> columns = _columnLefts.skip(1);
+      border.paint(context.canvas, borderRect, rows: rows, columns: columns);
     }
   }
 
