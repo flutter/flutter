@@ -25,7 +25,7 @@ void main() {
               return new Container(
                 key: new ValueKey<int>(index),
                 height: 100.0,
-                child: new Text("$index"),
+                child: new Text('$index'),
               );
             },
           ),

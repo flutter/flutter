@@ -33,13 +33,13 @@ void main() {
     expect(tester.renderObjectList<RenderBox>(find.byType(DecoratedBox)), hasLength(4));
 
     for (RenderBox box in tester.renderObjectList<RenderBox>(find.byType(DecoratedBox))) {
-      expect(box.size.width, equals(100.0), reason: "child width");
-      expect(box.size.height, equals(100.0), reason: "child height");
+      expect(box.size.width, equals(100.0), reason: 'child width');
+      expect(box.size.height, equals(100.0), reason: 'child height');
     }
 
     final RenderBox grid = tester.renderObject(find.byType(GridView));
-    expect(grid.size.width, equals(200.0), reason: "grid width");
-    expect(grid.size.height, equals(200.0), reason: "grid height");
+    expect(grid.size.width, equals(200.0), reason: 'grid width');
+    expect(grid.size.height, equals(200.0), reason: 'grid height');
 
     expect(grid.debugNeedsLayout, false);
 
@@ -60,11 +60,11 @@ void main() {
     );
 
     for (RenderBox box in tester.renderObjectList<RenderBox>(find.byType(DecoratedBox))) {
-      expect(box.size.width, equals(50.0), reason: "child width");
-      expect(box.size.height, equals(50.0), reason: "child height");
+      expect(box.size.width, equals(50.0), reason: 'child width');
+      expect(box.size.height, equals(50.0), reason: 'child height');
     }
 
-    expect(grid.size.width, equals(200.0), reason: "grid width");
-    expect(grid.size.height, equals(50.0), reason: "grid height");
+    expect(grid.size.width, equals(200.0), reason: 'grid width');
+    expect(grid.size.height, equals(50.0), reason: 'grid height');
   });
 }

@@ -35,7 +35,7 @@ void main() {
 
     expect(log, equals(<MethodCall>[new MethodCall(
       'SystemChrome.setPreferredOrientations',
-      <String>["DeviceOrientation.portraitUp"],
+      <String>['DeviceOrientation.portraitUp'],
     )]));
   });
 
@@ -52,7 +52,7 @@ void main() {
 
     expect(log, equals(<MethodCall>[new MethodCall(
       'SystemChrome.setApplicationSwitcherDescription',
-      <String, dynamic>{"label":"Example label","primaryColor":4278255360}
+      <String, dynamic>{'label':'Example label','primaryColor':4278255360}
     )]));
   });
 
@@ -82,7 +82,7 @@ void main() {
 
     expect(log, equals(<MethodCall>[new MethodCall(
       'SystemChrome.setEnabledSystemUIOverlays',
-      <String>["SystemUiOverlay.top"],
+      <String>['SystemUiOverlay.top'],
     )]));
   });
 }

@@ -27,7 +27,7 @@ import 'route.dart';
 ///  4. Finally if all else fails [onUnknownRoute] is called.
 ///
 /// These navigation properties are not shared with any sibling [CupertinoTabView]
-/// nor any ancestor or descendent [Navigator] instances.
+/// nor any ancestor or descendant [Navigator] instances.
 ///
 /// See also:
 ///
@@ -70,7 +70,7 @@ class CupertinoTabView extends StatelessWidget {
   /// instead.
   ///
   /// This routing table is not shared with any routing tables of ancestor or
-  /// descendent [Navigator]s.
+  /// descendant [Navigator]s.
   final Map<String, WidgetBuilder> routes;
 
   /// The route generator callback used when the tab view is navigated to a named route.
@@ -90,7 +90,7 @@ class CupertinoTabView extends StatelessWidget {
 
   /// The list of observers for the [Navigator] created in this tab view.
   ///
-  /// This list of observers is not shared with ancestor or descendent [Navigator]s.
+  /// This list of observers is not shared with ancestor or descendant [Navigator]s.
   final List<NavigatorObserver> navigatorObservers;
 
   @override

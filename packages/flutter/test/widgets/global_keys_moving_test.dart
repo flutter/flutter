@@ -10,7 +10,7 @@ class Item {
   GlobalKey key2 = new GlobalKey();
 
   @override
-  String toString() => "Item($key1, $key2)";
+  String toString() => 'Item($key1, $key2)';
 }
 List<Item> items = <Item>[new Item(), new Item()];
 

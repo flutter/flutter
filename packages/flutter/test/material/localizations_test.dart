@@ -135,8 +135,8 @@ void main() {
       expect(localizations.selectAllButtonLabel, isNotNull);
       expect(localizations.viewLicensesButtonLabel, isNotNull);
 
-      expect(localizations.aboutListTileTitle("FOO"), isNotNull);
-      expect(localizations.aboutListTileTitle("FOO"), contains("FOO"));
+      expect(localizations.aboutListTileTitle('FOO'), isNotNull);
+      expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));
 
       expect(localizations.selectedRowCountTitle(0), isNotNull);
       expect(localizations.selectedRowCountTitle(1), isNotNull);

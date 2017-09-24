@@ -269,7 +269,7 @@ void main() {
   });
 
   testWidgets(
-    'Same ThemeData reapplied does not trigger descendents rebuilds',
+    'Same ThemeData reapplied does not trigger descendants rebuilds',
     (WidgetTester tester) async {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));

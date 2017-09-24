@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test("RRect.contains()", () {
+  test('RRect.contains()', () {
     final RRect rrect = new RRect.fromRectAndCorners(
       new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(0.5),
@@ -26,7 +26,7 @@ void main() {
     expect(rrect.contains(const Offset(1.0, 1.99)), isTrue);
   });
 
-  test("RRect.contains() large radii", () {
+  test('RRect.contains() large radii', () {
     final RRect rrect = new RRect.fromRectAndCorners(
       new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
       topLeft: const Radius.circular(5000.0),

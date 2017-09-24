@@ -15,6 +15,6 @@ void main() {
 
     await SystemSound.play(SystemSoundType.click);
 
-    expect(log, equals(<MethodCall>[const MethodCall('SystemSound.play', "SystemSoundType.click")]));
+    expect(log, equals(<MethodCall>[const MethodCall('SystemSound.play', 'SystemSoundType.click')]));
   });
 }

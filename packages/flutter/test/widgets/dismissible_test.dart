@@ -93,7 +93,7 @@ Future<Null> dismissElement(WidgetTester tester, Finder finder, { DismissDirecti
       upLocation = tester.getBottomLeft(finder);
       break;
     default:
-      fail("unsupported gestureDirection");
+      fail('unsupported gestureDirection');
   }
 
   final TestGesture gesture = await tester.startGesture(downLocation, pointer: 5);

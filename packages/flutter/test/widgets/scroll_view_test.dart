@@ -373,7 +373,7 @@ void main() {
     expect(scrolled, isFalse);
   });
 
-  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behaviour', (WidgetTester tester) async {
+  testWidgets('physics:AlwaysScrollableScrollPhysics actually overrides primary:false default behavior', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       new Directionality(
@@ -392,7 +392,7 @@ void main() {
     expect(scrolled, isTrue);
   });
 
-  testWidgets('physics:ScrollPhysics actually overrides primary:true default behaviour', (WidgetTester tester) async {
+  testWidgets('physics:ScrollPhysics actually overrides primary:true default behavior', (WidgetTester tester) async {
     bool scrolled = false;
     await tester.pumpWidget(
       new Directionality(

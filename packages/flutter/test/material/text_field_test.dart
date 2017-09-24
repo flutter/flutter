@@ -960,7 +960,7 @@ void main() {
     expect(find.text('Suffix'), findsOneWidget);
 
     // Enter some text, and the prefix should still display.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1014,7 +1014,7 @@ void main() {
 
     // Enter some text, and the hint should disappear and the prefix and suffix
     // should appear.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1086,7 +1086,7 @@ void main() {
 
     // Enter some text, and the label should stay and the prefix should
     // remain.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 

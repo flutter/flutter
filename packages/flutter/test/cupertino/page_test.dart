@@ -14,7 +14,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? "1" : "2";
+              final String pageNumber = settings.name == '/' ? '1' : '2';
               return new Center(child: new Text('Page $pageNumber'));
             }
           );
@@ -150,7 +150,7 @@ void main() {
           return new CupertinoPageRoute<Null>(
             settings: settings,
             builder: (BuildContext context) {
-              final String pageNumber = settings.name == '/' ? "1" : "2";
+              final String pageNumber = settings.name == '/' ? '1' : '2';
               return new Center(child: new Text('Page $pageNumber'));
             }
           );

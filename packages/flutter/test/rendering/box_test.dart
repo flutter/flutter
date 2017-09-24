@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test("should size to render view", () {
+  test('should size to render view', () {
     final RenderBox root = new RenderDecoratedBox(
       decoration: new BoxDecoration(
         color: const Color(0xFF00FF00),
@@ -65,7 +65,7 @@ void main() {
     expect(outer.size.height, equals(600.0));
   });
 
-  test("should not have a 0 sized colored Box", () {
+  test('should not have a 0 sized colored Box', () {
     final RenderBox coloredBox = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );
@@ -107,7 +107,7 @@ void main() {
     );
   });
 
-  test("reparenting should clear position", () {
+  test('reparenting should clear position', () {
     final RenderDecoratedBox coloredBox = new RenderDecoratedBox(
       decoration: const BoxDecoration(),
     );

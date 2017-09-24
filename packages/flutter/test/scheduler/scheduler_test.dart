@@ -17,7 +17,7 @@ class TestStrategy {
 }
 
 void main() {
-  test("Tasks are executed in the right order", () {
+  test('Tasks are executed in the right order', () {
     final SchedulerBinding scheduler = new TestSchedulerBinding();
     final TestStrategy strategy = new TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;

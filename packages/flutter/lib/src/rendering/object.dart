@@ -1317,7 +1317,7 @@ class PipelineOwner {
 /// Hit testing is even more open-ended than layout. There is no method to
 /// override, you are expected to provide one.
 ///
-/// The general behaviour of your hit-testing method should be similar to the
+/// The general behavior of your hit-testing method should be similar to the
 /// behavior described for [RenderBox]. The main difference is that the input
 /// need not be an [Offset]. You are also allowed to use a different subclass of
 /// [HitTestEntry] when adding entries to the [HitTestResult]. When the
