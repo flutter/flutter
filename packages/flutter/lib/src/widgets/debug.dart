@@ -7,6 +7,7 @@ import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs 
 
 import 'package:flutter/foundation.dart';
 
+import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'table.dart';
@@ -195,6 +196,43 @@ bool debugCheckHasMediaQuery(BuildContext context) {
         '  ${element.debugGetCreatorChain(10)}\n'
         'Typically, the MediaQuery widget is introduced by the MaterialApp or '
         'WidgetsApp widget at the top of your application widget tree.'
+      );
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [Directionality] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasDirectionality(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasDirectionality(BuildContext context) {
+  assert(() {
+    if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
+      final Element element = context;
+      throw new FlutterError(
+        'No Directionality widget found.\n'
+        '${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'
+        'The specific widget that could not find a Directionality ancestor was:\n'
+        '  ${context.widget}\n'
+        'The ownership chain for the affected widget is:\n'
+        '  ${element.debugGetCreatorChain(10)}\n'
+        'Typically, the Directionality widget is introduced by the MaterialApp '
+        'or WidgetsApp widget at the top of your application widget tree. It '
+        'determines the ambient reading direction and is used, for example, to '
+        'determine how to lay out text, how to interpret "start" and "end" '
+        'values, and to resolve EdgeInsetsDirectional, '
+        'FractionalOffsetDirectional, and other *Directional objects.'
       );
     }
     return true;

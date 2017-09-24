@@ -3792,11 +3792,10 @@ class RichText extends LeafRenderObjectWidget {
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
-    final TextDirection direction = textDirection ?? Directionality.of(context);
-    assert(direction != null, 'A RichText was created with no textDirection and no ambient Directionality widget.');
+    assert(textDirection != null || debugCheckHasDirectionality(context));
     return new RenderParagraph(text,
       textAlign: textAlign,
-      textDirection: direction,
+      textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -3806,6 +3805,7 @@ class RichText extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
+    assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
       ..text = text
       ..textAlign = textAlign
