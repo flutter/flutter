@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
@@ -117,8 +118,8 @@ class SingleChildScrollView extends StatelessWidget {
   AxisDirection _getDirection(BuildContext context) {
     switch (scrollDirection) {
       case Axis.horizontal:
+        assert(debugCheckHasDirectionality(context));
         final TextDirection textDirection = Directionality.of(context);
-        assert(textDirection != null);
         final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
         return reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:

@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 /// [NavigationToolbar] is a layout helper to position 3 widgets or groups of
@@ -60,6 +61,7 @@ class NavigationToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     final List<Widget> children = <Widget>[];
 
     if (leading != null)
@@ -72,7 +74,6 @@ class NavigationToolbar extends StatelessWidget {
       children.add(new LayoutId(id: _ToolbarSlot.trailing, child: trailing));
 
     final TextDirection textDirection = Directionality.of(context);
-    assert(textDirection != null);
     return new CustomMultiChildLayout(
       delegate: new _ToolbarLayout(
         centerMiddle: centerMiddle,

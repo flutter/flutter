@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 
 const double _kOffset = 40.0; // distance to bottom of banner, at a 45 degree angle inwards
@@ -294,6 +295,7 @@ class Banner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert((textDirection != null && layoutDirection != null) || debugCheckHasDirectionality(context));
     return new CustomPaint(
       foregroundPainter: new BannerPainter(
         message: message,

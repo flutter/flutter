@@ -102,7 +102,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositioned - basics (LTR)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - basics (LTR)', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
     RenderBox box;
@@ -188,7 +188,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositioned - basics (RTL)', (WidgetTester tester) async {
+  testWidgets('AnimatedPositionedDirectional - basics (RTL)', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
     RenderBox box;
@@ -274,7 +274,7 @@ void main() {
     );
   });
 
-  testWidgets('AnimatedPositioned - interrupted animation', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - interrupted animation (VISUAL)', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
     RenderBox box;
@@ -289,10 +289,10 @@ void main() {
             top: 0.0,
             width: 100.0,
             height: 100.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -313,10 +313,10 @@ void main() {
             top: 100.0,
             width: 100.0,
             height: 100.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -337,10 +337,10 @@ void main() {
             top: 150.0,
             width: 100.0,
             height: 100.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -357,7 +357,7 @@ void main() {
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
   });
 
-  testWidgets('AnimatedPositioned - switching variables', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - switching variables (VISUAL)', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
     RenderBox box;
@@ -372,10 +372,10 @@ void main() {
             top: 0.0,
             width: 100.0,
             height: 100.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -396,10 +396,10 @@ void main() {
             top: 100.0,
             right: 100.0, // 700.0 from the left
             height: 100.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -414,6 +414,310 @@ void main() {
 
     box = key.currentContext.findRenderObject();
     expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
+  });
+
+  testWidgets('AnimatedPositionedDirectional - interrupted animation (LTR)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 0.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 100.0,
+              top: 100.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 150.0,
+              top: 150.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(100.0, 100.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(150.0, 150.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(200.0, 200.0)));
+  });
+
+  testWidgets('AnimatedPositionedDirectional - switching variables (LTR)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 0.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0, 50.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 100.0,
+              end: 100.0, // 700.0 from the start
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 100.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(350.0, 150.0)));
+  });
+
+  testWidgets('AnimatedPositionedDirectional - interrupted animation (RTL)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 0.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 100.0,
+              top: 100.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 150.0,
+              top: 150.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(700.0, 100.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(650.0, 150.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(600.0, 200.0)));
+  });
+
+  testWidgets('AnimatedPositionedDirectional - switching variables (RTL)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 0.0,
+              width: 100.0,
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(750.0, 50.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 0.0,
+              top: 100.0,
+              end: 100.0, // 700.0 from the start
+              height: 100.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 50.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 100.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(450.0, 150.0)));
   });
 
 }

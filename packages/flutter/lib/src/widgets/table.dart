@@ -202,6 +202,7 @@ class Table extends RenderObjectWidget {
 
   @override
   RenderTable createRenderObject(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     return new RenderTable(
       columns: children.isNotEmpty ? children[0].children.length : 0,
       rows: children.length,
@@ -218,6 +219,7 @@ class Table extends RenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderTable renderObject) {
+    assert(debugCheckHasDirectionality(context));
     assert(renderObject.columns == (children.isNotEmpty ? children[0].children.length : 0));
     assert(renderObject.rows == children.length);
     renderObject

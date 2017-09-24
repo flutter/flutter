@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
@@ -486,7 +487,8 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// See also:
 ///
 ///  * [AnimatedPositionedDirectional], which adapts to the ambient
-///    [Directionality].
+///    [Directionality] (the same as this widget, but for animating
+///    [PositionedDirectional]).
 class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its position implicitly.
   ///
@@ -545,14 +547,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The child's width.
   ///
-  /// Only two out of the three horizontal values (left, right, width) can be
-  /// set. The third must be null.
+  /// Only two out of the three horizontal values ([left], [right], [width]) can
+  /// be set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Only two out of the three vertical values (top, bottom, height) can be
-  /// set. The third must be null.
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can
+  /// be set. The third must be null.
   final double height;
 
   @override
@@ -597,7 +599,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
       right: _right?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
-      height: _height?.evaluate(animation)
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -613,21 +615,25 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
   }
 }
 
-/// Animated version of [PositionedDirectional] which automatically transitions the child's
-/// position over a given duration whenever the given position changes.
+/// Animated version of [PositionedDirectional] which automatically transitions
+/// the child's position over a given duration whenever the given position
+/// changes.
+///
+/// The ambient [Directionality] is used to determine whether [start] is to the
+/// left or to the right.
 ///
 /// Only works if it's the child of a [Stack].
 ///
 /// See also:
 ///
-///  * [AnimatedPositioned], which specifies the widget's position visually.
+///  * [AnimatedPositioned], which specifies the widget's position visually (the
+///  * same as this widget, but for animating [Positioned]).
 class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its position implicitly.
   ///
-  /// Only two out of the three horizontal values ([start], [end],
-  /// [width]), and only two out of the three vertical values ([top],
-  /// [bottom], [height]), can be set. In each case, at least one of
-  /// the three must be null.
+  /// Only two out of the three horizontal values ([start], [end], [width]), and
+  /// only two out of the three vertical values ([top], [bottom], [height]), can
+  /// be set. In each case, at least one of the three must be null.
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedPositionedDirectional({
@@ -662,14 +668,14 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
 
   /// The child's width.
   ///
-  /// Only two out of the three horizontal values (start, end, width) can be
-  /// set. The third must be null.
+  /// Only two out of the three horizontal values ([start], [end], [width]) can
+  /// be set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Only two out of the three vertical values (top, bottom, height) can be
-  /// set. The third must be null.
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can
+  /// be set. The third must be null.
   final double height;
 
   @override
@@ -707,14 +713,16 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 
   @override
   Widget build(BuildContext context) {
-    return new PositionedDirectional(
+    assert(debugCheckHasDirectionality(context));
+    return new Positioned.directional(
+      textDirection: Directionality.of(context),
       child: widget.child,
       start: _start?.evaluate(animation),
       top: _top?.evaluate(animation),
       end: _end?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
-      height: _height?.evaluate(animation)
+      height: _height?.evaluate(animation),
     );
   }
 
