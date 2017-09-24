@@ -77,6 +77,8 @@ void main() {
     double right(String text) => tester.getTopRight(find.text(text)).dx;
     double top(String text) => tester.getTopLeft(find.text(text)).dy;
     double bottom(String text) => tester.getBottomLeft(find.text(text)).dy;
+    double width(String text) => tester.getSize(find.text(text)).width;
+    double height(String text) => tester.getSize(find.text(text)).height;
 
     // 16.0 padding to the left and right of the leading and trailing widgets
     void testHorizontalGeometry() {
@@ -86,12 +88,14 @@ void main() {
         expect(left('subtitle'), 72.0);
       expect(left('title'), right('leading') + 16.0);
       expect(right('trailing'), 800.0 - 16.0);
+      expect(width('trailing'), 112.0);
     }
 
     void testVerticalGeometry(double expectedHeight) {
       expect(tester.getSize(find.byType(ListTile)), new Size(800.0, expectedHeight));
       if (hasSubtitle)
         expect(top('subtitle'), bottom('title'));
+      expect(height('trailing'), 14.0); // Fits on one line (doesn't wrap)
     }
 
     await tester.pumpWidget(buildFrame());
