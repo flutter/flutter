@@ -5,9 +5,10 @@ description: A framework for writing Flutter applications
 homepage: http://flutter.io
 
 dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
   collection: 1.14.3
   http: 0.11.3+14
-  intl: 0.15.1
+  intl: 0.15.1 # TODO(ianh): remove this, see https://github.com/flutter/flutter/issues/12050
   meta: 1.1.1
   typed_data: 1.1.4
   vector_math: 2.0.5
