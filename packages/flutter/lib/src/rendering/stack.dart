@@ -309,7 +309,6 @@ class RenderStack extends RenderBox
        _fit = fit,
        _overflow = overflow {
     addAll(children);
-    _applyUpdate();
   }
 
   bool _hasVisualOverflow = false;
@@ -320,15 +319,17 @@ class RenderStack extends RenderBox
       child.parentData = new StackParentData();
   }
 
-  // The resolved absolute insets.
   FractionalOffset _resolvedAlignment;
 
-  void _applyUpdate() {
-    final FractionalOffset resolvedAlignment = alignment.resolve(textDirection);
-    if (_resolvedAlignment != resolvedAlignment) {
-      _resolvedAlignment = resolvedAlignment;
-      markNeedsLayout();
-    }
+  void _resolve() {
+    if (_resolvedAlignment != null)
+      return;
+    _resolvedAlignment = alignment.resolve(textDirection);
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    markNeedsLayout();
   }
 
   /// How to align the non-positioned children in the stack.
@@ -337,24 +338,30 @@ class RenderStack extends RenderBox
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
+  ///
+  /// If this is set to a [FractionalOffsetDirectional] object, then
+  /// [textDirection] must not be null.
   FractionalOffsetGeometry get alignment => _alignment;
   FractionalOffsetGeometry _alignment;
   set alignment(FractionalOffsetGeometry value) {
     assert(value != null);
-    if (_alignment != value) {
-      _alignment = value;
-      _applyUpdate();
-    }
+    if (_alignment == value)
+      return;
+    _alignment = value;
+    _markNeedResolution();
   }
 
   /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after the [alignment] has been changed
+  /// to a value that does not depend on the direction.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      _applyUpdate();
-    }
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _markNeedResolution();
   }
 
   /// How to size the non-positioned children in the stack.
@@ -426,6 +433,8 @@ class RenderStack extends RenderBox
 
   @override
   void performLayout() {
+    _resolve();
+    assert(_resolvedAlignment != null);
     _hasVisualOverflow = false;
     bool hasNonPositionedChildren = false;
 

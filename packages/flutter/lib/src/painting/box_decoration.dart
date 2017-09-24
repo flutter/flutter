@@ -321,9 +321,20 @@ class _BoxDecorationPainter extends BoxPainter {
   ImageInfo _image;
 
   void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
+    // TODO(ianh): factor this out into a DecorationImage.paint method.
     final DecorationImage backgroundImage = _decoration.image;
     if (backgroundImage == null)
       return;
+
+    bool flipHorizontally = false;
+    if (backgroundImage.matchTextDirection) {
+      // We check this first so that the assert will fire immediately, not just when the
+      // image is ready.
+      assert(configuration.textDirection != null, 'matchTextDirection can only be used when a TextDirection is available.');
+      if (configuration.textDirection == TextDirection.rtl)
+        flipHorizontally = true;
+    }
+
     final ImageStream newImageStream = backgroundImage.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
       _imageStream?.removeListener(_imageListener);
@@ -350,9 +361,10 @@ class _BoxDecorationPainter extends BoxPainter {
       image: image,
       colorFilter: backgroundImage.colorFilter,
       fit: backgroundImage.fit,
-      alignment: backgroundImage.alignment,
+      alignment: backgroundImage.alignment.resolve(configuration.textDirection),
       centerSlice: backgroundImage.centerSlice,
       repeat: backgroundImage.repeat,
+      flipHorizontally: flipHorizontally,
     );
 
     if (clipPath != null)

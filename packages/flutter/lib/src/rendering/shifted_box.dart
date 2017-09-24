@@ -98,20 +98,20 @@ class RenderPadding extends RenderShiftedBox {
        assert(padding.isNonNegative),
        _textDirection = textDirection,
        _padding = padding,
-       super(child) {
-    _applyUpdate();
-  }
+       super(child);
 
-  // The resolved absolute insets.
   EdgeInsets _resolvedPadding;
 
-  void _applyUpdate() {
-    final EdgeInsets resolvedPadding = padding.resolve(textDirection);
-    assert(resolvedPadding.isNonNegative);
-    if (_resolvedPadding != resolvedPadding) {
-      _resolvedPadding = resolvedPadding;
-      markNeedsLayout();
-    }
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
+    _resolvedPadding = padding.resolve(textDirection);
+    assert(_resolvedPadding.isNonNegative);
+  }
+
+  void _markNeedResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
   }
 
   /// The amount to pad the child in each dimension.
@@ -126,21 +126,25 @@ class RenderPadding extends RenderShiftedBox {
     if (_padding == value)
       return;
     _padding = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   /// The text direction with which to resolve [padding].
+  ///
+  /// This may be changed to null, but only after the [padding] has been changed
+  /// to a value that does not depend on the direction.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   @override
   double computeMinIntrinsicWidth(double height) {
+    _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -150,6 +154,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
+    _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -159,6 +164,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -168,6 +174,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   double computeMaxIntrinsicHeight(double width) {
+    _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
     if (child != null) // next line relies on double.INFINITY absorption
@@ -177,6 +184,7 @@ class RenderPadding extends RenderShiftedBox {
 
   @override
   void performLayout() {
+    _resolve();
     assert(_resolvedPadding != null);
     if (child == null) {
       size = constraints.constrain(new Size(
@@ -226,19 +234,19 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   }) : assert(alignment != null),
        _alignment = alignment,
        _textDirection = textDirection,
-       super(child) {
-    _applyUpdate();
-  }
+       super(child);
 
-  // The resolved absolute alignment.
   FractionalOffset _resolvedAlignment;
 
-  void _applyUpdate() {
-    final FractionalOffset resolvedAlignment = alignment.resolve(textDirection);
-    if (_resolvedAlignment != resolvedAlignment) {
-      _resolvedAlignment = resolvedAlignment;
-      markNeedsLayout();
-    }
+  void _resolve() {
+    if (_resolvedAlignment != null)
+      return;
+    _resolvedAlignment = alignment.resolve(textDirection);
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    markNeedsLayout();
   }
 
   /// How to align the child.
@@ -251,7 +259,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// For example, a value of 0.5 means that the center of the child is aligned
   /// with the center of the parent.
   ///
-  /// If this is set to an [FractionalOffsetDirectional] object, then
+  /// If this is set to a [FractionalOffsetDirectional] object, then
   /// [textDirection] must not be null.
   FractionalOffsetGeometry get alignment => _alignment;
   FractionalOffsetGeometry _alignment;
@@ -263,17 +271,20 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
     if (_alignment == value)
       return;
     _alignment = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
     if (_textDirection == value)
       return;
     _textDirection = value;
-    _applyUpdate();
+    _markNeedResolution();
   }
 
   /// Apply the current [alignment] to the [child].
@@ -285,10 +296,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// This method must be called after the child has been laid out and
   /// this object's own size has been set.
   void alignChild() {
+    _resolve();
     assert(child != null);
     assert(!child.debugNeedsLayout);
     assert(child.hasSize);
     assert(hasSize);
+    assert(_resolvedAlignment != null);
     final BoxParentData childParentData = child.parentData;
     childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
   }

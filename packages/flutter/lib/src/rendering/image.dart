@@ -20,6 +20,10 @@ export 'package:flutter/painting.dart' show
 /// various fields on this class in more detail.
 class RenderImage extends RenderBox {
   /// Creates a render box that displays an image.
+  ///
+  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments
+  /// must not be null. The [textDirection] argument must not be null if
+  /// [alignment] will need resolving or if [matchTextDirection] is true.
   RenderImage({
     ui.Image image,
     double width,
@@ -28,20 +32,44 @@ class RenderImage extends RenderBox {
     Color color,
     BlendMode colorBlendMode,
     BoxFit fit,
-    FractionalOffset alignment,
+    FractionalOffsetGeometry alignment: FractionalOffset.center,
     ImageRepeat repeat: ImageRepeat.noRepeat,
-    Rect centerSlice
-  }) : _image = image,
-      _width = width,
-      _height = height,
-      _scale = scale,
-      _color = color,
-      _colorBlendMode = colorBlendMode,
-      _fit = fit,
-      _alignment = alignment,
-      _repeat = repeat,
-      _centerSlice = centerSlice {
+    Rect centerSlice,
+    bool matchTextDirection: false,
+    TextDirection textDirection,
+  }) : assert(scale != null),
+       assert(repeat != null),
+       assert(alignment != null),
+       assert(matchTextDirection != null),
+       _image = image,
+       _width = width,
+       _height = height,
+       _scale = scale,
+       _color = color,
+       _colorBlendMode = colorBlendMode,
+       _fit = fit,
+       _alignment = alignment,
+       _repeat = repeat,
+       _centerSlice = centerSlice,
+       _matchTextDirection = matchTextDirection,
+       _textDirection = textDirection {
     _updateColorFilter();
+  }
+
+  FractionalOffset _resolvedAlignment;
+  bool _flipHorizontally;
+
+  void _resolve() {
+    if (_resolvedAlignment != null)
+      return;
+    _resolvedAlignment = alignment.resolve(textDirection);
+    _flipHorizontally = matchTextDirection && textDirection == TextDirection.rtl;
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    _flipHorizontally = null;
+    markNeedsPaint();
   }
 
   /// The image to display.
@@ -147,19 +175,24 @@ class RenderImage extends RenderBox {
   }
 
   /// How to align the image within its bounds.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
+  ///
+  /// If this is set to a text-direction-dependent value, [textDirection] must
+  /// not be null.
+  FractionalOffsetGeometry get alignment => _alignment;
+  FractionalOffsetGeometry _alignment;
+  set alignment(FractionalOffsetGeometry value) {
+    assert(value != null);
     if (value == _alignment)
       return;
     _alignment = value;
-    markNeedsPaint();
+    _markNeedResolution();
   }
 
   /// How to repeat this image if it doesn't fill its layout bounds.
   ImageRepeat get repeat => _repeat;
   ImageRepeat _repeat;
   set repeat(ImageRepeat value) {
+    assert(value != null);
     if (value == _repeat)
       return;
     _repeat = value;
@@ -180,6 +213,44 @@ class RenderImage extends RenderBox {
       return;
     _centerSlice = value;
     markNeedsPaint();
+  }
+
+  /// Whether to paint the image in the direction of the [TextDirection].
+  ///
+  /// If this is true, then in [TextDirection.ltr] contexts, the image will be
+  /// drawn with its origin in the top left (the "normal" painting direction for
+  /// images); and in [TextDirection.rtl] contexts, the image will be drawn with
+  /// a scaling factor of -1 in the horizontal direction so that the origin is
+  /// in the top right.
+  ///
+  /// This is occasionally used with images in right-to-left environments, for
+  /// images that were designed for left-to-right locales. Be careful, when
+  /// using this, to not flip images with integral shadows, text, or other
+  /// effects that will look incorrect when flipped.
+  ///
+  /// If this is set to true, [textDirection] must not be null.
+  bool get matchTextDirection => _matchTextDirection;
+  bool _matchTextDirection;
+  set matchTextDirection(bool value) {
+    assert(value != null);
+    if (value == _matchTextDirection)
+      return;
+    _matchTextDirection = value;
+    _markNeedResolution();
+  }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after the [alignment] and
+  /// [matchTextDirection] properties have been changed to values that do not
+  /// depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _markNeedResolution();
   }
 
   /// Find a size for the render image within the given constraints.
@@ -246,15 +317,19 @@ class RenderImage extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     if (_image == null)
       return;
+    _resolve();
+    assert(_resolvedAlignment != null);
+    assert(_flipHorizontally != null);
     paintImage(
       canvas: context.canvas,
       rect: offset & size,
       image: _image,
       colorFilter: _colorFilter,
       fit: _fit,
-      alignment: _alignment,
+      alignment: _resolvedAlignment,
       centerSlice: _centerSlice,
-      repeat: _repeat
+      repeat: _repeat,
+      flipHorizontally: _flipHorizontally,
     );
   }
 
@@ -271,5 +346,7 @@ class RenderImage extends RenderBox {
     description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

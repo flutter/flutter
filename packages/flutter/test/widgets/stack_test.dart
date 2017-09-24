@@ -610,4 +610,23 @@ void main() {
 
     expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
   });
+
+  testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffset.center,
+      ),
+    );
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffsetDirectional.topStart,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffset.center,
+      ),
+    );
+  });
 }

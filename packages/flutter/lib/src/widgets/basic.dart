@@ -3826,7 +3826,8 @@ class RichText extends LeafRenderObjectWidget {
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
   ///
-  /// The [scale] and [repeat] arguments must not be null.
+  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments must
+  /// not be null.
   const RawImage({
     Key key,
     this.image,
@@ -3836,11 +3837,14 @@ class RawImage extends LeafRenderObjectWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment,
+    this.alignment: FractionalOffset.center,
     this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice
+    this.centerSlice,
+    this.matchTextDirection: false,
   }) : assert(scale != null),
+       assert(alignment != null),
        assert(repeat != null),
+       assert(matchTextDirection != null),
        super(key: key);
 
   /// The image to display.
@@ -3884,10 +3888,23 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// How to align the image within its bounds.
   ///
-  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
-  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
-  /// of the right edge of its layout bounds.
-  final FractionalOffset alignment;
+  /// The alignment aligns the given position in the image to the given position
+  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
+  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// image with the bottom right corner of its layout bounds. Similarly, an
+  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// middle of the bottom edge of its layout bounds.
+  ///
+  /// To display a subpart of an image, consider using a [CustomPainter] and
+  /// [Canvas.drawImageRect].
+  ///
+  /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
+  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// must be in scope.
+  ///
+  /// Defaults to [FractionalOffset.center].
+  final FractionalOffsetGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -3901,8 +3918,26 @@ class RawImage extends LeafRenderObjectWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  /// Whether to paint the image in the direction of the [TextDirection].
+  ///
+  /// If this is true, then in [TextDirection.ltr] contexts, the image will be
+  /// drawn with its origin in the top left (the "normal" painting direction for
+  /// images); and in [TextDirection.rtl] contexts, the image will be drawn with
+  /// a scaling factor of -1 in the horizontal direction so that the origin is
+  /// in the top right.
+  ///
+  /// This is occasionally used with images in right-to-left environments, for
+  /// images that were designed for left-to-right locales. Be careful, when
+  /// using this, to not flip images with integral shadows, text, or other
+  /// effects that will look incorrect when flipped.
+  ///
+  /// If this is true, there must be an ambient [Directionality] widget in
+  /// scope.
+  final bool matchTextDirection;
+
   @override
   RenderImage createRenderObject(BuildContext context) {
+    assert((!matchTextDirection && alignment is FractionalOffset) || debugCheckHasDirectionality(context));
     return new RenderImage(
       image: image,
       width: width,
@@ -3913,7 +3948,9 @@ class RawImage extends LeafRenderObjectWidget {
       fit: fit,
       alignment: alignment,
       repeat: repeat,
-      centerSlice: centerSlice
+      centerSlice: centerSlice,
+      matchTextDirection: matchTextDirection,
+      textDirection: matchTextDirection || alignment is! FractionalOffset ? Directionality.of(context) : null,
     );
   }
 
@@ -3929,7 +3966,9 @@ class RawImage extends LeafRenderObjectWidget {
       ..alignment = alignment
       ..fit = fit
       ..repeat = repeat
-      ..centerSlice = centerSlice;
+      ..centerSlice = centerSlice
+      ..matchTextDirection = matchTextDirection
+      ..textDirection = matchTextDirection || alignment is! FractionalOffset ? Directionality.of(context) : null;
   }
 
   @override
@@ -3942,9 +3981,10 @@ class RawImage extends LeafRenderObjectWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: null));
+    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
   }
 }
 

@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph;
+import 'dart:ui' as ui show Paragraph, Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -278,6 +278,24 @@ abstract class PaintPattern {
   /// If no call to [Canvas.drawParagraph] was made, then this results in failure.
   void paragraph({ ui.Paragraph paragraph, Offset offset });
 
+  /// Indicates that an image is expected next.
+  ///
+  /// The next call to [Canvas.drawImageRect] is examined, and its arguments
+  /// compared to those passed to _this_ method.
+  ///
+  /// If no call to [Canvas.drawImageRect] was made, then this results in
+  /// failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawImageRect] call are ignored.
+  ///
+  /// The [Paint]-related arguments (`color`, `strokeWidth`, `hasMaskFilter`,
+  /// `style`) are compared against the state of the [Paint] object after the
+  /// painting has completed, not at the time of the call. If the same [Paint]
+  /// object is reused multiple times, then this may not match the actual
+  /// arguments as they were seen by the method.
+  void drawImageRect({ ui.Image image, Rect source, Rect destination, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+
   /// Provides a custom matcher.
   ///
   /// Each method call after the last matched call (if any) will be passed to
@@ -470,6 +488,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void paragraph({ ui.Paragraph paragraph, Offset offset }) {
     _predicates.add(new _FunctionPaintPredicate(#drawParagraph, <dynamic>[paragraph, offset]));
+  }
+
+  @override
+  void drawImageRect({ ui.Image image, Rect source, Rect destination, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _DrawImageRectPaintPredicate(image: image, source: source, destination: destination, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -798,6 +821,41 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   _ArcPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+}
+
+class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
+  _DrawImageRectPaintPredicate({ this.image, this.source, this.destination, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawImageRect, 'an image', 4, 3, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+  );
+
+  final ui.Image image;
+  final Rect source;
+  final Rect destination;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final ui.Image imageArgument = arguments[0];
+    if (image != null && imageArgument != image)
+      throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
+    final Rect sourceArgument = arguments[1];
+    if (source != null && sourceArgument != source)
+      throw 'It called $methodName with a source rectangle, $sourceArgument, which was not exactly the expected rectangle ($source).';
+    final Rect destinationArgument = arguments[2];
+    if (destination != null && destinationArgument != destination)
+      throw 'It called $methodName with a destination rectangle, $destinationArgument, which was not exactly the expected rectangle ($destination).';
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (image != null)
+      description.add('image $image');
+    if (source != null)
+      description.add('source $source');
+    if (destination != null)
+      description.add('destination $destination');
+  }
 }
 
 class _SomethingPaintPredicate extends _PaintPredicate {

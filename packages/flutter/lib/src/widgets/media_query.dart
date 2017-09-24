@@ -173,6 +173,8 @@ class MediaQuery extends InheritedWidget {
   /// If you use this from a widget (e.g. in its build function), consider
   /// calling [debugCheckHasMediaQuery].
   static MediaQueryData of(BuildContext context, { bool nullOk: false }) {
+    assert(context != null);
+    assert(nullOk != null);
     final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
     if (query != null)
       return query.data;

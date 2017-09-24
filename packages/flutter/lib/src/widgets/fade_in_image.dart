@@ -60,7 +60,8 @@ class FadeInImage extends StatefulWidget {
   /// then cross-fades to display the [image].
   ///
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
-  /// [fadeInDuration], [fadeInCurve] and [repeat] arguments must not be null.
+  /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
+  /// [matchTextDirection] arguments must not be null.
   const FadeInImage({
     Key key,
     @required this.placeholder,
@@ -72,15 +73,18 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment,
+    this.alignment: FractionalOffset.center,
     this.repeat: ImageRepeat.noRepeat,
+    this.matchTextDirection: false,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(alignment != null),
        assert(repeat != null),
+       assert(matchTextDirection != null),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in memory while
@@ -94,8 +98,9 @@ class FadeInImage extends StatefulWidget {
   /// [ImageProvider]s (see also [ImageInfo.scale]).
   ///
   /// The [placeholder], [image], [placeholderScale], [imageScale],
-  /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve] and
-  /// [repeat] arguments must not be null.
+  /// [fadeOutDuration], [fadeOutCurve], [fadeInDuration], [fadeInCurve],
+  /// [alignment], [repeat], and [matchTextDirection] arguments must not be
+  /// null.
   ///
   /// See also:
   ///
@@ -116,8 +121,9 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment,
+    this.alignment: FractionalOffset.center,
     this.repeat: ImageRepeat.noRepeat,
+    this.matchTextDirection: false,
   }) : assert(placeholder != null),
        assert(image != null),
        assert(placeholderScale != null),
@@ -126,7 +132,9 @@ class FadeInImage extends StatefulWidget {
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(alignment != null),
        assert(repeat != null),
+       assert(matchTextDirection != null),
        placeholder = new MemoryImage(placeholder, scale: placeholderScale),
        image = new NetworkImage(image, scale: imageScale),
        super(key: key);
@@ -146,8 +154,8 @@ class FadeInImage extends StatefulWidget {
   /// exact asset specified will be used.
   ///
   /// The [placeholder], [image], [imageScale], [fadeOutDuration],
-  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve] and [repeat] arguments
-  /// must not be null.
+  /// [fadeOutCurve], [fadeInDuration], [fadeInCurve], [alignment], [repeat],
+  /// and [matchTextDirection] arguments must not be null.
   ///
   /// See also:
   ///
@@ -169,8 +177,9 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment,
+    this.alignment: FractionalOffset.center,
     this.repeat: ImageRepeat.noRepeat,
+    this.matchTextDirection: false,
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
@@ -181,7 +190,9 @@ class FadeInImage extends StatefulWidget {
        assert(fadeOutCurve != null),
        assert(fadeInDuration != null),
        assert(fadeInCurve != null),
+       assert(alignment != null),
        assert(repeat != null),
+       assert(matchTextDirection != null),
        image = new NetworkImage(image, scale: imageScale),
        super(key: key);
 
@@ -227,13 +238,40 @@ class FadeInImage extends StatefulWidget {
 
   /// How to align the image within its bounds.
   ///
-  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
-  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
-  /// of the right edge of its layout bounds.
-  final FractionalOffset alignment;
+  /// The alignment aligns the given position in the image to the given position
+  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
+  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// image with the bottom right corner of its layout bounds. Similarly, an
+  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// middle of the bottom edge of its layout bounds.
+  ///
+  /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
+  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// must be in scope.
+  ///
+  /// Defaults to [FractionalOffset.center].
+  final FractionalOffsetGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
+
+  /// Whether to paint the image in the direction of the [TextDirection].
+  ///
+  /// If this is true, then in [TextDirection.ltr] contexts, the image will be
+  /// drawn with its origin in the top left (the "normal" painting direction for
+  /// images); and in [TextDirection.rtl] contexts, the image will be drawn with
+  /// a scaling factor of -1 in the horizontal direction so that the origin is
+  /// in the top right.
+  ///
+  /// This is occasionally used with images in right-to-left environments, for
+  /// images that were designed for left-to-right locales. Be careful, when
+  /// using this, to not flip images with integral shadows, text, or other
+  /// effects that will look incorrect when flipped.
+  ///
+  /// If this is true, there must be an ambient [Directionality] widget in
+  /// scope.
+  final bool matchTextDirection;
 
   @override
   State<StatefulWidget> createState() => new _FadeInImageState();
@@ -282,8 +320,8 @@ class _ImageProviderResolver {
   void resolve(ImageProvider provider) {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(
-        state.context,
-        size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+      state.context,
+      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
     ));
     assert(_imageStream != null);
 
@@ -456,6 +494,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       fit: widget.fit,
       alignment: widget.alignment,
       repeat: widget.repeat,
+      matchTextDirection: widget.matchTextDirection,
     );
   }
 
