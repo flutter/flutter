@@ -20,7 +20,7 @@ void main() {
     expect(positioned, hasOneLineDescription);
   });
 
-  testWidgets('AnimatedPositioned - basics', (WidgetTester tester) async {
+  testWidgets('AnimatedPositioned - basics (VISUAL)', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
 
     RenderBox box;
@@ -35,10 +35,10 @@ void main() {
             top: 30.0,
             width: 70.0,
             height: 110.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
     box = key.currentContext.findRenderObject();
@@ -59,25 +59,27 @@ void main() {
             top: 31.0,
             width: 59.0,
             height: 71.0,
-            duration: const Duration(seconds: 2)
-          )
-        ]
-      )
+            duration: const Duration(seconds: 2),
+          ),
+        ],
+      ),
     );
 
+    const Offset first = const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 - (50.0 - 37.0) / 2.0 + (70.0 - (70.0 - 59.0) / 2.0) / 2.0,
-                                                                                30.0 + (31.0 - 30.0) / 2.0 + (110.0 - (110.0 - 71.0) / 2.0) / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
 
     await tester.pump(const Duration(seconds: 1));
 
     box = key.currentContext.findRenderObject();
-    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0)));
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
 
     expect(box, hasAGoodToStringDeep);
     expect(
@@ -96,6 +98,178 @@ void main() {
         '     constraints: BoxConstraints(w=59.0, h=71.0)\n'
         '     size: Size(59.0, 71.0)\n'
         '     additionalConstraints: BoxConstraints(biggest)\n',
+      ),
+    );
+  });
+
+  testWidgets('AnimatedPositioned - basics (LTR)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 50.0,
+              top: 30.0,
+              width: 70.0,
+              height: 110.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 37.0,
+              top: 31.0,
+              width: 59.0,
+              height: 71.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    const Offset first = const Offset(50.0 + 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = const Offset(37.0 + 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
+
+    expect(box, hasAGoodToStringDeep);
+    expect(
+      box.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderLimitedBox#00000\n'
+        ' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n'
+        ' │   offset=Offset(37.0, 31.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        ' │ size: Size(59.0, 71.0)\n'
+        ' │ maxWidth: 0.0\n'
+        ' │ maxHeight: 0.0\n'
+        ' │\n'
+        ' └─child: RenderConstrainedBox#00000\n'
+        '     parentData: <none> (can use size)\n'
+        '     constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        '     size: Size(59.0, 71.0)\n'
+        '     additionalConstraints: BoxConstraints(biggest)\n',
+      ),
+    );
+  });
+
+  testWidgets('AnimatedPositioned - basics (RTL)', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    RenderBox box;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 50.0,
+              top: 30.0,
+              width: 70.0,
+              height: 110.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          children: <Widget>[
+            new AnimatedPositionedDirectional(
+              child: new Container(key: key),
+              start: 37.0,
+              top: 31.0,
+              width: 59.0,
+              height: 71.0,
+              duration: const Duration(seconds: 2),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    const Offset first = const Offset(800.0 - 50.0 - 70.0 / 2.0, 30.0 + 110.0 / 2.0);
+    const Offset last = const Offset(800.0 - 37.0 - 59.0 / 2.0, 31.0 + 71.0 / 2.0);
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(first));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(Offset.lerp(first, last, 0.5)));
+
+    await tester.pump(const Duration(seconds: 1));
+
+    box = key.currentContext.findRenderObject();
+    expect(box.localToGlobal(box.size.center(Offset.zero)), equals(last));
+
+    expect(box, hasAGoodToStringDeep);
+    expect(
+      box.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderLimitedBox#00000\n'
+        ' │ parentData: top=31.0; right=37.0; width=59.0; height=71.0;\n'
+        ' │   offset=Offset(704.0, 31.0) (can use size)\n'
+        ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        ' │ size: Size(59.0, 71.0)\n'
+        ' │ maxWidth: 0.0\n'
+        ' │ maxHeight: 0.0\n'
+        ' │\n'
+        ' └─child: RenderConstrainedBox#00000\n'
+        '     parentData: <none> (can use size)\n'
+        '     constraints: BoxConstraints(w=59.0, h=71.0)\n'
+        '     size: Size(59.0, 71.0)\n'
+        '     additionalConstraints: BoxConstraints(biggest)\n'
       ),
     );
   });

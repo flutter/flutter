@@ -416,11 +416,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           child: new Center(
             child: new Stack(
               children: <Widget>[
-                new Positioned(
-                  left: 0.0,
-                  top: 0.0,
-                  right: 0.0,
-                  bottom: 0.0,
+                new Positioned.fill(
                   child: new CustomPaint(
                     painter: new _RadialPainter(
                       circles: _circles.toList(),
