@@ -1488,7 +1488,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// )
 /// ```
 ///
-/// The same behaviour can be obtained using the [new SizedBox.expand] widget.
+/// The same behavior can be obtained using the [new SizedBox.expand] widget.
 ///
 /// See also:
 ///

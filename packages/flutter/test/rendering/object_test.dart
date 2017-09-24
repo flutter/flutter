@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test("ensure frame is scheduled for markNeedsSemanticsUpdate", () {
+  test('ensure frame is scheduled for markNeedsSemanticsUpdate', () {
     final TestRenderObject renderObject = new TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = new PipelineOwner(onNeedVisualUpdate: () {
@@ -22,7 +22,7 @@ void main() {
     expect(onNeedVisualUpdateCallCount, 2);
   });
 
-  test("ensure frame is scheduled for markNeedsSemanticsUpdate with onlyChanges: true", () {
+  test('ensure frame is scheduled for markNeedsSemanticsUpdate with onlyChanges: true', () {
     final TestRenderObject renderObject = new TestRenderObject();
     int onNeedVisualUpdateCallCount = 0;
     final PipelineOwner owner = new PipelineOwner(onNeedVisualUpdate: () {

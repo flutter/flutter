@@ -37,8 +37,8 @@ void main() {
                   child: const Text('E'),
                 )
               ],
-              accountName: const Text("name"),
-              accountEmail: const Text("email"),
+              accountName: const Text('name'),
+              accountEmail: const Text('email'),
             ),
           ),
         ),

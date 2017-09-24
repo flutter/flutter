@@ -134,7 +134,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Since [Container] combines a number of other widgets each with their own
-/// layout behavior, [Container]'s layout behaviour is somewhat complicated.
+/// layout behavior, [Container]'s layout behavior is somewhat complicated.
 ///
 /// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
 /// the [child], to honor the `width`, `height`, and [constraints], to expand to

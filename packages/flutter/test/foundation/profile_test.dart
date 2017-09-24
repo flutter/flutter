@@ -6,12 +6,12 @@ import 'package:flutter/foundation.dart';
 import 'package:test/test.dart';
 
 // We run our tests in debug mode, to this will always evaluate to false...
-const bool isReleaseMode = const bool.fromEnvironment("dart.vm.product");
+const bool isReleaseMode = const bool.fromEnvironment('dart.vm.product');
 
 void main() {
   // TODO(devoncarew): This test - while very nice - isn't testing what we really want to know:
   // that the code in the `profile` closure is omitted in release mode.
-  test("profile invokes its closure in debug or profile mode", () {
+  test('profile invokes its closure in debug or profile mode', () {
     int count = 0;
     profile(() {
       count++;

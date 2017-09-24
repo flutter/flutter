@@ -238,7 +238,7 @@ abstract class PointerEvent {
 
   /// We occasionally synthesize PointerEvents that aren't exact translations
   /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
-  /// in pointer behaviours.
+  /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes
   /// that happened between its reporting intervals when emiting the end events.

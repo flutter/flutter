@@ -62,7 +62,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },
@@ -139,7 +139,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: new Duration(seconds: time)
                 ));
               },
@@ -223,7 +223,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },

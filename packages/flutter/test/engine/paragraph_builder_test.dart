@@ -7,7 +7,7 @@ import 'dart:ui';
 import 'package:test/test.dart';
 
 void main() {
-  test("Should be able to build and layout a paragraph", () {
+  test('Should be able to build and layout a paragraph', () {
     final ParagraphBuilder builder = new ParagraphBuilder(new ParagraphStyle());
     builder.addText('Hello');
     final Paragraph paragraph = builder.build();

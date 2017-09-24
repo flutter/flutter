@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test("offstage", () {
+  test('offstage', () {
     RenderBox child;
     bool painted = false;
     // incoming constraints are tight 800x600

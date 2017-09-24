@@ -388,7 +388,7 @@ void main() {
             children: <Widget>[
               new GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () { print("HELLO"); tapped = true; },
+                onTap: () { tapped = true; },
                 child: const SizedBox(
                   width: 200.0,
                   height: 200.0,

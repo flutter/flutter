@@ -24,7 +24,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
     _position?.removeListener(listener);
     _position = Scrollable.of(context)?.position;
     _position?.addListener(listener);
-    widget.log("didChangeDependencies ${_position?.pixels}");
+    widget.log('didChangeDependencies ${_position?.pixels}');
   }
 
   @override
@@ -37,7 +37,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   Widget build(BuildContext context) => widget.child;
 
   void listener() {
-    widget.log("listener ${_position?.pixels}");
+    widget.log('listener ${_position?.pixels}');
   }
 
 }
@@ -62,24 +62,24 @@ void main() {
     }
 
     await tester.pumpWidget(buildFrame(null));
-    expect(logValue, "didChangeDependencies 0.0");
+    expect(logValue, 'didChangeDependencies 0.0');
 
     controller.jumpTo(100.0);
-    expect(logValue, "listener 100.0");
+    expect(logValue, 'listener 100.0');
 
     await tester.pumpWidget(buildFrame(const ClampingScrollPhysics()));
-    expect(logValue, "didChangeDependencies 100.0");
+    expect(logValue, 'didChangeDependencies 100.0');
 
     controller.jumpTo(200.0);
-    expect(logValue, "listener 200.0");
+    expect(logValue, 'listener 200.0');
 
     controller.jumpTo(300.0);
-    expect(logValue, "listener 300.0");
+    expect(logValue, 'listener 300.0');
 
     await tester.pumpWidget(buildFrame(const BouncingScrollPhysics()));
-    expect(logValue, "didChangeDependencies 300.0");
+    expect(logValue, 'didChangeDependencies 300.0');
 
     controller.jumpTo(400.0);
-    expect(logValue, "listener 400.0");
+    expect(logValue, 'listener 400.0');
   });
 }

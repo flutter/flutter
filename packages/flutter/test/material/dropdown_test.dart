@@ -40,7 +40,7 @@ Widget buildFrame({
             return new DropdownMenuItem<String>(
               key: new ValueKey<String>(item),
               value: item,
-              child: new Text(item, key: new ValueKey<String>(item + "Text")),
+              child: new Text(item, key: new ValueKey<String>(item + 'Text')),
             );
           }).toList(),
         ),
@@ -403,7 +403,7 @@ void main() {
     Rect getMenuRect() {
       Rect menuRect;
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
-        if (element.toString().startsWith("_DropdownMenu")) {
+        if (element.toString().startsWith('_DropdownMenu')) {
           final RenderBox box = element.findRenderObject();
           assert(box != null);
           menuRect =  box.localToGlobal(Offset.zero) & box.size;
