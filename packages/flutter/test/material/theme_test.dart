@@ -53,7 +53,9 @@ void main() {
       )
     );
 
-    expect(Theme.of(capturedContext), equals(new ThemeData.fallback()));
+    final dynamic localizedTheme = Theme.of(capturedContext);
+    expect('${localizedTheme.runtimeType}', '_LocalizedThemeData');
+    expect(localizedTheme.delegate, equals(new ThemeData.fallback()));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
   });
 
@@ -267,7 +269,7 @@ void main() {
   });
 
   testWidgets(
-    'Same ThemeData reapplied does not trigger descendents rebuilds',
+    'Same ThemeData reapplied does not trigger descendants rebuilds',
     (WidgetTester tester) async {
       testBuildCalled = 0;
       ThemeData themeData = new ThemeData(primaryColor: const Color(0xFF000000));

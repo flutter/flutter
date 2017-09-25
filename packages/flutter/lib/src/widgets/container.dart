@@ -71,7 +71,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     return new RenderDecoratedBox(
       decoration: decoration,
       position: position,
-      configuration: createLocalImageConfiguration(context)
+      configuration: createLocalImageConfiguration(context),
     );
   }
 
@@ -99,7 +99,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     } else {
       label = 'decoration';
     }
-    description.add(new EnumProperty<DecorationPosition>('position', position, hidden: position != null));
+    description.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     description.add(new DiagnosticsProperty<Decoration>(
       label,
       decoration,
@@ -134,7 +134,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Since [Container] combines a number of other widgets each with their own
-/// layout behavior, [Container]'s layout behaviour is somewhat complicated.
+/// layout behavior, [Container]'s layout behavior is somewhat complicated.
 ///
 /// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
 /// the [child], to honor the `width`, `height`, and [constraints], to expand to

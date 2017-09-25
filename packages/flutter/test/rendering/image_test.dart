@@ -67,13 +67,14 @@ void main() {
 
     expect(image, hasAGoodToStringDeep);
     expect(
-      image.toStringDeep(),
+      image.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderImage#00000 relayoutBoundary=up2 NEEDS-PAINT\n'
         '   parentData: <none> (can use size)\n'
         '   constraints: BoxConstraints(25.0<=w<=100.0, 25.0<=h<=100.0)\n'
         '   size: Size(25.0, 25.0)\n'
         '   image: [10×10]\n'
+        '   alignment: FractionalOffset.center\n'
       ),
     );
 
@@ -200,5 +201,12 @@ void main() {
              maxHeight: 75.0));
     expect(image.size.width, equals(75.0));
     expect(image.size.height, equals(75.0));
+  });
+
+  test('update image colorBlendMode', () {
+    final RenderImage image = new RenderImage();
+    expect(image.colorBlendMode, isNull);
+    image.colorBlendMode = BlendMode.color;
+    expect(image.colorBlendMode, BlendMode.color);
   });
 }

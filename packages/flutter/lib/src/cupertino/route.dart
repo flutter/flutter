@@ -69,6 +69,8 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 ///
 ///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform
 ///    appropriate transition.
+///  * [CupertinoPageScaffold] typical content of a [CupertinoPageRoute] implementing
+///    iOS style layout with navigation bar on top.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
@@ -129,7 +131,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         'Cannot install a subsidiary route (one with a hostRoute).\n'
         'This route ($this) cannot be installed, because it has a host route ($hostRoute).'
       );
-    });
+    }());
     super.install(insertionPoint);
   }
 
@@ -236,7 +238,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 

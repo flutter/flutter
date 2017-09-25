@@ -5,13 +5,15 @@
 import 'package:flutter/widgets.dart';
 
 class LifecycleWatcher extends StatefulWidget {
+  const LifecycleWatcher({ Key key }) : super(key: key);
+
   @override
   _LifecycleWatcherState createState() => new _LifecycleWatcherState();
 }
 
 class _LifecycleWatcherState extends State<LifecycleWatcher>
                              with WidgetsBindingObserver {
-  AppLifecycleState _lastLifecyleState;
+  AppLifecycleState _lastLifecycleState;
 
   @override
   void initState() {
@@ -28,21 +30,26 @@ class _LifecycleWatcherState extends State<LifecycleWatcher>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     setState(() {
-      _lastLifecyleState = state;
+      _lastLifecycleState = state;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_lastLifecyleState == null)
+    if (_lastLifecycleState == null)
       return const Text('This widget has not observed any lifecycle changes.');
-    return new Text('The most recent lifecycle state this widget observed was: $_lastLifecyleState.');
+    return new Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.');
   }
 }
 
 
 void main() {
-  runApp(new Center(
-    child: new LifecycleWatcher()
-  ));
+  runApp(
+    const Directionality(
+      textDirection: TextDirection.ltr,
+      child: const Center(
+        child: const LifecycleWatcher(),
+      ),
+    ),
+  );
 }

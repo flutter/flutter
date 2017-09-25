@@ -182,12 +182,15 @@ class PackageDependencyTracker {
       message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
-            'For packages in the flutter repository, try using '
-            '"flutter update-packages --upgrade" to do all of them at once.');
+          'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
+          'If you need to actually upgrade them, consider "flutter update-packages --force-upgrade". '
+          '(This will update your pubspec.yaml files as well, so you may wish to do this on a separate branch.)'
+        );
       }
       message.write(
-          'If this does not help, to track down the conflict you can use '
-          '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.');
+        'If this does not help, to track down the conflict you can use '
+        '"pub deps --style=list" and "pub upgrade --verbosity=solver" in the affected directories.'
+      );
       throwToolExit(message.toString());
     }
   }

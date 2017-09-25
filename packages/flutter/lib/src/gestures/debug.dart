@@ -54,6 +54,6 @@ bool debugAssertAllGesturesVarsUnset(String reason) {
         debugPrintRecognizerCallbacksTrace)
       throw new FlutterError(reason);
     return true;
-  });
+  }());
   return true;
 }

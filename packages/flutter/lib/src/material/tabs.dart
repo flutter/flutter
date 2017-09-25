@@ -546,7 +546,7 @@ class _TabBarState extends State<TabBar> {
         );
       }
       return true;
-    });
+    }());
     if (newController == _controller)
       return;
 
@@ -794,7 +794,7 @@ class _TabBarState extends State<TabBar> {
 }
 
 /// A page view that displays the widget which corresponds to the currently
-/// selected tab. Typically used in conjuction with a [TabBar].
+/// selected tab. Typically used in conjunction with a [TabBar].
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
@@ -855,7 +855,7 @@ class _TabBarViewState extends State<TabBarView> {
         );
       }
       return true;
-    });
+    }());
     if (newController == _controller)
       return;
 
@@ -1113,7 +1113,7 @@ class TabPageSelector extends StatelessWidget {
         );
       }
       return true;
-    });
+    }());
     final Animation<double> animation = new CurvedAnimation(
       parent: tabController.animation,
       curve: Curves.fastOutSlowIn,

@@ -7,10 +7,6 @@ import 'package:flutter/painting.dart';
 
 import 'colors.dart';
 
-// TODO(eseidel): Font weights are supposed to be language relative.
-// TODO(jackson): Baseline should be language relative.
-// TODO(ianh): These values are for English-like text.
-
 /// Material design text theme.
 ///
 /// Definitions for the various typographical styles found in material design
@@ -61,58 +57,6 @@ class TextTheme {
     this.caption,
     this.button,
   });
-
-  const TextTheme._blackMountainView()
-    : display4 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
-
-  const TextTheme._whiteMountainView()
-    : display4 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: 'Roboto',         inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
-
-  const TextTheme._blackCupertino()
-    : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.black87, textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.black54, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.black87, textBaseline: TextBaseline.alphabetic);
-
-  const TextTheme._whiteCupertino()
-    : display4 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize: 112.0, fontWeight: FontWeight.w100, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display3 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  56.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display2 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  45.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      display1 = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  34.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      headline = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  24.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      title    = const TextStyle(fontFamily: '.SF UI Display', inherit: false, fontSize:  20.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      subhead  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  16.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body2    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      body1    = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w400, color: Colors.white,   textBaseline: TextBaseline.alphabetic),
-      caption  = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  12.0, fontWeight: FontWeight.w400, color: Colors.white70, textBaseline: TextBaseline.alphabetic),
-      button   = const TextStyle(fontFamily: '.SF UI Text',    inherit: false, fontSize:  14.0, fontWeight: FontWeight.w500, color: Colors.white,   textBaseline: TextBaseline.alphabetic);
 
   /// Extremely large text.
   ///
@@ -184,6 +128,24 @@ class TextTheme {
       body1: body1 ?? this.body1,
       caption: caption ?? this.caption,
       button: button ?? this.button,
+    );
+  }
+
+  TextTheme merge(TextTheme other) {
+    if (other == null)
+      return this;
+    return copyWith(
+      display4: display4.merge(other.display4),
+      display3: display3.merge(other.display3),
+      display2: display2.merge(other.display2),
+      display1: display1.merge(other.display1),
+      headline: headline.merge(other.headline),
+      title: title.merge(other.title),
+      subhead: subhead.merge(other.subhead),
+      body2: body2.merge(other.body2),
+      body1: body1.merge(other.body1),
+      caption: caption.merge(other.caption),
+      button: button.merge(other.button),
     );
   }
 
@@ -353,13 +315,13 @@ class Typography {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return const Typography._(
-            const TextTheme._blackMountainView(),
-            const TextTheme._whiteMountainView(),
+          _MaterialTextColorThemes.blackMountainView,
+          _MaterialTextColorThemes.whiteMountainView,
         );
       case TargetPlatform.iOS:
         return const Typography._(
-            const TextTheme._blackCupertino(),
-            const TextTheme._whiteCupertino(),
+          _MaterialTextColorThemes.blackCupertino,
+          _MaterialTextColorThemes.whiteCupertino,
         );
     }
     return null;
@@ -372,4 +334,150 @@ class Typography {
 
   /// A material design text theme with light glyphs.
   final TextTheme white;
+}
+
+/// Provides default text theme colors compliant with the Material Design
+/// specification.
+///
+/// The geometric font properties are missing in these color themes. App are
+/// expected to use [Theme.of] to get [TextTheme] objects fully populated with
+/// font properties.
+///
+/// See also: https://material.io/guidelines/style/typography.html
+// TODO(yjbanov): implement font fallback (see "Font stack" at https://material.io/guidelines/style/typography.html)
+class _MaterialTextColorThemes {
+  static const TextTheme blackMountainView = const TextTheme(
+    display4: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black54),
+    display3: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black54),
+    display2: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black54),
+    display1: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black54),
+    headline: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+    title   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+    subhead : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+    body2   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+    body1   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+    caption : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black54),
+    button  : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.black87),
+  );
+
+  static const TextTheme whiteMountainView = const TextTheme(
+    display4: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white70),
+    display3: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white70),
+    display2: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white70),
+    display1: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white70),
+    headline: const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+    title   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+    subhead : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+    body2   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+    body1   : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+    caption : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white70),
+    button  : const TextStyle(fontFamily: 'Roboto',         inherit: false, color: Colors.white),
+  );
+
+  static const TextTheme blackCupertino = const TextTheme(
+    display4: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black54),
+    display3: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black54),
+    display2: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black54),
+    display1: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black54),
+    headline: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black87),
+    title   : const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.black87),
+    subhead : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.black87),
+    body2   : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.black87),
+    body1   : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.black87),
+    caption : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.black54),
+    button  : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.black87),
+  );
+
+  static const TextTheme whiteCupertino = const TextTheme(
+    display4: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white70),
+    display3: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white70),
+    display2: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white70),
+    display1: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white70),
+    headline: const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white),
+    title   : const TextStyle(fontFamily: '.SF UI Display', inherit: false, color: Colors.white),
+    subhead : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.white),
+    body2   : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.white),
+    body1   : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.white),
+    caption : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.white70),
+    button  : const TextStyle(fontFamily: '.SF UI Text',    inherit: false, color: Colors.white),
+  );
+}
+
+/// Defines text geometries for the three language categories defined in
+/// https://material.io/guidelines/style/typography.html.
+class MaterialTextGeometry {
+  /// The name of the English-like script category.
+  static const String englishLikeCategory = 'English-like';
+
+  /// The name of the dense script category.
+  static const String denseCategory = 'dense';
+
+  /// The name of the tall script category.
+  static const String tallCategory = 'tall';
+
+  /// The mapping from script category names to text themes.
+  static const Map<String, TextTheme> _categoryToTextTheme = const <String, TextTheme>{
+    englishLikeCategory: englishLike,
+    denseCategory: dense,
+    tallCategory: tall,
+  };
+
+  /// Looks up text geometry corresponding to the given [scriptCategoryName].
+  ///
+  /// Most apps would not call this method directly, but rather call [Theme.of]
+  /// and use the [TextTheme] fields of the returned [ThemeData] object.
+  ///
+  /// [scriptCategoryName] must be one of [englishLikeCategory], [denseCategory]
+  /// and [tallCategory].
+  ///
+  /// See also:
+  ///
+  ///  * [DefaultMaterialLocalizations.localTextGeometry], which uses this
+  ///    method to look-up text geometry for the current locale.
+  static TextTheme forScriptCategory(String scriptCategoryName) => _categoryToTextTheme[scriptCategoryName];
+
+  /// Defines text geometry for English-like scripts, such as English, French, Russian, etc.
+  static const TextTheme englishLike = const TextTheme(
+    display4: const TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.alphabetic),
+    display3: const TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2: const TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1: const TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline: const TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title   : const TextStyle(fontSize:  20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    subhead : const TextStyle(fontSize:  16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2   : const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+    body1   : const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption : const TextStyle(fontSize:  12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button  : const TextStyle(fontSize:  14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
+  );
+
+  /// Defines text geometry for dense scripts, such as Chinese, Japanese, Korean, etc.
+  static const TextTheme dense = const TextTheme(
+    display4: const TextStyle(fontSize: 112.0, fontWeight: FontWeight.w100, textBaseline: TextBaseline.ideographic),
+    display3: const TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display2: const TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    display1: const TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    headline: const TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    title   : const TextStyle(fontSize:  21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    subhead : const TextStyle(fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    body2   : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    body1   : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    caption : const TextStyle(fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    button  : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+  );
+
+  /// Defines text geometry for tall scripts, such as Farsi, Hindi, Thai, etc.
+  static const TextTheme tall = const TextTheme(
+    display4: const TextStyle(fontSize: 112.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display3: const TextStyle(fontSize:  56.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display2: const TextStyle(fontSize:  45.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    display1: const TextStyle(fontSize:  34.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    headline: const TextStyle(fontSize:  24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    title   : const TextStyle(fontSize:  21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    subhead : const TextStyle(fontSize:  17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    body2   : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+    body1   : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    caption : const TextStyle(fontSize:  13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    button  : const TextStyle(fontSize:  15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
+  );
 }

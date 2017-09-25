@@ -170,7 +170,7 @@ void main() {
 
     expect(parentFocusScope, hasAGoodToStringDeep);
     expect(
-      parentFocusScope.toStringDeep(),
+      parentFocusScope.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
           'FocusScopeNode#00000\n'
           '   focus: FocusNode#00000(FOCUSED)\n'
@@ -179,7 +179,7 @@ void main() {
 
     expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
     expect(
-      WidgetsBinding.instance.focusManager.rootScope.toStringDeep(),
+      WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'FocusScopeNode#00000\n'
         ' └─child 1: FocusScopeNode#00000\n'

@@ -133,6 +133,37 @@ void main() {
     drag.dispose();
   });
 
+  testGesture('Should report original timestamps', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Duration startTimestamp;
+    drag.onStart = (DragStartDetails details) {
+      startTimestamp = details.sourceTimeStamp;
+    };
+
+    Duration updatedTimestamp;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedTimestamp = details.sourceTimeStamp;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 100));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(startTimestamp, isNull);
+
+    tester.route(down);
+    expect(startTimestamp, const Duration(milliseconds: 100));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 200)));
+    expect(updatedTimestamp, const Duration(milliseconds: 200));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
+    expect(updatedTimestamp, const Duration(milliseconds: 300));
+
+    drag.dispose();
+  });
+
   testGesture('Drag with multiple pointers', (GestureTester tester) {
     final HorizontalDragGestureRecognizer drag1 = new HorizontalDragGestureRecognizer();
     final VerticalDragGestureRecognizer drag2 = new VerticalDragGestureRecognizer();

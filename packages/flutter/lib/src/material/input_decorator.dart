@@ -464,8 +464,8 @@ class InputDecorator extends StatelessWidget {
         top += topPaddingIncrement + baseStyle.fontSize - labelStyle.fontSize;
 
       stackChildren.add(
-        new AnimatedPositioned(
-          left: 0.0,
+        new AnimatedPositionedDirectional(
+          start: 0.0,
           top: top,
           duration: _kTransitionDuration,
           curve: _kTransitionCurve,

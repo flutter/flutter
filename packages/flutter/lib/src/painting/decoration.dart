@@ -10,9 +10,6 @@ import 'edge_insets.dart';
 
 export 'package:flutter/services.dart' show ImageConfiguration;
 
-export 'basic_types.dart' show Offset, Size;
-export 'edge_insets.dart' show EdgeInsets;
-
 // This group of classes is intended for painting in cartesian coordinates.
 
 /// A description of a box decoration (a decoration applied to a [Rect]).

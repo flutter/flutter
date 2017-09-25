@@ -30,7 +30,7 @@ void main() {
 
     expect(parent, hasAGoodToStringDeep);
     expect(
-      parent.toStringDeep(),
+      parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
         ' │ parentData: <none>\n'
@@ -116,7 +116,7 @@ void main() {
 
     expect(parent, hasAGoodToStringDeep);
     expect(
-      parent.toStringDeep(),
+      parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
         ' │ parentData: <none>\n'
@@ -152,7 +152,7 @@ void main() {
 
     expect(parent, hasAGoodToStringDeep);
     expect(
-      parent.toStringDeep(),
+      parent.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderConstrainedOverflowBox#00000 NEEDS-PAINT\n'
         ' │ parentData: <none>\n'

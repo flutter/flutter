@@ -954,7 +954,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       animation: widget.animationController,
       builder: (BuildContext context, Widget child) {
         return new Align(
-          alignment: FractionalOffset.topLeft,
+          alignment: FractionalOffsetDirectional.topStart,
           heightFactor: widget.animationController.value,
           child: child
         );

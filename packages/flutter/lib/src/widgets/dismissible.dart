@@ -388,7 +388,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
           );
         }
         return true;
-      });
+      }());
 
       return new SizeTransition(
         sizeFactor: _resizeAnimation,

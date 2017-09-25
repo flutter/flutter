@@ -8,6 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'basic.dart';
 import 'container.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'text.dart';
 import 'ticker_provider.dart';
@@ -482,6 +483,12 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 /// position over a given duration whenever the given position changes.
 ///
 /// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+///  * [AnimatedPositionedDirectional], which adapts to the ambient
+///    [Directionality] (the same as this widget, but for animating
+///    [PositionedDirectional]).
 class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its position implicitly.
   ///
@@ -540,14 +547,14 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
 
   /// The child's width.
   ///
-  /// Only two out of the three horizontal values (left, right, width) can be
-  /// set. The third must be null.
+  /// Only two out of the three horizontal values ([left], [right], [width]) can
+  /// be set. The third must be null.
   final double width;
 
   /// The child's height.
   ///
-  /// Only two out of the three vertical values (top, bottom, height) can be
-  /// set. The third must be null.
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can
+  /// be set. The third must be null.
   final double height;
 
   @override
@@ -592,7 +599,7 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
       right: _right?.evaluate(animation),
       bottom: _bottom?.evaluate(animation),
       width: _width?.evaluate(animation),
-      height: _height?.evaluate(animation)
+      height: _height?.evaluate(animation),
     );
   }
 
@@ -602,6 +609,129 @@ class _AnimatedPositionedState extends AnimatedWidgetBaseState<AnimatedPositione
     description.add(new ObjectFlagProperty<Tween<double>>.has('left', _left));
     description.add(new ObjectFlagProperty<Tween<double>>.has('top', _top));
     description.add(new ObjectFlagProperty<Tween<double>>.has('right', _right));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('bottom', _bottom));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('width', _width));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('height', _height));
+  }
+}
+
+/// Animated version of [PositionedDirectional] which automatically transitions
+/// the child's position over a given duration whenever the given position
+/// changes.
+///
+/// The ambient [Directionality] is used to determine whether [start] is to the
+/// left or to the right.
+///
+/// Only works if it's the child of a [Stack].
+///
+/// See also:
+///
+///  * [AnimatedPositioned], which specifies the widget's position visually (the
+///  * same as this widget, but for animating [Positioned]).
+class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its position implicitly.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]), and
+  /// only two out of the three vertical values ([top], [bottom], [height]), can
+  /// be set. In each case, at least one of the three must be null.
+  ///
+  /// The [curve] and [duration] arguments must not be null.
+  const AnimatedPositionedDirectional({
+    Key key,
+    @required this.child,
+    this.start,
+    this.top,
+    this.end,
+    this.bottom,
+    this.width,
+    this.height,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(start == null || end == null || width == null),
+       assert(top == null || bottom == null || height == null),
+      super(key: key, curve: curve, duration: duration);
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  /// The offset of the child's start edge from the start of the stack.
+  final double start;
+
+  /// The offset of the child's top edge from the top of the stack.
+  final double top;
+
+  /// The offset of the child's end edge from the end of the stack.
+  final double end;
+
+  /// The offset of the child's bottom edge from the bottom of the stack.
+  final double bottom;
+
+  /// The child's width.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can
+  /// be set. The third must be null.
+  final double width;
+
+  /// The child's height.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can
+  /// be set. The third must be null.
+  final double height;
+
+  @override
+  _AnimatedPositionedDirectionalState createState() => new _AnimatedPositionedDirectionalState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('start', start, defaultValue: null));
+    description.add(new DoubleProperty('top', top, defaultValue: null));
+    description.add(new DoubleProperty('end', end, defaultValue: null));
+    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
+  }
+}
+
+class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<AnimatedPositionedDirectional> {
+  Tween<double> _start;
+  Tween<double> _top;
+  Tween<double> _end;
+  Tween<double> _bottom;
+  Tween<double> _width;
+  Tween<double> _height;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _start = visitor(_start, widget.start, (dynamic value) => new Tween<double>(begin: value));
+    _top = visitor(_top, widget.top, (dynamic value) => new Tween<double>(begin: value));
+    _end = visitor(_end, widget.end, (dynamic value) => new Tween<double>(begin: value));
+    _bottom = visitor(_bottom, widget.bottom, (dynamic value) => new Tween<double>(begin: value));
+    _width = visitor(_width, widget.width, (dynamic value) => new Tween<double>(begin: value));
+    _height = visitor(_height, widget.height, (dynamic value) => new Tween<double>(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    return new Positioned.directional(
+      textDirection: Directionality.of(context),
+      child: widget.child,
+      start: _start?.evaluate(animation),
+      top: _top?.evaluate(animation),
+      end: _end?.evaluate(animation),
+      bottom: _bottom?.evaluate(animation),
+      width: _width?.evaluate(animation),
+      height: _height?.evaluate(animation),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<Tween<double>>.has('start', _start));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('top', _top));
+    description.add(new ObjectFlagProperty<Tween<double>>.has('end', _end));
     description.add(new ObjectFlagProperty<Tween<double>>.has('bottom', _bottom));
     description.add(new ObjectFlagProperty<Tween<double>>.has('width', _width));
     description.add(new ObjectFlagProperty<Tween<double>>.has('height', _height));

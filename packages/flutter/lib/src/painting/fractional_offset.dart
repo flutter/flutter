@@ -180,6 +180,13 @@ abstract class FractionalOffsetGeometry {
 /// `FractionalOffset(0.5, 2.0)` represents a point half way across the [Size],
 /// below the bottom of the rectangle by the height of the [Size].
 ///
+/// The [FractionalOffset] class specifies offsets in terms of a distance from
+/// the top left, regardless of the [TextDirection]. To support both
+/// left-to-right and right-to-left layouts, consider using
+/// [FractionalOffsetDirectional], which is expressed in terms of an offset from
+/// the leading edge, which is then resolved in terms of a [TextDirection]
+/// (typically obtained from the ambient [Directionality]).
+///
 /// A variety of widgets use [FractionalOffset] in their configuration, most
 /// notably:
 ///

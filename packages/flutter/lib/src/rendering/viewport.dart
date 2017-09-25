@@ -201,7 +201,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -296,7 +296,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       ), parentUsesSize: true);
 
       final SliverGeometry childLayoutGeometry = child.geometry;
-      assert(childLayoutGeometry.debugAssertIsValid);
+      assert(childLayoutGeometry.debugAssertIsValid());
 
       // If there is a correction to apply, we'll have to start over.
       if (childLayoutGeometry.scrollOffsetCorrection != null)
@@ -366,7 +366,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         child = childAfter(child);
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -848,7 +848,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         }
       }
       return true;
-    });
+    }());
     size = constraints.biggest;
     // We ignore the return value of applyViewportDimension below because we are
     // going to go through performLayout next regardless.
@@ -935,7 +935,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         );
       }
       return true;
-    });
+    }());
   }
 
   double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
@@ -1217,7 +1217,7 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 

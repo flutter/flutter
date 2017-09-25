@@ -138,7 +138,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
         'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
         'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
       );
-    });
+    }());
     child?.layout(
       constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
       parentUsesSize: true,
@@ -512,7 +512,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
 
   @override
   double updateGeometry() {
-    final double minExtent = this.maxExtent;
+    final double minExtent = this.minExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = (maxExtent - _effectiveScrollOffset);
     final double layoutExtent = (maxExtent - constraints.scrollOffset);

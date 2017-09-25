@@ -26,13 +26,13 @@ class _AccountPictures extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Stack(
       children: <Widget>[
-        new Positioned(
+        new PositionedDirectional(
           top: 0.0,
-          right: 0.0,
+          end: 0.0,
           child: new Row(
             children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
               return new Container(
-                margin: const EdgeInsets.only(left: 16.0),
+                margin: const EdgeInsetsDirectional.only(start: 16.0),
                 width: 40.0,
                 height: 40.0,
                 child: picture
@@ -70,7 +70,7 @@ class _AccountDetails extends StatelessWidget {
   Widget addDropdownIcon(Widget line) {
     final Widget icon = new Expanded(
       child: new Align(
-        alignment: FractionalOffset.centerRight,
+        alignment: FractionalOffsetDirectional.centerEnd,
         child: new Icon(
           isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
           color: Colors.white

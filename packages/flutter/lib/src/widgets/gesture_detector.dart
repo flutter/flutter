@@ -185,7 +185,7 @@ class GestureDetector extends StatelessWidget {
            }
          }
          return true;
-       }),
+       }()),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -524,7 +524,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         );
       }
       return true;
-    });
+    }());
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
@@ -554,13 +554,24 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
         );
       }
       return true;
-    });
+    }());
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      context.visitChildElements((Element element) {
-        final _GestureSemantics widget = element.widget;
-        widget._updateSemanticsActions(semanticsGestureHandler, actions);
-      });
+      semanticsGestureHandler.validActions = actions;
+    }
+  }
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  ///
+  /// The event can be interpreted by assistive technologies to provide
+  /// additional feedback to the user about the state of the UI.
+  ///
+  /// The event will not be sent if [excludeFromSemantics] is set to `true`.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    if (!widget.excludeFromSemantics) {
+      final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
+      semanticsGestureHandler.sendSemanticsEvent(event);
     }
   }
 
@@ -699,10 +710,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       description.add(new DiagnosticsNode.message('DISPOSED'));
     } else {
       final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.debugDescription).toList();
-      if (gestures.isEmpty)
-        gestures.add('<none>');
-      description.add(new IterableProperty<String>('gestures', gestures));
-      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, hidden: true));
+      description.add(new IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
+      description.add(new IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
     }
     description.add(new EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -733,10 +742,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
           recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsHorizontalDragUpdate : null
       ..onVerticalDragUpdate = recognizers.containsKey(VerticalDragGestureRecognizer) ||
           recognizers.containsKey(PanGestureRecognizer) ? owner._handleSemanticsVerticalDragUpdate : null;
-  }
-
-  void _updateSemanticsActions(RenderSemanticsGestureHandler renderObject, Set<SemanticsAction> actions) {
-    renderObject.validActions = actions;
   }
 
   @override

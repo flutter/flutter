@@ -158,7 +158,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
         node = node._parent;
       assert(node != child); // indicates we are about to create a cycle
       return true;
-    });
+    }());
     child._parent = this;
     child._nextSibling = _firstChild;
     if (_firstChild != null)
@@ -456,6 +456,6 @@ class FocusManager {
     final String indent = '  ';
     return '${describeIdentity(this)}$status\n'
       '${indent}currentFocus: $_currentFocus\n'
-      '${rootScope.toStringDeep(indent, indent)}';
+      '${rootScope.toStringDeep(prefixLineOne: indent, prefixOtherLines: indent)}';
   }
 }

@@ -51,7 +51,6 @@ class GenSnapshot {
       '--dependencies=$depfilePath',
       '--print_snapshot_sizes',
     ]..addAll(additionalArgs);
-
     final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, snapshotType.platform, snapshotType.mode);
     return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
   }
@@ -250,7 +249,7 @@ class Snapshotter {
       await fs.file(fingerprintPath).writeAsString(fingerprint.toJson());
     } catch (e, s) {
       // Log exception and continue, this step is a performance improvement only.
-      print('Error during snapshot fingerprinting: $e\n$s');
+      printStatus('Error during snapshot fingerprinting: $e\n$s');
     }
   }
 
@@ -260,6 +259,9 @@ class Snapshotter {
       'targetPlatform': type.platform?.toString() ?? '',
       'entryPoint': mainPath,
     };
-    return new Fingerprint.fromBuildInputs(properties, inputFilePaths);
+    final List<String> pathsWithSnapshotData = inputFilePaths.toList()
+      ..add(artifacts.getArtifactPath(Artifact.vmSnapshotData))
+      ..add(artifacts.getArtifactPath(Artifact.isolateSnapshotData));
+    return new Fingerprint.fromBuildInputs(properties, pathsWithSnapshotData);
   }
 }

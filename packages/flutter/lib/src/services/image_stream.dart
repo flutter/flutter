@@ -158,7 +158,7 @@ class ImageStream extends Diagnosticable {
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
       ifNull: 'no listeners',
-      hidden: _completer != null,
+      level: _completer != null ? DiagnosticLevel.hidden : DiagnosticLevel.info,
     ));
     _completer?.debugFillProperties(properties);
   }

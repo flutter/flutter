@@ -153,7 +153,8 @@ class _FlutterPlatform extends PlatformPlugin {
     bool subprocessActive = false;
     bool controllerSinkClosed = false;
     try {
-      controller.sink.done.whenComplete(() { controllerSinkClosed = true; });
+      // Callback can't throw since it's just setting a variable.
+      controller.sink.done.whenComplete(() { controllerSinkClosed = true; }); // ignore: unawaited_futures
 
       // Prepare our WebSocket server to talk to the engine subproces.
       final HttpServer server = await HttpServer.bind(host, 0);
@@ -272,7 +273,8 @@ class _FlutterPlatform extends PlatformPlugin {
           subprocessActive = false;
           final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before connecting to test harness'), testPath, shellPath);
           controller.sink.addError(message);
-          controller.sink.close();
+          // Awaited for with 'sink.done' below.
+          controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           break;
@@ -280,7 +282,8 @@ class _FlutterPlatform extends PlatformPlugin {
           printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
-          controller.sink.close();
+          // Awaited for with 'sink.done' below.
+          controller.sink.close(); // ignore: unawaited_futures
           printTrace('test $ourTestCount: waiting for controller sink to close');
           await controller.sink.done;
           break;
@@ -332,8 +335,10 @@ class _FlutterPlatform extends PlatformPlugin {
             testDone.future.then<_TestResult>((Null _) { return _TestResult.testBailed; }),
           ]);
 
-          harnessToTest.cancel();
-          testToHarness.cancel();
+          await Future.wait(<Future<Null>>[
+            harnessToTest.cancel(),
+            testToHarness.cancel(),
+          ]);
 
           switch (testResult) {
             case _TestResult.crashed:
@@ -342,7 +347,8 @@ class _FlutterPlatform extends PlatformPlugin {
               subprocessActive = false;
               final String message = _getErrorMessage(_getExitCodeMessage(exitCode, 'before test harness closed its WebSocket'), testPath, shellPath);
               controller.sink.addError(message);
-              controller.sink.close();
+              // Awaited for with 'sink.done' below.
+              controller.sink.close(); // ignore: unawaited_futures
               printTrace('test $ourTestCount: waiting for controller sink to close');
               await controller.sink.done;
               break;
@@ -384,7 +390,8 @@ class _FlutterPlatform extends PlatformPlugin {
         }
       }
       if (!controllerSinkClosed) {
-        controller.sink.close();
+        // Waiting below with await.
+        controller.sink.close(); // ignore: unawaited_futures
         printTrace('test $ourTestCount: waiting for controller sink to close');
         await controller.sink.done;
       }

@@ -76,7 +76,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
         node = node.parent;
       assert(node != newLayer); // indicates we are about to create a cycle
       return true;
-    });
+    }());
     parent.adoptChild(newLayer);
     assert(newLayer.attached == parent.attached);
     if (parent.firstChild == this)
@@ -107,8 +107,8 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<Object>('owner', owner, hidden: parent != null, defaultValue: null));
-    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null));
+    description.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
@@ -299,7 +299,7 @@ class ContainerLayer extends Layer {
         node = node.parent;
       assert(node != child); // indicates we are about to create a cycle
       return true;
-    });
+    }());
     adoptChild(child);
     child._previousSibling = lastChild;
     if (lastChild != null)

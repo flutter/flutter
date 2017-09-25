@@ -4,6 +4,8 @@ set -e
 # If you want to run this script locally, make sure you run it from
 # the root of the flutter repository.
 
+# This is called from travis_upload.sh on Travis.
+
 # Make sure dart is installed
 bin/flutter --version
 
@@ -26,17 +28,19 @@ if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     if [ "$TRAVIS_BRANCH" == "master" ]; then
       echo -e "User-agent: *\nDisallow: /" > doc/robots.txt
-      firebase deploy --project master-docs-flutter-io
+      while : ; do
+        firebase deploy --project master-docs-flutter-io && break
+        echo Error: Unable to deploy documentation to firebase. Retrying in five seconds...
+        sleep 5
+      done
     fi
 
     if [ "$TRAVIS_BRANCH" == "alpha" ]; then
-      firebase deploy --project docs-flutter-io
-    fi
-
-    exit_code=$?
-    if [[ $exit_code -ne 0 ]]; then
-      >&2 echo "Error deploying docs via firebase ($exit_code)"
-      exit $exit_code
+      while : ; do
+        firebase deploy --project docs-flutter-io && break
+        echo Error: Unable to deploy documentation to firebase. Retrying in five seconds...
+        sleep 5
+      done
     fi
   fi
 fi

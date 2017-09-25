@@ -48,7 +48,6 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 /// Use this class to configure a [Theme] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
-@immutable
 class ThemeData {
   /// Create a ThemeData given a set of preferred values.
   ///
@@ -248,14 +247,26 @@ class ThemeData {
        assert(platform != null);
 
   /// A default light blue theme.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.light() => new ThemeData(brightness: Brightness.light);
 
   /// A default dark theme with a teal accent color.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark() => new ThemeData(brightness: Brightness.dark);
 
-  /// The default theme. Same as [new ThemeData.light].
+  /// The default color theme. Same as [new ThemeData.light].
   ///
   /// This is used by [Theme.of] when no theme has been specified.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
+  ///
+  /// Most applications would use [Theme.of], which provides correct localized
+  /// text geometry.
   factory ThemeData.fallback() => new ThemeData.light();
 
   /// The brightness of the overall theme of the application. Used by widgets
@@ -407,38 +418,50 @@ class ThemeData {
     IconThemeData accentIconTheme,
     TargetPlatform platform,
   }) {
-    return new ThemeData.raw(
-      brightness: brightness ?? this.brightness,
-      primaryColor: primaryColor ?? this.primaryColor,
-      primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
-      accentColor: accentColor ?? this.accentColor,
-      accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
-      canvasColor: canvasColor ?? this.canvasColor,
-      scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
-      cardColor: cardColor ?? this.cardColor,
-      dividerColor: dividerColor ?? this.dividerColor,
-      highlightColor: highlightColor ?? this.highlightColor,
-      splashColor: splashColor ?? this.splashColor,
-      selectedRowColor: selectedRowColor ?? this.selectedRowColor,
-      unselectedWidgetColor: unselectedWidgetColor ?? this.unselectedWidgetColor,
-      disabledColor: disabledColor ?? this.disabledColor,
-      buttonColor: buttonColor ?? this.buttonColor,
-      secondaryHeaderColor: secondaryHeaderColor ?? this.secondaryHeaderColor,
-      textSelectionColor: textSelectionColor ?? this.textSelectionColor,
-      textSelectionHandleColor: textSelectionHandleColor ?? this.textSelectionHandleColor,
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      dialogBackgroundColor: dialogBackgroundColor ?? this.dialogBackgroundColor,
-      indicatorColor: indicatorColor ?? this.indicatorColor,
-      hintColor: hintColor ?? this.hintColor,
-      errorColor: errorColor ?? this.errorColor,
-      textTheme: textTheme ?? this.textTheme,
-      primaryTextTheme: primaryTextTheme ?? this.primaryTextTheme,
-      accentTextTheme: accentTextTheme ?? this.accentTextTheme,
-      iconTheme: iconTheme ?? this.iconTheme,
-      primaryIconTheme: primaryIconTheme ?? this.primaryIconTheme,
-      accentIconTheme: accentIconTheme ?? this.accentIconTheme,
-      platform: platform ?? this.platform,
+    return _copyThemeDataWith(
+      this,
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryColorBrightness: primaryColorBrightness,
+      accentColor: accentColor,
+      accentColorBrightness: accentColorBrightness,
+      canvasColor: canvasColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      cardColor: cardColor,
+      dividerColor: dividerColor,
+      highlightColor: highlightColor,
+      splashColor: splashColor,
+      selectedRowColor: selectedRowColor,
+      unselectedWidgetColor: unselectedWidgetColor,
+      disabledColor: disabledColor,
+      buttonColor: buttonColor,
+      secondaryHeaderColor: secondaryHeaderColor,
+      textSelectionColor: textSelectionColor,
+      textSelectionHandleColor: textSelectionHandleColor,
+      backgroundColor: backgroundColor,
+      dialogBackgroundColor: dialogBackgroundColor,
+      indicatorColor: indicatorColor,
+      hintColor: hintColor,
+      errorColor: errorColor,
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
+      accentTextTheme: accentTextTheme,
+      iconTheme: iconTheme,
+      primaryIconTheme: primaryIconTheme,
+      accentIconTheme: accentIconTheme,
+      platform: platform,
     );
+  }
+
+  /// Returns a new theme built by merging [baseTheme] into the text geometry
+  /// provided by the [localTextGeometry].
+  ///
+  /// The [TextStyle.inherit] field in the text styles provided by
+  /// [localTextGeometry] must be set to `true`.
+  static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
+    assert(baseTheme != null);
+    assert(localTextGeometry != null);
+    return new _LocalizedThemeData(baseTheme, localTextGeometry);
   }
 
   // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
@@ -589,4 +612,247 @@ class ThemeData {
 
   @override
   String toString() => '$runtimeType(${ platform != defaultTargetPlatform ? "$platform " : ''}$brightness $primaryColor etc...)';
+}
+
+/// A lazily evaluated theme that provides the properties of the given
+/// [delegate] theme localized using the properties of the given
+/// [localTextGeometry].
+///
+/// The localization is done by merging of the [TextTheme] fields of the
+/// [delegate] into the [localTextGeometry] and caching the results.
+class _LocalizedThemeData implements ThemeData {
+  _LocalizedThemeData(this.delegate, this.localTextGeometry);
+
+  final ThemeData delegate;
+  final TextTheme localTextGeometry;
+
+  @override
+  Color get accentColor => delegate.accentColor;
+
+  @override
+  Brightness get accentColorBrightness => delegate.accentColorBrightness;
+
+  @override
+  IconThemeData get accentIconTheme => delegate.accentIconTheme;
+
+  @override
+  Color get backgroundColor => delegate.backgroundColor;
+
+  @override
+  Brightness get brightness => delegate.brightness;
+
+  @override
+  Color get buttonColor => delegate.buttonColor;
+
+  @override
+  Color get canvasColor => delegate.canvasColor;
+
+  @override
+  Color get cardColor => delegate.cardColor;
+
+  @override
+  Color get dialogBackgroundColor => delegate.dialogBackgroundColor;
+
+  @override
+  Color get disabledColor => delegate.disabledColor;
+
+  @override
+  Color get dividerColor => delegate.dividerColor;
+
+  @override
+  Color get errorColor => delegate.errorColor;
+
+  @override
+  Color get highlightColor => delegate.highlightColor;
+
+  @override
+  Color get hintColor => delegate.hintColor;
+
+  @override
+  IconThemeData get iconTheme => delegate.iconTheme;
+
+  @override
+  Color get indicatorColor => delegate.indicatorColor;
+
+  @override
+  TargetPlatform get platform => delegate.platform;
+
+  @override
+  Color get primaryColor => delegate.primaryColor;
+
+  @override
+  Brightness get primaryColorBrightness => delegate.primaryColorBrightness;
+
+  @override
+  IconThemeData get primaryIconTheme => delegate.primaryIconTheme;
+
+  @override
+  Color get scaffoldBackgroundColor => delegate.scaffoldBackgroundColor;
+
+  @override
+  Color get secondaryHeaderColor => delegate.secondaryHeaderColor;
+
+  @override
+  Color get selectedRowColor => delegate.selectedRowColor;
+
+  @override
+  Color get splashColor => delegate.splashColor;
+
+  @override
+  Color get textSelectionColor => delegate.textSelectionColor;
+
+  @override
+  Color get textSelectionHandleColor => delegate.textSelectionHandleColor;
+
+  @override
+  Color get unselectedWidgetColor => delegate.unselectedWidgetColor;
+
+  @override
+  TextTheme get primaryTextTheme => _primaryTextTheme ??= delegate.primaryTextTheme.merge(localTextGeometry);
+  TextTheme _primaryTextTheme;
+
+  @override
+  TextTheme get accentTextTheme => _accentTextTheme ??= delegate.accentTextTheme.merge(localTextGeometry);
+  TextTheme _accentTextTheme;
+
+  @override
+  TextTheme get textTheme => _textTheme ??= delegate.textTheme.merge(localTextGeometry);
+  TextTheme _textTheme;
+
+  /// This should be identical to [ThemeData.copyWith].
+  @override
+  ThemeData copyWith({
+    Brightness brightness,
+    Color primaryColor,
+    Brightness primaryColorBrightness,
+    Color accentColor,
+    Brightness accentColorBrightness,
+    Color canvasColor,
+    Color scaffoldBackgroundColor,
+    Color cardColor,
+    Color dividerColor,
+    Color highlightColor,
+    Color splashColor,
+    Color selectedRowColor,
+    Color unselectedWidgetColor,
+    Color disabledColor,
+    Color buttonColor,
+    Color secondaryHeaderColor,
+    Color textSelectionColor,
+    Color textSelectionHandleColor,
+    Color backgroundColor,
+    Color dialogBackgroundColor,
+    Color indicatorColor,
+    Color hintColor,
+    Color errorColor,
+    TextTheme textTheme,
+    TextTheme primaryTextTheme,
+    TextTheme accentTextTheme,
+    IconThemeData iconTheme,
+    IconThemeData primaryIconTheme,
+    IconThemeData accentIconTheme,
+    TargetPlatform platform,
+  }) {
+    return _copyThemeDataWith(
+      this,
+      brightness: brightness,
+      primaryColor: primaryColor,
+      primaryColorBrightness: primaryColorBrightness,
+      accentColor: accentColor,
+      accentColorBrightness: accentColorBrightness,
+      canvasColor: canvasColor,
+      scaffoldBackgroundColor: scaffoldBackgroundColor,
+      cardColor: cardColor,
+      dividerColor: dividerColor,
+      highlightColor: highlightColor,
+      splashColor: splashColor,
+      selectedRowColor: selectedRowColor,
+      unselectedWidgetColor: unselectedWidgetColor,
+      disabledColor: disabledColor,
+      buttonColor: buttonColor,
+      secondaryHeaderColor: secondaryHeaderColor,
+      textSelectionColor: textSelectionColor,
+      textSelectionHandleColor: textSelectionHandleColor,
+      backgroundColor: backgroundColor,
+      dialogBackgroundColor: dialogBackgroundColor,
+      indicatorColor: indicatorColor,
+      hintColor: hintColor,
+      errorColor: errorColor,
+      textTheme: textTheme,
+      primaryTextTheme: primaryTextTheme,
+      accentTextTheme: accentTextTheme,
+      iconTheme: iconTheme,
+      primaryIconTheme: primaryIconTheme,
+      accentIconTheme: accentIconTheme,
+      platform: platform,
+    );
+  }
+}
+
+/// Implementation of [ThemeData.copyWith], shared with [_LocalizedThemeData.copyWith].
+ThemeData _copyThemeDataWith(
+  ThemeData base, {
+  @required Brightness brightness,
+  @required Color primaryColor,
+  @required Brightness primaryColorBrightness,
+  @required Color accentColor,
+  @required Brightness accentColorBrightness,
+  @required Color canvasColor,
+  @required Color scaffoldBackgroundColor,
+  @required Color cardColor,
+  @required Color dividerColor,
+  @required Color highlightColor,
+  @required Color splashColor,
+  @required Color selectedRowColor,
+  @required Color unselectedWidgetColor,
+  @required Color disabledColor,
+  @required Color buttonColor,
+  @required Color secondaryHeaderColor,
+  @required Color textSelectionColor,
+  @required Color textSelectionHandleColor,
+  @required Color backgroundColor,
+  @required Color dialogBackgroundColor,
+  @required Color indicatorColor,
+  @required Color hintColor,
+  @required Color errorColor,
+  @required TextTheme textTheme,
+  @required TextTheme primaryTextTheme,
+  @required TextTheme accentTextTheme,
+  @required IconThemeData iconTheme,
+  @required IconThemeData primaryIconTheme,
+  @required IconThemeData accentIconTheme,
+  @required TargetPlatform platform,
+}) {
+  return new ThemeData.raw(
+    brightness: brightness ?? base.brightness,
+    primaryColor: primaryColor ?? base.primaryColor,
+    primaryColorBrightness: primaryColorBrightness ?? base.primaryColorBrightness,
+    accentColor: accentColor ?? base.accentColor,
+    accentColorBrightness: accentColorBrightness ?? base.accentColorBrightness,
+    canvasColor: canvasColor ?? base.canvasColor,
+    scaffoldBackgroundColor: scaffoldBackgroundColor ?? base.scaffoldBackgroundColor,
+    cardColor: cardColor ?? base.cardColor,
+    dividerColor: dividerColor ?? base.dividerColor,
+    highlightColor: highlightColor ?? base.highlightColor,
+    splashColor: splashColor ?? base.splashColor,
+    selectedRowColor: selectedRowColor ?? base.selectedRowColor,
+    unselectedWidgetColor: unselectedWidgetColor ?? base.unselectedWidgetColor,
+    disabledColor: disabledColor ?? base.disabledColor,
+    buttonColor: buttonColor ?? base.buttonColor,
+    secondaryHeaderColor: secondaryHeaderColor ?? base.secondaryHeaderColor,
+    textSelectionColor: textSelectionColor ?? base.textSelectionColor,
+    textSelectionHandleColor: textSelectionHandleColor ?? base.textSelectionHandleColor,
+    backgroundColor: backgroundColor ?? base.backgroundColor,
+    dialogBackgroundColor: dialogBackgroundColor ?? base.dialogBackgroundColor,
+    indicatorColor: indicatorColor ?? base.indicatorColor,
+    hintColor: hintColor ?? base.hintColor,
+    errorColor: errorColor ?? base.errorColor,
+    textTheme: textTheme ?? base.textTheme,
+    primaryTextTheme: primaryTextTheme ?? base.primaryTextTheme,
+    accentTextTheme: accentTextTheme ?? base.accentTextTheme,
+    iconTheme: iconTheme ?? base.iconTheme,
+    primaryIconTheme: primaryIconTheme ?? base.primaryIconTheme,
+    accentIconTheme: accentIconTheme ?? base.accentIconTheme,
+    platform: platform ?? base.platform,
+  );
 }

@@ -52,8 +52,42 @@ Future<Null> _generateDocs() async {
   print('${bold}DONE: test.dart does nothing in the docs shard.$reset');
 }
 
+Future<Null> _verifyInternationalizations() async {
+  final EvalResult genResult = await _evalCommand(
+    dart,
+    <String>[
+      path.join('dev', 'tools', 'gen_localizations.dart'),
+      path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n'),
+      'material'
+    ],
+    workingDirectory: flutterRoot,
+  );
+
+  final String localizationsFile = path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n', 'localizations.dart');
+
+  final EvalResult sourceContents = await _evalCommand(
+    'cat',
+    <String>[localizationsFile],
+    workingDirectory: flutterRoot,
+  );
+
+  if (genResult.stdout.trim() != sourceContents.stdout.trim()) {
+    stderr
+      ..writeln('<<<<<<< $localizationsFile')
+      ..writeln(sourceContents.stdout.trim())
+      ..writeln('=======')
+      ..writeln(genResult.stdout.trim())
+      ..writeln('>>>>>>> gen_localizations')
+      ..writeln('The contents of $localizationsFile are different from that produced by gen_localizations.')
+      ..writeln()
+      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
+    exit(1);
+  }
+}
+
 Future<Null> _analyzeRepo() async {
   await _verifyNoBadImports(flutterRoot);
+  await _verifyInternationalizations();
 
   // Analyze all the Dart code in the repo.
   await _runFlutterAnalyze(flutterRoot,
@@ -176,6 +210,57 @@ Future<Null> _pubRunTest(
   return _runCommand(pub, args, workingDirectory: workingDirectory);
 }
 
+class EvalResult {
+  EvalResult({
+    this.stdout,
+    this.stderr,
+  });
+
+  final String stdout;
+  final String stderr;
+}
+
+Future<EvalResult> _evalCommand(String executable, List<String> arguments, {
+  String workingDirectory,
+  Map<String, String> environment,
+  bool skip: false,
+}) async {
+  final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
+  final String relativeWorkingDir = path.relative(workingDirectory);
+  if (skip) {
+    _printProgress('SKIPPING', relativeWorkingDir, commandDescription);
+    return null;
+  }
+  _printProgress('RUNNING', relativeWorkingDir, commandDescription);
+
+  final Process process = await Process.start(executable, arguments,
+    workingDirectory: workingDirectory,
+    environment: environment,
+  );
+
+  final Future<List<List<int>>> savedStdout = process.stdout.toList();
+  final Future<List<List<int>>> savedStderr = process.stderr.toList();
+  final int exitCode = await process.exitCode;
+  final EvalResult result = new EvalResult(
+    stdout: UTF8.decode((await savedStdout).expand((List<int> ints) => ints).toList()),
+    stderr: UTF8.decode((await savedStderr).expand((List<int> ints) => ints).toList()),
+  );
+
+  if (exitCode != 0) {
+    stderr.write(result.stderr);
+    print(
+      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset\n'
+      '${bold}ERROR:$red Last command exited with $exitCode.$reset\n'
+      '${bold}Command:$red $commandDescription$reset\n'
+      '${bold}Relative working directory:$red $relativeWorkingDir$reset\n'
+      '$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset'
+    );
+    exit(1);
+  }
+
+  return result;
+}
+
 Future<Null> _runCommand(String executable, List<String> arguments, {
   String workingDirectory,
   Map<String, String> environment,
@@ -263,7 +348,6 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
   final String libPath = path.join(workingDirectory, 'packages', 'flutter', 'lib');
   final String srcPath = path.join(workingDirectory, 'packages', 'flutter', 'lib', 'src');
   // Verify there's one libPath/*.dart for each srcPath/*/.
-  <String>[];
   final List<String> packages = new Directory(libPath).listSync()
     .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')
     .map<String>((FileSystemEntity entity) => path.basenameWithoutExtension(entity.path))

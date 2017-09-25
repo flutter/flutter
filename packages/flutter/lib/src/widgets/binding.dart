@@ -441,7 +441,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
         );
       }
       return true;
-    });
+    }());
     ensureVisualUpdate();
   }
 
@@ -524,7 +524,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     assert(() {
       debugBuildingDirtyElements = true;
       return true;
-    });
+    }());
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
@@ -534,7 +534,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
       assert(() {
         debugBuildingDirtyElements = false;
         return true;
-      });
+      }());
     }
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     // See https://github.com/dart-lang/sdk/issues/27192
@@ -613,7 +613,7 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
   String mode = 'RELEASE MODE';
-  assert(() { mode = 'CHECKED MODE'; return true; });
+  assert(() { mode = 'CHECKED MODE'; return true; }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.renderViewElement != null) {
     debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());

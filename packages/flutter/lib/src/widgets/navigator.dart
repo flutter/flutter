@@ -718,7 +718,7 @@ class Navigator extends StatefulWidget {
         );
       }
       return true;
-    });
+    }());
     return navigator;
   }
 
@@ -779,7 +779,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             ),
           );
           return true;
-        });
+        }());
         push(_routeNamed(Navigator.defaultRouteName));
       } else {
         for (Route<dynamic> route in plannedInitialRoutes)
@@ -813,7 +813,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void dispose() {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     for (NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
@@ -823,7 +823,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _history.clear();
     focusScopeNode.detach();
     super.dispose();
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// The overlay this navigator uses for its visual presentation.
@@ -859,7 +859,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
         }
         return true;
-      });
+      }());
       route = widget.onUnknownRoute(settings);
       assert(() {
         if (route == null) {
@@ -872,7 +872,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
         }
         return true;
-      });
+      }());
     }
     return route;
   }
@@ -908,7 +908,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// when the pushed route is popped off the navigator.
   Future<dynamic> push(Route<dynamic> route) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(route != null);
     assert(route._navigator == null);
     setState(() {
@@ -923,7 +923,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(route, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return route.popped;
   }
@@ -942,7 +942,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute != null);
     if (oldRoute == newRoute)
       return;
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(oldRoute._navigator == this);
     assert(newRoute._navigator == null);
     assert(oldRoute.overlayEntries.isNotEmpty);
@@ -965,7 +965,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _history[index - 1].didChangeNext(newRoute);
       oldRoute.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// Push the [newRoute] and dispose the old current Route.
@@ -980,7 +980,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// as if the old route had been popped.
   Future<dynamic> pushReplacement(Route<dynamic> newRoute, { dynamic result }) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final Route<dynamic> oldRoute = _history.last;
     assert(oldRoute != null && oldRoute._navigator == this);
     assert(oldRoute.overlayEntries.isNotEmpty);
@@ -1008,7 +1008,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(newRoute, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return newRoute.popped;
   }
@@ -1047,7 +1047,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// [Route.didChangePrevious]). The navigator observer is not notified.
   void removeRouteBelow(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(anchorRoute._navigator == this);
     final int index = _history.indexOf(anchorRoute) - 1;
     assert(index >= 0);
@@ -1064,7 +1064,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         nextRoute.didChangePrevious(previousRoute);
       targetRoute.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// Push the given route and then remove all the previous routes until the
@@ -1080,7 +1080,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// that always returns false.
   Future<dynamic> pushAndRemoveUntil(Route<dynamic> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
     while (_history.isNotEmpty && !predicate(_history.last)) {
       final Route<dynamic> removedRoute = _history.removeLast();
@@ -1107,7 +1107,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(newRoute, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return newRoute.popped;
   }
@@ -1167,11 +1167,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// popped.
   bool pop([dynamic result]) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
-    assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
+    assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; }());
     if (route.didPop(result ?? route.currentResult)) {
       assert(debugPredictedWouldPop);
       if (_history.length > 1) {
@@ -1190,13 +1190,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             observer.didPop(route, _history.last);
         });
       } else {
-        assert(() { _debugLocked = false; return true; });
+        assert(() { _debugLocked = false; return true; }());
         return false;
       }
     } else {
       assert(!debugPredictedWouldPop);
     }
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return true;
   }
@@ -1213,7 +1213,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void removeRoute(Route<dynamic> route) {
     assert(route != null);
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(route._navigator == this);
     final int index = _history.indexOf(route);
     assert(index != -1);
@@ -1227,7 +1227,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(route, previousRoute);
       route.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
   }
 

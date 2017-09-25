@@ -99,8 +99,10 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty)
       return;
     for (FlutterView view in flutterViews) {
-      if (view != null && view.uiIsolate != null)
-        view.uiIsolate.flutterExit();
+      if (view != null && view.uiIsolate != null) {
+        // Manage waits specifically below.
+        view.uiIsolate.flutterExit(); // ignore: unawaited_futures
+      }
     }
     await new Future<Null>.delayed(const Duration(milliseconds: 100));
   }
@@ -563,8 +565,9 @@ abstract class ResidentRunner {
   }
 
   Future<Null> stopEchoingDeviceLog() async {
-    for (FlutterDevice device in flutterDevices)
-      device.stopEchoingDeviceLog();
+    await Future.wait(
+      flutterDevices.map((FlutterDevice device) => device.stopEchoingDeviceLog())
+    );
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
@@ -591,7 +594,10 @@ abstract class ResidentRunner {
     // Listen for service protocol connection to close.
     for (FlutterDevice device in flutterDevices) {
       for (VMService service in device.vmServices) {
-        service.done.then<Null>(
+        // This hooks up callbacks for when the connection stops in the future.
+        // We don't want to wait for them. We don't handle errors in those callbacks'
+        // futures either because they just print to logger and is not critical.
+        service.done.then<Null>( // ignore: unawaited_futures
           _serviceProtocolDone,
           onError: _serviceProtocolError
         ).whenComplete(_serviceDisconnected);

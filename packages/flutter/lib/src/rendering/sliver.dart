@@ -453,7 +453,7 @@ class SliverConstraints extends Constraints {
       verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
       verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
       return true;
-    });
+    }());
     return true;
   }
 
@@ -669,7 +669,7 @@ class SliverGeometry extends Diagnosticable {
       verify(hasVisualOverflow != null, 'The "hasVisualOverflow" is null.');
       verify(scrollOffsetCorrection != 0.0, 'The "scrollOffsetCorrection" is zero.');
       return true;
-    });
+    }());
     return true;
   }
 
@@ -991,7 +991,7 @@ abstract class RenderSliver extends RenderObject {
         'The RenderSliver in question is:\n'
         '  $this'
       );
-    });
+    }());
     _geometry = value;
   }
 
@@ -1026,7 +1026,7 @@ abstract class RenderSliver extends RenderObject {
     assert(geometry.debugAssertIsValid(
       informationCollector: (StringBuffer information) {
         information.writeln('The RenderSliver that returned the offending geometry was:');
-        information.writeln('  ${toStringShallow('\n  ')}');
+        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
       },
     ));
     assert(() {
@@ -1034,7 +1034,7 @@ abstract class RenderSliver extends RenderObject {
         throw new FlutterError(
           'SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.\n'
           'The render object whose geometry violates the constraints is the following:\n'
-          '  ${toStringShallow('\n  ')}\n' +
+          '  ${toStringShallow(joiner: '\n  ')}\n' +
           _debugCompareFloats('remainingPaintExtent', constraints.remainingPaintExtent,
                               'paintExtent', geometry.paintExtent) +
           'The paintExtent must cause the child sliver to paint within the viewport, and so '
@@ -1042,7 +1042,7 @@ abstract class RenderSliver extends RenderObject {
         );
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -1195,7 +1195,7 @@ abstract class RenderSliver extends RenderObject {
   double childMainAxisPosition(covariant RenderObject child) {
     assert(() {
       throw new FlutterError('$runtimeType does not implement childPosition.');
-    });
+    }());
     return 0.0;
   }
 
@@ -1232,7 +1232,7 @@ abstract class RenderSliver extends RenderObject {
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(() {
       throw new FlutterError('$runtimeType does not implement applyPaintTransform.');
-    });
+    }());
   }
 
   /// This returns a [Size] with dimensions relative to the leading edge of the
@@ -1291,7 +1291,7 @@ abstract class RenderSliver extends RenderObject {
         paint
       );
       return true;
-    });
+    }());
   }
 
   @override
@@ -1358,7 +1358,7 @@ abstract class RenderSliver extends RenderObject {
         }
       }
       return true;
-    });
+    }());
   }
 
   // This override exists only to change the type of the second argument.

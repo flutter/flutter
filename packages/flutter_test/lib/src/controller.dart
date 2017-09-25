@@ -473,4 +473,8 @@ class WidgetController {
     assert(box != null);
     return box.size;
   }
+
+  /// Returns the rect of the given widget. This is only valid once
+  /// the widget's render object has been laid out at least once.
+  Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
 }

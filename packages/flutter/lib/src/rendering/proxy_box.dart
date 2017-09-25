@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -271,7 +272,7 @@ class RenderConstrainedBox extends RenderProxyBox {
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -462,7 +463,7 @@ class RenderAspectRatio extends RenderProxyBox {
         );
       }
       return true;
-    });
+    }());
 
     if (constraints.isTight)
       return constraints.smallest;
@@ -1038,10 +1039,11 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
               fontSize: 14.0,
             ),
           ),
+          textDirection: TextDirection.rtl, // doesn't matter, it's one character
         )
         ..layout();
       return true;
-    });
+    }());
   }
 }
 
@@ -1091,7 +1093,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
         _debugText.paint(context.canvas, offset + new Offset(_clip.width / 8.0, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
-    });
+    }());
   }
 }
 
@@ -1162,7 +1164,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
         _debugText.paint(context.canvas, offset + new Offset(_clip.tlRadiusX, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
-    });
+    }());
   }
 }
 
@@ -1226,7 +1228,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
         _debugText.paint(context.canvas, offset + new Offset((_clip.width - _debugText.width) / 2.0, -_debugText.text.style.fontSize * 1.1));
       }
       return true;
-    });
+    }());
   }
 }
 
@@ -1284,7 +1286,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
         _debugText.paint(context.canvas, offset);
       }
       return true;
-    });
+    }());
   }
 }
 
@@ -1553,7 +1555,7 @@ class RenderDecoratedBox extends RenderProxyBox {
       assert(() {
         debugSaveCount = context.canvas.getSaveCount();
         return true;
-      });
+      }());
       _painter.paint(context.canvas, offset, filledConfiguration);
       assert(() {
         if (debugSaveCount != context.canvas.getSaveCount()) {
@@ -1569,7 +1571,7 @@ class RenderDecoratedBox extends RenderProxyBox {
           );
         }
         return true;
-      });
+      }());
       if (decoration.isComplex)
         context.setIsComplexHint();
     }
@@ -2292,7 +2294,7 @@ class RenderCustomPaint extends RenderProxyBox {
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
     int debugPreviousCanvasSaveCount;
     canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; });
+    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
     if (offset != Offset.zero)
       canvas.translate(offset.dx, offset.dy);
     painter.paint(canvas, size);
@@ -2326,7 +2328,7 @@ class RenderCustomPaint extends RenderProxyBox {
         );
       }
       return debugNewCanvasSaveCount == debugPreviousCanvasSaveCount;
-    });
+    }());
     canvas.restore();
   }
 
@@ -2511,7 +2513,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
       _debugSymmetricPaintCount = 0;
       _debugAsymmetricPaintCount = 0;
       return true;
-    });
+    }());
   }
 
   @override
@@ -2522,7 +2524,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
       else
         _debugAsymmetricPaintCount += 1;
       return true;
-    });
+    }());
   }
 
   @override
@@ -2555,7 +2557,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
         description.add(new MessageProperty('diagnosis', diagnosis));
       }
       return true;
-    });
+    }());
     if (inReleaseMode)
       description.add(new DiagnosticsNode.message('(run in checked mode to collect repaint boundary statistics)'));
   }
@@ -2981,6 +2983,13 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
   SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
+  }
 
   @override
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
@@ -3017,6 +3026,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   void _annotate(SemanticsNode node) {
+    _annotatedNode = node;
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);

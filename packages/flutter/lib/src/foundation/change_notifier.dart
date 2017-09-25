@@ -54,7 +54,7 @@ class ChangeNotifier extends Listenable {
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -63,7 +63,7 @@ class ChangeNotifier extends Listenable {
   /// This method must not be called after [dispose] has been called.
   @override
   void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners.add(listener);
   }
 
@@ -88,7 +88,7 @@ class ChangeNotifier extends Listenable {
   /// registrations to a common upstream object.
   @override
   void removeListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners.remove(listener);
   }
 
@@ -100,7 +100,7 @@ class ChangeNotifier extends Listenable {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners = null;
   }
 
@@ -121,7 +121,7 @@ class ChangeNotifier extends Listenable {
   /// See the discussion at [removeListener].
   @protected
   void notifyListeners() {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     if (_listeners != null) {
       final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {

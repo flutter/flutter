@@ -15,6 +15,7 @@ import '../base/logger.dart';
 import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../commands/build_apk.dart';
 import '../device.dart';
@@ -404,6 +405,8 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--es', 'route', route]);
     if (debuggingOptions.enableSoftwareRendering)
       cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
+    if (debuggingOptions.traceSkia)
+      cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.buildInfo.isDebug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
@@ -450,8 +453,10 @@ class AndroidDevice extends Device {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      observatoryDiscovery.cancel();
-      diagnosticDiscovery.cancel();
+      await waitGroup<Null>(<Future<Null>>[
+        observatoryDiscovery.cancel(),
+        diagnosticDiscovery.cancel(),
+      ]);
     }
   }
 
@@ -522,8 +527,10 @@ class AndroidDevice extends Device {
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    await new Future<Null>.delayed(const Duration(seconds: 1));
-    logs.cancel();
+    await waitGroup<Null>(<Future<Null>>[
+      new Future<Null>.delayed(const Duration(seconds: 1)),
+      logs.cancel(),
+    ]);
     return result;
   }
 }

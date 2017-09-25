@@ -113,7 +113,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
           );
         }
         return true;
-      });
+      }());
       _handles.remove(handle);
       if (_handles.isEmpty) {
         if (SchedulerBinding.instance.schedulerPhase.index < SchedulerPhase.persistentCallbacks.index) {

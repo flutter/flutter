@@ -86,7 +86,7 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
           }
       );
       return true;
-    });
+    }());
 
     registerSignalServiceExtension(
       name: 'debugDumpRenderTree',
@@ -283,7 +283,7 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
   @override
   Future<Null> performReassemble() async {
     await super.performReassemble();
-    Timeline.startSync('Dirty Render Tree');
+    Timeline.startSync('Dirty Render Tree', arguments: timelineWhitelistArguments);
     try {
       renderView.reassemble();
     } finally {
@@ -329,7 +329,7 @@ void debugDumpLayerTree() {
 /// The order in which the children of a [SemanticsNode] will be printed is
 /// controlled by the [childOrder] parameter.
 void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder) ?? 'Semantics not collected.');
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework

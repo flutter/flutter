@@ -5,26 +5,19 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/rendering_tester.dart';
 import '../services/mocks_for_image_cache.dart';
 
-List<int> selectedTabs;
-
+/// Integration tests testing both [CupertinoPageScaffold] and [CupertinoTabScaffold].
 void main() {
-  setUp(() {
-    selectedTabs = <int>[];
-  });
-
   testWidgets('Contents are behind translucent bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-              return const CupertinoScaffold(
+            builder: (BuildContext context) {
+              return const CupertinoPageScaffold(
                 // Default nav bar is translucent.
                 navigationBar: const CupertinoNavigationBar(
                   middle: const Text('Title'),
@@ -47,18 +40,33 @@ void main() {
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-              return new CupertinoScaffold.tabbed(
-                navigationBar: const CupertinoNavigationBar(
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                tabBar: new CupertinoTabBar(
                   backgroundColor: CupertinoColors.white,
-                  middle: const Text('Title'),
+                  items: <BottomNavigationBarItem>[
+                    const BottomNavigationBarItem(
+                      icon: const ImageIcon(const TestImageProvider(24, 24)),
+                      title: const Text('Tab 1'),
+                    ),
+                    const BottomNavigationBarItem(
+                      icon: const ImageIcon(const TestImageProvider(24, 24)),
+                      title: const Text('Tab 2'),
+                    ),
+                  ],
                 ),
-                tabBar: _buildTabBar(),
-                rootTabPageBuilder: (BuildContext context, int index) {
-                   return index == 0 ? page1Center : new Stack();
+                tabBuilder: (BuildContext context, int index) {
+                  return index == 0
+                      ? new CupertinoPageScaffold(
+                        navigationBar: const CupertinoNavigationBar(
+                          backgroundColor: CupertinoColors.white,
+                          middle: const Text('Title'),
+                        ),
+                        child: page1Center,
+                      )
+                      : new Stack();
                 }
               );
             },
@@ -70,31 +78,68 @@ void main() {
     expect(tester.getSize(find.byWidget(page1Center)).height, 600.0 - 44.0 - 50.0);
   });
 
-  testWidgets('Tab switching', (WidgetTester tester) async {
-    final List<int> tabsPainted = <int>[];
-
+  testWidgets('iOS independent tab navigation', (WidgetTester tester) async {
+    // A full on iOS information architecture app with 2 tabs, and 2 pages
+    // in each with independent navigation states.
     await tester.pumpWidget(
       new WidgetsApp(
         color: const Color(0xFFFFFFFF),
         onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
+          return new CupertinoPageRoute<Null>(
             settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-              return new CupertinoScaffold.tabbed(
-                navigationBar: const CupertinoNavigationBar(
-                  backgroundColor: CupertinoColors.white,
-                  middle: const Text('Title'),
+            builder: (BuildContext context) {
+              return new CupertinoTabScaffold(
+                tabBar: new CupertinoTabBar(
+                  items: <BottomNavigationBarItem>[
+                    const BottomNavigationBarItem(
+                      icon: const ImageIcon(const TestImageProvider(24, 24)),
+                      title: const Text('Tab 1'),
+                    ),
+                    const BottomNavigationBarItem(
+                      icon: const ImageIcon(const TestImageProvider(24, 24)),
+                      title: const Text('Tab 2'),
+                    ),
+                  ],
                 ),
-                tabBar: _buildTabBar(),
-                rootTabPageBuilder: (BuildContext context, int index) {
-                  return new CustomPaint(
-                    child: new Text('Page ${index + 1}'),
-                    painter: new TestCallbackPainter(
-                      onPaint: () { tabsPainted.add(index); }
-                    )
+                tabBuilder: (BuildContext context, int index) {
+                  // For 1-indexed readability.
+                  ++index;
+                  return new CupertinoTabView(
+                    builder: (BuildContext context) {
+                      return new CupertinoPageScaffold(
+                        navigationBar: new CupertinoNavigationBar(
+                          middle: new Text('Page 1 of tab $index'),
+                        ),
+                        child: new Center(
+                          child: new CupertinoButton(
+                            child: const Text('Next'),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                new CupertinoPageRoute<Null>(
+                                  builder: (BuildContext context) {
+                                    return new CupertinoPageScaffold(
+                                      navigationBar: new CupertinoNavigationBar(
+                                        middle: new Text('Page 2 of tab $index'),
+                                      ),
+                                      child: new Center(
+                                        child: new CupertinoButton(
+                                          child: const Text('Back'),
+                                          onPressed: (){
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   );
-                }
+                },
               );
             },
           );
@@ -102,101 +147,51 @@ void main() {
       ),
     );
 
-    expect(tabsPainted, <int>[0]);
-    RichText tab1 = tester.widget(find.descendant(
-      of: find.text('Tab 1'),
-      matching: find.byType(RichText),
-    ));
-    expect(tab1.text.style.color, CupertinoColors.activeBlue);
-    RichText tab2 = tester.widget(find.descendant(
-      of: find.text('Tab 2'),
-      matching: find.byType(RichText),
-    ));
-    expect(tab2.text.style.color, CupertinoColors.inactiveGray);
+    expect(find.text('Page 1 of tab 1'), findsOneWidget);
+    expect(find.text('Page 1 of tab 2'), findsNothing); // Lazy building so not built yet.
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    expect(tabsPainted, <int>[0, 1]);
-    tab1 = tester.widget(find.descendant(
-      of: find.text('Tab 1'),
-      matching: find.byType(RichText),
-    ));
-    expect(tab1.text.style.color, CupertinoColors.inactiveGray);
-    tab2 = tester.widget(find.descendant(
-      of: find.text('Tab 2'),
-      matching: find.byType(RichText),
-    ));
-    expect(tab2.text.style.color, CupertinoColors.activeBlue);
+    expect(find.text('Page 1 of tab 1'), findsNothing); // It's offstage now.
+    expect(find.text('Page 1 of tab 1', skipOffstage: false), findsOneWidget);
+    expect(find.text('Page 1 of tab 2'), findsOneWidget);
+
+    // Navigate in tab 2.
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    expect(find.text('Page 2 of tab 2'), isOnstage);
+    expect(find.text('Page 1 of tab 1', skipOffstage: false), isOffstage);
 
     await tester.tap(find.text('Tab 1'));
     await tester.pump();
 
-    expect(tabsPainted, <int>[0, 1, 0]);
-  });
+    // Independent navigation stacks.
+    expect(find.text('Page 1 of tab 1'), isOnstage);
+    expect(find.text('Page 2 of tab 2', skipOffstage: false), isOffstage);
 
-  testWidgets('Tabs are lazy built and moved offstage when inactive', (WidgetTester tester) async {
-    final List<int> tabsBuilt = <int>[];
+    // Navigate in tab 1.
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.pumpWidget(
-      new WidgetsApp(
-        color: const Color(0xFFFFFFFF),
-        onGenerateRoute: (RouteSettings settings) {
-          // TODO(xster): change to a CupertinoPageRoute.
-          return new PageRouteBuilder<Null>(
-            settings: settings,
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-              return new CupertinoScaffold.tabbed(
-                  navigationBar: const CupertinoNavigationBar(
-                    backgroundColor: CupertinoColors.white,
-                    middle: const Text('Title'),
-                  ),
-                  tabBar: _buildTabBar(),
-                  rootTabPageBuilder: (BuildContext context, int index) {
-                    tabsBuilt.add(index);
-                    return new Text('Page ${index + 1}');
-                  }
-              );
-            },
-          );
-        },
-      ),
-    );
-
-    expect(tabsBuilt, <int>[0]);
-    expect(find.text('Page 1'), findsOneWidget);
-    expect(find.text('Page 2'), findsNothing);
+    expect(find.text('Page 2 of tab 1'), isOnstage);
+    expect(find.text('Page 2 of tab 2', skipOffstage: false), isOffstage);
 
     await tester.tap(find.text('Tab 2'));
     await tester.pump();
 
-    // Both tabs are built but only one is onstage.
-    expect(tabsBuilt, <int>[0, 0, 1]);
-    expect(find.text('Page 1', skipOffstage: false), isOffstage);
-    expect(find.text('Page 2'), findsOneWidget);
+    expect(find.text('Page 2 of tab 2'), isOnstage);
+    expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
 
-    await tester.tap(find.text('Tab 1'));
+    // Pop in tab 2
+    await tester.tap(find.text('Back'));
     await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
 
-    expect(tabsBuilt, <int>[0, 0, 1, 0, 1]);
-    expect(find.text('Page 1'), findsOneWidget);
-    expect(find.text('Page 2', skipOffstage: false), isOffstage);
+    expect(find.text('Page 1 of tab 2'), isOnstage);
+    expect(find.text('Page 2 of tab 1', skipOffstage: false), isOffstage);
   });
-}
-
-CupertinoTabBar _buildTabBar() {
-  return new CupertinoTabBar(
-    items: <BottomNavigationBarItem>[
-      const BottomNavigationBarItem(
-        icon: const ImageIcon(const TestImageProvider(24, 24)),
-        title: const Text('Tab 1'),
-      ),
-      const BottomNavigationBarItem(
-        icon: const ImageIcon(const TestImageProvider(24, 24)),
-        title: const Text('Tab 2'),
-      ),
-    ],
-    backgroundColor: CupertinoColors.white,
-    onTap: (int newTab) => selectedTabs.add(newTab),
-  );
 }

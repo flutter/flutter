@@ -26,6 +26,8 @@
 import 'dart:convert' show JSON;
 import 'dart:io';
 
+import 'localizations_validator.dart';
+
 const String outputHeader = '''
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
@@ -36,7 +38,13 @@ const String outputHeader = '''
 // @(regenerate)
 ''';
 
+/// Maps locales to resource key/value pairs.
 final Map<String, Map<String, String>> localeToResources = <String, Map<String, String>>{};
+
+/// Maps locales to resource attributes.
+/// 
+/// See also https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
+final Map<String, Map<String, dynamic>> localeToResourceAttributes = <String, Map<String, dynamic>>{};
 
 // Return s as a Dart-parseable raw string in double quotes. Expand double quotes:
 // foo => r"foo"
@@ -75,19 +83,15 @@ String generateLocalizationsMap() {
 /// This variable is used by [MaterialLocalizations].
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
 
-  final String lastLocale = localeToResources.keys.last;
-  for (String locale in localeToResources.keys) {
+  for (String locale in localeToResources.keys.toList()..sort()) {
     output.writeln('  "$locale": const <String, String>{');
 
     final Map<String, String> resources = localeToResources[locale];
-    final String lastName = resources.keys.last;
     for (String name in resources.keys) {
-      final String comma = name == lastName ? "" : ",";
       final String value = generateString(resources[name]);
-      output.writeln('    "$name": $value$comma');
+      output.writeln('    "$name": $value,');
     }
-    final String comma = locale == lastLocale ? "" : ",";
-    output.writeln('  }$comma');
+    output.writeln('  },');
   }
 
   output.writeln('};');
@@ -96,13 +100,16 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
 
 void processBundle(File file, String locale) {
   localeToResources[locale] ??= <String, String>{};
+  localeToResourceAttributes[locale] ??= <String, dynamic>{};
   final Map<String, String> resources = localeToResources[locale];
+  final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
   final Map<String, dynamic> bundle = JSON.decode(file.readAsStringSync());
   for (String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo.
     if (key.startsWith('@'))
-      continue;
-    resources[key] = bundle[key];
+      attributes[key.substring(1)] = bundle[key];
+    else
+      resources[key] = bundle[key];
   }
 }
 
@@ -125,8 +132,9 @@ void main(List<String> args) {
       processBundle(new File(path), locale);
     }
   }
+  validateLocalizations(localeToResources, localeToResourceAttributes);
 
-  final String regenerate = 'dart gen_localizations ${directory.path} ${args[1]}';
+  final String regenerate = 'dart dev/tools/gen_localizations.dart ${directory.path} ${args[1]}';
   print(outputHeader.replaceFirst('@(regenerate)', regenerate));
   print(generateLocalizationsMap());
 }

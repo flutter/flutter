@@ -21,6 +21,26 @@ void main() {
       child: child,
     ));
     expect(tester.getTopLeft(find.byType(Placeholder)), const Offset(0.0, 0.0));
+
+    await tester.pumpWidget(
+      const Padding(
+        key: const GlobalObjectKey<Null>(null),
+        padding: const EdgeInsets.only(left: 1.0),
+      ),
+    );
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.rtl,
+      child: const Padding(
+        key: const GlobalObjectKey<Null>(null),
+        padding: const EdgeInsetsDirectional.only(start: 1.0),
+      ),
+    ));
+    await tester.pumpWidget(
+      const Padding(
+        key: const GlobalObjectKey<Null>(null),
+        padding: const EdgeInsets.only(left: 1.0),
+      ),
+    );
   });
 
   testWidgets('Container padding/margin RTL', (WidgetTester tester) async {

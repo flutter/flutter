@@ -34,4 +34,11 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 3.0);
   });
+
+  testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
+    await tester.pumpWidget(const Text('Hello'));
+    final String message = tester.takeException().toString();
+    expect(message, contains('Directionality'));
+    expect(message, contains(' Text '));
+  });
 }

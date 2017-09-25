@@ -334,7 +334,7 @@ void main() {
     expect(isPopped, isTrue);
   });
 
-  testWidgets("Add and remove an observer should work", (WidgetTester tester) async {
+  testWidgets('Add and remove an observer should work', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),

@@ -40,7 +40,7 @@ Widget buildFrame({
             return new DropdownMenuItem<String>(
               key: new ValueKey<String>(item),
               value: item,
-              child: new Text(item, key: new ValueKey<String>(item + "Text")),
+              child: new Text(item, key: new ValueKey<String>(item + 'Text')),
             );
           }).toList(),
         ),
@@ -162,6 +162,41 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
 
     expect(value, equals('two'));
+  });
+
+  testWidgets('Dropdown in ListView', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/12053
+    // Positions a DropdownButton at the left and right edges of the screen,
+    // forcing it to be sized down to the viewport width
+    final String value = 'foo';
+    final UniqueKey itemKey = new UniqueKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new ListView(
+            children: <Widget>[
+              new DropdownButton<String>(
+                value: value,
+                items: <DropdownMenuItem<String>>[
+                  new DropdownMenuItem<String>(
+                    key: itemKey,
+                    value: value,
+                    child: new Text(value),
+                  ),
+                ],
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text(value));
+    await tester.pump();
+    final List<RenderBox> itemBoxes = tester.renderObjectList(find.byKey(itemKey)).toList();
+    expect(itemBoxes[0].localToGlobal(Offset.zero).dx, equals(0.0));
+    expect(itemBoxes[1].localToGlobal(Offset.zero).dx, equals(16.0));
+    expect(itemBoxes[1].size.width, equals(800.0 - 16.0 * 2));
   });
 
   testWidgets('Dropdown screen edges', (WidgetTester tester) async {
@@ -368,7 +403,7 @@ void main() {
     Rect getMenuRect() {
       Rect menuRect;
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
-        if (element.toString().startsWith("_DropdownMenu")) {
+        if (element.toString().startsWith('_DropdownMenu')) {
           final RenderBox box = element.findRenderObject();
           assert(box != null);
           menuRect =  box.localToGlobal(Offset.zero) & box.size;

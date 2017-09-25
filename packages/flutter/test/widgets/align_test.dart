@@ -21,6 +21,26 @@ void main() {
         alignment: const FractionalOffset(0.5, 0.5),
       ),
     );
+
+    await tester.pumpWidget(
+      const Align(
+        key: const GlobalObjectKey<Null>(null),
+        alignment: FractionalOffset.topLeft,
+      ),
+    );
+    await tester.pumpWidget(const Directionality(
+      textDirection: TextDirection.rtl,
+      child: const Align(
+        key: const GlobalObjectKey<Null>(null),
+        alignment: FractionalOffsetDirectional.topStart,
+      ),
+    ));
+    await tester.pumpWidget(
+      const Align(
+        key: const GlobalObjectKey<Null>(null),
+        alignment: FractionalOffset.topLeft,
+      ),
+    );
   });
 
   testWidgets('Align control test (LTR)', (WidgetTester tester) async {

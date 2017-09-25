@@ -178,6 +178,22 @@ class Tween<T extends dynamic> extends Animatable<T> {
   String toString() => '$runtimeType($begin \u2192 $end)';
 }
 
+/// A [Tween] that evaluates its [parent] in reverse.
+class ReverseTween<T> extends Tween<T> {
+  /// Construct a [Tween] that evaluates its [parent] in reverse.
+  ReverseTween(this.parent) : assert(parent != null), super(begin: parent.end, end: parent.begin);
+
+  /// This tween's value is the same as the parent's value evaluated in reverse.
+  ///
+  /// This tween's [begin] is the parent's [end] and its [end] is the parent's
+  /// [begin]. The [lerp] method returns `parent.lerp(1.0 - t)` and its
+  /// [evaluate] method is similar.
+  final Tween<T> parent;
+
+  @override
+  T lerp(double t) => parent.lerp(1.0 - t);
+}
+
 /// An interpolation between two colors.
 ///
 /// This class specializes the interpolation of [Tween<Color>] to use

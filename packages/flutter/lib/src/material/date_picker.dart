@@ -9,8 +9,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/date_symbols.dart';
-import 'package:intl/intl.dart' hide TextDirection;
+import 'package:intl/date_symbols.dart' as intl show DateSymbols;
+import 'package:intl/intl.dart' as intl show DateFormat;
 
 import 'button.dart';
 import 'button_bar.dart';
@@ -130,12 +130,12 @@ class _DatePickerHeader extends StatelessWidget {
     Widget yearButton = new _DateHeaderButton(
       color: backgroundColor,
       onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-      child: new Text(new DateFormat('yyyy').format(selectedDate), style: yearStyle),
+      child: new Text(new intl.DateFormat('yyyy').format(selectedDate), style: yearStyle),
     );
     Widget dayButton = new _DateHeaderButton(
       color: backgroundColor,
       onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
-      child: new Text(new DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
+      child: new Text(new intl.DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
     );
 
     // Disable the button for the current mode.
@@ -276,8 +276,8 @@ class DayPicker extends StatelessWidget {
   final SelectableDayPredicate selectableDayPredicate;
 
   List<Widget> _getDayHeaders(TextStyle headerStyle) {
-    final DateFormat dateFormat = new DateFormat();
-    final DateSymbols symbols = dateFormat.dateSymbols;
+    final intl.DateFormat dateFormat = new intl.DateFormat();
+    final intl.DateSymbols symbols = dateFormat.dateSymbols;
     return symbols.NARROWWEEKDAYS.map((String weekDay) {
       return new Center(child: new Text(weekDay, style: headerStyle));
     }).toList(growable: false);
@@ -370,7 +370,7 @@ class DayPicker extends StatelessWidget {
             child: new Center(
               child: new GestureDetector(
                 onTap: onMonthHeaderTap != null ? Feedback.wrapForTap(onMonthHeaderTap, context) : null,
-                child: new Text(new DateFormat('yMMMM').format(displayedMonth),
+                child: new Text(new intl.DateFormat('yMMMM').format(displayedMonth),
                   style: themeData.textTheme.subhead,
                 ),
               ),

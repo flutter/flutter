@@ -23,6 +23,27 @@ import 'widget_inspector.dart';
 
 export 'dart:ui' show Locale;
 
+/// The signature of [WidgetsApp.localeResolutionCallback].
+///
+/// A `LocaleResolutionCallback` is responsible for computing the locale of the app's
+/// [Localizations] object when the app starts and when user changes the default
+/// locale for the device.
+///
+/// The `locale` is the device's locale when the app started, or the device
+/// locale the user selected after the app was started. The `supportedLocales`
+/// parameter is just the value of [WidgetApp.supportedLocales].
+typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
+
+/// The signature of [WidgetsApp.onGenerateTitle].
+///
+/// Used to generate a value for the app's [Title.title], which the device uses
+/// to identify the app for the user. The `context` includes the [WidgetApp]'s
+/// [Localizations] widget so that this method can be used to produce a
+/// localized title.
+///
+/// This function must not return null.
+typedef String GenerateAppTitle(BuildContext context);
+
 // Delegate that fetches the default (English) strings.
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
@@ -52,17 +73,23 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The boolean arguments, [color], [navigatorObservers], and
   /// [onGenerateRoute] must not be null.
-  const WidgetsApp({
+  ///
+  /// The `supportedLocales` argument must be a list of one or more elements.
+  /// By default supportedLocales is `[const Locale('en', 'US')]`.
+  WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     Key key,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.title,
+    this.title: '',
+    this.onGenerateTitle,
     this.textStyle,
     @required this.color,
     this.navigatorObservers: const <NavigatorObserver>[],
     this.initialRoute,
     this.locale,
     this.localizationsDelegates,
+    this.localeResolutionCallback,
+    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.showPerformanceOverlay: false,
     this.checkerboardRasterCacheImages: false,
     this.checkerboardOffscreenLayers: false,
@@ -70,9 +97,11 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector: false,
     this.debugShowCheckedModeBanner: true,
     this.inspectorSelectButtonBuilder,
-  }) : assert(onGenerateRoute != null),
+  }) : assert(title != null),
+       assert(onGenerateRoute != null),
        assert(color != null),
        assert(navigatorObservers != null),
+       assert(supportedLocales != null && supportedLocales.isNotEmpty),
        assert(showPerformanceOverlay != null),
        assert(checkerboardRasterCacheImages != null),
        assert(checkerboardOffscreenLayers != null),
@@ -81,8 +110,25 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowWidgetInspector != null),
        super(key: key);
 
-  /// A one-line description of this app for use in the window manager.
+  /// A one-line description used by the device to identify the app for the user.
+  ///
+  /// On Android the titles appear above the task manager's app snapshots which are
+  /// displayed when the user presses the "recent apps" button. Similarly, on
+  /// iOS the titles appear in the App Switcher when the user double presses the
+  /// home button.
+  ///
+  /// To provide a localized title instead, use [onGenerateTitle].
   final String title;
+
+  /// If non-null this callback function is called to produce the app's
+  /// title string, otherwise [title] is used.
+  ///
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// [Localizations] widget so that this callback can be used to produce a
+  /// localized title.
+  ///
+  /// This callback function must not return null.
+  final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
   final TextStyle textStyle;
@@ -148,6 +194,55 @@ class WidgetsApp extends StatefulWidget {
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// The returned value becomes the locale of this app's [Localizations]
+  /// widget. The callback's `locale` parameter is the device's locale when
+  /// the app started, or the device locale the user selected after the app was
+  /// started. The callback's `supportedLocales` parameter is just the value
+  /// [supportedLocales].
+  ///
+  /// If the callback is null or if it returns null then the resolved locale is:
+  ///
+  /// - The callback's `locale` parameter if it's equal to a supported locale.
+  /// - The first supported locale with the same [Locale.langaugeCode] as the
+  ///   callback's `locale` parameter.
+  /// - The first locale in [supportedLocales].
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
+  ///    [WidgetsApp] it creates.
+  final LocaleResolutionCallback localeResolutionCallback;
+
+  /// The list of locales that this app has been localized for.
+  ///
+  /// By default only the American English locale is supported. Apps should
+  /// configure this list to match the locales they support.
+  ///
+  /// This list must not null. Its default value is just
+  /// `[const Locale('en', 'US')]`.
+  ///
+  /// The order of the list matters. By default, if the device's locale doesn't
+  /// exactly match a locale in [supportedLocales] then the first locale in
+  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
+  /// fails then the first locale in [supportedLocales] is used. The default
+  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  ///
+  /// See also:
+  ///
+  ///  * [MaterialApp.supportedLocales], which sets the `supportedLocales`
+  ///    of the [WidgetsApp] it creates.
+  ///
+  ///  * [localeResolutionCallback], an app callback that resolves the app's locale
+  ///    when the device's locale changes.
+  ///
+  ///  * [localizationDelegates], which collectively define all of the localized
+  ///    resources used by this app.
+  final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   /// https://flutter.io/debugging/#performanceoverlay
@@ -231,11 +326,43 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   GlobalObjectKey<NavigatorState> _navigator;
   Locale _locale;
 
+  Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
+    // Android devices (Java really) report 3 deprecated language codes, see
+    // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4140555
+    // and https://developer.android.com/reference/java/util/Locale.html
+    switch(newLocale.languageCode) {
+      case 'iw':
+        newLocale = new Locale('he', newLocale.countryCode); // Hebrew
+        break;
+      case 'ji':
+        newLocale = new Locale('yi', newLocale.countryCode); // Yiddish
+        break;
+      case 'in':
+        newLocale = new Locale('id', newLocale.countryCode); // Indonesian
+        break;
+    }
+
+    if (widget.localeResolutionCallback != null) {
+      final Locale locale = widget.localeResolutionCallback(newLocale, widget.supportedLocales);
+      if (locale != null)
+        return locale;
+    }
+
+    Locale matchesLanguageCode;
+    for (Locale locale in supportedLocales) {
+      if (locale == newLocale)
+        return newLocale;
+      if (locale.languageCode == newLocale.languageCode)
+        matchesLanguageCode ??= locale;
+    }
+    return matchesLanguageCode ?? supportedLocales.first;
+  }
+
   @override
   void initState() {
     super.initState();
     _navigator = new GlobalObjectKey<NavigatorState>(this);
-    _locale = ui.window.locale;
+    _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -273,19 +400,25 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   @override
   void didChangeLocale(Locale locale) {
-    if (locale != _locale) {
+    if (locale == _locale)
+      return;
+    final Locale newLocale = _resolveLocale(locale, widget.supportedLocales);
+    if (newLocale != _locale) {
       setState(() {
-        _locale = locale;
+        _locale = newLocale;
       });
     }
   }
 
   // Combine the Localizations for Widgets with the ones contributed
-  // by the localizationsDelegates parameter, if any.
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _WidgetsLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    yield const _WidgetsLocalizationsDelegate(); // TODO(ianh): make this configurable
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
+    yield const _WidgetsLocalizationsDelegate();
   }
 
   @override
@@ -353,17 +486,29 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         );
       }
       return true;
-    });
+    }());
 
     return new MediaQuery(
       data: new MediaQueryData.fromWindow(ui.window),
       child: new Localizations(
         locale: widget.locale ?? _locale,
         delegates: _localizationsDelegates.toList(),
-        child: new Title(
-          title: widget.title,
-          color: widget.color,
-          child: result,
+        // This Builder exists to provide a context below the Localizations widget.
+        // The onGenerateCallback() can refer to Localizations via its context
+        // parameter.
+        child: new Builder(
+          builder: (BuildContext context) {
+            String title = widget.title;
+            if (widget.onGenerateTitle != null) {
+              title = widget.onGenerateTitle(context);
+              assert(title != null, 'onGenerateTitle must return a non-null String');
+            }
+            return new Title(
+              title: title,
+              color: widget.color,
+              child: result,
+            );
+          },
         ),
       ),
     );

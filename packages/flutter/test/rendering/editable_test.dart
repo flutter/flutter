@@ -22,7 +22,7 @@ void main() {
     expect(editable.getMaxIntrinsicHeight(double.INFINITY), 10.0);
 
     expect(
-      editable.toStringDeep(),
+      editable.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
         ' │ parentData: MISSING\n'

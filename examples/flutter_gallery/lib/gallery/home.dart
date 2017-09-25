@@ -186,7 +186,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     assert(() {
       showPreviewBanner = false;
       return true;
-    });
+    }());
 
     if (showPreviewBanner) {
       home = new Stack(

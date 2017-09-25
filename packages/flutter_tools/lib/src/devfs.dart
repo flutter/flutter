@@ -286,7 +286,8 @@ class _DevFSHttpWriter {
     } catch (e) {
       if (retry < kMaxRetries) {
         printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
-        _scheduleWrite(deviceUri, content, retry + 1);
+        // Synchronization is handled by the _completer below.
+        _scheduleWrite(deviceUri, content, retry + 1); // ignore: unawaited_futures
         return;
       } else {
         printError('Error writing "$deviceUri" to DevFS: $e');
@@ -429,20 +430,26 @@ class DevFS {
           assetPathsToEvict.add(archivePath);
       }
     });
+    if (generator != null) {
+      // We run generator even if [dirtyEntries] was empty because we want
+      // to keep logic of accepting/rejecting generator's output simple:
+      // we must accept/reject generator's output after every [update] call.
+      // Incremental run with no changes is supposed to be fast (considering
+      // that it is initiated by user key press).
+      final List<String> invalidatedFiles = <String>[];
+      for (DevFSContent content in dirtyEntries.values)
+        if (content is DevFSFileContent)
+          invalidatedFiles.add(content.file.uri.toString());
+      printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+      final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
+      if (compiledBinary != null && compiledBinary.isNotEmpty)
+        dirtyEntries.putIfAbsent(
+          Uri.parse(target + '.dill'),
+          () => new DevFSFileContent(fs.file(compiledBinary))
+        );
+    }
     if (dirtyEntries.isNotEmpty) {
       printTrace('Updating files');
-      if (generator != null) {
-        final List<String> invalidatedFiles = <String>[];
-        dirtyEntries.forEach((Uri deviceUri, DevFSContent content) {
-          if (content is DevFSFileContent)
-            invalidatedFiles.add(content.file.uri.toString());
-        });
-        final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
-        if (compiledBinary != null && compiledBinary.isNotEmpty)
-          dirtyEntries.putIfAbsent(Uri.parse(target + '.dill'),
-                  () => new DevFSFileContent(fs.file(compiledBinary)));
-      }
-
       if (_httpWriter != null) {
         try {
           await _httpWriter.write(dirtyEntries);

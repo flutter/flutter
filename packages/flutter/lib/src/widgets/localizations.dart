@@ -38,9 +38,19 @@ class _Pending {
 // This is more complicated than just applying Future.wait to input
 // because some of the input.values may be SynchronousFutures. We don't want
 // to Future.wait for the synchronous futures.
-Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> delegates) {
+Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegate<dynamic>> allDelegates) {
   final Map<Type, dynamic> output = <Type, dynamic>{};
   List<_Pending> pendingList;
+
+  // Only load the first delegate for each delgate type.
+  final Set<Type> types = new Set<Type>();
+  final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
+  for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
+    if (!types.contains(delegate.type)) {
+      types.add(delegate.type);
+      delegates.add(delegate);
+    }
+  }
 
   for (LocalizationsDelegate<dynamic> delegate in delegates) {
     final Future<dynamic> inputValue = delegate.load(locale);
@@ -196,6 +206,7 @@ class _LocalizationsScope extends InheritedWidget {
     Key key,
     @required this.locale,
     @required this.localizationsState,
+    @required this.loadGeneration,
     Widget child,
   }) : super(key: key, child: child) {
     assert(localizationsState != null);
@@ -204,10 +215,14 @@ class _LocalizationsScope extends InheritedWidget {
   final Locale locale;
   final _LocalizationsState localizationsState;
 
+  /// A monotonically increasing number that changes after localizations
+  /// delegates have finished loading new data. When this number changes, it
+  /// triggers inherited widget notifications.
+  final int loadGeneration;
+
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    // Changes in Localizations.locale trigger a load(), see _LocalizationsState.didUpdateWidget()
-    return false;
+    return loadGeneration != old.loadGeneration;
   }
 }
 
@@ -227,6 +242,9 @@ class _LocalizationsScope extends InheritedWidget {
 /// class _MyDelegate extends LocalizationsDelegate<MyLocalizations> {
 ///   @override
 ///   Future<MyLocalizations> load(Locale locale) => MyLocalizations.load(locale);
+///
+///  @override
+///  bool shouldReload(MyLocalizationsDelegate old) => false;
 ///}
 /// ```
 ///
@@ -298,8 +316,7 @@ class _LocalizationsScope extends InheritedWidget {
 /// One could choose another approach for loading localized resources and looking them up while
 /// still conforming to the structure of this example.
 class Localizations extends StatefulWidget {
-  /// Create a widget from which ambient localizations (translated strings)
-  /// can be obtained.
+  /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
     Key key,
     @required this.locale,
@@ -309,6 +326,51 @@ class Localizations extends StatefulWidget {
     assert(locale != null);
     assert(delegates != null);
     assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
+  }
+
+  /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
+  ///
+  /// This factory constructor is used for the (usually rare) situation where part
+  /// of an app should be localized for a different locale than the one defined
+  /// for the device, or if its localizations should come from a different list
+  /// of [LocalizationsDelegate]s than the list defined by
+  /// [WidgetsApp.localizationsDelegates].
+  ///
+  /// For example you could specify that `myWidget` was only to be localized for
+  /// the US English locale:
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return new Localizations.override(
+  ///     context: context,
+  ///     locale: const Locale('en', 'US'),
+  ///     child: myWidget,
+  ///   );
+  /// }
+  /// ```
+  ///
+  /// The `locale` and `delegates` parameters default to the [Localizations.locale]
+  /// and [Localizations.delegates] values from the nearest [Localizations] ancestor.
+  ///
+  /// To override the [Localizations.locale] or [Localizations.delegates] for an
+  /// entire app, specify [WidgetsApp.locale] or [WidgetsApp.localizationsDelegates]
+  /// (or specify the same parameters for [MaterialApp]).
+  factory Localizations.override({
+    Key key,
+    @required BuildContext context,
+    Locale locale,
+    List<LocalizationsDelegate<dynamic>> delegates,
+    Widget child,
+  }) {
+    final List<LocalizationsDelegate<dynamic>> mergedDelegates = Localizations._delegatesOf(context);
+    if (delegates != null)
+      mergedDelegates.insertAll(0, delegates);
+    return new Localizations(
+      key: key,
+      locale: locale ?? Localizations.localeOf(context),
+      delegates: mergedDelegates,
+      child: child,
+    );
   }
 
   /// The resources returned by [Localizations.of] will be specific to this locale.
@@ -323,16 +385,36 @@ class Localizations extends StatefulWidget {
 
   /// The locale of the Localizations widget for the widget tree that
   /// corresponds to [BuildContext] `context`.
-  static Locale localeOf(BuildContext context) {
+  ///
+  /// If no [Localizations] widget is in scope then the [Localizations.localeOf]
+  /// method will throw an exception, unless the `nullOk` argument is set to
+  /// true, in which case it returns null.
+  static Locale localeOf(BuildContext context, { bool nullOk: false }) {
     assert(context != null);
+    assert(nullOk != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    if (nullOk && scope == null)
+      return null;
+    assert(scope != null, 'a Localizations ancestor was not found');
     return scope.localizationsState.locale;
   }
 
-  /// Returns the 'type' localized resources for the widget tree that
-  /// corresponds to [BuildContext] `context`.
+  // There doesn't appear to be a need to make this public. See the
+  // Localizations.override factory constructor.
+  static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
+    assert(context != null);
+    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    assert(scope != null, 'a Localizations ancestor was not found');
+    return new List<LocalizationsDelegate<dynamic>>.from(scope.localizationsState.widget.delegates);
+  }
+
+  /// Returns the localized resources object of the given `type` for the widget
+  /// tree that corresponds to the given `context`.
   ///
-  /// This method is typically used by a static factory method on the 'type'
+  /// Returns `null` if no resources object of the given `type` exists within
+  /// the given `context`.
+  ///
+  /// This method is typically used by a static factory method on the `type`
   /// class. For example Flutter's MaterialLocalizations class looks up Material
   /// resources with a method defined like this:
   ///
@@ -345,7 +427,7 @@ class Localizations extends StatefulWidget {
     assert(context != null);
     assert(type != null);
     final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
-    return scope.localizationsState.resourcesFor<T>(type);
+    return scope?.localizationsState?.resourcesFor<T>(type);
   }
 
   @override
@@ -362,6 +444,11 @@ class Localizations extends StatefulWidget {
 class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
   Map<Type, dynamic> _typeToResources = <Type, dynamic>{};
+
+  /// A monotonically increasing number that increases after localizations
+  /// delegates have finished loading new data, triggering inherited widget
+  /// notifications.
+  int _loadGeneration = 0;
 
   Locale get locale => _locale;
   Locale _locale;
@@ -426,9 +513,8 @@ class _LocalizationsState extends State<Localizations> {
         setState(() {
           _typeToResources = value;
           _locale = locale;
+          _loadGeneration += 1;
         });
-        final InheritedElement scopeElement = _localizedResourcesScopeKey.currentContext;
-        scopeElement?.dispatchDidChangeDependencies();
       });
     }
   }
@@ -453,6 +539,7 @@ class _LocalizationsState extends State<Localizations> {
       key: _localizedResourcesScopeKey,
       locale: _locale,
       localizationsState: this,
+      loadGeneration: _loadGeneration,
       child: new Directionality(
         textDirection: _textDirection,
         child: widget.child,

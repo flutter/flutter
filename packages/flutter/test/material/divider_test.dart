@@ -8,7 +8,14 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Divider control test', (WidgetTester tester) async {
-    await tester.pumpWidget(const Center(child: const Divider()));
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Divider(),
+        ),
+      ),
+    );
     final RenderBox box = tester.firstRenderObject(find.byType(Divider));
     expect(box.size.height, 16.0);
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));

@@ -84,7 +84,8 @@ class MaterialApp extends StatefulWidget {
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
-    this.title,
+    this.title: '',
+    this.onGenerateTitle,
     this.color,
     this.theme,
     this.home,
@@ -94,6 +95,8 @@ class MaterialApp extends StatefulWidget {
     this.onUnknownRoute,
     this.locale,
     this.localizationsDelegates,
+    this.localeResolutionCallback,
+    this.supportedLocales: const <Locale>[const Locale('en', 'US')],
     this.navigatorObservers: const <NavigatorObserver>[],
     this.debugShowMaterialGrid: false,
     this.showPerformanceOverlay: false,
@@ -101,7 +104,8 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers: false,
     this.showSemanticsDebugger: false,
     this.debugShowCheckedModeBanner: true
-  }) : assert(routes != null),
+  }) : assert(title != null),
+       assert(routes != null),
        assert(navigatorObservers != null),
        assert(debugShowMaterialGrid != null),
        assert(showPerformanceOverlay != null),
@@ -129,8 +133,29 @@ class MaterialApp extends StatefulWidget {
        ),
        super(key: key);
 
-  /// A one-line description of this app for use in the window manager.
+  /// A one-line description used by the device to identify the app for the user.
+  ///
+  /// On Android the titles appear above the task manager's app snapshots which are
+  /// displayed when the user presses the "recent apps" button. Similarly, on
+  /// iOS the titles appear in the App Switcher when the user double presses the
+  /// home button.
+  ///
+  /// To provide a localized title instead, use [onGenerateTitle].
+  ///
+  /// This value is passed unmodified to [WidgetsApp.title].
   final String title;
+
+  /// If non-null this function is called to produce the app's
+  /// title string, otherwise [title] is used.
+  ///
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// [Localizations] widget so that this callback can be used to produce a
+  /// localized title.
+  ///
+  /// This callback function must not return null.
+  ///
+  /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
+  final GenerateAppTitle onGenerateTitle;
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
@@ -231,7 +256,121 @@ class MaterialApp extends StatefulWidget {
   ///
   /// The delegates collectively define all of the localized resources
   /// for this application's [Localizations] widget.
+  ///
+  /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
+  /// are included automatically. Apps can provide their own versions of these
+  /// localizations by creating implementations of
+  /// [LocalizationsDelegate<WidgetLocalizations>] or
+  /// [LocalizationsDelegate<MaterialLocalizations>] whose load methods return
+  /// custom versions of [WidgetLocalizations] or [MaterialLocalizations].
+  ///
+  /// For example: to add support to [MaterialLocalizations] for a
+  /// locale it doesn't already support, say `const Locale('foo', 'BR')`,
+  /// one could just extend [DefaultMaterialLocalizations]:
+  ///
+  /// ```dart
+  /// class FooLocalizations extends DefaultMaterialLocalizations {
+  ///   FooLocalizations(Locale locale) : super(locale);
+  ///   @override
+  ///   String get okButtonLabel {
+  ///     if (locale == const Locale('foo', 'BR'))
+  ///       return 'foo';
+  ///     return super.okButtonLabel;
+  ///   }
+  /// }
+  ///
+  /// ```
+  ///
+  /// A `FooLocalizationsDelegate` is essentially just a method that constructs
+  /// a `FooLocalizations` object. We return a [SynchronousFuture] here because
+  /// no asynchronous work takes place upon "loading" the localizations object.
+  ///
+  /// ```dart
+  /// class FooLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  ///   const FooLocalizationsDelegate();
+  ///   @override
+  ///   Future<FooLocalizations> load(Locale locale) {
+  ///     return new SynchronousFuture(new FooLocalizations(locale));
+  ///   }
+  ///   @override
+  ///   bool shouldReload(FooLocalizationsDelegate old) => false;
+  /// }
+  /// ```
+  ///
+  /// Constructing a [MaterialApp] with a `FooLocalizationsDelegate` overrides
+  /// the automatically included delegate for [MaterialLocalizations] because
+  /// only the first delegate of each [LocalizationsDelegate.type] is used and
+  /// the automatically included delegates are added to the end of the app's
+  /// [localizationsDelegates] list.
+  ///
+  /// ```dart
+  /// new MaterialApp(
+  ///   localizationsDelegates: [
+  ///     const FooLocalizationsDelegate(),
+  ///   ],
+  ///   // ...
+  /// )
+  /// ```
   final Iterable<LocalizationsDelegate<dynamic>> localizationsDelegates;
+
+  /// This callback is responsible for choosing the app's locale
+  /// when the app is started, and when the user changes the
+  /// device's locale.
+  ///
+  /// The returned value becomes the locale of this app's [Localizations]
+  /// widget. The callback's `locale` parameter is the device's locale when
+  /// the app started, or the device locale the user selected after the app was
+  /// started. The callback's `supportedLocales` parameter is just the value
+  /// [supportedLocales].
+  ///
+  /// An app could use this callback to substitute locales based on the app's
+  /// intended audience. If the device's OS provides a prioritized
+  /// list of locales, this callback could be used to defer to it.
+  ///
+  /// If the callback is null then the resolved locale is:
+  /// - The callback's `locale` parameter if it's equal to a supported locale.
+  /// - The first supported locale with the same [Locale.languageCode] as the
+  ///   callback's `locale` parameter.
+  /// - The first supported locale.
+  ///
+  /// This callback is passed along to the [WidgetsApp] built by this widget.
+  final LocaleResolutionCallback localeResolutionCallback;
+
+  /// The list of locales that this app has been localized for.
+  ///
+  /// By default only the American English locale is supported. Apps should
+  /// configure this list to match the locales they support.
+  ///
+  /// This list must not null. It's default value is just
+  /// `[const Locale('en', 'US')]`. It is passed along unmodified to the
+  /// [WidgetsApp] built by this widget.
+  ///
+  /// The order of the list matters. By default, if the device's locale doesn't
+  /// exactly match a locale in [supportedLocales] then the first locale in
+  /// [supportedLocales] with a matching [Locale.languageCode] is used. If that
+  /// fails then the first locale in [supportedLocales] is used. The default
+  /// locale resolution algorithm can be overridden with [localeResolutionCallback].
+  ///
+  /// The material widgets include translations for locales with the following
+  /// language codes:
+  /// ```
+  /// ar - Arabic
+  /// de - German
+  /// en - English
+  /// es - Spanish
+  /// fa - Farsi (Persian)
+  /// fr - French
+  /// he - Hebrew
+  /// it - Italian
+  /// ja - Japanese
+  /// ps - Pashto
+  /// pt - Portugese
+  /// ru - Russian
+  /// sd - Sindhi
+  /// ur - Urdu
+  /// zh - Chinese (simplified)
+  /// ```
+  final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
   ///
@@ -317,11 +456,14 @@ class _MaterialAppState extends State<MaterialApp> {
   }
 
   // Combine the Localizations for Material with the ones contributed
-  // by the localizationsDelegates parameter, if any.
+  // by the localizationsDelegates parameter, if any. Only the first delegate
+  // of a particular LocalizationsDelegate.type is loaded so the
+  // localizationsDelegate parameter can be used to override
+  // _MaterialLocalizationsDelegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
-    yield const _MaterialLocalizationsDelegate(); // TODO(ianh): make this configurable
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
+    yield const _MaterialLocalizationsDelegate();
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {
@@ -346,7 +488,6 @@ class _MaterialAppState extends State<MaterialApp> {
     return null;
   }
 
-
   Route<dynamic> _onUnknownRoute(RouteSettings settings) {
     assert(() {
       if (widget.onUnknownRoute == null) {
@@ -363,7 +504,7 @@ class _MaterialAppState extends State<MaterialApp> {
         );
       }
       return true;
-    });
+    }());
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
@@ -375,7 +516,7 @@ class _MaterialAppState extends State<MaterialApp> {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -388,6 +529,7 @@ class _MaterialAppState extends State<MaterialApp> {
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
         title: widget.title,
+        onGenerateTitle: widget.onGenerateTitle,
         textStyle: _errorTextStyle,
         // blue is the primary color of the default theme
         color: widget.color ?? theme?.primaryColor ?? Colors.blue,
@@ -399,6 +541,8 @@ class _MaterialAppState extends State<MaterialApp> {
         onUnknownRoute: _onUnknownRoute,
         locale: widget.locale,
         localizationsDelegates: _localizationsDelegates,
+        localeResolutionCallback: widget.localeResolutionCallback,
+        supportedLocales: widget.supportedLocales,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
         checkerboardOffscreenLayers: widget.checkerboardOffscreenLayers,
@@ -425,7 +569,7 @@ class _MaterialAppState extends State<MaterialApp> {
         );
       }
       return true;
-    });
+    }());
 
     return new ScrollConfiguration(
       behavior: new _MaterialScrollBehavior(),

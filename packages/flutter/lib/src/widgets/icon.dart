@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'icon_data.dart';
 import 'icon_theme.dart';
@@ -84,8 +85,8 @@ class Icon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     final TextDirection textDirection = Directionality.of(context);
-    assert(textDirection != null, 'Icon widgets required an ambient Directionality.');
 
     final IconThemeData iconTheme = IconTheme.of(context);
 

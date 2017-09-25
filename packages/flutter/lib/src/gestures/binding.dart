@@ -89,7 +89,7 @@ abstract class GestureBinding extends BindingBase with HitTestable, HitTestDispa
         if (debugPrintHitTestResults)
           debugPrint('$event: $result');
         return true;
-      });
+      }());
     } else if (event is PointerUpEvent || event is PointerCancelEvent) {
       result = _hitTests.remove(event.pointer);
     } else if (event.down) {

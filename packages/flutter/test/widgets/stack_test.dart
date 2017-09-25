@@ -388,7 +388,7 @@ void main() {
             children: <Widget>[
               new GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTap: () { print("HELLO"); tapped = true; },
+                onTap: () { tapped = true; },
                 child: const SizedBox(
                   width: 200.0,
                   height: 200.0,
@@ -609,5 +609,24 @@ void main() {
     );
 
     expect(tester.getTopLeft(find.byKey(key)), const Offset(50.0, 0.0));
+  });
+
+  testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffset.center,
+      ),
+    );
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffsetDirectional.topStart,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+    await tester.pumpWidget(
+      new Stack(
+        alignment: FractionalOffset.center,
+      ),
+    );
   });
 }

@@ -10,6 +10,7 @@ import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
+import 'debug.dart';
 import 'framework.dart';
 import 'notification_listener.dart';
 import 'page_storage.dart';
@@ -451,8 +452,8 @@ class _PageViewState extends State<PageView> {
   AxisDirection _getDirection(BuildContext context) {
     switch (widget.scrollDirection) {
       case Axis.horizontal:
+        assert(debugCheckHasDirectionality(context));
         final TextDirection textDirection = Directionality.of(context);
-        assert(textDirection != null);
         final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
         return widget.reverse ? flipAxisDirection(axisDirection) : axisDirection;
       case Axis.vertical:

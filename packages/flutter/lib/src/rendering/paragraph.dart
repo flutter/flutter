@@ -331,7 +331,7 @@ class RenderParagraph extends RenderBox {
         canvas.drawRect(offset & size, paint);
       }
       return true;
-    });
+    }());
 
     if (_hasVisualOverflow) {
       final Rect bounds = offset & size;

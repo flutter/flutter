@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
@@ -789,8 +789,11 @@ void main() {
   });
 
   testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
-    final ThemeData themeData = new ThemeData(
-      hintColor: Colors.blue[500],
+    final ThemeData themeData = ThemeData.localize(
+      new ThemeData(
+        hintColor: Colors.blue[500],
+      ),
+      MaterialTextGeometry.forScriptCategory(MaterialTextGeometry.englishLikeCategory),
     );
 
     await tester.pumpWidget(
@@ -957,7 +960,7 @@ void main() {
     expect(find.text('Suffix'), findsOneWidget);
 
     // Enter some text, and the prefix should still display.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1011,7 +1014,7 @@ void main() {
 
     // Enter some text, and the hint should disappear and the prefix and suffix
     // should appear.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1083,7 +1086,7 @@ void main() {
 
     // Enter some text, and the label should stay and the prefix should
     // remain.
-    await tester.enterText(find.byKey(secondKey), "Hi");
+    await tester.enterText(find.byKey(secondKey), 'Hi');
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
@@ -1233,14 +1236,14 @@ void main() {
   });
 
   testWidgets('Controller can update server', (WidgetTester tester) async {
-    final TextEditingController controller = new TextEditingController(
+    final TextEditingController controller1 = new TextEditingController(
       text: 'Initial Text',
     );
     final TextEditingController controller2 = new TextEditingController(
       text: 'More Text',
     );
 
-    TextEditingController currentController = controller;
+    TextEditingController currentController;
     StateSetter setState;
 
     await tester.pumpWidget(
@@ -1255,36 +1258,64 @@ void main() {
     );
     expect(tester.testTextInput.editingState['text'], isEmpty);
 
+    // Initial state with null controller.
     await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.editingState['text'], isEmpty);
+
+    // Update the controller from null to controller1.
+    setState(() {
+      currentController = controller1;
+    });
     await tester.pump();
     expect(tester.testTextInput.editingState['text'], equals('Initial Text'));
 
-    controller.text = 'Updated Text';
+    // Verify that updates to controller1 are handled.
+    controller1.text = 'Updated Text';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('Updated Text'));
 
+    // Verify that switching from controller1 to controller2 is handled.
     setState(() {
       currentController = controller2;
     });
     await tester.pump();
     expect(tester.testTextInput.editingState['text'], equals('More Text'));
 
-    controller.text = 'Ignored Text';
+    // Verify that updates to controller1 are ignored.
+    controller1.text = 'Ignored Text';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('More Text'));
 
+    // Verify that updates to controller text are handled.
     controller2.text = 'Additional Text';
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals('Additional Text'));
 
+    // Verify that updates to controller selection are handled.
     controller2.selection = const TextSelection(baseOffset: 0, extentOffset: 5);
     await tester.idle();
     expect(tester.testTextInput.editingState['selectionBase'], equals(0));
     expect(tester.testTextInput.editingState['selectionExtent'], equals(5));
 
+    // Verify that calling clear() clears the text.
     controller2.clear();
     await tester.idle();
     expect(tester.testTextInput.editingState['text'], equals(''));
+
+    // Verify that switching from controller2 to null preserves current text.
+    controller2.text = 'The Final Cut';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('The Final Cut'));
+    setState(() {
+      currentController = null;
+    });
+    await tester.pump();
+    expect(tester.testTextInput.editingState['text'], equals('The Final Cut'));
+
+    // Verify that changes to controller2 are ignored.
+    controller2.text = 'Goodbye Cruel World';
+    expect(tester.testTextInput.editingState['text'], equals('The Final Cut'));
   });
 
   testWidgets('Cannot enter new lines onto single line TextField', (WidgetTester tester) async {

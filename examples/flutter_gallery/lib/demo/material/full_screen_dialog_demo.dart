@@ -51,7 +51,8 @@ class DateTimeItem extends StatelessWidget {
                     lastDate: date.add(const Duration(days: 30))
                   )
                   .then<Null>((DateTime value) {
-                    onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
+                    if (value != null)
+                      onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
                 },
                 child: new Row(
@@ -77,12 +78,13 @@ class DateTimeItem extends StatelessWidget {
                   initialTime: time
                 )
                 .then<Null>((TimeOfDay value) {
-                  onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
+                  if (value != null)
+                    onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
               },
               child: new Row(
                 children: <Widget>[
-                  new Text('$time'),
+                  new Text('${time.format(context)}'),
                   const Icon(Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )

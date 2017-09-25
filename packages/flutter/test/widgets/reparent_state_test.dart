@@ -72,13 +72,13 @@ void main() {
     );
 
     final StateMarkerState leftState = left.currentState;
-    leftState.marker = "left";
+    leftState.marker = 'left';
     final StateMarkerState rightState = right.currentState;
-    rightState.marker = "right";
+    rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
-    grandchildState.marker = "grandchild";
+    grandchildState.marker = 'grandchild';
 
     final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
@@ -99,14 +99,14 @@ void main() {
     );
 
     expect(left.currentState, equals(leftState));
-    expect(leftState.marker, equals("left"));
+    expect(leftState.marker, equals('left'));
     expect(right.currentState, equals(rightState));
-    expect(rightState.marker, equals("right"));
+    expect(rightState.marker, equals('right'));
 
     final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
-    expect(newGrandchildState.marker, equals("grandchild"));
+    expect(newGrandchildState.marker, equals('grandchild'));
 
     await tester.pumpWidget(
       new Center(
@@ -120,7 +120,7 @@ void main() {
     );
 
     expect(left.currentState, equals(leftState));
-    expect(leftState.marker, equals("left"));
+    expect(leftState.marker, equals('left'));
     expect(right.currentState, isNull);
   });
 
@@ -143,13 +143,13 @@ void main() {
     );
 
     final StateMarkerState leftState = left.currentState;
-    leftState.marker = "left";
+    leftState.marker = 'left';
     final StateMarkerState rightState = right.currentState;
-    rightState.marker = "right";
+    rightState.marker = 'right';
 
     final StateMarkerState grandchildState = tester.state(find.byWidget(grandchild));
     expect(grandchildState, isNotNull);
-    grandchildState.marker = "grandchild";
+    grandchildState.marker = 'grandchild';
 
     final StateMarker newGrandchild = const StateMarker();
     await tester.pumpWidget(
@@ -166,14 +166,14 @@ void main() {
     );
 
     expect(left.currentState, equals(leftState));
-    expect(leftState.marker, equals("left"));
+    expect(leftState.marker, equals('left'));
     expect(right.currentState, equals(rightState));
-    expect(rightState.marker, equals("right"));
+    expect(rightState.marker, equals('right'));
 
     final StateMarkerState newGrandchildState = tester.state(find.byWidget(newGrandchild));
     expect(newGrandchildState, isNotNull);
     expect(newGrandchildState, equals(grandchildState));
-    expect(newGrandchildState.marker, equals("grandchild"));
+    expect(newGrandchildState.marker, equals('grandchild'));
 
     await tester.pumpWidget(
       new Center(
@@ -187,7 +187,7 @@ void main() {
     );
 
     expect(left.currentState, equals(leftState));
-    expect(leftState.marker, equals("left"));
+    expect(leftState.marker, equals('left'));
     expect(right.currentState, isNull);
   });
 
@@ -197,7 +197,7 @@ void main() {
     await tester.pumpWidget(new StateMarker(key: key));
 
     final StateMarkerState keyState = key.currentState;
-    keyState.marker = "marked";
+    keyState.marker = 'marked';
 
     await tester.pumpWidget(
       new Directionality(
@@ -216,12 +216,12 @@ void main() {
     );
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
 
     await tester.pumpWidget(new StateMarker(key: key));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
   });
 
   testWidgets('Reparent during update children', (WidgetTester tester) async {
@@ -236,7 +236,7 @@ void main() {
     ));
 
     final StateMarkerState keyState = key.currentState;
-    keyState.marker = "marked";
+    keyState.marker = 'marked';
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -247,7 +247,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -258,7 +258,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
   });
 
   testWidgets('Reparent to child during update children', (WidgetTester tester) async {
@@ -274,7 +274,7 @@ void main() {
     ));
 
     final StateMarkerState keyState = key.currentState;
-    keyState.marker = "marked";
+    keyState.marker = 'marked';
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -285,7 +285,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -297,7 +297,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -308,7 +308,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
 
     await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
@@ -320,7 +320,7 @@ void main() {
     ));
 
     expect(key.currentState, equals(keyState));
-    expect(keyState.marker, equals("marked"));
+    expect(keyState.marker, equals('marked'));
   });
 
   testWidgets('Deactivate implies build', (WidgetTester tester) async {
