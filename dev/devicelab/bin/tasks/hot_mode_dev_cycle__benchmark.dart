@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-void main() {
+void main({bool isPreviewDart2: false}) {
   task(() async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -18,10 +18,14 @@ void main() {
         dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
     final File benchmarkFile = file(path.join(appDir.path, 'hot_benchmark.json'));
     rm(benchmarkFile);
+    final List<String> options = <String>[
+      '--hot', '-d', device.deviceId, '--benchmark', '--verbose'
+    ];
+    if (isPreviewDart2) {
+      options.add('--preview-dart-2');
+    }
     await inDirectory(appDir, () async {
-      return await flutter('run',
-          options: <String>['--hot', '-d', device.deviceId, '--benchmark', '--verbose'],
-          canFail: false);
+      return await flutter('run', options: options, canFail: false);
     });
     return new TaskResult.successFromFile(benchmarkFile,
         benchmarkScoreKeys: <String>[
