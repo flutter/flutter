@@ -82,6 +82,8 @@ class RunCommand extends RunCommandBase {
   final String description = 'Run your Flutter app on an attached device.';
 
   RunCommand({ bool verboseHelp: false }) {
+    requiresPubspecYaml();
+
     argParser.addFlag('full-restart',
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');

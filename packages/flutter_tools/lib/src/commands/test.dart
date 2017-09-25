@@ -21,6 +21,7 @@ import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
+    requiresPubspecYaml();
     usesPubOption();
     argParser.addOption('name',
       help: 'A regular expression matching substrings of the names of tests to run.',

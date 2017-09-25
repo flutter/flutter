@@ -37,6 +37,10 @@ class BuildCommand extends FlutterCommand {
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
+  BuildSubCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   @mustCallSuper
   Future<Null> runCommand() async {
@@ -59,6 +63,10 @@ abstract class BuildSubCommand extends FlutterCommand {
 }
 
 class BuildCleanCommand extends FlutterCommand {
+  BuildCleanCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   final String name = 'clean';
 

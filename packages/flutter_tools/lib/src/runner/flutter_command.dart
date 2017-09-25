@@ -58,6 +58,8 @@ abstract class FlutterCommand extends Command<Null> {
   @override
   FlutterCommandRunner get runner => super.runner;
 
+  bool _requiresPubspecYaml = false;
+
   /// Whether this command uses the 'target' option.
   bool _usesTargetOption = false;
 
@@ -68,6 +70,10 @@ abstract class FlutterCommand extends Command<Null> {
   bool get shouldUpdateCache => true;
 
   BuildMode _defaultBuildMode;
+
+  void requiresPubspecYaml() {
+    _requiresPubspecYaml = true;
+  }
 
   void usesTargetOption() {
     argParser.addOption('target',
@@ -312,7 +318,7 @@ abstract class FlutterCommand extends Command<Null> {
   @protected
   @mustCallSuper
   Future<Null> validateCommand() async {
-    if (!PackageMap.isUsingCustomPackagesPath) {
+    if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {
         throw new ToolExit(
@@ -321,6 +327,7 @@ abstract class FlutterCommand extends Command<Null> {
           'Do not run this command from the root of your git clone of Flutter.'
         );
       }
+
       if (fs.isFileSync('flutter.yaml')) {
         throw new ToolExit(
           'Please merge your flutter.yaml into your pubspec.yaml.\n\n'
@@ -338,19 +345,19 @@ abstract class FlutterCommand extends Command<Null> {
           'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n'
         );
       }
+
+      // Validate the current package map only if we will not be running "pub get" later.
+      if (!(_usesPubOption && argResults['pub'])) {
+        final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
+        if (error != null)
+          throw new ToolExit(error);
+      }
     }
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
       if (!fs.isFileSync(targetPath))
         throw new ToolExit('Target file "$targetPath" not found.');
-    }
-
-    // Validate the current package map only if we will not be running "pub get" later.
-    if (!(_usesPubOption && argResults['pub'])) {
-      final String error = new PackageMap(PackageMap.globalPackagesPath).checkValid();
-      if (error != null)
-        throw new ToolExit(error);
     }
   }
 

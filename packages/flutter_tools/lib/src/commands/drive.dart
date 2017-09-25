@@ -38,6 +38,8 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand() {
+    requiresPubspecYaml();
+
     argParser.addFlag(
       'keep-app-running',
       defaultsTo: null,

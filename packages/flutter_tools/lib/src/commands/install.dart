@@ -12,6 +12,10 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
+  InstallCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   final String name = 'install';
 

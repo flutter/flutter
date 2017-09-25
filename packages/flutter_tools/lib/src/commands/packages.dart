@@ -32,6 +32,7 @@ class PackagesCommand extends FlutterCommand {
 
 class PackagesGetCommand extends FlutterCommand {
   PackagesGetCommand(this.name, this.upgrade) {
+    requiresPubspecYaml();
     argParser.addFlag('offline',
       negatable: false,
       help: 'Use cached packages instead of accessing the network.'
@@ -78,6 +79,10 @@ class PackagesGetCommand extends FlutterCommand {
 }
 
 class PackagesTestCommand extends FlutterCommand {
+  PackagesTestCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   String get name => 'test';
 
@@ -101,7 +106,9 @@ class PackagesTestCommand extends FlutterCommand {
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
-  PackagesPassthroughCommand();
+  PackagesPassthroughCommand() {
+    requiresPubspecYaml();
+  }
 
   @override
   String get name => 'pub';

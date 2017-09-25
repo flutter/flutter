@@ -21,6 +21,7 @@ const String kFirstUsefulFrameEventName = 'Widgets completed first useful frame'
 
 class TraceCommand extends FlutterCommand {
   TraceCommand() {
+    requiresPubspecYaml();
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
     argParser.addOption('out', help: 'Specify the path of the saved trace file.');

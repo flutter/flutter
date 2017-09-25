@@ -12,6 +12,10 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class StopCommand extends FlutterCommand {
+  StopCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   final String name = 'stop';
 
