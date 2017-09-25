@@ -53,10 +53,31 @@ void main() {
       )
     );
 
-    final dynamic localizedTheme = Theme.of(capturedContext);
-    expect('${localizedTheme.runtimeType}', '_LocalizedThemeData');
-    expect(localizedTheme.delegate, equals(new ThemeData.fallback()));
+    expect(Theme.of(capturedContext), equals(ThemeData.localize(new ThemeData.fallback(), MaterialTextGeometry.englishLike)));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
+  });
+
+  testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
+    final ThemeData light = new ThemeData.light();
+    final ThemeData dark = new ThemeData.dark();
+
+    // Same input, same output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      same(ThemeData.localize(light, MaterialTextGeometry.englishLike)),
+    );
+
+    // Different text geometry, different output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(light, MaterialTextGeometry.tall))),
+    );
+
+    // Different base theme, different output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(dark, MaterialTextGeometry.englishLike))),
+    );
   });
 
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
