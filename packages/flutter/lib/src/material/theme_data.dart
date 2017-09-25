@@ -48,6 +48,7 @@ const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
 /// Use this class to configure a [Theme] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
+@immutable
 class ThemeData {
   /// Create a ThemeData given a set of preferred values.
   ///
@@ -473,7 +474,8 @@ class ThemeData {
     // When changing this method, make sure the memoization logic is correct. Do
     // not forget about the two hardest things in computer science:
     //
-    // https://martinfowler.com/bliki/TwoHardThings.html
+    // There are only two hard things in Computer Science: cache invalidation
+    // and naming things. -- Phil Karlton
     assert(baseTheme != null);
     assert(localTextGeometry != null);
 
