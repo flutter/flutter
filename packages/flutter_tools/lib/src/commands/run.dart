@@ -153,13 +153,6 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the\n'
             'results out to "refresh_benchmark.json", and exit. This flag is\n'
             'intended for use in generating automated flutter benchmarks.');
-
-    commandValidator = () {
-      // When running with a prebuilt application, no command validation is
-      // necessary.
-      if (!runningWithPrebuiltApplication)
-        commonCommandValidator();
-    };
   }
 
   List<Device> devices;
@@ -222,14 +215,16 @@ class RunCommand extends RunCommandBase {
   bool get stayResident => argResults['resident'];
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
-    commandValidator();
+  Future<Null> validateCommand() async {
+    // When running with a prebuilt application, no command validation is
+    // necessary.
+    if (!runningWithPrebuiltApplication)
+      await super.validateCommand();
     devices = await findAllTargetDevices();
     if (devices == null)
       throwToolExit(null);
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication)
       throwToolExit('Using -d all with --use-application-binary is not supported');
-    return super.verifyThenRunCommand();
   }
 
   DebuggingOptions _createDebuggingOptions() {

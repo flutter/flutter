@@ -22,8 +22,6 @@ import '../globals.dart';
 import '../usage.dart';
 import 'flutter_command_runner.dart';
 
-typedef void Validator();
-
 enum ExitStatus {
   success,
   warning,
@@ -57,10 +55,6 @@ class FlutterCommandResult {
 }
 
 abstract class FlutterCommand extends Command<Null> {
-  FlutterCommand() {
-    commandValidator = commonCommandValidator;
-  }
-
   @override
   FlutterCommandRunner get runner => super.runner;
 
@@ -219,6 +213,8 @@ abstract class FlutterCommand extends Command<Null> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand() async {
+    await validateCommand();
+
     // Populate the cache. We call this before pub get below so that the sky_engine
     // package is available in the flutter cache for pub to find.
     if (shouldUpdateCache)
@@ -313,10 +309,9 @@ abstract class FlutterCommand extends Command<Null> {
     printStatus('No connected devices.');
   }
 
-  // This is a field so that you can modify the value for testing.
-  Validator commandValidator;
-
-  void commonCommandValidator() {
+  @protected
+  @mustCallSuper
+  Future<Null> validateCommand() async {
     if (!PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
       if (!fs.isFileSync('pubspec.yaml')) {

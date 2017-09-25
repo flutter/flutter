@@ -33,23 +33,10 @@ class BuildCommand extends FlutterCommand {
   final String description = 'Flutter build commands.';
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
-
-  @override
   Future<Null> runCommand() async { }
 }
 
 abstract class BuildSubCommand extends FlutterCommand {
-  @override
-  @mustCallSuper
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
-
   @override
   @mustCallSuper
   Future<Null> runCommand() async {
@@ -77,12 +64,6 @@ class BuildCleanCommand extends FlutterCommand {
 
   @override
   final String description = 'Delete the build/ directory.';
-
-  @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
 
   @override
   Future<Null> runCommand() async {

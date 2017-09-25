@@ -90,12 +90,6 @@ class DriveCommand extends RunCommandBase {
   StreamSubscription<String> _deviceLogSubscription;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
-
-  @override
   Future<Null> runCommand() async {
     final String testFile = _getTestFile();
     if (testFile == null)

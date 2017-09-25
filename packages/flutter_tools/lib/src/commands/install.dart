@@ -21,12 +21,11 @@ class InstallCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
+  Future<Null> validateCommand() async {
+    await super.validateCommand();
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('No target device found');
-    return super.verifyThenRunCommand();
   }
 
   @override

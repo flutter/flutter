@@ -27,12 +27,6 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
-
-  @override
   Future<Null> runCommand() async { }
 }
 
