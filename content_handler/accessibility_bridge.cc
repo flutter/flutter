@@ -17,10 +17,7 @@
 namespace flutter_runner {
 
 AccessibilityBridge::AccessibilityBridge(app::ApplicationContext* context)
-    : writer_(context->ConnectToEnvironmentService<maxwell::ContextWriter>()) {
-  writer_.set_connection_error_handler(
-      [] { FXL_LOG(ERROR) << "Error connecting to ContextWriter."; });
-}
+    : writer_(context->ConnectToEnvironmentService<maxwell::ContextWriter>()) {}
 
 void AccessibilityBridge::UpdateSemantics(
     const std::vector<blink::SemanticsNode>& update) {
