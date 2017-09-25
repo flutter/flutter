@@ -35,6 +35,7 @@ class SectionCard extends StatelessWidget {
         ),
         child: new Image.asset(
           section.backgroundAsset,
+          package: section.backgroundAssetPackage,
           color: const Color.fromRGBO(255, 255, 255, 0.075),
           colorBlendMode: BlendMode.modulate,
           fit: BoxFit.cover,
@@ -130,7 +131,10 @@ class SectionDetailView extends StatelessWidget {
       decoration: new BoxDecoration(
         borderRadius: new BorderRadius.circular(6.0),
         image: new DecorationImage(
-          image: new AssetImage(detail.imageAsset),
+          image: new AssetImage(
+            detail.imageAsset,
+            package: detail.imageAssetPackage,
+          ),
           fit: BoxFit.cover,
           alignment: FractionalOffset.center,
         ),

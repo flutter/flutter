@@ -14,11 +14,19 @@ enum GridDemoTileStyle {
 typedef void BannerTapCallback(Photo photo);
 
 const double _kMinFlingVelocity = 800.0;
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class Photo {
-  Photo({ this.assetName, this.title, this.caption, this.isFavorite: false });
+  Photo({
+    this.assetName,
+    this.assetPackage,
+    this.title,
+    this.caption,
+    this.isFavorite: false,
+  });
 
   final String assetName;
+  final String assetPackage;
   final String title;
   final String caption;
 
@@ -130,7 +138,11 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
           transform: new Matrix4.identity()
             ..translate(_offset.dx, _offset.dy)
             ..scale(_scale),
-          child: new Image.asset(widget.photo.assetName, fit: BoxFit.cover),
+          child: new Image.asset(
+            widget.photo.assetName,
+            package: widget.photo.assetPackage,
+            fit: BoxFit.cover,
+          ),
         ),
       ),
     );
@@ -177,7 +189,11 @@ class GridDemoPhotoItem extends StatelessWidget {
       child: new Hero(
         key: new Key(photo.assetName),
         tag: photo.tag,
-        child: new Image.asset(photo.assetName, fit: BoxFit.cover)
+        child: new Image.asset(
+          photo.assetName,
+          package: photo.assetPackage,
+          fit: BoxFit.cover,
+        )
       )
     );
 
@@ -239,62 +255,74 @@ class GridListDemoState extends State<GridListDemo> {
 
   List<Photo> photos = <Photo>[
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_0.jpg',
+      assetName: 'landscape_0.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Philippines',
       caption: 'Batad rice terraces',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_1.jpg',
+      assetName: 'landscape_1.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Italy',
       caption: 'Ceresole Reale',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_2.jpg',
+      assetName: 'landscape_2.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Somewhere',
       caption: 'Beautiful mountains',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_3.jpg',
+      assetName: 'landscape_3.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'A place',
       caption: 'Beautiful hills',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_4.jpg',
+      assetName: 'landscape_4.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'New Zealand',
       caption: 'View from the van',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_5.jpg',
+      assetName: 'landscape_5.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Autumn',
       caption: 'The golden season',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_6.jpg',
+      assetName: 'landscape_6.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Germany',
       caption: 'Englischer Garten',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_7.jpg',
+      assetName: 'landscape_7.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'A country',
       caption: 'Grass fields',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_8.jpg',
+      assetName: 'landscape_8.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Mountain country',
       caption: 'River forest',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_9.jpg',
+      assetName: 'landscape_9.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Alpine place',
       caption: 'Green hills',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_10.jpg',
+      assetName: 'landscape_10.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Desert land',
       caption: 'Blue skies',
     ),
     new Photo(
-      assetName: 'packages/flutter_gallery_assets/landscape_11.jpg',
+      assetName: 'landscape_11.jpg',
+      assetPackage: _kGalleryAssetsPackage,
       title: 'Narnia',
       caption: 'Rocks and rivers',
     ),

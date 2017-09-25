@@ -10,12 +10,14 @@ class Vendor {
   const Vendor({
     this.name,
     this.description,
-    this.avatarAsset
+    this.avatarAsset,
+    this.avatarAssetPackage,
   });
 
   final String name;
   final String description;
   final String avatarAsset;
+  final String avatarAssetPackage;
 
   bool isValid() {
     return name != null &&
@@ -34,6 +36,7 @@ class Product {
     this.featureTitle,
     this.featureDescription,
     this.imageAsset,
+    this.imageAssetPackage,
     this.categories,
     this.price,
     this.vendor
@@ -44,6 +47,7 @@ class Product {
   final String featureTitle;
   final String featureDescription;
   final String imageAsset;
+  final String imageAssetPackage;
   final List<String> categories;
   final double price;
   final Vendor vendor;

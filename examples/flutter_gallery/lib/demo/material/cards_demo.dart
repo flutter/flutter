@@ -5,10 +5,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 class TravelDestination {
-  const TravelDestination({ this.assetName, this.title, this.description });
+  const TravelDestination({
+    this.assetName,
+    this.assetPackage,
+    this.title,
+    this.description,
+  });
 
   final String assetName;
+  final String assetPackage;
   final String title;
   final List<String> description;
 
@@ -17,7 +25,8 @@ class TravelDestination {
 
 final List<TravelDestination> destinations = <TravelDestination>[
   const TravelDestination(
-    assetName: 'packages/flutter_gallery_assets/top_10_australian_beaches.jpg',
+    assetName: 'top_10_australian_beaches.jpg',
+    assetPackage: _kGalleryAssetsPackage,
     title: 'Top 10 Australian beaches',
     description: const <String>[
       'Number 10',
@@ -26,7 +35,8 @@ final List<TravelDestination> destinations = <TravelDestination>[
     ],
   ),
   const TravelDestination(
-    assetName: 'packages/flutter_gallery_assets/kangaroo_valley_safari.jpg',
+    assetName: 'kangaroo_valley_safari.jpg',
+    assetPackage: _kGalleryAssetsPackage,
     title: 'Kangaroo Valley Safari',
     description: const <String>[
       '2031 Moss Vale Road',
@@ -65,6 +75,7 @@ class TravelDestinationItem extends StatelessWidget {
                   new Positioned.fill(
                     child: new Image.asset(
                       destination.assetName,
+                      package: destination.assetPackage,
                       fit: BoxFit.cover,
                     ),
                   ),

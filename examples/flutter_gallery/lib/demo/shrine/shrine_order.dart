@@ -172,6 +172,7 @@ class _Heading extends StatelessWidget {
                   tag: product.tag,
                   child: new Image.asset(
                     product.imageAsset,
+                    package: product.imageAssetPackage,
                     fit: BoxFit.contain,
                     alignment: FractionalOffset.center,
                   ),
@@ -302,6 +303,7 @@ class _OrderPageState extends State<OrderPage> {
                       elevation: 1.0,
                       child: new Image.asset(
                         product.imageAsset,
+                        package: product.imageAssetPackage,
                         fit: BoxFit.contain,
                       ),
                     );
