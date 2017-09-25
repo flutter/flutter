@@ -26,6 +26,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.WindowInsets;
+import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
@@ -664,7 +665,9 @@ public class FlutterView extends SurfaceView
             mMetrics.physicalPaddingBottom,
             mMetrics.physicalPaddingLeft);
 
-        float fps = getDisplay().getRefreshRate();
+        WindowManager wm = (WindowManager) getContext()
+            .getSystemService(Context.WINDOW_SERVICE);
+        float fps = wm.getDefaultDisplay().getRefreshRate();
         VsyncWaiter.refreshPeriodNanos = (long)(1000000000.0 / fps);
     }
 
