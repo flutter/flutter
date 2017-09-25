@@ -12,8 +12,8 @@ import 'build_info.dart';
 import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'globals.dart';
 import 'flutter_manifest.dart';
+import 'globals.dart';
 
 /// A bundle of assets.
 class AssetBundle {
