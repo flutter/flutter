@@ -26,10 +26,10 @@ class FlutterManifest {
 
   static Future<FlutterManifest> _createFromYaml(Object yamlDocument) async {
     final FlutterManifest pubspec = new FlutterManifest._();
-    if (yamlDocument == null || !await _validate(yamlDocument))
+    if (yamlDocument != null && !await _validate(yamlDocument))
       return null;
 
-    pubspec._descriptor = yamlDocument;
+    pubspec._descriptor = yamlDocument ?? <String, dynamic>{};
     pubspec._flutterDescriptor = pubspec._descriptor['flutter'] ?? <String, dynamic>{};
     return pubspec;
   }
@@ -40,7 +40,9 @@ class FlutterManifest {
   /// A map representation of the `flutter` section in the `pubspec.yaml` file.
   Map<String, dynamic> _flutterDescriptor;
 
-  String get appName => _descriptor['name'];
+  bool get isEmpty => _descriptor.isEmpty;
+
+  String get appName => _descriptor['name'] ?? '';
 
   bool get usesMaterialDesign {
     return _flutterDescriptor['uses-material-design'] ?? false;
