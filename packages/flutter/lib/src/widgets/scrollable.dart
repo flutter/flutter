@@ -281,7 +281,12 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_semanticsScrollEventScheduled)
       return;
     SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent());
+      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
+        axis: position.axis,
+        pixels: position.pixels,
+        minScrollExtent: position.minScrollExtent,
+        maxScrollExtent: position.maxScrollExtent,
+      ));
       _semanticsScrollEventScheduled = false;
     });
     _semanticsScrollEventScheduled = true;
