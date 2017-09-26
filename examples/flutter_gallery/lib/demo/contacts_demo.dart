@@ -156,7 +156,8 @@ class ContactsDemoState extends State<ContactsDemo> {
                   fit: StackFit.expand,
                   children: <Widget>[
                     new Image.asset(
-                      'packages/flutter_gallery_assets/ali_connors.jpg',
+                      'ali_connors.jpg',
+                      package: 'flutter_gallery_assets',
                       fit: BoxFit.cover,
                       height: _appBarHeight,
                     ),

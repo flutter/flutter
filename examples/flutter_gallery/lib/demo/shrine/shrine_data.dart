@@ -4,9 +4,12 @@
 
 import 'shrine_types.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 const Vendor _ali = const Vendor(
   name: 'Ali’s shop',
-  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/ali-connors.png',
+  avatarAsset: 'shrine/vendors/ali-connors.png',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Ali Connor’s makes custom goods for folks of all shapes and sizes '
     'made by hand and sometimes by machine, but always with love and care. '
@@ -15,7 +18,8 @@ const Vendor _ali = const Vendor(
 
 const Vendor _sandra = const Vendor(
   name: 'Sandra’s shop',
-  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg',
+  avatarAsset: 'shrine/vendors/sandra-adams.jpg',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Sandra specializes in furniture, beauty and travel products with a classic vibe. '
     'Custom orders are available if you’re looking for a certain color or material.'
@@ -23,7 +27,8 @@ const Vendor _sandra = const Vendor(
 
 const Vendor _trevor = const Vendor(
   name: 'Trevor’s shop',
-  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/zach.jpg',
+  avatarAsset: 'shrine/vendors/zach.jpg',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Trevor makes great stuff for awesome people like you.  Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -32,7 +37,8 @@ const Vendor _trevor = const Vendor(
 
 const Vendor _peter = const Vendor(
   name: 'Peter’s shop',
-  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png',
+  avatarAsset: 'shrine/vendors/peter-carlsson.png',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Peter makes great stuff for awesome people like you.  Super cool and extra '
     'awesome all of his shop’s goods are handmade with love. Custom orders are '
@@ -41,7 +47,8 @@ const Vendor _peter = const Vendor(
 
 const Vendor _stella = const Vendor(
   name: 'Stella’s shop',
-  avatarAsset: 'packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg',
+  avatarAsset: 'shrine/vendors/16c477b.jpg',
+  avatarAssetPackage: _kGalleryAssetsPackage,
   description:
     'Stella sells awesome stuff at lovely prices. made by hand and sometimes by '
     'machine, but always with love and care. Custom orders are available upon request '
@@ -51,7 +58,8 @@ const Vendor _stella = const Vendor(
 const List<Product> _allProducts = const <Product> [
   const Product(
     name: 'Vintage Bluetooth Radio',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/radio.png',
+    imageAsset: 'shrine/products/radio.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'latest'],
     price: 300.00,
     vendor: _sandra,
@@ -62,7 +70,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Sunglasses',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
+    imageAsset: 'shrine/products/sunnies.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 20.00,
     vendor: _trevor,
@@ -74,7 +83,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Clock',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/clock.png',
+    imageAsset: 'shrine/products/clock.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 30.00,
     vendor: _trevor,
@@ -85,7 +95,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Red popsicle',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/popsicle.png',
+    imageAsset: 'shrine/products/popsicle.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['food', 'fashion'],
     price: 300.00,
     vendor: _stella,
@@ -96,7 +107,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Folding Chair',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/lawn_chair.png',
+    imageAsset: 'shrine/products/lawn_chair.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 63.00,
     vendor: _stella,
@@ -105,7 +117,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green comfort chair',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/chair.png',
+    imageAsset: 'shrine/products/chair.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture'],
     price: 36.00,
     vendor: _ali,
@@ -114,7 +127,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Better wearing heels',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/heels.png',
+    imageAsset: 'shrine/products/heels.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion'],
     price: 125.00,
     vendor: _peter,
@@ -123,7 +137,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Green Slip-ons',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/green-shoes.png',
+    imageAsset: 'shrine/products/green-shoes.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion'],
     price: 75.00,
     vendor: _sandra,
@@ -134,7 +149,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Teapot',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/teapot.png',
+    imageAsset: 'shrine/products/teapot.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['furniture', 'fashion'],
     price: 70.00,
     vendor: _trevor,
@@ -148,7 +164,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Blue suede shoes',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/chucks.png',
+    imageAsset: 'shrine/products/chucks.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion'],
     price: 89.00,
     vendor: _trevor,
@@ -158,7 +175,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Dipped Brush',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/brush.png',
+    imageAsset: 'shrine/products/brush.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'beauty'],
     price: 25.00,
     vendor: _stella,
@@ -169,7 +187,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Perfect Goldfish Bowl',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/fish_bowl.png',
+    imageAsset: 'shrine/products/fish_bowl.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest', 'furniture'],
     price: 30.00,
     vendor: _ali,
@@ -180,7 +199,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Red Lipstick Set',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
+    imageAsset: 'shrine/products/lipstick.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['fashion', 'beauty'],
     price: 54.00,
     vendor: _sandra,
@@ -191,7 +211,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Backpack',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/backpack.png',
+    imageAsset: 'shrine/products/backpack.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion'],
     price: 25.00,
     vendor: _peter,
@@ -202,7 +223,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Half Shield Helmet',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/helmet.png',
+    imageAsset: 'shrine/products/helmet.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _ali,
@@ -213,7 +235,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Beachball',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/beachball.png',
+    imageAsset: 'shrine/products/beachball.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['latest'],
     price: 17.00,
     vendor: _peter,
@@ -224,7 +247,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Old Binoculars',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/binoculars.png',
+    imageAsset: 'shrine/products/binoculars.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'latest'],
     price: 25.00,
     vendor: _stella,
@@ -236,7 +260,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Lime Flippers',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/flippers.png',
+    imageAsset: 'shrine/products/flippers.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>['travel', 'fashion', 'beauty'],
     price: 25.00,
     vendor: _peter,
@@ -247,7 +272,8 @@ const List<Product> _allProducts = const <Product> [
   ),
   const Product(
     name: 'Surfboard',
-    imageAsset: 'packages/flutter_gallery_assets/shrine/products/surfboard.png',
+    imageAsset: 'shrine/products/surfboard.png',
+    imageAssetPackage: _kGalleryAssetsPackage,
     categories: const <String>[ 'travel', 'latest'],
     price: 120.00,
     vendor: _stella,

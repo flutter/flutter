@@ -9,12 +9,15 @@ import 'drawer.dart';
 import 'item.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class _BackgroundLayer {
   _BackgroundLayer({ int level, double parallax })
-    : assetName = 'packages/flutter_gallery_assets/appbar/appbar_background_layer$level.png',
+    : assetName = 'appbar/appbar_background_layer$level.png',
+      assetPackage = _kGalleryAssetsPackage,
       parallaxTween = new Tween<double>(begin: 0.0, end: parallax);
   final String assetName;
+  final String assetPackage;
   final Tween<double> parallaxTween;
 }
 
@@ -46,6 +49,7 @@ class _AppBarBackground extends StatelessWidget {
               bottom: 0.0,
               child: new Image.asset(
                 layer.assetName,
+                package: layer.assetPackage,
                 fit: BoxFit.cover,
                 height: _kFlexibleSpaceMaxHeight
               )

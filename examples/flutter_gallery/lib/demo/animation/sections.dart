@@ -12,17 +12,33 @@ const Color _tomato = const Color(0xFFF95B57);
 const Color _mySin = const Color(0xFFF3A646);
 const Color _deepCerise = const Color(0xFFD93F9B);
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
 class SectionDetail {
-  const SectionDetail({ this.title, this.subtitle, this.imageAsset });
+  const SectionDetail({
+    this.title,
+    this.subtitle,
+    this.imageAsset,
+    this.imageAssetPackage,
+  });
   final String title;
   final String subtitle;
   final String imageAsset;
+  final String imageAssetPackage;
 }
 
 class Section {
-  const Section({ this.title, this.backgroundAsset, this.leftColor, this.rightColor, this.details });
+  const Section({
+    this.title,
+    this.backgroundAsset,
+    this.backgroundAssetPackage,
+    this.leftColor,
+    this.rightColor,
+    this.details,
+  });
   final String title;
   final String backgroundAsset;
+  final String backgroundAssetPackage;
   final Color leftColor;
   final Color rightColor;
   final List<SectionDetail> details;
@@ -44,43 +60,51 @@ class Section {
 // image SectionDetails in the allSections list.
 
 const SectionDetail _eyeglassesDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
+  imageAsset: 'shrine/products/sunnies.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _eyeglassesImageDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
+  imageAsset: 'shrine/products/sunnies.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _seatingDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/lawn_chair.png',
+  imageAsset: 'shrine/products/lawn_chair.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _seatingImageDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/lawn_chair.png',
+  imageAsset: 'shrine/products/lawn_chair.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _decorationDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
+  imageAsset: 'shrine/products/lipstick.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _decorationImageDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
+  imageAsset: 'shrine/products/lipstick.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 const SectionDetail _protectionDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/helmet.png',
+  imageAsset: 'shrine/products/helmet.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
   title: 'Flutter enables interactive animation',
   subtitle: '3K views - 5 days',
 );
 
 const SectionDetail _protectionImageDetail = const SectionDetail(
-  imageAsset: 'packages/flutter_gallery_assets/shrine/products/helmet.png',
+  imageAsset: 'shrine/products/helmet.png',
+  imageAssetPackage: _kGalleryAssetsPackage,
 );
 
 final List<Section> allSections = <Section>[
@@ -88,7 +112,8 @@ final List<Section> allSections = <Section>[
     title: 'EYEGLASSES',
     leftColor: _mediumPurple,
     rightColor: _mariner,
-    backgroundAsset: 'packages/flutter_gallery_assets/shrine/products/sunnies.png',
+    backgroundAsset: 'shrine/products/sunnies.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _eyeglassesDetail,
       _eyeglassesImageDetail,
@@ -102,7 +127,8 @@ final List<Section> allSections = <Section>[
     title: 'SEATING',
     leftColor: _tomato,
     rightColor: _mediumPurple,
-    backgroundAsset: 'packages/flutter_gallery_assets/shrine/products/lawn_chair.png',
+    backgroundAsset: 'shrine/products/lawn_chair.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _seatingDetail,
       _seatingImageDetail,
@@ -116,7 +142,8 @@ final List<Section> allSections = <Section>[
     title: 'DECORATION',
     leftColor: _mySin,
     rightColor: _tomato,
-    backgroundAsset: 'packages/flutter_gallery_assets/shrine/products/lipstick.png',
+    backgroundAsset: 'shrine/products/lipstick.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _decorationDetail,
       _decorationImageDetail,
@@ -130,7 +157,8 @@ final List<Section> allSections = <Section>[
     title: 'PROTECTION',
     leftColor: Colors.white,
     rightColor: _tomato,
-    backgroundAsset: 'packages/flutter_gallery_assets/shrine/products/helmet.png',
+    backgroundAsset: 'shrine/products/helmet.png',
+    backgroundAssetPackage: _kGalleryAssetsPackage,
     details: const <SectionDetail>[
       _protectionDetail,
       _protectionImageDetail,
