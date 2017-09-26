@@ -38,6 +38,8 @@ import 'run.dart';
 /// exit code.
 class DriveCommand extends RunCommandBase {
   DriveCommand() {
+    requiresPubspecYaml();
+
     argParser.addFlag(
       'keep-app-running',
       defaultsTo: null,
@@ -88,12 +90,6 @@ class DriveCommand extends RunCommandBase {
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
   StreamSubscription<String> _deviceLogSubscription;
-
-  @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
 
   @override
   Future<Null> runCommand() async {

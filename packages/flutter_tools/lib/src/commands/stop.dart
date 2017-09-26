@@ -12,6 +12,10 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class StopCommand extends FlutterCommand {
+  StopCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   final String name = 'stop';
 
@@ -21,12 +25,11 @@ class StopCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
+  Future<Null> validateCommand() async {
+    await super.validateCommand();
     device = await findTargetDevice();
     if (device == null)
       throwToolExit(null);
-    return super.verifyThenRunCommand();
   }
 
   @override

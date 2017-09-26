@@ -21,6 +21,7 @@ const String kFirstUsefulFrameEventName = 'Widgets completed first useful frame'
 
 class TraceCommand extends FlutterCommand {
   TraceCommand() {
+    requiresPubspecYaml();
     argParser.addFlag('start', negatable: false, help: 'Start tracing.');
     argParser.addFlag('stop', negatable: false, help: 'Stop tracing.');
     argParser.addOption('out', help: 'Specify the path of the saved trace file.');
@@ -42,12 +43,6 @@ class TraceCommand extends FlutterCommand {
     '\`trace\` called with no arguments will automatically start tracing, delay a set amount of\n'
     'time (controlled by --duration), and stop tracing. To explicitly control tracing, call trace\n'
     'with --start and later with --stop.';
-
-  @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
-    return super.verifyThenRunCommand();
-  }
 
   @override
   Future<Null> runCommand() async {
