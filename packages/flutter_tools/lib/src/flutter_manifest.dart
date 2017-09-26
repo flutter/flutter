@@ -160,9 +160,9 @@ Future<bool> _validate(Object manifest) async {
   final Schema schema = await Schema.createSchemaFromUrl(fs.path.toUri(schemaPath).toString());
 
   final Validator validator = new Validator(schema);
-  if (validator.validate(manifest))
+  if (validator.validate(manifest)) {
     return true;
-  else {
+  } else {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
     printError(validator.errors.join('\n'));
     return false;
