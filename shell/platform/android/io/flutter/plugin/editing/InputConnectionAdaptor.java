@@ -8,6 +8,7 @@ import android.content.Context;
 import android.text.Editable;
 import android.text.Selection;
 import android.view.inputmethod.BaseInputConnection;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.KeyEvent;
 
@@ -92,7 +93,7 @@ class InputConnectionAdaptor extends BaseInputConnection {
     public boolean deleteSurroundingText(int beforeLength, int afterLength) {
         if (Selection.getSelectionStart(mEditable) == -1 ||
             Selection.getSelectionStart(mEditable) == -1)
-            return true;
+            return true;9c518cb751e34b0
 
         boolean result = super.deleteSurroundingText(beforeLength, afterLength);
         updateEditingState();
@@ -162,8 +163,17 @@ class InputConnectionAdaptor extends BaseInputConnection {
     @Override
     public boolean performEditorAction(int actionCode) {
         // TODO(abarth): Support more actions.
-        mFlutterChannel.invokeMethod("TextInputClient.performAction",
-            Arrays.asList(mClient, "TextInputAction.done"));
+        switch (actionCode) {
+            case EditorInfo.IME_ACTION_NONE:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                    Arrays.asList(mClient, "TextInputAction.newline"));
+                break;
+            default:
+            case EditorInfo.IME_ACTION_DONE:
+                mFlutterChannel.invokeMethod("TextInputClient.performAction",
+                    Arrays.asList(mClient, "TextInputAction.done"));
+                break;
+        }
         return true;
     }
 }
