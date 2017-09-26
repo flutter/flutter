@@ -142,13 +142,14 @@ class EditableText extends StatefulWidget {
   ///
   /// The [maxLines] property can be set to null to remove the restriction on
   /// the number of lines. By default, it is one, meaning this is a single-line
-  /// text field. [maxLines] must not be set to zero.
+  /// text field. [maxLines] must be null or greater than zero.
   ///
-  /// If [maxLines] is not one, then [keyboardType] will be ignored, and the
-  /// keyboard type [TextInputType.multiline] will be used.
+  /// If [keyboardType] is not set or is null, it will default to
+  /// [TextInputType.text] unless [maxLines] is greater than one, when it will
+  /// default to [TextInputType.multiline].
   ///
-  /// The [controller], [focusNode], [style], [cursorColor], [textAlign], and
-  /// [keyboardType] arguments must not be null.
+  /// The [controller], [focusNode], [style], [cursorColor], and [textAlign]
+  /// arguments must not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -164,7 +165,7 @@ class EditableText extends StatefulWidget {
     this.autofocus: false,
     this.selectionColor,
     this.selectionControls,
-    TextInputType keyboardType: TextInputType.text,
+    TextInputType keyboardType,
     this.onChanged,
     this.onSubmitted,
     this.onSelectionChanged,
@@ -178,8 +179,7 @@ class EditableText extends StatefulWidget {
        assert(textAlign != null),
        assert(maxLines == null || maxLines > 0),
        assert(autofocus != null),
-       assert(keyboardType != null),
-       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       keyboardType = keyboardType ?? (maxLines == 1 ? TextInputType.text : TextInputType.multiline),
        inputFormatters = maxLines == 1
            ? (
                <TextInputFormatter>[BlacklistingTextInputFormatter.singleLineFormatter]
@@ -199,7 +199,7 @@ class EditableText extends StatefulWidget {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -439,8 +439,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               inputAction: widget.keyboardType == TextInputType.multiline
                   ? TextInputAction.newline
                   : TextInputAction.done
-          ))
-        ..setEditingState(localValue);
+          )
+      )..setEditingState(localValue);
     }
     _textInputConnection.show();
   }

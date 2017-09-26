@@ -17,16 +17,44 @@ void main() {
     await tester.pumpWidget(new Directionality(
         textDirection: TextDirection.ltr,
         child: new EditableText(
-            controller: controller,
-            focusNode: focusNode,
-            style: textStyle,
-            cursorColor: cursorColor)));
+          controller: controller,
+          focusNode: focusNode,
+          style: textStyle,
+          cursorColor: cursorColor,
+        )));
 
     final EditableText editableText =
         tester.firstWidget(find.byType(EditableText));
     expect(editableText.maxLines, equals(1));
-    expect(editableText.obscureText, equals(false));
-    expect(editableText.autocorrect, equals(true));
+    expect(editableText.obscureText, isFalse);
+    expect(editableText.autocorrect, isTrue);
+  });
+
+  testWidgets('text keyboard is requested when maxLines is default',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: new EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ))));
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    final EditableText editableText =
+        tester.firstWidget(find.byType(EditableText));
+    expect(editableText.maxLines, equals(1));
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType'],
+        equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputAction'],
+        equals('TextInputAction.done'));
   });
 
   testWidgets('multiline keyboard is requested when set explicitly',
@@ -37,22 +65,45 @@ void main() {
             node: focusScopeNode,
             autofocus: true,
             child: new EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                keyboardType: TextInputType.multiline,
-                style: textStyle,
-                cursorColor: cursorColor))));
+              controller: controller,
+              focusNode: focusNode,
+              keyboardType: TextInputType.multiline,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ))));
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
-    print(tester.testTextInput.editingState.toString());
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs['inputAction'],
-        equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
+  });
+
+  testWidgets('Correct keyboard is requested when set explicitly and maxLines > 1',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: new EditableText(
+              controller: controller,
+              focusNode: focusNode,
+              keyboardType: TextInputType.phone,
+              maxLines: 3,
+              style: textStyle,
+              cursorColor: cursorColor,
+            ))));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text = 'test';
+    await tester.idle();
+    expect(tester.testTextInput.editingState['text'], equals('test'));
+    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.phone'));
+    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 
   testWidgets('multiline keyboard is requested when set implicitly',
@@ -63,72 +114,43 @@ void main() {
             node: focusScopeNode,
             autofocus: true,
             child: new EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                maxLines: 3, // Sets multiline keyboard implicitly.
-                style: textStyle,
-                cursorColor: cursorColor))));
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 3, // Sets multiline keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ))));
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
-    print(tester.testTextInput.editingState.toString());
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs['inputAction'],
-        equals('TextInputAction.newline'));
+    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.multiline'));
+    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.newline'));
   });
 
-  testWidgets('maxLines overrides keyboardType', (WidgetTester tester) async {
+  testWidgets('single line inputs have correct default keyboard',
+      (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
         textDirection: TextDirection.ltr,
         child: new FocusScope(
             node: focusScopeNode,
             autofocus: true,
             child: new EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                keyboardType: TextInputType.text,
-                maxLines: 3, // Sets multiline keyboard implicitly.
-                style: textStyle,
-                cursorColor: cursorColor))));
+              controller: controller,
+              focusNode: focusNode,
+              maxLines: 1, // Sets text keyboard implicitly.
+              style: textStyle,
+              cursorColor: cursorColor,
+            ))));
 
     await tester.tap(find.byType(EditableText));
     await tester.showKeyboard(find.byType(EditableText));
     controller.text = 'test';
     await tester.idle();
-    print(tester.testTextInput.editingState.toString());
     expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.multiline'));
-    expect(tester.testTextInput.setClientArgs['inputAction'],
-        equals('TextInputAction.newline'));
-  });
-
-  testWidgets('single line inputs have correct default keyboard', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new FocusScope(
-            node: focusScopeNode,
-            autofocus: true,
-            child: new EditableText(
-                controller: controller,
-                focusNode: focusNode,
-                maxLines: 1, // Sets text keyboard implicitly.
-                style: textStyle,
-                cursorColor: cursorColor))));
-
-    await tester.tap(find.byType(EditableText));
-    await tester.showKeyboard(find.byType(EditableText));
-    controller.text = 'test';
-    await tester.idle();
-    print(tester.testTextInput.editingState.toString());
-    expect(tester.testTextInput.editingState['text'], equals('test'));
-    expect(tester.testTextInput.setClientArgs['inputType'],
-        equals('TextInputType.text'));
-    expect(tester.testTextInput.setClientArgs['inputAction'],
-        equals('TextInputAction.done'));
+    expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.text'));
+    expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 }

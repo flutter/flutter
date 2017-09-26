@@ -28,7 +28,7 @@ class TestTextInput {
 
   int _client = 0;
 
-  /// Arguments supplied to setCient.
+  /// Arguments supplied to the TextInput.setClient method call.
   Map<String, dynamic> setClientArgs;
 
   /// The last set of arguments that [TextInputConnection.setEditingState] sent

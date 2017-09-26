@@ -63,6 +63,7 @@ enum TextInputType {
 enum TextInputAction {
   /// Complete the text input operation.
   done,
+
   /// The action to take when the enter button is pressed in a multi-line
   /// text field (which is typically to do nothing).
   newline,
@@ -293,10 +294,10 @@ class TextInputConnection {
 
 TextInputAction _toTextInputAction(String action) {
   switch (action) {
-    case 'TextInputAction.newline':
-      return TextInputAction.newline;
     case 'TextInputAction.done':
       return TextInputAction.done;
+    case 'TextInputAction.newline':
+      return TextInputAction.newline;
   }
   throw new FlutterError('Unknown text input action: $action');
 }
