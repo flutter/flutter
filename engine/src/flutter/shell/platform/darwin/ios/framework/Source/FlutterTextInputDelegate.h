@@ -9,6 +9,7 @@
 
 typedef NS_ENUM(NSInteger, FlutterTextInputAction) {
   FlutterTextInputActionDone,
+  FlutterTextInputActionNewline,
 };
 
 @protocol FlutterTextInputDelegate<NSObject>

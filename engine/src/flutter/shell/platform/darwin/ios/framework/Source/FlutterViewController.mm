@@ -626,6 +626,9 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     case FlutterTextInputActionDone:
       actionString = @"TextInputAction.done";
       break;
+    case FlutterTextInputActionNewline:
+      actionString = @"TextInputAction.newline";
+      break;
   }
   [_textInputChannel.get() invokeMethod:@"TextInputClient.performAction"
                               arguments:@[ @(client), actionString ]];

@@ -12,6 +12,8 @@ static const char _kTextAffinityUpstream[] = "TextAffinity.upstream";
 static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   if ([inputType isEqualToString:@"TextInputType.text"])
     return UIKeyboardTypeDefault;
+  if ([inputType isEqualToString:@"TextInputType.multiline"])
+    return UIKeyboardTypeDefault;
   if ([inputType isEqualToString:@"TextInputType.number"])
     return UIKeyboardTypeDecimalPad;
   if ([inputType isEqualToString:@"TextInputType.phone"])
@@ -21,6 +23,12 @@ static UIKeyboardType ToUIKeyboardType(NSString* inputType) {
   if ([inputType isEqualToString:@"TextInputType.url"])
     return UIKeyboardTypeURL;
   return UIKeyboardTypeDefault;
+}
+
+static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
+  if ([inputType isEqualToString:@"TextInputType.multiline"])
+    return UIReturnKeyDefault;
+  return UIReturnKeyDone;
 }
 
 static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inputType) {
@@ -272,6 +280,8 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
     [_textInputDelegate performAction:FlutterTextInputActionDone withClient:_textInputClient];
     return NO;
   }
+  if (self.returnKeyType == UIReturnKeyDefault && [text isEqualToString:@"\n"])
+    [_textInputDelegate performAction:FlutterTextInputActionNewline withClient:_textInputClient];
   return YES;
 }
 
@@ -569,6 +579,7 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   _view.keyboardType = ToUIKeyboardType(configuration[@"inputType"]);
+  _view.returnKeyType = ToUIReturnKeyType(configuration[@"inputType"]);
   _view.autocapitalizationType = ToUITextAutocapitalizationType(configuration[@"inputType"]);
   _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
   NSString* autocorrect = configuration[@"autocorrect"];
