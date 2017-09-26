@@ -35,7 +35,7 @@ bool _offsetIsValid(Offset offset) {
 }
 
 Color _scaleAlpha(Color a, double factor) {
-  return a.withAlpha((a.alpha * factor).round());
+  return a.withAlpha((a.alpha * factor).round().clamp(0, 255));
 }
 
 /// An immutable 32 bit color value in ARGB format.
@@ -100,10 +100,10 @@ class Color {
   /// See also [fromARGB], which takes the alpha value as a floating point
   /// value.
   const Color.fromARGB(int a, int r, int g, int b) :
-    value = ((((a & 0xff) << 24) |
-                ((r & 0xff) << 16) |
-                ((g & 0xff) << 8) |
-                ((b & 0xff) << 0)) & 0xFFFFFFFF);
+    value = (((a & 0xff) << 24) |
+             ((r & 0xff) << 16) |
+             ((g & 0xff) << 8)  |
+             ((b & 0xff) << 0)) & 0xFFFFFFFF;
 
   /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
   ///
@@ -117,10 +117,10 @@ class Color {
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
   const Color.fromRGBO(int r, int g, int b, double opacity) :
-    value = (((((opacity * 0xff ~/ 1) & 0xff) << 24) |
-                ((r & 0xff) << 16) |
-                ((g & 0xff) << 8) |
-                ((b & 0xff) << 0)) & 0xFFFFFFFF);
+    value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
+              ((r                    & 0xff) << 16) |
+              ((g                    & 0xff) << 8)  |
+              ((b                    & 0xff) << 0)) & 0xFFFFFFFF;
 
   /// A 32 bit value representing this color.
   ///
@@ -155,31 +155,41 @@ class Color {
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with `a` (which ranges from 0 to 255).
+  ///
+  /// Out of range values will have unexpected effects.
   Color withAlpha(int a) {
     return new Color.fromARGB(a, red, green, blue);
   }
 
   /// Returns a new color that matches this color with the alpha channel
   /// replaced with the given `opacity` (which ranges from 0.0 to 1.0).
+  ///
+  /// Out of range values will have unexpected effects.
   Color withOpacity(double opacity) {
     assert(opacity >= 0.0 && opacity <= 1.0);
     return withAlpha((255.0 * opacity).round());
   }
 
   /// Returns a new color that matches this color with the red channel replaced
-  /// with `r`.
+  /// with `r` (which ranges from 0 to 255).
+  ///
+  /// Out of range values will have unexpected effects.
   Color withRed(int r) {
     return new Color.fromARGB(alpha, r, green, blue);
   }
 
   /// Returns a new color that matches this color with the green channel
-  /// replaced with `g`.
+  /// replaced with `g` (which ranges from 0 to 255).
+  ///
+  /// Out of range values will have unexpected effects.
   Color withGreen(int g) {
     return new Color.fromARGB(alpha, red, g, blue);
   }
 
   /// Returns a new color that matches this color with the blue channel replaced
-  /// with `b`.
+  /// with `b` (which ranges from 0 to 255).
+  ///
+  /// Out of range values will have unexpected effects.
   Color withBlue(int b) {
     return new Color.fromARGB(alpha, red, green, b);
   }
@@ -188,6 +198,12 @@ class Color {
   ///
   /// If either color is null, this function linearly interpolates from a
   /// transparent instance of the other color.
+  ///
+  /// Values of `t` less that 0.0 or greater than 1.0 are supported. Each
+  /// channel will be clamped to the range 0 to 255.
+  ///
+  /// This is intended to be fast but as a result may be ugly. Consider
+  /// [HSVColor] or writing custom logic for interpolating colors.
   static Color lerp(Color a, Color b, double t) {
     if (a == null && b == null)
       return null;
@@ -196,10 +212,10 @@ class Color {
     if (b == null)
       return _scaleAlpha(a, 1.0 - t);
     return new Color.fromARGB(
-      lerpDouble(a.alpha, b.alpha, t).toInt(),
-      lerpDouble(a.red, b.red, t).toInt(),
-      lerpDouble(a.green, b.green, t).toInt(),
-      lerpDouble(a.blue, b.blue, t).toInt()
+      lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
+      lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
+      lerpDouble(a.green, b.green, t).toInt().clamp(0, 255),
+      lerpDouble(a.blue, b.blue, t).toInt().clamp(0, 255),
     );
   }
 
