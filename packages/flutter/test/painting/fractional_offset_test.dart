@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show lerpDouble;
+import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+void approxExpect(FractionalOffset a, FractionalOffset b) {
+  expect(a.dx, moreOrLessEquals(b.dx));
+  expect(a.dy, moreOrLessEquals(b.dy));
+}
 
 void main() {
   test('FractionalOffset control test', () {
@@ -39,6 +44,50 @@ void main() {
     expect(a, const FractionalOffset(0.5, 0.25));
   });
 
+  test('FractionalOffsetGeometry invariants', () {
+    final FractionalOffsetDirectional topStart = FractionalOffsetDirectional.topStart;
+    final FractionalOffsetDirectional topEnd = FractionalOffsetDirectional.topEnd;
+    final FractionalOffset topLeft = FractionalOffset.topLeft;
+    final FractionalOffset topRight = FractionalOffset.topRight;
+    final List<double> numbers = <double>[0.0, 1.0, -1.0, 2.0, 0.25, 0.5, 100.0, -999.75];
+
+    expect((topEnd * 0.0).add(topRight * 0.0), topStart.add(topLeft));
+    expect(topEnd.add(topRight) * 0.0, (topEnd * 0.0).add(topRight * 0.0));
+    expect(topStart.add(topLeft), topLeft.add(topStart));
+    expect((topStart.add(topLeft)).resolve(TextDirection.ltr), (topStart.resolve(TextDirection.ltr)) + topLeft);
+    expect((topStart.add(topLeft)).resolve(TextDirection.rtl), (topStart.resolve(TextDirection.rtl)) + topLeft);
+    expect((topStart.add(topLeft)).resolve(TextDirection.ltr), (topStart.resolve(TextDirection.ltr)).add(topLeft));
+    expect((topStart.add(topLeft)).resolve(TextDirection.rtl), (topStart.resolve(TextDirection.rtl)).add(topLeft));
+    expect(topStart.resolve(TextDirection.ltr), topLeft);
+    expect(topStart.resolve(TextDirection.rtl), topRight);
+    expect(topEnd * 0.0, topStart);
+    expect(topLeft * 0.0, topLeft);
+    expect(topStart * 1.0, topStart);
+    expect(topEnd * 1.0, topEnd);
+    expect(topLeft * 1.0, topLeft);
+    expect(topRight * 1.0, topRight);
+    for (double n in numbers) {
+      expect((topStart * n).add(topStart), topStart * (n + 1.0));
+      expect((topEnd * n).add(topEnd), topEnd * (n + 1.0));
+      for (double m in numbers)
+        expect((topStart * n).add(topStart * m), topStart * (n + m));
+    }
+    expect(topStart + topStart + topStart, topStart * 3.0); // without using "add"
+    for (TextDirection x in TextDirection.values) {
+      expect((topEnd * 0.0).add(topRight * 0.0).resolve(x), topStart.add(topLeft).resolve(x));
+      expect((topEnd * 0.0).add(topLeft).resolve(x), topStart.add(topLeft).resolve(x));
+      expect(((topEnd * 0.0).resolve(x)).add(topLeft.resolve(x)), (topStart.resolve(x)).add(topLeft.resolve(x)));
+      expect(((topEnd * 0.0).resolve(x)).add(topLeft), (topStart.resolve(x)).add(topLeft));
+      expect((topEnd * 0.0).resolve(x), topStart.resolve(x));
+    }
+    expect(topStart, isNot(topLeft));
+    expect(topEnd, isNot(topLeft));
+    expect(topStart, isNot(topRight));
+    expect(topEnd, isNot(topRight));
+    expect(topStart.add(topLeft), isNot(topLeft));
+    expect(topStart.add(topLeft), isNot(topStart));
+  });
+
   test('FractionalOffsetGeometry.resolve()', () {
     expect(const FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.ltr), const FractionalOffset(0.25, 0.3));
     expect(const FractionalOffsetDirectional(0.25, 0.3).resolve(TextDirection.rtl), const FractionalOffset(0.75, 0.3));
@@ -63,43 +112,38 @@ void main() {
      isNot(const FractionalOffsetDirectional(1.0, 0.0).resolve(TextDirection.rtl)));
   });
 
-  test('FractionalOffsetGeometry.lerp', () {
-    final FractionalOffsetGeometry directional1 = const FractionalOffsetDirectional(0.125, 0.625);
-    final FractionalOffsetGeometry normal1 = const FractionalOffset(0.25, 0.875);
-    final FractionalOffsetGeometry mixed1 = const FractionalOffset(0.0625, 0.5625).add(const FractionalOffsetDirectional(0.1875, 0.6875));
-    final FractionalOffsetGeometry directional2 = const FractionalOffsetDirectional(2.0, 3.0);
-    final FractionalOffsetGeometry normal2 = const FractionalOffset(2.0, 3.0);
-    final FractionalOffsetGeometry mixed2 = const FractionalOffset(2.0, 3.0).add(const FractionalOffsetDirectional(5.0, 3.0));
-
-    expect(FractionalOffsetGeometry.lerp(directional1, directional2, 0.5), const FractionalOffsetDirectional(0.125 + (2.0 - 0.125) / 2.0, 0.625 + (3.0 - 0.625) / 2.0));
-    expect(FractionalOffsetGeometry.lerp(directional2, directional2, 0.5), directional2);
-    expect(FractionalOffsetGeometry.lerp(directional1, normal2, 0.5).resolve(TextDirection.ltr), const FractionalOffset(1.0 + 1.0 / 16.0, 0.625 + (3.0 - 0.625) / 2.0));
-    expect(FractionalOffsetGeometry.lerp(directional1, normal2, 0.5).resolve(TextDirection.rtl), new FractionalOffset(lerpDouble(0.875, 2.0, 0.5), 0.625 + (3.0 - 0.625) / 2.0));
-    expect(FractionalOffsetGeometry.lerp(directional1, mixed1, 0.5).resolve(TextDirection.ltr), new FractionalOffset(1.0 / 32.0 + 2.5 / 16.0, lerpDouble(0.625, 0.5625 + 0.6875, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(directional1, mixed1, 0.5).resolve(TextDirection.rtl), new FractionalOffset(1.0 / 32.0 + 1.0 - 2.5 / 16.0, lerpDouble(0.625, 0.5625 + 0.6875, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.5).resolve(TextDirection.ltr), new FractionalOffset(3.0 + 5.0 / 8.0, lerpDouble(0.5625 + 0.6875, 6.0, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.5).resolve(TextDirection.rtl), new FractionalOffset(2.0 - 41.0 / 16.0, lerpDouble(0.5625 + 0.6875, 6.0, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(normal1, normal2, 0.5), const FractionalOffset(0.25 + (2.0 - 0.25) / 2.0, 0.875 + (3.0 - 0.875) / 2.0));
-    expect(FractionalOffsetGeometry.lerp(normal1, mixed1, 0.5).resolve(TextDirection.ltr), new FractionalOffset(lerpDouble(0.25, 0.0625, 0.5) + lerpDouble(0.0, 0.1875, 0.5), lerpDouble(0.875, 0.5625 + 0.6875, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(normal1, mixed1, 0.5).resolve(TextDirection.rtl), new FractionalOffset(lerpDouble(0.25, 0.0625 + 0.8125, 0.5), lerpDouble(0.875, 0.5625 + 0.6875, 0.5)));
-    expect(FractionalOffsetGeometry.lerp(null, mixed1, 0.5).resolve(TextDirection.ltr), FractionalOffsetGeometry.lerp(FractionalOffset.center, mixed1, 0.5).resolve(TextDirection.ltr));
-    expect(FractionalOffsetGeometry.lerp(mixed2, null, 0.25).resolve(TextDirection.ltr), FractionalOffsetGeometry.lerp(FractionalOffset.center, mixed2, 0.75).resolve(TextDirection.ltr));
-    expect(FractionalOffsetGeometry.lerp(directional1, null, 1.0), FractionalOffsetDirectional.center);
-    expect(FractionalOffsetGeometry.lerp(null, null, 0.5), isNull);
-  });
-
-  test('FractionalOffsetGeometry.lerp more', () {
+  test('FractionalOffsetGeometry.lerp ad hoc tests', () {
     final FractionalOffsetGeometry mixed1 = const FractionalOffset(10.0, 20.0).add(const FractionalOffsetDirectional(30.0, 50.0));
     final FractionalOffsetGeometry mixed2 = const FractionalOffset(70.0, 110.0).add(const FractionalOffsetDirectional(130.0, 170.0));
     final FractionalOffsetGeometry mixed3 = const FractionalOffset(25.0, 42.5).add(const FractionalOffsetDirectional(55.0, 80.0));
 
-    expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.0), mixed1);
-    expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 1.0), mixed2);
-    expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.25), mixed3);
+    for (TextDirection direction in TextDirection.values) {
+      expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.0).resolve(direction), mixed1.resolve(direction));
+      expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 1.0).resolve(direction), mixed2.resolve(direction));
+      expect(FractionalOffsetGeometry.lerp(mixed1, mixed2, 0.25).resolve(direction), mixed3.resolve(direction));
+    }
   });
 
   test('lerp commutes with resolve', () {
     final List<FractionalOffsetGeometry> offsets = <FractionalOffsetGeometry>[
+      FractionalOffset.topLeft,
+      FractionalOffset.topCenter,
+      FractionalOffset.topRight,
+      FractionalOffsetDirectional.topStart,
+      FractionalOffsetDirectional.topCenter,
+      FractionalOffsetDirectional.topEnd,
+      FractionalOffset.centerLeft,
+      FractionalOffset.center,
+      FractionalOffset.centerRight,
+      FractionalOffsetDirectional.centerStart,
+      FractionalOffsetDirectional.center,
+      FractionalOffsetDirectional.centerEnd,
+      FractionalOffset.bottomLeft,
+      FractionalOffset.bottomCenter,
+      FractionalOffset.bottomRight,
+      FractionalOffsetDirectional.bottomStart,
+      FractionalOffsetDirectional.bottomCenter,
+      FractionalOffsetDirectional.bottomEnd,
       const FractionalOffset(-1.0, 0.65),
       const FractionalOffsetDirectional(-1.0, 0.45),
       const FractionalOffsetDirectional(0.125, 0.625),
@@ -111,16 +155,32 @@ void main() {
       const FractionalOffset(10.0, 20.0).add(const FractionalOffsetDirectional(30.0, 50.0)),
       const FractionalOffset(70.0, 110.0).add(const FractionalOffsetDirectional(130.0, 170.0)),
       const FractionalOffset(25.0, 42.5).add(const FractionalOffsetDirectional(55.0, 80.0)),
+      null,
     ];
 
-    final List<double> times = <double>[ 0.0, 0.25, 0.5, 0.75, 1.0 ];
+    final List<double> times = <double>[ 0.25, 0.5, 0.75 ];
 
     for (TextDirection direction in TextDirection.values) {
+      final FractionalOffset defaultValue = FractionalOffsetDirectional.topStart.resolve(direction);
       for (FractionalOffsetGeometry a in offsets) {
+        final FractionalOffset resolvedA = a?.resolve(direction) ?? defaultValue;
         for (FractionalOffsetGeometry b in offsets) {
+          final FractionalOffset resolvedB = b?.resolve(direction) ?? defaultValue;
+          approxExpect(FractionalOffset.lerp(resolvedA, resolvedB, 0.0), resolvedA);
+          approxExpect(FractionalOffset.lerp(resolvedA, resolvedB, 1.0), resolvedB);
+          approxExpect(FractionalOffsetGeometry.lerp(a, b, 0.0).resolve(direction), resolvedA);
+          approxExpect(FractionalOffsetGeometry.lerp(a, b, 1.0).resolve(direction), resolvedB);
           for (double t in times) {
-            expect(FractionalOffsetGeometry.lerp(a, b, t).resolve(direction),
-                   FractionalOffset.lerp(a.resolve(direction), b.resolve(direction), t));
+            assert(t > 0.0);
+            assert(t < 1.0);
+            final FractionalOffset value = FractionalOffsetGeometry.lerp(a, b, t).resolve(direction);
+            expect(value, FractionalOffset.lerp(resolvedA, resolvedB, t));
+            final double minDX = math.min(resolvedA.dx, resolvedB.dx);
+            final double maxDX = math.max(resolvedA.dx, resolvedB.dx);
+            final double minDY = math.min(resolvedA.dy, resolvedB.dy);
+            final double maxDY = math.max(resolvedA.dy, resolvedB.dy);
+            expect(value.dx, inInclusiveRange(minDX, maxDX));
+            expect(value.dy, inInclusiveRange(minDY, maxDY));
           }
         }
       }
@@ -145,10 +205,12 @@ void main() {
     expect(const FractionalOffsetDirectional(1.0, 2.0) / 2.0, const FractionalOffsetDirectional(0.5, 1.0));
     expect(const FractionalOffsetDirectional(1.0, 2.0) % 2.0, const FractionalOffsetDirectional(1.0, 0.0));
     expect(const FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0, const FractionalOffsetDirectional(0.0, 1.0));
-    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) * 2.0), const FractionalOffsetDirectional(2.0, 4.0));
-    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) / 2.0), const FractionalOffsetDirectional(0.5, 1.0));
-    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) % 2.0), const FractionalOffsetDirectional(1.0, 0.0));
-    expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0), const FractionalOffsetDirectional(0.0, 1.0));
+    for (TextDirection direction in TextDirection.values) {
+      expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) * 2.0).resolve(direction), const FractionalOffsetDirectional(2.0, 4.0).resolve(direction));
+      expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) / 2.0).resolve(direction), const FractionalOffsetDirectional(0.5, 1.0).resolve(direction));
+      expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) % 2.0).resolve(direction), const FractionalOffsetDirectional(1.0, 0.0).resolve(direction));
+      expect(FractionalOffset.topLeft.add(const FractionalOffsetDirectional(1.0, 2.0) ~/ 2.0).resolve(direction), const FractionalOffsetDirectional(0.0, 1.0).resolve(direction));
+    }
     expect(const FractionalOffset(1.0, 2.0) * 2.0, const FractionalOffset(2.0, 4.0));
     expect(const FractionalOffset(1.0, 2.0) / 2.0, const FractionalOffset(0.5, 1.0));
     expect(const FractionalOffset(1.0, 2.0) % 2.0, const FractionalOffset(1.0, 0.0));
@@ -165,10 +227,10 @@ void main() {
   test('FractionalOffsetGeometry toString', () {
     expect(const FractionalOffset(1.0001, 2.0001).toString(), 'FractionalOffset(1.0, 2.0)');
     expect(const FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
-    expect(const FractionalOffset(0.0, 1.0).add(const FractionalOffsetDirectional(1.0, 0.0)).toString(), 'FractionalOffset.bottomLeft in RTL or FractionalOffset.bottomRight in LTR');
+    expect(const FractionalOffset(0.0, 1.0).add(const FractionalOffsetDirectional(1.0, 0.0)).toString(), 'FractionalOffset(0.0, 1.0) + FractionalOffsetDirectional(1.0, 0.0)');
     expect(const FractionalOffset(0.0001, 0.0001).toString(), 'FractionalOffset(0.0, 0.0)');
     expect(const FractionalOffset(0.0, 0.0).toString(), 'FractionalOffset.topLeft');
     expect(const FractionalOffsetDirectional(0.0, 0.0).toString(), 'FractionalOffsetDirectional.topStart');
-    expect(const FractionalOffset(1.0, 1.0).add(const FractionalOffsetDirectional(1.0, 1.0)).toString(), 'FractionalOffset(1.0, 2.0) in RTL or FractionalOffset(2.0, 2.0) in LTR');
+    expect(const FractionalOffset(1.0, 1.0).add(const FractionalOffsetDirectional(1.0, 1.0)).toString(), 'FractionalOffset(1.0, 2.0) + FractionalOffsetDirectional(1.0, 0.0)');
   });
 }
