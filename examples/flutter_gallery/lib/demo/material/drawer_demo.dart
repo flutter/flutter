@@ -4,9 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-const String _kAsset0 = 'packages/flutter_gallery_assets/shrine/vendors/zach.jpg';
-const String _kAsset1 = 'packages/flutter_gallery_assets/shrine/vendors/16c477b.jpg';
-const String _kAsset2 = 'packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg';
+const String _kAsset0 = 'shrine/vendors/zach.jpg';
+const String _kAsset1 = 'shrine/vendors/16c477b.jpg';
+const String _kAsset2 = 'shrine/vendors/sandra-adams.jpg';
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class DrawerDemo extends StatefulWidget {
   static const String routeName = '/material/drawer';
@@ -93,10 +94,25 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             new UserAccountsDrawerHeader(
               accountName: const Text('Zach Widget'),
               accountEmail: const Text('zach.widget@example.com'),
-              currentAccountPicture: const CircleAvatar(backgroundImage: const AssetImage(_kAsset0)),
+              currentAccountPicture: const CircleAvatar(
+                backgroundImage: const AssetImage(
+                  _kAsset0,
+                  package: _kGalleryAssetsPackage,
+                ),
+              ),
               otherAccountsPictures: const <Widget>[
-                const CircleAvatar(backgroundImage: const AssetImage(_kAsset1)),
-                const CircleAvatar(backgroundImage: const AssetImage(_kAsset2)),
+                const CircleAvatar(
+                  backgroundImage: const AssetImage(
+                    _kAsset1,
+                    package: _kGalleryAssetsPackage,
+                  ),
+                ),
+                const CircleAvatar(
+                  backgroundImage: const AssetImage(
+                    _kAsset2,
+                    package: _kGalleryAssetsPackage,
+                  ),
+                ),
               ],
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
@@ -167,7 +183,10 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   image: const DecorationImage(
-                    image: const AssetImage(_kAsset0),
+                    image: const AssetImage(
+                      _kAsset0,
+                      package: _kGalleryAssetsPackage,
+                    ),
                   ),
                 ),
               ),

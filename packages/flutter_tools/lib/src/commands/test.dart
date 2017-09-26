@@ -21,6 +21,7 @@ import '../test/watcher.dart';
 
 class TestCommand extends FlutterCommand {
   TestCommand({ bool verboseHelp: false }) {
+    requiresPubspecYaml();
     usesPubOption();
     argParser.addOption('name',
       help: 'A regular expression matching substrings of the names of tests to run.',
@@ -67,15 +68,6 @@ class TestCommand extends FlutterCommand {
         negatable: false,
         help: 'Handle machine structured JSON command input\n'
             'and provide output and progress in machine friendly format.');
-    commandValidator = () {
-      if (!fs.isFileSync('pubspec.yaml')) {
-        throwToolExit(
-          'Error: No pubspec.yaml file found in the current working directory.\n'
-          'Run this command from the root of your project. Test files must be\n'
-          'called *_test.dart and must reside in the package\'s \'test\'\n'
-          'directory (or one of its subdirectories).');
-      }
-    };
   }
 
   @override
@@ -144,6 +136,18 @@ class TestCommand extends FlutterCommand {
   }
 
   @override
+  Future<Null> validateCommand() async {
+    await super.validateCommand();
+    if (!fs.isFileSync('pubspec.yaml')) {
+      throwToolExit(
+          'Error: No pubspec.yaml file found in the current working directory.\n'
+              'Run this command from the root of your project. Test files must be\n'
+              'called *_test.dart and must reside in the package\'s \'test\'\n'
+              'directory (or one of its subdirectories).');
+    }
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
     if (platform.isWindows) {
       throwToolExit(
@@ -152,7 +156,6 @@ class TestCommand extends FlutterCommand {
       );
     }
 
-    commandValidator();
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
 

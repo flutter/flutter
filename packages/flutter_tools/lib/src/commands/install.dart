@@ -12,6 +12,10 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 class InstallCommand extends FlutterCommand {
+  InstallCommand() {
+    requiresPubspecYaml();
+  }
+
   @override
   final String name = 'install';
 
@@ -21,12 +25,11 @@ class InstallCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<Null> verifyThenRunCommand() async {
-    commandValidator();
+  Future<Null> validateCommand() async {
+    await super.validateCommand();
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('No target device found');
-    return super.verifyThenRunCommand();
   }
 
   @override

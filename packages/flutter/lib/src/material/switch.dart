@@ -51,6 +51,9 @@ class Switch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage
   }) : super(key: key);
@@ -89,6 +92,21 @@ class Switch extends StatefulWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to accent color of the current [Theme] with the opacity set at 50%.
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveTrackColor;
+
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
 
@@ -114,16 +132,16 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
-    final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
+    final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
     if (widget.onChanged != null) {
-      inactiveThumbColor = isDark ? Colors.grey.shade400 : Colors.grey.shade50;
-      inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : Colors.black26);
     } else {
-      inactiveThumbColor = isDark ? Colors.grey.shade800 : Colors.grey.shade400;
-      inactiveTrackColor = isDark ? Colors.white10 : Colors.black12;
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
 
     return new _SwitchRenderObjectWidget(

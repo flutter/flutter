@@ -76,10 +76,11 @@ void main() {
 
       final String testApp = fs.path.join(cwd.path, 'test', 'e2e.dart');
       final String testFile = fs.path.join(cwd.path, 'test_driver', 'e2e_test.dart');
+      fs.file(testApp).createSync(recursive: true);
 
       final List<String> args = <String>[
         'drive',
-        '--target=$testApp}',
+        '--target=$testApp',
       ];
       try {
         await createTestCommandRunner(command).run(args);
@@ -120,6 +121,7 @@ void main() {
 
     testUsingContext('returns 1 when app file is outside package', () async {
       final String appFile = fs.path.join(cwd.dirname, 'other_app', 'app.dart');
+      fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         'drive',
         '--target=$appFile',
@@ -139,6 +141,7 @@ void main() {
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
       final String appFile = fs.path.join(cwd.path, 'main.dart');
+      fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         'drive',
         '--target=$appFile',

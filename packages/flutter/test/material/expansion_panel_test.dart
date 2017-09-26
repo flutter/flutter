@@ -71,4 +71,42 @@ void main() {
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
   });
+  testWidgets("Multiple Panel List test", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new ListView(
+          children: <ExpansionPanelList>[
+            new ExpansionPanelList(
+              children: <ExpansionPanel>[
+                new ExpansionPanel(
+                  headerBuilder: (BuildContext context, bool isExpanded) {
+                    return new Text(isExpanded ? 'B' : 'A');
+                  },
+                  body: const SizedBox(height:100.0),
+                  isExpanded: true,
+                ),
+              ],
+            ),
+            new ExpansionPanelList(
+              children: <ExpansionPanel>[
+                new ExpansionPanel(
+                  headerBuilder: (BuildContext context, bool isExpanded){
+                    return new Text(isExpanded ? 'D' : 'C');
+                  },
+                  body: const SizedBox(height:100.0),
+                  isExpanded: true,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    expect(find.text('C'), findsNothing);
+    expect(find.text('D'), findsOneWidget);
+  });
 }

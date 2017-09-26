@@ -103,8 +103,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
 void applyMocksToCommand(FlutterCommand command) {
   command
-    ..applicationPackages = new MockApplicationPackageStore()
-    ..commandValidator = () => true;
+    ..applicationPackages = new MockApplicationPackageStore();
 }
 
 /// Common functionality for tracking mock interaction
