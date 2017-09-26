@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '24ad1035147b65dd42e765b566f5002e87caafa7',
+  'dart_revision': '3d21a46b726c24ded2d3cb3cce4f43aeed875dbc',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': 'daf66909019d2aaec1721fc39d94ea648a9fdc1d',
@@ -57,7 +57,7 @@ vars = {
   'dart_http_tag': '0.11.3+14',
   'dart_http_throttle_tag': '1.0.1',
   'dart_intl_tag': '0.14.0',
-  'dart_isolate_tag': '1.1.0',
+  'dart_isolate_tag': '1.0.0',
   'dart_json_rpc_2_tag': '2.0.4',
   'dart_linter_tag': '0.1.35',
   'dart_logging_tag': '0.11.3+1',
@@ -72,9 +72,9 @@ vars = {
   'dart_package_resolver_tag': '1.0.2+1',
   'dart_path_tag': '1.4.1',
   'dart_plugin_tag': '0.2.0',
-  'dart_pool_tag': '1.3.2',
+  'dart_pool_tag': '1.3.0',
   'dart_protobuf_tag': '0.5.4',
-  'dart_pub_rev': 'cde958f157d3662bf968bcbed05580d5c0355e89',
+  'dart_pub_rev': '0f122625f8e607842afe156b9b23a9709e4ce39a',
   'dart_pub_semver_tag': '1.3.2',
   'dart_quiver_tag': '0.22.0',
   'dart_resource_rev': 'a49101ba2deb29c728acba6fb86000a8f730f4b1',
@@ -86,10 +86,10 @@ vars = {
   'dart_source_map_stack_trace_tag': '1.1.4',
   'dart_source_maps_tag': '0.10.4',
   'dart_source_span_tag': '1.4.0',
-  'dart_stack_trace_tag': '1.8.2',
+  'dart_stack_trace_tag': '1.7.2',
   'dart_stream_channel_tag': '1.6.1',
   'dart_string_scanner_tag': '1.0.1',
-  'dart_test_tag': '0.12.24+6',
+  'dart_test_tag': '0.12.24+2',
   'dart_tuple_tag': 'v1.0.1',
   'dart_typed_data_tag': '1.1.3',
   'dart_usage_tag': '3.3.0',
