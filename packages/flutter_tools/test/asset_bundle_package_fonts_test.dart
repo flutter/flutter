@@ -180,8 +180,8 @@ $fontsSection
       writeFontAsset('p/p/', font);
 
       final String expectedFontManifest =
-          '[{"fonts":[{"asset":"packages/test_package/a/bar"}],'
-          '"family":"packages/test_package/foo"}]';
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
         <String>[font],
@@ -211,8 +211,8 @@ $fontsSection
       writeFontAsset('p2/p/lib/', font);
 
       final String expectedFontManifest =
-          '[{"fonts":[{"asset":"packages/test_package2/bar"}],'
-          '"family":"packages/test_package/foo"}]';
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
         <String>[font],
@@ -243,8 +243,8 @@ $fontsSection
       writeFontAsset('p/p/', font);
 
       final String expectedFontManifest =
-          '[{"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}],'
-          '"family":"packages/test_package/foo"}]';
+          '[{"family":"packages/test_package/foo",'
+          '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
         <String>[font],
@@ -279,8 +279,8 @@ $fontsSection
 
       final String expectedFontManifest =
           '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
-          '{"fonts":[{"asset":"packages/test_package/a/bar"}],'
-          '"family":"packages/test_package/foo"}]';
+          '{"family":"packages/test_package/foo",'
+          '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[font],
         <String>[font],

@@ -74,7 +74,7 @@ class AssetBundle {
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
-      flutterManifest = await FlutterManifest.createManifestFromPath(manifestPath);
+      flutterManifest = await FlutterManifest.createFromPath(manifestPath);
       if (flutterManifest == null)
         return 1;
     } catch (e) {
@@ -113,7 +113,7 @@ class AssetBundle {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = package.resolve('../pubspec.yaml').path;
-        final FlutterManifest packageFlutterManifest = await FlutterManifest.createManifestFromPath(packageManifestPath);
+        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath);
         if (packageFlutterManifest == null)
           continue;
         // Skip the app itself
@@ -418,11 +418,7 @@ List<Font> _parsePackageFonts(
 }
 
 List<Map<String, dynamic>> _createFontsDescriptor(List<Font> fonts) {
-  final List<Map<String, dynamic>> json = <Map<String, dynamic>>[];
-  for (Font font in fonts) {
-    json.add(font.getDescriptor());
-  }
-  return json;
+  return fonts.map((Font font) => font.descriptor).toList();
 }
 
 // Given an assets directory like this:

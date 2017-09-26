@@ -23,7 +23,7 @@ dependencies:
   flutter:
     sdk: flutter
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest, isNotNull);
       expect(flutterManifest.appName, 'test');
       expect(flutterManifest.usesMaterialDesign, false);
@@ -32,7 +32,7 @@ dependencies:
       expect(flutterManifest.assets, isEmpty);
     });
 
-    test('usesMaterialDesign flag is set', () async {
+    test('knows if material design is used', () async {
       final String manifest = '''
 name: test
 dependencies:
@@ -41,13 +41,8 @@ dependencies:
 flutter:
   uses-material-design: true
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.fontsDescriptor, isEmpty);
-      expect(flutterManifest.fonts, isEmpty);
-      expect(flutterManifest.assets, isEmpty);
     });
 
     test('has two assets', () async {
@@ -62,17 +57,8 @@ flutter:
     - a/foo
     - a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.fontsDescriptor, isEmpty);
-      expect(flutterManifest.fonts, isEmpty);
-
-      final List<String> assets = flutterManifest.assets;
-      expect(assets.length, 2);
-      expect(assets, contains('a/foo'));
-      expect(assets, contains('a/bar'));
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.assets, <String>['a/foo', 'a/bar']);
     });
 
     test('has one font family with one asset', () async {
@@ -88,18 +74,14 @@ flutter:
       fonts:
         - asset: a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest.fontsDescriptor.toString(), '[{fonts: [{asset: a/bar}], family: foo}]');
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{fonts: [{asset: a/bar}], family: foo}';
-      expect(font.getDescriptor().toString(), fontDescriptor);
+      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}]}';
+      expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 1);
@@ -124,19 +106,15 @@ flutter:
         - asset: a/bar
           weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
       final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}';
-      expect(font.getDescriptor().toString(), fontDescriptor);
+      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}]}';
+      expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -166,19 +144,15 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
       final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      final String fontDescriptor = '{fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}], family: foo}';
-      expect(font.getDescriptor().toString(), fontDescriptor);
+      final String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      expect(font.descriptor.toString(), fontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -214,11 +188,8 @@ flutter:
           asset: a/baz
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+
       final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}], family: bar}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
@@ -226,8 +197,8 @@ flutter:
       expect(fonts.length, 2);
 
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}], family: foo}';
-      expect(fooFont.getDescriptor().toString(), barFontDescriptor);
+      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -241,8 +212,8 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
 
       final Font barFont = fonts[1];
-      final String fontDescriptor = '{fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}], family: bar}';
-      expect(barFont.getDescriptor().toString(), fontDescriptor);
+      final String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
+      expect(barFont.descriptor.toString(), fontDescriptor);
       expect(barFont.familyName, 'bar');
       final List<FontAsset> barAssets = barFont.fontAssets;
       expect(barAssets.length, 2);
@@ -277,11 +248,8 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+
 
       final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}]}]';
@@ -289,8 +257,8 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}], family: foo}';
-      expect(fooFont.getDescriptor().toString(), barFontDescriptor);
+      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -321,11 +289,7 @@ flutter:
           style: italic
     - family: bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
       final String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
                                              ' {family: bar}]';
@@ -333,8 +297,8 @@ flutter:
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      final String barFontDescriptor = '{fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}], family: foo}';
-      expect(fooFont.getDescriptor().toString(), barFontDescriptor);
+      final String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
+      expect(fooFont.descriptor.toString(), barFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -361,11 +325,7 @@ flutter:
       fonts:
         - weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createManifestFromString(manifest);
-      expect(flutterManifest, isNotNull);
-      expect(flutterManifest.appName, 'test');
-      expect(flutterManifest.usesMaterialDesign, true);
-      expect(flutterManifest.assets, isEmpty);
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
 
       final String expectedFontsDescriptor = '[{fonts: [{weight: 400}], family: foo}]';
       expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
