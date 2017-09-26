@@ -61,8 +61,7 @@ template("flutter_content_handler") {
              "//flutter/runtime",
              "//flutter/sky/engine/platform",
              "//flutter/vulkan",
-             # TODO(abarth): This library should be public in garnet.
-             "//garnet/lib/magma:vulkan",
+             "//garnet/public/lib/vulkan",
              "//garnet/public/dart-pkg/fuchsia",
              "//garnet/public/lib/fxl",
              "//garnet/public/lib/icu_data/cpp",
