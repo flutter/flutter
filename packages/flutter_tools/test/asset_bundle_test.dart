@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -80,6 +81,21 @@ void main()  {
       expect(await ab.build(), 0);
       expect(ab.entries.length, greaterThan(0));
     });
+
+    testUsingContext('empty pubspec', () async {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('');
+
+      final AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(bundle.entries.length, 1);
+      final String expectedAssetManifest = '{}';
+      expect(
+        UTF8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        expectedAssetManifest,
+      );
+    }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
   });
 
 }
