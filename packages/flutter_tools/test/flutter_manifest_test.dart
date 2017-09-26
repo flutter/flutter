@@ -16,6 +16,16 @@ void main() {
   });
 
   group('FlutterManifest', () {
+    testUsingContext('is empty when the pubspec.yaml file is empty', () async {
+      final FlutterManifest flutterManifest = await FlutterManifest.createFromString('');
+      expect(flutterManifest.isEmpty, true);
+      expect(flutterManifest.appName, '');
+      expect(flutterManifest.usesMaterialDesign, false);
+      expect(flutterManifest.fontsDescriptor, isEmpty);
+      expect(flutterManifest.fonts, isEmpty);
+      expect(flutterManifest.assets, isEmpty);
+    });
+
     test('has no fonts or assets when the "flutter" section is empty', () async {
       final String manifest = '''
 name: test
@@ -25,6 +35,7 @@ dependencies:
 ''';
       final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
       expect(flutterManifest, isNotNull);
+      expect(flutterManifest.isEmpty, false);
       expect(flutterManifest.appName, 'test');
       expect(flutterManifest.usesMaterialDesign, false);
       expect(flutterManifest.fontsDescriptor, isEmpty);
