@@ -44,6 +44,7 @@ Future<Null> main(List<String> args) async {
   executableContext.setVariable(Logger, new StdoutLogger());
   await executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    context.putIfAbsent(Stdio, () => const Stdio());
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
