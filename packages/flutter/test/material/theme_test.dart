@@ -122,7 +122,7 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for(Element item in tester.elementList(find.text('menuItem')))
+    for (Element item in tester.elementList(find.text('menuItem')))
       expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 

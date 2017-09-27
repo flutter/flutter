@@ -330,7 +330,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     // Android devices (Java really) report 3 deprecated language codes, see
     // http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4140555
     // and https://developer.android.com/reference/java/util/Locale.html
-    switch(newLocale.languageCode) {
+    switch (newLocale.languageCode) {
       case 'iw':
         newLocale = new Locale('he', newLocale.countryCode); // Hebrew
         break;

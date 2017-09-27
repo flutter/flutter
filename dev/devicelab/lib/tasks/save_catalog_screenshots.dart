@@ -101,7 +101,7 @@ Future<Null> saveScreenshots(List<String> fromPaths, List<String> largeNames, Li
   for (int index = 0; index < uploads.length; index += 1)
     uploads[index] = new Upload(fromPaths[index], largeNames[index], smallNames[index]);
 
-  while(uploads.any(Upload.isNotComplete)) {
+  while (uploads.any(Upload.isNotComplete)) {
     final HttpClient client = new HttpClient();
     uploads = uploads.where(Upload.isNotComplete).toList();
     await Future.wait(uploads.map((Upload upload) => upload.run(client)));

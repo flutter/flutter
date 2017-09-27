@@ -303,7 +303,7 @@ class _IndicatorPainter extends CustomPainter {
 
   static bool _tabOffsetsNotEqual(List<double> a, List<double> b) {
     assert(a != null && b != null && a.length == b.length);
-    for(int i = 0; i < a.length; i++) {
+    for (int i = 0; i < a.length; i += 1) {
       if (a[i] != b[i])
         return true;
     }

@@ -87,7 +87,7 @@ class _DatePickerHeader extends StatelessWidget {
     final TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
     Color yearColor;
-    switch(themeData.primaryColorBrightness) {
+    switch (themeData.primaryColorBrightness) {
       case Brightness.light:
         dayColor = mode == DatePickerMode.day ? Colors.black87 : Colors.black54;
         yearColor = mode == DatePickerMode.year ? Colors.black87 : Colors.black54;

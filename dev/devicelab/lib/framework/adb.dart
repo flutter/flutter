@@ -23,7 +23,7 @@ DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
 /// Discovers available devices and chooses one to work with.
 abstract class DeviceDiscovery {
   factory DeviceDiscovery() {
-    switch(deviceOperatingSystem) {
+    switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.android:
         return new AndroidDeviceDiscovery();
       case DeviceOperatingSystem.ios:

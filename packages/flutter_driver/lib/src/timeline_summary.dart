@@ -138,7 +138,7 @@ class TimelineSummary {
     // Timeline does not guarantee that the first event is the "begin" event.
     final Iterator<TimelineEvent> events = _extractNamedEvents(name)
         .skipWhile((TimelineEvent evt) => evt.phase != 'B').iterator;
-    while(events.moveNext()) {
+    while (events.moveNext()) {
       final TimelineEvent beginEvent = events.current;
       if (events.moveNext()) {
         final TimelineEvent endEvent = events.current;

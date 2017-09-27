@@ -75,7 +75,7 @@ final Duration _kPauseBetweenReconnectAttempts = _kShortTimeout ~/ 5;
 // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/timeline.cc#L32
 String _timelineStreamsToString(List<TimelineStream> streams) {
   final String contents = streams.map((TimelineStream stream) {
-    switch(stream) {
+    switch (stream) {
       case TimelineStream.all: return 'all';
       case TimelineStream.api: return 'API';
       case TimelineStream.compiler: return 'Compiler';
@@ -425,7 +425,7 @@ class FlutterDriver {
 
   /// Turns semantics on or off in the Flutter app under test.
   ///
-  /// Returns `true` when the call actually changed the state from on to off or
+  /// Returns true when the call actually changed the state from on to off or
   /// vice versa.
   Future<bool> setSemantics(bool enabled, { Duration timeout: _kShortTimeout }) async {
     final SetSemanticsResult result = SetSemanticsResult.fromJson(await _sendCommand(new SetSemantics(enabled, timeout: timeout)));

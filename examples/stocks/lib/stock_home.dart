@@ -86,7 +86,7 @@ class StockHomeState extends State<StockHome> {
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
-    switch(value) {
+    switch (value) {
       case _StockMenuItem.autorefresh:
         setState(() {
           _autorefresh = !_autorefresh;

@@ -274,7 +274,7 @@ void main() {
     // have the same origin and height as the dropdown button.
     final List<RenderObject> itemBoxes = tester.renderObjectList(find.byKey(const ValueKey<String>('two'))).toList();
     expect(itemBoxes.length, equals(2));
-    for(RenderBox itemBox in itemBoxes) {
+    for (RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
       expect(buttonBox.localToGlobal(Offset.zero), equals(itemBox.localToGlobal(Offset.zero)));
       expect(buttonBox.size.height, equals(itemBox.size.height));
@@ -310,7 +310,7 @@ void main() {
     final double menuItemHeight = itemBoxes.map((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
-    for(RenderBox itemBox in itemBoxes) {
+    for (RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter =  itemBox.size.center(itemBox.localToGlobal(Offset.zero));

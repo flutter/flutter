@@ -82,7 +82,7 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded) {
                     return new Text(isExpanded ? 'B' : 'A');
                   },
-                  body: const SizedBox(height:100.0),
+                  body: const SizedBox(height: 100.0),
                   isExpanded: true,
                 ),
               ],
@@ -93,7 +93,7 @@ void main() {
                   headerBuilder: (BuildContext context, bool isExpanded){
                     return new Text(isExpanded ? 'D' : 'C');
                   },
-                  body: const SizedBox(height:100.0),
+                  body: const SizedBox(height: 100.0),
                   isExpanded: true,
                 ),
               ],

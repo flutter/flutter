@@ -118,11 +118,7 @@ class AnsiTerminal {
     }
     String choice;
     singleCharMode = true;
-    while(
-      isEmpty(choice)
-      || choice.length != 1
-      || !acceptedCharacters.contains(choice)
-     ) {
+    while (isEmpty(choice) || choice.length != 1 || !acceptedCharacters.contains(choice)) {
       if (isNotEmpty(prompt)) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)

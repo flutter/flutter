@@ -778,7 +778,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// Represents a RenderObject that has [isSemanticBoundary] set to `true`.
+/// Represents a RenderObject that has [isSemanticBoundary] set to true.
 ///
 /// It returns the SemanticsNode for that [RenderObject].
 class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
@@ -818,7 +818,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
 }
 
 /// Represents a RenderObject that does not have [isSemanticBoundary] set to
-/// `true`, but which does have some semantic annotators.
+/// true, but which does have some semantic annotators.
 ///
 /// When it is compiled, if the nearest ancestor [_SemanticsFragment] that isn't
 /// also an [_ImplicitSemanticsFragment] is a [_RootSemanticsFragment] or a
@@ -2500,7 +2500,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Whether this [RenderObject] makes other [RenderObject]s previously painted
   /// within the same semantic boundary unreachable for accessibility purposes.
   ///
-  /// If `true` is returned, the [SemanticsNode]s for all siblings and cousins
+  /// If true is returned, the [SemanticsNode]s for all siblings and cousins
   /// of this node, that are earlier in a depth-first pre-order traversal, are
   /// dropped from the semantics tree up until a semantic boundary (as defined
   /// by [isSemanticBoundary]) is reached.
@@ -2562,9 +2562,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// The parameters [onlyLocalUpdates] and [noGeometry] tell the framework
   /// how much of the semantics have changed. Bigger changes (indicated by
-  /// setting one or both parameters to `false`) are more expansive to compute.
+  /// setting one or both parameters to false) are more expansive to compute.
   ///
-  /// [onlyLocalUpdates] should be set to `true` to reduce cost if the semantics
+  /// [onlyLocalUpdates] should be set to true to reduce cost if the semantics
   /// update does not in any way change the shape of the semantics tree (e.g.
   /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
   /// within the tree). In other words, with [onlyLocalChanges] the
@@ -2572,14 +2572,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
   /// other nodes in the tree.
   ///
-  /// [onlyLocalUpdates] has to be set to `false` in the following cases as they
+  /// [onlyLocalUpdates] has to be set to false in the following cases as they
   /// will change the shape of the tree:
   ///
   /// 1. [isSemanticBoundary] changed its value.
-  /// 2. [semanticsAnnotator] changed from or to returning `null` and
-  ///    [isSemanticBoundary] isn't `true`.
+  /// 2. [semanticsAnnotator] changed from or to returning null and
+  ///    [isSemanticBoundary] isn't true.
   ///
-  /// [noGeometry] should be set to `true` to reduce cost if the geometry (e.g.
+  /// [noGeometry] should be set to true to reduce cost if the geometry (e.g.
   /// size and position) of the corresponding [SemanticsNode] has not
   /// changed. Examples for such semantic updates that don't require a geometry
   /// update are changes to flags, labels, or actions.
@@ -2766,7 +2766,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// [markNeedsSemanticsUpdate] must not have `onlyLocalUpdates` set, as it is
   /// possible that the node should be entirely removed.
   ///
-  /// If the annotation should only happen under certain conditions, `null`
+  /// If the annotation should only happen under certain conditions, null
   /// should be returned if those conditions are currently not met to avoid
   /// the creation of an empty [SemanticsNode].
   SemanticsAnnotator get semanticsAnnotator => null;

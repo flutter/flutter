@@ -53,8 +53,8 @@ abstract class AnalyzeBase {
   bool get isBenchmarking => argResults['benchmark'];
 }
 
-/// Return `true` if [fileList] contains a path that resides inside the Flutter repository.
-/// If [fileList] is empty, then return `true` if the current directory resides inside the Flutter repository.
+/// Return true if [fileList] contains a path that resides inside the Flutter repository.
+/// If [fileList] is empty, then return true if the current directory resides inside the Flutter repository.
 bool inRepo(List<String> fileList) {
   if (fileList == null || fileList.isEmpty)
     fileList = <String>[fs.path.current];

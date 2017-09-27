@@ -406,7 +406,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   void _updatePhase() {
     setState(() {
-      switch(_phase) {
+      switch (_phase) {
         case FadeInImagePhase.start:
           if (_imageResolver._imageInfo != null)
             _phase = FadeInImagePhase.completed;
