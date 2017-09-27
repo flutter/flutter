@@ -44,13 +44,6 @@ template("flutter_content_handler") {
     ]
 
     deps = [
-             "//garnet/public/lib/app/cpp",
-             "//garnet/public/lib/svc/cpp",
-             "//garnet/public/lib/ui/flutter/sdk_ext",
-             "//garnet/public/lib/ui/scenic:client",
-             "//garnet/public/lib/ui/input/fidl",
-             "//garnet/public/lib/ui/views/fidl",
-             "//peridot/public/lib/context/fidl",
              "//dart/runtime/bin:libdart_builtin",
              "//dart/runtime/platform:libdart_platform",
              "//flutter/assets",
@@ -61,16 +54,23 @@ template("flutter_content_handler") {
              "//flutter/runtime",
              "//flutter/sky/engine/platform",
              "//flutter/vulkan",
-             "//garnet/public/lib/vulkan",
-             "//garnet/public/dart-pkg/fuchsia",
+             "//garnet/public/lib/app/cpp",
+             "//garnet/public/lib/fsl",
              "//garnet/public/lib/fxl",
              "//garnet/public/lib/icu_data/cpp",
-             "//garnet/public/lib/fsl",
+             "//garnet/public/lib/svc/cpp",
+             "//garnet/public/lib/ui/input/fidl",
+             "//garnet/public/lib/ui/scenic:client",
+             "//garnet/public/lib/ui/views/fidl",
+             "//garnet/public/lib/vulkan",
              "//garnet/public/lib/zip",
-             "//zircon/system/ulib/trace-provider",
+             "//peridot/public/lib/context/fidl",
              "//third_party/rapidjson",
              "//third_party/skia",
              "//topaz/lib/tonic",
+             "//topaz/public/dart-pkg/fuchsia",
+             "//topaz/public/lib/ui/flutter/sdk_ext",
+             "//zircon/system/ulib/trace-provider",
            ] + extra_deps
 
     # The flags below are needed so that Dart's CPU profiler can walk the

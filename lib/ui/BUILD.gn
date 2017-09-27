@@ -99,6 +99,6 @@ source_set("ui") {
     "//topaz/lib/tonic",
   ]
   if (is_fuchsia) {
-    deps += [ "//garnet/public/dart-pkg/zircon" ]
+    deps += [ "//topaz/public/dart-pkg/zircon" ]
   }
 }

@@ -72,9 +72,9 @@ source_set("flow") {
     ]
 
     deps += [
-      "//garnet/public/dart-pkg/zircon",
       "//garnet/public/lib/ui/scenic:client",
       "//garnet/public/lib/ui/scenic/fidl",
+      "//topaz/public/dart-pkg/zircon",
     ]
 
     public_deps += [ "//zircon/system/ulib/zx" ]
