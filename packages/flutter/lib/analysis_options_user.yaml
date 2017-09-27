@@ -85,7 +85,7 @@ linter:
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures
-    - unnecessary_brace_in_string_interp
+    - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
 
     # === pub rules ===

@@ -96,7 +96,7 @@ class TextField extends StatefulWidget {
 
   /// Controls the text being edited.
   ///
-  /// If null, this widget will creates its own [TextEditingController].
+  /// If null, this widget will create its own [TextEditingController].
   final TextEditingController controller;
 
   /// Controls whether this widget has keyboard focus.

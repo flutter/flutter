@@ -75,13 +75,19 @@ class AssetBundle {
     FlutterManifest flutterManifest;
     try {
       flutterManifest = await FlutterManifest.createFromPath(manifestPath);
-      if (flutterManifest == null)
-        return 1;
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
       printError('$e');
       return 1;
     }
+    if (flutterManifest == null)
+      return 1;
+
+    if (flutterManifest.isEmpty) {
+      entries[_kAssetManifestJson] = new DevFSStringContent('{}');
+      return 0;
+    }
+
     final String assetBasePath = fs.path.dirname(fs.path.absolute(manifestPath));
 
     _lastBuildTimestamp = new DateTime.now();
