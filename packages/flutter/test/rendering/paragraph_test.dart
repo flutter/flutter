@@ -243,20 +243,25 @@ void main() {
         ),
       ],
     );
-    final RenderParagraph paragraph = new RenderParagraph(testSpan,
-        textDirection: TextDirection.ltr, textScaleFactor: 2.5);
+    final RenderParagraph paragraph = new RenderParagraph(
+        testSpan,
+        textDirection: TextDirection.ltr,
+        textScaleFactor: 2.5
+    );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.height, equals(50.0));
-    expect(paragraph.size.width, equals(150.0));
+    expect(paragraph.size.width, equals(151.0));
 
     // Test the sizes of nested spans.
     final List<ui.TextBox> boxes = <ui.TextBox>[];
     final String text = testSpan.toStringDeep();
     for (int i = 0; i < text.length; ++i) {
       boxes.addAll(paragraph.getBoxesForSelection(
-          new TextSelection(baseOffset: i, extentOffset: i + 1)));
+          new TextSelection(baseOffset: i, extentOffset: i + 1)
+      ));
     }
     expect(boxes.length, equals(4));
+    expect(boxes[0].toRect(), new Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
     expect(boxes[0].toRect().width, equals(25.0));
     expect(boxes[0].toRect().height, equals(25.0));
     expect(boxes[1].toRect().width, equals(50.0));
