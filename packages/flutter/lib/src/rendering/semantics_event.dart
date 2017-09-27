@@ -44,7 +44,7 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
   /// the just completed scroll action to the user.
   ///
   /// The parameters [axis], [pixels], [minScrollExtent], and [maxScrollExtent] are
-  /// required and may not be `null`.
+  /// required and may not be null.
   ScrollCompletedSemanticsEvent({
     @required this.axis,
     @required this.pixels,
