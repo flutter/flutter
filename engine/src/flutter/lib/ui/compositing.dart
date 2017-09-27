@@ -273,7 +273,7 @@ class SceneHost extends NativeFieldWrapperClass2 {
   ///
   /// The export token is a dart:zircon Handle, but that type isn't
   /// available here. This is called by ChildViewConnection in
-  /// //garnet/public/lib/ui/flutter/.
+  /// //topaz/public/lib/ui/flutter/.
   ///
   /// The scene host takes ownership of the provided export token handle.
   SceneHost(dynamic export_token_handle) {
