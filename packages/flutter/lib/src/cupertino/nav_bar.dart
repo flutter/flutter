@@ -328,11 +328,15 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
             left: _kNavBarEdgePadding,
             right: _kNavBarEdgePadding,
           ),
-          child: new NavigationToolbar(
-            leading: styledLeading,
-            middle: animatedStyledMiddle,
-            trailing: styledTrailing,
-            centerMiddle: true,
+          child: new MediaQuery.removePadding(
+            context: context,
+            removeTop: true,
+            child: new NavigationToolbar(
+              leading: styledLeading,
+              middle: animatedStyledMiddle,
+              trailing: styledTrailing,
+              centerMiddle: true,
+            ),
           ),
         ),
       ),

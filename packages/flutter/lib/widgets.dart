@@ -64,6 +64,7 @@ export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
 export 'src/widgets/routes.dart';
+export 'src/widgets/safe_area.dart';
 export 'src/widgets/scroll_activity.dart';
 export 'src/widgets/scroll_configuration.dart';
 export 'src/widgets/scroll_context.dart';
