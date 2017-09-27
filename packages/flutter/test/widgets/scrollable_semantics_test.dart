@@ -197,7 +197,7 @@ void main() {
     expect(tester.getTopLeft(find.byWidget(semantics[1])).dy, kToolbarHeight);
   });
 
-  testWidgets('scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
+  testWidgets('vertical scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
     final List<dynamic> messages = <dynamic>[];
     SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
       messages.add(message);
@@ -218,11 +218,71 @@ void main() {
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
 
+    Map<String, Object> message = messages.last['data'];
+    expect(message['axis'], 'v');
+    expect(message['pixels'], isPositive);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 520.0);
+
     messages.clear();
     await flingDown(tester);
 
     expect(messages, isNot(hasLength(0)));
     expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+
+    message = messages.last['data'];
+    expect(message['axis'], 'v');
+    expect(message['pixels'], isNonNegative);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 520.0);
+
+    semantics.dispose();
+  });
+
+  testWidgets('horizontal scrolling sends ScrollCompletedSemanticsEvent', (WidgetTester tester) async {
+    final List<dynamic> messages = <dynamic>[];
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+      messages.add(message);
+    });
+
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Widget> children = <Widget>[];
+    for (int i = 0; i < 80; i++)
+      children.add(new Container(
+        child: new Text('$i'),
+        width: 100.0,
+      ));
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new ListView(
+        children: children,
+        scrollDirection: Axis.horizontal,
+      ),
+    ));
+
+    await flingLeft(tester);
+
+    expect(messages, isNot(hasLength(0)));
+    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+
+    Map<String, Object> message = messages.last['data'];
+    expect(message['axis'], 'h');
+    expect(message['pixels'], isPositive);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 7200.0);
+
+    messages.clear();
+    await flingRight(tester);
+
+    expect(messages, isNot(hasLength(0)));
+    expect(messages.every((dynamic message) => message['type'] == 'scroll'), isTrue);
+
+    message = messages.last['data'];
+    expect(message['axis'], 'h');
+    expect(message['pixels'], isNonNegative);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 7200.0);
 
     semantics.dispose();
   });
@@ -255,17 +315,17 @@ void main() {
   });
 }
 
-Future<Null> flingUp(WidgetTester tester, { int repetitions: 1 }) async {
-  while (repetitions-- > 0) {
-    await tester.fling(find.byType(ListView), const Offset(0.0, -200.0), 1000.0);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 5));
-  }
-}
+Future<Null> flingUp(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(0.0, -200.0), repetitions);
 
-Future<Null> flingDown(WidgetTester tester, { int repetitions: 1 }) async {
+Future<Null> flingDown(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(0.0, 200.0), repetitions);
+
+Future<Null> flingRight(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(200.0, 0.0), repetitions);
+
+Future<Null> flingLeft(WidgetTester tester, { int repetitions: 1 }) => fling(tester, const Offset(-200.0, 0.0), repetitions);
+
+Future<Null> fling(WidgetTester tester, Offset offset, int repetitions) async {
   while (repetitions-- > 0) {
-    await tester.fling(find.byType(ListView), const Offset(0.0, 200.0), 1000.0);
+    await tester.fling(find.byType(ListView), offset, 1000.0);
     await tester.pump();
     await tester.pump(const Duration(seconds: 5));
   }
