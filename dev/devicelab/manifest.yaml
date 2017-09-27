@@ -102,6 +102,7 @@ tasks:
       --preview-dart-2 option, that enables Dart 2.0 frontend.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
+    flaky: true
 
   complex_layout_scroll_perf__memory:
     description: >
