@@ -247,6 +247,9 @@ class TextStyle extends Diagnosticable {
   /// its size.
   final double fontSize;
 
+  // The default font size if none is specified.
+  static const double _defaultFontSize = 14.0;
+
   /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight fontWeight;
 
@@ -459,7 +462,7 @@ class TextStyle extends Diagnosticable {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
+      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: height,
       maxLines: maxLines,
       ellipsis: ellipsis,

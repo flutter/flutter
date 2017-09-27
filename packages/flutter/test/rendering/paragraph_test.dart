@@ -222,6 +222,42 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
   });
 
+  test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
+    final TextSpan testSpan = const TextSpan(
+      text: 'a',
+      style: const TextStyle(
+        fontSize: 10.0,
+      ),
+      children: const <TextSpan>[
+        const TextSpan(
+          text: 'b',
+          children: const <TextSpan>[
+            const TextSpan(text: 'd'),
+          ],
+          style: const TextStyle(
+            fontSize: 20.0,
+          ),
+        ),
+        const TextSpan(
+          text: 'c',
+        ),
+      ],
+    );
+    final RenderParagraph paragraph = new RenderParagraph(testSpan,
+        textDirection: TextDirection.ltr, textScaleFactor: 2.5);
+    paragraph.layout(const BoxConstraints());
+    expect(paragraph.size.height, equals(50.0));
+    expect(paragraph.size.width, equals(150.0));
+
+    // Make sure that if we double the scale, the overall dimensions double.
+    // If they don't, then it's a sign that nested spans aren't being scaled correctly.
+    final RenderParagraph paragraph2 = new RenderParagraph(testSpan,
+        textDirection: TextDirection.ltr, textScaleFactor: 5.0);
+    paragraph2.layout(const BoxConstraints());
+    expect(paragraph2.size.height, equals(100.0));
+    expect(paragraph2.size.width, equals(300.0));
+  });
+
   test('toStringDeep', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),

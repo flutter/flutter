@@ -25,14 +25,59 @@ void main() {
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.0);
+  });
+
+  testWidgets('Text respects textScaleFactor with default font size',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const Center(child: const Text('Hello', textDirection: TextDirection.ltr)));
+
+    RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.textScaleFactor, 1.0);
+    final Size baseSize = tester.getSize(find.byType(RichText));
+    expect(baseSize.width, equals(70.0));
+    expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
+        child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
     expect(text.textScaleFactor, 3.0);
+    final Size largeSize = tester.getSize(find.byType(RichText));
+    expect(largeSize.width, equals(3.0 * baseSize.width));
+    expect(largeSize.height, equals(3.0 * baseSize.height));
+  });
+
+  testWidgets('Text respects textScaleFactor with explicit font size',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const Center(
+        child: const Text('Hello',
+            style: const TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
+    ));
+
+    RichText text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.textScaleFactor, 1.0);
+    final Size baseSize = tester.getSize(find.byType(RichText));
+    expect(baseSize.width, equals(100.0));
+    expect(baseSize.height, equals(20.0));
+
+    await tester.pumpWidget(const Center(
+        child: const Text('Hello',
+            style: const TextStyle(fontSize: 20.0),
+            textScaleFactor: 3.0,
+            textDirection: TextDirection.ltr)
+    ));
+
+    text = tester.firstWidget(find.byType(RichText));
+    expect(text, isNotNull);
+    expect(text.textScaleFactor, 3.0);
+    final Size largeSize = tester.getSize(find.byType(RichText));
+    expect(largeSize.width, equals(3.0 * baseSize.width));
+    expect(largeSize.height, equals(3.0 * baseSize.height));
   });
 
   testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
