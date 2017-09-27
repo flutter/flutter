@@ -747,7 +747,7 @@ static inline void resolveRunBasedOnScriptValue(Vector<CandidateRun>& runs,
 }
 
 static inline bool resolveCandidateRuns(Vector<CandidateRun>& runs) {
-  UScriptCode scriptExtensions[8];
+  UScriptCode scriptExtensions[USCRIPT_CODE_LIMIT];
   UErrorCode errorCode = U_ZERO_ERROR;
   size_t length = runs.size();
   size_t nextResolvedRun = 0;
@@ -759,7 +759,8 @@ static inline bool resolveCandidateRuns(Vector<CandidateRun>& runs) {
       run.script = i > 0 ? runs[i - 1].script : USCRIPT_COMMON;
 
     int extensionsLength = uscript_getScriptExtensions(
-        run.character, scriptExtensions, sizeof(scriptExtensions), &errorCode);
+        run.character, scriptExtensions,
+        sizeof(scriptExtensions) / sizeof(scriptExtensions[0]), &errorCode);
     if (U_FAILURE(errorCode))
       return false;
 
