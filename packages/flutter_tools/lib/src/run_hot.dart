@@ -426,6 +426,8 @@ class HotRunner extends ResidentRunner {
         status.cancel();
         if (result.isOk)
           printStatus("${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.");
+        if (result.hint != null)
+          printStatus(result.hint);
         return result;
       } catch (error) {
         status.cancel();
@@ -622,9 +624,34 @@ class HotRunner extends ResidentRunner {
         !reassembleTimedOut &&
         shouldReportReloadTime)
       flutterUsage.sendTiming('hot', 'reload', reloadTimer.elapsed);
+
+    String unusedElementMessage;
+    if (!reassembleAndScheduleErrors && !reassembleTimedOut) {
+      final List<Future<List<ProgramElement>>> unusedReports =
+          <Future<List<ProgramElement>>>[];
+      for (FlutterDevice device in flutterDevices) {
+        unusedReports.add(device.unusedChangesInLastReload());
+      }
+      final List<ProgramElement> unusedElements = <ProgramElement>[];
+      for (Future<List<ProgramElement>> unusedReport in unusedReports) {
+        unusedElements.addAll(await unusedReport);
+      }
+
+      if (unusedElements.isNotEmpty) {
+        unusedElementMessage =
+            '\nThe following program elements were changed by the reload, '
+            'but did not run when the view was reassembled. If this code '
+            'only runs at start-up, you will need to restart ("R") for '
+            'the changes to have an effect.\n';
+        for (ProgramElement unusedElement in unusedElements) {
+          unusedElementMessage += " - $unusedElement\n";
+        }
+      }
+    }
+
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
-      reloadMessage
+      reloadMessage, unusedElementMessage
     );
   }
 
