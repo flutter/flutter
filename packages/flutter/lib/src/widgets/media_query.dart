@@ -147,7 +147,9 @@ class MediaQueryData {
   int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
 
   @override
-  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding)';
+  String toString() => '$runtimeType(size: $size, '
+      'devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, '
+      'padding: $padding)';
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.
