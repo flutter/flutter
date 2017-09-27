@@ -145,7 +145,7 @@ import 'basic_types.dart';
 ///
 /// The `family` property determines the name of the font, which you can use in
 /// the [fontFamily] argument. The `asset` property is a path to the font file,
-/// relative to the [pubspec.yaml] file. The `weight` property specifies the
+/// relative to the `pubspec.yaml` file. The `weight` property specifies the
 /// weight of the glyph outlines in the file as an integer multiple of 100
 /// between 100 and 900. This corresponds to the [FontWeight] class and can be
 /// used in the [fontWeight] argument. The `style` property specfies whether the

@@ -518,7 +518,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// ```
   ///
   /// The given [BuildContext] will be rebuilt if the state of the route changes
-  /// (specifically, if [Route.isCurrent] or [Route.canPop] change value).
+  /// (specifically, if [isCurrent] or [canPop] change value).
   static ModalRoute<dynamic> of(BuildContext context) {
     final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
@@ -736,13 +736,46 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by this class
 
   /// Whether you can dismiss this route by tapping the modal barrier.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// If [barrierDismissible] is true, then tapping this barrier will cause the
+  /// current route to be popped (see [Navigator.pop]) with null as the value.
+  ///
+  /// If [barrierDismissible] is false, then tapping the barrier has no effect.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierColor], which controls the color of the scrim for this route.
+  ///  * [ModalBarrier], the widget that implements this feature.
   bool get barrierDismissible;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
   ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
   /// The color is ignored, and the barrier made invisible, when [offstage] is
   /// true.
+  ///
+  /// While the route is animating into position, the color is animated from
+  /// transparent to the specified color.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
   Color get barrierColor;
 
   /// Whether the route should remain in memory when it is inactive. If this is

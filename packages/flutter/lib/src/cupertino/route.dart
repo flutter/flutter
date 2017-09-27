@@ -67,10 +67,12 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 ///
 /// See also:
 ///
-///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform
-///    appropriate transition.
-///  * [CupertinoPageScaffold] typical content of a [CupertinoPageRoute] implementing
-///    iOS style layout with navigation bar on top.
+///  * [MaterialPageRoute], for an adaptive [PageRoute] that uses a
+///    platform-appropriate transition.
+///  * [CupertinoPageScaffold], for applications that have one page with a fixed
+///    navigation bar on top.
+///  * [CupertinoTabScaffold], for applications that have a tab bar at the
+///    bottom with multiple pages.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
@@ -146,9 +148,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// Whether a pop gesture is currently underway.
   ///
-  /// This starts returning true when the [startPopGesture] method returns a new
-  /// [NavigationGestureController]. It returns false if that has not yet
-  /// occurred or if the most recent such gesture has completed.
+  /// This starts returning true when pop gesture is started by the user. It
+  /// returns false if that has not yet occurred or if the most recent such
+  /// gesture has completed.
   ///
   /// See also:
   ///
@@ -156,12 +158,14 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///    in the first place.
   bool get popGestureInProgress => _backGestureController != null;
 
-  /// Whether a pop gesture will be considered acceptable by [startPopGesture].
+  /// Whether a pop gesture can be started by the user.
   ///
   /// This returns true if the user can edge-swipe to a previous route,
   /// otherwise false.
   ///
-  /// This will return false if [popGestureInProgress] is true.
+  /// This will return false once [popGestureInProgress] is true, but
+  /// [popGestureInProgress] can only become true if [popGestureEnabled] was
+  /// true first.
   ///
   /// This should only be used between frames, not during build.
   bool get popGestureEnabled {

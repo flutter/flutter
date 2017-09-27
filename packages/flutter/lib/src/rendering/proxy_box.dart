@@ -2869,7 +2869,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   ///
   /// As an example, a [RenderSliver] that stays on the screen within a
   /// [Scrollable] even though the user has scrolled past it (e.g. a pinned app
-  /// bar) can tag its [SemanticNode] with [excludeFromScrolling] to indicate
+  /// bar) can tag its [SemanticsNode] with [excludeFromScrolling] to indicate
   /// that it should no longer be considered for semantic actions related to
   /// scrolling.
   static const SemanticsTag excludeFromScrolling = const SemanticsTag('RenderSemanticsGestureHandler.excludeFromScrolling');

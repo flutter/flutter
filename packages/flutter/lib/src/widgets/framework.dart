@@ -1353,21 +1353,6 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @mustCallSuper
   void didChangeDependencies() { }
 
-  /// Add additional properties to the given description used by
-  /// [toDiagnosticsNode], [toString] and [toStringDeep].
-  ///
-  /// This method makes it easier for subclasses to coordinate to provide
-  /// high-quality diagnostic data. The [toString] implementation on
-  /// the [State] base class calls [debugFillProperties] to collect useful
-  /// information from subclasses to incorporate into its return value.
-  ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillProperties(description)`.
-  ///
-  /// See also:
-  ///
-  ///  * [DiagnosticableTree.debugFillProperties], which provides detailed
-  ///    best practices for defining diagnostic properties.
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
@@ -3332,23 +3317,6 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
   }
 
-  /// Add additional properties to the given description used by
-  /// [toDiagnosticsNode], [toString] and [toStringDeep].
-  ///
-  /// This method makes it easier for subclasses to coordinate to provide
-  /// high-quality diagnostic data. The [toString] implementation on
-  /// the [State] base class calls [debugFillProperties] to collect useful
-  /// information from subclasses to incorporate into its return value.
-  ///
-  /// If you override this, make sure to start your method with a call to
-  /// `super.debugFillProperties(description)`.
-  ///
-  /// See also:
-  ///
-  ///  * [DiagnosticableTree.debugFillProperties], which provides detailed
-  ///    best practices for defining diagnostic properties.
-  @protected
-  @mustCallSuper
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);

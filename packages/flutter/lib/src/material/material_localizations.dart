@@ -34,10 +34,10 @@ abstract class MaterialLocalizations {
   /// The tooltip for the [MonthPicker]'s "previous month" button.
   String get previousMonthTooltip;
 
-  /// The tooltip for the [PaginatedDataTables]'s "next page" button.
+  /// The tooltip for the [PaginatedDataTable]'s "next page" button.
   String get nextPageTooltip;
 
-  /// The tooltip for the [PaginatedDataTables]'s "previous page" button.
+  /// The tooltip for the [PaginatedDataTable]'s "previous page" button.
   String get previousPageTooltip;
 
   /// The default [PopupMenuButton] tooltip.
@@ -55,7 +55,7 @@ abstract class MaterialLocalizations {
   /// Title for the [PaginatedDataTable]'s "rows per page" footer.
   String get rowsPerPageTitle;
 
-  /// Title for the PaginatedDataTable's selected row count header.
+  /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
 
   /// Label for "cancel" buttons and menu items.
@@ -82,7 +82,7 @@ abstract class MaterialLocalizations {
   /// Label for "select all" edit buttons and menu items.
   String get selectAllButtonLabel;
 
-  /// Label for the [AboutBox] button that shows the [LicensePage].
+  /// Label for the [AboutDialog] button that shows the [LicensePage].
   String get viewLicensesButtonLabel;
 
   /// The abbreviation for ante meridiem (before noon) shown in the time picker.

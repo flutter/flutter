@@ -2560,31 +2560,31 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Mark this node as needing an update to its semantics description.
   ///
-  /// The parameters [onlyLocalUpdates] and [noGeometry] tell the framework
+  /// The parameters `onlyLocalUpdates` and `noGeometry` tell the framework
   /// how much of the semantics have changed. Bigger changes (indicated by
   /// setting one or both parameters to false) are more expansive to compute.
   ///
-  /// [onlyLocalUpdates] should be set to true to reduce cost if the semantics
+  /// `onlyLocalUpdates` should be set to true to reduce cost if the semantics
   /// update does not in any way change the shape of the semantics tree (e.g.
   /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
-  /// within the tree). In other words, with [onlyLocalChanges] the
+  /// within the tree). In other words, with `onlyLocalUpdates` the
   /// [RenderObject] can indicate that it only wants to perform updates on the
   /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
   /// other nodes in the tree.
   ///
-  /// [onlyLocalUpdates] has to be set to false in the following cases as they
+  /// `onlyLocalUpdates` has to be set to false in the following cases as they
   /// will change the shape of the tree:
   ///
   /// 1. [isSemanticBoundary] changed its value.
   /// 2. [semanticsAnnotator] changed from or to returning null and
   ///    [isSemanticBoundary] isn't true.
   ///
-  /// [noGeometry] should be set to true to reduce cost if the geometry (e.g.
+  /// `noGeometry` should be set to true to reduce cost if the geometry (e.g.
   /// size and position) of the corresponding [SemanticsNode] has not
   /// changed. Examples for such semantic updates that don't require a geometry
   /// update are changes to flags, labels, or actions.
   ///
-  /// If [onlyLocalUpdates] or [noGeometry] are incorrectly set to true, asserts
+  /// If `onlyLocalUpdates` or `noGeometry` are incorrectly set to true, asserts
   /// might throw or the computed semantics tree might be out-of-date without
   /// warning.
   void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false, bool noGeometry: false }) {
@@ -2778,9 +2778,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// By default, the method will annotate [node] with the [semanticsAnnotator]
   /// and add the [children] to it.
   ///
-  /// Subclasses can override this method to add additional [SemanticNode]s
+  /// Subclasses can override this method to add additional [SemanticsNode]s
   /// to the tree. If a subclass adds additional nodes in this method, it also
-  /// needs to override [resetSemantics] to call [SemanticsNodes.reset] on those
+  /// needs to override [resetSemantics] to call [SemanticsNode.reset] on those
   /// additional [SemanticsNode]s.
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
     assert(node == _semantics);

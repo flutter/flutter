@@ -148,7 +148,7 @@ class MaterialApp extends StatefulWidget {
   /// If non-null this function is called to produce the app's
   /// title string, otherwise [title] is used.
   ///
-  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetsApp]'s
   /// [Localizations] widget so that this callback can be used to produce a
   /// localized title.
   ///
@@ -260,9 +260,9 @@ class MaterialApp extends StatefulWidget {
   /// Delegates that produce [WidgetsLocalizations] and [MaterialLocalizations]
   /// are included automatically. Apps can provide their own versions of these
   /// localizations by creating implementations of
-  /// [LocalizationsDelegate<WidgetLocalizations>] or
+  /// [LocalizationsDelegate<WidgetsLocalizations>] or
   /// [LocalizationsDelegate<MaterialLocalizations>] whose load methods return
-  /// custom versions of [WidgetLocalizations] or [MaterialLocalizations].
+  /// custom versions of [WidgetsLocalizations] or [MaterialLocalizations].
   ///
   /// For example: to add support to [MaterialLocalizations] for a
   /// locale it doesn't already support, say `const Locale('foo', 'BR')`,
