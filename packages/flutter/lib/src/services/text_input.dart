@@ -22,6 +22,13 @@ enum TextInputType {
   /// Requests the default platform keyboard.
   text,
 
+  /// Optimize for multi-line textual information.
+  ///
+  /// Requests the default platform keyboard, but accepts newlines when the
+  /// enter key is pressed. This is the input type used for all multi-line text
+  /// fields.
+  multiline,
+
   /// Optimize for numerical information.
   ///
   /// Requests a keyboard with ready access to the decimal point and number
@@ -56,6 +63,10 @@ enum TextInputType {
 enum TextInputAction {
   /// Complete the text input operation.
   done,
+
+  /// The action to take when the enter button is pressed in a multi-line
+  /// text field (which is typically to do nothing).
+  newline,
 }
 
 /// Controls the visual appearance of the text input control.
@@ -67,15 +78,18 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType], [obscureText], and [autocorrect] arguments must not be null.
+  /// All arguments have default values, except [actionLabel].  Only
+  /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
     this.obscureText: false,
     this.autocorrect: true,
     this.actionLabel,
+    this.inputAction: TextInputAction.done,
   }) : assert(inputType != null),
        assert(obscureText != null),
-       assert(autocorrect != null);
+       assert(autocorrect != null),
+       assert(inputAction != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -93,6 +107,9 @@ class TextInputConfiguration {
   /// What text to display in the text input control's action button.
   final String actionLabel;
 
+  /// What kind of action to request for the action button on the IME.
+  final TextInputAction inputAction;
+
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
@@ -100,6 +117,7 @@ class TextInputConfiguration {
       'obscureText': obscureText,
       'autocorrect': autocorrect,
       'actionLabel': actionLabel,
+      'inputAction': inputAction.toString(),
     };
   }
 }
@@ -278,6 +296,8 @@ TextInputAction _toTextInputAction(String action) {
   switch (action) {
     case 'TextInputAction.done':
       return TextInputAction.done;
+    case 'TextInputAction.newline':
+      return TextInputAction.newline;
   }
   throw new FlutterError('Unknown text input action: $action');
 }

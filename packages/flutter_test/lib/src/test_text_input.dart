@@ -28,6 +28,9 @@ class TestTextInput {
 
   int _client = 0;
 
+  /// Arguments supplied to the TextInput.setClient method call.
+  Map<String, dynamic> setClientArgs;
+
   /// The last set of arguments that [TextInputConnection.setEditingState] sent
   /// to the embedder.
   ///
@@ -40,6 +43,7 @@ class TestTextInput {
     switch (methodCall.method) {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0];
+        setClientArgs = methodCall.arguments[1];
         break;
       case 'TextInput.clearClient':
         _client = 0;
