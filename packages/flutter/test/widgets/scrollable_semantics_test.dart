@@ -220,9 +220,9 @@ void main() {
 
     Map<String, Object> message = messages.last['data'];
     expect(message['axis'], 'v');
-    expect(message['position'], isPositive);
-    expect(message['minPosition'], 0.0);
-    expect(message['maxPosition'], 520.0);
+    expect(message['pixels'], isPositive);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 520.0);
 
     messages.clear();
     await flingDown(tester);
@@ -232,9 +232,9 @@ void main() {
 
     message = messages.last['data'];
     expect(message['axis'], 'v');
-    expect(message['position'], isNonNegative);
-    expect(message['minPosition'], 0.0);
-    expect(message['maxPosition'], 520.0);
+    expect(message['pixels'], isNonNegative);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 520.0);
 
     semantics.dispose();
   });
@@ -268,9 +268,9 @@ void main() {
 
     Map<String, Object> message = messages.last['data'];
     expect(message['axis'], 'h');
-    expect(message['position'], isPositive);
-    expect(message['minPosition'], 0.0);
-    expect(message['maxPosition'], 7200.0);
+    expect(message['pixels'], isPositive);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 7200.0);
 
     messages.clear();
     await flingRight(tester);
@@ -280,9 +280,9 @@ void main() {
 
     message = messages.last['data'];
     expect(message['axis'], 'h');
-    expect(message['position'], isNonNegative);
-    expect(message['minPosition'], 0.0);
-    expect(message['maxPosition'], 7200.0);
+    expect(message['pixels'], isNonNegative);
+    expect(message['minScrollExtent'], 0.0);
+    expect(message['maxScrollExtent'], 7200.0);
 
     semantics.dispose();
   });
