@@ -160,29 +160,31 @@ void main() {
     );
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: Colors.blue[500],
-              rrect: new RRect.fromLTRBR(
-                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.yellow[500]));
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.blue[500],
+            rrect: new RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.yellow[500])
+    );
     await tester.drag(find.byType(Switch), const Offset(-30.0, 0.0));
     await tester.pump();
 
     expect(
-        Material.of(tester.element(find.byType(Switch))),
-        paints
-          ..rrect(
-              color: Colors.green[500],
-              rrect: new RRect.fromLTRBR(
-                  383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
-          ..circle(color: const Color(0x33000000))
-          ..circle(color: const Color(0x24000000))
-          ..circle(color: const Color(0x1f000000))
-          ..circle(color: Colors.red[500]));
+      Material.of(tester.element(find.byType(Switch))),
+      paints
+        ..rrect(
+            color: Colors.green[500],
+            rrect: new RRect.fromLTRBR(
+                383.5, 293.0, 416.5, 307.0, const Radius.circular(7.0)))
+        ..circle(color: const Color(0x33000000))
+        ..circle(color: const Color(0x24000000))
+        ..circle(color: const Color(0x1f000000))
+        ..circle(color: Colors.red[500])
+    );
   });
 }

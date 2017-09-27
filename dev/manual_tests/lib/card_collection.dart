@@ -265,7 +265,7 @@ class CardCollectionState extends State<CardCollection> {
     );
 
     String backgroundMessage;
-    switch(_dismissDirection) {
+    switch (_dismissDirection) {
       case DismissDirection.horizontal:
         backgroundMessage = "Swipe in either direction";
         break;

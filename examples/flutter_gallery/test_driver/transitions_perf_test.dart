@@ -121,7 +121,7 @@ Future<Null> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     final Iterator<Map<String, dynamic>> eventIter = events.iterator;
     String lastEventName = '';
     String lastRouteName = '';
-    while(eventIter.moveNext()) {
+    while (eventIter.moveNext()) {
       final String eventName = eventIter.current['name'];
 
       if (!<String>['Start Transition', 'Frame'].contains(eventName))

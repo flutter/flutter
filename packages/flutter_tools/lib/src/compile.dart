@@ -109,7 +109,7 @@ class ResidentCompiler {
   /// Otherwise, [mainPath] is ignored, but [invalidatedFiles] is recompiled
   /// into new binary.
   /// Binary file name is returned if compilation was successful, otherwise
-  /// `null` is returned.
+  /// null is returned.
   Future<String> recompile(String mainPath, List<String> invalidatedFiles) async {
     stdoutHandler.reset();
 

@@ -287,7 +287,7 @@ class _MinuteControl extends StatelessWidget {
 /// Provides time picker header layout configuration for the given
 /// [timeOfDayFormat] passing [context] to each widget in the configuration.
 ///
-/// [timeOfDayFormat] and [context] must not be `null`.
+/// The [timeOfDayFormat] and [context] arguments must not be null.
 _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _TimePickerFragmentContext context) {
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour(HourFormat hourFormat) {

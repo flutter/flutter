@@ -1386,7 +1386,7 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// Create a diagnostics property for iterables (e.g. lists).
   ///
   /// The [ifEmpty] argument is used to indicate how an iterable [value] with 0
-  /// elements is displayed. If [ifEmpty] equals `null` that indicates that an
+  /// elements is displayed. If [ifEmpty] equals null that indicates that an
   /// empty iterable [value] is not interesting to display similar to how
   /// [defaultValue] is used to indicate that a specific concrete value is not
   /// interesting to display.
@@ -1433,10 +1433,10 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
   ///
-  /// If [ifEmpty] is `null` and the [value] is an empty [Iterable] then level
+  /// If [ifEmpty] is null and the [value] is an empty [Iterable] then level
   /// [DiagnosticLevel.fine] is returned in a similar way to how an
-  /// [ObjectFlagProperty] handles when [ifNull] is `null` and the [value] is
-  /// `null`.
+  /// [ObjectFlagProperty] handles when [ifNull] is null and the [value] is
+  /// null.
   @override
   DiagnosticLevel get level {
     if (ifEmpty == null && value != null && value.isEmpty && super.level != DiagnosticLevel.hidden)
@@ -1605,8 +1605,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   ///
   /// The [level] argument is just a suggestion and can be overridden if
   /// something else about the property causes it to have a lower or higher
-  /// level. For example, if the property value is `null` and [missingIfNull] is
-  /// `true`, [level] is raised to [DiagnosticLevel.warning].
+  /// level. For example, if the property value is null and [missingIfNull] is
+  /// true, [level] is raised to [DiagnosticLevel.warning].
   DiagnosticsProperty(
     String name,
     T value, {
@@ -2056,7 +2056,7 @@ abstract class Diagnosticable {
   /// Returns a debug representation of the object that is used by debugging
   /// tools and by [toStringDeep].
   ///
-  /// Leave [name] as `null` if there is not a meaningful description of the
+  /// Leave [name] as null if there is not a meaningful description of the
   /// relationship between the this node and its parent.
   ///
   /// Typically the [style] argument is only specified to indicate an atypical

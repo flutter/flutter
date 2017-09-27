@@ -71,7 +71,7 @@ import 'theme.dart';
 /// ```dart
 /// assert(debugCheckHasMaterial(context));
 /// ```
-/// The parameter [enableFeedback] must not be `null`.
+/// The parameter [enableFeedback] must not be null.
 ///
 /// See also:
 ///

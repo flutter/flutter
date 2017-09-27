@@ -457,7 +457,7 @@ class ThemeData {
   /// provided by the [localTextGeometry].
   ///
   /// The [TextStyle.inherit] field in the text styles provided by
-  /// [localTextGeometry] must be set to `true`.
+  /// [localTextGeometry] must be set to true.
   static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
     assert(baseTheme != null);
     assert(localTextGeometry != null);

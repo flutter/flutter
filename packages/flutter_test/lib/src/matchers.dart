@@ -434,10 +434,10 @@ class _EqualsIgnoringHashCodes extends Matcher {
   }
 }
 
-/// Returns `true` if [c] represents a whitespace code unit.
+/// Returns true if [c] represents a whitespace code unit.
 bool _isWhitespace(int c) => (c <= 0x000D && c >= 0x0009) || c == 0x0020;
 
-/// Returns `true` if [c] represents a vertical line unicode line art code unit.
+/// Returns true if [c] represents a vertical line unicode line art code unit.
 ///
 /// See [https://en.wikipedia.org/wiki/Box-drawing_character]. This method only
 /// specifies vertical line art code units currently used by Flutter line art.

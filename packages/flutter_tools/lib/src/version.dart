@@ -395,7 +395,7 @@ class VersionCheckError implements Exception {
 
 /// Runs [command] and returns the standard output as a string.
 ///
-/// If [lenient] is `true` and the command fails, returns an empty string.
+/// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, {bool lenient: true}) {
   final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);

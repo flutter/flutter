@@ -130,7 +130,7 @@ class TwoLevelSublist extends StatefulWidget {
   /// Called when the sublist expands or collapses.
   ///
   /// When the sublist starts expanding, this function is called with the value
-  /// `true`. When the sublist starts collapsing, this function is called with
+  /// true. When the sublist starts collapsing, this function is called with
   /// the value false.
   final ValueChanged<bool> onOpenChanged;
 

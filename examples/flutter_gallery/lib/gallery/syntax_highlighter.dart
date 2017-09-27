@@ -116,7 +116,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   bool _generateSpans() {
     int lastLoopPosition = _scanner.position;
 
-    while(!_scanner.isDone) {
+    while (!_scanner.isDone) {
       // Skip White space
       _scanner.scan(new RegExp(r"\s+"));
 
@@ -294,7 +294,7 @@ class DartSyntaxHighlighter extends SyntaxHighlighter {
   }
 
   void _simplify() {
-    for(int i = _spans.length - 2; i >= 0; i -= 1) {
+    for (int i = _spans.length - 2; i >= 0; i -= 1) {
       if (_spans[i].type == _spans[i + 1].type && _spans[i].end == _spans[i + 1].start) {
         _spans[i] = new _HighlightSpan(
           _spans[i].type,

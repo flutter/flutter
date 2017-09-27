@@ -830,7 +830,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     if (_children == null)
       return const <SemanticsNode>[];
 
-    switch(childOrder) {
+    switch (childOrder) {
       case DebugSemanticsDumpOrder.traversal:
         return new List<SemanticsNode>.from(_children)..sort(_geometryComparator);
       case DebugSemanticsDumpOrder.inverseHitTest:

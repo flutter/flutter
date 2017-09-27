@@ -282,7 +282,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 
   String _getStatus(CalculationState state) {
-      switch(state) {
+      switch (state) {
         case CalculationState.loading:
           return 'Loading...';
         case CalculationState.calculating:

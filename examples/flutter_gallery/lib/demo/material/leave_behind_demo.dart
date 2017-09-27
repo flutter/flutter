@@ -60,7 +60,7 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   void handleDemoAction(LeaveBehindDemoAction action) {
-    switch(action) {
+    switch (action) {
       case LeaveBehindDemoAction.reset:
         initListItems();
         break;

@@ -209,7 +209,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// be excluded from the semantic scrolling area.
   ///
   /// [RenderSliver]s that stay on the screen even though the user has scrolled
-  /// past them (e.g. a pinned app bar) should set this to `true`.
+  /// past them (e.g. a pinned app bar) should set this to true.
   @protected
   bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
   bool _excludeFromSemanticsScrolling = false;

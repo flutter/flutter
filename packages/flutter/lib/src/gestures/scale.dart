@@ -254,7 +254,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    switch(_state) {
+    switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);
         break;

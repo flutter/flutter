@@ -30,7 +30,7 @@ DevFSConfig get devFSConfig => context[DevFSConfig];
 abstract class DevFSContent {
   bool _exists = true;
 
-  /// Return `true` if this is the first time this method is called
+  /// Return true if this is the first time this method is called
   /// or if the entry has been modified since this method was last called.
   bool get isModified;
 
@@ -125,7 +125,7 @@ class DevFSByteContent extends DevFSContent {
     _isModified = true;
   }
 
-  /// Return `true` only once so that the content is written to the device only once.
+  /// Return true only once so that the content is written to the device only once.
   @override
   bool get isModified {
     final bool modified = _isModified;

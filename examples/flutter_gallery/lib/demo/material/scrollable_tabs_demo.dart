@@ -83,7 +83,7 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
           controller: _controller,
           isScrollable: true,
           tabs: _allPages.map((_Page page) {
-            switch(_demoStyle) {
+            switch (_demoStyle) {
               case TabsDemoStyle.iconsAndText:
                 return new Tab(text: page.text, icon: new Icon(page.icon));
               case TabsDemoStyle.iconsOnly:

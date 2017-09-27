@@ -285,7 +285,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     if (_directionIsXAxis) {
       if (vx.abs() - vy.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(widget.direction) {
+      switch (widget.direction) {
         case DismissDirection.horizontal:
           return vx.abs() > _kMinFlingVelocity;
         case DismissDirection.endToStart:
@@ -296,7 +296,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
     } else {
       if (vy.abs() - vx.abs() < _kMinFlingVelocityDelta)
         return false;
-      switch(widget.direction) {
+      switch (widget.direction) {
         case DismissDirection.vertical:
           return vy.abs() > _kMinFlingVelocity;
         case DismissDirection.up:

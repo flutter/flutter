@@ -411,7 +411,7 @@ class Localizations extends StatefulWidget {
   /// Returns the localized resources object of the given `type` for the widget
   /// tree that corresponds to the given `context`.
   ///
-  /// Returns `null` if no resources object of the given `type` exists within
+  /// Returns null if no resources object of the given `type` exists within
   /// the given `context`.
   ///
   /// This method is typically used by a static factory method on the `type`
