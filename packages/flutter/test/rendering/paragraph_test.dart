@@ -232,14 +232,14 @@ void main() {
         const TextSpan(
           text: 'b',
           children: const <TextSpan>[
-            const TextSpan(text: 'd'),
+            const TextSpan(text: 'c'),
           ],
           style: const TextStyle(
             fontSize: 20.0,
           ),
         ),
         const TextSpan(
-          text: 'c',
+          text: 'd',
         ),
       ],
     );
@@ -249,13 +249,22 @@ void main() {
     expect(paragraph.size.height, equals(50.0));
     expect(paragraph.size.width, equals(150.0));
 
-    // Make sure that if we double the scale, the overall dimensions double.
-    // If they don't, then it's a sign that nested spans aren't being scaled correctly.
-    final RenderParagraph paragraph2 = new RenderParagraph(testSpan,
-        textDirection: TextDirection.ltr, textScaleFactor: 5.0);
-    paragraph2.layout(const BoxConstraints());
-    expect(paragraph2.size.height, equals(100.0));
-    expect(paragraph2.size.width, equals(300.0));
+    // Test the sizes of nested spans.
+    final List<ui.TextBox> boxes = <ui.TextBox>[];
+    final String text = testSpan.toStringDeep();
+    for (int i = 0; i < text.length; ++i) {
+      boxes.addAll(paragraph.getBoxesForSelection(
+          new TextSelection(baseOffset: i, extentOffset: i + 1)));
+    }
+    expect(boxes.length, equals(4));
+    expect(boxes[0].toRect().width, equals(25.0));
+    expect(boxes[0].toRect().height, equals(25.0));
+    expect(boxes[1].toRect().width, equals(50.0));
+    expect(boxes[1].toRect().height, equals(50.0));
+    expect(boxes[2].toRect().width, equals(50.0));
+    expect(boxes[2].toRect().height, equals(50.0));
+    expect(boxes[3].toRect().width, equals(25.0));
+    expect(boxes[3].toRect().height, equals(25.0));
   });
 
   test('toStringDeep', () {
