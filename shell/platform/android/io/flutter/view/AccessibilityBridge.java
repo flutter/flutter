@@ -322,6 +322,14 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
     }
 
+    private AccessibilityEvent obtainAccessibilityEvent(int virtualViewId, int eventType) {
+        assert virtualViewId != 0;
+        AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
+        event.setPackageName(mOwner.getContext().getPackageName());
+        event.setSource(mOwner, virtualViewId);
+        return event;
+    }
+
     private void sendAccessibilityEvent(int virtualViewId, int eventType) {
         if (!mAccessibilityEnabled) {
             return;
@@ -329,11 +337,15 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         if (virtualViewId == 0) {
             mOwner.sendAccessibilityEvent(eventType);
         } else {
-            AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
-            event.setPackageName(mOwner.getContext().getPackageName());
-            event.setSource(mOwner, virtualViewId);
-            mOwner.getParent().requestSendAccessibilityEvent(mOwner, event);
+            sendAccessibilityEvent(obtainAccessibilityEvent(virtualViewId, eventType));
         }
+    }
+
+    private void sendAccessibilityEvent(AccessibilityEvent event) {
+        if (!mAccessibilityEnabled) {
+            return;
+        }
+        mOwner.getParent().requestSendAccessibilityEvent(mOwner, event);
     }
 
     // Message Handler for [mFlutterAccessibilityChannel].
@@ -342,10 +354,26 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         final HashMap<String, Object> annotatedEvent = (HashMap<String, Object>)message;
         final int nodeId = (int)annotatedEvent.get("nodeId");
         final String type = (String)annotatedEvent.get("type");
+        @SuppressWarnings("unchecked")
+        final HashMap<String, Object> data = (HashMap<String, Object>)annotatedEvent.get("data");
 
         switch (type) {
             case "scroll":
-                sendAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                AccessibilityEvent event =
+                    obtainAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
+                char axis = ((String)data.get("axis")).charAt(0);
+                double minPosition = (double)data.get("minScrollExtent");
+                double maxPosition = (double)data.get("maxScrollExtent") - minPosition;
+                double position = (double)data.get("pixels") - minPosition;
+                if (axis == 'v') {
+                    event.setScrollY((int)position);
+                    event.setMaxScrollY((int)maxPosition);
+                } else {
+                    assert axis == 'h';
+                    event.setScrollX((int)position);
+                    event.setMaxScrollX((int)maxPosition);
+                }
+                sendAccessibilityEvent(event);
                 break;
             default:
                 assert false;
