@@ -291,11 +291,11 @@ class FormFieldState<T> extends State<FormField<T>> {
 
   /// Sets the value associated with this form field.
   ///
-  /// Do not call this method directly: instead call [onChanged] in the
-  /// [FormField] builder function.
-  ///
-  /// This method should be called by sublasses that need to update the form
-  /// field value due to state changes identified in the widget build phase.
+  /// This method should be only be called by subclasses that need to update
+  /// the form field value due to state changes identified during the widget
+  /// build phase, when calling `setState` is prohibited. In all other cases,
+  /// the value should be set by a call to [onChanged], which ensures that
+  /// `setState` is called.
   @protected
   void setValue(T value) {
     _value = value;
