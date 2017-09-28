@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -64,7 +65,7 @@ enum BorderStyle {
 ///
 ///  * [Border], which uses [BorderSide] objects to represent its sides.
 ///  * [BoxDecoration], which optionally takes a [Border] object.
-///  * [TableBorder], which extends [Border] to have two more sides
+///  * [TableBorder], which is similar to [Border] but has two more sides
 ///    ([TableBorder.horizontalInside] and [TableBorder.verticalInside]), both
 ///    of which are also [BorderSide] objects.
 @immutable
@@ -75,8 +76,34 @@ class BorderSide {
   const BorderSide({
     this.color: const Color(0xFF000000),
     this.width: 1.0,
-    this.style: BorderStyle.solid
-  });
+    this.style: BorderStyle.solid,
+  }) : assert(color != null),
+       assert(width != null),
+       assert(width >= 0.0),
+       assert(style != null);
+
+  /// Creates a [BorderSide] that represents the addition of the two given
+  /// [BorderSide]s.
+  ///
+  /// It is only valid to call this if [canMerge] returns true for the two
+  /// sides.
+  ///
+  /// If both sides are null, then this will return null. If one of the two
+  /// sides is null, then the other side is returned as-is.
+  static BorderSide merge(BorderSide a, BorderSide b) {
+    assert(canMerge(a, b));
+    if (a == null)
+      return b; // might return null
+    if (b == null)
+      return a;
+    assert(a.color == b.color);
+    assert(a.style == b.style);
+    return new BorderSide(
+      color: a.color, // == b.color
+      width: a.width + b.width,
+      style: a.style, // == b.style
+    );
+  }
 
   /// The color of this side of the border.
   final Color color;
@@ -101,17 +128,69 @@ class BorderSide {
     double width,
     BorderStyle style
   }) {
+    assert(width == null || width >= 0.0);
     return new BorderSide(
       color: color ?? this.color,
       width: width ?? this.width,
-      style: style ?? this.style
+      style: style ?? this.style,
     );
   }
 
+  /// Creates a copy of this border but with the width scaled by the given factor.
+  ///
+  /// Since a zero width is painted as a hairline width rather than no border at
+  /// all, the zero factor is special-cased to instead change the style no
+  /// [BorderStyle.none].
+  BorderSide scale(double t) {
+    assert(t != null);
+    return new BorderSide(
+      color: color,
+      width: math.max(0.0, width * t),
+      style: t <= 0.0 ? BorderStyle.none : style,
+    );
+  }
+
+  /// Create a [Paint] object that, if used to stroke a line, will draw the line
+  /// in this border's style.
+  ///
+  /// Not all borders use this method to paint their border sides. For example,
+  /// non-uniform rectangular [Border]s have beveled edges and so paint their
+  /// border sides as filled shapes rather than using a stroke.
+  Paint toPaint() {
+    switch (style) {
+      case BorderStyle.solid:
+        return new Paint()
+          ..color = color
+          ..strokeWidth = width
+          ..style = PaintingStyle.stroke;
+      case BorderStyle.none:
+        return new Paint()
+          ..color = const Color(0x00000000)
+          ..strokeWidth = 0.0
+          ..style = PaintingStyle.stroke;
+    }
+    return null;
+  }
+
+  /// Whether the two given [BorderSide]s can be merged using [new
+  /// BorderSide.merge].
+  ///
+  /// Two sides can be merged if one or both are null, or if they both have the
+  /// same color and style.
+  static bool canMerge(BorderSide a, BorderSide b) {
+    if (a == null || b == null)
+      return true;
+    return a.style == b.style
+        && a.color == b.color;
+  }
+
   /// Linearly interpolate between two border sides.
+  ///
+  /// The arguments must not be null.
   static BorderSide lerp(BorderSide a, BorderSide b, double t) {
     assert(a != null);
     assert(b != null);
+    assert(t != null);
     if (t == 0.0)
       return a;
     if (t == 1.0)
@@ -119,8 +198,8 @@ class BorderSide {
     if (a.style == b.style) {
       return new BorderSide(
         color: Color.lerp(a.color, b.color, t),
-        width: ui.lerpDouble(a.width, b.width, t),
-        style: a.style // == b.style
+        width: math.max(0.0, ui.lerpDouble(a.width, b.width, t)),
+        style: a.style, // == b.style
       );
     }
     Color colorA, colorB;
@@ -142,7 +221,7 @@ class BorderSide {
     }
     return new BorderSide(
       color: Color.lerp(colorA, colorB, t),
-      width: ui.lerpDouble(a.width, b.width, t),
+      width: math.max(0.0, ui.lerpDouble(a.width, b.width, t)),
       style: BorderStyle.solid,
     );
   }
@@ -163,7 +242,7 @@ class BorderSide {
   int get hashCode => hashValues(color, width, style);
 
   @override
-  String toString() => 'BorderSide($color, $width, $style)';
+  String toString() => '$runtimeType($color, ${width.toStringAsFixed(1)}, $style)';
 }
 
 /// A border of a box, comprised of four sides.
