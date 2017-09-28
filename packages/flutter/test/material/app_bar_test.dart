@@ -278,7 +278,7 @@ void main() {
     expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
   });
 
-  testWidgets('AppBar centerTitle:false title overflow OK ', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
@@ -1084,5 +1084,65 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+  });
+
+  testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    final Key leadingKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
+    final Key trailingKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(
+              leading: new Placeholder(key: leadingKey),
+              title: new Placeholder(key: titleKey),
+              actions: <Widget>[ new Placeholder(key: trailingKey) ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
+  });
+
+  testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    final Key leadingKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
+    final Key trailingKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                leading: new Placeholder(key: leadingKey),
+                title: new Placeholder(key: titleKey),
+                actions: <Widget>[ new Placeholder(key: trailingKey) ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
   });
 }
