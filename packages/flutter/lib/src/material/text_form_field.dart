@@ -18,6 +18,10 @@ import 'text_field.dart';
 /// pass a [GlobalKey] to the constructor and use [GlobalKey.currentState] to
 /// save or reset the form field.
 ///
+/// When a [controller] is specified, it can be used to control the text being
+/// edited. Its content will be overwritten by [initialValue] (which defaults
+/// to the empty string) on creation and when [reset] is called.
+///
 /// For a documentation about the various parameters, see [TextField].
 ///
 /// See also:
@@ -29,6 +33,10 @@ import 'text_field.dart';
 ///    surround the actual text editing widget.
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
+  ///
+  /// When a [controller] is specified, it can be used to control the text
+  /// being edited. Its content will be overwritten by [initialValue] (which
+  /// defaults to the empty string) on creation and when [reset] is called.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
