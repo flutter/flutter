@@ -930,6 +930,44 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
+  testWidgets('AppBar title scales with textScaleFactor', (WidgetTester tester) async {
+    const MediaQueryData textScale1 = const MediaQueryData(
+        textScaleFactor: 1.0);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: textScale1,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(primary: false, centerTitle: true, title: const Text("Hello")),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight);
+
+    const MediaQueryData textScale2 = const MediaQueryData(
+      textScaleFactor: 2.0);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: textScale2,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(primary: false, centerTitle: true, title: const Text("Hello")),
+          ),
+        ),
+      ),
+    );
+    expect(appBarTop(tester), 0.0);
+    expect(appBarHeight(tester), kToolbarHeight * 2.0);
+  });
+
   testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
