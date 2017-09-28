@@ -100,11 +100,6 @@ class PageController extends ScrollController {
   }
 
   /// Changes which page is displayed in the controlled [PageView].
-  ///
-  /// The animation lasts for the given duration and follows the given curve.
-  /// The returned [Future] resolves when the animation completes.
-  ///
-  /// The `duration` and `curve` arguments must not be null.
   void jumpToPage(int page) {
     final _PagePosition position = this.position;
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
