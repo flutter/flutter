@@ -41,7 +41,7 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 ///     testWidgets('MyWidget', (WidgetTester tester) async {
 ///       await tester.pumpWidget(new MyWidget());
 ///       await tester.tap(find.text('Save'));
-///       expect(tester, hasWidget(find.text('Success')));
+///       expect(find.text('Success'), findsOneWidget);
 ///     });
 void testWidgets(String description, WidgetTesterCallback callback, {
   bool skip: false,
