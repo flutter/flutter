@@ -261,7 +261,6 @@ void main() {
       ));
     }
     expect(boxes.length, equals(4));
-    expect(boxes[0].toRect(), new Rect.fromLTRB(0.0, 0.0, 25.0, 25.0));
     expect(boxes[0].toRect().width, equals(25.0));
     expect(boxes[0].toRect().height, equals(25.0));
     expect(boxes[1].toRect().width, equals(50.0));

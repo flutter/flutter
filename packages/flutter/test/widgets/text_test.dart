@@ -27,10 +27,10 @@ void main() {
     expect(text.textScaleFactor, 1.0);
   });
 
-  testWidgets('Text respects textScaleFactor with default font size',
-      (WidgetTester tester) async {
+  testWidgets('Text respects textScaleFactor with default font size', (WidgetTester tester) async {
     await tester.pumpWidget(
-        const Center(child: const Text('Hello', textDirection: TextDirection.ltr)));
+      const Center(child: const Text('Hello', textDirection: TextDirection.ltr))
+    );
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
@@ -40,7 +40,7 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-        child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
+      child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -51,11 +51,10 @@ void main() {
     expect(largeSize.height, equals(3.0 * baseSize.height));
   });
 
-  testWidgets('Text respects textScaleFactor with explicit font size',
-      (WidgetTester tester) async {
+  testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
-        child: const Text('Hello',
-            style: const TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
+      child: const Text('Hello',
+        style: const TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -66,10 +65,10 @@ void main() {
     expect(baseSize.height, equals(20.0));
 
     await tester.pumpWidget(const Center(
-        child: const Text('Hello',
-            style: const TextStyle(fontSize: 20.0),
-            textScaleFactor: 3.0,
-            textDirection: TextDirection.ltr)
+      child: const Text('Hello',
+        style: const TextStyle(fontSize: 20.0),
+        textScaleFactor: 3.0,
+        textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
