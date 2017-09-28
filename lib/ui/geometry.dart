@@ -653,6 +653,15 @@ class Rect {
     );
   }
 
+  /// Whether `other` has a nonzero area of overlap with this rectangle.
+  bool overlaps(Rect other) {
+    if (right <= other.left || other.right <= left)
+      return false;
+    if (bottom <= other.top || other.bottom <= top)
+      return false;
+    return true;
+  }
+
   /// The lesser of the magnitudes of the width and the height of this
   /// rectangle.
   double get shortestSide {
