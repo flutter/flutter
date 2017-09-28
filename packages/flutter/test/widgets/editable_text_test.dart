@@ -178,7 +178,7 @@ void main() {
                   cursorColor: Colors.blue,
                   selectionControls: materialTextSelectionControls,
                   keyboardType: TextInputType.text,
-                  onChanged: (String value) {},
+                  onChanged: (String value) { },
                 ),
               ),
             ),
@@ -199,10 +199,16 @@ void main() {
     });
     await tester.pump();
 
-    final MethodCall setStateCall = log.firstWhere((MethodCall methodCall) {
-      return methodCall.method == 'TextInput.setEditingState';
-    });
-    final Map<String, dynamic> arguments = setStateCall.arguments;
-    expect(arguments['text'], equals('Wobble'));
+    expect(log, <MethodCall>[
+      const MethodCall('TextInput.setEditingState', const <String, dynamic>{
+        'text': 'Wobble',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    ]);
   });
 }
