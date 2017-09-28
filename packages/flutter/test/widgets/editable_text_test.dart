@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
@@ -152,5 +153,62 @@ void main() {
     expect(tester.testTextInput.editingState['text'], equals('test'));
     expect(tester.testTextInput.setClientArgs['inputType'], equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
+  });
+
+  testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+    final TextEditingController controller1 = new TextEditingController(text: 'Wibble');
+    final TextEditingController controller2 = new TextEditingController(text: 'Wobble');
+    TextEditingController currentController = controller1;
+    StateSetter setState;
+
+    Widget builder() {
+      return new StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          setState = setter;
+          return new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Center(
+              child: new Material(
+                child: new EditableText(
+                  key: editableTextKey,
+                  controller: currentController,
+                  focusNode: new FocusNode(),
+                  style: new Typography(platform: TargetPlatform.android).black.subhead,
+                  cursorColor: Colors.blue,
+                  selectionControls: materialTextSelectionControls,
+                  keyboardType: TextInputType.text,
+                  onChanged: (String value) { },
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+    await tester.pumpWidget(builder());
+    await tester.showKeyboard(find.byType(EditableText));
+
+    // Verify TextInput.setEditingState is fired with updated text when controller is replaced.
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) {
+      log.add(methodCall);
+    });
+    setState(() {
+      currentController = controller2;
+    });
+    await tester.pump();
+
+    expect(log, <MethodCall>[
+      const MethodCall('TextInput.setEditingState', const <String, dynamic>{
+        'text': 'Wobble',
+        'selectionBase': -1,
+        'selectionExtent': -1,
+        'selectionAffinity': 'TextAffinity.downstream',
+        'selectionIsDirectional': false,
+        'composingBase': -1,
+        'composingExtent': -1,
+      }),
+    ]);
   });
 }
