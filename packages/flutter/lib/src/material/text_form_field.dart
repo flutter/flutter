@@ -123,8 +123,7 @@ class _TextFormFieldState extends FormFieldState<String> {
 
   @override
   void dispose() {
-    if (widget.controller != null)
-      widget.controller.removeListener(_handleControllerChanged);
+    widget.controller?.removeListener(_handleControllerChanged);
     super.dispose();
   }
 
