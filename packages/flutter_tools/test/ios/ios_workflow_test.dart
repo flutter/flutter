@@ -162,6 +162,21 @@ void main() {
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
+      IMobileDevice: () => new MockIMobileDevice(isInstalled: false, isWorking: false),
+      Xcode: () => xcode,
+      CocoaPods: () => cocoaPods,
+    });
+
+    testUsingContext('Emits partial status when libimobiledevice is installed but not working', () async {
+      when(xcode.isInstalled).thenReturn(true);
+      when(xcode.xcodeVersionText)
+          .thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
+      when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
+      when(xcode.eulaSigned).thenReturn(true);
+      final IOSWorkflowTestTarget workflow = new IOSWorkflowTestTarget();
+      final ValidationResult result = await workflow.validate();
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
       IMobileDevice: () => new MockIMobileDevice(isWorking: false),
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
@@ -281,7 +296,13 @@ final ProcessResult exitsHappy = new ProcessResult(
 );
 
 class MockIMobileDevice extends IMobileDevice {
-  MockIMobileDevice({bool isWorking: true}) : isWorking = new Future<bool>.value(isWorking);
+  MockIMobileDevice({
+    this.isInstalled: true,
+    bool isWorking: true,
+  }) : isWorking = new Future<bool>.value(isWorking);
+
+  @override
+  final bool isInstalled;
 
   @override
   final Future<bool> isWorking;
