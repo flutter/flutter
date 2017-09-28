@@ -161,7 +161,9 @@ class LinearProgressIndicator extends ProgressIndicator {
   const LinearProgressIndicator({
     Key key,
     double value,
-  }) : super(key: key, value: value);
+    Color backgroundColor,
+    Animation<Color> valueColor,
+  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   @override
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();

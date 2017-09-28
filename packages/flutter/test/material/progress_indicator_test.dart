@@ -143,6 +143,31 @@ void main() {
     expect(tester.binding.transientCallbackCount, 1);
   });
 
+  testWidgets('LinearProgressIndicator with colors', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const SizedBox(
+            width: 200.0,
+            child: const LinearProgressIndicator(
+              value: 0.25,
+              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              backgroundColor: Colors.black,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(LinearProgressIndicator),
+      paints
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 200.0, 6.0))
+        ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 50.0, 6.0), color: Colors.white)
+    );
+  });
+
   testWidgets('CircularProgressIndicator(value: 0.0) can be constructed', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Center(
