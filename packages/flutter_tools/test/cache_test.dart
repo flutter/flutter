@@ -48,6 +48,7 @@ void main() {
       Platform: () => new FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
     });
   });
+
   group('Cache', () {
     test('should not be up to date, if some cached artifact is not', () {
       final CachedArtifact artifact1 = new MockCachedArtifact();
