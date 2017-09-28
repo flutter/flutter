@@ -88,9 +88,6 @@ class Paragraph {
   // can.
   double GetHeight() const;
 
-  // Returns the actual max width of the longest line after Layout().
-  double GetLayoutWidth() const;
-
   // Returns the width provided in the Layout() method. This is the maximum
   // width any line in the laid out paragraph can occupy. We expect that
   // GetMaxWidth() >= GetLayoutWidth().
@@ -186,8 +183,6 @@ class Paragraph {
   // Stores the result of Layout().
   std::vector<PaintRecord> records_;
 
-  // TODO(garyq): Can we access this info without redundantly storing it here?
-  std::vector<double> line_widths_;
   std::vector<double> line_heights_;
 
   struct GlyphPosition {

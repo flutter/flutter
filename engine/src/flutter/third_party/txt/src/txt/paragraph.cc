@@ -221,7 +221,6 @@ void Paragraph::Layout(double width, bool force) {
 
   // Reset member variables so Layout still works when called more than once
   lines_ = 0;
-  line_widths_ = std::vector<double>();
   line_heights_ = std::vector<double>();
   records_ = std::vector<PaintRecord>();
 
@@ -237,7 +236,6 @@ void Paragraph::Layout(double width, bool force) {
   double max_line_spacing = 0.0f;
   double max_descent = 0.0f;
   double prev_max_descent = 0.0f;
-  double line_width = 0.0f;
   std::vector<SkScalar> x_queue;
   double justify_spacing = 0.0f;
   double prev_word_pos = 0.0f;
@@ -485,9 +483,6 @@ void Paragraph::Layout(double width, bool force) {
       }
       records_.push_back(PaintRecord{run.style, builder.make(), metrics, lines_,
                                      layout.getAdvance()});
-      line_width +=
-          std::abs(records_[records_.size() - 1].text()->bounds().fRight +
-                   records_[records_.size() - 1].text()->bounds().fLeft);
       // Must adjust each line to the largest text in the line, so cannot
       // directly push the offset property of PaintRecord until line is
       // finished.
@@ -517,7 +512,6 @@ void Paragraph::Layout(double width, bool force) {
             roundf(max_line_spacing + max_descent));
         glyph_position_x_.push_back(glyph_single_line_position_x);
         prev_max_descent = max_descent;
-        line_widths_.push_back(line_width);
         postprocess_line();
 
         // Reset Variables for next line.
@@ -528,7 +522,6 @@ void Paragraph::Layout(double width, bool force) {
         prev_char_advance = 0.0f;
         previous_run_x_position = 0.0f;
         current_x_position = 0.0f;
-        line_width = 0.0f;
         break_index += 1;
         lines_++;
         glyph_single_line_position_x.clear();
@@ -545,8 +538,6 @@ void Paragraph::Layout(double width, bool force) {
       buffer_sizes.size() > 0) {
     JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
   }
-  line_widths_ =
-      std::vector<double>(breaker_.getWidths(), breaker_.getWidths() + lines_);
   CalculateIntrinsicWidths();
   breaker_.finish();
 }
@@ -604,16 +595,16 @@ double Paragraph::GetIdeographicBaseline() const {
 
 void Paragraph::CalculateIntrinsicWidths() {
   max_intrinsic_width_ = 0;
-  for (size_t i = 0; i < line_widths_.size(); ++i) {
-    max_intrinsic_width_ += line_widths_[i];
+  for (size_t i = 0; i < lines_; ++i) {
+    max_intrinsic_width_ += breaker_.getWidths()[i];
   }
 
   // TODO(garyq): Investigate correctness of the following implementation of min
   // intrinsic width. This is currently the longest line in the text after
   // layout.
   min_intrinsic_width_ = 0;
-  for (size_t i = 0; i < line_widths_.size(); ++i) {
-    min_intrinsic_width_ = std::max(min_intrinsic_width_, line_widths_[i]);
+  for (size_t i = 0; i < lines_; ++i) {
+    min_intrinsic_width_ = fmax(min_intrinsic_width_, breaker_.getWidths()[i]);
   }
 
   // Ensure that min < max widths.
@@ -635,14 +626,6 @@ size_t Paragraph::TextSize() const {
 
 double Paragraph::GetHeight() const {
   return line_heights_.size() ? line_heights_.back() : 0;
-}
-
-double Paragraph::GetLayoutWidth() const {
-  double w = 0;
-  for (size_t i = 0; i < line_widths_.size(); ++i) {
-    w = std::max(w, line_widths_[i]);
-  }
-  return w;
 }
 
 double Paragraph::GetMaxWidth() const {
