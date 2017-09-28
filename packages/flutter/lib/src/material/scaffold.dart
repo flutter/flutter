@@ -39,11 +39,13 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
     @required this.bottomPadding,
+    @required this.endPadding, // for floating action button
     @required this.textDirection,
   });
 
   final double statusBarHeight;
   final double bottomPadding;
+  final double endPadding;
   final TextDirection textDirection;
 
   @override
@@ -72,7 +74,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
-      final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop)).height;
+      final BoxConstraints footerConstraints = new BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
+      );
+      final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, footerConstraints).height;
       contentBottom -= persistentFooterHeight;
       positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, contentBottom));
     }
@@ -102,7 +108,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size snackBarSize = Size.zero;
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop));
+      final BoxConstraints bottomSheetConstraints = new BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
+      );
+      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
     }
 
@@ -117,10 +127,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       assert(textDirection != null);
       switch (textDirection) {
         case TextDirection.rtl:
-          fabX = _kFloatingActionButtonMargin;
+          fabX = _kFloatingActionButtonMargin + endPadding;
           break;
         case TextDirection.ltr:
-          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
+          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
           break;
       }
       double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
@@ -146,6 +156,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.statusBarHeight != statusBarHeight
         || oldDelegate.bottomPadding != bottomPadding
+        || oldDelegate.endPadding != endPadding
         || oldDelegate.textDirection != textDirection;
   }
 }
@@ -336,9 +347,12 @@ class Scaffold extends StatefulWidget {
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
   /// Typically this is a list of [FlatButton] widgets. These buttons are
-  /// persistently visible, even of the [body] of the scaffold scrolls.
+  /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
   /// These widgets will be wrapped in a [ButtonBar].
+  ///
+  /// The [persistentFooterButtons] are rendered above the
+  /// [bottomNavigationBar] but below the [body].
   ///
   /// See also:
   ///
@@ -363,6 +377,9 @@ class Scaffold extends StatefulWidget {
   ///
   /// Snack bars slide from underneath the bottom navigation bar while bottom
   /// sheets are stacked on top.
+  ///
+  /// The [bottomNavigationBar] is rendered below the [persistentFooterButtons]
+  /// and the [body].
   final Widget bottomNavigationBar;
 
   /// Whether the [body] (and other floating widgets) should size themselves to
@@ -773,6 +790,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
+    assert(debugCheckHasDirectionality(context));
     final EdgeInsets padding = MediaQuery.of(context).padding;
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
@@ -846,9 +864,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               ),
             ),
           ),
-          child: new ButtonTheme.bar(
-            child: new ButtonBar(
-              children: widget.persistentFooterButtons
+          child: new SafeArea(
+            child: new ButtonTheme.bar(
+              child: new ButtonBar(
+                children: widget.persistentFooterButtons
+              ),
             ),
           ),
         ),
@@ -936,6 +956,17 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
+    double endPadding;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        endPadding = padding.left;
+        break;
+      case TextDirection.ltr:
+        endPadding = padding.right;
+        break;
+    }
+    assert(endPadding != null);
+
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
       child: new PrimaryScrollController(
@@ -947,6 +978,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             delegate: new _ScaffoldLayout(
               statusBarHeight: padding.top,
               bottomPadding: widget.resizeToAvoidBottomPadding ? padding.bottom : 0.0,
+              endPadding: endPadding,
               textDirection: textDirection,
             ),
           ),
