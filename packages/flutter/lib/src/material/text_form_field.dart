@@ -107,18 +107,18 @@ class _TextFormFieldState extends FormFieldState<String> {
   @override
   void didUpdateWidget(TextFormField oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.controller == null && oldWidget.controller != null)
-      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
-    else if (widget.controller != null && oldWidget.controller == null)
-      _controller = null;
-
     if (widget.controller != oldWidget.controller) {
-      if (oldWidget.controller != null)
-        oldWidget.controller.removeListener(_handleControllerChanged);
-      if (widget.controller != null)
-        widget.controller.addListener(_handleControllerChanged);
+      oldWidget.controller?.removeListener(_handleControllerChanged);
+      widget.controller?.addListener(_handleControllerChanged);
+
+      if (oldWidget.controller != null && widget.controller == null)
+        _controller = new TextEditingController.fromValue(oldWidget.controller.value);
+      if (widget.controller != null) {
+        setValue(widget.controller.text);
+        if (oldWidget.controller == null)
+          _controller = null;
+      }
     }
-    setValue(_effectiveController.text);
   }
 
   @override
