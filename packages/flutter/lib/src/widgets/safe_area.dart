@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'debug.dart';
 import 'framework.dart';
+import 'implicit_animations.dart';
 import 'media_query.dart';
 
 /// A widget that insets its child by sufficient padding to avoid
@@ -89,5 +90,94 @@ class SafeArea extends StatelessWidget {
     description.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
     description.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
     description.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+  }
+}
+
+/// A widget that insets its child by sufficient padding to avoid intrusions by
+/// the operating system, with an implicit animation if the sizes of the
+/// intrusions change.
+///
+/// This is an animated version of [SafeArea] that uses [AnimatedPadding]
+/// instead of [Padding].
+class AnimatedSafeArea extends StatelessWidget {
+  /// Creates a widget that avoids operating system interfaces, with implicit
+  /// animations.
+  ///
+  /// The [left], [top], [right], [bottom], [curve], and [duration] arguments
+  /// must not be null.
+  const AnimatedSafeArea({
+    Key key,
+    this.left: true,
+    this.top: true,
+    this.right: true,
+    this.bottom: true,
+    @required this.child,
+    this.curve: Curves.linear,
+    @required this.duration,
+  }) : assert(left != null),
+       assert(top != null),
+       assert(right != null),
+       assert(bottom != null),
+       assert(curve != null),
+       assert(duration != null),
+       super(key: key);
+
+  /// Whether to avoid system intrusions on the left.
+  final bool left;
+
+  /// Whether to avoid system intrusions at the top of the screen, typically the
+  /// system status bar.
+  final bool top;
+
+  /// Whether to avoid system intrusions on the right.
+  final bool right;
+
+  /// Whether to avoid system intrusions on the bottom side of the screen.
+  final bool bottom;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
+  /// to zero out any sides that were avoided by this widget.
+  final Widget child;
+
+  /// The curve to apply when animating the parameters of this container.
+  final Curve curve;
+
+  /// The duration over which to animate the parameters of this container.
+  final Duration duration;
+
+  @override
+  Widget build(BuildContext context) {
+    assert(debugCheckHasMediaQuery(context));
+    final EdgeInsets padding = MediaQuery.of(context).padding;
+    return new AnimatedPadding(
+      padding: new EdgeInsets.only(
+        left: left ? padding.left : 0.0,
+        top: top ? padding.top : 0.0,
+        right: right ? padding.right : 0.0,
+        bottom: bottom ? padding.bottom : 0.0,
+      ),
+      curve: curve,
+      duration: duration,
+      child: new MediaQuery.removePadding(
+        context: context,
+        removeLeft: left,
+        removeTop: top,
+        removeRight: right,
+        removeBottom: bottom,
+        child: child,
+      ),
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('left', value: left, ifTrue: 'avoid left padding'));
+    description.add(new FlagProperty('top', value: left, ifTrue: 'avoid top padding'));
+    description.add(new FlagProperty('right', value: left, ifTrue: 'avoid right padding'));
+    description.add(new FlagProperty('bottom', value: left, ifTrue: 'avoid bottom padding'));
+    description.add(new IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
   }
 }
