@@ -10,7 +10,7 @@ import 'text_field.dart';
 
 /// A [FormField] that contains a [TextField].
 ///
-/// This is a convenience widget that simply wraps a [TextField] widget in a
+/// This is a convenience widget that wraps a [TextField] widget in a
 /// [FormField].
 ///
 /// A [Form] ancestor is not required. The [Form] simply makes it easier to
