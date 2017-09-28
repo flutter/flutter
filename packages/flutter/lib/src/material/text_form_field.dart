@@ -35,7 +35,7 @@ class TextFormField extends FormField<String> {
   TextFormField({
     Key key,
     this.controller,
-    String initialValue,
+    String initialValue: '',
     FocusNode focusNode,
     InputDecoration decoration: const InputDecoration(),
     TextInputType keyboardType: TextInputType.text,
@@ -47,14 +47,15 @@ class TextFormField extends FormField<String> {
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
-  }) : assert(keyboardType != null),
+  }) : assert(initialValue != null),
+       assert(keyboardType != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
        super(
     key: key,
-    initialValue: initialValue ?? '',
+    initialValue: initialValue,
     onSaved: onSaved,
     validator: validator,
     builder: (FormFieldState<String> field) {
