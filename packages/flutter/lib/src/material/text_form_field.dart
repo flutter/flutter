@@ -136,6 +136,13 @@ class _TextFormFieldState extends FormFieldState<String> {
   }
 
   void _handleControllerChanged() {
+    // Suppress changes that originated from within this class.
+    //
+    // In the case where a controller has been passed in to this widget, we
+    // register this change listener. In these cases, we'll also receive change
+    // notifications for changes originating from within this class -- for
+    // example, the reset() method. In such cases, the FormField value will
+    // already have been set.
     if (_effectiveController.text != value)
       onChanged(_effectiveController.text);
   }
