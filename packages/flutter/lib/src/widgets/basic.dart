@@ -2330,7 +2330,7 @@ class Positioned extends ParentDataWidget<Stack> {
   /// See also:
   ///
   ///  * [Positioned.directional], which specifies the widget's horizontal
-  ///    position using [start] and [end] rather than [left] and [right].
+  ///    position using `start` and `end` rather than `left` and `right`.
   const Positioned({
     Key key,
     this.left,
@@ -3049,7 +3049,7 @@ class Row extends Flex {
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to determine the layout order (which is always the case
   /// unless the row has no children or only one child) or to disambiguate
-  /// `start` or `end` values for the [mainAxisDirection], the [textDirection]
+  /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
   /// must not be null.
   Row({
     Key key,
@@ -3239,7 +3239,7 @@ class Column extends Flex {
   /// The [textDirection] argument defaults to the ambient [Directionality], if
   /// any. If there is no ambient directionality, and a text direction is going
   /// to be necessary to disambiguate `start` or `end` values for the
-  /// [crossAxisDirection], the [textDirection] must not be null.
+  /// [crossAxisAlignment], the [textDirection] must not be null.
   Column({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,

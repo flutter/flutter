@@ -31,13 +31,13 @@ export 'dart:ui' show Locale;
 ///
 /// The `locale` is the device's locale when the app started, or the device
 /// locale the user selected after the app was started. The `supportedLocales`
-/// parameter is just the value of [WidgetApp.supportedLocales].
+/// parameter is just the value of [WidgetsApp.supportedLocales].
 typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
 /// Used to generate a value for the app's [Title.title], which the device uses
-/// to identify the app for the user. The `context` includes the [WidgetApp]'s
+/// to identify the app for the user. The `context` includes the [WidgetsApp]'s
 /// [Localizations] widget so that this method can be used to produce a
 /// localized title.
 ///
@@ -123,7 +123,7 @@ class WidgetsApp extends StatefulWidget {
   /// If non-null this callback function is called to produce the app's
   /// title string, otherwise [title] is used.
   ///
-  /// The [onGenerateTitle] `context` parameter includes the [WidgetApp]'s
+  /// The [onGenerateTitle] `context` parameter includes the [WidgetsApp]'s
   /// [Localizations] widget so that this callback can be used to produce a
   /// localized title.
   ///
@@ -208,7 +208,7 @@ class WidgetsApp extends StatefulWidget {
   /// If the callback is null or if it returns null then the resolved locale is:
   ///
   /// - The callback's `locale` parameter if it's equal to a supported locale.
-  /// - The first supported locale with the same [Locale.langaugeCode] as the
+  /// - The first supported locale with the same [Locale.languageCode] as the
   ///   callback's `locale` parameter.
   /// - The first locale in [supportedLocales].
   ///
@@ -240,7 +240,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [localeResolutionCallback], an app callback that resolves the app's locale
   ///    when the device's locale changes.
   ///
-  ///  * [localizationDelegates], which collectively define all of the localized
+  ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
   final Iterable<Locale> supportedLocales;
 

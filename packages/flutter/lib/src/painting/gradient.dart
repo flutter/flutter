@@ -27,7 +27,7 @@ abstract class Gradient {
   /// Creates a [Shader] for this gradient to fill the given rect.
   ///
   /// If the gradient's configuration is text-direction-dependent, for example
-  /// it uses [FractionalOffsetDirection] objects instead of [FractionalOffset]
+  /// it uses [FractionalOffsetDirectional] objects instead of [FractionalOffset]
   /// objects, then the `textDirection` argument must not be null.
   Shader createShader(Rect rect, { TextDirection textDirection });
 }

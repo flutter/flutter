@@ -31,10 +31,11 @@ import 'route.dart';
 ///
 /// See also:
 ///
-///  * [CupertinoTabScaffold] a typical host that supports switching between tabs.
-///  * [CupertinoPageRoute] a typical modal page route pushed onto the [CupertinoTabView]'s
-///    [Navigator].
+///  * [CupertinoTabScaffold], a typical host that supports switching between tabs.
+///  * [CupertinoPageRoute], a typical modal page route pushed onto the
+///    [CupertinoTabView]'s [Navigator].
 class CupertinoTabView extends StatelessWidget {
+  /// Creates the content area for a tab in a [CupertinoTabScaffold].
   const CupertinoTabView({
     Key key,
     this.builder,

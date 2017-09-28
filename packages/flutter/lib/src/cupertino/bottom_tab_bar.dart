@@ -32,8 +32,8 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 ///
 /// See also:
 ///
-///  * [CupertinoTabScaffold] which hosts the [CupertinoTabBar] at the bottom.
-///  * [BottomNavigationBarItem] typical item in a [CupertinoTabBar].
+///  * [CupertinoTabScaffold], which hosts the [CupertinoTabBar] at the bottom.
+///  * [BottomNavigationBarItem], an item in a [CupertinoTabBar].
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
@@ -143,7 +143,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   List<Widget> _buildTabItems() {
     final List<Widget> result = <Widget>[];
 
-    for (int index = 0; index < items.length; ++index) {
+    for (int index = 0; index < items.length; index += 1) {
       result.add(
         _wrapActiveItem(
           new Expanded(
