@@ -88,13 +88,22 @@ class BorderSide {
   /// It is only valid to call this if [canMerge] returns true for the two
   /// sides.
   ///
-  /// If both sides are null, then this will return null. If one of the two
-  /// sides is null, then the other side is returned as-is.
+  /// If one of the sides is zero-width with [BorderStyle.none], then the other
+  /// side is return as-is. If both of the sides are zero-width with
+  /// [BorderStyle.none], then [BorderSide.zero] is returned.
+  ///
+  /// The arguments must not be null.
   static BorderSide merge(BorderSide a, BorderSide b) {
+    assert(a != null);
+    assert(b != null);
     assert(canMerge(a, b));
-    if (a == null)
-      return b; // might return null
-    if (b == null)
+    final bool aIsNone = a.style == BorderStyle.none && a.width == 0.0;
+    final bool bIsNone = b.style == BorderStyle.none && b.width == 0.0;
+    if (aIsNone && bIsNone)
+      return BorderSide.none;
+    if (aIsNone)
+      return b;
+    if (bIsNone)
       return a;
     assert(a.color == b.color);
     assert(a.style == b.style);
@@ -175,10 +184,15 @@ class BorderSide {
   /// Whether the two given [BorderSide]s can be merged using [new
   /// BorderSide.merge].
   ///
-  /// Two sides can be merged if one or both are null, or if they both have the
-  /// same color and style.
+  /// Two sides can be merged if one or both are zero-width with
+  /// [BorderStyle.none], or if they both have the same color and style.
+  ///
+  /// The arguments must not be null.
   static bool canMerge(BorderSide a, BorderSide b) {
-    if (a == null || b == null)
+    assert(a != null);
+    assert(b != null);
+    if ((a.style == BorderStyle.none && a.width == 0.0) ||
+        (b.style == BorderStyle.none && b.width == 0.0))
       return true;
     return a.style == b.style
         && a.color == b.color;
@@ -325,6 +339,28 @@ class Border {
     return new Border(top: side, right: side, bottom: side, left: side);
   }
 
+  /// Creates a [Border] that represents the addition of the two given
+  /// [Border]s.
+  ///
+  /// It is only valid to call this if [BorderSide.canMerge] returns true for
+  /// the pairwise combination of each side on both [Border]s.
+  ///
+  /// The arguments must not be null.
+  static Border merge(Border a, Border b) {
+    assert(a != null);
+    assert(b != null);
+    assert(BorderSide.canMerge(a.top, b.top));
+    assert(BorderSide.canMerge(a.right, b.right));
+    assert(BorderSide.canMerge(a.bottom, b.bottom));
+    assert(BorderSide.canMerge(a.left, b.left));
+    return new Border(
+      top: BorderSide.merge(a.top, b.top),
+      right: BorderSide.merge(a.right, b.right),
+      bottom: BorderSide.merge(a.bottom, b.bottom),
+      left: BorderSide.merge(a.left, b.left),
+    );
+  }
+
   /// The top side of this border.
   final BorderSide top;
 
@@ -341,7 +377,7 @@ class Border {
   ///
   /// This can be used, for example, with a [Padding] widget to inset a box by
   /// the size of these borders.
-  EdgeInsets get dimensions {
+  EdgeInsetsGeometry get dimensions {
     return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
@@ -374,13 +410,23 @@ class Border {
     return true;
   }
 
+  Border add(Border typedOther) {
+    if (BorderSide.canMerge(top, typedOther.top) &&
+        BorderSide.canMerge(right, typedOther.right) &&
+        BorderSide.canMerge(bottom, typedOther.bottom) &&
+        BorderSide.canMerge(left, typedOther.left)) {
+      return Border.merge(this, typedOther);
+    }
+    return null;
+  }
+
   /// Creates a new border with the widths of this border multiplied by `t`.
   Border scale(double t) {
     return new Border(
-      top: top.copyWith(width: t * top.width),
-      right: right.copyWith(width: t * right.width),
-      bottom: bottom.copyWith(width: t * bottom.width),
-      left: left.copyWith(width: t * left.width)
+      top: top.scale(t),
+      right: right.scale(t),
+      bottom: bottom.scale(t),
+      left: left.scale(t),
     );
   }
 
@@ -407,12 +453,12 @@ class Border {
   ///
   /// Uniform borders are more efficient to paint than more complex borders.
   ///
-  /// You can provide a [BoxShape] to draw the border on. If the shape in
+  /// You can provide a [BoxShape] to draw the border on. If the `shape` in
   /// [BoxShape.circle], there is the requirement that the border [isUniform].
   ///
-  /// If you specify a rectangular box shape (BoxShape.rectangle), then you may
-  /// specify a [BorderRadius]. If a border radius is specified, there is the
-  /// requirement that the border [isUniform].
+  /// If you specify a rectangular box shape ([BoxShape.rectangle]), then you
+  /// may specify a [BorderRadius]. If a `borderRadius` is specified, there is
+  /// the requirement that the border [isUniform].
   ///
   /// See also:
   ///
@@ -422,17 +468,22 @@ class Border {
     BorderRadius borderRadius,
   }) {
     if (isUniform) {
-      if (shape == BoxShape.circle) {
-        assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-        _paintUniformBorderWithCircle(canvas, rect);
-        return;
+      switch (top.style) {
+        case BorderStyle.none:
+          return;
+        case BorderStyle.solid:
+          if (shape == BoxShape.circle) {
+            assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+            _paintUniformBorderWithCircle(canvas, rect);
+            return;
+          }
+          if (borderRadius != null) {
+            _paintUniformBorderWithRadius(canvas, rect, borderRadius);
+            return;
+          }
+          _paintUniformBorderWithRectangle(canvas, rect);
+          return;
       }
-      if (borderRadius != null) {
-        _paintUniformBorderWithRadius(canvas, rect, borderRadius);
-        return;
-      }
-      _paintUniformBorderWithRectangle(canvas, rect);
-      return;
     }
 
     assert(borderRadius == null, 'A borderRadius can only be given for uniform borders.');
@@ -444,6 +495,7 @@ class Border {
   void _paintUniformBorderWithRadius(Canvas canvas, Rect rect,
                                      BorderRadius borderRadius) {
     assert(isUniform);
+    assert(top.style != BorderStyle.none);
     final Paint paint = new Paint()
       ..color = top.color;
     final RRect outer = borderRadius.toRRect(rect);
@@ -461,22 +513,18 @@ class Border {
 
   void _paintUniformBorderWithCircle(Canvas canvas, Rect rect) {
     assert(isUniform);
+    assert(top.style != BorderStyle.none);
     final double width = top.width;
-    final Paint paint = new Paint()
-      ..color = top.color
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke;
+    final Paint paint = top.toPaint();
     final double radius = (rect.shortestSide - width) / 2.0;
     canvas.drawCircle(rect.center, radius, paint);
   }
 
   void _paintUniformBorderWithRectangle(Canvas canvas, Rect rect) {
     assert(isUniform);
+    assert(top.style != BorderStyle.none);
     final double width = top.width;
-    final Paint paint = new Paint()
-      ..color = top.color
-      ..strokeWidth = width
-      ..style = PaintingStyle.stroke;
+    final Paint paint = top.toPaint();
     canvas.drawRect(rect.deflate(width / 2.0), paint);
   }
 
