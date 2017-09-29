@@ -710,7 +710,12 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+  }) : super(
+         renderObjectOwner: renderObjectOwner,
+         annotator: annotator,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+       );
 
   @override
   Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics }) sync* {
@@ -743,7 +748,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     SemanticsAnnotator annotator,
     Iterable<_SemanticsFragment> children,
     bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+  }) : super(
+         renderObjectOwner: renderObjectOwner,
+         annotator: annotator,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+       );
 
   @override
   SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics, SemanticsNode parentSemantics) {
@@ -789,7 +799,14 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
     bool dropSemanticsOfPreviousSiblings,
     bool mergeIntoParent,
     bool mergesAllDescendants,
-  }) : _mergeIntoParent = mergeIntoParent, _mergesAllDescendants = mergesAllDescendants, super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+  }) : _mergeIntoParent = mergeIntoParent,
+       _mergesAllDescendants = mergesAllDescendants,
+       super(
+         renderObjectOwner: renderObjectOwner,
+         annotator: annotator,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+       );
 
   final bool _mergeIntoParent;
   final bool _mergesAllDescendants;
@@ -839,7 +856,14 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
     bool dropSemanticsOfPreviousSiblings,
     bool mergeIntoParent,
     bool mergesAllDescendants,
-  }) : _mergeIntoParent = mergeIntoParent, _mergesAllDescendants = mergesAllDescendants, super(renderObjectOwner: renderObjectOwner, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+  }) : _mergeIntoParent = mergeIntoParent,
+       _mergesAllDescendants = mergesAllDescendants,
+       super(
+         renderObjectOwner: renderObjectOwner,
+         annotator: annotator,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+       );
 
   // If true, this fragment will introduce its own node into the Semantics Tree.
   // If false, a borrowed semantics node from an ancestor is used.
@@ -2529,6 +2553,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// determine if a node is previous to this one.
   bool get isBlockingSemanticsOfPreviouslyPaintedNodes => false;
 
+  /// Whether the semantic information provided by this [RenderObject] and all
+  /// of its descendants should be treated as one logical entity.
+  ///
+  /// If true is returned, the descendants of this [RenderObject]'s
+  /// [SemanticsNode] will merge their semantic information into the
+  /// [SemanticsNode] representing this [RenderObject].
   bool get isMergingSemanticsOfDescendants => false;
 
   /// The bounding box, in the local coordinate system, of this
@@ -2701,7 +2731,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!_needsSemanticsUpdate && isSemanticBoundary) {
       assert(_semantics != null);
       if (mergeIntoParent == _semantics.isMergedIntoParent) {
-        return new _CleanSemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes);
+        return new _CleanSemanticsFragment(
+          renderObjectOwner: this,
+          dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes,
+        );
       }
     }
     List<_SemanticsFragment> children;
@@ -2738,19 +2771,48 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (parent is! RenderObject) {
       assert(!mergeIntoParent);
       assert(!isMergingSemanticsOfDescendants);
-      return new _RootSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _RootSemanticsFragment(
+        renderObjectOwner: this,
+        annotator: annotator,
+        children: children,
+        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
     }
-    if (isSemanticBoundary)
-      return new _ConcreteSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings, mergeIntoParent: mergeIntoParent, mergesAllDescendants: isMergingSemanticsOfDescendants);
-    if (annotator != null || isMergingSemanticsOfDescendants)
-      return new _ImplicitSemanticsFragment(renderObjectOwner: this, annotator: annotator, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings, mergeIntoParent: mergeIntoParent, mergesAllDescendants: isMergingSemanticsOfDescendants);
+    if (isSemanticBoundary) {
+      return new _ConcreteSemanticsFragment(
+        renderObjectOwner: this,
+        annotator: annotator,
+        children: children,
+        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+        mergeIntoParent: mergeIntoParent,
+        mergesAllDescendants: isMergingSemanticsOfDescendants,
+      );
+    }
+     if (annotator != null || isMergingSemanticsOfDescendants) {
+       return new _ImplicitSemanticsFragment(
+         renderObjectOwner: this,
+         annotator: annotator,
+         children: children,
+         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+         mergeIntoParent: mergeIntoParent,
+         mergesAllDescendants: isMergingSemanticsOfDescendants,
+       );
+     }
     _semantics = null;
     if (children == null) {
       // Introduces no semantics and has no descendants that introduce semantics.
-      return new _EmptySemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+      return new _EmptySemanticsFragment(
+        renderObjectOwner: this,
+        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
     }
-    if (children.length > 1)
-      return new _ForkingSemanticsFragment(renderObjectOwner: this, children: children, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
+    if (children.length > 1) {
+      return new _ForkingSemanticsFragment(
+        renderObjectOwner: this,
+        children: children,
+        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
+    }
     assert(children.length == 1);
     return children.single..dropSemanticsOfPreviousSiblings = dropSemanticsOfPreviousSiblings;
   }

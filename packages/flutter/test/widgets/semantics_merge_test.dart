@@ -45,7 +45,7 @@ void main() {
       ignoreTransform: true,
     ));
 
-    //merged
+    // merged
     await tester.pumpWidget(
       new Directionality(
         textDirection: TextDirection.ltr,
