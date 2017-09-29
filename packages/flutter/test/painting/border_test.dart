@@ -51,34 +51,34 @@ void main() {
     final BorderSide yellow2 = const BorderSide(color: const Color(0xFFFFFF00), width: 2.0);
     final BorderSide yellowNone0 = const BorderSide(color: const Color(0xFFFFFF00), width: 0.0, style: BorderStyle.none);
     expect(
-      new Border(top: yellow2).add(new Border(right: magenta3)),
+      new Border(top: yellow2) + new Border(right: magenta3),
       new Border(top: yellow2, right: magenta3),
     );
     expect(
-      new Border(bottom: magenta3).add(new Border(bottom: magenta3)),
+      new Border(bottom: magenta3) + new Border(bottom: magenta3),
       new Border(bottom: magenta6),
     );
     expect(
-      new Border(left: magenta3, right: yellowNone0).add(new Border(right: yellow2)),
+      new Border(left: magenta3, right: yellowNone0) + new Border(right: yellow2),
       new Border(left: magenta3, right: yellow2),
     );
     expect(
-      const Border().add(const Border()),
+      const Border() + const Border(),
       const Border(),
     );
     expect(
-      new Border(left: magenta3).add(new Border(left: yellow2)),
-      isNull,
+      new Border(left: magenta3) + new Border(left: yellow2),
+      isNot(const isInstanceOf<Border>()), // see shape_border_test.dart for better tests of this case
     );
     final Border b3 = new Border(top: magenta3);
     final Border b6 = new Border(top: magenta6);
-    expect(b3.add(b3), b6);
+    expect(b3 + b3, b6);
     final Border b0 = new Border(top: yellowNone0);
     final Border bZ = const Border();
-    expect(b0.add(b0), bZ);
-    expect(bZ.add(bZ), bZ);
-    expect(b0.add(bZ), bZ);
-    expect(bZ.add(b0), bZ);
+    expect(b0 + b0, bZ);
+    expect(bZ + bZ, bZ);
+    expect(b0 + bZ, bZ);
+    expect(bZ + b0, bZ);
   });
 
   test('Border.scale', () {
