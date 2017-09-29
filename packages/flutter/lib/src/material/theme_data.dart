@@ -453,9 +453,7 @@ class ThemeData {
     );
   }
 
-  static ThemeData _lastBaseTheme;
-  static TextTheme _lastLocalTextGeometry;
-  static ThemeData _memoizedLocalizeResult;
+  static final _LruCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache = new _LruCache<_IdentityThemeDataCacheKey, ThemeData>(5);
 
   /// Returns a new theme built by merging [baseTheme] into the text geometry
   /// provided by the [localTextGeometry].
@@ -463,13 +461,13 @@ class ThemeData {
   /// The [TextStyle.inherit] field in the text styles provided by
   /// [localTextGeometry] must be set to true.
   static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
-    // WARNING: this method memoizes the result based on the previously seen
-    // baseTheme and localTextGeometry. Memoization is safe because all inputs
-    // and outputs of this function are deeply immutable, and the computations
-    // are referentially transparent. It only short-circuits the computation if
-    // the new inputs are identical() to the previous ones. It does not use the
-    // == operator, which performs a costly deep comparison. This memoization
-    // saves us ~6% on the stock_build_iteration benchmark.
+    // WARNING: this method memoizes the result in an LRU cache based on the
+    // previously seen baseTheme and localTextGeometry. Memoization is safe
+    // because all inputs and outputs of this function are deeply immutable, and
+    // the computations are referentially transparent. It only short-circuits
+    // the computation if the new inputs are identical() to the previous ones.
+    // It does not use the == operator, which performs a costly deep comparison.
+    // This memoization saves us ~6% on the stock_build_iteration benchmark.
     //
     // When changing this method, make sure the memoization logic is correct. Do
     // not forget about the two hardest things in computer science:
@@ -479,16 +477,15 @@ class ThemeData {
     assert(baseTheme != null);
     assert(localTextGeometry != null);
 
-    if (identical(baseTheme, _lastBaseTheme) && identical(localTextGeometry, _lastLocalTextGeometry))
-      return _memoizedLocalizeResult;
-
-    _lastBaseTheme = baseTheme;
-    _lastLocalTextGeometry = localTextGeometry;
-
-    return _memoizedLocalizeResult = baseTheme.copyWith(
-      primaryTextTheme: baseTheme.primaryTextTheme.merge(localTextGeometry),
-      accentTextTheme: baseTheme.accentTextTheme.merge(localTextGeometry),
-      textTheme: baseTheme.textTheme.merge(localTextGeometry),
+    return _localizedThemeDataCache.putIfAbsent(
+      new _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
+      () {
+        return baseTheme.copyWith(
+          primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
+          accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
+          textTheme: localTextGeometry.merge(baseTheme.textTheme),
+        );
+      },
     );
   }
 
@@ -640,4 +637,107 @@ class ThemeData {
 
   @override
   String toString() => '$runtimeType(${ platform != defaultTargetPlatform ? "$platform " : ''}$brightness $primaryColor etc...)';
+}
+
+class _IdentityThemeDataCacheKey {
+  _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
+
+  final ThemeData baseTheme;
+  final TextTheme localTextGeometry;
+
+  // TODO: use Jenkins hash function with identityHashCode
+  @override
+  int get hashCode => _PrecomputedJenkins.finish(_PrecomputedJenkins.combine(identityHashCode(baseTheme), identityHashCode(localTextGeometry)));
+
+  @override
+  bool operator ==(Object other) {
+    final _IdentityThemeDataCacheKey otherKey = other;
+    return identical(baseTheme, otherKey.baseTheme) && identical(localTextGeometry, otherKey.localTextGeometry);
+  }
+}
+
+/// Jenkins hash function that combines precomputed hash codes into.
+//
+// Borrowed from the dart sdk: sdk/lib/math/jenkins_smi_hash.dart.
+// TODO: move this to engine, where we keep our other hash functions.
+class _PrecomputedJenkins {
+  static int combine(int hash1, int hash2) {
+    hash1 = 0x1fffffff & (hash1 + hash2);
+    hash1 = 0x1fffffff & (hash1 + ((0x0007ffff & hash1) << 10));
+    return hash1 ^ (hash1 >> 6);
+  }
+
+  static int finish(int hash) {
+    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
+    hash = hash ^ (hash >> 11);
+    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  }
+}
+
+/// Cache of objects that uses least-recently-used strategy.
+///
+// TODO(yjbanov): factor it out and reuse for image cache.
+class _LruCache<K, V> {
+  _LruCache(int initialMaximumSize)
+    : assert(initialMaximumSize != null),
+      _maximumSize = initialMaximumSize;
+
+  final Map<K, V> _cache = <K, V>{};
+
+  /// Maximum number of entries to store in the cache.
+  ///
+  /// Once this many entries have been cached, the least-recently-used entry is
+  /// evicted when adding a new entry.
+  int get maximumSize => _maximumSize;
+  int _maximumSize;
+  /// Changes the maximum cache size.
+  ///
+  /// If the new size is smaller than the current number of elements, the
+  /// extraneous elements are evicted immediately. Setting this to zero and then
+  /// returning it to its original value will therefore immediately clear the
+  /// cache.
+  set maximumSize(int value) {
+    assert(value != null);
+    assert(value >= 0);
+    if (value == maximumSize)
+      return;
+    _maximumSize = value;
+    if (maximumSize == 0) {
+      _cache.clear();
+    } else {
+      while (_cache.length > maximumSize)
+        _cache.remove(_cache.keys.first);
+    }
+  }
+
+  /// Evicts all entries from the cache.
+  void clear() {
+    _cache.clear();
+  }
+
+  /// Returns the previously cached value for the given key, if available;
+  /// if not, calls the given callback to obtain it first. In either case, the
+  /// key is moved to the "most recently used" position.
+  ///
+  /// The arguments must not be null. The `loader` cannot return null.
+  V putIfAbsent(K key, V loader()) {
+    assert(key != null);
+    assert(loader != null);
+    V result = _cache[key];
+    if (result != null) {
+      // Remove the provider from the list so that we can put it back in below
+      // and thus move it to the end of the list.
+      _cache.remove(key);
+    } else {
+      if (_cache.length == maximumSize && maximumSize > 0)
+        _cache.remove(_cache.keys.first);
+      result = loader();
+    }
+    if (maximumSize > 0) {
+      assert(_cache.length < maximumSize);
+      _cache[key] = result;
+    }
+    assert(_cache.length <= maximumSize);
+    return result;
+  }
 }

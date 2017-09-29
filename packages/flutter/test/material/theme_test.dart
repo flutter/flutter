@@ -336,6 +336,37 @@ void main() {
       expect(testBuildCalled, 2);
     },
   );
+
+  testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
+    const double _kMagicFontSize = 4321.0;
+    final ThemeData fallback = new ThemeData.fallback();
+    final ThemeData customTheme = fallback.copyWith(
+      primaryTextTheme: fallback.primaryTextTheme.copyWith(
+        body1: fallback.primaryTextTheme.body1.copyWith(
+          fontSize: _kMagicFontSize,
+        )
+      ),
+    );
+    expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);
+
+    double actualFontSize;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Theme(
+        data: customTheme,
+        child: new Builder(builder: (BuildContext context) {
+          final ThemeData theme = Theme.of(context);
+          actualFontSize = theme.primaryTextTheme.body1.fontSize;
+          return new Text(
+            'A',
+            style: theme.primaryTextTheme.body1,
+          );
+        }),
+      ),
+    ));
+
+    expect(actualFontSize, _kMagicFontSize);
+  });
 }
 
 int testBuildCalled;
