@@ -13,7 +13,6 @@ void main() {
   testWidgets('MergeSemantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    print('>>>>> not merged');
     // not merged
     await tester.pumpWidget(
       new Directionality(
@@ -35,14 +34,17 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(id: 1, label: 'test1'),
-        new TestSemantics.rootChild(id: 2, label: 'test2'),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(id: 1, label: 'test1'),
+          new TestSemantics.rootChild(id: 2, label: 'test2'),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
-    print('>>>>> merged');
     //merged
     await tester.pumpWidget(
       new Directionality(
@@ -66,9 +68,12 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'test1\ntest2')));
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(label: 'test1\ntest2'),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
-    print('>>>>> not merged');
     // not merged
     await tester.pumpWidget(
       new Directionality(
@@ -90,14 +95,16 @@ void main() {
       ),
     );
 
-    debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-
-    expect(semantics, hasSemantics(new TestSemantics.root(
-      children: <TestSemantics>[
-        new TestSemantics.rootChild(id: 1, label: 'test1'),
-        new TestSemantics.rootChild(id: 2, label: 'test2'),
-      ],
-    ), ignoreRect: true, ignoreTransform: true));
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(id: 5, label: 'test1'),
+          new TestSemantics.rootChild(id: 6, label: 'test2'),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     semantics.dispose();
   });
