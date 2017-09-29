@@ -8,8 +8,10 @@ import 'framework.dart';
 
 /// A [Widget] backed by a platform surface.
 class PlatformSurface extends LeafRenderObjectWidget {
+  /// Creates a widget backed by the platform surface identified by [surfaceId].
   const PlatformSurface({ Key key, @required this.surfaceId }): super(key: key);
 
+  /// The identity of the platform surface backing this widget.
   final int surfaceId;
 
   @override

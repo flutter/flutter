@@ -8,10 +8,12 @@ import 'object.dart';
 
 /// A [RenderBox] backed by a platform surface.
 class PlatformSurfaceBox extends RenderBox {
+  /// Creates a box backed by the platform surface identified by [surfaceId].
   PlatformSurfaceBox({ int surfaceId }) : _surfaceId = surfaceId;
 
   int _surfaceId;
 
+  /// Sets the platform surface ID.
   set surfaceId(int value) {
     if (value != _surfaceId) {
       _surfaceId = value;
@@ -19,6 +21,7 @@ class PlatformSurfaceBox extends RenderBox {
     }
   }
 
+  /// Returns the platform surface ID.
   int get surfaceId => _surfaceId;
 
   @override
@@ -34,7 +37,6 @@ class PlatformSurfaceBox extends RenderBox {
   void performResize() {
     size = constraints.biggest;
   }
-
 
   @override
   bool hitTestSelf(Offset position) {

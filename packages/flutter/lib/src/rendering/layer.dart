@@ -171,13 +171,18 @@ class PictureLayer extends Layer {
 ///
 /// Platform surface layers are always leaves in the layer tree.
 class PlatformSurfaceLayer extends Layer {
+  /// Creates a platform surface layer bounded by [rect] and identified
+  /// by [surfaceId].
   PlatformSurfaceLayer({
     @required this.rect,
     @required this.surfaceId,
   });
 
-  Rect rect;
-  int surfaceId;
+  /// Bounding rectangle of this layer.
+  final Rect rect;
+
+  /// Identity of the platform surface backing this layer.
+  final int surfaceId;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
