@@ -5,9 +5,10 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'constants.dart';
 import 'theme.dart';
-import 'typography.dart';
+import 'theme_data.dart';
 
 // Examples can assume:
 // String userAvatarUrl;
@@ -91,9 +92,19 @@ class CircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final TextStyle textStyle = backgroundColor != null ?
-        new Typography(platform: theme.platform).white.title :
-        theme.primaryTextTheme.title;
+    TextStyle textStyle = theme.primaryTextTheme.title;
+    if (foregroundColor != null) {
+      textStyle = textStyle.copyWith(color: foregroundColor);
+    } else if (backgroundColor != null) {
+      switch (ThemeData.estimateBrightnessForColor(backgroundColor)) {
+        case Brightness.dark:
+          textStyle = textStyle.copyWith(color: Colors.white);
+          break;
+        case Brightness.light:
+          textStyle = textStyle.copyWith(color: Colors.black);
+          break;
+      }
+    }
     return new AnimatedContainer(
       width: radius * 2.0,
       height: radius * 2.0,
