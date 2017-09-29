@@ -143,19 +143,30 @@ abstract class MaterialLocalizations {
   /// in the date picker invoked using [showDatePicker].
   String formatMonthYear(DateTime date);
 
-  /// List of week day names in narrow format, usually 1- or 2-letter long
+  /// List of week day names in narrow format, usually 1- or 2-letter
   /// abbreviations of full names.
   ///
   /// The list begins with the value corresponding to Sunday and ends with
-  /// Saturday.
+  /// Saturday. Use [firstDayOfWeekIndex] to find the first day of week in this
+  /// list.
   ///
   /// Examples:
   ///
   /// - US English: S, M, T, W, T, F, S
-  /// - Russian: пн, вт, ср, чт, пт, сб, вс
+  /// - Russian: вс, пн, вт, ср, чт, пт, сб - notice that the list begins with
+  ///   вс (Sunday) even though the first day of week for Russian is Monday.
   List<String> get narrowWeekDays;
 
-  /// Index into [narrowWeekDays] pointing at the first day of week.
+  /// Index of the first day of week, where 0 points to Sunday, and 6 points to
+  /// Saturday.
+  ///
+  /// This getter is compatible with [narrowWeekDays]. For example:
+  ///
+  /// ```dart
+  /// var localizations = MaterialLocalizations.of(context);
+  /// // The name of the first day of week for the current locale.
+  /// var firstDayOfWeek = localizations.narrowWeekDays[localizations.firstDayOfWeekIndex];
+  /// ```
   int get firstDayOfWeekIndex;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
@@ -177,9 +188,6 @@ abstract class MaterialLocalizations {
 
 /// Localized strings for the material widgets.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
-  /// Ensures that i18n data for dates is loaded lazily and only once globally.
-  static bool _dateDataInitialized = false;
-
   /// Constructs an object that defines the material widgets' localized strings
   /// for the given `locale`.
   ///
@@ -188,13 +196,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   DefaultMaterialLocalizations(this.locale)
       : assert(locale != null),
         this._localeName = _computeLocaleName(locale) {
-    if (!_dateDataInitialized) {
-      // The returned Future is intentionally dropped on the floor. The
-      // function only returns it to be compatible with the async counterparts.
-      // The Future has no value otherwise.
-      intl_local_date_data.initializeDateFormatting();
-      _dateDataInitialized = true;
-    }
+    _loadDateIntlDataIfNotLoaded();
 
     if (localizations.containsKey(locale.languageCode))
       _nameToValue.addAll(localizations[locale.languageCode]);
@@ -508,3 +510,20 @@ const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDa
   'a h:mm': TimeOfDayFormat.a_space_h_colon_mm,
   'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
 };
+
+/// Tracks if date i18n data has been loaded.
+bool _dateIntlDataInitialized = false;
+
+/// Loads i18n data for dates if it hasn't be loaded yet.
+///
+/// Only the first invocation of this function has the effect of loading the
+/// data. Subsequent invocations have no effect.
+void _loadDateIntlDataIfNotLoaded() {
+  if (!_dateIntlDataInitialized) {
+    // The returned Future is intentionally dropped on the floor. The
+    // function only returns it to be compatible with the async counterparts.
+    // The Future has no value otherwise.
+    intl_local_date_data.initializeDateFormatting();
+    _dateIntlDataInitialized = true;
+  }
+}

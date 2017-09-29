@@ -274,13 +274,30 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
+  /// Builds widgets showing abbreviated days of week. The first widget in the
+  /// returned list corresponds to the first day of week for the current locale.
+  ///
+  /// Examples:
+  ///
+  /// ```
+  /// ┌ Sunday is the first day of week in the US (en_US)
+  /// |
+  /// S M T W T F S  <-- the returned list contains these widgets
+  /// _ _ _ _ _ 1 2
+  /// 3 4 5 6 7 8 9
+  ///
+  /// ┌ But it's Monday in the UK (en_GB)
+  /// |
+  /// M T W T F S S  <-- the returned list contains these widgets
+  /// _ _ _ _ 1 2 3
+  /// 4 5 6 7 8 9 10
+  /// ```
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
-    final int daysInWeek = localizations.narrowWeekDays.length;
-    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % daysInWeek) {
+    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
       final String weekDay = localizations.narrowWeekDays[i];
       result.add(new Center(child: new Text(weekDay, style: headerStyle)));
-      if (i == (localizations.firstDayOfWeekIndex - 1) % daysInWeek)
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
         break;
     }
     return result;
@@ -316,14 +333,14 @@ class DayPicker extends StatelessWidget {
   /// ```
   ///
   /// The offset for the first day of the months is the number of leading blanks
-  /// in the calendar - 5.
+  /// in the calendar, i.e. 5.
   ///
   /// The same date localized for the Russian calendar has a different offset,
   /// because the first day of week is Monday rather than Sunday:
   ///
   /// ```
   /// M T W T F S S
-  /// _ _ _ _ 1 2 _
+  /// _ _ _ _ 1 2 3
   /// ```
   ///
   /// So the offset is 4, rather than 5.
@@ -931,6 +948,13 @@ typedef bool SelectableDayPredicate(DateTime day);
 /// An optional [initialDatePickerMode] argument can be used to display the
 /// date picker initially in the year or month+day picker mode. It defaults
 /// to month+day, and must not be null.
+///
+/// An optional [locale] argument can be used to set the locale for the date
+/// picker. It defaults to the ambient locale provided by [Localizations].
+///
+/// An optional [textDirection] argument can be used to set the text direction
+/// (RTL or LTR) for the date picker. It defaults to the ambient text direction
+/// provided by [Directionality].
 ///
 /// See also:
 ///
