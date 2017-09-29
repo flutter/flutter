@@ -147,7 +147,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   DefaultMaterialLocalizations(this.locale)
       : this._localeName = _computeLocaleName(locale) {
-    // TODO(tvolkert): Move this assert back to the initializer.
     assert(locale != null);
     if (localizations.containsKey(locale.languageCode))
       _nameToValue.addAll(localizations[locale.languageCode]);
