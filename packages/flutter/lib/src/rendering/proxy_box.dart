@@ -3001,6 +3001,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
     _innerNode
       ..wasAffectedByClip = node.wasAffectedByClip
+      ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
 
     semanticsAnnotator(_innerNode);
@@ -3257,14 +3258,8 @@ class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  @override
   bool get isMergingSemanticsOfDescendants => true;
 
-  void _annotate(SemanticsNode node) {
-    node.mergeAllDescendantsIntoThisNode = true;
-  }
 }
 
 /// Excludes this subtree from the semantic tree.
