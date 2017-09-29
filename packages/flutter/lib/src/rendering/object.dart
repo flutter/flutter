@@ -799,7 +799,7 @@ class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
       showOnScreen: renderObjectOwner.showOnScreen,
     );
     final SemanticsNode node = renderObjectOwner._semantics;
-    node.inheritedMergeAllDescendantsIntoThisNode = _mergeIntoParent;
+    node.isMergedIntoParent = _mergeIntoParent;
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
       geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node, parentSemantics: parentSemantics);
@@ -854,7 +854,7 @@ class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
         showOnScreen: renderObjectOwner.showOnScreen,
       );
       node = renderObjectOwner._semantics;
-      node.inheritedMergeAllDescendantsIntoThisNode = _mergeIntoParent;
+      node.isMergedIntoParent = _mergeIntoParent;
     } else {
       renderObjectOwner._semantics = null;
       node = currentSemantics;
@@ -2672,7 +2672,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     try {
       assert(_needsSemanticsUpdate);
       assert(_semantics != null || parent is! RenderObject);
-      final _SemanticsFragment fragment = _getSemanticsFragment(mergeIntoParent: _semantics?.parent?.shouldMergeAllDescendantsIntoThisNode ?? false);
+      final _SemanticsFragment fragment = _getSemanticsFragment(mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false);
       assert(fragment is _InterestingSemanticsFragment);
       final SemanticsNode node = fragment.compile(parentSemantics: _semantics?.parent).single;
       assert(node != null);
@@ -2690,10 +2690,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// semantics.
   _SemanticsFragment _getSemanticsFragment({ bool mergeIntoParent: false }) {
     // early-exit if we're not dirty and have our own semantics
-    print('>>> $mergeIntoParent $this');
     if (!_needsSemanticsUpdate && isSemanticBoundary) {
       assert(_semantics != null);
-      if (mergeIntoParent == _semantics.inheritedMergeAllDescendantsIntoThisNode) {
+      if (mergeIntoParent == _semantics.isMergedIntoParent) {
         return new _CleanSemanticsFragment(renderObjectOwner: this, dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes);
       }
     }

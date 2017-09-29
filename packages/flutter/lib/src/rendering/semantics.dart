@@ -341,17 +341,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
-  bool get inheritedMergeAllDescendantsIntoThisNode => _inheritedMergeAllDescendantsIntoThisNodeValue;
-  bool _inheritedMergeAllDescendantsIntoThisNodeValue = false;
-  set inheritedMergeAllDescendantsIntoThisNode(bool value) {
+  bool get isMergedIntoParent => _isMergedIntoParent;
+  bool _isMergedIntoParent = false;
+  set isMergedIntoParent(bool value) {
     assert(value != null);
-    if (_inheritedMergeAllDescendantsIntoThisNodeValue == value)
+    if (_isMergedIntoParent == value)
       return;
-    _inheritedMergeAllDescendantsIntoThisNodeValue = value;
+    _isMergedIntoParent = value;
     _markDirty();
   }
 
-  bool get shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || inheritedMergeAllDescendantsIntoThisNode;
+  bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
 
   int _flags = 0;
   void _setFlag(SemanticsFlags flag, bool value) {
@@ -601,8 +601,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _dirty = false;
       _markDirty();
     }
-    if (parent != null)
-      inheritedMergeAllDescendantsIntoThisNode = parent.shouldMergeAllDescendantsIntoThisNode;
+    assert(isMergedIntoParent == (parent?.isPartOfNodeMerging ?? false));
     if (_children != null) {
       for (SemanticsNode child in _children)
         child.attach(owner);
@@ -757,7 +756,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       hideOwner = inDirtyNodes;
     }
     properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(new FlagProperty('shouldMergeAllDescendantsIntoThisNode', value: shouldMergeAllDescendantsIntoThisNode, ifTrue: 'leaf merge'));
+    properties.add(new FlagProperty('isPartOfNodeMerging', value: isPartOfNodeMerging, ifTrue: 'leaf merge'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -883,31 +882,11 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent.shouldMergeAllDescendantsIntoThisNode || node.inheritedMergeAllDescendantsIntoThisNode);
-        if (node.shouldMergeAllDescendantsIntoThisNode) {
+        assert(node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent);
+        if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          if (node.mergeAllDescendantsIntoThisNode ||
-              node.parent != null && node.parent.shouldMergeAllDescendantsIntoThisNode) {
-            // if we're merged into our parent, make sure our parent is added to the list
-            if (node.parent != null && node.parent.shouldMergeAllDescendantsIntoThisNode)
-              node.parent._markDirty(); // this can add the node to the dirty list
-            // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
-            if (node._children != null) {
-              for (SemanticsNode child in node._children)
-                child.inheritedMergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
-            }
-          } else {
-            // we previously were being merged but aren't any more
-            // update our bits and all our descendants'
-            assert(node.inheritedMergeAllDescendantsIntoThisNode);
-            assert(!node.mergeAllDescendantsIntoThisNode);
-            assert(node.parent == null || !node.parent.shouldMergeAllDescendantsIntoThisNode);
-            node.inheritedMergeAllDescendantsIntoThisNode = false;
-            if (node._children != null) {
-              for (SemanticsNode child in node._children)
-                child.inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
-            }
-          }
+          if (node.parent != null && node.parent.isPartOfNodeMerging)
+            node.parent._markDirty(); // this can add the node to the dirty list
         }
       }
     }
@@ -935,7 +914,7 @@ class SemanticsOwner extends ChangeNotifier {
 
   SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode result = _nodes[id];
-    if (result != null && result.shouldMergeAllDescendantsIntoThisNode && !result._canPerformAction(action)) {
+    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
         if (node._canPerformAction(action)) {
           result = node;
