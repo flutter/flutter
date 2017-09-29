@@ -121,15 +121,13 @@ void handleKnownGradleExceptions(String exceptionString) {
   final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
   if (licenseMatch != null) {
     final String missingLicenses = licenseMatch.group(1);
-    if (matcher.isNotEmpty) {
-      final String errorMessage =
-        '\n\n* Error running Gradle:\n'
-        'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
-        '$missingLicenses\n\n'
-        'To resolve this, please run the following command in a Terminal:\n'
-        'flutter doctor --android-licenses';
-      throwToolExit(errorMessage);
-    }
+    final String errorMessage =
+      '\n\n* Error running Gradle:\n'
+      'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
+      '$missingLicenses\n\n'
+      'To resolve this, please run the following command in a Terminal:\n'
+      'flutter doctor --android-licenses';
+    throwToolExit(errorMessage);
   }
 }
 
