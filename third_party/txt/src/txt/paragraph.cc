@@ -201,7 +201,7 @@ void Paragraph::Layout(double width, bool force) {
 
   breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
   breaker_.setStrategy(paragraph_style_.break_strategy);
-  size_t breaks_count = breaker_.computeBreaks();
+  breaks_count_ = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 
   // Create a copy of text_ to use locally so that any changes made to the
@@ -226,12 +226,9 @@ void Paragraph::Layout(double width, bool force) {
 
   glyph_position_x_ = std::vector<std::vector<GlyphPosition>>();
   std::vector<GlyphPosition> glyph_single_line_position_x;
-  // Track the x of the previous run to maintain accurate xposition when
-  // multiple SkTextBlobs make up a single line.
-  double previous_run_x_position = 0.0f;
 
-  SkScalar x = 0.0f;
-  SkScalar y = 0.0f;
+  SkScalar x_offset = GetLineXOffset(0);
+  SkScalar y_offset = 0.0f;
   size_t break_index = 0;
   double max_line_spacing = 0.0f;
   double max_descent = 0.0f;
@@ -240,71 +237,13 @@ void Paragraph::Layout(double width, bool force) {
   double justify_spacing = 0.0f;
   double prev_word_pos = 0.0f;
   double prev_char_advance = 0.0f;
-  double current_x_position = previous_run_x_position;
+  double current_x_position = 0.0f;
 
   std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
   std::vector<size_t> buffer_sizes;
   int word_count = 0;
   size_t max_lines = paragraph_style_.max_lines;
 
-  auto postprocess_line = [this, &x_queue, &y]() -> void {
-    size_t record_index = 0;
-    for (size_t i = 0; i < x_queue.size(); ++i) {
-      record_index = records_.size() - (x_queue.size() - i);
-      records_[record_index].SetOffset(SkPoint::Make(x_queue[i], y));
-      // Adjust the offsets for each of the different alignments.
-      switch (paragraph_style_.text_align) {
-        case TextAlign::left:
-          break;
-        case TextAlign::right: {
-          records_[record_index].SetOffset(SkPoint::Make(
-              records_[record_index].offset().x() + width_ -
-                  breaker_.getWidths()[records_[record_index].line()],
-              records_[record_index].offset().y()));
-          break;
-        }
-        case TextAlign::center: {
-          records_[record_index].SetOffset(SkPoint::Make(
-              records_[record_index].offset().x() +
-                  (width_ -
-                   breaker_.getWidths()[records_[record_index].line()]) /
-                      2,
-              records_[record_index].offset().y()));
-          break;
-        }
-        case TextAlign::justify: {
-          break;
-        }
-      }
-    }
-    // Correct positions stored in the member vars.
-    for (size_t y_index = 0; y_index < lines_; ++y_index) {
-      switch (paragraph_style_.text_align) {
-        case TextAlign::left:
-          break;
-        case TextAlign::right: {
-          for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
-            glyph_position_x_[y_index][i].start +=
-                width_ - breaker_.getWidths()[y_index];
-          }
-          break;
-        }
-        case TextAlign::center: {
-          for (size_t i = 0; i < glyph_position_x_[y_index].size(); ++i) {
-            glyph_position_x_[y_index][i].start +=
-                (width_ - breaker_.getWidths()[y_index]) / 2;
-          }
-          break;
-        }
-        case TextAlign::justify: {
-          // TODO(garyq): Track position changes due to justify in justify
-          // method.
-          break;
-        }
-      }
-    }
-    x_queue.clear();
-  };
   for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
     auto run = runs_.GetRun(run_index);
     bool is_newline = text_[run.start] == '\n' && run.end - run.start == 1;
@@ -319,7 +258,7 @@ void Paragraph::Layout(double width, bool force) {
     size_t layout_start = run.start;
     // Layout until the end of the run or too many lines.
     while (layout_start < run.end && lines_ < max_lines) {
-      const size_t next_break = (break_index > breaks_count - 1)
+      const size_t next_break = (break_index > breaks_count_ - 1)
                                     ? std::numeric_limits<size_t>::max()
                                     : breaks[break_index];
       const size_t layout_end = std::min(run.end, next_break);
@@ -441,8 +380,7 @@ void Paragraph::Layout(double width, bool force) {
           size_t ligature_width = ligature_end - character_index;
           float subglyph_advance = glyph_advance / ligature_width;
           glyph_single_line_position_x.emplace_back(
-              current_x_position + previous_run_x_position + letter_spacing,
-              subglyph_advance);
+              x_offset + current_x_position + letter_spacing, subglyph_advance);
 
           // Compute positions for the additional characters in the ligature.
           for (size_t i = 1; i < ligature_width; ++i) {
@@ -469,7 +407,6 @@ void Paragraph::Layout(double width, bool force) {
           }
         }
         blob_start += blob_length;
-        previous_run_x_position += current_x_position + letter_spacing;
       }
 
       // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
@@ -486,7 +423,7 @@ void Paragraph::Layout(double width, bool force) {
       // Must adjust each line to the largest text in the line, so cannot
       // directly push the offset property of PaintRecord until line is
       // finished.
-      x_queue.push_back(x);
+      x_queue.push_back(x_offset);
 
       temp_line_spacing = lines_ == 0 ? -metrics.fAscent * run.style.height
                                       : (-metrics.fAscent + metrics.fLeading) *
@@ -506,27 +443,31 @@ void Paragraph::Layout(double width, bool force) {
         max_descent = temp_line_spacing;
 
       if (layout_end == next_break || is_newline) {
-        y += roundf(max_line_spacing + prev_max_descent);
+        y_offset += roundf(max_line_spacing + prev_max_descent);
+        for (size_t i = 0; i < x_queue.size(); ++i) {
+          PaintRecord& record = records_[records_.size() - x_queue.size() + i];
+          record.SetOffset(SkPoint::Make(x_queue[i], y_offset));
+        }
+        x_queue.clear();
+
         line_heights_.push_back(
             (line_heights_.empty() ? 0 : line_heights_.back()) +
             roundf(max_line_spacing + max_descent));
         glyph_position_x_.push_back(glyph_single_line_position_x);
         prev_max_descent = max_descent;
-        postprocess_line();
 
         // Reset Variables for next line.
         max_line_spacing = 0.0f;
         max_descent = 0.0f;
-        x = 0.0f;
         prev_word_pos = 0;
         prev_char_advance = 0.0f;
-        previous_run_x_position = 0.0f;
         current_x_position = 0.0f;
         break_index += 1;
         lines_++;
+        x_offset = GetLineXOffset(lines_);
         glyph_single_line_position_x.clear();
       } else {
-        x += layout.getAdvance();
+        x_offset += layout.getAdvance();
       }
 
       layout_start = layout_end;
@@ -540,6 +481,19 @@ void Paragraph::Layout(double width, bool force) {
   }
   CalculateIntrinsicWidths();
   breaker_.finish();
+}
+
+double Paragraph::GetLineXOffset(size_t line) {
+  if (line >= breaks_count_)
+    return 0;
+
+  if (paragraph_style_.text_align == TextAlign::right) {
+    return width_ - breaker_.getWidths()[line];
+  } else if (paragraph_style_.text_align == TextAlign::center) {
+    return (width_ - breaker_.getWidths()[line]) / 2;
+  } else {
+    return 0;
+  }
 }
 
 // Amends the buffers to incorporate justification.

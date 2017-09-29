@@ -179,6 +179,7 @@ class Paragraph {
   std::shared_ptr<FontCollection> font_collection_;
 
   minikin::LineBreaker breaker_;
+  size_t breaks_count_ = 0;
 
   // Stores the result of Layout().
   std::vector<PaintRecord> records_;
@@ -242,6 +243,10 @@ class Paragraph {
   // between start and end. THis is used to correctly add extra whitespace when
   // justifying.
   void FillWhitespaceSet(size_t start, size_t end, hb_font_t* hb_font);
+
+  // Calculate the starting X offset of a line based on the line's width and
+  // alignment.
+  double GetLineXOffset(size_t line);
 
   // Calculates and amends the layout for one line to be justified.
   void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
