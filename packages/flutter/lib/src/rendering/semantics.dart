@@ -330,7 +330,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return _actionHandler != null && (_actions & action.index) != 0;
   }
 
-  /// Whether all this node and all of its descendants should be treated as one logical entity.
+  /// Whether this node and all of its descendants should be treated as one logical entity.
   bool get mergeAllDescendantsIntoThisNode => _mergeAllDescendantsIntoThisNode;
   bool _mergeAllDescendantsIntoThisNode = false;
   set mergeAllDescendantsIntoThisNode(bool value) {
@@ -341,6 +341,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
+  /// Whether this node merges its semantic information into an ancestor node.
   bool get isMergedIntoParent => _isMergedIntoParent;
   bool _isMergedIntoParent = false;
   set isMergedIntoParent(bool value) {
@@ -351,6 +352,14 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
+  /// Whether this node is taking part in a merge of semantic information.
+  ///
+  /// This returns true if the node is either merged into an ancestor node or if
+  /// decedent nodes are merged into this node.
+  ///
+  /// See also:
+  ///  * [isMergedIntoParent]
+  ///  * [mergeAllDescendantsIntoThisNode]
   bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
 
   int _flags = 0;
