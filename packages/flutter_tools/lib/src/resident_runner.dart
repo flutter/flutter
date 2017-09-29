@@ -150,8 +150,10 @@ class FlutterDevice {
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
       for (ProgramElement element in await report) {
-        element.uri = devFS.deviceUriToHostUri(element.uri);
-        elements.add(element);
+        elements.add(new ProgramElement(element.qualifiedName,
+                                        devFS.deviceUriToHostUri(element.uri),
+                                        element.line,
+                                        element.column));
       }
     }
     return elements;
@@ -823,8 +825,6 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  static final OperationResult ok = new OperationResult(0, '');
-
   OperationResult(this.code, this.message, [this.hint]);
 
   final int code;
@@ -832,6 +832,8 @@ class OperationResult {
   final String hint;
 
   bool get isOk => code == 0;
+
+  static final OperationResult ok = new OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file

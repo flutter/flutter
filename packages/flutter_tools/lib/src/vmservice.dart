@@ -899,19 +899,19 @@ class HeapSpace extends ServiceObject {
 
 // A function, field or class along with its source location.
 class ProgramElement {
-  String qualifiedName;
-  Uri uri;
-  int line;
-  int column;
-
   ProgramElement(this.qualifiedName, this.uri, this.line, this.column);
+
+  final String qualifiedName;
+  final Uri uri;
+  final int line;
+  final int column;
 
   @override
   String toString() {
     if (line == null) {
-      return "$qualifiedName ($uri)";
+      return '$qualifiedName ($uri)';
     } else {
-      return "$qualifiedName ($uri:$line)";
+      return '$qualifiedName ($uri:$line)';
     }
   }
 }
@@ -1072,11 +1072,10 @@ class Isolate extends ServiceObjectOwner {
 
     // The engine's tag handler doesn't seem to create proper URIs.
     Uri uri = Uri.parse(script['uri']);
-    if (uri.scheme == '') {
+    if (uri.scheme == '')
       uri = uri.replace(scheme: 'file');
-    }
 
-    // See //dart/runtime/vm/service/service.md.
+    // See https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md
     for (List<int> lineTuple in script['tokenPosTable']) {
       final int line = lineTuple[0];
       for (int i = 1; i < lineTuple.length; i += 2) {

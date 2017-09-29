@@ -436,6 +436,15 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  String _uriToRelativePath(Uri uri) {
+    final String path = uri.toString();
+    final String base = new Uri.file(projectRootPath).toString();
+    if (path.startsWith(base)) {
+      return path.substring(base.length + 1);
+    }
+    return path;
+  }
+
   Future<OperationResult> _reloadSources({ bool pause: false }) async {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
@@ -629,22 +638,29 @@ class HotRunner extends ResidentRunner {
     if (!reassembleAndScheduleErrors && !reassembleTimedOut) {
       final List<Future<List<ProgramElement>>> unusedReports =
           <Future<List<ProgramElement>>>[];
-      for (FlutterDevice device in flutterDevices) {
+      for (FlutterDevice device in flutterDevices)
         unusedReports.add(device.unusedChangesInLastReload());
-      }
       final List<ProgramElement> unusedElements = <ProgramElement>[];
-      for (Future<List<ProgramElement>> unusedReport in unusedReports) {
+      for (Future<List<ProgramElement>> unusedReport in unusedReports)
         unusedElements.addAll(await unusedReport);
-      }
 
       if (unusedElements.isNotEmpty) {
         unusedElementMessage =
             '\nThe following program elements were changed by the reload, '
             'but did not run when the view was reassembled. If this code '
             'only runs at start-up, you will need to restart ("R") for '
-            'the changes to have an effect.\n';
+            'the changes to have an effect.';
         for (ProgramElement unusedElement in unusedElements) {
-          unusedElementMessage += " - $unusedElement\n";
+          final String name = unusedElement.qualifiedName;
+          final String path = _uriToRelativePath(unusedElement.uri);
+          final int line = unusedElement.line;
+          String elementDescription;
+          if (line == null) {
+            elementDescription = '$name ($path)';
+          } else {
+            elementDescription = '$name ($path:$line)';
+          }
+          unusedElementMessage += '\n - $elementDescription';
         }
       }
     }
