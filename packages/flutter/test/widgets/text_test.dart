@@ -47,8 +47,8 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 1.3);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, equals(90.0));
-    expect(largeSize.height, equals(19.0));
+    expect(largeSize.width, equals(211.0));
+    expect(largeSize.height, equals(42.0));
   });
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
