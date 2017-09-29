@@ -156,7 +156,7 @@ class TestSemantics {
     final SemanticsData nodeData = node.getSemanticsData();
 
     bool fail(String message) {
-      matchState[TestSemantics] = 'message\n$_matcherHelp';
+      matchState[TestSemantics] = '$message\n$_matcherHelp';
       return false;
     }
 
