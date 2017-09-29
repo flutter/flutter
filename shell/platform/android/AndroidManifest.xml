@@ -11,7 +11,7 @@
     <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
 
     <application android:label="Flutter Shell" android:name="FlutterApplication" android:debuggable="true">
-        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection"
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|layoutDirection|fontScale"
                   android:hardwareAccelerated="true"
                   android:launchMode="standard"
                   android:name="FlutterActivity"
