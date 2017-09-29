@@ -155,6 +155,45 @@ void main() {
     expect(tester.testTextInput.setClientArgs['inputAction'], equals('TextInputAction.done'));
   });
 
+  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: new FocusNode(),
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onChanged: (String value) {
+          changedValue = value;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
+  });
+
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
     final TextEditingController controller1 = new TextEditingController(text: 'Wibble');
@@ -210,5 +249,44 @@ void main() {
         'composingExtent': -1,
       }),
     ]);
+  });
+
+  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+
+    String changedValue;
+    final Widget widget = new MaterialApp(
+      home: new EditableText(
+        key: editableTextKey,
+        controller: new TextEditingController(),
+        focusNode: new FocusNode(),
+        style: new Typography(platform: TargetPlatform.android).black.subhead,
+        cursorColor: Colors.blue,
+        selectionControls: materialTextSelectionControls,
+        keyboardType: TextInputType.text,
+        onChanged: (String value) {
+          changedValue = value;
+        },
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{ 'text': clipboardContent };
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    await tester.pump();
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+
+    expect(changedValue, clipboardContent);
   });
 }
