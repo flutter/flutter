@@ -601,7 +601,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _dirty = false;
       _markDirty();
     }
-//    print('>>> $id -- $isMergedIntoParent -- ${parent?.isPartOfNodeMerging}');
     assert(isMergedIntoParent == (parent?.isPartOfNodeMerging ?? false));
     if (_children != null) {
       for (SemanticsNode child in _children)

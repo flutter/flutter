@@ -13,7 +13,6 @@ void main() {
   testWidgets('MergeSemantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
-    print('>>> not merged');
     // not merged
     await tester.pumpWidget(
       new Directionality(
@@ -46,7 +45,6 @@ void main() {
       ignoreTransform: true,
     ));
 
-    print('>>> merged');
     //merged
     await tester.pumpWidget(
       new Directionality(
@@ -76,7 +74,6 @@ void main() {
       ignoreTransform: true,
     ));
 
-    print('>>> not merged');
     // not merged
     await tester.pumpWidget(
       new Directionality(
