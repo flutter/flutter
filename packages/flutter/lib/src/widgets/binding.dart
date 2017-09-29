@@ -90,7 +90,7 @@ abstract class WidgetsBindingObserver {
   /// navigator.
   ///
   /// Observers are expected to return true if they were able to
-  /// handle the notification.  Observers are notified in registration
+  /// handle the notification. Observers are notified in registration
   /// order until one returns true.
   Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
 
