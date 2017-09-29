@@ -98,14 +98,37 @@ Future<GradleProject> _readGradleProject() async {
     return project;
   } catch (e) {
     if (flutterPluginVersion == FlutterPluginVersion.managed) {
-      printError('Error running Gradle:\n$e\n');
-      throwToolExit(
-        'Please review your Gradle project setup in the android/ folder.',
-      );
+      // Handle known exceptions. This will exit if handled.
+      handleKnownGradleExceptions(e);
+      
+      // Print a general Gradle error and exit.
+      printError('* Error running Gradle:\n$e\n');
+      throwToolExit('Please review your Gradle project setup in the android/ folder.');
     }
   }
   // Fall back to the default
   return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], gradleAppOutDirV1);
+}
+
+void handleKnownGradleExceptions(String exceptionString) {
+  // Handle Gradle error thrown when Gradle needs to download additional
+  // Android SDK components (e.g. Platform Tools), and the license
+  // for that component has not been accepted.
+  final String matcher =
+    r'You have not accepted the license agreements of the following SDK components:'
+    r'\s*\[(.+)\]';
+  final RegExp licenseFailure = new RegExp(matcher, multiLine: true);
+  final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
+  if (licenseMatch != null) {
+    final String missingLicenses = licenseMatch.group(1);
+    final String errorMessage =
+      '\n\n* Error running Gradle:\n'
+      'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
+      '$missingLicenses\n\n'
+      'To resolve this, please run the following command in a Terminal:\n'
+      'flutter doctor --android-licenses';
+    throwToolExit(errorMessage);
+  }
 }
 
 String _locateProjectGradlew({ bool ensureExecutable: true }) {
