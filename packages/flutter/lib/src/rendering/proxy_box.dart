@@ -3259,6 +3259,9 @@ class RenderMergeSemantics extends RenderProxyBox {
   @override
   SemanticsAnnotator get semanticsAnnotator => _annotate;
 
+  @override
+  bool get isMergingSemanticsOfDescendants => true;
+
   void _annotate(SemanticsNode node) {
     node.mergeAllDescendantsIntoThisNode = true;
   }
