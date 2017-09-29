@@ -146,8 +146,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
   DefaultMaterialLocalizations(this.locale)
-      : assert(locale != null),
-        this._localeName = _computeLocaleName(locale) {
+      : this._localeName = _computeLocaleName(locale) {
+    // TODO(tvolkert): Move this assert back to the initializer.
+    assert(locale != null);
     if (localizations.containsKey(locale.languageCode))
       _nameToValue.addAll(localizations[locale.languageCode]);
     if (localizations.containsKey(_localeName))
