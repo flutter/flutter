@@ -50,11 +50,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new MediaQuery(
-            data: new MediaQueryData(textScaleFactor: 1.0),
+            data: const MediaQueryData(textScaleFactor: 1.0),
             child: new Center(
               child: new FlatButton(
-                  onPressed: () {},
-                  child: const Text('ABC')
+                onPressed: () { },
+                child: const Text('ABC'),
               ),
             ),
           ),
@@ -69,11 +69,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new MediaQuery(
-            data: new MediaQueryData(textScaleFactor: 2.0),
+            data: const MediaQueryData(textScaleFactor: 2.0),
             child: new Center(
               child: new FlatButton(
-                  onPressed: () {},
-                  child: const Text('ABC')
+                onPressed: () { },
+                child: const Text('ABC'),
               ),
             ),
           ),

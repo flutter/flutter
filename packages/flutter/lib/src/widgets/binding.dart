@@ -154,6 +154,8 @@ abstract class WidgetsBindingObserver {
   /// preferences, and it should affect all of the text sizes in the
   /// application.
   ///
+  /// ## Sample code
+  ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
   ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
@@ -331,12 +333,6 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
-  /// Called when the system metrics change.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didChangeMetrics].
-  ///
-  /// See [Window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
@@ -344,9 +340,6 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
       observer.didChangeMetrics();
   }
 
-  /// Called when the platform text scale factor changes.
-  ///
-  /// See [Window.onTextScaleFactorChanged].
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
