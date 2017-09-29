@@ -254,6 +254,38 @@ class Window {
     _onLocaleChangedZone = Zone.current;
   }
 
+  /// The system-reported text scale.
+  ///
+  /// This establishes the text scaling factor to use when rendering text,
+  /// according to the user's platform preferences.
+  ///
+  /// The [onTextScaleFactorChanged] callback is called whenever this value
+  /// changes.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor = 1.0;
+
+  /// A callback that is invoked whenever [textScaleFactor] changes value.
+  ///
+  /// The framework invokes this callback in the same zone in which the
+  /// callback was set.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this callback is invoked.
+  VoidCallback get onTextScaleFactorChanged => _onTextScaleFactorChanged;
+  VoidCallback _onTextScaleFactorChanged;
+  Zone _onTextScaleFactorChangedZone;
+  set onTextScaleFactorChanged(VoidCallback callback) {
+    _onTextScaleFactorChanged = callback;
+    _onTextScaleFactorChangedZone = Zone.current;
+  }
+
   /// A callback that is invoked to notify the application that it is an
   /// appropriate time to provide a scene using the [SceneBuilder] API and the
   /// [render] method. When possible, this is driven by the hardware VSync

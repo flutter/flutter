@@ -34,6 +34,7 @@ void main() {
     VoidCallback originalOnSemanticsEnabledChanged;
     SemanticsActionCallback originalOnSemanticsAction;
     PlatformMessageCallback originalOnPlatformMessage;
+    VoidCallback originalOnTextScaleFactorChanged;
 
     setUp(() {
       originalOnMetricsChanged = window.onMetricsChanged;
@@ -44,6 +45,7 @@ void main() {
       originalOnSemanticsEnabledChanged = window.onSemanticsEnabledChanged;
       originalOnSemanticsAction = window.onSemanticsAction;
       originalOnPlatformMessage = window.onPlatformMessage;
+      originalOnTextScaleFactorChanged = window.onTextScaleFactorChanged;
     });
 
     tearDown(() {
@@ -55,55 +57,65 @@ void main() {
       window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
       window.onSemanticsAction = originalOnSemanticsAction;
       window.onPlatformMessage = originalOnPlatformMessage;
+      window.onTextScaleFactorChanged = originalOnTextScaleFactorChanged;
     });
 
     test('onMetricsChanged preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      double devicePixelRatio;
 
       runZoned(() {
         innerZone = Zone.current;
         window.onMetricsChanged = () {
           runZone = Zone.current;
+          devicePixelRatio = window.devicePixelRatio;
         };
       });
 
       window.onMetricsChanged();
-      _updateWindowMetrics(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      _updateWindowMetrics(0.1234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(devicePixelRatio, equals(0.1234));
     });
 
     test('onLocaleChanged preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      Locale locale;
 
       runZoned(() {
         innerZone = Zone.current;
         window.onLocaleChanged = () {
           runZone = Zone.current;
+          locale = window.locale;
         };
       });
 
       _updateLocale('en', 'US');
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(locale, equals(const Locale('en', 'US')));
     });
 
     test('onBeginFrame preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      Duration start;
 
       runZoned(() {
         innerZone = Zone.current;
-        window.onBeginFrame = (_) {
+        window.onBeginFrame = (Duration value) {
           runZone = Zone.current;
+          start = value;
         };
       });
 
-      _beginFrame(0);
+      _beginFrame(1234);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(start, equals(const Duration(microseconds: 1234)));
     });
 
     test('onDrawFrame preserves callback zone', () {
@@ -125,65 +137,99 @@ void main() {
     test('onPointerDataPacket preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      PointerDataPacket data;
 
       runZoned(() {
         innerZone = Zone.current;
-        window.onPointerDataPacket = (_) {
+        window.onPointerDataPacket = (PointerDataPacket value) {
           runZone = Zone.current;
+          data = value;
         };
       });
 
-      _dispatchPointerDataPacket(new ByteData.view(new Uint8List(0).buffer));
+      final ByteData testData = new ByteData.view(new Uint8List(0).buffer);
+      _dispatchPointerDataPacket(testData);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(data.data, equals(_unpackPointerDataPacket(testData).data));
     });
 
     test('onSemanticsEnabledChanged preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      bool enabled;
 
       runZoned(() {
         innerZone = Zone.current;
         window.onSemanticsEnabledChanged = () {
           runZone = Zone.current;
+          enabled = window.semanticsEnabled;
         };
       });
 
       _updateSemanticsEnabled(window._semanticsEnabled);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(enabled, isNotNull);
+      expect(enabled, equals(window._semanticsEnabled));
     });
 
     test('onSemanticsAction preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      int action;
 
       runZoned(() {
         innerZone = Zone.current;
-        window.onSemanticsAction = (_, __) {
+        window.onSemanticsAction = (int value, _) {
           runZone = Zone.current;
+          action = value;
         };
       });
 
-      _dispatchSemanticsAction(0, 0);
+      _dispatchSemanticsAction(1234, 0);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(action, equals(1234));
     });
 
     test('onPlatformMessage preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      String name;
 
       runZoned(() {
         innerZone = Zone.current;
-        window.onPlatformMessage = (_, __, ___) {
+        window.onPlatformMessage = (String value, _, __) {
           runZone = Zone.current;
+          name = value;
         };
       });
 
-      _dispatchPlatformMessage(null, null, null);
+      _dispatchPlatformMessage('testName', null, null);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
+      expect(name, equals('testName'));
+    });
+
+    test('onTextScaleFactorChanged preserves callback zone', () {
+      Zone innerZone;
+      Zone runZone;
+      double textScaleFactor;
+
+      runZoned(() {
+        innerZone = Zone.current;
+        window.onTextScaleFactorChanged = () {
+          runZone = Zone.current;
+          textScaleFactor = window.textScaleFactor;
+        };
+      });
+
+      window.onTextScaleFactorChanged();
+      _updateTextScaleFactor(0.5);
+      expect(runZone, isNotNull);
+      expect(runZone, same(innerZone));
+      expect(textScaleFactor, equals(0.5));
     });
   });
 }

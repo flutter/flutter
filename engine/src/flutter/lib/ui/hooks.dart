@@ -32,6 +32,11 @@ void _updateLocale(String languageCode, String countryCode) {
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
+void _updateTextScaleFactor(double textScaleFactor) {
+  window._textScaleFactor = textScaleFactor;
+  _invoke(window.onTextScaleFactorChanged, window._onTextScaleFactorChangedZone);
+}
+
 void _updateSemanticsEnabled(bool enabled) {
   window._semanticsEnabled = enabled;
   _invoke(window.onSemanticsEnabledChanged, window._onSemanticsEnabledChangedZone);
