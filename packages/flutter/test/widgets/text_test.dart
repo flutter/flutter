@@ -47,7 +47,7 @@ void main() {
     expect(text, isNotNull);
     expect(text.textScaleFactor, 3.0);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, equals(211.0));
+    expect(largeSize.width, equals(210.0));
     expect(largeSize.height, equals(42.0));
   });
 
