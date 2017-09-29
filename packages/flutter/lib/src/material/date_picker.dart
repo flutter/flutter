@@ -607,6 +607,7 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
@@ -625,7 +626,7 @@ class _MonthPickerState extends State<MonthPicker> {
             start: 8.0,
             child: new IconButton(
               icon: _getPreviousMonthIcon(textDirection),
-              tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
+              tooltip: localizations.previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
@@ -634,7 +635,7 @@ class _MonthPickerState extends State<MonthPicker> {
             end: 8.0,
             child: new IconButton(
               icon: _getNextMonthIcon(textDirection),
-              tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
+              tooltip: localizations.nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
           ),
