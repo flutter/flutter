@@ -37,13 +37,15 @@ enum _ScaffoldSlot {
 
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
-    @required this.padding,
     @required this.statusBarHeight,
+    @required this.bottomPadding,
+    @required this.endPadding, // for floating action button
     @required this.textDirection,
   });
 
-  final EdgeInsets padding;
   final double statusBarHeight;
+  final double bottomPadding;
+  final double endPadding;
   final TextDirection textDirection;
 
   @override
@@ -56,7 +58,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = math.max(0.0, size.height - padding.bottom);
+    final double bottom = math.max(0.0, size.height - bottomPadding);
     double contentTop = 0.0;
     double contentBottom = bottom;
 
@@ -72,7 +74,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ScaffoldSlot.persistentFooter)) {
-      final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop)).height;
+      final BoxConstraints footerConstraints = new BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
+      );
+      final double persistentFooterHeight = layoutChild(_ScaffoldSlot.persistentFooter, footerConstraints).height;
       contentBottom -= persistentFooterHeight;
       positionChild(_ScaffoldSlot.persistentFooter, new Offset(0.0, contentBottom));
     }
@@ -102,7 +108,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     Size snackBarSize = Size.zero;
 
     if (hasChild(_ScaffoldSlot.bottomSheet)) {
-      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, fullWidthConstraints.copyWith(maxHeight: contentBottom - contentTop));
+      final BoxConstraints bottomSheetConstraints = new BoxConstraints(
+        maxWidth: fullWidthConstraints.maxWidth,
+        maxHeight: math.max(0.0, contentBottom - contentTop),
+      );
+      bottomSheetSize = layoutChild(_ScaffoldSlot.bottomSheet, bottomSheetConstraints);
       positionChild(_ScaffoldSlot.bottomSheet, new Offset((size.width - bottomSheetSize.width) / 2.0, bottom - bottomSheetSize.height));
     }
 
@@ -117,10 +127,10 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       assert(textDirection != null);
       switch (textDirection) {
         case TextDirection.rtl:
-          fabX = _kFloatingActionButtonMargin;
+          fabX = _kFloatingActionButtonMargin + endPadding;
           break;
         case TextDirection.ltr:
-          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin;
+          fabX = size.width - fabSize.width - _kFloatingActionButtonMargin - endPadding;
           break;
       }
       double fabY = contentBottom - fabSize.height - _kFloatingActionButtonMargin;
@@ -144,8 +154,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
-    return oldDelegate.padding != padding
-        || oldDelegate.statusBarHeight != statusBarHeight
+    return oldDelegate.statusBarHeight != statusBarHeight
+        || oldDelegate.bottomPadding != bottomPadding
+        || oldDelegate.endPadding != endPadding
         || oldDelegate.textDirection != textDirection;
   }
 }
@@ -336,9 +347,12 @@ class Scaffold extends StatefulWidget {
   /// A set of buttons that are displayed at the bottom of the scaffold.
   ///
   /// Typically this is a list of [FlatButton] widgets. These buttons are
-  /// persistently visible, even of the [body] of the scaffold scrolls.
+  /// persistently visible, even if the [body] of the scaffold scrolls.
   ///
   /// These widgets will be wrapped in a [ButtonBar].
+  ///
+  /// The [persistentFooterButtons] are rendered above the
+  /// [bottomNavigationBar] but below the [body].
   ///
   /// See also:
   ///
@@ -363,6 +377,9 @@ class Scaffold extends StatefulWidget {
   ///
   /// Snack bars slide from underneath the bottom navigation bar while bottom
   /// sheets are stacked on top.
+  ///
+  /// The [bottomNavigationBar] is rendered below the [persistentFooterButtons]
+  /// and the [body].
   final Widget bottomNavigationBar;
 
   /// Whether the [body] (and other floating widgets) should size themselves to
@@ -747,18 +764,36 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     super.dispose();
   }
 
-  void _addIfNonNull(List<LayoutId> children, Widget child, Object childId) {
-    if (child != null)
-      children.add(new LayoutId(child: child, id: childId));
+  void _addIfNonNull(List<LayoutId> children, Widget child, Object childId, {
+    @required bool removeLeftPadding,
+    @required bool removeTopPadding,
+    @required bool removeRightPadding,
+    bool removeBottomPadding, // defaults to widget.resizeToAvoidBottomPadding
+  }) {
+    if (child != null) {
+      children.add(
+        new LayoutId(
+          id: childId,
+          child: new MediaQuery.removePadding(
+            context: context,
+            removeLeft: removeLeftPadding,
+            removeTop: removeTopPadding,
+            removeRight: removeRightPadding,
+            removeBottom: removeBottomPadding ?? widget.resizeToAvoidBottomPadding,
+            child: child,
+          ),
+        ),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    EdgeInsets padding = MediaQuery.of(context).padding;
+    assert(debugCheckHasDirectionality(context));
+    final EdgeInsets padding = MediaQuery.of(context).padding;
     final ThemeData themeData = Theme.of(context);
-    if (!widget.resizeToAvoidBottomPadding)
-      padding = new EdgeInsets.fromLTRB(padding.left, padding.top, padding.right, 0.0);
+    final TextDirection textDirection = Directionality.of(context);
 
     if (_snackBars.isNotEmpty) {
       final ModalRoute<dynamic> route = ModalRoute.of(context);
@@ -777,7 +812,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     final List<LayoutId> children = <LayoutId>[];
 
-    _addIfNonNull(children, widget.body, _ScaffoldSlot.body);
+    _addIfNonNull(
+      children,
+      widget.body,
+      _ScaffoldSlot.body,
+      removeLeftPadding: false,
+      removeTopPadding: widget.appBar != null,
+      removeRightPadding: false,
+    );
 
     if (widget.appBar != null) {
       final double topPadding = widget.primary ? padding.top : 0.0;
@@ -793,16 +835,28 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           ),
         ),
         _ScaffoldSlot.appBar,
+        removeLeftPadding: false,
+        removeTopPadding: false,
+        removeRightPadding: false,
+        removeBottomPadding: true,
       );
     }
 
-    if (_snackBars.isNotEmpty)
-      _addIfNonNull(children, _snackBars.first._widget, _ScaffoldSlot.snackBar);
+    if (_snackBars.isNotEmpty) {
+      _addIfNonNull(
+        children,
+        _snackBars.first._widget,
+        _ScaffoldSlot.snackBar,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+      );
+    }
 
     if (widget.persistentFooterButtons != null) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.persistentFooter,
-        child: new Container(
+      _addIfNonNull(
+        children,
+        new Container(
           decoration: new BoxDecoration(
             border: new Border(
               top: new BorderSide(
@@ -810,20 +864,30 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
               ),
             ),
           ),
-          child: new ButtonTheme.bar(
-            child: new ButtonBar(
-              children: widget.persistentFooterButtons
+          child: new SafeArea(
+            child: new ButtonTheme.bar(
+              child: new ButtonBar(
+                children: widget.persistentFooterButtons
+              ),
             ),
           ),
         ),
-      ));
+        _ScaffoldSlot.persistentFooter,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+      );
     }
 
     if (widget.bottomNavigationBar != null) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.bottomNavigationBar,
-        child: widget.bottomNavigationBar,
-      ));
+      _addIfNonNull(
+        children,
+        widget.bottomNavigationBar,
+        _ScaffoldSlot.bottomNavigationBar,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+      );
     }
 
     if (_currentBottomSheet != null || _dismissedBottomSheets.isNotEmpty) {
@@ -836,38 +900,72 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children: bottomSheets,
         alignment: FractionalOffset.bottomCenter,
       );
-      _addIfNonNull(children, stack, _ScaffoldSlot.bottomSheet);
+      _addIfNonNull(
+        children,
+        stack,
+        _ScaffoldSlot.bottomSheet,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+      );
     }
 
-    children.add(new LayoutId(
-      id: _ScaffoldSlot.floatingActionButton,
-      child: new _FloatingActionButtonTransition(
+    _addIfNonNull(
+      children,
+      new _FloatingActionButtonTransition(
         child: widget.floatingActionButton,
-      )
-    ));
+      ),
+      _ScaffoldSlot.floatingActionButton,
+      removeLeftPadding: true,
+      removeTopPadding: true,
+      removeRightPadding: true,
+      removeBottomPadding: true,
+    );
 
     if (themeData.platform == TargetPlatform.iOS) {
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.statusBar,
-        child: new GestureDetector(
+      _addIfNonNull(
+        children,
+        new GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: _handleStatusBarTap,
           // iOS accessibility automatically adds scroll-to-top to the clock in the status bar
           excludeFromSemantics: true,
-        )
-      ));
+        ),
+        _ScaffoldSlot.statusBar,
+        removeLeftPadding: false,
+        removeTopPadding: true,
+        removeRightPadding: false,
+        removeBottomPadding: true,
+      );
     }
 
     if (widget.drawer != null) {
       assert(hasDrawer);
-      children.add(new LayoutId(
-        id: _ScaffoldSlot.drawer,
-        child: new DrawerController(
+      _addIfNonNull(
+        children,
+        new DrawerController(
           key: _drawerKey,
           child: widget.drawer,
-        )
-      ));
+        ),
+        _ScaffoldSlot.drawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.rtl,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.ltr,
+        removeBottomPadding: false,
+      );
     }
+
+    double endPadding;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        endPadding = padding.left;
+        break;
+      case TextDirection.ltr:
+        endPadding = padding.right;
+        break;
+    }
+    assert(endPadding != null);
 
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
@@ -878,9 +976,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: new CustomMultiChildLayout(
             children: children,
             delegate: new _ScaffoldLayout(
-              padding: padding,
               statusBarHeight: padding.top,
-              textDirection: Directionality.of(context),
+              bottomPadding: widget.resizeToAvoidBottomPadding ? padding.bottom : 0.0,
+              endPadding: endPadding,
+              textDirection: textDirection,
             ),
           ),
         ),

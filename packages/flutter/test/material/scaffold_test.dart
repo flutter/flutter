@@ -527,4 +527,100 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Scaffold and extreme window padding', (WidgetTester tester) async {
+    final Key appBar = new UniqueKey();
+    final Key body = new UniqueKey();
+    final Key floatingActionButton = new UniqueKey();
+    final Key persistentFooterButton = new UniqueKey();
+    final Key drawer = new UniqueKey();
+    final Key bottomNavigationBar = new UniqueKey();
+    final Key insideAppBar = new UniqueKey();
+    final Key insideBody = new UniqueKey();
+    final Key insideFloatingActionButton = new UniqueKey();
+    final Key insidePersistentFooterButton = new UniqueKey();
+    final Key insideDrawer = new UniqueKey();
+    final Key insideBottomNavigationBar = new UniqueKey();
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.only(
+              left: 20.0,
+              top: 30.0,
+              right: 50.0,
+              bottom: 70.0,
+            ),
+          ),
+          child: new Scaffold(
+            appBar: new PreferredSize(
+              preferredSize: const Size(11.0, 13.0),
+              child: new Container(
+                key: appBar,
+                child: new SafeArea(
+                  child: new Placeholder(key: insideAppBar),
+                ),
+              ),
+            ),
+            body: new Container(
+              key: body,
+              child: new SafeArea(
+                child: new Placeholder(key: insideBody),
+              ),
+            ),
+            floatingActionButton: new SizedBox(
+              key: floatingActionButton,
+              width: 77.0,
+              height: 77.0,
+              child: new SafeArea(
+                child: new Placeholder(key: insideFloatingActionButton),
+              ),
+            ),
+            persistentFooterButtons: <Widget>[
+              new SizedBox(
+                key: persistentFooterButton,
+                width: 100.0,
+                height: 90.0,
+                child: new SafeArea(
+                  child: new Placeholder(key: insidePersistentFooterButton),
+                ),
+              ),
+            ],
+            drawer: new Container(
+              key: drawer,
+              width: 204.0,
+              child: new SafeArea(
+                child: new Placeholder(key: insideDrawer),
+              ),
+            ),
+            bottomNavigationBar: new SizedBox(
+              key: bottomNavigationBar,
+              height: 55.0,
+              child: new SafeArea(
+                child: new Placeholder(key: insideBottomNavigationBar),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // open drawer
+    await tester.flingFrom(const Offset(795.0, 5.0), const Offset(-200.0, 0.0), 10.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(tester.getRect(find.byKey(appBar)), new Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
+    expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 368.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 275.0, 113.0, 352.0));
+    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(28.0, 377.0, 128.0, 467.0));
+    expect(tester.getRect(find.byKey(drawer)), new Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(bottomNavigationBar)), new Rect.fromLTRB(0.0, 475.0, 800.0, 530.0));
+    expect(tester.getRect(find.byKey(insideAppBar)), new Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
+    expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 368.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 275.0, 113.0, 352.0));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 377.0, 128.0, 467.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 530.0));
+    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 475.0, 750.0, 530.0));
+  });
 }

@@ -336,6 +336,11 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// For more complex animations, you'll likely want to use a subclass of
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
+///
+/// See also:
+///
+///  * [AnimatedPadding], which is a subset of this widget that only
+///    supports animating the [padding].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -476,6 +481,66 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
     description.add(new DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(new ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+  }
+}
+
+/// Animated version of [Padding] which automatically transitions the
+/// indentation over a given duration whenever the given inset changes.
+///
+/// See also:
+///
+///  * [AnimatedContainer], which can transition more values at once.
+class AnimatedPadding extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that insets its child by a value that animates
+  /// implicitly.
+  ///
+  /// The [padding], [curve], and [duration] arguments must not be null.
+  AnimatedPadding({
+    Key key,
+    @required this.padding,
+    this.child,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(padding != null),
+       assert(padding.isNonNegative),
+       super(key: key, curve: curve, duration: duration);
+
+  /// The amount of space by which to inset the child.
+  final EdgeInsetsGeometry padding;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  _AnimatedPaddingState createState() => new _AnimatedPaddingState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+  }
+}
+
+class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
+  EdgeInsetsGeometryTween _padding;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsGeometryTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: _padding.evaluate(animation),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
   }
 }
 

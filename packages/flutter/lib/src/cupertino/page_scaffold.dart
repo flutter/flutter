@@ -54,10 +54,9 @@ class CupertinoPageScaffold extends StatelessWidget {
       if (topPadding > 0.0) {
         final EdgeInsets mediaQueryPadding = MediaQuery.of(context).padding;
         topPadding += mediaQueryPadding.top;
-        childWithMediaQuery = new MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            padding: mediaQueryPadding.copyWith(top: 0.0),
-          ),
+        childWithMediaQuery = new MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
           child: child,
         );
       }
