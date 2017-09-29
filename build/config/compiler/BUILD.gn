@@ -622,11 +622,6 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
-
-    # TODO(jsimmons): This is needed for building Flutter's current version of
-    # third_party/icu with the clang-6.0 toolchain.  Remove this when we upgrade
-    # to a more recent version of ICU.
-    "-Wno-enum-compare-switch",
   ]
 
   if (is_mac) {
