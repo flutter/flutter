@@ -186,7 +186,7 @@ abstract class WidgetsBindingObserver {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return new Text('Current scale factor: _lastTextScaleFactor');
+  ///     return new Text('Current scale factor: $_lastTextScaleFactor');
   ///   }
   /// }
   /// ```
