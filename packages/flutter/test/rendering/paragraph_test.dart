@@ -250,7 +250,7 @@ void main() {
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.height, equals(26.0));
-    expect(paragraph.size.width, equals(78.0));
+    expect(paragraph.size.width, equals(79.0));
 
     // Test the sizes of nested spans.
     final List<ui.TextBox> boxes = <ui.TextBox>[];
