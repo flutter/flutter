@@ -261,13 +261,13 @@ void main() {
       ));
     }
     expect(boxes.length, equals(4));
-    expect(boxes[0].toRect().width, equals(13.0));
+    expect(boxes[0].toRect().width, equals(14.0));
     expect(boxes[0].toRect().height, equals(13.0));
-    expect(boxes[1].toRect().width, equals(26.0));
+    expect(boxes[1].toRect().width, equals(27.0));
     expect(boxes[1].toRect().height, equals(26.0));
-    expect(boxes[2].toRect().width, equals(26.0));
+    expect(boxes[2].toRect().width, equals(27.0));
     expect(boxes[2].toRect().height, equals(26.0));
-    expect(boxes[3].toRect().width, equals(13.0));
+    expect(boxes[3].toRect().width, equals(14.0));
     expect(boxes[3].toRect().height, equals(13.0));
   });
 
