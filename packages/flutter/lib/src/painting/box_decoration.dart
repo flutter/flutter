@@ -71,6 +71,8 @@ class BoxDecoration extends Decoration {
   ///   [BoxShape.circle].
   /// * If [boxShadow] is null, this decoration does not paint a shadow.
   /// * If [gradient] is null, this decoration does not paint gradients.
+  ///
+  /// The [shape] argument must not be null.
   const BoxDecoration({
     this.color,
     this.image,
@@ -79,7 +81,7 @@ class BoxDecoration extends Decoration {
     this.boxShadow,
     this.gradient,
     this.shape: BoxShape.rectangle,
-  });
+  }) : assert(shape != null);
 
   @override
   bool debugAssertIsValid() {
@@ -90,20 +92,30 @@ class BoxDecoration extends Decoration {
 
   /// The color to fill in the background of the box.
   ///
-  /// The color is filled into the shape of the box (e.g., either a rectangle,
-  /// potentially with a border radius, or a circle).
+  /// The color is filled into the [shape] of the box (e.g., either a rectangle,
+  /// potentially with a [borderRadius], or a circle).
+  ///
+  /// This is ignored if [gradient] is non-null.
+  ///
+  /// The [color] is drawn under the [image].
   final Color color;
 
-  /// An image to paint above the background color. If [shape] is [BoxShape.circle]
-  /// then the image is clipped to the circle's boundary.
+  /// An image to paint above the background [color] or [gradient].
+  ///
+  /// If [shape] is [BoxShape.circle] then the image is clipped to the circle's
+  /// boundary; if [borderRadius] is non-null then the image is clipped to the
+  /// given radii.
   final DecorationImage image;
 
-  /// A border to draw above the background [color] or [image].
+  /// A border to draw above the background [color], [gradient], or [image].
+  ///
+  /// Follows the [shape] and [borderRadius].
   final Border border;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   ///
-  /// Applies only to boxes with rectangular shapes.
+  /// Applies only to boxes with rectangular shapes; ignored if [shape] is not
+  /// [BoxShape.rectangle].
   final BorderRadius borderRadius;
 
   /// A list of shadows cast by this box behind the box.
@@ -112,12 +124,18 @@ class BoxDecoration extends Decoration {
   final List<BoxShadow> boxShadow;
 
   /// A gradient to use when filling the box.
+  ///
+  /// If this is specified, [color] has no effect.
+  ///
+  /// The [gradient] is drawn under the [image].
   final Gradient gradient;
 
-  /// The shape to fill the background [color] into and to cast as the [boxShadow].
+  /// The shape to fill the background [color], [gradient], and [image] into and
+  /// to cast as the [boxShadow].
+  ///
+  /// If this is [BoxShape.rectangle] then [borderRadius] is ignored.
   final BoxShape shape;
 
-  /// The inset space occupied by the border.
   @override
   EdgeInsets get padding => border?.dimensions;
 
@@ -138,11 +156,31 @@ class BoxDecoration extends Decoration {
   @override
   bool get isComplex => boxShadow != null;
 
+  @override
+  BoxDecoration lerpFrom(Decoration a, double t) {
+    if (a is BoxDecoration)
+      return BoxDecoration.lerp(a, this, t);
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  BoxDecoration lerpTo(Decoration b, double t) {
+    if (b is BoxDecoration)
+      return BoxDecoration.lerp(this, b, t);
+    return super.lerpTo(b, t);
+  }
+
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
   ///
-  /// See also [Decoration.lerp].
+  /// See also:
+  ///
+  ///  * [Decoration.lerp], which can interpolate between any two types of
+  ///    [Decoration]s, not just [BoxDecoration]s.
+  ///  * [lerpFrom] and [lerpTo], which are used to implement [Decoration.lerp]
+  ///     and which use [BoxDecoration.lerp] when interpolating two
+  ///    [BoxDecoration]s or a [BoxDecoration] to or from null.
   static BoxDecoration lerp(BoxDecoration a, BoxDecoration b, double t) {
     if (a == null && b == null)
       return null;
@@ -153,27 +191,13 @@ class BoxDecoration extends Decoration {
     // TODO(abarth): lerp ALL the fields.
     return new BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
-      image: b.image,
+      image: t < 0.5 ? a.image : b.image,
       border: Border.lerp(a.border, b.border, t),
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
-      gradient: b.gradient,
-      shape: b.shape,
+      gradient: t < 0.5 ? a.gradient : b.gradient,
+      shape: t < 0.5 ? a.shape : b.shape,
     );
-  }
-
-  @override
-  BoxDecoration lerpFrom(Decoration a, double t) {
-    if (a is! BoxDecoration)
-      return BoxDecoration.lerp(null, this, t);
-    return BoxDecoration.lerp(a, this, t);
-  }
-
-  @override
-  BoxDecoration lerpTo(Decoration b, double t) {
-    if (b is! BoxDecoration)
-      return BoxDecoration.lerp(this, null, t);
-    return BoxDecoration.lerp(this, b, t);
   }
 
   @override
@@ -261,21 +285,17 @@ class _BoxDecorationPainter extends BoxPainter {
   Rect _rectForCachedBackgroundPaint;
   Paint _getBackgroundPaint(Rect rect) {
     assert(rect != null);
+    assert(_decoration.gradient != null || _rectForCachedBackgroundPaint == null);
+
     if (_cachedBackgroundPaint == null ||
-        (_decoration.gradient == null && _rectForCachedBackgroundPaint != null) ||
         (_decoration.gradient != null && _rectForCachedBackgroundPaint != rect)) {
       final Paint paint = new Paint();
-
       if (_decoration.color != null)
         paint.color = _decoration.color;
-
       if (_decoration.gradient != null) {
         paint.shader = _decoration.gradient.createShader(rect);
         _rectForCachedBackgroundPaint = rect;
-      } else {
-        _rectForCachedBackgroundPaint = null;
       }
-
       _cachedBackgroundPaint = paint;
     }
 
