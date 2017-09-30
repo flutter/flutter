@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Text respects media query', (WidgetTester tester) async {
     await tester.pumpWidget(const MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.5),
+      data: const MediaQueryData(textScaleFactor: 1.3),
       child: const Center(
         child: const Text('Hello', textDirection: TextDirection.ltr)
       )
@@ -16,7 +16,7 @@ void main() {
 
     RichText text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.5);
+    expect(text.textScaleFactor, 1.3);
 
     await tester.pumpWidget(const Center(
       child: const Text('Hello', textDirection: TextDirection.ltr)
@@ -40,15 +40,15 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textScaleFactor: 3.0, textDirection: TextDirection.ltr)
+      child: const Text('Hello', textScaleFactor: 1.3, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 3.0);
+    expect(text.textScaleFactor, 1.3);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, equals(210.0));
-    expect(largeSize.height, equals(42.0));
+    expect(largeSize.width, equals(91.0));
+    expect(largeSize.height, equals(19.0));
   });
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
@@ -67,16 +67,16 @@ void main() {
     await tester.pumpWidget(const Center(
       child: const Text('Hello',
         style: const TextStyle(fontSize: 20.0),
-        textScaleFactor: 3.0,
+        textScaleFactor: 1.3,
         textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 3.0);
+    expect(text.textScaleFactor, 1.3);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, equals(3.0 * baseSize.width));
-    expect(largeSize.height, equals(3.0 * baseSize.height));
+    expect(largeSize.width, equals(130.0));
+    expect(largeSize.height, equals(26.0));
   });
 
   testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {

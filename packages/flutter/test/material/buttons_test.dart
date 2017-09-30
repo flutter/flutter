@@ -69,7 +69,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Material(
           child: new MediaQuery(
-            data: const MediaQueryData(textScaleFactor: 2.0),
+            data: const MediaQueryData(textScaleFactor: 1.3),
             child: new Center(
               child: new FlatButton(
                 onPressed: () { },
@@ -81,7 +81,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(117.0, 36.0)));
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
   });
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
