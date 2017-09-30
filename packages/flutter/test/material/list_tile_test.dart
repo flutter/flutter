@@ -83,9 +83,9 @@ void main() {
     // 16.0 padding to the left and right of the leading and trailing widgets
     void testHorizontalGeometry() {
       expect(left('leading'), 16.0);
-      expect(left('title'), 72.0);
+      expect(left('title') - right('leading'), 16.0);
       if (hasSubtitle)
-        expect(left('subtitle'), 72.0);
+        expect(left('subtitle') - right('leading'), 16.0);
       expect(left('title'), right('leading') + 16.0);
       expect(right('trailing'), 800.0 - 16.0);
       expect(width('trailing'), 112.0);
@@ -148,8 +148,8 @@ void main() {
 
     void testHorizontalGeometry() {
       expect(right('leading'), 800.0 - 16.0);
-      expect(right('title'), 800.0 - 72.0);
       expect(left('leading') - right('title'), 16.0);
+      expect(left('title') - right('trailing'), 16.0);
       expect(left('trailing'), 16.0);
     }
 
