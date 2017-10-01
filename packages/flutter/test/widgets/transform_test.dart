@@ -82,7 +82,7 @@ void main() {
                 height: 100.0,
                 child: new Transform(
                   transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                  alignment: const FractionalOffset(1.0, 0.5),
+                  alignment: const Alignment(1.0, 0.0),
                   child: new GestureDetector(
                     onTap: () {
                       didReceiveTap = true;
@@ -131,7 +131,7 @@ void main() {
                 child: new Transform(
                   transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
-                  alignment: const FractionalOffset(0.0, 0.5),
+                  alignment: const Alignment(-1.0, 0.0),
                   child: new GestureDetector(
                     onTap: () {
                       didReceiveTap = true;

@@ -898,7 +898,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         bottomSheets.add(_currentBottomSheet._widget);
       final Widget stack = new Stack(
         children: bottomSheets,
-        alignment: FractionalOffset.bottomCenter,
+        alignment: Alignment.bottomCenter,
       );
       _addIfNonNull(
         children,
@@ -1053,7 +1053,7 @@ class _PersistentBottomSheetState extends State<_PersistentBottomSheet> {
       animation: widget.animationController,
       builder: (BuildContext context, Widget child) {
         return new Align(
-          alignment: FractionalOffsetDirectional.topStart,
+          alignment: AlignmentDirectional.topStart,
           heightFactor: widget.animationController.value,
           child: child
         );

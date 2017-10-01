@@ -297,7 +297,7 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip,
@@ -319,7 +319,7 @@ class RenderStack extends RenderBox
       child.parentData = new StackParentData();
   }
 
-  FractionalOffset _resolvedAlignment;
+  Alignment _resolvedAlignment;
 
   void _resolve() {
     if (_resolvedAlignment != null)
@@ -336,14 +336,14 @@ class RenderStack extends RenderBox
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
   ///
-  /// If this is set to a [FractionalOffsetDirectional] object, then
-  /// [textDirection] must not be null.
-  FractionalOffsetGeometry get alignment => _alignment;
-  FractionalOffsetGeometry _alignment;
-  set alignment(FractionalOffsetGeometry value) {
+  /// If this is set to a [AlignmentDirectional] object, then [textDirection]
+  /// must not be null.
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     assert(value != null);
     if (_alignment == value)
       return;
@@ -559,7 +559,7 @@ class RenderStack extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
@@ -577,7 +577,7 @@ class RenderIndexedStack extends RenderStack {
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
     List<RenderBox> children,
-    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
     TextDirection textDirection,
     int index: 0,
   }) : _index = index, super(

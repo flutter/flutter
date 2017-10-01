@@ -145,7 +145,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     if (widget.tabBar != null) {
       stacked.add(new Align(
-        alignment: FractionalOffset.bottomCenter,
+        alignment: Alignment.bottomCenter,
         // Override the tab bar's currentIndex to the current tab and hook in
         // our own listener to update the _currentPage on top of a possibly user
         // provided callback.

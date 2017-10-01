@@ -222,13 +222,13 @@ class RenderPadding extends RenderShiftedBox {
 }
 
 /// Abstract class for one-child-layout render boxes that use a
-/// [FractionalOffsetGeometry] to align their children.
+/// [AlignmentGeometry] to align their children.
 abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// Initializes member variables for subclasses.
   ///
   /// The [alignment] argument must not be null.
   RenderAligningShiftedBox({
-    FractionalOffsetGeometry alignment: FractionalOffset.center,
+    AlignmentGeometry alignment: Alignment.center,
     TextDirection textDirection,
     RenderBox child,
   }) : assert(alignment != null),
@@ -236,7 +236,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
-  FractionalOffset _resolvedAlignment;
+  Alignment _resolvedAlignment;
 
   void _resolve() {
     if (_resolvedAlignment != null)
@@ -252,21 +252,21 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
   ///
-  /// If this is set to a [FractionalOffsetDirectional] object, then
+  /// If this is set to a [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
-  FractionalOffsetGeometry get alignment => _alignment;
-  FractionalOffsetGeometry _alignment;
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
   /// Sets the alignment to a new value, and triggers a layout update.
   ///
   /// The new alignment must not be null or have any null properties.
-  set alignment(FractionalOffsetGeometry value) {
+  set alignment(AlignmentGeometry value) {
     assert(value != null);
     if (_alignment == value)
       return;
@@ -309,16 +309,16 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
-/// Positions its child using a [FractionalOffset].
+/// Positions its child using a [AlignmentGeometry].
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with an alignment of [FractionalOffset.bottomRight].
+/// with an alignment of [Alignment.bottomRight].
 ///
 /// By default, sizes to be as big as possible in both axes. If either axis is
 /// unconstrained, then in that direction it will be sized to fit the child's
@@ -330,7 +330,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    FractionalOffsetGeometry alignment: FractionalOffset.center,
+    AlignmentGeometry alignment: Alignment.center,
     TextDirection textDirection,
   }) : assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -475,7 +475,7 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
     double maxWidth,
     double minHeight,
     double maxHeight,
-    FractionalOffsetGeometry alignment: FractionalOffset.center,
+    AlignmentGeometry alignment: Alignment.center,
     TextDirection textDirection,
   }) : _minWidth = minWidth,
        _maxWidth = maxWidth,
@@ -571,7 +571,7 @@ class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   RenderSizedOverflowBox({
     RenderBox child,
     @required Size requestedSize,
-    FractionalOffset alignment: FractionalOffset.center,
+    Alignment alignment: Alignment.center,
     TextDirection textDirection,
   }) : assert(requestedSize != null),
        _requestedSize = requestedSize,
@@ -643,7 +643,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
     RenderBox child,
     double widthFactor,
     double heightFactor,
-    FractionalOffset alignment: FractionalOffset.center,
+    Alignment alignment: Alignment.center,
     TextDirection textDirection,
   }) : _widthFactor = widthFactor,
        _heightFactor = heightFactor,

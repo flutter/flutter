@@ -57,7 +57,7 @@ TestRenderingFlutterBinding get renderer {
 /// has no build phase.
 void layout(RenderBox box, {
   BoxConstraints constraints,
-  FractionalOffset alignment: FractionalOffset.center,
+  Alignment alignment: Alignment.center,
   EnginePhase phase: EnginePhase.layout,
 }) {
   assert(box != null); // If you want to just repump the last box, call pumpFrame().

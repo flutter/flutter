@@ -11,34 +11,34 @@ void main() {
     await tester.pumpWidget(
       new Align(
         child: new Container(),
-        alignment: const FractionalOffset(0.75, 0.75),
+        alignment: const Alignment(0.50, 0.50),
       ),
     );
 
     await tester.pumpWidget(
       new Align(
         child: new Container(),
-        alignment: const FractionalOffset(0.5, 0.5),
+        alignment: const Alignment(0.0, 0.0),
       ),
     );
 
     await tester.pumpWidget(
       const Align(
         key: const GlobalObjectKey<Null>(null),
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
       ),
     );
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.rtl,
       child: const Align(
         key: const GlobalObjectKey<Null>(null),
-        alignment: FractionalOffsetDirectional.topStart,
+        alignment: AlignmentDirectional.topStart,
       ),
     ));
     await tester.pumpWidget(
       const Align(
         key: const GlobalObjectKey<Null>(null),
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
       ),
     );
   });
@@ -48,7 +48,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new Align(
         child: new Container(width: 100.0, height: 80.0),
-        alignment: FractionalOffsetDirectional.topStart,
+        alignment: AlignmentDirectional.topStart,
       ),
     ));
 
@@ -59,7 +59,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new Align(
         child: new Container(width: 100.0, height: 80.0),
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
       ),
     ));
 
@@ -72,7 +72,7 @@ void main() {
       textDirection: TextDirection.rtl,
       child: new Align(
         child: new Container(width: 100.0, height: 80.0),
-        alignment: FractionalOffsetDirectional.topStart,
+        alignment: AlignmentDirectional.topStart,
       ),
     ));
 
@@ -83,7 +83,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new Align(
         child: new Container(width: 100.0, height: 80.0),
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
       ),
     ));
 
@@ -101,7 +101,7 @@ void main() {
             width: 10.0,
             height: 10.0
           ),
-          alignment: const FractionalOffset(0.50, 0.50),
+          alignment: const Alignment(0.0, 0.0),
         ),
       ),
     );

@@ -9,9 +9,9 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-  begin: FractionalOffset.bottomLeft,
-  end: FractionalOffset.topLeft
+final AlignmentTween _kBottomUpTween = new AlignmentTween(
+  begin: Alignment.bottomCenter * 0.5,
+  end: Alignment.center
 );
 
 // Used for Android and Fuchsia.
@@ -26,7 +26,7 @@ class _MountainViewPageTransition extends StatelessWidget {
        )),
        super(key: key);
 
-  final Animation<FractionalOffset> _positionAnimation;
+  final Animation<Alignment> _positionAnimation;
   final Widget child;
 
   @override

@@ -14,7 +14,7 @@ void main() {
       decoration: new BoxDecoration(
         color: const Color(0xFF00FF00),
         gradient: new RadialGradient(
-          center: FractionalOffset.topLeft, radius: 1.8,
+          center: Alignment.topLeft, radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]],
         ),
         boxShadow: kElevationToShadow[3],

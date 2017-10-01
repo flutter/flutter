@@ -135,19 +135,21 @@ class _DismissibleClipper extends CustomClipper<Rect> {
        super(reclip: moveAnimation);
 
   final Axis axis;
-  final Animation<FractionalOffset> moveAnimation;
+  final Animation<Alignment> moveAnimation;
 
   @override
   Rect getClip(Size size) {
     assert(axis != null);
     switch (axis) {
       case Axis.horizontal:
-        final double offset = moveAnimation.value.dx * size.width;
+        final double halfWidth = size.width / 2.0;
+        final double offset = halfWidth + moveAnimation.value.x * halfWidth;
         if (offset < 0)
           return new Rect.fromLTRB(size.width + offset, 0.0, size.width, size.height);
         return new Rect.fromLTRB(0.0, 0.0, offset, size.height);
       case Axis.vertical:
-        final double offset = moveAnimation.value.dy * size.height;
+        final double halfHeight = size.height / 2.0;
+        final double offset = halfHeight + moveAnimation.value.y * halfHeight;
         if (offset < 0)
           return new Rect.fromLTRB(0.0, size.height + offset, size.width, size.height);
         return new Rect.fromLTRB(0.0, 0.0, size.width, offset);
@@ -175,7 +177,7 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   AnimationController _moveController;
-  Animation<FractionalOffset> _moveAnimation;
+  Animation<Alignment> _moveAnimation;
 
   AnimationController _resizeController;
   Animation<double> _resizeAnimation;
@@ -268,11 +270,10 @@ class _DismissibleState extends State<Dismissible> with TickerProviderStateMixin
   }
 
   void _updateMoveAnimation() {
-    _moveAnimation = new FractionalOffsetTween(
-      begin: FractionalOffset.topLeft,
-      end: _directionIsXAxis ?
-             new FractionalOffset(_dragExtent.sign, 0.0) :
-             new FractionalOffset(0.0, _dragExtent.sign)
+    final double end = _dragExtent.sign * 2.0;
+    _moveAnimation = new AlignmentTween(
+      begin: Alignment.center,
+      end: _directionIsXAxis ? new Alignment(end, 0.0) : new Alignment(0.0, end),
     ).animate(_moveController);
   }
 

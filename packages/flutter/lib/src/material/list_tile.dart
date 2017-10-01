@@ -397,7 +397,7 @@ class ListTile extends StatelessWidget {
         child: new Container(
           margin: const EdgeInsetsDirectional.only(end: 16.0),
           width: 40.0,
-          alignment: FractionalOffsetDirectional.centerStart,
+          alignment: AlignmentDirectional.centerStart,
           child: leading,
         ),
       ));
@@ -432,7 +432,7 @@ class ListTile extends StatelessWidget {
         data: iconThemeData,
         child: new Container(
           margin: const EdgeInsetsDirectional.only(start: 16.0),
-          alignment: FractionalOffsetDirectional.centerEnd,
+          alignment: AlignmentDirectional.centerEnd,
           child: trailing,
         ),
       ));

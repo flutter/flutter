@@ -6,8 +6,8 @@ import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
+import 'alignment.dart';
 import 'basic_types.dart';
-import 'fractional_offset.dart';
 
 /// A 2D gradient.
 ///
@@ -27,7 +27,7 @@ abstract class Gradient {
   /// Creates a [Shader] for this gradient to fill the given rect.
   ///
   /// If the gradient's configuration is text-direction-dependent, for example
-  /// it uses [FractionalOffsetDirectional] objects instead of [FractionalOffset]
+  /// it uses [AlignmentDirectional] objects instead of [Alignment]
   /// objects, then the `textDirection` argument must not be null.
   Shader createShader(Rect rect, { TextDirection textDirection });
 }
@@ -64,8 +64,8 @@ abstract class Gradient {
 /// new Container(
 ///   decoration: new BoxDecoration(
 ///     gradient: new LinearGradient(
-///       begin: FractionalOffset.topLeft,
-///       end: new FractionalOffset(0.1, 0.0), // 10% of the width, so there are ten blinds.
+///       begin: Alignment.topLeft,
+///       end: new Alignment(0.8, 0.0), // 10% of the width, so there are ten blinds.
 ///       colors: [const Color(0xFFFFFFEE), const Color(0xFF999999)], // whitish to gray
 ///       tileMode: TileMode.repeated, // repeats the gradient over the canvas
 ///     ),
@@ -85,8 +85,8 @@ class LinearGradient extends Gradient {
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const LinearGradient({
-    this.begin: FractionalOffset.centerLeft,
-    this.end: FractionalOffset.centerRight,
+    this.begin: Alignment.centerLeft,
+    this.end: Alignment.centerRight,
     @required this.colors,
     this.stops,
     this.tileMode: TileMode.clamp,
@@ -97,35 +97,33 @@ class LinearGradient extends Gradient {
 
   /// The offset at which stop 0.0 of the gradient is placed.
   ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  /// If this is a [Alignment], then it is expressed as a vector from
+  /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
+  /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
-  /// For example, a begin offset of (0.0,0.5) is half way down the
+  /// For example, a begin offset of (-1.0, 0.0) is half way down the
   /// left side of the box.
   ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
+  /// It can also be a [AlignmentDirectional], where the start is the
   /// left in left-to-right contexts and the right in right-to-left contexts. If
   /// a text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry begin;
+  final AlignmentGeometry begin;
 
   /// The offset at which stop 1.0 of the gradient is placed.
   ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  /// If this is a [Alignment], then it is expressed as a vector from
+  /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
+  /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
-  /// For example, a begin offset of (1.0,0.5) is half way down the
+  /// For example, a begin offset of (1.0, 0.0) is half way down the
   /// right side of the box.
   ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
-  /// left in left-to-right contexts and the right in right-to-left contexts. If
-  /// a text-direction-dependent value is provided here, then the [createShader]
+  /// It can also be a [AlignmentDirectional], where the start is the left in
+  /// left-to-right contexts and the right in right-to-left contexts. If a
+  /// text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry end;
+  final AlignmentGeometry end;
 
   /// The colors the gradient should obtain at each of the stops.
   ///
@@ -215,8 +213,8 @@ class LinearGradient extends Gradient {
       interpolatedStops = a.stops ?? b.stops;
     }
     return new LinearGradient(
-      begin: FractionalOffsetGeometry.lerp(a.begin, b.begin, t),
-      end: FractionalOffsetGeometry.lerp(a.end, b.end, t),
+      begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
+      end: AlignmentGeometry.lerp(a.end, b.end, t),
       colors: interpolatedColors,
       stops: interpolatedStops,
       tileMode: t < 0.5 ? a.tileMode : b.tileMode,
@@ -295,7 +293,7 @@ class LinearGradient extends Gradient {
 /// ```dart
 /// void paintSky(Canvas canvas, Rect rect) {
 ///   var gradient = new RadialGradient(
-///     center: const FractionalOffset(0.7, 0.2), // near the top right
+///     center: const Alignment(0.7, -0.6), // near the top right
 ///     radius: 0.2,
 ///     colors: [
 ///       const Color(0xFFFFFF00), // yellow sun
@@ -324,7 +322,7 @@ class RadialGradient extends Gradient {
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].
   const RadialGradient({
-    this.center: FractionalOffset.center,
+    this.center: Alignment.center,
     this.radius: 0.5,
     @required this.colors,
     this.stops,
@@ -334,22 +332,21 @@ class RadialGradient extends Gradient {
        assert(colors != null),
        assert(tileMode != null);
 
-  /// The center of the gradient, as an offset into the unit square
-  /// describing the gradient which will be mapped onto the paint box.
+  /// The center of the gradient, as an offset into the (-1.0, -1.0) x (1.0, 1.0)
+  /// square describing the gradient which will be mapped onto the paint box.
   ///
-  /// For example, an offset of (0.5,0.5) will place the radial
+  /// For example, an alignment of (0.0, 0.0) will place the radial
   /// gradient in the center of the box.
   ///
-  /// If this is a [FractionalOffset], then it is expressed as a vector from
-  /// coordinate (0.0,0.0), in a coordinate space that maps the top left of the
-  /// paint box at (0.0,0.0) and the bottom right at (1.0,1.0).
+  /// If this is a [Alignment], then it is expressed as a vector from
+  /// coordinate (0.0, 0.0), in a coordinate space that maps the center of the
+  /// paint box at (0.0, 0.0) and the bottom right at (1.0, 1.0).
   ///
-  /// It can also be a [FractionalOffsetDirectional], in which case it is
-  /// expressed as a vector from the top start corner, where the start is the
-  /// left in left-to-right contexts and the right in right-to-left contexts. If
-  /// a text-direction-dependent value is provided here, then the [createShader]
+  /// It can also be a [AlignmentDirectional], where the start is the left in
+  /// left-to-right contexts and the right in right-to-left contexts. If a
+  /// text-direction-dependent value is provided here, then the [createShader]
   /// method will need to be given a [TextDirection].
-  final FractionalOffsetGeometry center;
+  final AlignmentGeometry center;
 
   /// The radius of the gradient, as a fraction of the shortest side
   /// of the paint box.

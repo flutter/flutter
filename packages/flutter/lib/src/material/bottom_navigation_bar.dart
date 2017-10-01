@@ -215,14 +215,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     return (leftWeights + _flex(_animations[index]) / 2.0) / allWeights;
   }
 
-  FractionalOffset _circleOffset(int index) {
+  Alignment _circleOffset(int index) {
     final double iconSize = widget.iconSize;
     final Tween<double> yOffsetTween = new Tween<double>(
       begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
       end: (6.0 + iconSize / 2.0) / kBottomNavigationBarHeight     // 6dp + icon center
     );
 
-    return new FractionalOffset(
+    return new Alignment(
       _xOffset(index),
       yOffsetTween.evaluate(_animations[index])
     );
@@ -283,10 +283,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                     widget.onTap(i);
                 },
                 child: new Stack(
-                  alignment: FractionalOffset.center,
+                  alignment: Alignment.center,
                   children: <Widget>[
                     new Align(
-                      alignment: FractionalOffset.topCenter,
+                      alignment: Alignment.topCenter,
                       child: new Container(
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
@@ -304,7 +304,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                       ),
                     ),
                     new Align(
-                      alignment: FractionalOffset.bottomCenter,
+                      alignment: Alignment.bottomCenter,
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: 10.0),
                         child: DefaultTextStyle.merge(
@@ -319,7 +319,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                                 end: 1.0,
                               ).evaluate(_animations[i]),
                             )),
-                            alignment: FractionalOffset.bottomCenter,
+                            alignment: Alignment.bottomCenter,
                             child: widget.items[i].title,
                           ),
                         ),
@@ -352,10 +352,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                     widget.onTap(i);
                 },
                 child: new Stack(
-                  alignment: FractionalOffset.center,
+                  alignment: Alignment.center,
                   children: <Widget>[
                     new Align(
-                      alignment: FractionalOffset.topCenter,
+                      alignment: Alignment.topCenter,
                       child: new Container(
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
@@ -373,7 +373,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                       ),
                     ),
                     new Align(
-                      alignment: FractionalOffset.bottomCenter,
+                      alignment: Alignment.bottomCenter,
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: 10.0),
                         child: new FadeTransition(
@@ -465,7 +465,7 @@ class _Circle {
   AnimationController controller;
   CurvedAnimation animation;
 
-  FractionalOffset get offset {
+  Alignment get offset {
     return state._circleOffset(index);
   }
 
@@ -487,11 +487,13 @@ class _RadialPainter extends CustomPainter {
   // bounding rectangle's corners touches the egde of the circle. Drawing a
   // circle beyond this radius is futile since there is no perceivable
   // difference within the cropped rectangle.
-  double _maxRadius(FractionalOffset offset, Size size) {
-    final double dx = offset.dx;
-    final double dy = offset.dy;
-    final double x = (dx > 0.5 ? dx : 1.0 - dx) * size.width;
-    final double y = (dy > 0.5 ? dy : 1.0 - dy) * size.height;
+  double _maxRadius(Alignment alignment, Size size) {
+    final double dx = alignment.x;
+    final double dy = alignment.y;
+    final double halfWidth = size.width / 2.0;
+    final double halfHeight = size.height / 2.0;
+    final double x = halfWidth + dx.abs() * halfWidth;
+    final double y = halfHeight + dy.abs() * halfHeight;
     return math.sqrt(x * x + y * y);
   }
 
@@ -517,20 +519,22 @@ class _RadialPainter extends CustomPainter {
     for (_Circle circle in circles) {
       final Tween<double> radiusTween = new Tween<double>(
         begin: 0.0,
-        end: _maxRadius(circle.offset, size)
+        end: _maxRadius(circle.offset, size),
       );
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
       final double navWidth = math.min(bottomNavMaxWidth, size.width);
+      final double halfNavWidth = navWidth / 2.0;
+      final double halfHeight = size.height / 2.0;
       final Offset center = new Offset(
-        (size.width - navWidth) / 2.0 + circle.offset.dx * navWidth,
-        circle.offset.dy * size.height
+        (size.width - navWidth) / 2.0 + halfNavWidth + circle.offset.x * halfNavWidth,
+        halfHeight + circle.offset.y * halfHeight,
       );
       canvas.drawCircle(
         center,
         radiusTween.lerp(circle.animation.value),
-        paint
+        paint,
       );
     }
   }

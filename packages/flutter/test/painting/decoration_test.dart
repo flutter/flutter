@@ -205,7 +205,7 @@ void main() {
       image: new SynchronousTestImageProvider(),
       colorFilter: colorFilter,
       fit: BoxFit.contain,
-      alignment: FractionalOffset.bottomLeft,
+      alignment: Alignment.bottomLeft,
       centerSlice: new Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
       repeat: ImageRepeat.repeatY,
     );
