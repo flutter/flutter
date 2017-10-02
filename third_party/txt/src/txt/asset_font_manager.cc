@@ -58,7 +58,6 @@ SkTypeface* AssetFontManager::onMatchFamilyStyleCharacter(
     const char* bcp47[],
     int bcp47Count,
     SkUnichar character) const {
-  FXL_DCHECK(false);
   return nullptr;
 }
 

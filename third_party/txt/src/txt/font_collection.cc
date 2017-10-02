@@ -30,6 +30,17 @@
 
 namespace txt {
 
+namespace {
+
+// Example characters representing character classes that may require a
+// fallback font.
+const std::vector<SkUnichar> fallback_characters{
+    0x1f600,  // emoji
+    0x4e00,   // CJK
+};
+
+}  // anonymous namespace
+
 FontCollection::FontCollection() = default;
 
 FontCollection::~FontCollection() = default;
@@ -42,6 +53,7 @@ void FontCollection::PushFront(sk_sp<SkFontMgr> skia_font_manager) {
   if (!skia_font_manager) {
     return;
   }
+  UpdateFallbackFonts(skia_font_manager);
   skia_font_managers_.push_front(std::move(skia_font_manager));
 }
 
@@ -49,6 +61,7 @@ void FontCollection::PushBack(sk_sp<SkFontMgr> skia_font_manager) {
   if (!skia_font_manager) {
     return;
   }
+  UpdateFallbackFonts(skia_font_manager);
   skia_font_managers_.push_back(std::move(skia_font_manager));
 }
 
@@ -92,11 +105,12 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
     auto minikin_family =
         std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
 
-    // Create a vector of font families for the Minikin font collection. For
-    // now, we only have one family in our collection.
+    // Create a vector of font families for the Minikin font collection.
     std::vector<std::shared_ptr<minikin::FontFamily>> minikin_families = {
         minikin_family,
     };
+    for (const auto& fallback : fallback_fonts_)
+      minikin_families.push_back(fallback.second);
 
     // Create the minikin font collection.
     auto font_collection =
@@ -115,6 +129,32 @@ FontCollection::GetMinikinFontCollectionForFamily(const std::string& family) {
 
   // No match found in any of our font managers.
   return nullptr;
+}
+
+void FontCollection::UpdateFallbackFonts(sk_sp<SkFontMgr> manager) {
+  char language_tag[ULOC_FULLNAME_CAPACITY];
+  UErrorCode uerr;
+  uloc_toLanguageTag(icu::Locale::getDefault().getName(), language_tag,
+                     ULOC_FULLNAME_CAPACITY, FALSE, &uerr);
+  if (U_FAILURE(uerr))
+    return;
+  const char* bcp47[] = {language_tag};
+
+  for (SkUnichar fallback_char : fallback_characters) {
+    if (fallback_fonts_.count(fallback_char))
+      continue;
+
+    sk_sp<SkTypeface> skia_typeface(manager->matchFamilyStyleCharacter(
+        0, SkFontStyle(), bcp47, 1, fallback_char));
+    if (!skia_typeface)
+      continue;
+
+    std::vector<minikin::Font> minikin_fonts;
+    minikin_fonts.emplace_back(std::make_shared<FontSkia>(skia_typeface),
+                               minikin::FontStyle());
+    fallback_fonts_[fallback_char] =
+        std::make_shared<minikin::FontFamily>(std::move(minikin_fonts));
+  }
 }
 
 }  // namespace txt
