@@ -51,7 +51,7 @@ class DualHeaderWithHint extends StatelessWidget {
             margin: const EdgeInsets.only(left: 24.0),
             child: new FittedBox(
               fit: BoxFit.scaleDown,
-              alignment: FractionalOffset.centerLeft,
+              alignment: Alignment.centerLeft,
               child: new Text(
                 name,
                 style: textTheme.body1.copyWith(fontSize: 15.0),

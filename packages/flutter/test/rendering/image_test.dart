@@ -74,7 +74,7 @@ void main() {
         '   constraints: BoxConstraints(25.0<=w<=100.0, 25.0<=h<=100.0)\n'
         '   size: Size(25.0, 25.0)\n'
         '   image: [10×10]\n'
-        '   alignment: FractionalOffset.center\n'
+        '   alignment: Alignment.center\n'
       ),
     );
 

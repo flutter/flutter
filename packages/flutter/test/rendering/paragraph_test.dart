@@ -222,6 +222,64 @@ void main() {
     expect(paragraph.debugNeedsPaint, isFalse);
   });
 
+  test('nested TextSpans in paragraph handle textScaleFactor correctly.', () {
+    final TextSpan testSpan = const TextSpan(
+      text: 'a',
+      style: const TextStyle(
+        fontSize: 10.0,
+      ),
+      children: const <TextSpan>[
+        const TextSpan(
+          text: 'b',
+          children: const <TextSpan>[
+            const TextSpan(text: 'c'),
+          ],
+          style: const TextStyle(
+            fontSize: 20.0,
+          ),
+        ),
+        const TextSpan(
+          text: 'd',
+        ),
+      ],
+    );
+    final RenderParagraph paragraph = new RenderParagraph(
+        testSpan,
+        textDirection: TextDirection.ltr,
+        textScaleFactor: 1.3
+    );
+    paragraph.layout(const BoxConstraints());
+    // anyOf is needed here because Linux and Mac have different text
+    // rendering widths in tests.
+    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
+    // text rendering is replaced.
+    expect(paragraph.size.width, anyOf(79.0, 78.0));
+    expect(paragraph.size.height, 26.0);
+
+    // Test the sizes of nested spans.
+    final List<ui.TextBox> boxes = <ui.TextBox>[];
+    final String text = testSpan.toStringDeep();
+    for (int i = 0; i < text.length; ++i) {
+      boxes.addAll(paragraph.getBoxesForSelection(
+          new TextSelection(baseOffset: i, extentOffset: i + 1)
+      ));
+    }
+    expect(boxes.length, equals(4));
+
+    // anyOf is needed here and below because Linux and Mac have different text
+    // rendering widths in tests.
+    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
+    // text rendering is replaced.
+    expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
+    expect(boxes[0].toRect().height, 13.0);
+    expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
+    expect(boxes[1].toRect().height, 26.0);
+    expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
+    expect(boxes[2].toRect().height, 26.0);
+    expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
+    expect(boxes[3].toRect().height, 13.0);
+  });
+
   test('toStringDeep', () {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(text: _kText),

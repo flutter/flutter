@@ -328,9 +328,9 @@ class MaterialRectArcTween extends RectTween {
   }
 }
 
-/// A [Tween] that interpolates a [Rect] by moving it along a circular
-/// arc from [begin.center] to [end.center] while interpoloting the rectangle's
-/// width and height.
+/// A [Tween] that interpolates a [Rect] by moving it along a circular arc from
+/// [begin]'s [Rect.center] to [end]'s [Rect.center] while interpolating the
+/// rectangle's width and height.
 ///
 /// The arc that defines that center of the interpolated rectangle as it morphs
 /// from [begin] to [end] is a [MaterialPointArcTween].
@@ -367,8 +367,8 @@ class MaterialRectCenterArcTween extends RectTween {
     _dirty = false;
   }
 
-  /// If [begin] and [end] are non-null, returns a tween that interpolates
-  /// along a circular arc between [begin.center] and [end.center].
+  /// If [begin] and [end] are non-null, returns a tween that interpolates along
+  /// a circular arc between [begin]'s [Rect.center] and [end]'s [Rect.center].
   MaterialPointArcTween get centerArc {
     if (begin == null || end == null)
       return null;

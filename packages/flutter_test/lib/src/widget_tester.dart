@@ -36,13 +36,15 @@ typedef Future<Null> WidgetTesterCallback(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
-/// Example:
+/// ## Sample code
 ///
+/// ```dart
 ///     testWidgets('MyWidget', (WidgetTester tester) async {
 ///       await tester.pumpWidget(new MyWidget());
 ///       await tester.tap(find.text('Save'));
-///       expect(tester, hasWidget(find.text('Success')));
+///       expect(find.text('Success'), findsOneWidget);
 ///     });
+/// ```
 void testWidgets(String description, WidgetTesterCallback callback, {
   bool skip: false,
   test_package.Timeout timeout

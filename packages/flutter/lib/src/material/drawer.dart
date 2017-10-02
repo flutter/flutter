@@ -267,7 +267,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: FractionalOffsetDirectional.centerStart,
+        alignment: AlignmentDirectional.centerStart,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -299,9 +299,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: FractionalOffsetDirectional.centerStart,
+                alignment: AlignmentDirectional.centerStart,
                 child: new Align(
-                  alignment: FractionalOffsetDirectional.centerEnd,
+                  alignment: AlignmentDirectional.centerEnd,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(

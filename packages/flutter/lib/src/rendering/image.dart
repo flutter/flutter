@@ -32,7 +32,7 @@ class RenderImage extends RenderBox {
     Color color,
     BlendMode colorBlendMode,
     BoxFit fit,
-    FractionalOffsetGeometry alignment: FractionalOffset.center,
+    AlignmentGeometry alignment: Alignment.center,
     ImageRepeat repeat: ImageRepeat.noRepeat,
     Rect centerSlice,
     bool matchTextDirection: false,
@@ -56,7 +56,7 @@ class RenderImage extends RenderBox {
     _updateColorFilter();
   }
 
-  FractionalOffset _resolvedAlignment;
+  Alignment _resolvedAlignment;
   bool _flipHorizontally;
 
   void _resolve() {
@@ -178,9 +178,9 @@ class RenderImage extends RenderBox {
   ///
   /// If this is set to a text-direction-dependent value, [textDirection] must
   /// not be null.
-  FractionalOffsetGeometry get alignment => _alignment;
-  FractionalOffsetGeometry _alignment;
-  set alignment(FractionalOffsetGeometry value) {
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     assert(value != null);
     if (value == _alignment)
       return;
@@ -343,7 +343,7 @@ class RenderImage extends RenderBox {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));

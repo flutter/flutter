@@ -11,21 +11,21 @@ const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
 // Fractional offset from offscreen to the right to fully on screen.
-final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
-  begin: FractionalOffset.topRight,
-  end: FractionalOffset.topLeft,
+final AlignmentTween _kRightMiddleTween = new AlignmentTween(
+  begin: Alignment.centerRight * 2.0,
+  end: Alignment.center,
 );
 
 // Fractional offset from fully on screen to 1/3 offscreen to the left.
-final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
-  begin: FractionalOffset.topLeft,
-  end: const FractionalOffset(-1.0/3.0, 0.0),
+final AlignmentTween _kMiddleLeftTween = new AlignmentTween(
+  begin: Alignment.center,
+  end: const Alignment(-2.0/3.0, 0.0),
 );
 
 // Fractional offset from offscreen below to fully on screen.
-final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-  begin: FractionalOffset.bottomLeft,
-  end: FractionalOffset.topLeft,
+final AlignmentTween _kBottomUpTween = new AlignmentTween(
+  begin: Alignment.bottomCenter * 2.0,
+  end: Alignment.center,
 );
 
 // Custom decoration from no shadow to page shadow mimicking iOS page
@@ -35,8 +35,8 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
   end: const _CupertinoEdgeShadowDecoration(
     edgeGradient: const LinearGradient(
       // Spans 5% of the page.
-      begin: const FractionalOffset(0.95, 0.0),
-      end: FractionalOffset.topRight,
+      begin: const Alignment(0.90, 0.0),
+      end: Alignment.centerRight,
       // Eyeballed gradient used to mimic a drop shadow on the left side only.
       colors: const <Color>[
         const Color(0x00000000),
@@ -67,10 +67,12 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
 ///
 /// See also:
 ///
-///  * [MaterialPageRoute] for an adaptive [PageRoute] that uses a platform
-///    appropriate transition.
-///  * [CupertinoPageScaffold] typical content of a [CupertinoPageRoute] implementing
-///    iOS style layout with navigation bar on top.
+///  * [MaterialPageRoute], for an adaptive [PageRoute] that uses a
+///    platform-appropriate transition.
+///  * [CupertinoPageScaffold], for applications that have one page with a fixed
+///    navigation bar on top.
+///  * [CupertinoTabScaffold], for applications that have a tab bar at the
+///    bottom with multiple pages.
 class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in an iOS designed app.
   ///
@@ -146,9 +148,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   /// Whether a pop gesture is currently underway.
   ///
-  /// This starts returning true when the [startPopGesture] method returns a new
-  /// [NavigationGestureController]. It returns false if that has not yet
-  /// occurred or if the most recent such gesture has completed.
+  /// This starts returning true when pop gesture is started by the user. It
+  /// returns false if that has not yet occurred or if the most recent such
+  /// gesture has completed.
   ///
   /// See also:
   ///
@@ -156,12 +158,14 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///    in the first place.
   bool get popGestureInProgress => _backGestureController != null;
 
-  /// Whether a pop gesture will be considered acceptable by [startPopGesture].
+  /// Whether a pop gesture can be started by the user.
   ///
   /// This returns true if the user can edge-swipe to a previous route,
   /// otherwise false.
   ///
-  /// This will return false if [popGestureInProgress] is true.
+  /// This will return false once [popGestureInProgress] is true, but
+  /// [popGestureInProgress] can only become true if [popGestureEnabled] was
+  /// true first.
   ///
   /// This should only be used between frames, not during build.
   bool get popGestureEnabled {
@@ -314,9 +318,9 @@ class CupertinoPageTransition extends StatelessWidget {
       super(key: key);
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> _primaryPositionAnimation;
+  final Animation<Alignment> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> _secondaryPositionAnimation;
+  final Animation<Alignment> _secondaryPositionAnimation;
   final Animation<Decoration> _primaryShadowAnimation;
 
   /// The widget below this widget in the tree.
@@ -357,7 +361,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
        ),
        super(key: key);
 
-  final Animation<FractionalOffset> _positionAnimation;
+  final Animation<Alignment> _positionAnimation;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -558,7 +562,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       const _CupertinoEdgeShadowDecoration();
 
   /// A gradient to draw to the left of the box being decorated.
-  /// FractionalOffsets are relative to the original box translated one box
+  /// Alignments are relative to the original box translated one box
   /// width to the left.
   final LinearGradient edgeGradient;
 
