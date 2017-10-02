@@ -194,10 +194,13 @@ class BorderSide {
       return a;
     if (t == 1.0)
       return b;
+    final double width = ui.lerpDouble(a.width, b.width, t);
+    if (width < 0.0)
+      return BorderSide.none;
     if (a.style == b.style) {
       return new BorderSide(
         color: Color.lerp(a.color, b.color, t),
-        width: math.max(0.0, ui.lerpDouble(a.width, b.width, t)),
+        width: width,
         style: a.style, // == b.style
       );
     }
@@ -220,7 +223,7 @@ class BorderSide {
     }
     return new BorderSide(
       color: Color.lerp(colorA, colorB, t),
-      width: math.max(0.0, ui.lerpDouble(a.width, b.width, t)),
+      width: width,
       style: BorderStyle.solid,
     );
   }

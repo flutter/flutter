@@ -38,10 +38,15 @@ import 'recording_canvas.dart';
 /// See [PaintPattern] for a discussion of the semantics of paint patterns.
 ///
 /// To match something which paints nothing, see [paintsNothing].
+///
+/// To match something which asserts instead of painting, see [paintsAssertion].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
 /// Matches objects or functions that paint an empty display list.
 Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
+
+/// Matches objects or functions that assert when they try to paint.
+Matcher get paintsAssertion => new _TestRecordingCanvasPaintsAssertionMatcher();
 
 /// Signature for [PaintPattern.something] predicate argument.
 ///
@@ -218,8 +223,10 @@ abstract class PaintPattern {
   /// are compared to the actual [Canvas.drawPath] call's `paint` argument, and
   /// any mismatches result in failure.
   ///
-  /// There is currently no way to check the actual path itself.
-  // See https://github.com/flutter/flutter/issues/93 which tracks that issue.
+  /// To introspect the Path object (as it stands after the painting has
+  /// completed), the `includes` and `excludes` arguments can be provided to
+  /// specify points that should be considered inside or outside the path
+  /// (respectively).
   ///
   /// If no call to [Canvas.drawPath] was made, then this results in failure.
   ///
@@ -231,7 +238,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+  void path({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a line is expected next.
   ///
@@ -327,6 +334,29 @@ class _MismatchedCall {
   final RecordedInvocation call;
 }
 
+bool _evaluatePainter(Object object, Canvas canvas, PaintingContext context) {
+  if (object is _ContextPainterFunction) {
+    final _ContextPainterFunction function = object;
+    function(context, Offset.zero);
+  } else if (object is _CanvasPainterFunction) {
+    final _CanvasPainterFunction function = object;
+    function(canvas);
+  } else {
+    if (object is Finder) {
+      TestAsyncUtils.guardSync();
+      final Finder finder = object;
+      object = finder.evaluate().single.renderObject;
+    }
+    if (object is RenderObject) {
+      final RenderObject renderObject = object;
+      renderObject.paint(context, Offset.zero);
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
 abstract class _TestRecordingCanvasMatcher extends Matcher {
   @override
   bool matches(Object object, Map<dynamic, dynamic> matchState) {
@@ -336,25 +366,9 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     String prefixMessage = 'unexpectedly failed.';
     bool result = false;
     try {
-      if (object is _ContextPainterFunction) {
-        final _ContextPainterFunction function = object;
-        function(context, Offset.zero);
-      } else if (object is _CanvasPainterFunction) {
-        final _CanvasPainterFunction function = object;
-        function(canvas);
-      } else {
-        if (object is Finder) {
-          TestAsyncUtils.guardSync();
-          final Finder finder = object;
-          object = finder.evaluate().single.renderObject;
-        }
-        if (object is RenderObject) {
-          final RenderObject renderObject = object;
-          renderObject.paint(context, Offset.zero);
-        } else {
-          matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
-          return false;
-        }
+      if (!_evaluatePainter(object, canvas, context)) {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
       }
       result = _evaluatePredicates(canvas.invocations, description);
       if (!result)
@@ -404,6 +418,55 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
       '${calls.first.stackToString(indent: "  ")}\n'
     );
     return false;
+  }
+}
+
+class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    final TestRecordingCanvas canvas = new TestRecordingCanvas();
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+    final StringBuffer description = new StringBuffer();
+    String prefixMessage = 'unexpectedly failed.';
+    bool result = false;
+    try {
+      if (!_evaluatePainter(object, canvas, context)) {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
+      }
+      prefixMessage = 'did not assert.';
+    } on AssertionError {
+      result = true;
+    } catch (error, stack) {
+      prefixMessage = 'threw the following exception:';
+      description.writeln(error.toString());
+      description.write(stack.toString());
+      result = false;
+    }
+    if (!result) {
+      if (canvas.invocations.isNotEmpty) {
+        description.write('The complete display list was:');
+        for (RecordedInvocation call in canvas.invocations)
+          description.write('\n  * $call');
+      }
+      matchState[this] = '$prefixMessage\n$description';
+    }
+    return result;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('An object or closure that asserts when it tries to paint.');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return description.add(matchState[this]);
   }
 }
 
@@ -471,8 +534,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _PathPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void path({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _PathPaintPredicate(includes: includes, excludes: excludes, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -805,9 +868,42 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _PathPaintPredicate extends _DrawCommandPaintPredicate {
-  _PathPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+  _PathPaintPredicate({ this.includes, this.excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawPath, 'a path', 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final Path pathArgument = arguments[0];
+    if (includes != null) {
+      for (Offset offset in includes) {
+        if (!pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+      }
+    }
+    if (excludes != null) {
+      for (Offset offset in excludes) {
+        if (pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+      }
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (includes != null && excludes != null) {
+      description.add('that contains $includes and does not contain $excludes');
+    } else if (includes != null) {
+      description.add('that contains $includes');
+    } else if (excludes != null) {
+      description.add('that does not contain $excludes');
+    }
+  }
 }
 
 // TODO(ianh): add arguments to test the points, length, angle, that kind of thing
