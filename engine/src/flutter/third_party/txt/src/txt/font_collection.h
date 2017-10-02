@@ -50,6 +50,10 @@ class FontCollection {
   std::deque<sk_sp<SkFontMgr>> skia_font_managers_;
   std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
       font_collections_cache_;
+  std::unordered_map<SkUnichar, std::shared_ptr<minikin::FontFamily>>
+      fallback_fonts_;
+
+  void UpdateFallbackFonts(sk_sp<SkFontMgr> manager);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(FontCollection);
 };
