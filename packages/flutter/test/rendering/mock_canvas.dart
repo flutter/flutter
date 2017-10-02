@@ -327,6 +327,65 @@ abstract class PaintPattern {
   void something(PaintPatternPredicate predicate);
 }
 
+/// Matches a [Path] that contains (as defined by [Path.contains]) the given
+/// `includes` points and does not contain the given `excludes` points.
+Matcher isPathThat({
+  Iterable<Offset> includes: const <Offset>[],
+  Iterable<Offset> excludes: const <Offset>[],
+}) {
+  return new _PathMatcher(includes.toList(), excludes.toList());
+}
+
+class _PathMatcher extends Matcher {
+  _PathMatcher(this.includes, this.excludes);
+
+  List<Offset> includes;
+  List<Offset> excludes;
+
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    if (object is! Path) {
+      matchState[this] = 'The given object ($object) was not a Path.';
+      return false;
+    }
+    final Path path = object;
+    final List<String> errors = <String>[];
+    for (Offset offset in includes) {
+      if (!path.contains(offset))
+        errors.add('Offset $offset should be inside the path, but is not.');
+    }
+    for (Offset offset in excludes) {
+      if (path.contains(offset))
+        errors.add('Offset $offset should be outside the path, but is not.');
+    }
+    if (errors.isEmpty)
+      return true;
+    matchState[this] = 'Not all the given points were inside or outside the path as expected:\n  ${errors.join("\n  ")}';
+    return false;
+  }
+
+  @override
+  Description describe(Description description) {
+    String points(List<Offset> list) {
+      final int count = list.length;
+      if (count == 1)
+        return 'one particular point';
+      return '$count particular points';
+    }
+    return description.add('A Path that contains ${points(includes)} but does not contain ${points(excludes)}.');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return description.add(matchState[this]);
+  }
+}
+
 class _MismatchedCall {
   const _MismatchedCall(this.message, this.callIntroduction, this.call) : assert(call != null);
   final String message;
