@@ -40,15 +40,15 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: const Text('Hello', textScaleFactor: 1.3, textDirection: TextDirection.ltr)
+      child: const Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr)
     ));
 
     text = tester.firstWidget(find.byType(RichText));
     expect(text, isNotNull);
-    expect(text.textScaleFactor, 1.3);
+    expect(text.textScaleFactor, 1.5);
     final Size largeSize = tester.getSize(find.byType(RichText));
-    expect(largeSize.width, anyOf(90.0, 91.0));
-    expect(largeSize.height, equals(19.0));
+    expect(largeSize.width, 105.0);
+    expect(largeSize.height, equals(21.0));
   });
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {

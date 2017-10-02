@@ -250,6 +250,10 @@ void main() {
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.height, equals(26.0));
+    // anyOf needed here and below because Linux and Mac have different text
+    // rendering widths in tests.
+    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
+    // text rendering is replaced.
     expect(paragraph.size.width, anyOf(79.0, 78.0));
 
     // Test the sizes of nested spans.

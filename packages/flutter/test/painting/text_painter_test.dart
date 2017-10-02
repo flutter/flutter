@@ -64,14 +64,14 @@ void main() {
         style: const TextStyle(
           inherit: false,
           fontFamily: 'Ahem',
-          fontSize: 123.0,
+          fontSize: 10.0,
         ),
       ),
       textDirection: TextDirection.ltr,
-      textScaleFactor: 1.3,
+      textScaleFactor: 2.0,
     );
     painter.layout();
-    expect(painter.size, anyOf(const Size(161.0, 160.0), const Size(160.0, 160.0)));
+    expect(painter.size, const Size(20.0, 20.0));
   });
 
   test('TextPainter default text height is 14 pixels', () {
