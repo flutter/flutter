@@ -211,7 +211,7 @@ class _PestoLogoState extends State<PestoLogo> {
   Widget build(BuildContext context) {
     return new Transform(
       transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
-      alignment: FractionalOffset.topCenter,
+      alignment: Alignment.topCenter,
       child: new SizedBox(
         width: kLogoWidth,
         child: new Stack(
@@ -362,8 +362,8 @@ class _RecipePageState extends State<RecipePage> {
                   background: new DecoratedBox(
                     decoration: new BoxDecoration(
                       gradient: new LinearGradient(
-                        begin: const FractionalOffset(0.5, 0.0),
-                        end: const FractionalOffset(0.5, 0.40),
+                        begin: const Alignment(0.0, -1.0),
+                        end: const Alignment(0.0, -0.2),
                         colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
                       ),
                     ),
@@ -450,7 +450,7 @@ class RecipeSheet extends StatelessWidget {
                     package: recipe.ingredientsImagePackage,
                     width: 32.0,
                     height: 32.0,
-                    alignment: FractionalOffset.centerLeft,
+                    alignment: Alignment.centerLeft,
                     fit: BoxFit.scaleDown
                   )
                 ),

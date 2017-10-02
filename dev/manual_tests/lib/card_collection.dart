@@ -224,7 +224,7 @@ class CardCollectionState extends State<CardCollection> {
       flexibleSpace: new Container(
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
-        alignment: const FractionalOffset(0.0, 0.75),
+        alignment: const Alignment(-1.0, 0.5),
         child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title),
       ),
     );
@@ -330,8 +330,8 @@ class CardCollectionState extends State<CardCollection> {
 
   Shader _createShader(Rect bounds) {
     return new LinearGradient(
-        begin: FractionalOffset.topLeft,
-        end: FractionalOffset.bottomLeft,
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
         colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
         stops: <double>[0.1, 0.35],
     )
