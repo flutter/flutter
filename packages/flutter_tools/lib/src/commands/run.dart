@@ -156,8 +156,8 @@ class RunCommand extends RunCommandBase {
             'results out to "refresh_benchmark.json", and exit. This flag is\n'
             'intended for use in generating automated flutter benchmarks.');
 
-    argParser.addOption('extra-front-end-options', hide: true);
-    argParser.addOption('extra-gen-snapshot-options', hide: true);
+    argParser.addOption(FlutterOptions.kExtraFrontEndOptions, hide: true);
+    argParser.addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
 
   List<Device> devices;

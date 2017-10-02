@@ -73,9 +73,8 @@ Future<String> compile(
     '--sdk-root',
     sdkRoot,
   ];
-  if (extraFrontEndOptions != null) {
+  if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
-  }
   command.add(mainPath);
   final Process server = await processManager
       .start(command)

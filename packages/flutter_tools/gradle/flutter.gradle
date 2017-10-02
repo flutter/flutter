@@ -296,13 +296,13 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
-    @Optional
+    @Optional @Input
     Boolean previewDart2
     File sourceDir
     File intermediateDir
-    @Optional
+    @Optional @Input
     String extraFrontEndOptions
-    @Optional
+    @Optional @Input
     String extraGenSnapshotOptions
 
     @OutputFile

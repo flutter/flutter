@@ -54,6 +54,12 @@ class FlutterCommandResult {
   final DateTime endTimeOverride;
 }
 
+/// Common flutter command line options.
+class FlutterOptions {
+  static const String kExtraFrontEndOptions = 'extra-front-end-options';
+  static const String kExtraGenSnapshotOptions = 'extra-gen-snapshot-options';
+}
+
 abstract class FlutterCommand extends Command<Null> {
   @override
   FlutterCommandRunner get runner => super.runner;
@@ -150,11 +156,11 @@ abstract class FlutterCommand extends Command<Null> {
       previewDart2: argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
         : false,
-      extraFrontEndOptions: argParser.options.containsKey('extra-front-end-options')
-          ? argResults['extra-front-end-options']
+      extraFrontEndOptions: argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
+          ? argResults[FlutterOptions.kExtraFrontEndOptions]
           : null,
-      extraGenSnapshotOptions: argParser.options.containsKey('extra-gen-snapshot-options')
-          ? argResults['extra-gen-snapshot-options']
+      extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
+          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null);
   }
 
