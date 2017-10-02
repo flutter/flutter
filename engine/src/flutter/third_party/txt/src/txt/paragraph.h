@@ -114,6 +114,10 @@ class Paragraph {
   // end glyph indexes, including start and excluding end.
   std::vector<SkRect> GetRectsForRange(size_t start, size_t end) const;
 
+  // Returns a bounding box that encloses the given starting and ending
+  // positions within a line.
+  SkRect GetRectForLineRange(size_t line, size_t start, size_t end) const;
+
   // Returns the index of the glyph that corresponds to the provided coordinate,
   // with the top left corner as the origin, and +y direction as down.
   //
@@ -126,9 +130,6 @@ class Paragraph {
       double dx,
       double dy,
       bool using_glyph_center_as_boundary = false) const;
-
-  // Returns a bounding box that encloses the glyph at the index pos.
-  SkRect GetCoordinatesForGlyphPosition(size_t pos) const;
 
   // Finds the first and last glyphs that define a word containing the glyph at
   // index offset.
