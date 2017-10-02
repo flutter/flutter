@@ -530,7 +530,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (_newChildren != null) {
       for (SemanticsNode child in _newChildren) {
-        assert(!child.canBeDroppedFromTree);
+        assert(!child.canBeDroppedFromTree, 'Child with id ${child.id} must be dropped from tree');
         child._dead = false;
       }
     }

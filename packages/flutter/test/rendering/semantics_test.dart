@@ -32,6 +32,7 @@ void main() {
 
     test('getSemanticsData includes tags', () {
       final SemanticsNode node = new SemanticsNode()
+        ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ..addTag(tag1)
         ..addTag(tag2);
 
@@ -43,7 +44,9 @@ void main() {
 
       node.mergeAllDescendantsIntoThisNode = true;
       node.addChildren(<SemanticsNode>[
-        new SemanticsNode()..addTag(tag3)
+        new SemanticsNode()
+          ..rect = new Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+          ..addTag(tag3),
       ]);
       node.finalizeChildren();
 
@@ -95,9 +98,12 @@ void main() {
   });
 
   test('toStringDeep() does not throw with transform == null', () {
-    final SemanticsNode child1 = new SemanticsNode();
-    final SemanticsNode child2 = new SemanticsNode();
-    final SemanticsNode root = new SemanticsNode();
+    final SemanticsNode child1 = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+    final SemanticsNode child2 = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+    final SemanticsNode root = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.addChildren(<SemanticsNode>[child1, child2]);
     root.finalizeChildren();
 
@@ -107,64 +113,68 @@ void main() {
 
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#8(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '├SemanticsNode#6(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '└SemanticsNode#7(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+      'SemanticsNode#8(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
+      '├SemanticsNode#6(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
+      '└SemanticsNode#7(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n',
     );
   });
 
   test('toStringDeep respects childOrder parameter', () {
     final SemanticsNode child1 = new SemanticsNode()
-      ..rect = new Rect.fromLTRB(20.0, 20.0, 20.0, 20.0);
+      ..rect = new Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
     final SemanticsNode child2 = new SemanticsNode()
-      ..rect = new Rect.fromLTRB(10.0, 10.0, 10.0, 10.0);
-    final SemanticsNode root = new SemanticsNode();
+      ..rect = new Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+    final SemanticsNode root = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.addChildren(<SemanticsNode>[child1, child2]);
     root.finalizeChildren();
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
-      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n',
+      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
+      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
     );
 
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
-      '└SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n',
+      'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
+      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
+      '└SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n',
     );
 
     final SemanticsNode child3 = new SemanticsNode()
-      ..rect = new Rect.fromLTRB(0.0, 0.0, 0.0, 0.0);
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.addChildren(<SemanticsNode>[
-      new SemanticsNode()..rect = new Rect.fromLTRB(20.0, 0.0, 20.0, 0.0),
-      new SemanticsNode(),
+      new SemanticsNode()
+        ..rect = new Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+      new SemanticsNode()
+        ..rect = new Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
     ]);
     child3.finalizeChildren();
 
-    final SemanticsNode rootComplex = new SemanticsNode();
+    final SemanticsNode rootComplex = new SemanticsNode()
+      ..rect = new Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.addChildren(<SemanticsNode>[child1, child2, child3]);
     rootComplex.finalizeChildren();
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
-      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '├SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '│├SemanticsNode#14(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '│└SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(20.0, 0.0, 20.0, 0.0))\n'
-      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
-      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n',
+      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
+      '├SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
+      '│├SemanticsNode#14(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n'
+      '│└SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
+      '└SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n',
     );
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest),
-      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(20.0, 20.0, 20.0, 20.0))\n'
-      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 10.0, 10.0, 10.0))\n'
-      '└SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n'
-      ' ├SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(20.0, 0.0, 20.0, 0.0))\n'
-      ' └SemanticsNode#14(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))\n',
+      'SemanticsNode#15(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 25.0, 5.0))\n'
+      '├SemanticsNode#9(STALE, owner: null, Rect.fromLTRB(15.0, 0.0, 20.0, 5.0))\n'
+      '├SemanticsNode#10(STALE, owner: null, Rect.fromLTRB(10.0, 0.0, 15.0, 5.0))\n'
+      '└SemanticsNode#12(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 10.0, 5.0))\n'
+      ' ├SemanticsNode#13(STALE, owner: null, Rect.fromLTRB(5.0, 0.0, 10.0, 5.0))\n'
+      ' └SemanticsNode#14(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 5.0, 5.0))\n',
     );
   });
 
