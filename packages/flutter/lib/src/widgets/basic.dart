@@ -1201,12 +1201,12 @@ class Align extends SingleChildRenderObjectWidget {
   /// with the center of the parent.
   final AlignmentGeometry alignment;
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double widthFactor;
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;

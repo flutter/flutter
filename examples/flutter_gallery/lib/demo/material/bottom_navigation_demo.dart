@@ -95,31 +95,31 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
     _navigationViews = <NavigationIconView>[
       new NavigationIconView(
         icon: const Icon(Icons.access_alarm),
-        title: const Text('Alarm'),
+        title: const Text('Alarm', overflow: TextOverflow.ellipsis),
         color: Colors.deepPurple,
         vsync: this,
       ),
       new NavigationIconView(
         icon: new CustomIcon(),
-        title: const Text('Box'),
+        title: const Text('Box', overflow: TextOverflow.ellipsis),
         color: Colors.deepOrange,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.cloud),
-        title: const Text('Cloud'),
+        title: const Text('Cloud', overflow: TextOverflow.ellipsis),
         color: Colors.teal,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.favorite),
-        title: const Text('Favorites'),
+        title: const Text('Favorites', overflow: TextOverflow.ellipsis),
         color: Colors.indigo,
         vsync: this,
       ),
       new NavigationIconView(
         icon: const Icon(Icons.event_available),
-        title: const Text('Event'),
+        title: const Text('Event', overflow: TextOverflow.ellipsis),
         color: Colors.pink,
         vsync: this,
       )

@@ -114,6 +114,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   double _weight;
   final Queue<_Circle> _circles = new Queue<_Circle>();
   Color _backgroundColor; // Last growing circle's color.
+  static const double _fontSize = 14.0;
+  static const double _topMargin = 6.0;
+  static const double _bottomMargin = 10.0;
 
   static final Tween<double> _flexTween = new Tween<double>(
     begin: 1.0,
@@ -291,7 +294,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 8.0,
-                            end: 6.0,
+                            end: _topMargin,
                           ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
@@ -306,10 +309,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                     new Align(
                       alignment: Alignment.bottomCenter,
                       child: new Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
+                        margin: const EdgeInsets.only(bottom: _bottomMargin),
                         child: DefaultTextStyle.merge(
                           style: new TextStyle(
-                            fontSize: 14.0,
+                            fontSize: _fontSize,
                             color: colorTween.evaluate(_animations[i]),
                           ),
                           child: new Transform(
@@ -360,7 +363,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 18.0,
-                            end: 6.0,
+                            end: _topMargin,
                           ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
@@ -375,12 +378,12 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                     new Align(
                       alignment: Alignment.bottomCenter,
                       child: new Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
+                        margin: const EdgeInsets.only(bottom: _bottomMargin),
                         child: new FadeTransition(
                           opacity: _animations[i],
                           child: DefaultTextStyle.merge(
                             style: const TextStyle(
-                              fontSize: 14.0,
+                              fontSize: _fontSize,
                               color: Colors.white
                             ),
                             child: widget.items[i].title
@@ -412,7 +415,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           )
         ),
         new SizedBox(
-          height: kBottomNavigationBarHeight,
+          height: math.max(
+            kBottomNavigationBarHeight,
+            widget.iconSize + _bottomMargin + _topMargin + _fontSize * MediaQuery.of(context).textScaleFactor
+          ),
           child: new Center(
             child: new Stack(
               children: <Widget>[
@@ -427,7 +433,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 new Material( // Splashes.
                   type: MaterialType.transparency,
                   child: new Center(
-                    child: bottomNavigation
+                    child: bottomNavigation,
                   ),
                 ),
               ],
