@@ -330,7 +330,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return _actionHandler != null && (_actions & action.index) != 0;
   }
 
-  /// Whether all this node and all of its descendants should be treated as one logical entity.
+  /// Whether this node and all of its descendants should be treated as one logical entity.
   bool get mergeAllDescendantsIntoThisNode => _mergeAllDescendantsIntoThisNode;
   bool _mergeAllDescendantsIntoThisNode = false;
   set mergeAllDescendantsIntoThisNode(bool value) {
@@ -341,17 +341,26 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
-  bool get _inheritedMergeAllDescendantsIntoThisNode => _inheritedMergeAllDescendantsIntoThisNodeValue;
-  bool _inheritedMergeAllDescendantsIntoThisNodeValue = false;
-  set _inheritedMergeAllDescendantsIntoThisNode(bool value) {
+  /// Whether this node merges its semantic information into an ancestor node.
+  bool get isMergedIntoParent => _isMergedIntoParent;
+  bool _isMergedIntoParent = false;
+  set isMergedIntoParent(bool value) {
     assert(value != null);
-    if (_inheritedMergeAllDescendantsIntoThisNodeValue == value)
+    if (_isMergedIntoParent == value)
       return;
-    _inheritedMergeAllDescendantsIntoThisNodeValue = value;
+    _isMergedIntoParent = value;
     _markDirty();
   }
 
-  bool get _shouldMergeAllDescendantsIntoThisNode => mergeAllDescendantsIntoThisNode || _inheritedMergeAllDescendantsIntoThisNode;
+  /// Whether this node is taking part in a merge of semantic information.
+  ///
+  /// This returns true if the node is either merged into an ancestor node or if
+  /// decedent nodes are merged into this node.
+  ///
+  /// See also:
+  ///  * [isMergedIntoParent]
+  ///  * [mergeAllDescendantsIntoThisNode]
+  bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
 
   int _flags = 0;
   void _setFlag(SemanticsFlags flag, bool value) {
@@ -433,13 +442,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Restore this node to its default state.
   void reset() {
-    final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
-    if (hadInheritedMergeAllDescendantsIntoThisNode)
-      _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
     _textDirection = null;
+    _mergeAllDescendantsIntoThisNode = false;
     _tags.clear();
     _markDirty();
   }
@@ -603,8 +610,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _dirty = false;
       _markDirty();
     }
-    if (parent != null)
-      _inheritedMergeAllDescendantsIntoThisNode = parent._shouldMergeAllDescendantsIntoThisNode;
+    assert(isMergedIntoParent == (parent?.isPartOfNodeMerging ?? false));
     if (_children != null) {
       for (SemanticsNode child in _children)
         child.attach(owner);
@@ -759,7 +765,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       hideOwner = inDirtyNodes;
     }
     properties.add(new DiagnosticsProperty<SemanticsOwner>('owner', owner, level: hideOwner ? DiagnosticLevel.hidden : DiagnosticLevel.info));
-    properties.add(new FlagProperty('shouldMergeAllDescendantsIntoThisNode', value: _shouldMergeAllDescendantsIntoThisNode, ifTrue: 'leaf merge'));
+    properties.add(new FlagProperty('isPartOfNodeMerging', value: isPartOfNodeMerging, ifTrue: 'leaf merge'));
     final Offset offset = transform != null ? MatrixUtils.getAsTranslation(transform) : null;
     if (offset != null) {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect.shift(offset), showName: false));
@@ -885,31 +891,12 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode || node._inheritedMergeAllDescendantsIntoThisNode);
-        if (node._shouldMergeAllDescendantsIntoThisNode) {
+        assert(node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent);
+        if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
-          if (node.mergeAllDescendantsIntoThisNode ||
-              node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode) {
-            // if we're merged into our parent, make sure our parent is added to the list
-            if (node.parent != null && node.parent._shouldMergeAllDescendantsIntoThisNode)
-              node.parent._markDirty(); // this can add the node to the dirty list
-            // make sure all the descendants are also marked, so that if one gets marked dirty later we know to walk up then too
-            if (node._children != null) {
-              for (SemanticsNode child in node._children)
-                child._inheritedMergeAllDescendantsIntoThisNode = true; // this can add the node to the dirty list
-            }
-          } else {
-            // we previously were being merged but aren't any more
-            // update our bits and all our descendants'
-            assert(node._inheritedMergeAllDescendantsIntoThisNode);
-            assert(!node.mergeAllDescendantsIntoThisNode);
-            assert(node.parent == null || !node.parent._shouldMergeAllDescendantsIntoThisNode);
-            node._inheritedMergeAllDescendantsIntoThisNode = false;
-            if (node._children != null) {
-              for (SemanticsNode child in node._children)
-                child._inheritedMergeAllDescendantsIntoThisNode = false; // this can add the node to the dirty list
-            }
-          }
+          // if we're merged into our parent, make sure our parent is added to the dirty list
+          if (node.parent != null && node.parent.isPartOfNodeMerging)
+            node.parent._markDirty(); // this can add the node to the dirty list
         }
       }
     }
@@ -937,7 +924,7 @@ class SemanticsOwner extends ChangeNotifier {
 
   SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode result = _nodes[id];
-    if (result != null && result._shouldMergeAllDescendantsIntoThisNode && !result._canPerformAction(action)) {
+    if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
         if (node._canPerformAction(action)) {
           result = node;
