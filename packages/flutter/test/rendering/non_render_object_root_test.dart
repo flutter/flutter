@@ -47,7 +47,7 @@ void main() {
     RenderPositionedBox child;
     final RealRoot root = new RealRoot(
       child = new RenderPositionedBox(
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
         child: new RenderSizedBox(const Size(100.0, 100.0))
       )
     );

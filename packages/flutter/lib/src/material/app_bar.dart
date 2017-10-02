@@ -448,7 +448,7 @@ class _AppBarState extends State<AppBar> {
     }
 
     appBar = new Align(
-      alignment: FractionalOffset.topCenter,
+      alignment: Alignment.topCenter,
       child: appBar,
     );
 

@@ -297,7 +297,7 @@ class _StepperState extends State<Stepper> with TickerProviderStateMixin {
               color: _isDark() ? _kErrorDark : _kErrorLight,
             ),
             child: new Align(
-              alignment: const FractionalOffset(0.5, 0.9), // 0.9 looks better than the geometrical 0.66.
+              alignment: const Alignment(0.0, 0.8), // 0.8 looks better than the geometrical 0.33.
               child: _buildCircleChild(index, oldState && widget.steps[index].state != StepState.error),
             ),
           ),

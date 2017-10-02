@@ -416,7 +416,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
               child: new OverflowBox(
                 minHeight: 0.0,
                 maxHeight: double.INFINITY,
-                alignment: FractionalOffsetDirectional.bottomStart,
+                alignment: AlignmentDirectional.bottomStart,
                 child: new Padding(
                   padding: const EdgeInsetsDirectional.only(
                     start: _kNavBarEdgePadding,

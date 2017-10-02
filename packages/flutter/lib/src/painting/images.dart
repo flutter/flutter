@@ -7,10 +7,10 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_fit.dart';
-import 'fractional_offset.dart';
 
 /// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {
@@ -41,7 +41,7 @@ class DecorationImage {
     @required this.image,
     this.colorFilter,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.centerSlice,
     this.repeat: ImageRepeat.noRepeat,
     this.matchTextDirection: false,
@@ -70,22 +70,22 @@ class DecorationImage {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// To display a subpart of an image, consider using a [CustomPainter] and
   /// [Canvas.drawImageRect].
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then a [TextDirection] must be available
+  /// [AlignmentDirectional]), then a [TextDirection] must be available
   /// when the image is painted.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// The center slice for a nine-patch image.
   ///
@@ -180,9 +180,9 @@ class DecorationImage {
 ///
 ///  * `alignment`: How the destination rectangle defined by applying `fit` is
 ///    aligned within `rect`. For example, if `fit` is [BoxFit.contain] and
-///    `alignment` is [FractionalOffset.bottomRight], the image will be as large
+///    `alignment` is [Alignment.bottomRight], the image will be as large
 ///    as possible within `rect` and placed with its bottom right corner at the
-///    bottom right corner of `rect`. Defaults to [FractionalOffset.center].
+///    bottom right corner of `rect`. Defaults to [Alignment.center].
 ///
 ///  * `centerSlice`: The image is drawn in nine portions described by splitting
 ///    the image by drawing two horizontal lines and two vertical lines, where
@@ -219,7 +219,7 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  FractionalOffset alignment: FractionalOffset.center,
+  Alignment alignment: Alignment.center,
   Rect centerSlice,
   ImageRepeat repeat: ImageRepeat.noRepeat,
   bool flipHorizontally: false,
@@ -268,8 +268,10 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
-  final double dx = (outputSize.width - destinationSize.width) * (flipHorizontally ? 1.0 - alignment.dx : alignment.dx);
-  final double dy = (outputSize.height - destinationSize.height) * alignment.dy;
+  final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
+  final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
+  final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
+  final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
   final bool needSave = repeat != ImageRepeat.noRepeat || flipHorizontally;

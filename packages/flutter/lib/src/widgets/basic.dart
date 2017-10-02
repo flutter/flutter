@@ -19,6 +19,8 @@ export 'package:flutter/foundation.dart' show
   ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
+  AlignmentTween,
+  AlignmentGeometryTween,
   Axis,
   BoxConstraints,
   CrossAxisAlignment,
@@ -29,7 +31,6 @@ export 'package:flutter/rendering.dart' show
   FlowDelegate,
   FlowPaintingContext,
   FractionalOffsetTween,
-  FractionalOffsetGeometryTween,
   HitTestBehavior,
   LayerLink,
   MainAxisAlignment,
@@ -190,7 +191,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// new ShaderMask(
 ///   shaderCallback: (Rect bounds) {
 ///     return new RadialGradient(
-///       center: FractionalOffset.topLeft,
+///       center: Alignment.topLeft,
 ///       radius: 1.0,
 ///       colors: <Color>[Colors.yellow, Colors.deepOrange.shade900],
 ///       tileMode: TileMode.mirror,
@@ -435,7 +436,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// ```dart
 /// new ClipRect(
 ///   child: new Align(
-///     alignment: FractionalOffset.topCenter,
+///     alignment: Alignment.topCenter,
 ///     heightFactor: 0.5,
 ///     child: new Image.network(userAvatarUrl),
 ///   ),
@@ -712,7 +713,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 /// new Container(
 ///   color: Colors.black,
 ///   child: new Transform(
-///     alignment: FractionalOffset.topRight,
+///     alignment: Alignment.topRight,
 ///     transform: new Matrix4.skewY(0.3)..rotateZ(-math.PI / 12.0),
 ///     child: new Container(
 ///       padding: const EdgeInsets.all(8.0),
@@ -767,7 +768,7 @@ class Transform extends SingleChildRenderObjectWidget {
     Key key,
     @required double angle,
     this.origin,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.transformHitTests: true,
     Widget child,
   }) : transform = new Matrix4.rotationZ(angle),
@@ -787,7 +788,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
-  final FractionalOffset alignment;
+  final Alignment alignment;
 
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
@@ -959,7 +960,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
   const FittedBox({
     Key key,
     this.fit: BoxFit.contain,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     Widget child
   }) : assert(fit != null),
        assert(alignment != null),
@@ -970,10 +971,10 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// How to align the child within its parent's bounds.
   ///
-  /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
+  /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  final FractionalOffset alignment;
+  final Alignment alignment;
 
   @override
   RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
@@ -1000,8 +1001,8 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
   }) : assert(translation != null),
        super(key: key, child: child);
 
-  /// The offset by which to translate the child, as a multiple of its size.
-  final FractionalOffset translation;
+  /// The translation to apply to the child, relative to the child's center.
+  final Alignment translation;
 
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
@@ -1146,7 +1147,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with an alignment of [FractionalOffset.bottomRight].
+/// with an alignment of [Alignment.bottomRight].
 ///
 /// This widget will be as big as possible if its dimensions are constrained and
 /// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
@@ -1161,16 +1162,16 @@ class Padding extends SingleChildRenderObjectWidget {
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
-///    set to [FractionalOffset.center].
+///    set to [Alignment.center].
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value.
+///    size and positions the child according to a [Alignment] value.
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
-  /// The alignment defaults to [FractionalOffset.center].
+  /// The alignment defaults to [Alignment.center].
   const Align({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.widthFactor,
     this.heightFactor,
     Widget child
@@ -1182,13 +1183,13 @@ class Align extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// If non-null, sets its width to the child's width multipled by this factor.
   ///
@@ -1222,7 +1223,7 @@ class Align extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1259,9 +1260,9 @@ class Center extends Align {
 ///
 ///  * [SingleChildLayoutDelegate], which controls the layout of the child.
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value.
+///    the child according to a [Alignment] value.
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value.
+///    size and positions the child according to a [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
@@ -1536,7 +1537,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 /// * [Align] (which sizes itself based on its child's size and positions
-///   the child according to a [FractionalOffset] value)
+///   the child according to a [Alignment] value)
 /// * [OverflowBox]
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to a fraction of the total available space.
@@ -1545,7 +1546,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// non-negative.
   const FractionallySizedBox({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.widthFactor,
     this.heightFactor,
     Widget child,
@@ -1575,13 +1576,13 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   @override
   RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
@@ -1605,7 +1606,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
     description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
@@ -1686,7 +1687,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that lets its child overflow itself.
   const OverflowBox({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.minWidth,
     this.maxWidth,
     this.minHeight,
@@ -1697,13 +1698,13 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -1747,7 +1748,7 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new DoubleProperty('minWidth', minWidth, defaultValue: null));
     description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: null));
     description.add(new DoubleProperty('minHeight', minHeight, defaultValue: null));
@@ -1764,7 +1765,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   const SizedOverflowBox({
     Key key,
     @required this.size,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     Widget child,
   }) : assert(size != null),
        assert(alignment != null),
@@ -1773,13 +1774,13 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
   final Size size;
@@ -1804,7 +1805,7 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
@@ -2179,7 +2180,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value.
+///    the child according to a [Alignment] value.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
@@ -2193,7 +2194,7 @@ class Stack extends MultiChildRenderObjectWidget {
   /// top left corners.
   Stack({
     Key key,
-    this.alignment: FractionalOffsetDirectional.topStart,
+    this.alignment: AlignmentDirectional.topStart,
     this.textDirection,
     this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
@@ -2204,9 +2205,9 @@ class Stack extends MultiChildRenderObjectWidget {
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
   ///
@@ -2248,7 +2249,7 @@ class Stack extends MultiChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
@@ -2269,7 +2270,7 @@ class IndexedStack extends Stack {
   /// The [index] argument must not be null.
   IndexedStack({
     Key key,
-    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit sizing: StackFit.loose,
     this.index: 0,
@@ -3837,7 +3838,7 @@ class RawImage extends LeafRenderObjectWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -3889,22 +3890,22 @@ class RawImage extends LeafRenderObjectWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// To display a subpart of an image, consider using a [CustomPainter] and
   /// [Canvas.drawImageRect].
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// [AlignmentDirectional]), then an ambient [Directionality] widget
   /// must be in scope.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -3937,7 +3938,7 @@ class RawImage extends LeafRenderObjectWidget {
 
   @override
   RenderImage createRenderObject(BuildContext context) {
-    assert((!matchTextDirection && alignment is FractionalOffset) || debugCheckHasDirectionality(context));
+    assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
     return new RenderImage(
       image: image,
       width: width,
@@ -3950,7 +3951,7 @@ class RawImage extends LeafRenderObjectWidget {
       repeat: repeat,
       centerSlice: centerSlice,
       matchTextDirection: matchTextDirection,
-      textDirection: matchTextDirection || alignment is! FractionalOffset ? Directionality.of(context) : null,
+      textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
     );
   }
 
@@ -3968,7 +3969,7 @@ class RawImage extends LeafRenderObjectWidget {
       ..repeat = repeat
       ..centerSlice = centerSlice
       ..matchTextDirection = matchTextDirection
-      ..textDirection = matchTextDirection || alignment is! FractionalOffset ? Directionality.of(context) : null;
+      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
   }
 
   @override
@@ -3981,7 +3982,7 @@ class RawImage extends LeafRenderObjectWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));

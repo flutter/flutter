@@ -75,7 +75,7 @@ class ImageIcon extends StatelessWidget {
       height: iconSize,
       color: iconColor,
       fit: BoxFit.scaleDown,
-      alignment: FractionalOffset.center
+      alignment: Alignment.center,
     );
   }
 

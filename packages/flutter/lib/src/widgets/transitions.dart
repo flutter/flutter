@@ -103,7 +103,7 @@ class SlideTransition extends AnimatedWidget {
   /// The [position] argument must not be null.
   const SlideTransition({
     Key key,
-    @required Animation<FractionalOffsetGeometry> position,
+    @required Animation<Alignment> position,
     this.transformHitTests: true,
     this.child,
   }) : super(key: key, listenable: position);
@@ -112,7 +112,7 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// If the current value of the position animation is (dx, dy), the child will
   /// be translated horizontally by width * dx and vertically by height * dy.
-  Animation<FractionalOffsetGeometry> get position => listenable;
+  Animation<Alignment> get position => listenable;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -140,11 +140,11 @@ class ScaleTransition extends AnimatedWidget {
   /// Creates a scale transition.
   ///
   /// The [scale] argument must not be null. The [alignment] argument defaults
-  /// to [FractionalOffset.center].
+  /// to [Alignment.center].
   const ScaleTransition({
     Key key,
     @required Animation<double> scale,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.child,
   }) : super(key: key, listenable: scale);
 
@@ -158,8 +158,8 @@ class ScaleTransition extends AnimatedWidget {
   /// takes place, relative to the size of the box.
   ///
   /// For example, to set the origin of the scale to bottom middle, you can use
-  /// an alignment of (0.5, 1.0).
-  final FractionalOffset alignment;
+  /// an alignment of (0.0, 1.0).
+  final Alignment alignment;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -203,7 +203,7 @@ class RotationTransition extends AnimatedWidget {
     final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
-      alignment: FractionalOffset.center,
+      alignment: Alignment.center,
       child: child,
     );
   }
@@ -217,13 +217,13 @@ class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
   /// The [sizeFactor] argument must not be null. The [axis] argument defaults
-  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
+  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.0, which centers the
   /// child along the main axis during the transition.
   const SizeTransition({
     Key key,
     this.axis: Axis.vertical,
     @required Animation<double> sizeFactor,
-    this.axisAlignment: 0.5,
+    this.axisAlignment: 0.0,
     this.child,
   }) : assert(axis != null),
        super(key: key, listenable: sizeFactor);
@@ -244,11 +244,11 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    FractionalOffsetDirectional alignment;
+    AlignmentDirectional alignment;
     if (axis == Axis.vertical)
-      alignment = new FractionalOffsetDirectional(0.0, axisAlignment);
+      alignment = new AlignmentDirectional(-1.0, axisAlignment);
     else
-      alignment = new FractionalOffsetDirectional(axisAlignment, 0.0);
+      alignment = new AlignmentDirectional(axisAlignment, -1.0);
     return new ClipRect(
       child: new Align(
         alignment: alignment,

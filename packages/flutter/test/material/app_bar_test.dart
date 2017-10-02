@@ -999,8 +999,8 @@ void main() {
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),
@@ -1029,8 +1029,8 @@ void main() {
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),

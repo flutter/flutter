@@ -14,7 +14,7 @@ void main() {
       maxWidth: 100.0,
       minHeight: 0.0,
       maxHeight: 100.0,
-      alignment: const FractionalOffset(0.0, 0.0),
+      alignment: const Alignment(-1.0, -1.0),
       child: new Center(
         child: new FractionallySizedBox(
           widthFactor: 0.5,

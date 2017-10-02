@@ -1599,11 +1599,10 @@ class RenderTransform extends RenderProxyBox {
   RenderTransform({
     @required Matrix4 transform,
     Offset origin,
-    FractionalOffset alignment,
+    Alignment alignment,
     this.transformHitTests: true,
     RenderBox child
   }) : assert(transform != null),
-       assert(alignment == null || (alignment.dx != null && alignment.dy != null)),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
@@ -1628,10 +1627,10 @@ class RenderTransform extends RenderProxyBox {
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
-    assert(value == null || (value.dx != null && value.dy != null));
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    assert(value == null || (value.x != null && value.y != null));
     if (_alignment == value)
       return;
     _alignment = value;
@@ -1751,7 +1750,7 @@ class RenderTransform extends RenderProxyBox {
     super.debugFillProperties(description);
     description.add(new TransformProperty('transform matrix', _transform));
     description.add(new DiagnosticsProperty<Offset>('origin', origin));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1764,9 +1763,9 @@ class RenderFittedBox extends RenderProxyBox {
   RenderFittedBox({
     RenderBox child,
     BoxFit fit: BoxFit.contain,
-    FractionalOffset alignment: FractionalOffset.center
+    Alignment alignment: Alignment.center
   }) : assert(fit != null),
-       assert(alignment != null && alignment.dx != null && alignment.dy != null),
+       assert(alignment != null),
        _fit = fit,
        _alignment = alignment,
        super(child);
@@ -1788,10 +1787,10 @@ class RenderFittedBox extends RenderProxyBox {
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
-    assert(value != null && value.dx != null && value.dy != null);
+  Alignment get alignment => _alignment;
+  Alignment _alignment;
+  set alignment(Alignment value) {
+    assert(value != null && value.x != null && value.y != null);
     if (_alignment == value)
       return;
     _alignment = value;
@@ -1891,13 +1890,13 @@ class RenderFittedBox extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxFit>('fit', fit));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
   }
 }
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as a [FractionalOffset] relative to the
+/// The translation is expressed as a [Alignment] relative to the
 /// RenderFractionalTranslation box's size. Hit tests will only be detected
 /// inside the bounds of the RenderFractionalTranslation, even if the contents
 /// are offset such that they overflow.
@@ -1906,18 +1905,18 @@ class RenderFractionalTranslation extends RenderProxyBox {
   ///
   /// The [translation] argument must not be null.
   RenderFractionalTranslation({
-    FractionalOffset translation,
+    Alignment translation,
     this.transformHitTests: true,
     RenderBox child
-  }) : assert(translation == null || (translation.dx != null && translation.dy != null)),
+  }) : assert(translation == null || (translation.x != null && translation.y != null)),
        _translation = translation,
        super(child);
 
-  /// The translation to apply to the child, as a multiple of the size.
-  FractionalOffset get translation => _translation;
-  FractionalOffset _translation;
-  set translation(FractionalOffset value) {
-    assert(value == null || (value.dx != null && value.dy != null));
+  /// The translation to apply to the child, relative to the child's center.
+  Alignment get translation => _translation;
+  Alignment _translation;
+  set translation(Alignment value) {
+    assert(value == null || (value.x != null && value.y != null));
     if (_translation == value)
       return;
     _translation = value;
@@ -1935,27 +1934,41 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
-    if (transformHitTests)
-      position = new Offset(position.dx - translation.dx * size.width, position.dy - translation.dy * size.height);
+    if (transformHitTests) {
+      final double halfWidth = size.width / 2.0;
+      final double halfHeight = size.height / 2.0;
+      position = new Offset(
+        position.dx - translation.x * halfWidth,
+        position.dy - translation.y * halfHeight,
+      );
+    }
     return super.hitTest(result, position: position);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(!debugNeedsLayout);
-    if (child != null)
-      super.paint(context, offset + translation.alongSize(size));
+    if (child != null) {
+      final double halfWidth = size.width / 2.0;
+      final double halfHeight = size.height / 2.0;
+      super.paint(context, new Offset(
+        offset.dx + translation.x * halfWidth,
+        offset.dy + translation.y * halfHeight,
+      ));
+    }
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    final double halfWidth = size.width / 2.0;
+    final double halfHeight = size.height / 2.0;
+    transform.translate(translation.x * halfWidth, translation.y * halfHeight);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('translation', translation));
+    description.add(new DiagnosticsProperty<Alignment>('translation', translation));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1997,7 +2010,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 ///   void paint(Canvas canvas, Size size) {
 ///     var rect = Offset.zero & size;
 ///     var gradient = new RadialGradient(
-///       center: const FractionalOffset(0.7, 0.2),
+///       center: const Alignment(0.7, -0.6),
 ///       radius: 0.2,
 ///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
 ///       stops: [0.4, 1.0],

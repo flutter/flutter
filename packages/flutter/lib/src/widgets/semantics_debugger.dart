@@ -279,7 +279,7 @@ void _paintMessage(Canvas canvas, SemanticsNode node) {
     ..textAlign = TextAlign.center
     ..layout(maxWidth: rect.width);
 
-  textPainter.paint(canvas, FractionalOffset.center.inscribe(textPainter.size, rect).topLeft);
+  textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
   canvas.restore();
 }
 

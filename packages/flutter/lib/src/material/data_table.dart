@@ -408,7 +408,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kHeadingRowHeight,
-      alignment: numeric ? FractionalOffset.centerRight : FractionalOffsetDirectional.centerStart,
+      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: new AnimatedDefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
@@ -460,7 +460,7 @@ class DataTable extends StatelessWidget {
     label = new Container(
       padding: padding,
       height: _kDataRowHeight,
-      alignment: numeric ? FractionalOffset.centerRight : FractionalOffsetDirectional.centerStart,
+      alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: new DefaultTextStyle(
         style: new TextStyle(
           // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
@@ -774,7 +774,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
       child: new Transform(
         transform: new Matrix4.rotationZ(_orientationOffset + _orientationAnimation.value)
                              ..setTranslationRaw(0.0, _kArrowIconBaselineOffset, 0.0),
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
         child: new Icon(
           Icons.arrow_downward,
           size: _kArrowIconSize,
