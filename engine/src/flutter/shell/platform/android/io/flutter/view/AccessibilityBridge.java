@@ -132,11 +132,11 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             // TODO(ianh): Once we're on SDK v23+, call addAction to
             // expose AccessibilityAction.ACTION_SCROLL_LEFT, _RIGHT,
             // _UP, and _DOWN when appropriate.
-            if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0
+            if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0
                     || (object.actions & SEMANTICS_ACTION_SCROLL_UP) != 0) {
                 result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_FORWARD);
             }
-            if ((object.actions & SEMANTICS_ACTION_SCROLL_LEFT) != 0
+            if ((object.actions & SEMANTICS_ACTION_SCROLL_RIGHT) != 0
                     || (object.actions & SEMANTICS_ACTION_SCROLL_DOWN) != 0) {
                 result.addAction(AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD);
             }
