@@ -250,7 +250,7 @@ void main() {
     );
     paragraph.layout(const BoxConstraints());
     expect(paragraph.size.height, equals(26.0));
-    expect(paragraph.size.width, equals(79.0));
+    expect(paragraph.size.width, anyOf(79.0, 78.0));
 
     // Test the sizes of nested spans.
     final List<ui.TextBox> boxes = <ui.TextBox>[];
@@ -261,13 +261,13 @@ void main() {
       ));
     }
     expect(boxes.length, equals(4));
-    expect(boxes[0].toRect().width, equals(14.0));
+    expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[0].toRect().height, equals(13.0));
-    expect(boxes[1].toRect().width, equals(27.0));
+    expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
     expect(boxes[1].toRect().height, equals(26.0));
-    expect(boxes[2].toRect().width, equals(27.0));
+    expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
     expect(boxes[2].toRect().height, equals(26.0));
-    expect(boxes[3].toRect().width, equals(14.0));
+    expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
     expect(boxes[3].toRect().height, equals(13.0));
   });
 
