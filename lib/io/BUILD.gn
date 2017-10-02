@@ -14,4 +14,8 @@ source_set("io") {
     "//garnet/public/lib/fxl",
     "//topaz/lib/tonic/converter",
   ]
+
+  configs += [
+    "//dart/runtime:dart_config",
+  ]
 }

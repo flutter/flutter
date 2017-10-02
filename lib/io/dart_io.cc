@@ -4,6 +4,7 @@
 
 #include "flutter/lib/io/dart_io.h"
 
+#include "dart/runtime/bin/crypto.h"
 #include "dart/runtime/bin/io_natives.h"
 #include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
@@ -16,6 +17,10 @@ void DartIO::InitForIsolate() {
   DART_CHECK_VALID(Dart_SetNativeResolver(Dart_LookupLibrary(ToDart("dart:io")),
                                           dart::bin::IONativeLookup,
                                           dart::bin::IONativeSymbol));
+}
+
+bool DartIO::EntropySource(uint8_t* buffer, intptr_t length) {
+  return dart::bin::Crypto::GetRandomBytes(length, buffer);
 }
 
 }  // namespace blink
