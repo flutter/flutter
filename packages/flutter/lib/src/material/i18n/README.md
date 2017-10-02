@@ -1,5 +1,7 @@
 The `.arb` files in this directory contain localized values (primarily strings) used by the material library.  The `localizations.dart` file combines all of the localizations into a single Dart Map that is linked with the rest of the material library.
 
+If you're looking for information about internationalizing Flutter apps in general, see the [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/) tutorial.
+
 
 ### Translations for one locale: .arb files
 
@@ -7,7 +9,7 @@ Each `.arb` file contains a single JSON table that maps from resource IDs to loc
 
 Filenames contain the locale that the values have been translated for. For example `material_de.arb` contains German translations, and `material_ar.arb` contains Arabic translations. Files that contain regional translations have names that include the locale's regional suffix. For example `material_en_GB.arb` contains additional English translations that are specific to Great Britain.
 
-There is one language-specifc .arb file for all supported locales. If an additional file with a regional suffix is present, the regional localizations are merged with the language-specic ones.
+There is one language-specifc .arb file for all supported locales. If an additional file with a regional suffix is present, the regional localizations are merged with the language-specific ones.
 
 The JSON table's keys, called resource IDs, are valid Dart variable names. They correspond to methods from the `MaterialLocalizations` class. For example:
 
