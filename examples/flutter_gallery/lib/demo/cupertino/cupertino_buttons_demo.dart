@@ -39,7 +39,7 @@ class _CupertinoButtonDemoState extends State<CupertinoButtonsDemo> {
                     : ' '),
                 const Padding(padding: const EdgeInsets.all(12.0)),
                 new Align(
-                  alignment: const FractionalOffset(0.5, 0.4),
+                  alignment: const Alignment(0.0, -0.2),
                   child: new Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[

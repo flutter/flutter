@@ -14,14 +14,14 @@ void approxExpect(Alignment a, Alignment b) {
 
 void main() {
   test('Alignment control test', () {
-    const Alignment offset = const Alignment(0.5, 0.25);
+    const Alignment alignment = const Alignment(0.5, 0.25);
 
-    expect(offset, hasOneLineDescription);
-    expect(offset.hashCode, equals(const Alignment(0.5, 0.25).hashCode));
+    expect(alignment, hasOneLineDescription);
+    expect(alignment.hashCode, equals(const Alignment(0.5, 0.25).hashCode));
 
-    expect(offset / 2.0, const Alignment(0.25, 0.125));
-    expect(offset ~/ 2.0, const Alignment(0.0, 0.0));
-    expect(offset % 5.0, const Alignment(0.5, 0.25));
+    expect(alignment / 2.0, const Alignment(0.25, 0.125));
+    expect(alignment ~/ 2.0, const Alignment(0.0, 0.0));
+    expect(alignment % 5.0, const Alignment(0.5, 0.25));
   });
 
   test('Alignment.lerp()', () {

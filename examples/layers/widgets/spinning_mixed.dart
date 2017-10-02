@@ -100,7 +100,7 @@ void main() {
   flexRoot.add(proxy);
   addFlexChildSolidColor(flexRoot, const Color(0xFF0000FF), flex: 1);
 
-  transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity(), alignment: FractionalOffset.center);
+  transformBox = new RenderTransform(child: flexRoot, transform: new Matrix4.identity(), alignment: Alignment.center);
   final RenderPadding root = new RenderPadding(padding: const EdgeInsets.all(80.0), child: transformBox);
 
   binding.renderView.child = root;
