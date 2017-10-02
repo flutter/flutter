@@ -46,7 +46,8 @@ void main() {
           'ios/Runner/AppDelegate.m',
           'ios/Runner/main.m',
           'lib/main.dart',
-          'test/widget_test.dart'
+          'test/widget_test.dart',
+          'flutter_project.iml',
         ],
       );
     }, timeout: const Timeout.factor(2.0));
@@ -111,6 +112,7 @@ void main() {
           'example/ios/Runner/AppDelegate.m',
           'example/ios/Runner/main.m',
           'example/lib/main.dart',
+          'flutter_project.iml',
         ],
         plugin: true,
       );
