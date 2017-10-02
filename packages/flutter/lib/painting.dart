@@ -35,6 +35,7 @@ export 'src/painting/geometry.dart';
 export 'src/painting/gradient.dart';
 export 'src/painting/images.dart';
 export 'src/painting/matrix_utils.dart';
+export 'src/painting/rounded_rectangle_border.dart';
 export 'src/painting/text_painter.dart';
 export 'src/painting/text_span.dart';
 export 'src/painting/text_style.dart';
