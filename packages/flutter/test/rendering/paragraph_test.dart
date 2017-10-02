@@ -249,12 +249,12 @@ void main() {
         textScaleFactor: 1.3
     );
     paragraph.layout(const BoxConstraints());
-    expect(paragraph.size.height, equals(26.0));
-    // anyOf needed here and below because Linux and Mac have different text
+    // anyOf is needed here because Linux and Mac have different text
     // rendering widths in tests.
     // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
     // text rendering is replaced.
     expect(paragraph.size.width, anyOf(79.0, 78.0));
+    expect(paragraph.size.height, 26.0);
 
     // Test the sizes of nested spans.
     final List<ui.TextBox> boxes = <ui.TextBox>[];
@@ -265,14 +265,19 @@ void main() {
       ));
     }
     expect(boxes.length, equals(4));
+
+    // anyOf is needed here and below because Linux and Mac have different text
+    // rendering widths in tests.
+    // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
+    // text rendering is replaced.
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, equals(13.0));
+    expect(boxes[0].toRect().height, 13.0);
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[1].toRect().height, equals(26.0));
+    expect(boxes[1].toRect().height, 26.0);
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
-    expect(boxes[2].toRect().height, equals(26.0));
+    expect(boxes[2].toRect().height, 26.0);
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, equals(13.0));
+    expect(boxes[3].toRect().height, 13.0);
   });
 
   test('toStringDeep', () {
