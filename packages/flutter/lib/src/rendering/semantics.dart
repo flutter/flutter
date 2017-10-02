@@ -288,16 +288,17 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Whether [rect] was clipped by ancestors.
   bool wasAffectedByClip = false;
 
-  /// Whether the node can be dropped from the semantics tree because it doesn't
-  /// contribute any semantic information that are reachable by the user.
+  /// Whether the node is invisible.
   ///
-  /// For example, a node whose [rect] is outside of the bounds of the screen
-  /// and hence not reachable for users is safe to drop. However, if the node
-  /// is merged into a (partially) visible parent, it cannot be dropped even if
-  /// it is outside of the bounds of the screen because its semantics
-  /// information is still relevant: It is exposed to the user via its reachable
-  /// parent.
-  bool get canBeDroppedFromTree => !isMergedIntoParent && rect.isEmpty;
+  /// A node, whose [rect] is outside of the bounds of the screen and hence not
+  /// reachable for users is considered invisible if its semantic information
+  /// are not merged into a (partially) visible parent as indicated by
+  /// [isMergedIntoParent].
+  ///
+  /// An invisible node can be safely dropped from the semantic tree without
+  /// loosing semantic information that is relevant for describing the content
+  /// currently shown on screen.
+  bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
 
   // FLAGS AND LABELS
   // These are supposed to be set by SemanticsAnnotator obtained from getSemanticsAnnotators
@@ -530,7 +531,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (_newChildren != null) {
       for (SemanticsNode child in _newChildren) {
-        assert(!child.canBeDroppedFromTree, 'Child with id ${child.id} must be dropped from tree');
+        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
         child._dead = false;
       }
     }

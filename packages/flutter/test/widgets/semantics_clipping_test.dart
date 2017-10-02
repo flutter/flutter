@@ -66,9 +66,9 @@ void main() {
     expect(node2.wasAffectedByClip, true);
     expect(node3.wasAffectedByClip, true);
 
-    expect(node1.canBeDroppedFromTree, isFalse);
-    expect(node2.canBeDroppedFromTree, isFalse);
-    expect(node3.canBeDroppedFromTree, isTrue);
+    expect(node1.isInvisible, isFalse);
+    expect(node2.isInvisible, isFalse);
+    expect(node3.isInvisible, isTrue);
 
     semantics.dispose();
   });
