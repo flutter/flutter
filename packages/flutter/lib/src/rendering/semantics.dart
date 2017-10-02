@@ -285,9 +285,19 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] might have been influenced by clips applied by ancestors.
+  /// Whether [rect] was clipped by ancestors.
   bool wasAffectedByClip = false;
 
+  /// Whether the node can be dropped from the semantics tree because it doesn't
+  /// contribute any semantic information that are reachable by the user.
+  ///
+  /// For example, a node whose [rect] is outside of the bounds of the screen
+  /// and hence not reachable for users is safe to drop. However, if the node
+  /// is merged into a (partially) visible parent, it cannot be dropped even if
+  /// it is outside of the bounds of the screen because its semantics
+  /// information is still relevant: It is exposed to the user via its reachable
+  /// parent.
+  bool get canBeDroppedFromTree => !isMergedIntoParent && rect.isEmpty;
 
   // FLAGS AND LABELS
   // These are supposed to be set by SemanticsAnnotator obtained from getSemanticsAnnotators
@@ -519,8 +529,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         child._dead = true;
     }
     if (_newChildren != null) {
-      for (SemanticsNode child in _newChildren)
+      for (SemanticsNode child in _newChildren) {
+        assert(!child.canBeDroppedFromTree);
         child._dead = false;
+      }
     }
     bool sawChange = false;
     if (_children != null) {

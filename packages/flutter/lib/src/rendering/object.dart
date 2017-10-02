@@ -605,10 +605,10 @@ class _SemanticsGeometry {
     semantics.transform = _transform;
     if (_clipRect != null) {
       semantics.rect = _clipRect.intersect(rendering.semanticBounds);
-      semantics.wasAffectedByClip = true;
+      semantics.wasAffectedByClip = semantics.rect != rendering.semanticBounds;
     } else {
       semantics.rect = rendering.semanticBounds;
-      semantics.wasAffectedByClip = parentSemantics?.wasAffectedByClip ?? false;
+      semantics.wasAffectedByClip = false;
     }
   }
 }
@@ -697,6 +697,8 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
       geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node, parentSemantics: parentSemantics);
+      if (node.canBeDroppedFromTree)
+        return;
     } else {
       assert(_ancestorChain.length == 1);
     }
@@ -722,6 +724,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; }());
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
+    if (node.canBeDroppedFromTree)
+      return;
     final List<SemanticsNode> children = <SemanticsNode>[];
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
@@ -2714,6 +2718,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(fragment is _InterestingSemanticsFragment);
       final SemanticsNode node = fragment.compile(parentSemantics: _semantics?.parent).single;
       assert(node != null);
+      assert(!node.canBeDroppedFromTree);
       assert(node == _semantics);
     } catch (e, stack) {
       _debugReportException('_updateSemantics', e, stack);
