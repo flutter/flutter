@@ -132,8 +132,6 @@ class _MethodCall implements Invocation {
   Map<Symbol, dynamic> get namedArguments => <Symbol, dynamic>{};
   @override
   List<dynamic> get positionalArguments => _arguments;
-  @override
-  List<Type> get typeArguments => const <Type>[];
 }
 
 String _valueName(Object value) {
