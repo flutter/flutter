@@ -249,7 +249,8 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
+  /// The value given to the constructor as textScaleFactor.  If null, will
+  /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
 

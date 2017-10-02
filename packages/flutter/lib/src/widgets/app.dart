@@ -399,6 +399,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   }
 
   @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of ui.window has changed. We reference
+      // ui.window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  @override
   void didChangeLocale(Locale locale) {
     if (locale == _locale)
       return;
