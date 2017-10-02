@@ -5,6 +5,8 @@
 #ifndef FLUTTER_LIB_IO_DART_IO_H_
 #define FLUTTER_LIB_IO_DART_IO_H_
 
+#include <cstdint>
+
 #include "lib/fxl/macros.h"
 
 namespace blink {
@@ -12,6 +14,7 @@ namespace blink {
 class DartIO {
  public:
   static void InitForIsolate();
+  static bool EntropySource(uint8_t* buffer, intptr_t length);
 
  private:
   FXL_DISALLOW_IMPLICIT_CONSTRUCTORS(DartIO);

@@ -565,6 +565,7 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
     params.shutdown = IsolateShutdownCallback;
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
+    params.entropy_source = DartIO::EntropySource;
     char* init_error = Dart_Initialize(&params);
     if (init_error != nullptr)
       FXL_LOG(FATAL) << "Error while initializing the Dart VM: " << init_error;
