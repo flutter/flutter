@@ -1,4 +1,4 @@
-Signature: 9b7a7e1d11f784ab285e3c2dde8006ec
+Signature: 356efd55a6b39eb92bfb69f95b01afff
 
 UNUSED LICENSES:
 
@@ -13961,6 +13961,7 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Perf-Ubuntu14-GCC-GCE-CPU-AVX2-x86_64-Release-CT_BENCH_1k_SKPs.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-TSAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-GCC-GCE-CPU-AVX2-x86_64-Release.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu16-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Debug-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Win10-MSVC-ShuttleA-GPU-GTX660-x86_64-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-iOS-Clang-iPadPro-GPU-GT7800-arm64-Debug.json
@@ -14126,7 +14127,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Mac-Clang-MacMini7.1-GPU-IntelIris5100-x86_64-Debug-CommandBuffer.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUC5PPYH-GPU-IntelHD405-x86_64-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Debug-Vulkan.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu16-Clang-NUCDE3815TYKHE-GPU-IntelBayTrail-x86_64-Debug.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-Valgrind_AbandonGpuContext_SK_CPU_LIMIT_SSE41.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-GCC-Golo-GPU-QuadroP400-x86_64-Release-Valgrind_PreAbandonGpuContext_SK_CPU_LIMIT_SSE41.json
@@ -16003,9 +16003,9 @@ FILE: ../../../third_party/skia/src/gpu/GrAHardwareBufferImageGenerator.h
 FILE: ../../../third_party/skia/src/gpu/GrBackendSurface.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBackendTextureImageGenerator.h
-FILE: ../../../third_party/skia/src/gpu/GrDeferredProxyUploader.h
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.cpp
 FILE: ../../../third_party/skia/src/gpu/GrOnFlushResourceProvider.h
+FILE: ../../../third_party/skia/src/gpu/GrPrepareCallback.h
 FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.cpp
 FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceAllocator.cpp
