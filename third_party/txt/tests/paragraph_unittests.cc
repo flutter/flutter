@@ -958,11 +958,7 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 1ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 0);
-  EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 28.417969);
-  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
+  EXPECT_EQ(rects.size(), 0ull);
 
   rects = paragraph->GetRectsForRange(0, 1);
   for (size_t i = 0; i < rects.size(); ++i) {
@@ -979,80 +975,66 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 3ull);
+  EXPECT_EQ(rects.size(), 1ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 56.835938);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 153.07422);
+  EXPECT_FLOAT_EQ(rects[0].right(), 177.97266);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
-
-  EXPECT_FLOAT_EQ(rects[1].left(), 153.07422);
-  EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 165.52344);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
-
-  EXPECT_FLOAT_EQ(rects[2].left(), 165.52344);
-  EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 177.97266);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 59);
 
   paint.setColor(SK_ColorGREEN);
   rects = paragraph->GetRectsForRange(8, 21);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 3ull);
+  EXPECT_EQ(rects.size(), 1ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 177.97266);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 352.48438);
+  EXPECT_FLOAT_EQ(rects[0].right(), 507.02344);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
-
-  EXPECT_FLOAT_EQ(rects[1].left(), 352.48438);
-  EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 364.93359);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
-
-  EXPECT_FLOAT_EQ(rects[2].left(), 364.93359);
-  EXPECT_FLOAT_EQ(rects[2].top(), 0);
-  EXPECT_FLOAT_EQ(rects[2].right(), 507.02344);
-  EXPECT_FLOAT_EQ(rects[2].bottom(), 59);
 
   paint.setColor(SK_ColorRED);
   rects = paragraph->GetRectsForRange(30, 100);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 17ull);
+  EXPECT_EQ(rects.size(), 4ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 211.375);
   EXPECT_FLOAT_EQ(rects[0].top(), 59);
-  EXPECT_FLOAT_EQ(rects[0].right(), 296.62891);
+  EXPECT_FLOAT_EQ(rects[0].right(), 463.61719);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 118);
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
-  EXPECT_FLOAT_EQ(rects[16].left(), 0);
-  EXPECT_FLOAT_EQ(rects[16].top(), 236);
-  EXPECT_FLOAT_EQ(rects[16].right(), 142.08984);
-  EXPECT_FLOAT_EQ(rects[16].bottom(), 295);
+  EXPECT_FLOAT_EQ(rects[3].left(), 0);
+  EXPECT_FLOAT_EQ(rects[3].top(), 236);
+  EXPECT_FLOAT_EQ(rects[3].right(), 142.08984);
+  EXPECT_FLOAT_EQ(rects[3].bottom(), 295);
 
   paint.setColor(SK_ColorBLUE);
   rects = paragraph->GetRectsForRange(19, 22);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 2ull);
-  EXPECT_FLOAT_EQ(rects[1].left(), 507.02344);
-  EXPECT_FLOAT_EQ(rects[1].top(), 0);
-  EXPECT_FLOAT_EQ(rects[1].right(), 519.47266);
-  EXPECT_FLOAT_EQ(rects[1].bottom(), 59);
+  EXPECT_EQ(rects.size(), 1ull);
+  EXPECT_FLOAT_EQ(rects[0].left(), 450.1875);
+  EXPECT_FLOAT_EQ(rects[0].top(), 0);
+  EXPECT_FLOAT_EQ(rects[0].right(), 519.47266);
+  EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   paint.setColor(SK_ColorRED);
   rects = paragraph->GetRectsForRange(21, 21);
   for (size_t i = 0; i < rects.size(); ++i) {
     GetCanvas()->drawRect(rects[i], paint);
   }
-  EXPECT_EQ(rects.size(), 1ull);
+  EXPECT_EQ(rects.size(), 0ull);
 
   ASSERT_TRUE(Snapshot());
+}
+
+SkRect GetCoordinatesForGlyphPosition(const txt::Paragraph& paragraph,
+                                      size_t pos) {
+  std::vector<SkRect> rects = paragraph.GetRectsForRange(pos, pos + 1);
+  return !rects.empty() ? rects.front() : SkRect::MakeEmpty();
 }
 
 TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
@@ -1091,7 +1073,7 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   paint.setStrokeWidth(1);
   paint.setColor(SK_ColorRED);
 
-  SkRect rect = paragraph->GetCoordinatesForGlyphPosition(0);
+  SkRect rect = GetCoordinatesForGlyphPosition(*paragraph, 0);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(0), SkIPoint::Make(0, 5));
@@ -1099,15 +1081,15 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   EXPECT_EQ(paragraph->GetWordBoundary(2), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(3), SkIPoint::Make(0, 5));
   EXPECT_EQ(paragraph->GetWordBoundary(4), SkIPoint::Make(0, 5));
-  rect = paragraph->GetCoordinatesForGlyphPosition(5);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 5);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(5), SkIPoint::Make(5, 6));
-  rect = paragraph->GetCoordinatesForGlyphPosition(6);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 6);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(6), SkIPoint::Make(6, 7));
-  rect = paragraph->GetCoordinatesForGlyphPosition(7);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 7);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(7), SkIPoint::Make(7, 12));
@@ -1115,39 +1097,39 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   EXPECT_EQ(paragraph->GetWordBoundary(9), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(10), SkIPoint::Make(7, 12));
   EXPECT_EQ(paragraph->GetWordBoundary(11), SkIPoint::Make(7, 12));
-  rect = paragraph->GetCoordinatesForGlyphPosition(12);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 12);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(12), SkIPoint::Make(12, 13));
-  rect = paragraph->GetCoordinatesForGlyphPosition(13);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 13);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(13), SkIPoint::Make(13, 18));
-  rect = paragraph->GetCoordinatesForGlyphPosition(18);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 18);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  rect = paragraph->GetCoordinatesForGlyphPosition(19);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 19);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  rect = paragraph->GetCoordinatesForGlyphPosition(24);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 24);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  rect = paragraph->GetCoordinatesForGlyphPosition(25);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 25);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  rect = paragraph->GetCoordinatesForGlyphPosition(30);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 30);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(30), SkIPoint::Make(30, 31));
-  rect = paragraph->GetCoordinatesForGlyphPosition(31);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, 31);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length() - 5);
+  rect = GetCoordinatesForGlyphPosition(*paragraph, icu_text.length() - 5);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(icu_text.length() - 1),
             SkIPoint::Make(icu_text.length() - 5, icu_text.length()));
-  rect = paragraph->GetCoordinatesForGlyphPosition(icu_text.length());
+  rect = GetCoordinatesForGlyphPosition(*paragraph, icu_text.length());
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   ASSERT_TRUE(Snapshot());
