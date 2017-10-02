@@ -433,13 +433,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Restore this node to its default state.
   void reset() {
-    final bool hadInheritedMergeAllDescendantsIntoThisNode = _inheritedMergeAllDescendantsIntoThisNode;
     _actions = 0;
     _flags = 0;
-    if (hadInheritedMergeAllDescendantsIntoThisNode)
-      _inheritedMergeAllDescendantsIntoThisNodeValue = true;
     _label = '';
     _textDirection = null;
+    _mergeAllDescendantsIntoThisNode = false;
     _tags.clear();
     _markDirty();
   }
