@@ -1201,12 +1201,12 @@ class Align extends SingleChildRenderObjectWidget {
   /// with the center of the parent.
   final AlignmentGeometry alignment;
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double widthFactor;
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;
@@ -3408,7 +3408,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
 /// expand to fill the available space in the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
-/// the available space is divided amoung them according to the [flex] factor.
+/// the available space is divided among them according to the [flex] factor.
 ///
 /// An [Expanded] widget must be a descendant of a [Row], [Column], or [Flex],
 /// and the path from the [Expanded] widget to its enclosing [Row], [Column], or
