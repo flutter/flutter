@@ -36,7 +36,6 @@
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/dart_sticky_error.h"
 #include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/debugger/dart_debugger.h"
 #include "lib/tonic/file_loader/file_loader.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/logging/dart_invoke.h"
@@ -537,14 +536,6 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
     args.push_back(settings.dart_flags[i].c_str());
 
   FXL_CHECK(Dart_SetVMFlags(args.size(), args.data()));
-
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
-  if (!IsRunningPrecompiledCode()) {
-    TRACE_EVENT0("flutter", "DartDebugger::InitDebugger");
-    // This should be called before calling Dart_Initialize.
-    tonic::DartDebugger::InitDebugger();
-  }
-#endif
 
   DartUI::InitForGlobal();
 

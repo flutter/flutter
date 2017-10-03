@@ -42,7 +42,4 @@ static_library("core") {
     "//topaz/lib/tonic",
   ]
 
-  if (flutter_runtime_mode != "release") {
-    public_deps += [ "//topaz/lib/tonic/debugger" ]
-  }
 }

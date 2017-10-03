@@ -95,10 +95,6 @@ source_set("runtime") {
     defines += [ "EMBED_TEST_FONT_DATA=1" ]
   }
 
-  if (flutter_runtime_mode != "release") {
-    deps += [ "//topaz/lib/tonic/debugger" ]
-  }
-
   # In AOT mode, precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no generic snapshot.

@@ -22,7 +22,6 @@
 #include "lib/tonic/dart_message_handler.h"
 #include "lib/tonic/dart_state.h"
 #include "lib/tonic/dart_wrappable.h"
-#include "lib/tonic/debugger/dart_debugger.h"
 #include "lib/tonic/file_loader/file_loader.h"
 #include "lib/tonic/logging/dart_error.h"
 #include "lib/tonic/logging/dart_invoke.h"
