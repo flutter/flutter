@@ -3,20 +3,24 @@
   <component name="FacetManager">
     <facet type="android" name="Android">
       <configuration>
-        <option name="GEN_FOLDER_RELATIVE_PATH_APT" value="/../../{{projectName}}/gen" />
-        <option name="GEN_FOLDER_RELATIVE_PATH_AIDL" value="/../../{{projectName}}/gen" />
-        <option name="MANIFEST_FILE_RELATIVE_PATH" value="/../../{{projectName}}/AndroidManifest.xml" />
-        <option name="RES_FOLDER_RELATIVE_PATH" value="/../../{{projectName}}/res" />
-        <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/../../{{projectName}}/assets" />
-        <option name="LIBS_FOLDER_RELATIVE_PATH" value="/../../{{projectName}}/libs" />
-        <option name="PROGUARD_LOGS_FOLDER_RELATIVE_PATH" value="/../../{{projectName}}/proguard_logs" />
+        <option name="GEN_FOLDER_RELATIVE_PATH_APT" value="/android/gen" />
+        <option name="GEN_FOLDER_RELATIVE_PATH_AIDL" value="/android/gen" />
+        <option name="MANIFEST_FILE_RELATIVE_PATH" value="/android/AndroidManifest.xml" />
+        <option name="RES_FOLDER_RELATIVE_PATH" value="/android/res" />
+        <option name="ASSETS_FOLDER_RELATIVE_PATH" value="/android/assets" />
+        <option name="LIBS_FOLDER_RELATIVE_PATH" value="/android/libs" />
+        <option name="PROGUARD_LOGS_FOLDER_RELATIVE_PATH" value="/android/proguard_logs" />
       </configuration>
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$/android">
-      <sourceFolder url="file://$MODULE_DIR$/android/app/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/android/src/main/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/android/gen" isTestSource="false" generated="true" />
+    </content>
+    <content url="file://$MODULE_DIR$/example/android">
+      <sourceFolder url="file://$MODULE_DIR$/example/android/app/src/main/java" isTestSource="false" />
     </content>
     <orderEntry type="jdk" jdkName="Android API {{androidSdkVersion}} Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
