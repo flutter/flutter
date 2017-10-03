@@ -60,7 +60,8 @@ void _defaultInitializeContext(AppContext testContext) {
     ..putIfAbsent(SimControl, () => new MockSimControl())
     ..putIfAbsent(Usage, () => new MockUsage())
     ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())
-    ..putIfAbsent(Clock, () => const Clock());
+    ..putIfAbsent(Clock, () => const Clock())
+    ..putIfAbsent(HttpClient, () => new MockHttpClient());
 }
 
 void testUsingContext(String description, dynamic testMethod(), {
@@ -244,3 +245,5 @@ class MockUsage implements Usage {
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockClock extends Mock implements Clock {}
+
+class MockHttpClient extends Mock implements HttpClient {}

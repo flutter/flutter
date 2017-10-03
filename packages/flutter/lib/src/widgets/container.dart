@@ -25,7 +25,7 @@ import 'image.dart';
 /// new DecoratedBox(
 ///   decoration: new BoxDecoration(
 ///     gradient: new RadialGradient(
-///       center: const FractionalOffset(0.25, 0.3),
+///       center: const Alignment(-0.5, -0.6),
 ///       radius: 0.15,
 ///       colors: <Color>[
 ///         const Color(0xFFEEEEEE),
@@ -207,7 +207,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.teal.shade700,
-///   alignment: FractionalOffset.center,
+///   alignment: Alignment.center,
 ///   child: new Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
 ///   foregroundDecoration: new BoxDecoration(
 ///     image: new DecorationImage(
@@ -278,7 +278,7 @@ class Container extends StatelessWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
@@ -362,7 +362,7 @@ class Container extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));

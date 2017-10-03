@@ -82,10 +82,11 @@ void main() {
     testUsingContext('test', () async {
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'run');
-      expect(commands[2], 'test');
+      expect(commands[1], '--trace');
+      expect(commands[2], 'run');
+      expect(commands[3], 'test');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,

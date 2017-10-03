@@ -187,7 +187,8 @@ class CupertinoAlertDialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [CupertinoAlertDialog]
+///  * [CupertinoAlertDialog], a dialog that informs the user about situations
+///    that require acknowledgement
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({

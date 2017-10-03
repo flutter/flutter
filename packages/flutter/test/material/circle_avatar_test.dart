@@ -7,8 +7,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('CircleAvatar with background color', (WidgetTester tester) async {
-    final Color backgroundColor = Colors.blue.shade400;
+  testWidgets('CircleAvatar with dark background color', (WidgetTester tester) async {
+    final Color backgroundColor = Colors.blue.shade900;
     await tester.pumpWidget(
       wrap(
         child: new CircleAvatar(
@@ -28,6 +28,29 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(Colors.white));
+  });
+
+  testWidgets('CircleAvatar with light background color', (WidgetTester tester) async {
+    final Color backgroundColor = Colors.blue.shade100;
+    await tester.pumpWidget(
+      wrap(
+        child: new CircleAvatar(
+          backgroundColor: backgroundColor,
+          radius: 50.0,
+          child: const Text('Z'),
+        ),
+      ),
+    );
+
+    final RenderConstrainedBox box = tester.renderObject(find.byType(CircleAvatar));
+    expect(box.size.width, equals(100.0));
+    expect(box.size.height, equals(100.0));
+    final RenderDecoratedBox child = box.child;
+    final BoxDecoration decoration = child.decoration;
+    expect(decoration.color, equals(backgroundColor));
+
+    final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
+    expect(paragraph.text.style.color, equals(Colors.black));
   });
 
   testWidgets('CircleAvatar with foreground color', (WidgetTester tester) async {

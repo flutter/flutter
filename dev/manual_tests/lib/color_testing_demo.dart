@@ -64,8 +64,8 @@ class GradientRow extends StatelessWidget {
       height: 100.0,
       decoration: new BoxDecoration(
         gradient: new LinearGradient(
-          begin: FractionalOffset.topLeft,
-          end: FractionalOffset.bottomRight,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: <Color>[ leftColor, rightColor ],
         ),
       ),

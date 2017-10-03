@@ -100,6 +100,9 @@ class PageController extends ScrollController {
   }
 
   /// Changes which page is displayed in the controlled [PageView].
+  ///
+  /// Jumps the page position from its current value to the given value,
+  /// without animation, and without checking if the new value is in range.
   void jumpToPage(int page) {
     final _PagePosition position = this.position;
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));

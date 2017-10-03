@@ -450,6 +450,7 @@ class IOSSimulator extends Device {
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
+    assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => new _IOSSimulatorLogReader(this, app));
   }
@@ -519,7 +520,7 @@ Future<Process> launchSystemLogTool(IOSSimulator device) async {
 class _IOSSimulatorLogReader extends DeviceLogReader {
   String _appName;
 
-  _IOSSimulatorLogReader(this.device, ApplicationPackage app) {
+  _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = new StreamController<String>.broadcast(
       onListen: _start,
       onCancel: _stop
@@ -583,7 +584,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       final String content = match.group(4);
 
       // Filter out non-Flutter originated noise from the engine.
-      if (category != 'Runner')
+      if (_appName != null && category != _appName)
         return null;
 
       if (tag != null && tag != '(Flutter)')

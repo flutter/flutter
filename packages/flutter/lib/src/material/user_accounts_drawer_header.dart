@@ -70,7 +70,7 @@ class _AccountDetails extends StatelessWidget {
   Widget addDropdownIcon(Widget line) {
     final Widget icon = new Expanded(
       child: new Align(
-        alignment: FractionalOffsetDirectional.centerEnd,
+        alignment: AlignmentDirectional.centerEnd,
         child: new Icon(
           isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
           color: Colors.white

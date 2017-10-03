@@ -26,6 +26,16 @@ abstract class SemanticsEvent {
   /// Converts this event to a Map that can be encoded with
   /// [StandardMessageCodec].
   Map<String, dynamic> toMap();
+
+  @override
+  String toString() {
+    final List<String> pairs = <String>[];
+    final Map<String, dynamic> map = toMap();
+    final List<String> sortedKeys = map.keys.toList()..sort();
+    for (String key in sortedKeys)
+      pairs.add('$key: ${map[key]}');
+    return '$runtimeType(${pairs.join(', ')})';
+  }
 }
 
 /// Notifies that a scroll action has been completed.

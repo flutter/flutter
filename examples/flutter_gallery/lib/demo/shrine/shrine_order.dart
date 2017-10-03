@@ -85,7 +85,7 @@ class _VendorItem extends StatelessWidget {
         new SizedBox(
           height: 24.0,
           child: new Align(
-            alignment: FractionalOffset.bottomLeft,
+            alignment: Alignment.bottomLeft,
             child: new Text(vendor.name, style: theme.vendorTitleStyle),
           ),
         ),
@@ -174,7 +174,7 @@ class _Heading extends StatelessWidget {
                     product.imageAsset,
                     package: product.imageAssetPackage,
                     fit: BoxFit.contain,
-                    alignment: FractionalOffset.center,
+                    alignment: Alignment.center,
                   ),
                 ),
               ),

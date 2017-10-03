@@ -160,7 +160,7 @@ void main() {
       child: new Container(
         width: 100.0,
         height: 100.0,
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
         child: const Text('Dialog1'),
       ),
     );
@@ -180,7 +180,7 @@ void main() {
       child: new Container(
         width: 100.0,
         height: 100.0,
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
         child: const Text('Dialog2'),
       ),
     );

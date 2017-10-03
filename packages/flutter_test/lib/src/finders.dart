@@ -290,7 +290,7 @@ abstract class Finder {
   ///
   /// The [at] parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({ FractionalOffset at: FractionalOffset.center }) => new _HitTestableFinder(this, at);
+  Finder hitTestable({ Alignment at: Alignment.center }) => new _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -336,10 +336,10 @@ class _LastFinder extends Finder {
 }
 
 class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.offset);
+  _HitTestableFinder(this.parent, this.alignment);
 
   final Finder parent;
-  final FractionalOffset offset;
+  final Alignment alignment;
 
   @override
   String get description => '${parent.description} (considering only hit-testable ones)';
@@ -349,7 +349,7 @@ class _HitTestableFinder extends Finder {
     for (final Element candidate in parent.apply(candidates)) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
-      final Offset absoluteOffset = box.localToGlobal(offset.alongSize(box.size));
+      final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = new HitTestResult();
       WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {

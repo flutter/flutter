@@ -24,7 +24,7 @@ Widget buildFrame({
     bool isDense: false,
     Widget hint,
     List<String> items: menuItems,
-    FractionalOffset alignment: FractionalOffset.center,
+    Alignment alignment: Alignment.center,
   }) {
   return new MaterialApp(
     home: new Material(
@@ -219,7 +219,7 @@ void main() {
       new MaterialApp(
         home: new Material(
           child: new Align(
-            alignment: FractionalOffset.topCenter,
+            alignment: Alignment.topCenter,
             child: button,
           ),
         ),
@@ -443,19 +443,19 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topLeft, value: menuItems.last)
+      buildFrame(alignment: Alignment.topLeft, value: menuItems.last)
     );
     expect(menuRect.topLeft, Offset.zero);
     expect(menuRect.topRight, new Offset(menuRect.width, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topCenter, value: menuItems.last)
+      buildFrame(alignment: Alignment.topCenter, value: menuItems.last)
     );
     expect(menuRect.topLeft, new Offset(buttonRect.left, 0.0));
     expect(menuRect.topRight, new Offset(buttonRect.right, 0.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.topRight, value: menuItems.last)
+      buildFrame(alignment: Alignment.topRight, value: menuItems.last)
     );
     expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, 0.0));
     expect(menuRect.topRight, const Offset(800.0, 0.0));
@@ -465,19 +465,19 @@ void main() {
     // is selected) and shifted horizontally so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.centerLeft, value: menuItems.first)
+      buildFrame(alignment: Alignment.centerLeft, value: menuItems.first)
     );
     expect(menuRect.topLeft, new Offset(0.0, buttonRect.top));
     expect(menuRect.topRight, new Offset(menuRect.width, buttonRect.top));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.center, value: menuItems.first)
+      buildFrame(alignment: Alignment.center, value: menuItems.first)
     );
     expect(menuRect.topLeft, buttonRect.topLeft);
     expect(menuRect.topRight, buttonRect.topRight);
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.centerRight, value: menuItems.first)
+      buildFrame(alignment: Alignment.centerRight, value: menuItems.first)
     );
     expect(menuRect.topLeft, new Offset(800.0 - menuRect.width, buttonRect.top));
     expect(menuRect.topRight, new Offset(800.0, buttonRect.top));
@@ -487,19 +487,19 @@ void main() {
     // so that it fits within the frame.
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomLeft, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomLeft, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, const Offset(0.0, 600.0));
     expect(menuRect.bottomRight, new Offset(menuRect.width, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomCenter, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomCenter, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, new Offset(buttonRect.left, 600.0));
     expect(menuRect.bottomRight, new Offset(buttonRect.right, 600.0));
 
     await popUpAndDown(
-      buildFrame(alignment: FractionalOffset.bottomRight, value: menuItems.first)
+      buildFrame(alignment: Alignment.bottomRight, value: menuItems.first)
     );
     expect(menuRect.bottomLeft, new Offset(800.0 - menuRect.width, 600.0));
     expect(menuRect.bottomRight, const Offset(800.0, 600.0));

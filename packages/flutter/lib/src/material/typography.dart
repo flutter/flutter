@@ -34,7 +34,7 @@ import 'colors.dart';
 ///  * <http://material.google.com/style/typography.html>
 @immutable
 class TextTheme {
-  /// Create a text theme that uses the given values.
+  /// Creates a text theme that uses the given values.
   ///
   /// Rather than creating a new text theme, consider using [Typography.black]
   /// or [Typography.white], which implement the typography styles in the
@@ -131,6 +131,12 @@ class TextTheme {
     );
   }
 
+  /// Creates a new [TextTheme] where each text style from this object has been
+  /// merged with the matching text style from the `other` object.
+  ///
+  /// This is particularly useful if one [TextTheme] defines one set of
+  /// properties and another defines a different set, e.g. having colors defined
+  /// in one text theme and font sizes in another.
   TextTheme merge(TextTheme other) {
     if (other == null)
       return this;

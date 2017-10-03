@@ -361,7 +361,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      alignment: FractionalOffset.centerLeft,
+      alignment: Alignment.centerLeft,
       child: child,
     );
   }
@@ -589,7 +589,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             // the hint or nothing at all.
             new IndexedStack(
               index: _selectedIndex ?? hintIndex,
-              alignment: FractionalOffset.centerLeft,
+              alignment: Alignment.centerLeft,
               children: items,
             ),
             new Icon(Icons.arrow_drop_down,

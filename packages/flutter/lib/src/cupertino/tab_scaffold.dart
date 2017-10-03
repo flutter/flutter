@@ -16,9 +16,9 @@ import 'bottom_tab_bar.dart';
 /// to change the active tab.
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
-/// tab index. [tabBuilder] must be able to build the same number of
-/// pages as the [tabBar.items.length]. Inactive tabs will be moved [Offstage]
-/// and its animations disabled.
+/// tab index. The [tabBuilder] must be able to build the same number of
+/// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
+/// and their animations disabled.
 ///
 /// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
 /// navigation state and history.
@@ -74,13 +74,16 @@ import 'bottom_tab_bar.dart';
 ///
 /// See also:
 ///
-///  * [CupertinoTabBar] bottom tab bars inserted in the scaffold.
-///  * [CupertinoTabView] a typical root content of each tap that holds its own
+///  * [CupertinoTabBar], the bottom tab bar inserted in the scaffold.
+///  * [CupertinoTabView], the typical root content of each tab that holds its own
 ///    [Navigator] stack.
-///  * [CupertinoPageRoute] a route hosting modal pages with iOS style transitions.
-///  * [CupertinoPageScaffold] typical contents of an iOS modal page implementing
+///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
+///  * [CupertinoPageScaffold], typical contents of an iOS modal page implementing
 ///    layout with a navigation bar on top.
 class CupertinoTabScaffold extends StatefulWidget {
+  /// Creates a layout for applications with a tab bar at the bottom.
+  ///
+  /// The [tabBar] and [tabBuilder] arguments must not be null.
   const CupertinoTabScaffold({
     Key key,
     @required this.tabBar,
@@ -142,7 +145,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     if (widget.tabBar != null) {
       stacked.add(new Align(
-        alignment: FractionalOffset.bottomCenter,
+        alignment: Alignment.bottomCenter,
         // Override the tab bar's currentIndex to the current tab and hook in
         // our own listener to update the _currentPage on top of a possibly user
         // provided callback.

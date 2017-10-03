@@ -447,7 +447,7 @@ class _PopupMenu<T> extends StatelessWidget {
             type: MaterialType.card,
             elevation: route.elevation,
             child: new Align(
-              alignment: FractionalOffset.topRight,
+              alignment: Alignment.topRight,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
               child: child,

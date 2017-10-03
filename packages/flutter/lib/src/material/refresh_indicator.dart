@@ -384,15 +384,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           left: 0.0,
           right: 0.0,
           child: new SizeTransition(
-            axisAlignment: _isIndicatorAtTop ? 1.0 : 0.0,
+            axisAlignment: _isIndicatorAtTop ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // this is what brings it down
             child: new Container(
               padding: _isIndicatorAtTop
                 ? new EdgeInsets.only(top: widget.displacement)
                 : new EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
-                ? FractionalOffset.topCenter
-                : FractionalOffset.bottomCenter,
+                ? Alignment.topCenter
+                : Alignment.bottomCenter,
               child: new ScaleTransition(
                 scale: _scaleFactor,
                 child: new AnimatedBuilder(

@@ -15,9 +15,11 @@ import 'nav_bar.dart';
 ///
 /// See also:
 ///
-///  * [CupertinoPageRoute] a modal page route that typically hosts a [CupertinoPageRoute]
-///    with support for iOS style page transitions.
+///  * [CupertinoTabScaffold], a similar widget for tabbed applications.
+///  * [CupertinoPageRoute], a modal page route that typically hosts a
+///    [CupertinoPageScaffold] with support for iOS-style page transitions.
 class CupertinoPageScaffold extends StatelessWidget {
+  /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
     Key key,
     this.navigationBar,
@@ -52,10 +54,9 @@ class CupertinoPageScaffold extends StatelessWidget {
       if (topPadding > 0.0) {
         final EdgeInsets mediaQueryPadding = MediaQuery.of(context).padding;
         topPadding += mediaQueryPadding.top;
-        childWithMediaQuery = new MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            padding: mediaQueryPadding.copyWith(top: 0.0),
-          ),
+        childWithMediaQuery = new MediaQuery.removePadding(
+          context: context,
+          removeTop: true,
           child: child,
         );
       }
