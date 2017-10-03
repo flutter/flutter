@@ -97,22 +97,28 @@ class _AnimatedState extends State<AnimatedWidget> {
 }
 
 /// Animates the position of a widget relative to its normal position.
+///
+/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
   /// The [position] argument must not be null.
   const SlideTransition({
     Key key,
-    @required Animation<Alignment> position,
+    @required Animation<Offset> position,
     this.transformHitTests: true,
     this.child,
-  }) : super(key: key, listenable: position);
+  }) : assert(position != null),
+       super(key: key, listenable: position);
 
   /// The animation that controls the position of the child.
   ///
-  /// If the current value of the position animation is (dx, dy), the child will
-  /// be translated horizontally by width * dx and vertically by height * dy.
-  Animation<Alignment> get position => listenable;
+  /// If the current value of the position animation is `(dx, dy)`, the child
+  /// will be translated horizontally by `width * dx` and vertically by
+  /// `height * dy`.
+  Animation<Offset> get position => listenable;
 
   /// Whether hit testing should be affected by the slide animation.
   ///

@@ -987,8 +987,15 @@ class FittedBox extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that applies a translation expressed as a fraction of the box's
-/// size before painting its child.
+/// Applies a translation transformation before painting its child.
+///
+/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [FractionalTranslation], even if the contents are offset such that
+/// they overflow.
 class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Creates a widget that translates its child's painting.
   ///
@@ -1001,8 +1008,11 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
   }) : assert(translation != null),
        super(key: key, child: child);
 
-  /// The translation to apply to the child, relative to the child's center.
-  final Alignment translation;
+  /// The translation to apply to the child, scaled to the child's size.
+  ///
+  /// For example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+  /// translation of one quarter the width of the child.
+  final Offset translation;
 
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
