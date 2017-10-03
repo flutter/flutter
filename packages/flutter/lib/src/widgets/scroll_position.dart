@@ -371,7 +371,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   Set<SemanticsAction> _semanticActions;
 
-  void _updateSemanticActions() {
+  @override
+  void updateSemanticActions() {
     SemanticsAction forward;
     SemanticsAction backward;
     switch (axis) {
@@ -409,7 +410,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _didChangeViewportDimension = false;
     }
-    _updateSemanticActions();
+    updateSemanticActions();
     return true;
   }
 

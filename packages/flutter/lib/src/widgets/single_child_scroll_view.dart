@@ -215,11 +215,17 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (value == _offset)
       return;
     if (attached)
-      _offset.removeListener(markNeedsPaint);
+      _offset.removeListener(_hasScrolled);
     _offset = value;
     if (attached)
-      _offset.addListener(markNeedsPaint);
+      _offset.addListener(_hasScrolled);
     markNeedsLayout();
+  }
+
+  void _hasScrolled() {
+    markNeedsPaint();
+    _offset.updateSemanticActions();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -233,12 +239,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _offset.addListener(markNeedsPaint);
+    _offset.addListener(_hasScrolled);
   }
 
   @override
   void detach() {
-    _offset.removeListener(markNeedsPaint);
+    _offset.removeListener(_hasScrolled);
     super.detach();
   }
 
