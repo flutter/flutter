@@ -137,9 +137,9 @@ class InkResponse extends StatefulWidget {
   /// this part of the material.
   ///
   /// If the shape is [BoxShape.circle], then the highlight is centered on the
-  /// [InkResponse]. If the shape is [BoxShape.rectangle], then the highlight
-  /// fills the [InkResponse], or the rectangle provided by [getRectCallback] if
-  /// the callback is specified.
+  /// [InkResponse]. If the shape is [BoxShape.rectangle] or [BoxShape.pill],
+  /// then the highlight fills the [InkResponse], or the rectangle provided by
+  /// [getRectCallback] if the callback is specified.
   ///
   /// See also:
   ///

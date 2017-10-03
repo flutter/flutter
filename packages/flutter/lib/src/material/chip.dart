@@ -12,7 +12,6 @@ import 'icons.dart';
 import 'tooltip.dart';
 
 const double _kChipHeight = 32.0;
-const double _kAvatarDiamater = _kChipHeight;
 
 const TextStyle _kLabelStyle = const TextStyle(
   inherit: false,
@@ -29,7 +28,8 @@ const TextStyle _kLabelStyle = const TextStyle(
 /// Supplying a non-null [onDeleted] callback will cause the chip to include a
 /// button for deleting the chip.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget.  [label] may not be
+/// null.
 ///
 /// ## Sample code
 ///
@@ -57,11 +57,13 @@ class Chip extends StatelessWidget {
     this.avatar,
     @required this.label,
     this.onDeleted,
-    this.labelStyle,
+    TextStyle labelStyle,
     this.deleteButtonTooltipMessage,
     this.backgroundColor,
     this.deleteIconColor,
-  }) : super(key: key);
+  }) : assert(label != null),
+       labelStyle = labelStyle ?? _kLabelStyle,
+       super(key: key);
 
   /// A widget to display prior to the chip's label.
   ///
@@ -116,8 +118,8 @@ class Chip extends StatelessWidget {
       children.add(new ExcludeSemantics(
         child: new Container(
           margin: const EdgeInsetsDirectional.only(end: 8.0),
-          width: _kAvatarDiamater,
-          height: _kAvatarDiamater,
+          width: _kChipHeight,
+          height: _kChipHeight,
           child: avatar,
         ),
       ));
@@ -125,7 +127,8 @@ class Chip extends StatelessWidget {
 
     children.add(new Flexible(
       child: new DefaultTextStyle(
-        style: labelStyle ?? _kLabelStyle,
+        overflow: TextOverflow.ellipsis,
+        style: labelStyle,
         child: label,
       ),
     ));
@@ -135,12 +138,13 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
+          // TODO(gspencer): Internationalize this text.
           message: deleteButtonTooltipMessage ?? 'Delete "$label"',
           child: new Container(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+            padding: const EdgeInsetsDirectional.only(start: 4.0, end: 4.0),
             child: new Icon(
               Icons.cancel,
-              size: 18.0,
+              size: 24.0,
               color: deleteIconColor ?? Colors.black54,
             ),
           ),
@@ -150,16 +154,22 @@ class Chip extends StatelessWidget {
 
     return new Semantics(
       container: true,
-      child: new Container(
-        height: _kChipHeight,
-        padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
-        decoration: new BoxDecoration(
-          color: backgroundColor ?? Colors.grey.shade300,
-          borderRadius: new BorderRadius.circular(16.0),
-        ),
-        child: new Row(
-          children: children,
-          mainAxisSize: MainAxisSize.min,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: _kChipHeight),
+        child: new Container(
+          padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+          decoration: new BoxDecoration(
+            color: backgroundColor ?? Colors.grey.shade300,
+            shape: BoxShape.pill,
+          ),
+          child: new Center(
+            widthFactor: 1.0,
+            heightFactor: 1.0,
+            child: new Row(
+              children: children,
+              mainAxisSize: MainAxisSize.min,
+            ),
+          ),
         ),
       ),
     );

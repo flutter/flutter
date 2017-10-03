@@ -84,8 +84,8 @@ class BoxDecoration extends Decoration {
 
   @override
   bool debugAssertIsValid() {
-    assert(shape != BoxShape.circle ||
-           borderRadius == null); // Can't have a border radius if you're a circle.
+    assert(shape == BoxShape.rectangle ||
+           borderRadius == null); // Can't have a border radius if you're not a rectangle.
     return super.debugAssertIsValid();
   }
 
@@ -290,6 +290,10 @@ class BoxDecoration extends Decoration {
         final Offset center = size.center(Offset.zero);
         final double distance = (position - center).distance;
         return distance <= math.min(size.width, size.height) / 2.0;
+      case BoxShape.pill:
+        final Rect rect = Offset.zero & size;
+        final RRect bounds = BoxBorder.pillRadiusForRect(shape, rect).toRRect(rect);
+        return bounds.contains(position);
     }
     assert(shape != null);
     return null;
@@ -345,6 +349,9 @@ class _BoxDecorationPainter extends BoxPainter {
         } else {
           canvas.drawRRect(_decoration.borderRadius.resolve(textDirection).toRRect(rect), paint);
         }
+        break;
+      case BoxShape.pill:
+        canvas.drawRRect(BoxBorder.pillRadiusForRect(_decoration.shape, rect).toRRect(rect), paint);
         break;
     }
   }

@@ -124,6 +124,15 @@ class InkHighlight extends InkFeature {
           canvas.drawRect(rect, paint);
         }
         break;
+      case BoxShape.pill:
+        final BorderRadius pillRadius = BoxBorder.pillRadiusForRect(_shape, rect);
+          final RRect clipRRect = new RRect.fromRectAndCorners(
+            rect,
+            topLeft: pillRadius.topLeft, topRight: pillRadius.topRight,
+            bottomLeft: pillRadius.bottomLeft, bottomRight: pillRadius.bottomRight,
+          );
+          canvas.drawRRect(clipRRect, paint);
+        break;
     }
   }
 
