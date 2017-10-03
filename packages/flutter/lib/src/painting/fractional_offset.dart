@@ -21,6 +21,31 @@ import 'basic_types.dart';
 /// The [FractionalOffset] class specifies offsets in terms of a distance from
 /// the top left, regardless of the [TextDirection].
 ///
+/// ## Design discussion
+///
+/// [FractionalOffset] and [Alignment] are two different representations of the
+/// same information: the location within a rectangle relative to the size of
+/// the rectangle. The difference between the two classes is in the coordinate
+/// system they use to represent the location.
+///
+/// [FractionalOffset] uses a coordinate system with an origin in the top-left
+/// corner of the rectangle whereas [Alignment] uses a coordinate system with an
+/// origin in the center of the rectangle.
+///
+/// Historically, [FractionalOffset] predates [Alignment]. When we attempted to
+/// make a version of [FractionalOffset] that adapted to the [TextDirection], we
+/// ran into difficulty because placing the origin in the top-left corner
+/// introduced a left-to-right bias that was hard to remove.
+///
+/// By placing the origin in the center, [Alignment] and [AlignmentDirectional]
+/// are able to use the same origin, which means we can use a linear function to
+/// resolve an [AlignmentDirectional] into an [Alignment] in both
+/// [TextDirection.rtl] and [TextDirection.ltr].
+///
+/// [Alignment] is better for most purposes than [FractionalOffset] and should
+/// be used instead of [FractionalOffset]. We continue to implement
+/// [FractionalOffset] to support code that predates [Alignment].
+///
 /// See also:
 ///
 ///  * [Alignment], which uses a coordinate system based on the center of the
@@ -108,6 +133,47 @@ class FractionalOffset extends Alignment {
   /// The bottom right corner.
   static const FractionalOffset bottomRight = const FractionalOffset(1.0, 1.0);
 
+  @override
+  Alignment operator -(Alignment other) {
+    if (other is! FractionalOffset)
+      return super - other;
+    final FractionalOffset typedOther = other;
+    return new FractionalOffset(dx - typedOther.dx, dy - typedOther.dy);
+  }
+
+  @override
+  Alignment operator +(Alignment other) {
+    if (other is! FractionalOffset)
+      return super + other;
+    final FractionalOffset typedOther = other;
+    return new FractionalOffset(dx + typedOther.dx, dy + typedOther.dy);
+  }
+
+  @override
+  FractionalOffset operator -() {
+    return new FractionalOffset(-dx, -dy);
+  }
+
+  @override
+  FractionalOffset operator *(double other) {
+    return new FractionalOffset(dx * other, dy * other);
+  }
+
+  @override
+  FractionalOffset operator /(double other) {
+    return new FractionalOffset(dx / other, dy / other);
+  }
+
+  @override
+  FractionalOffset operator ~/(double other) {
+    return new FractionalOffset((dx ~/ other).toDouble(), (dy ~/ other).toDouble());
+  }
+
+  @override
+  FractionalOffset operator %(double other) {
+    return new FractionalOffset(dx % other, dy % other);
+  }
+
   /// Linearly interpolate between two [FractionalOffset]s.
   ///
   /// If either is null, this function interpolates from [FractionalOffset.center].
@@ -119,5 +185,11 @@ class FractionalOffset extends Alignment {
     if (b == null)
       return new FractionalOffset(ui.lerpDouble(a.dx, 0.5, t), ui.lerpDouble(a.dy, 0.5, t));
     return new FractionalOffset(ui.lerpDouble(a.dx, b.dx, t), ui.lerpDouble(a.dy, b.dy, t));
+  }
+
+  @override
+  String toString() {
+    return 'FractionalOffset(${dx.toStringAsFixed(1)}, '
+                            '${dy.toStringAsFixed(1)})';
   }
 }

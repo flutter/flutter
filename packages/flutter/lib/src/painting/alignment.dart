@@ -540,7 +540,7 @@ class AlignmentDirectional extends AlignmentGeometry {
     if (start == 1.0 && y == 1.0)
       return 'AlignmentDirectional.bottomEnd';
     return 'AlignmentDirectional(${start.toStringAsFixed(1)}, '
-                     '${y.toStringAsFixed(1)})';
+                                '${y.toStringAsFixed(1)})';
   }
 
   @override

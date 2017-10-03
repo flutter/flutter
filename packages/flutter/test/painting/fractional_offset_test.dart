@@ -7,14 +7,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('FractionalOffset control test', () {
-    const FractionalOffset offset = const FractionalOffset(0.5, 0.25);
+    const FractionalOffset a = const FractionalOffset(0.5, 0.25);
+    const FractionalOffset b = const FractionalOffset(1.25, 0.75);
 
-    expect(offset, hasOneLineDescription);
-    expect(offset.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
+    expect(a, hasOneLineDescription);
+    expect(a.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
+    expect(a.toString(), equals('FractionalOffset(0.5, 0.3)'));
 
-    expect(offset / 2.0, const Alignment(0.0, -0.25));
-    expect(offset ~/ 2.0, Alignment.center);
-    expect(offset % 5.0, const Alignment(0.0, 4.5));
+    expect(-a, const FractionalOffset(-0.5, -0.25));
+    expect(a - b, const FractionalOffset(-0.75, -0.5));
+    expect(a + b, const FractionalOffset(1.75, 1.0));
+    expect(a * 2.0, const FractionalOffset(1.0, 0.5));
+    expect(a / 2.0, const FractionalOffset(0.25, 0.125));
+    expect(a ~/ 2.0, const FractionalOffset(0.0, 0.0));
+    expect(a % 5.0, const FractionalOffset(0.5, 0.25));
   });
 
   test('FractionalOffset.lerp()', () {
