@@ -501,11 +501,11 @@ void main() {
 
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(new MaterialApp(home: new Scaffold(
-      body: new Semantics(label: bodyLabel, child: new Container()),
-      persistentFooterButtons: <Widget>[new Semantics(label: persistentFooterButtonLabel, child: new Container())],
-      bottomNavigationBar: new Semantics(label: bottomNavigationBarLabel, child: new Container()),
-      floatingActionButton: new Semantics(label: floatingActionButtonLabel, child: new Container()),
-      drawer: new Drawer(child:new Semantics(label: drawerLabel, child: new Container())),
+      body: const Text(bodyLabel),
+      persistentFooterButtons: <Widget>[const Text(persistentFooterButtonLabel)],
+      bottomNavigationBar: const Text(bottomNavigationBarLabel),
+      floatingActionButton: const Text(floatingActionButtonLabel),
+      drawer: const Drawer(child:const Text(drawerLabel)),
     )));
 
     expect(semantics, includesNodeWith(label: bodyLabel));

@@ -285,9 +285,24 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] might have been influenced by clips applied by ancestors.
+  /// Whether [rect] was clipped by ancestors.
+  ///
+  /// This is only true if the [rect] of this [SemanticsNode] has been altered
+  /// due to clipping by an ancestor. If ancestors have been clipped, but the
+  /// [rect] of this node was unaffected it will be false.
   bool wasAffectedByClip = false;
 
+  /// Whether the node is invisible.
+  ///
+  /// A node whose [rect] is outside of the bounds of the screen and hence not
+  /// reachable for users is considered invisible if its semantic information
+  /// is not merged into a (partially) visible parent as indicated by
+  /// [isMergedIntoParent].
+  ///
+  /// An invisible node can be safely dropped from the semantic tree without
+  /// loosing semantic information that is relevant for describing the content
+  /// currently shown on screen.
+  bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
 
   // FLAGS AND LABELS
   // These are supposed to be set by SemanticsAnnotator obtained from getSemanticsAnnotators
@@ -519,8 +534,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         child._dead = true;
     }
     if (_newChildren != null) {
-      for (SemanticsNode child in _newChildren)
+      for (SemanticsNode child in _newChildren) {
+        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
         child._dead = false;
+      }
     }
     bool sawChange = false;
     if (_children != null) {

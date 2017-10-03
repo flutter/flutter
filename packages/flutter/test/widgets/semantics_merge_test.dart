@@ -19,16 +19,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Row(
           children: <Widget>[
-            new Semantics(
-                label: 'test1',
-                textDirection: TextDirection.ltr,
-                child: new Container()
-            ),
-            new Semantics(
-                label: 'test2',
-                textDirection: TextDirection.ltr,
-                child: new Container()
-            )
+            const Text('test1'),
+            const Text('test2'),
           ],
         ),
       ),
@@ -52,16 +44,8 @@ void main() {
         child: new MergeSemantics(
           child: new Row(
             children: <Widget>[
-              new Semantics(
-                  label: 'test1',
-                  textDirection: TextDirection.ltr,
-                  child: new Container()
-              ),
-              new Semantics(
-                  label: 'test2',
-                  textDirection: TextDirection.ltr,
-                  child: new Container()
-              )
+              const Text('test1'),
+              const Text('test2'),
             ],
           ),
         ),
@@ -80,16 +64,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Row(
           children: <Widget>[
-            new Semantics(
-                label: 'test1',
-                textDirection: TextDirection.ltr,
-                child: new Container()
-            ),
-            new Semantics(
-                label: 'test2',
-                textDirection: TextDirection.ltr,
-                child: new Container()
-            )
+            const Text('test1'),
+            const Text('test2'),
           ],
         ),
       ),

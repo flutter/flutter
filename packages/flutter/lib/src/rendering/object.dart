@@ -603,12 +603,14 @@ class _SemanticsGeometry {
     assert(parentSemantics != null);
     assert(parentSemantics.wasAffectedByClip != null);
     semantics.transform = _transform;
+    final Rect semanticBounds = rendering.semanticBounds;
     if (_clipRect != null) {
-      semantics.rect = _clipRect.intersect(rendering.semanticBounds);
-      semantics.wasAffectedByClip = true;
+      final Rect rect = _clipRect.intersect(semanticBounds);
+      semantics.rect = rect;
+      semantics.wasAffectedByClip = rect != semanticBounds;
     } else {
-      semantics.rect = rendering.semanticBounds;
-      semantics.wasAffectedByClip = parentSemantics?.wasAffectedByClip ?? false;
+      semantics.rect = semanticBounds;
+      semantics.wasAffectedByClip = false;
     }
   }
 }
@@ -697,6 +699,8 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
     if (geometry != null) {
       geometry.applyAncestorChain(_ancestorChain);
       geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node, parentSemantics: parentSemantics);
+      if (node.isInvisible)
+        return; // drop the node
     } else {
       assert(_ancestorChain.length == 1);
     }
@@ -722,6 +726,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     assert(!_debugCompiled);
     assert(() { _debugCompiled = true; return true; }());
     final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics, parentSemantics);
+    if (node.isInvisible)
+      return; // drop the node
     final List<SemanticsNode> children = <SemanticsNode>[];
     for (_SemanticsFragment child in _children) {
       assert(child._ancestorChain.last == renderObjectOwner);
@@ -2714,6 +2720,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       assert(fragment is _InterestingSemanticsFragment);
       final SemanticsNode node = fragment.compile(parentSemantics: _semantics?.parent).single;
       assert(node != null);
+      assert(!node.isInvisible);
       assert(node == _semantics);
     } catch (e, stack) {
       _debugReportException('_updateSemantics', e, stack);
