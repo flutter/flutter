@@ -269,9 +269,9 @@ abstract class IntelliJValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    _validatePackage(messages, 'flutter-intellij.jar', 'Flutter',
-        minVersion: kMinFlutterPluginVersion);
-    _validatePackage(messages, 'Dart', 'Dart');
+    _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+        'Flutter', minVersion: kMinFlutterPluginVersion);
+    _validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_hasIssues(messages)) {
       messages.add(new ValidationMessage(
@@ -309,26 +309,32 @@ abstract class IntelliJValidator extends DoctorValidator {
     }
   }
 
-  void _validatePackage(List<ValidationMessage> messages, String packageName, String title, {
+  void _validatePackage(List<ValidationMessage> messages, List<String> packageNames, String title, {
     Version minVersion
   }) {
-    if (!hasPackage(packageName)) {
-      messages.add(new ValidationMessage.error(
-        '$title plugin not installed; this adds $title specific functionality.'
-      ));
-      return;
-    }
-    final String versionText = _readPackageVersion(packageName);
-    final Version version = new Version.parse(versionText);
-    if (version != null && minVersion != null && version < minVersion) {
+    for (String packageName in packageNames) {
+      if (!hasPackage(packageName)) {
+        continue;
+      }
+
+      final String versionText = _readPackageVersion(packageName);
+      final Version version = new Version.parse(versionText);
+      if (version != null && minVersion != null && version < minVersion) {
         messages.add(new ValidationMessage.error(
           '$title plugin version $versionText - the recommended minimum version is $minVersion'
         ));
-    } else {
-      messages.add(new ValidationMessage(
-        '$title plugin ${version != null ? "version $version" : "installed"}'
-      ));
+      } else {
+        messages.add(new ValidationMessage(
+          '$title plugin ${version != null ? "version $version" : "installed"}'
+        ));
+      }
+
+      return;
     }
+
+    messages.add(new ValidationMessage.error(
+      '$title plugin not installed; this adds $title specific functionality.'
+    ));
   }
 
   String _readPackageVersion(String packageName) {
