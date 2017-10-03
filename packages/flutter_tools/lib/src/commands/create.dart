@@ -165,7 +165,7 @@ class CreateCommand extends FlutterCommand {
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
       printStatus('');
-      printStatus('Your plugin code is in lib/$projectName.dart in the $relativePath directory.');
+      printStatus('Your package code is in lib/$projectName.dart in the $relativePath directory.');
       return;
     }
 
