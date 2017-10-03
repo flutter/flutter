@@ -286,6 +286,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Whether [rect] was clipped by ancestors.
+  ///
+  /// This is only true if the [rect] of this [SemanticsNode] has been altered
+  /// due to clipping by an ancestor. If ancestors have been clipped, but the
+  /// [rect] of this node was unaffected it will be false.
   bool wasAffectedByClip = false;
 
   /// Whether the node is invisible.
