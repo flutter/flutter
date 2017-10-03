@@ -188,16 +188,29 @@ class Paragraph {
   std::vector<double> line_heights_;
 
   struct GlyphPosition {
-    double start;
-    double advance;
+    const double start;
+    const double advance;
+    const size_t code_units;
 
-    GlyphPosition(double s, double a) : start(s), advance(a) {}
+    GlyphPosition(double s, double a, size_t cu)
+        : start(s), advance(a), code_units(cu) {}
 
     double glyph_end() const { return start + advance; }
   };
 
+  struct GlyphLine {
+    const std::vector<GlyphPosition> positions;
+    const size_t total_code_units;
+
+    GlyphLine(std::vector<GlyphPosition>&& p);
+
+    // Return the GlyphPosition containing the given code unit index within
+    // the line.
+    const GlyphPosition& GetGlyphPosition(size_t pos) const;
+  };
+
   // Holds the laid out x positions of each glyph.
-  std::vector<std::vector<GlyphPosition>> glyph_position_x_;
+  std::vector<GlyphLine> glyph_position_x_;
 
   // Set of glyph IDs that correspond to whitespace.
   std::set<GlyphID> whitespace_set_;
