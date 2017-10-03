@@ -4,8 +4,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
 import 'states.dart';
 
 const Duration _frameDuration = const Duration(milliseconds: 100);
@@ -504,5 +506,44 @@ void main() {
       ),
     ));
     expect(controller2.page, 0);
+  });
+
+  testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final PageController controller = new PageController();
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
+          controller: controller,
+          children: new List<Widget>.generate(3, (int i) {
+            return new Semantics(
+              child: new Text('Page #$i'),
+              container: true,
+            );
+          })
+        ),
+    ));
+    expect(controller.page, 0);
+
+    expect(semantics, includesNodeWith(label: 'Page #0'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #1')));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2')));
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0')));
+    expect(semantics, includesNodeWith(label: 'Page #1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2')));
+
+    controller.jumpToPage(2);
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0')));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #1')));
+    expect(semantics, includesNodeWith(label: 'Page #2'));
+
+    semantics.dispose();
   });
 }

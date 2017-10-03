@@ -291,24 +291,24 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       case GrowthDirection.forward:
         super.visitChildrenForSemantics((RenderObject child) {
           // The sliver is overlapped at the leading edge.
-          final Offset bottomLeftInViewport = MatrixUtils.transformPoint(
-              child.getTransformTo(parent), child.semanticBounds.bottomLeft
+          final Offset bottomRightInViewport = MatrixUtils.transformPoint(
+              child.getTransformTo(parent), child.semanticBounds.bottomRight
           );
           final double endOverlap = constraints.overlap;
-          if ((constraints.axis == Axis.vertical && bottomLeftInViewport.dy > endOverlap) ||
-              (constraints.axis == Axis.horizontal && bottomLeftInViewport.dx > endOverlap))
+          if ((constraints.axis == Axis.vertical && bottomRightInViewport.dy > endOverlap) ||
+              (constraints.axis == Axis.horizontal && bottomRightInViewport.dx > endOverlap))
             visitor(child);
         });
         break;
       case GrowthDirection.reverse:
         super.visitChildrenForSemantics((RenderObject child) {
           // The sliver is overlapped at the trailing edge.
-          final Offset topRightInViewport = MatrixUtils.transformPoint(
-              child.getTransformTo(parent), child.semanticBounds.topRight
+          final Offset topLeftInViewport = MatrixUtils.transformPoint(
+              child.getTransformTo(parent), child.semanticBounds.topLeft
           );
           final double startOverlap = constraints.remainingPaintExtent - constraints.overlap;
-          if ((constraints.axis == Axis.vertical && topRightInViewport.dy < startOverlap) ||
-              (constraints.axis == Axis.horizontal && topRightInViewport.dx < startOverlap))
+          if ((constraints.axis == Axis.vertical && topLeftInViewport.dy < startOverlap) ||
+              (constraints.axis == Axis.horizontal && topLeftInViewport.dx < startOverlap))
             visitor(child);
         });
         break;
