@@ -290,9 +290,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Whether the node is invisible.
   ///
-  /// A node, whose [rect] is outside of the bounds of the screen and hence not
+  /// A node whose [rect] is outside of the bounds of the screen and hence not
   /// reachable for users is considered invisible if its semantic information
-  /// are not merged into a (partially) visible parent as indicated by
+  /// is not merged into a (partially) visible parent as indicated by
   /// [isMergedIntoParent].
   ///
   /// An invisible node can be safely dropped from the semantic tree without

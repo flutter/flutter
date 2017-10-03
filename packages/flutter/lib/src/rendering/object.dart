@@ -603,11 +603,13 @@ class _SemanticsGeometry {
     assert(parentSemantics != null);
     assert(parentSemantics.wasAffectedByClip != null);
     semantics.transform = _transform;
+    final Rect semanticBounds = rendering.semanticBounds;
     if (_clipRect != null) {
-      semantics.rect = _clipRect.intersect(rendering.semanticBounds);
-      semantics.wasAffectedByClip = semantics.rect != rendering.semanticBounds;
+      final Rect rect = _clipRect.intersect(semanticBounds);
+      semantics.rect = rect;
+      semantics.wasAffectedByClip = rect != semanticBounds;
     } else {
-      semantics.rect = rendering.semanticBounds;
+      semantics.rect = semanticBounds;
       semantics.wasAffectedByClip = false;
     }
   }
