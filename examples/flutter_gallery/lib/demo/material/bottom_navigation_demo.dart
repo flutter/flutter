@@ -47,9 +47,9 @@ class NavigationIconView {
     return new FadeTransition(
       opacity: _animation,
       child: new SlideTransition(
-        position: new AlignmentTween(
-          begin: const Alignment(0.0, 0.4), // Slightly down.
-          end: Alignment.center,
+        position: new Tween<Offset>(
+          begin: const Offset(0.0, 0.02), // Slightly down.
+          end: Offset.zero,
         ).animate(_animation),
         child: new IconTheme(
           data: new IconThemeData(

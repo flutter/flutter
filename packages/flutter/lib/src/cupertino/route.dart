@@ -10,22 +10,22 @@ import 'package:flutter/widgets.dart';
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
-// Fractional offset from offscreen to the right to fully on screen.
-final AlignmentTween _kRightMiddleTween = new AlignmentTween(
-  begin: Alignment.centerRight * 2.0,
-  end: Alignment.center,
+// Offset from offscreen to the right to fully on screen.
+final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
+  begin: const Offset(1.0, 0.0),
+  end: Offset.zero,
 );
 
-// Fractional offset from fully on screen to 1/3 offscreen to the left.
-final AlignmentTween _kMiddleLeftTween = new AlignmentTween(
-  begin: Alignment.center,
-  end: const Alignment(-2.0/3.0, 0.0),
+// Offset from fully on screen to 1/3 offscreen to the left.
+final Tween<Offset> _kMiddleLeftTween = new Tween<Offset>(
+  begin: Offset.zero,
+  end: const Offset(-1.0/3.0, 0.0),
 );
 
-// Fractional offset from offscreen below to fully on screen.
-final AlignmentTween _kBottomUpTween = new AlignmentTween(
-  begin: Alignment.bottomCenter * 2.0,
-  end: Alignment.center,
+// Offset from offscreen below to fully on screen.
+final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+  begin: const Offset(0.0, 1.0),
+  end: Offset.zero,
 );
 
 // Custom decoration from no shadow to page shadow mimicking iOS page
@@ -318,9 +318,9 @@ class CupertinoPageTransition extends StatelessWidget {
       super(key: key);
 
   // When this page is coming in to cover another page.
-  final Animation<Alignment> _primaryPositionAnimation;
+  final Animation<Offset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<Alignment> _secondaryPositionAnimation;
+  final Animation<Offset> _secondaryPositionAnimation;
   final Animation<Decoration> _primaryShadowAnimation;
 
   /// The widget below this widget in the tree.
@@ -361,7 +361,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
        ),
        super(key: key);
 
-  final Animation<Alignment> _positionAnimation;
+  final Animation<Offset> _positionAnimation;
 
   /// The widget below this widget in the tree.
   final Widget child;
