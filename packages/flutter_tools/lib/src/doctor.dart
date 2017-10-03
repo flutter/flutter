@@ -269,8 +269,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
 
-    _validatePackage(messages, 'flutter-intellij.jar', 'Flutter',
-        minVersion: kMinFlutterPluginVersion);
+    _validatePackage(messages, 'flutter-intellij', 'Flutter', minVersion: kMinFlutterPluginVersion);
     _validatePackage(messages, 'Dart', 'Dart');
 
     if (_hasIssues(messages)) {
