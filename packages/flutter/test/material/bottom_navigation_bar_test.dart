@@ -85,8 +85,8 @@ void main() {
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 158.4);
-    expect(actions.elementAt(1).size.width, 105.6);
+    expect(actions.elementAt(0).size.width, moreOrLessEquals(148.8));
+    expect(actions.elementAt(1).size.width, moreOrLessEquals(99.2));
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -113,8 +113,8 @@ void main() {
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 105.6);
-    expect(actions.elementAt(1).size.width, 158.4);
+    expect(actions.elementAt(0).size.width, moreOrLessEquals(99.2));
+    expect(actions.elementAt(1).size.width, moreOrLessEquals(148.8));
   });
 
   testWidgets('BottomNavigationBar multiple taps test', (WidgetTester tester) async {

@@ -27,11 +27,13 @@ const double _kInactiveMaxWidth = 96.0;
 ///  * [BottomNavigationBarItem]
 ///  * <https://material.google.com/components/bottom-navigation.html#bottom-navigation-specs>
 enum BottomNavigationBarType {
-  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width.
+  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
+  /// display their text labels, and do not animate when tapped.
   fixed,
 
   /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
-  /// animate larger when they are tapped.
+  /// animate larger and labels fade in when they are tapped, and only the selected item
+  /// displays its text label.
   shifting,
 }
 
@@ -39,7 +41,7 @@ enum BottomNavigationBarType {
 /// small number of views.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
-/// labels, icons, or both, laid out on top of a piece of material. It provides
+/// text labels, icons, or both, laid out on top of a piece of material. It provides
 /// quick navigation between the top-level views of an app. For larger screens,
 /// side navigation may be a better fit.
 ///
@@ -55,9 +57,12 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The arguments [items] and [type] should not be null.
+  /// The argument [items] should not be null.
   ///
-  /// The number of items passed should be equal or greater than 2.
+  /// The number of items passed should be equal or greater than two.  If three or fewer
+  /// items are passed, then the default [type] (if [type] is null or not given) will be
+  /// [BottomNavigationBarType.fixed], and if more than three items are passed, will be
+  /// [BottomNavigationBarType.shifting]
   ///
   /// Passing a null [fixedColor] will cause a fallback to the theme's primary
   /// color.
@@ -66,15 +71,15 @@ class BottomNavigationBar extends StatefulWidget {
     @required this.items,
     this.onTap,
     this.currentIndex: 0,
-    this.type: BottomNavigationBarType.fixed,
+    BottomNavigationBarType type,
     this.fixedColor,
     this.iconSize: 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(type != null),
        assert(type == BottomNavigationBarType.fixed || fixedColor == null),
        assert(iconSize != null),
+       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -90,11 +95,13 @@ class BottomNavigationBar extends StatefulWidget {
   /// The index into [items] of the current active item.
   final int currentIndex;
 
-  /// Defines the layout and behavior of a [BottomNavigationBar].
+  /// Defines the layout and behavior of a [BottomNavigationBar].  See documentation for
+  /// [BottomNavigationBarType] for information on the meaning of different types.
   final BottomNavigationBarType type;
 
   /// The color of the selected item when bottom navigation bar is
-  /// [BottomNavigationBarType.fixed].
+  /// [BottomNavigationBarType.fixed].  [fixedColor] must be null if the type is
+  /// not [BottomNavigationBarType.fixed].
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
@@ -115,8 +122,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   final Queue<_Circle> _circles = new Queue<_Circle>();
   Color _backgroundColor; // Last growing circle's color.
   static const double _fontSize = 14.0;
+  static const double _inactiveFontSize = 12.0;
   static const double _topMargin = 6.0;
-  static const double _bottomMargin = 8.0;
+  static const double _inactiveTopMargin = 8.0;
+  static const double _bottomMargin = 10.0;
+  double _preferredHeight = kBottomNavigationBarHeight;
 
   static final Tween<double> _flexTween = new Tween<double>(
     begin: 1.0,
@@ -219,10 +229,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 
   Alignment _circleOffset(int index) {
-    final double iconSize = widget.iconSize;
+    final double iconCenter = widget.iconSize / 2.0;
     final Tween<double> yOffsetTween = new Tween<double>(
-      begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
-      end: (6.0 + iconSize / 2.0) / kBottomNavigationBarHeight     // 6dp + icon center
+      begin: (18.0 + iconCenter) / _preferredHeight,
+      end: (6.0 + iconCenter) / _preferredHeight,
     );
 
     return new Alignment(
@@ -265,6 +275,11 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   @override
   Widget build(BuildContext context) {
     Widget bottomNavigation;
+    _preferredHeight = math.max(
+        kBottomNavigationBarHeight,
+        widget.iconSize + _bottomMargin + _topMargin + _fontSize * MediaQuery.of(context).textScaleFactor
+    );
+
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
         final List<Widget> children = <Widget>[];
@@ -294,7 +309,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 8.0,
-                            end: _topMargin,
+                            end: widget.currentIndex == i ? _topMargin : _inactiveTopMargin,
                           ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
@@ -311,8 +326,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: _bottomMargin),
                         child: DefaultTextStyle.merge(
+                          overflow: TextOverflow.ellipsis,
                           style: new TextStyle(
-                            fontSize: _fontSize,
+                            fontSize: widget.currentIndex == i ? _fontSize : _inactiveFontSize,
                             color: colorTween.evaluate(_animations[i]),
                           ),
                           child: new Transform(
@@ -363,7 +379,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         margin: new EdgeInsets.only(
                           top: new Tween<double>(
                             begin: 18.0,
-                            end: _topMargin,
+                            end: widget.currentIndex == i ? _topMargin : _inactiveTopMargin,
                           ).evaluate(_animations[i]),
                         ),
                         child: new IconTheme(
@@ -382,8 +398,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         child: new FadeTransition(
                           opacity: _animations[i],
                           child: DefaultTextStyle.merge(
-                            style: const TextStyle(
-                              fontSize: _fontSize,
+                            overflow: TextOverflow.ellipsis,
+                            style: new TextStyle(
+                              fontSize: widget.currentIndex == i ? _fontSize : _inactiveFontSize,
                               color: Colors.white,
                             ),
                             child: widget.items[i].title
@@ -418,10 +435,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           ),
         ),
         new SizedBox(
-          height: math.max(
-            kBottomNavigationBarHeight,
-            widget.iconSize + _bottomMargin + _topMargin + _fontSize * MediaQuery.of(context).textScaleFactor
-          ),
+          height: _preferredHeight,
           child: new Center(
             child: new Stack(
               children: <Widget>[
