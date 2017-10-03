@@ -116,7 +116,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   Color _backgroundColor; // Last growing circle's color.
   static const double _fontSize = 14.0;
   static const double _topMargin = 6.0;
-  static const double _bottomMargin = 10.0;
+  static const double _bottomMargin = 8.0;
 
   static final Tween<double> _flexTween = new Tween<double>(
     begin: 1.0,
