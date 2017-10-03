@@ -56,7 +56,10 @@ class _StdoutHandler {
   }
 }
 
-Future<String> compile({String sdkRoot, String mainPath}) async {
+Future<String> compile(
+    {String sdkRoot,
+    String mainPath,
+    List<String> extraFrontEndOptions}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -64,13 +67,18 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
-  final Process server = await processManager.start(<String>[
+  final List<String> command = <String>[
     _dartExecutable(),
     frontendServer,
     '--sdk-root',
     sdkRoot,
-    mainPath
-  ]).catchError((dynamic error, StackTrace stack) {
+  ];
+  if (extraFrontEndOptions != null)
+    command.addAll(extraFrontEndOptions);
+  command.add(mainPath);
+  final Process server = await processManager
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
     printTrace('Failed to start frontend server $error, $stack');
   });
 

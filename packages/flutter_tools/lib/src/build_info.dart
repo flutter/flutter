@@ -10,7 +10,10 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, { this.previewDart2 });
+  const BuildInfo(this.mode, this.flavor,
+      {this.previewDart2,
+      this.extraFrontEndOptions,
+      this.extraGenSnapshotOptions});
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -23,6 +26,12 @@ class BuildInfo {
 
   // Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
+
+  /// Extra command-line options for front-end.
+  final String extraFrontEndOptions;
+
+  /// Extra command-line options for gen_snapshot.
+  final String extraGenSnapshotOptions;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);

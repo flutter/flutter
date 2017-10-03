@@ -227,6 +227,15 @@ class FlutterPlugin implements Plugin<Project> {
             previewDart2Value = project.property('preview-dart-2')
         }
 
+        String extraFrontEndOptionsValue = null
+        if (project.hasProperty('extra-front-end-options')) {
+            extraFrontEndOptionsValue = project.property('extra-front-end-options')
+        }
+        String extraGenSnapshotOptionsValue = null
+        if (project.hasProperty('extra-gen-snapshot-options')) {
+            extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
+        }
+
         project.android.applicationVariants.all { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
             if (flutterBuildMode == 'debug' && project.tasks.findByName('flutterBuildX86Jar')) {
@@ -259,6 +268,8 @@ class FlutterPlugin implements Plugin<Project> {
                 previewDart2 previewDart2Value
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
+                extraFrontEndOptions extraFrontEndOptionsValue
+                extraGenSnapshotOptions extraGenSnapshotOptionsValue
             }
 
             Task copyFlxTask = project.tasks.create(name: "copyFlutterAssets${variant.name.capitalize()}", type: Copy) {
@@ -285,10 +296,14 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngineSrcPath
     @Input
     String targetPath
-    @Optional
+    @Optional @Input
     Boolean previewDart2
     File sourceDir
     File intermediateDir
+    @Optional @Input
+    String extraFrontEndOptions
+    @Optional @Input
+    String extraGenSnapshotOptions
 
     @OutputFile
     File getDependenciesFile() {
@@ -321,6 +336,12 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--output-dir", "${intermediateDir}"
                 if (previewDart2) {
                     args "--preview-dart-2"
+                }
+                if (extraFrontEndOptions != null) {
+                  args "--extra-front-end-options", "${extraFrontEndOptions}"
+                }
+                if (extraGenSnapshotOptions != null) {
+                  args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
                 args "--${buildMode}"
             }
