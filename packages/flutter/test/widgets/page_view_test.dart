@@ -209,6 +209,25 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
   });
 
+  testWidgets('PageController nextPage and previousPage return Futures', (WidgetTester tester) async {
+    final PageController controller = new PageController();
+    final Future<Null> nullFuture = new Future<Null>.value(null);
+
+    await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+    ));
+
+    final Future<Null> nextPage = controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    expect(nextPage.runtimeType, nullFuture.runtimeType);
+
+    final Future<Null> previousPage = controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    expect(previousPage.runtimeType, nullFuture.runtimeType);
+  });
+
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
