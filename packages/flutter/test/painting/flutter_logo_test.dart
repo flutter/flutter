@@ -57,8 +57,10 @@ void main() {
   });
 
   test('FlutterLogoDecorationl.lerpFrom and FlutterLogoDecorationl.lerpTo', () {
+    expect(Decoration.lerp(start, const BoxDecoration(), 0.0), start);
     expect(Decoration.lerp(start, const BoxDecoration(), 1.0), const BoxDecoration());
-    expect(Decoration.lerp(const BoxDecoration(), end, 0.0), end);
+    expect(Decoration.lerp(const BoxDecoration(), end, 0.0), const BoxDecoration());
+    expect(Decoration.lerp(const BoxDecoration(), end, 1.0), end);
   });
 
   test('FlutterLogoDecoration lerp changes styles at 0.5', () {

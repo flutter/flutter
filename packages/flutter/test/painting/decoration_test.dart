@@ -333,4 +333,11 @@ void main() {
       new BoxDecoration(gradient: gradient)
     );
   });
+
+  test('Decoration.lerp with unrelated decorations', () {
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.0), const isInstanceOf<FlutterLogoDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.25), const isInstanceOf<FlutterLogoDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.75), const isInstanceOf<BoxDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 1.0), const isInstanceOf<BoxDecoration>());
+  });
 }

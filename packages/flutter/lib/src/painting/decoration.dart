@@ -44,27 +44,72 @@ abstract class Decoration extends Diagnosticable {
   /// of the decoration. For example, if the decoration draws a frame
   /// around its edge, the padding would return the distance by which
   /// to inset the children so as to not overlap the frame.
-  EdgeInsets get padding => null;
+  ///
+  /// This only works for decorations that have absolute sizes. If the padding
+  /// needed would change based on the size at which the decoration is drawn,
+  /// then this will return incorrect padding values.
+  ///
+  /// For example, when a [BoxDecoration] has [BoxShape.circle], the padding
+  /// does not take into account that the circle is drawn in the center of the
+  /// box regardless of the ratio of the box; it does not provide the extra
+  /// padding that is implied by changing the ratio.
+  EdgeInsets get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;
 
-  /// Linearly interpolates from [a] to [this].
-  Decoration lerpFrom(Decoration a, double t) => this;
-
-  /// Linearly interpolates from [this] to [b].
-  Decoration lerpTo(Decoration b, double t) => b;
-
-  /// Linearly interpolates from [begin] to [end].
+  /// Linearly interpolates from `a` to [this].
   ///
-  /// This defers to [end]'s [lerpTo] function if [end] is not null,
-  /// otherwise it uses [begin]'s [lerpFrom] function.
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
+  /// method instead.
+  ///
+  /// Supporting interpolating from null is recommended as the [Decoration.lerp]
+  /// method uses this as a fallback when two classes can't interpolate between
+  /// each other.
+  ///
+  /// Instead of calling this directly, use [Decoration.lerp].
+  @protected
+  Decoration lerpFrom(Decoration a, double t) => null;
+
+  /// Linearly interpolates from [this] to `b`.
+  ///
+  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  ///
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `b`. In that case, [lerp] will apply a default
+  /// behavior instead.
+  ///
+  /// Supporting interpolating to null is recommended as the [Decoration.lerp]
+  /// method uses this as a fallback when two classes can't interpolate between
+  /// each other.
+  ///
+  /// Instead of calling this directly, use [Decoration.lerp].
+  @protected
+  Decoration lerpTo(Decoration b, double t) => null;
+
+  /// Linearly interpolates from `begin` to `end`.
+  ///
+  /// This defers to `end`'s [lerpTo] function if `end` is not null. If `end` is
+  /// null or if its [lerpTo] returns null, it uses `begin`'s [lerpFrom]
+  /// function instead. If both return null, it attempts to lerp from `begin` to
+  /// null if `t<0.5`, or null to `end` if `t≥0.5`.
   static Decoration lerp(Decoration begin, Decoration end, double t) {
+    Decoration result;
     if (end != null)
-      return end.lerpFrom(begin, t);
-    if (begin != null)
-      return begin.lerpTo(end, t);
-    return null;
+      result = end.lerpFrom(begin, t);
+    if (result == null && begin != null)
+      result = begin.lerpTo(end, t);
+    if (result == null && begin != null && end != null) {
+      if (t < 0.5) {
+        result = begin.lerpTo(null, t * 2.0);
+      } else {
+        result = end.lerpFrom(null, (t - 0.5) * 2.0);
+      }
+    }
+    if (result == null)
+      result = t < 0.5 ? begin : end;
+    return result;
   }
 
   /// Tests whether the given point, on a rectangle of a given size,
