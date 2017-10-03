@@ -165,19 +165,21 @@ class FlutterLogoDecoration extends Decoration {
   @override
   FlutterLogoDecoration lerpFrom(Decoration a, double t) {
     assert(debugAssertIsValid());
-    if (a is! FlutterLogoDecoration)
-      return lerp(null, this, t);
-    assert(a.debugAssertIsValid());
-    return lerp(a, this, t);
+    if (a == null || a is FlutterLogoDecoration) {
+      assert(a == null || a.debugAssertIsValid());
+      return FlutterLogoDecoration.lerp(a, this, t);
+    }
+    return super.lerpFrom(a, t);
   }
 
   @override
   FlutterLogoDecoration lerpTo(Decoration b, double t) {
     assert(debugAssertIsValid());
-    if (b is! FlutterLogoDecoration)
-      return lerp(this, null, t);
-    assert(b.debugAssertIsValid());
-    return lerp(this, b, t);
+    if (b == null || b is FlutterLogoDecoration) {
+      assert(b == null || b.debugAssertIsValid());
+      return FlutterLogoDecoration.lerp(this, b, t);
+    }
+    return super.lerpTo(b, t);
   }
 
   @override
