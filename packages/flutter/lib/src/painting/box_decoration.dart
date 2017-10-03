@@ -10,7 +10,7 @@ import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
-import 'borders.dart';
+import 'box_border.dart';
 import 'box_shadow.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
