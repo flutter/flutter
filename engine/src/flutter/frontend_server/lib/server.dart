@@ -14,7 +14,7 @@ import 'package:front_end/kernel_generator.dart';
 import 'package:kernel/ast.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:kernel/binary/limited_ast_to_binary.dart';
-import 'package:kernel/target/flutter.dart';
+import 'package:kernel/target/flutter_fasta.dart';
 import 'package:kernel/target/targets.dart';
 import 'package:usage/uuid/uuid.dart';
 
@@ -120,7 +120,7 @@ class _FrontendCompiler implements CompilerInterface {
       ..byteStore = new MemoryByteStore()
       ..sdkRoot = sdkRoot
       ..strongMode = false
-      ..target = new FlutterTarget(new TargetFlags())
+      ..target = new FlutterFastaTarget(new TargetFlags())
       ..onError = (CompilationMessage message) {
         final StringBuffer outputMessage = new StringBuffer()
           ..write(_severityName(message.severity))
