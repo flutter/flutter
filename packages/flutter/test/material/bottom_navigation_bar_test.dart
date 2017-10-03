@@ -292,7 +292,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new MediaQuery(
-          data: new MediaQueryData(textScaleFactor: 2.0),
+          data: const MediaQueryData(textScaleFactor: 2.0),
           child: new Scaffold(
             bottomNavigationBar: new BottomNavigationBar(
               items: <BottomNavigationBarItem>[
