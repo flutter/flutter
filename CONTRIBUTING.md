@@ -125,7 +125,7 @@ test should have a `main` function and use the `test` package.
 Working with flutter tools
 --------------------------
 
-The flutter tools itself is built when you run `flutter` for the first time and each time
+The flutter tool itself is built when you run `flutter` for the first time and each time
 you run `flutter upgrade`. If you want to alter and re-test the tool's behavior itself,
 locally commit your tool changes in git and the tool will be rebuilt from Dart sources
 in `packages/flutter_tools` the next time you run `flutter`.
@@ -189,8 +189,8 @@ organization's) name and contact info to the [AUTHORS](AUTHORS) file.
 We grant commit access to people who have gained our trust and demonstrated
 a commitment to Flutter.
 
-Tools for tracking an improving test coverage
----------------------------------------------
+Tools for tracking and improving test coverage
+----------------------------------------------
 
 We strive for a high degree of test coverage for the Flutter framework. We use
 Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutter?branch=master).
