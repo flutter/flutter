@@ -384,7 +384,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                           child: DefaultTextStyle.merge(
                             style: const TextStyle(
                               fontSize: _fontSize,
-                              color: Colors.white
+                              color: Colors.white,
                             ),
                             child: widget.items[i].title
                           ),
@@ -397,11 +397,14 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ),
           );
         }
-        bottomNavigation = new SizedBox(
-          width: _maxWidth,
-          child: new Row(
-            children: children
-          )
+        bottomNavigation = DefaultTextStyle.merge(
+          overflow: TextOverflow.ellipsis,
+          child: new SizedBox(
+            width: _maxWidth,
+            child: new Row(
+              children: children
+            ),
+          ),
         );
         break;
     }
@@ -411,8 +414,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         new Positioned.fill(
           child: new Material( // Casts shadow.
             elevation: 8.0,
-            color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null
-          )
+            color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null,
+          ),
         ),
         new SizedBox(
           height: math.max(
