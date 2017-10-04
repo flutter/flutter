@@ -228,10 +228,11 @@ sk_sp<SkTypeface> AssetFontSelector::getTypefaceAsset(
   }
 
   sk_sp<SkFontMgr> font_mgr(SkFontMgr::RefDefault());
-  SkMemoryStream* typeface_stream = new SkMemoryStream(
-      typeface_asset->data.data(), typeface_asset->data.size());
+  std::unique_ptr<SkStreamAsset> typeface_stream =
+      std::make_unique<SkMemoryStream>(typeface_asset->data.data(),
+                                       typeface_asset->data.size());
   typeface_asset->typeface =
-      sk_sp<SkTypeface>(font_mgr->createFromStream(typeface_stream));
+      font_mgr->makeFromStream(std::move(typeface_stream));
   if (typeface_asset->typeface == nullptr) {
     typeface_cache_.insert(std::make_pair(asset_path, nullptr));
     return nullptr;
