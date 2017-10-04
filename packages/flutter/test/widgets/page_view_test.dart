@@ -219,26 +219,26 @@ void main() {
         ),
     ));
 
-    bool nextPageCalled = false;
+    bool nextPageCompleted = false;
     controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
-        .then((_) => nextPageCalled = true);
+        .then((_) => nextPageCompleted = true);
 
-    expect(nextPageCalled, false);
+    expect(nextPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(nextPageCalled, false);
+    expect(nextPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(nextPageCalled, true);
+    expect(nextPageCompleted, true);
 
 
-    bool previousPageCalled = false;
+    bool previousPageCompleted = false;
     controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
-        .then((_) => previousPageCalled = true);
+        .then((_) => previousPageCompleted = true);
 
-    expect(previousPageCalled, false);
+    expect(previousPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(previousPageCalled, false);
+    expect(previousPageCompleted, false);
     await tester.pump(const Duration(milliseconds: 200));
-    expect(previousPageCalled, true);
+    expect(previousPageCompleted, true);
   });
 
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
