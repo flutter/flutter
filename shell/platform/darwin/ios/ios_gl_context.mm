@@ -163,14 +163,16 @@ bool IOSGLContext::PresentRenderBuffer() const {
 
 bool IOSGLContext::UpdateStorageSizeIfNecessary() {
   const CGSize layer_size = [layer_.get() bounds].size;
-
-  const GLint size_width = layer_size.width;
-  const GLint size_height = layer_size.height;
+  const CGFloat contents_scale = layer_.get().contentsScale;
+  const GLint size_width = layer_size.width * contents_scale;
+  const GLint size_height = layer_size.height * contents_scale;
 
   if (size_width == storage_size_width_ && size_height == storage_size_height_) {
     // Nothing to since the stoage size is already consistent with the layer.
     return true;
   }
+  TRACE_EVENT0("flutter", "Updating render buffer storage size");
+  FXL_DLOG(INFO) << "Updating render buffer storage size.";
 
   if (![EAGLContext setCurrentContext:context_]) {
     return false;
