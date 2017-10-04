@@ -441,14 +441,14 @@ class _AppBarState extends State<AppBar> {
 
     // The padding applies to the toolbar and tabbar, not the flexible space.
     if (widget.primary) {
-      appBar = new Padding(
-        padding: new EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      appBar = new SafeArea(
+        top: true,
         child: appBar,
       );
     }
 
     appBar = new Align(
-      alignment: FractionalOffset.topCenter,
+      alignment: Alignment.topCenter,
       child: appBar,
     );
 

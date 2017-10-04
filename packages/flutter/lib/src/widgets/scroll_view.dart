@@ -279,7 +279,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       delegate: new SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
 ///           return new Container(
-///             alignment: FractionalOffset.center,
+///             alignment: Alignment.center,
 ///             color: Colors.teal[100 * (index % 9)],
 ///             child: new Text('grid item $index'),
 ///           );
@@ -292,7 +292,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       delegate: new SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
 ///           return new Container(
-///             alignment: FractionalOffset.center,
+///             alignment: Alignment.center,
 ///             color: Colors.lightBlue[100 * (index % 9)],
 ///             child: new Text('list item $index'),
 ///           );

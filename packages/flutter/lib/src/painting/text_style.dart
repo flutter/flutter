@@ -145,7 +145,7 @@ import 'basic_types.dart';
 ///
 /// The `family` property determines the name of the font, which you can use in
 /// the [fontFamily] argument. The `asset` property is a path to the font file,
-/// relative to the [pubspec.yaml] file. The `weight` property specifies the
+/// relative to the `pubspec.yaml` file. The `weight` property specifies the
 /// weight of the glyph outlines in the file as an integer multiple of 100
 /// between 100 and 900. This corresponds to the [FontWeight] class and can be
 /// used in the [fontWeight] argument. The `style` property specfies whether the
@@ -245,7 +245,13 @@ class TextStyle extends Diagnosticable {
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
+  ///
+  /// [getParagraphStyle] will default to 14 logical pixels if the font size
+  /// isn't specified here.
   final double fontSize;
+
+  // The default font size if none is specified.
+  static const double _defaultFontSize = 14.0;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight fontWeight;
@@ -444,6 +450,9 @@ class TextStyle extends Diagnosticable {
   /// The `textScaleFactor` argument must not be null. If omitted, it defaults
   /// to 1.0. The other arguments may be null. The `maxLines` argument, if
   /// specified and non-null, must be greater than zero.
+  ///
+  /// If the font size on this style isn't set, it will default to 14 logical
+  /// pixels.
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
       TextDirection textDirection,
@@ -459,7 +468,7 @@ class TextStyle extends Diagnosticable {
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
+      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: height,
       maxLines: maxLines,
       ellipsis: ellipsis,

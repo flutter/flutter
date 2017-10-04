@@ -177,7 +177,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, shouldMergeAllDescendantsIntoThisNode: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], tags: [], isSelected: false, label: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], tags: [], isSelected: false, label: "", textDirection: null)\n',
     );
 
     final SemanticsNode allProperties = new SemanticsNode()

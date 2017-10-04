@@ -336,6 +336,11 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// For more complex animations, you'll likely want to use a subclass of
 /// [AnimatedWidget] such as the [DecoratedBoxTransition] or use your own
 /// [AnimationController].
+///
+/// See also:
+///
+///  * [AnimatedPadding], which is a subset of this widget that only
+///    supports animating the [padding].
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -386,7 +391,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
-  final FractionalOffsetGeometry alignment;
+  final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
@@ -422,7 +427,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
@@ -433,7 +438,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
 }
 
 class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer> {
-  FractionalOffsetGeometryTween _alignment;
+  AlignmentGeometryTween _alignment;
   EdgeInsetsGeometryTween _padding;
   DecorationTween _decoration;
   DecorationTween _foregroundDecoration;
@@ -443,7 +448,7 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new FractionalOffsetGeometryTween(begin: value));
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new AlignmentGeometryTween(begin: value));
     _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsGeometryTween(begin: value));
     _decoration = visitor(_decoration, widget.decoration, (dynamic value) => new DecorationTween(begin: value));
     _foregroundDecoration = visitor(_foregroundDecoration, widget.foregroundDecoration, (dynamic value) => new DecorationTween(begin: value));
@@ -469,13 +474,73 @@ class _AnimatedContainerState extends AnimatedWidgetBaseState<AnimatedContainer>
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometryTween>('alignment', _alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
     description.add(new DiagnosticsProperty<DecorationTween>('bg', _decoration, defaultValue: null));
     description.add(new DiagnosticsProperty<DecorationTween>('fg', _foregroundDecoration, defaultValue: null));
     description.add(new DiagnosticsProperty<BoxConstraintsTween>('constraints', _constraints, showName: false, defaultValue: null));
     description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('margin', _margin, defaultValue: null));
     description.add(new ObjectFlagProperty<Matrix4Tween>.has('transform', _transform));
+  }
+}
+
+/// Animated version of [Padding] which automatically transitions the
+/// indentation over a given duration whenever the given inset changes.
+///
+/// See also:
+///
+///  * [AnimatedContainer], which can transition more values at once.
+class AnimatedPadding extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that insets its child by a value that animates
+  /// implicitly.
+  ///
+  /// The [padding], [curve], and [duration] arguments must not be null.
+  AnimatedPadding({
+    Key key,
+    @required this.padding,
+    this.child,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(padding != null),
+       assert(padding.isNonNegative),
+       super(key: key, curve: curve, duration: duration);
+
+  /// The amount of space by which to inset the child.
+  final EdgeInsetsGeometry padding;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  _AnimatedPaddingState createState() => new _AnimatedPaddingState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
+  }
+}
+
+class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
+  EdgeInsetsGeometryTween _padding;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _padding = visitor(_padding, widget.padding, (dynamic value) => new EdgeInsetsGeometryTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: _padding.evaluate(animation),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
   }
 }
 

@@ -73,7 +73,7 @@ class IconButton extends StatelessWidget {
     Key key,
     this.iconSize: 24.0,
     this.padding: const EdgeInsets.all(8.0),
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     @required this.icon,
     this.color,
     this.highlightColor,
@@ -107,8 +107,8 @@ class IconButton extends StatelessWidget {
 
   /// Defines how the icon is positioned within the IconButton.
   ///
-  /// This property must not be null. It defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// This property must not be null. It defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// The icon to display inside the button.
   ///

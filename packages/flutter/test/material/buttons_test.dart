@@ -44,6 +44,46 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Does FlatButton scale with font scale changes', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new MediaQuery(
+            data: const MediaQueryData(textScaleFactor: 1.0),
+            child: new Center(
+              child: new FlatButton(
+                onPressed: () { },
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new MediaQuery(
+            data: const MediaQueryData(textScaleFactor: 1.3),
+            child: new Center(
+              child: new FlatButton(
+                onPressed: () { },
+                child: const Text('ABC'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
+  });
+
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
   testWidgets('MaterialButton with explicit splashColor and highlightColor', (WidgetTester tester) async {

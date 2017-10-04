@@ -82,7 +82,7 @@ class SnackBarAction extends StatefulWidget {
   const SnackBarAction({
     Key key,
     @required this.label,
-    @required this.onPressed
+    @required this.onPressed,
   }) : assert(label != null),
        assert(onPressed != null),
        super(key: key);
@@ -117,7 +117,7 @@ class _SnackBarActionState extends State<SnackBarAction> {
   Widget build(BuildContext context) {
     return new FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
-      child: new Text(widget.label)
+      child: new Text(widget.label),
     );
   }
 }
@@ -192,7 +192,7 @@ class SnackBar extends StatelessWidget {
     final ThemeData darkTheme = new ThemeData(
       brightness: Brightness.dark,
       accentColor: theme.accentColor,
-      accentColorBrightness: theme.accentColorBrightness
+      accentColorBrightness: theme.accentColorBrightness,
     );
     final List<Widget> children = <Widget>[
       const SizedBox(width: _kSnackBarPadding),
@@ -202,15 +202,15 @@ class SnackBar extends StatelessWidget {
           child: new DefaultTextStyle(
             style: darkTheme.textTheme.subhead,
             child: content,
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ];
     if (action != null) {
       children.add(new ButtonTheme.bar(
         padding: const EdgeInsets.symmetric(horizontal: _kSnackBarPadding),
         textTheme: ButtonTextTheme.accent,
-        child: action
+        child: action,
       ));
     } else {
       children.add(const SizedBox(width: _kSnackBarPadding));
@@ -222,9 +222,9 @@ class SnackBar extends StatelessWidget {
         animation: heightAnimation,
         builder: (BuildContext context, Widget child) {
           return new Align(
-            alignment: FractionalOffsetDirectional.topStart,
+            alignment: AlignmentDirectional.topStart,
             heightFactor: heightAnimation.value,
-            child: child
+            child: child,
           );
         },
         child: new Semantics(
@@ -245,14 +245,14 @@ class SnackBar extends StatelessWidget {
                   opacity: fadeAnimation,
                   child: new Row(
                     children: children,
-                    crossAxisAlignment: CrossAxisAlignment.center
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -278,7 +278,7 @@ class SnackBar extends StatelessWidget {
       backgroundColor: backgroundColor,
       action: action,
       duration: duration,
-      animation: newAnimation
+      animation: newAnimation,
     );
   }
 }

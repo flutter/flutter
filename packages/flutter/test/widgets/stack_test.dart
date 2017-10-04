@@ -41,7 +41,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         children: <Widget>[
           new Positioned(
             left: 10.0,
@@ -69,7 +69,7 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         children: <Widget>[
           new Positioned(
             right: 10.0,
@@ -140,7 +140,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new Stack(
-            alignment: FractionalOffset.center,
+            alignment: Alignment.center,
             children: <Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0),
@@ -163,7 +163,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new Stack(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             children: <Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0),
@@ -186,7 +186,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Center(
           child: new Stack(
-            alignment: FractionalOffset.center,
+            alignment: Alignment.center,
             children: <Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0),
@@ -209,7 +209,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Center(
           child: new Stack(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             children: <Widget>[
               new Container(key: child0Key, width: 20.0, height: 20.0),
               new Container(key: child1Key, width: 10.0, height: 10.0),
@@ -257,7 +257,7 @@ void main() {
       });
       return new Center(
         child: new IndexedStack(
-          alignment: FractionalOffset.topLeft,
+          alignment: Alignment.topLeft,
           children: items,
           index: index,
         ),
@@ -289,7 +289,7 @@ void main() {
       });
       return new Center(
         child: new IndexedStack(
-          alignment: FractionalOffset.topLeft,
+          alignment: Alignment.topLeft,
           children: items,
           key: key,
           index: index,
@@ -614,18 +614,18 @@ void main() {
   testWidgets('Can change the text direction of a Stack', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Stack(
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
       ),
     );
     await tester.pumpWidget(
       new Stack(
-        alignment: FractionalOffsetDirectional.topStart,
+        alignment: AlignmentDirectional.topStart,
         textDirection: TextDirection.rtl,
       ),
     );
     await tester.pumpWidget(
       new Stack(
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
       ),
     );
   });

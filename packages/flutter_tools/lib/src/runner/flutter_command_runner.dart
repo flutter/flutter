@@ -13,6 +13,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/flags.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -163,6 +164,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   @override
   Future<Null> runCommand(ArgResults globalResults) async {
+    context.setVariable(Flags, new Flags(globalResults));
+
     // Check for verbose.
     if (globalResults['verbose']) {
       // Override the logger.

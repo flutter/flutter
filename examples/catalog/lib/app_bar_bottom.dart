@@ -55,7 +55,7 @@ class _AppBarBottomSampleState extends State<AppBarBottomSample> with SingleTick
               data: Theme.of(context).copyWith(accentColor: Colors.white),
               child: new Container(
                 height: 48.0,
-                alignment: FractionalOffset.center,
+                alignment: Alignment.center,
                 child: new TabPageSelector(controller: _tabController),
               ),
             ),

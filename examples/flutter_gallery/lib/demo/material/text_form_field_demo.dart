@@ -188,7 +188,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
             ),
             new Container(
               padding: const EdgeInsets.all(20.0),
-              alignment: const FractionalOffset(0.5, 0.5),
+              alignment: Alignment.center,
               child: new RaisedButton(
                 child: const Text('SUBMIT'),
                 onPressed: _handleSubmitted,

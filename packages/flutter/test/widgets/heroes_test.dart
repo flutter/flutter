@@ -312,7 +312,7 @@ void main() {
       routes: <String, WidgetBuilder>{
         '/next': (BuildContext context) {
           return new Align(
-            alignment: FractionalOffset.topLeft,
+            alignment: Alignment.topLeft,
             child: new Hero(
               tag: 'foo',
               child: new GestureDetector(

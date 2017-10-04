@@ -237,7 +237,7 @@ class RenderParagraph extends RenderBox {
   bool _hasVisualOverflow = false;
   ui.Shader _overflowShader;
 
-  /// Whether this paragraph currently has a [ui.Shader] for its overflow
+  /// Whether this paragraph currently has a [dart:ui.Shader] for its overflow
   /// effect.
   ///
   /// Used to test this object. Not for use in production.

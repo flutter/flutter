@@ -8,8 +8,8 @@ import 'package:flutter/painting.dart';
 void main() {
   test('LinearGradient scale test', () {
     final LinearGradient testGradient = const LinearGradient(
-      begin: FractionalOffset.bottomRight,
-      end: const FractionalOffset(0.7, 1.0),
+      begin: Alignment.bottomRight,
+      end: const Alignment(0.7, 1.0),
       colors: const <Color>[
         const Color(0x00FFFFFF),
         const Color(0x11777777),
@@ -19,8 +19,8 @@ void main() {
     final LinearGradient actual = LinearGradient.lerp(null, testGradient, 0.25);
 
     expect(actual, const LinearGradient(
-      begin: FractionalOffset.bottomRight,
-      end: const FractionalOffset(0.7, 1.0),
+      begin: Alignment.bottomRight,
+      end: const Alignment(0.7, 1.0),
       colors: const <Color>[
         const Color(0x00FFFFFF),
         const Color(0x04777777),
@@ -31,8 +31,8 @@ void main() {
 
   test('LinearGradient lerp test', () {
     final LinearGradient testGradient1 = const LinearGradient(
-      begin: FractionalOffset.topLeft,
-      end: FractionalOffset.bottomLeft,
+      begin: Alignment.topLeft,
+      end: Alignment.bottomLeft,
       colors: const <Color>[
         const Color(0x33333333),
         const Color(0x66666666),
@@ -40,8 +40,8 @@ void main() {
     );
 
     final LinearGradient testGradient2 = const LinearGradient(
-      begin: FractionalOffset.topRight,
-      end: FractionalOffset.topLeft,
+      begin: Alignment.topRight,
+      end: Alignment.topLeft,
       colors: const <Color>[
         const Color(0x44444444),
         const Color(0x88888888),
@@ -50,8 +50,8 @@ void main() {
     final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
 
     expect(actual, const LinearGradient(
-      begin: const FractionalOffset(0.5, 0.0),
-      end: const FractionalOffset(0.0, 0.5),
+      begin: const Alignment(0.0, -1.0),
+      end: const Alignment(-1.0, 0.0),
       colors: const <Color>[
         const Color(0x3B3B3B3B),
         const Color(0x77777777),
@@ -62,24 +62,24 @@ void main() {
   test('LinearGradient toString', () {
     expect(
       const LinearGradient(
-        begin: FractionalOffset.topLeft,
-        end: FractionalOffset.bottomLeft,
+        begin: Alignment.topLeft,
+        end: Alignment.bottomLeft,
         colors: const <Color>[
           const Color(0x33333333),
           const Color(0x66666666),
         ],
       ).toString(),
       equals(
-        'LinearGradient(FractionalOffset.topLeft, FractionalOffset.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
       ),
     );
   });
 
-  test('LinearGradient with FractionalOffsetDirectional', () {
+  test('LinearGradient with AlignmentDirectional', () {
     expect(
       () {
         return const LinearGradient(
-          begin: FractionalOffsetDirectional.topStart,
+          begin: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
@@ -88,7 +88,7 @@ void main() {
     expect(
       () {
         return const LinearGradient(
-          begin: FractionalOffsetDirectional.topStart,
+          begin: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
@@ -97,7 +97,7 @@ void main() {
     expect(
       () {
         return const LinearGradient(
-          begin: FractionalOffsetDirectional.topStart,
+          begin: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
@@ -106,7 +106,7 @@ void main() {
     expect(
       () {
         return const LinearGradient(
-          begin: FractionalOffset.topLeft,
+          begin: Alignment.topLeft,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
@@ -114,11 +114,11 @@ void main() {
     );
   });
 
-  test('RadialGradient with FractionalOffsetDirectional', () {
+  test('RadialGradient with AlignmentDirectional', () {
     expect(
       () {
         return const RadialGradient(
-          center: FractionalOffsetDirectional.topStart,
+          center: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },
@@ -127,7 +127,7 @@ void main() {
     expect(
       () {
         return const RadialGradient(
-          center: FractionalOffsetDirectional.topStart,
+          center: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.rtl);
       },
@@ -136,7 +136,7 @@ void main() {
     expect(
       () {
         return const RadialGradient(
-          center: FractionalOffsetDirectional.topStart,
+          center: AlignmentDirectional.topStart,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0), textDirection: TextDirection.ltr);
       },
@@ -145,7 +145,7 @@ void main() {
     expect(
       () {
         return const RadialGradient(
-          center: FractionalOffset.topLeft,
+          center: Alignment.topLeft,
           colors: const <Color>[ const Color(0xFFFFFFFF), const Color(0xFFFFFFFF) ]
         ).createShader(new Rect.fromLTWH(0.0, 0.0, 100.0, 100.0));
       },

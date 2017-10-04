@@ -113,7 +113,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -136,7 +136,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -162,7 +162,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -293,7 +293,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -318,7 +318,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -367,22 +367,22 @@ class Image extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// To display a subpart of an image, consider using a [CustomPainter] and
   /// [Canvas.drawImageRect].
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// [AlignmentDirectional]), then an ambient [Directionality] widget
   /// must be in scope.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -433,7 +433,7 @@ class Image extends StatefulWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));

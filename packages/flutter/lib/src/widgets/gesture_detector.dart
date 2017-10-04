@@ -567,7 +567,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// The event can be interpreted by assistive technologies to provide
   /// additional feedback to the user about the state of the UI.
   ///
-  /// The event will not be sent if [excludeFromSemantics] is set to true.
+  /// The event will not be sent if [RawGestureDetector.excludeFromSemantics] is
+  /// set to true.
   void sendSemanticsEvent(SemanticsEvent event) {
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();

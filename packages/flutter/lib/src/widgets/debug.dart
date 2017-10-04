@@ -232,7 +232,7 @@ bool debugCheckHasDirectionality(BuildContext context) {
         'determines the ambient reading direction and is used, for example, to '
         'determine how to lay out text, how to interpret "start" and "end" '
         'values, and to resolve EdgeInsetsDirectional, '
-        'FractionalOffsetDirectional, and other *Directional objects.'
+        'AlignmentDirectional, and other *Directional objects.'
       );
     }
     return true;

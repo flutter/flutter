@@ -444,7 +444,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Align(
-          alignment: FractionalOffset.topLeft,
+          alignment: Alignment.topLeft,
           child: new SizedBox(
             width: 300.0,
             height: 200.0,
