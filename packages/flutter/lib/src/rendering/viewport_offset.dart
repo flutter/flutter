@@ -143,10 +143,6 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// after [applyViewportDimension], if that method is called.
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent);
 
-  /// Updates the available semantics actions according to the the current
-  /// scroll position.
-  void updateSemanticActions();
-
   /// Apply a layout-time correction to the scroll offset.
   ///
   /// This method should change the [pixels] value by `correction`, but without
@@ -210,11 +206,6 @@ class _FixedViewportOffset extends ViewportOffset {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) => true;
-
-  @override
-  void updateSemanticActions() {
-    // Do nothing.
-  }
 
   @override
   void correctBy(double correction) {

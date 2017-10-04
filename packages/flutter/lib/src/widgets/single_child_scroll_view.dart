@@ -224,7 +224,6 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
 
   void _hasScrolled() {
     markNeedsPaint();
-    _offset.updateSemanticActions();
     markNeedsSemanticsUpdate();
   }
 

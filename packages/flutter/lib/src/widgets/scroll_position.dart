@@ -79,6 +79,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       absorb(oldPosition);
     if (keepScrollOffset)
       restoreScrollOffset();
+    addListener(_updateSemanticActions);
   }
 
   /// How the scroll position should respond to user input.
@@ -371,8 +372,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   Set<SemanticsAction> _semanticActions;
 
-  @override
-  void updateSemanticActions() {
+  void _updateSemanticActions() {
     SemanticsAction forward;
     SemanticsAction backward;
     switch (axis) {
@@ -410,7 +410,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _didChangeViewportDimension = false;
     }
-    updateSemanticActions();
     return true;
   }
 
@@ -438,6 +437,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void applyNewDimensions() {
     assert(pixels != null);
     activity.applyNewDimensions();
+    _updateSemanticActions();
   }
 
   /// Animates the position such that the given object is as visible as possible
