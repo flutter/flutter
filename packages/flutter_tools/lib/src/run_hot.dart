@@ -439,9 +439,8 @@ class HotRunner extends ResidentRunner {
   String _uriToRelativePath(Uri uri) {
     final String path = uri.toString();
     final String base = new Uri.file(projectRootPath).toString();
-    if (path.startsWith(base)) {
+    if (path.startsWith(base))
       return path.substring(base.length + 1);
-    }
     return path;
   }
 
