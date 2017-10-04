@@ -1095,9 +1095,8 @@ class Isolate extends ServiceObjectOwner {
         await invokeRpcRaw('_getUnusedChangesInLastReload');
     final List<Future<ProgramElement>> unusedElements =
         <Future<ProgramElement>>[];
-    for (Map<String, dynamic> element in response['unused']) {
+    for (Map<String, dynamic> element in response['unused'])
       unusedElements.add(_describeElement(element));
-    }
     return Future.wait(unusedElements);
   }
 
