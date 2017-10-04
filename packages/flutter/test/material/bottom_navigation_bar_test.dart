@@ -57,7 +57,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, 60.0);
+    expect(box.size.height, kBottomNavigationBarHeight);
     expect(find.text('AC'), findsOneWidget);
     expect(find.text('Alarm'), findsOneWidget);
   });
@@ -85,8 +85,8 @@ void main() {
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 158.4);
-    expect(actions.elementAt(1).size.width, 105.6);
+    expect(actions.elementAt(0).size.width, moreOrLessEquals(158.4));
+    expect(actions.elementAt(1).size.width, moreOrLessEquals(105.6));
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -113,8 +113,8 @@ void main() {
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 105.6);
-    expect(actions.elementAt(1).size.width, 158.4);
+    expect(actions.elementAt(0).size.width, moreOrLessEquals(105.6));
+    expect(actions.elementAt(1).size.width, moreOrLessEquals(158.4));
   });
 
   testWidgets('BottomNavigationBar multiple taps test', (WidgetTester tester) async {
@@ -287,5 +287,54 @@ void main() {
     expect(builderIconSize, 12.0);
   });
 
+
+  testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 2.0),
+          child: new Scaffold(
+            bottomNavigationBar: new BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                const BottomNavigationBarItem(
+                  title: const Text('A'),
+                  icon: const Icon(Icons.ac_unit),
+                ),
+                const BottomNavigationBarItem(
+                  title: const Text('B'),
+                  icon: const Icon(Icons.battery_alert),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box.size.height, equals(68.0));
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              const BottomNavigationBarItem(
+                title: const Text('A'),
+                icon: const Icon(Icons.ac_unit),
+              ),
+              const BottomNavigationBarItem(
+                title: const Text('B'),
+                icon: const Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox defaultBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(defaultBox.size.height, equals(kBottomNavigationBarHeight));
+  });
 
 }
