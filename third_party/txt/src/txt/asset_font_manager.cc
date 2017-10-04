@@ -67,31 +67,35 @@ SkTypeface* AssetFontManager::onMatchFaceStyle(const SkTypeface*,
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onCreateFromData(SkData*, int ttcIndex) const {
+sk_sp<SkTypeface> AssetFontManager::onMakeFromData(sk_sp<SkData>,
+                                                   int ttcIndex) const {
   FXL_DCHECK(false);
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onCreateFromStream(SkStreamAsset*,
-                                                 int ttcIndex) const {
+sk_sp<SkTypeface> AssetFontManager::onMakeFromStreamIndex(
+    std::unique_ptr<SkStreamAsset>,
+    int ttcIndex) const {
   FXL_DCHECK(false);
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onCreateFromStream(SkStreamAsset*,
-                                                 const SkFontArguments&) const {
+sk_sp<SkTypeface> AssetFontManager::onMakeFromStreamArgs(
+    std::unique_ptr<SkStreamAsset>,
+    const SkFontArguments&) const {
   FXL_DCHECK(false);
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onCreateFromFile(const char path[],
-                                               int ttcIndex) const {
+sk_sp<SkTypeface> AssetFontManager::onMakeFromFile(const char path[],
+                                                   int ttcIndex) const {
   FXL_DCHECK(false);
   return nullptr;
 }
 
-SkTypeface* AssetFontManager::onLegacyCreateTypeface(const char familyName[],
-                                                     SkFontStyle) const {
+sk_sp<SkTypeface> AssetFontManager::onLegacyMakeTypeface(
+    const char familyName[],
+    SkFontStyle) const {
   FXL_DCHECK(false);
   return nullptr;
 }

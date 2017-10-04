@@ -61,21 +61,23 @@ class AssetFontManager : public SkFontMgr {
                                const SkFontStyle&) const override;
 
   // |SkFontMgr|
-  SkTypeface* onCreateFromData(SkData*, int ttcIndex) const override;
+  sk_sp<SkTypeface> onMakeFromData(sk_sp<SkData>, int ttcIndex) const override;
 
   // |SkFontMgr|
-  SkTypeface* onCreateFromStream(SkStreamAsset*, int ttcIndex) const override;
+  sk_sp<SkTypeface> onMakeFromStreamIndex(std::unique_ptr<SkStreamAsset>,
+                                          int ttcIndex) const override;
 
   // |SkFontMgr|
-  SkTypeface* onCreateFromStream(SkStreamAsset*,
-                                 const SkFontArguments&) const override;
+  sk_sp<SkTypeface> onMakeFromStreamArgs(std::unique_ptr<SkStreamAsset>,
+                                         const SkFontArguments&) const override;
 
   // |SkFontMgr|
-  SkTypeface* onCreateFromFile(const char path[], int ttcIndex) const override;
+  sk_sp<SkTypeface> onMakeFromFile(const char path[],
+                                   int ttcIndex) const override;
 
   // |SkFontMgr|
-  SkTypeface* onLegacyCreateTypeface(const char familyName[],
-                                     SkFontStyle) const override;
+  sk_sp<SkTypeface> onLegacyMakeTypeface(const char familyName[],
+                                         SkFontStyle) const override;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(AssetFontManager);
 };
