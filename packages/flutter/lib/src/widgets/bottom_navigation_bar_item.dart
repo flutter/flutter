@@ -11,7 +11,7 @@ import 'framework.dart';
 /// An interactive button within either material's [BottomNavigationBar]
 /// or the iOS themed [CupertinoTabBar] with an icon and title.
 ///
-/// This calss is rarely used in isolation. Commonly embedded in one of the
+/// This class is rarely used in isolation. Commonly embedded in one of the
 /// bottom navigation widgets above.
 ///
 /// See also:
@@ -38,7 +38,10 @@ class BottomNavigationBarItem {
   /// [IconTheme] size and color.
   final Widget icon;
 
-  /// The title of the item.
+  /// The title of the item.  To conform with the Material Design specification, this
+  /// should be a [Text] or Text-like widget that respects the textScaleFactor on a
+  /// [MediaQuery]. Using title widgets that don't respect the textScaleFactor will result
+  /// in larger margins around the title when the textScaleFactor is larger than 1.0.
   final Widget title;
 
   /// The color of the background radial animation for material [BottomNavigationBar].

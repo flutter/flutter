@@ -277,7 +277,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     Widget bottomNavigation;
     _preferredHeight = math.max(
         kBottomNavigationBarHeight,
-        widget.iconSize + _bottomMargin + _topMargin + _fontSize * MediaQuery.of(context).textScaleFactor
+        widget.iconSize + _bottomMargin + _topMargin +
+            _fontSize * (MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0)
     );
 
     switch (widget.type) {
