@@ -1,4 +1,4 @@
-Signature: 65303da5f9417d807edf8cdd345f5596
+Signature: 166a4d00849da38c6ac848b0c0a1d9dc
 
 UNUSED LICENSES:
 
@@ -404,6 +404,13 @@ FILE: ../../../dart/runtime/vm/weak_table.cc
 FILE: ../../../dart/runtime/vm/weak_table.h
 FILE: ../../../dart/sdk/lib/_chrome/dart2js/chrome_dart2js.dart
 FILE: ../../../dart/sdk/lib/_chrome/dart2js/chrome_dart2js.dart
+FILE: ../../../dart/sdk/lib/_http/http.dart
+FILE: ../../../dart/sdk/lib/_http/http_headers.dart
+FILE: ../../../dart/sdk/lib/_http/http_impl.dart
+FILE: ../../../dart/sdk/lib/_http/http_parser.dart
+FILE: ../../../dart/sdk/lib/_http/http_session.dart
+FILE: ../../../dart/sdk/lib/_http/websocket.dart
+FILE: ../../../dart/sdk/lib/_http/websocket_impl.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/annotations.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/collection_patch.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/convert_patch.dart
@@ -455,11 +462,6 @@ FILE: ../../../dart/sdk/lib/io/data_transformer.dart
 FILE: ../../../dart/sdk/lib/io/file.dart
 FILE: ../../../dart/sdk/lib/io/file_impl.dart
 FILE: ../../../dart/sdk/lib/io/file_system_entity.dart
-FILE: ../../../dart/sdk/lib/io/http.dart
-FILE: ../../../dart/sdk/lib/io/http_headers.dart
-FILE: ../../../dart/sdk/lib/io/http_impl.dart
-FILE: ../../../dart/sdk/lib/io/http_parser.dart
-FILE: ../../../dart/sdk/lib/io/http_session.dart
 FILE: ../../../dart/sdk/lib/io/io_service.dart
 FILE: ../../../dart/sdk/lib/io/io_sink.dart
 FILE: ../../../dart/sdk/lib/io/link.dart
@@ -467,8 +469,6 @@ FILE: ../../../dart/sdk/lib/io/secure_socket.dart
 FILE: ../../../dart/sdk/lib/io/socket.dart
 FILE: ../../../dart/sdk/lib/io/stdio.dart
 FILE: ../../../dart/sdk/lib/io/string_transformer.dart
-FILE: ../../../dart/sdk/lib/io/websocket.dart
-FILE: ../../../dart/sdk/lib/io/websocket_impl.dart
 FILE: ../../../dart/sdk/lib/js/dart2js/js_dart2js.dart
 FILE: ../../../dart/sdk/lib/math/jenkins_smi_hash.dart
 FILE: ../../../dart/sdk/lib/math/point.dart
@@ -1096,6 +1096,8 @@ FILE: ../../../dart/samples/sample_extension/sample_synchronous_extension.dart
 FILE: ../../../dart/samples/sample_extension/test_sample_asynchronous_extension.dart
 FILE: ../../../dart/samples/sample_extension/test_sample_synchronous_extension.dart
 FILE: ../../../dart/samples/samples.status
+FILE: ../../../dart/sdk/lib/_http/crypto.dart
+FILE: ../../../dart/sdk/lib/_http/http_date.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/async_patch.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/constant_map.dart
 FILE: ../../../dart/sdk/lib/_internal/js_runtime/lib/core_patch.dart
@@ -1153,11 +1155,9 @@ FILE: ../../../dart/sdk/lib/html/html_common/metadata.dart
 FILE: ../../../dart/sdk/lib/indexed_db/dart2js/indexed_db_dart2js.dart
 FILE: ../../../dart/sdk/lib/internal/internal.dart
 FILE: ../../../dart/sdk/lib/io/common.dart
-FILE: ../../../dart/sdk/lib/io/crypto.dart
 FILE: ../../../dart/sdk/lib/io/directory.dart
 FILE: ../../../dart/sdk/lib/io/directory_impl.dart
 FILE: ../../../dart/sdk/lib/io/eventhandler.dart
-FILE: ../../../dart/sdk/lib/io/http_date.dart
 FILE: ../../../dart/sdk/lib/io/io.dart
 FILE: ../../../dart/sdk/lib/io/platform.dart
 FILE: ../../../dart/sdk/lib/io/platform_impl.dart
@@ -1964,7 +1964,6 @@ FILE: ../../../dart/third_party/observatory_pub_packages/packages/barback/exampl
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/barback/example/aggregate_transformer/lib/recipes-grammas/winter-squash-pie-recipe.html
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/barback/example/markdown_converter/lib/images/bison.jpg
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/barback/example/markdown_converter/lib/index.markdown
-FILE: ../../../dart/third_party/observatory_pub_packages/packages/csslib/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/csslib/.test_config
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/csslib/example/call_parser.dart
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/csslib/example/call_parser.html
@@ -3106,13 +3105,10 @@ FILE: ../../../dart/third_party/observatory_pub_packages/packages/dart_style/.te
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/dart_style/dist/dart-style.d.ts
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/dart_style/web/index.html
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/dart_style/web/main.dart
-FILE: ../../../dart/third_party/observatory_pub_packages/packages/glob/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/glob/.test_config
-FILE: ../../../dart/third_party/observatory_pub_packages/packages/matcher/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/matcher/.test_config
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/path/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/path/.test_config
-FILE: ../../../dart/third_party/observatory_pub_packages/packages/pool/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/pool/.test_config
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/source_maps/.analysis_options
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/source_maps/.test_config
@@ -3448,7 +3444,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 LIBRARY: observatory_pub_packages
 ORIGIN: ../../../dart/third_party/observatory_pub_packages/packages/meta/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../dart/third_party/observatory_pub_packages/packages/meta/.packages
 FILE: ../../../dart/third_party/observatory_pub_packages/packages/observable/.analysis_options
 ----------------------------------------------------------------------------------------------------
 Copyright 2016, the Dart project authors. All rights reserved.
