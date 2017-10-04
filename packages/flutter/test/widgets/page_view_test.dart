@@ -209,10 +209,8 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
   });
 
-  testWidgets('PageController nextPage and previousPage return Futures', (WidgetTester tester) async {
+  testWidgets('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
     final PageController controller = new PageController();
-    final Future<Null> nullFuture = new Future<Null>.value(null);
-
     await tester.pumpWidget(new Directionality(
         textDirection: TextDirection.ltr,
         child: new PageView(
@@ -221,11 +219,26 @@ void main() {
         ),
     ));
 
-    final Future<Null> nextPage = controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    expect(nextPage.runtimeType, nullFuture.runtimeType);
+    bool nextPageCalled = false;
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+        .then((_) => nextPageCalled = true);
 
-    final Future<Null> previousPage = controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
-    expect(previousPage.runtimeType, nullFuture.runtimeType);
+    expect(nextPageCalled, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(nextPageCalled, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(nextPageCalled, true);
+
+
+    bool previousPageCalled = false;
+    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+        .then((_) => previousPageCalled = true);
+
+    expect(previousPageCalled, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(previousPageCalled, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(previousPageCalled, true);
   });
 
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
