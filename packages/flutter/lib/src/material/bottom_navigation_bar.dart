@@ -327,7 +327,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                       child: new Container(
                         margin: const EdgeInsets.only(bottom: _bottomMargin),
                         child: DefaultTextStyle.merge(
-                          overflow: TextOverflow.ellipsis,
                           style: new TextStyle(
                             fontSize: widget.currentIndex == i ? _fontSize : _inactiveFontSize,
                             color: colorTween.evaluate(_animations[i]),
@@ -399,7 +398,6 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                         child: new FadeTransition(
                           opacity: _animations[i],
                           child: DefaultTextStyle.merge(
-                            overflow: TextOverflow.ellipsis,
                             style: new TextStyle(
                               fontSize: widget.currentIndex == i ? _fontSize : _inactiveFontSize,
                               color: Colors.white,
@@ -415,13 +413,10 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
             ),
           );
         }
-        bottomNavigation = DefaultTextStyle.merge(
-          overflow: TextOverflow.ellipsis,
-          child: new SizedBox(
-            width: _maxWidth,
-            child: new Row(
-              children: children
-            ),
+        bottomNavigation = new SizedBox(
+          width: _maxWidth,
+          child: new Row(
+            children: children
           ),
         );
         break;
