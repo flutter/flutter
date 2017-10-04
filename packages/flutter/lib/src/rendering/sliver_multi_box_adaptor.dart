@@ -290,7 +290,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     switch (constraints.normalizedGrowthDirection) {
       case GrowthDirection.forward:
         super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the leading edge.
+          // The sliver is overlapped at the leading edge; check if trailing edge is visible.
           final Offset bottomRightInViewport = MatrixUtils.transformPoint(
               child.getTransformTo(parent), child.semanticBounds.bottomRight
           );
@@ -302,7 +302,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         break;
       case GrowthDirection.reverse:
         super.visitChildrenForSemantics((RenderObject child) {
-          // The sliver is overlapped at the trailing edge.
+          // The sliver is overlapped at the trailing edge; check if leading edge is visible.
           final Offset topLeftInViewport = MatrixUtils.transformPoint(
               child.getTransformTo(parent), child.semanticBounds.topLeft
           );
