@@ -139,6 +139,26 @@ class FlutterDevice {
     return reports;
   }
 
+  // Lists program elements changed in the most recent reload that have not
+  // since executed.
+  Future<List<ProgramElement>> unusedChangesInLastReload() async {
+    final List<Future<List<ProgramElement>>> reports =
+        <Future<List<ProgramElement>>>[];
+    for (FlutterView view in views) {
+      reports.add(view.uiIsolate.getUnusedChangesInLastReload());
+    }
+    final List<ProgramElement> elements = <ProgramElement>[];
+    for (Future<List<ProgramElement>> report in reports) {
+      for (ProgramElement element in await report) {
+        elements.add(new ProgramElement(element.qualifiedName,
+                                        devFS.deviceUriToHostUri(element.uri),
+                                        element.line,
+                                        element.column));
+      }
+    }
+    return elements;
+  }
+
   Future<Null> debugDumpApp() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpApp();
@@ -805,14 +825,15 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  static final OperationResult ok = new OperationResult(0, '');
-
-  OperationResult(this.code, this.message);
+  OperationResult(this.code, this.message, [this.hint]);
 
   final int code;
   final String message;
+  final String hint;
 
   bool get isOk => code == 0;
+
+  static final OperationResult ok = new OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file
