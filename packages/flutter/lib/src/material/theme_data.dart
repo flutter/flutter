@@ -456,7 +456,7 @@ class ThemeData {
   // The number 5 was chosen without any real science or research behind it. It
   // just seemed like a number that's not too big (we should be able to fit 5
   // copies of ThemeData in memory comfortably) and not too small (most apps
-  // shouldn't have more than 5 themes).
+  // shouldn't have more than 5 theme/localization pairs).
   static const int _localizedThemeDataCacheSize = 5;
 
   /// Caches localized themes to speed up the [localize] method.
@@ -474,7 +474,6 @@ class ThemeData {
     // the computations are referentially transparent. It only short-circuits
     // the computation if the new inputs are identical() to the previous ones.
     // It does not use the == operator, which performs a costly deep comparison.
-    // This memoization saves us ~4% on the stock_build_iteration benchmark.
     //
     // When changing this method, make sure the memoization logic is correct.
     // Remember:
@@ -652,11 +651,15 @@ class _IdentityThemeDataCacheKey {
   final ThemeData baseTheme;
   final TextTheme localTextGeometry;
 
+  // Using XOR to make the hash function as fast as possible (e.g. Jenkins is
+  // noticeably slower).
   @override
   int get hashCode => identityHashCode(baseTheme) ^ identityHashCode(localTextGeometry);
 
   @override
   bool operator ==(Object other) {
+    // We are explicitly ignoring the possibility that the types might not
+    // match in the interests of speed.
     final _IdentityThemeDataCacheKey otherKey = other;
     return identical(baseTheme, otherKey.baseTheme) && identical(localTextGeometry, otherKey.localTextGeometry);
   }
