@@ -32,7 +32,6 @@ export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 export 'src/rendering/animated_size.dart';
 export 'src/rendering/binding.dart';
-export 'src/rendering/block.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/custom_layout.dart';
 export 'src/rendering/debug.dart';
@@ -42,6 +41,7 @@ export 'src/rendering/flex.dart';
 export 'src/rendering/flow.dart';
 export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
+export 'src/rendering/list_body.dart';
 export 'src/rendering/node.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';

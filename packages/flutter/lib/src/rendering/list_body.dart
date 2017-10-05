@@ -31,8 +31,9 @@ class RenderListBody extends RenderBox
   /// By default, children are arranged along the vertical axis.
   RenderListBody({
     List<RenderBox> children,
-    Axis mainAxis: Axis.vertical,
-  }) : _mainAxis = mainAxis {
+    AxisDirection axisDirection: AxisDirection.down,
+  }) : assert(axisDirection != null),
+       _axisDirection = axisDirection {
     addAll(children);
   }
 
@@ -42,41 +43,17 @@ class RenderListBody extends RenderBox
       child.parentData = new ListBodyParentData();
   }
 
-  /// The direction to use as the main axis.
-  Axis get mainAxis => _mainAxis;
-  Axis _mainAxis;
-  set mainAxis(Axis value) {
-    if (_mainAxis != value) {
-      _mainAxis = value;
-      markNeedsLayout();
-    }
+  AxisDirection get axisDirection => _axisDirection;
+  AxisDirection _axisDirection;
+  set axisDirection(AxisDirection value) {
+    assert(value != null);
+    if (_axisDirection == value)
+      return;
+    _axisDirection = value;
+    markNeedsLayout();
   }
 
-  BoxConstraints _getInnerConstraints(BoxConstraints constraints) {
-    assert(_mainAxis != null);
-    switch (_mainAxis) {
-      case Axis.horizontal:
-        return new BoxConstraints.tightFor(height: constraints.maxHeight);
-      case Axis.vertical:
-        return new BoxConstraints.tightFor(width: constraints.maxWidth);
-    }
-    return null;
-  }
-
-  double get _mainAxisExtent {
-    final RenderBox child = lastChild;
-    if (child == null)
-      return 0.0;
-    final BoxParentData parentData = child.parentData;
-    assert(mainAxis != null);
-    switch (mainAxis) {
-      case Axis.horizontal:
-        return parentData.offset.dx + child.size.width;
-      case Axis.vertical:
-        return parentData.offset.dy + child.size.height;
-    }
-    return null;
-  }
+  Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override
   void performLayout() {
@@ -124,41 +101,81 @@ class RenderListBody extends RenderBox
         'This is relatively expensive, however.' // (that's why we don't do it automatically)
       );
     }());
-    final BoxConstraints innerConstraints = _getInnerConstraints(constraints);
-    double position = 0.0;
+    double mainAxisExtent = 0.0;
     RenderBox child = firstChild;
-    while (child != null) {
-      child.layout(innerConstraints, parentUsesSize: true);
-      final ListBodyParentData childParentData = child.parentData;
-      switch (mainAxis) {
-        case Axis.horizontal:
-          childParentData.offset = new Offset(position, 0.0);
-          position += child.size.width;
-          break;
-        case Axis.vertical:
-          childParentData.offset = new Offset(0.0, position);
-          position += child.size.height;
-          break;
+    switch (axisDirection) {
+    case AxisDirection.right:
+      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(height: constraints.maxHeight);
+      while (child != null) {
+        child.layout(innerConstraints, parentUsesSize: true);
+        final ListBodyParentData childParentData = child.parentData;
+        childParentData.offset = new Offset(mainAxisExtent, 0.0);
+        mainAxisExtent += child.size.width;
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
       }
-      assert(child.parentData == childParentData);
-      child = childParentData.nextSibling;
+      size = constraints.constrain(new Size(mainAxisExtent, constraints.maxHeight));
+      break;
+    case AxisDirection.left:
+      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(height: constraints.maxHeight);
+      while (child != null) {
+        child.layout(innerConstraints, parentUsesSize: true);
+        final ListBodyParentData childParentData = child.parentData;
+        mainAxisExtent += child.size.width;
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
+      }
+      double position = 0.0;
+      child = firstChild;
+      while (child != null) {
+        final ListBodyParentData childParentData = child.parentData;
+        position += child.size.width;
+        childParentData.offset = new Offset(mainAxisExtent - position, 0.0);
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
+      }
+      size = constraints.constrain(new Size(mainAxisExtent, constraints.maxHeight));
+      break;
+    case AxisDirection.down:
+      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.maxWidth);
+      while (child != null) {
+        child.layout(innerConstraints, parentUsesSize: true);
+        final ListBodyParentData childParentData = child.parentData;
+        childParentData.offset = new Offset(0.0, mainAxisExtent);
+          mainAxisExtent += child.size.height;
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
+      }
+      size = constraints.constrain(new Size(constraints.maxWidth, mainAxisExtent));
+      break;
+    case AxisDirection.up:
+      final BoxConstraints innerConstraints = new BoxConstraints.tightFor(width: constraints.maxWidth);
+      while (child != null) {
+        child.layout(innerConstraints, parentUsesSize: true);
+        final ListBodyParentData childParentData = child.parentData;
+        mainAxisExtent += child.size.height;
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
+      }
+      double position = 0.0;
+      child = firstChild;
+      while (child != null) {
+        final ListBodyParentData childParentData = child.parentData;
+        position += child.size.height;
+        childParentData.offset = new Offset(0.0, mainAxisExtent - position);
+        assert(child.parentData == childParentData);
+        child = childParentData.nextSibling;
+      }
+      size = constraints.constrain(new Size(constraints.maxWidth, mainAxisExtent));
+      break;
     }
-    switch (mainAxis) {
-      case Axis.horizontal:
-        size = constraints.constrain(new Size(_mainAxisExtent, constraints.maxHeight));
-        break;
-      case Axis.vertical:
-        size = constraints.constrain(new Size(constraints.maxWidth, _mainAxisExtent));
-        break;
-    }
-
     assert(size.isFinite);
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<Axis>('mainAxis', mainAxis));
+    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
   }
 
   double _getIntrinsicCrossAxis(_ChildSizingFunction childSize) {

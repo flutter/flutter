@@ -285,6 +285,10 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
+  /// Returns a variant of this finder that only matches the element at the
+  /// given index matched by this finder.
+  Finder at(int index) => new _IndexFinder(this, index);
+
   /// Returns a variant of this finder that only matches elements reachable by
   /// a hit test.
   ///
@@ -332,6 +336,22 @@ class _LastFinder extends Finder {
   @override
   Iterable<Element> apply(Iterable<Element> candidates) sync* {
     yield parent.apply(candidates).last;
+  }
+}
+
+class _IndexFinder extends Finder {
+  _IndexFinder(this.parent, this.index);
+
+  final Finder parent;
+
+  final int index;
+
+  @override
+  String get description => '${parent.description} (ignoring all but index $index)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    yield parent.apply(candidates).elementAt(index);
   }
 }
 
