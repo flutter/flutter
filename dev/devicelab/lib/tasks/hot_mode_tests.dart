@@ -28,6 +28,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     });
     return new TaskResult.successFromFile(benchmarkFile,
         benchmarkScoreKeys: <String>[
+          'hotReloadInitialDevFSSyncMilliseconds',
           'hotReloadMillisecondsToFrame',
           'hotRestartMillisecondsToFrame',
           'hotReloadDevFSSyncMilliseconds',

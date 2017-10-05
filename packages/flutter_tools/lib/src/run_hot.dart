@@ -128,7 +128,18 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
+    Stopwatch initialUpdateDevFSsTimer;
+    if (benchmarkMode) {
+      initialUpdateDevFSsTimer = new Stopwatch();
+      initialUpdateDevFSsTimer.start();
+
+    }
     final bool devfsResult = await _updateDevFS();
+    if (benchmarkMode) {
+      initialUpdateDevFSsTimer.stop();
+      benchmarkData['hotReloadInitialDevFSSyncMilliseconds'] =
+          initialUpdateDevFSsTimer.elapsed.inMilliseconds;
+    }
     if (!devfsResult) {
       return 3;
     }
