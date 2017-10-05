@@ -53,10 +53,31 @@ void main() {
       )
     );
 
-    final dynamic localizedTheme = Theme.of(capturedContext);
-    expect('${localizedTheme.runtimeType}', '_LocalizedThemeData');
-    expect(localizedTheme.delegate, equals(new ThemeData.fallback()));
+    expect(Theme.of(capturedContext), equals(ThemeData.localize(new ThemeData.fallback(), MaterialTextGeometry.englishLike)));
     expect(Theme.of(capturedContext, shadowThemeOnly: true), isNull);
+  });
+
+  testWidgets('ThemeData.localize memoizes the result', (WidgetTester tester) async {
+    final ThemeData light = new ThemeData.light();
+    final ThemeData dark = new ThemeData.dark();
+
+    // Same input, same output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      same(ThemeData.localize(light, MaterialTextGeometry.englishLike)),
+    );
+
+    // Different text geometry, different output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(light, MaterialTextGeometry.tall))),
+    );
+
+    // Different base theme, different output.
+    expect(
+      ThemeData.localize(light, MaterialTextGeometry.englishLike),
+      isNot(same(ThemeData.localize(dark, MaterialTextGeometry.englishLike))),
+    );
   });
 
   testWidgets('PopupMenu inherits shadowed app theme', (WidgetTester tester) async {
@@ -315,6 +336,37 @@ void main() {
       expect(testBuildCalled, 2);
     },
   );
+
+  testWidgets('Text geometry set in Theme has higher precedence than that of Localizations', (WidgetTester tester) async {
+    const double _kMagicFontSize = 4321.0;
+    final ThemeData fallback = new ThemeData.fallback();
+    final ThemeData customTheme = fallback.copyWith(
+      primaryTextTheme: fallback.primaryTextTheme.copyWith(
+        body1: fallback.primaryTextTheme.body1.copyWith(
+          fontSize: _kMagicFontSize,
+        )
+      ),
+    );
+    expect(customTheme.primaryTextTheme.body1.fontSize, _kMagicFontSize);
+
+    double actualFontSize;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Theme(
+        data: customTheme,
+        child: new Builder(builder: (BuildContext context) {
+          final ThemeData theme = Theme.of(context);
+          actualFontSize = theme.primaryTextTheme.body1.fontSize;
+          return new Text(
+            'A',
+            style: theme.primaryTextTheme.body1,
+          );
+        }),
+      ),
+    ));
+
+    expect(actualFontSize, _kMagicFontSize);
+  });
 }
 
 int testBuildCalled;

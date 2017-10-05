@@ -3911,9 +3911,9 @@ class InheritedElement extends ProxyElement {
     assert(_active);
     final Map<Type, InheritedElement> incomingWidgets = _parent?._inheritedWidgets;
     if (incomingWidgets != null)
-      _inheritedWidgets = new Map<Type, InheritedElement>.from(incomingWidgets);
+      _inheritedWidgets = new HashMap<Type, InheritedElement>.from(incomingWidgets);
     else
-      _inheritedWidgets = <Type, InheritedElement>{};
+      _inheritedWidgets = new HashMap<Type, InheritedElement>();
     _inheritedWidgets[widget.runtimeType] = this;
   }
 
