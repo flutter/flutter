@@ -339,16 +339,6 @@ class DevFS {
   Uri _baseUri;
   Uri get baseUri => _baseUri;
 
-  Uri deviceUriToHostUri(Uri deviceUri) {
-    final String deviceUriString = deviceUri.toString();
-    final String baseUriString = baseUri.toString();
-    if (deviceUriString.startsWith(baseUriString)) {
-      final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
-      return rootDirectory.uri.resolve(deviceUriSuffix);
-    }
-    return deviceUri;
-  }
-
   Future<Uri> create() async {
     printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
