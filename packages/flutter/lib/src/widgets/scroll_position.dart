@@ -79,7 +79,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       absorb(oldPosition);
     if (keepScrollOffset)
       restoreScrollOffset();
-    addListener(_updateSemanticActions);
   }
 
   /// How the scroll position should respond to user input.
@@ -612,6 +611,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    _updateSemanticActions();
+    super.notifyListeners();
   }
 
   @override
