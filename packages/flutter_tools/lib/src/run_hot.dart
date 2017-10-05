@@ -132,7 +132,6 @@ class HotRunner extends ResidentRunner {
     if (benchmarkMode) {
       initialUpdateDevFSsTimer = new Stopwatch();
       initialUpdateDevFSsTimer.start();
-
     }
     final bool devfsResult = await _updateDevFS();
     if (benchmarkMode) {
