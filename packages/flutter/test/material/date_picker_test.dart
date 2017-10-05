@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart' hide TextDirection;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -241,7 +240,10 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('2017'));
       await tester.pump();
-      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2017, DateTime.JANUARY, 15));
+      final MaterialLocalizations localizations = MaterialLocalizations.of(
+        tester.element(find.byType(DayPicker))
+      );
+      final String dayLabel = localizations.formatMediumDate(new DateTime(2017, DateTime.JANUARY, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));
@@ -488,6 +490,133 @@ void main() {
         });
       });
     }
+  });
+
+  testWidgets('locale parameter overrides ambient locale', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      locale: const Locale('en', 'US'),
+      supportedLocales: const <Locale>[
+        const Locale('en', 'US'),
+        const Locale('fr', 'CA'),
+      ],
+      home: new Material(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new FlatButton(
+              onPressed: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                  locale: const Locale('fr', 'CA'),
+                );
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final Element dayPicker = tester.element(find.byType(DayPicker));
+    expect(
+      Localizations.localeOf(dayPicker),
+      const Locale('fr', 'CA'),
+    );
+
+    expect(
+      Directionality.of(dayPicker),
+      TextDirection.ltr,
+    );
+
+    await tester.tap(find.text('ANNULER'));
+  });
+
+  testWidgets('textDirection parameter overrides ambient textDirection', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      locale: const Locale('en', 'US'),
+      supportedLocales: const <Locale>[
+        const Locale('en', 'US'),
+      ],
+      home: new Material(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new FlatButton(
+              onPressed: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                  textDirection: TextDirection.rtl,
+                );
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final Element dayPicker = tester.element(find.byType(DayPicker));
+    expect(
+      Directionality.of(dayPicker),
+      TextDirection.rtl,
+    );
+
+    await tester.tap(find.text('CANCEL'));
+  });
+
+  testWidgets('textDirection parameter takes precendence over locale parameter', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      locale: const Locale('en', 'US'),
+      supportedLocales: const <Locale>[
+        const Locale('en', 'US'),
+        const Locale('fr', 'CA'),
+      ],
+      home: new Material(
+        child: new Builder(
+          builder: (BuildContext context) {
+            return new FlatButton(
+              onPressed: () async {
+                await showDatePicker(
+                  context: context,
+                  initialDate: initialDate,
+                  firstDate: firstDate,
+                  lastDate: lastDate,
+                  locale: const Locale('fr', 'CA'),
+                  textDirection: TextDirection.rtl,
+                );
+              },
+              child: const Text('X'),
+            );
+          },
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
+
+    final Element dayPicker = tester.element(find.byType(DayPicker));
+    expect(
+      Localizations.localeOf(dayPicker),
+      const Locale('fr', 'CA'),
+    );
+
+    expect(
+      Directionality.of(dayPicker),
+      TextDirection.rtl,
+    );
+
+    await tester.tap(find.text('ANNULER'));
   });
 }
 

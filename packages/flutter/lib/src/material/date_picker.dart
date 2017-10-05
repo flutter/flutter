@@ -358,7 +358,7 @@ class DayPicker extends StatelessWidget {
     final int weekDayFromMonday = new DateTime(year, month).weekday - 1;
     // 0-based day of week, with 0 representing Sunday.
     final int firstDayOfWeekFromSunday = localizations.firstDayOfWeekIndex;
-    // firstDayOfWeekFromSunday recomputed to be Sunday-based
+    // firstDayOfWeekFromSunday recomputed to be Monday-based
     final int firstDayOfWeekFromMonday = (firstDayOfWeekFromSunday - 1) % 7;
     // Number of days between the first day of week appearing on the calendar,
     // and the day corresponding to the 1-st of the month.
@@ -954,7 +954,8 @@ typedef bool SelectableDayPredicate(DateTime day);
 ///
 /// An optional [textDirection] argument can be used to set the text direction
 /// (RTL or LTR) for the date picker. It defaults to the ambient text direction
-/// provided by [Directionality].
+/// provided by [Directionality]. If both [locale] and [textDirection] are not
+/// null, [textDirection] overrides the direction chosen for the [locale].
 ///
 /// See also:
 ///
@@ -987,6 +988,13 @@ Future<DateTime> showDatePicker({
     initialDatePickerMode: initialDatePickerMode,
   );
 
+  if (textDirection != null) {
+    child = new Directionality(
+      textDirection: textDirection,
+      child: child,
+    );
+  }
+
   if (locale != null) {
     child = new Localizations.override(
       context: context,
@@ -995,21 +1003,8 @@ Future<DateTime> showDatePicker({
     );
   }
 
-  if (textDirection != null) {
-    child = new Directionality(
-      textDirection: textDirection,
-      child: child,
-    );
-  }
-
   return await showDialog<DateTime>(
     context: context,
-    child: new _DatePickerDialog(
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      selectableDayPredicate: selectableDayPredicate,
-      initialDatePickerMode: initialDatePickerMode,
-    )
+    child: child,
   );
 }
