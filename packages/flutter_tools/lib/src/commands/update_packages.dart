@@ -371,7 +371,6 @@ class PubspecYaml {
             // dependency lines.
             if (!data.isTransitive) {
               assert(!done.contains(data.name));
-              assert(versions.contains(data.name));
               if (data.kind == DependencyKind.normal) {
                 // This is a regular dependency, so we need to update the
                 // version number.
@@ -379,6 +378,7 @@ class PubspecYaml {
                 // We output data that matches the format that
                 // PubspecDependency.parse can handle. The data.suffix is any
                 // previously-specified trailing comment.
+                assert(versions.contains(data.name));
                 output.add('  ${data.name}: ${versions.versionFor(data.name)}${data.suffix}');
               } else {
                 // If it wasn't a regular dependency, then we output the line
@@ -677,7 +677,8 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   for (PubspecDependency dependency in dependencies)
-    dependency.describeForFakePubspec(result, overrides);
+    if (dependency.kind != DependencyKind.sdk)
+      dependency.describeForFakePubspec(result, overrides);
   result.write(overrides.toString());
   return result.toString();
 }
@@ -756,6 +757,11 @@ class PubDependencyTree {
   /// excluding any listen in `seen`.
   Iterable<String> getTransitiveDependenciesFor(String package, { Set<String> seen }) sync* {
     seen ??= new Set<String>();
+    if (!_dependencyTree.containsKey(package)) {
+      // We have no transitive dependencies extracted for flutter_sdk packages
+      // because they were omitted from pubspec.yaml used for 'pub upgrade' run.
+      return;
+    }
     for (String dependency in _dependencyTree[package]) {
       if (!seen.contains(dependency)) {
         yield dependency;
