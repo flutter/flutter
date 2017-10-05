@@ -9,7 +9,7 @@ assert(is_fuchsia)
 flutter_app("flutter_gallery") {
   main_dart = "lib/main.dart"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
     "//lib/flutter/packages/flutter",

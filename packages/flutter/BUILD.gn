@@ -7,7 +7,7 @@ import("//build/dart/dart_package.gni")
 dart_package("flutter") {
   package_name = "flutter"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
     "//third_party/dart-pkg/pub/async",
