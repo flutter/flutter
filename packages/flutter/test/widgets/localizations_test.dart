@@ -103,17 +103,6 @@ class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizat
   bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
 }
 
-// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
-class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const DefaultWidgetsLocalizationsDelegate();
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
-}
-
 class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
   OnlyRTLDefaultWidgetsLocalizations(Locale locale) : super(locale);
 
@@ -349,7 +338,7 @@ void main() {
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
                   new SyncTestLocalizationsDelegate(),
-                  const DefaultWidgetsLocalizationsDelegate(),
+                  DefaultWidgetsLocalizations.delegate,
                 ],
                 // Create a new context within the en_GB Localization
                 child: new Builder(

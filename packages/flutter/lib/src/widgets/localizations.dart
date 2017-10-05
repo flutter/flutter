@@ -161,6 +161,17 @@ abstract class WidgetsLocalizations {
   }
 }
 
+// Delegate that fetches the default (English) strings.
+class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _WidgetsLocalizationsDelegate();
+
+  @override
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+}
+
 /// Localized values for widgets.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
@@ -199,6 +210,12 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   static Future<WidgetsLocalizations> load(Locale locale) {
     return new SynchronousFuture<WidgetsLocalizations>(new DefaultWidgetsLocalizations(locale));
   }
+
+  /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
+  /// to create an instance of this class.
+  ///
+  /// Automatically added to [WidgetApp.localizationsDelegates].
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {

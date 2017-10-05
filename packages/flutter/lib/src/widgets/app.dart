@@ -44,17 +44,6 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// This function must not return null.
 typedef String GenerateAppTitle(BuildContext context);
 
-// Delegate that fetches the default (English) strings.
-class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const _WidgetsLocalizationsDelegate();
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
-}
-
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -423,11 +412,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
-  // _WidgetsLocalizationsDelegate.
+  // WidgetsLocalizations.delegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
-    yield const _WidgetsLocalizationsDelegate();
+    yield DefaultWidgetsLocalizations.delegate;
   }
 
   @override

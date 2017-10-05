@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
+// dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -452,4 +452,3 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "postMeridiemAbbreviation": r"下午",
   },
 };
-

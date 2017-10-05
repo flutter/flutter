@@ -1,4 +1,4 @@
-# Material Library Internationalization
+# Material Library Localizations
 
 The `.arb` files in this directory contain localized values (primarily
 strings) used by the material library.  The `localizations.dart` file
@@ -6,7 +6,7 @@ combines all of the localizations into a single Dart Map that is
 linked with the rest of the material library.
 
 If you're looking for information about internationalizing Flutter
-apps in general, see th
+apps in general, see the
 [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/) tutorial.
 
 
@@ -130,7 +130,7 @@ see that it was manually generated using a `dev/tools` app called
 `gen_localizations` roughly like this:
 
 ```dart
-dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
+dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
