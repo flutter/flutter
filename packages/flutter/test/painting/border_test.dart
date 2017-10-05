@@ -6,6 +6,14 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('Border constructor', () {
+    final Null $null = null;
+    expect(() => new Border(left: $null), throwsAssertionError);
+    expect(() => new Border(top: $null), throwsAssertionError);
+    expect(() => new Border(right: $null), throwsAssertionError);
+    expect(() => new Border(bottom: $null), throwsAssertionError);
+  });
+
   test('Border.merge', () {
     final BorderSide magenta3 = const BorderSide(color: const Color(0xFFFF00FF), width: 3.0);
     final BorderSide magenta6 = const BorderSide(color: const Color(0xFFFF00FF), width: 6.0);
@@ -93,5 +101,136 @@ void main() {
     expect(bY0.scale(3.0), bY0);
     final Border bY2 = new Border(top: yellow2);
     expect(bY2.scale(0.0), bY0);
+  });
+
+  test('Border.dimensions', () {
+    expect(
+      const Border(
+        left: const BorderSide(width: 2.0),
+        top: const BorderSide(width: 3.0),
+        bottom: const BorderSide(width: 5.0),
+        right: const BorderSide(width: 7.0),
+      ).dimensions,
+      const EdgeInsets.fromLTRB(2.0, 3.0, 7.0, 5.0),
+    );
+  });
+
+  test('Border.isUniform', () {
+    expect(
+      const Border(
+        left: const BorderSide(width: 3.0),
+        top: const BorderSide(width: 3.0),
+        right: const BorderSide(width: 3.0),
+        bottom: const BorderSide(width: 3.1),
+      ).isUniform,
+      false,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(width: 3.0),
+        top: const BorderSide(width: 3.0),
+        right: const BorderSide(width: 3.0),
+        bottom: const BorderSide(width: 3.0),
+      ).isUniform,
+      true,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(color: const Color(0xFFFFFFFE)),
+        top: const BorderSide(color: const Color(0xFFFFFFFF)),
+        right: const BorderSide(color: const Color(0xFFFFFFFF)),
+        bottom: const BorderSide(color: const Color(0xFFFFFFFF)),
+      ).isUniform,
+      false,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(color: const Color(0xFFFFFFFF)),
+        top: const BorderSide(color: const Color(0xFFFFFFFF)),
+        right: const BorderSide(color: const Color(0xFFFFFFFF)),
+        bottom: const BorderSide(color: const Color(0xFFFFFFFF)),
+      ).isUniform,
+      true,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(style: BorderStyle.none),
+        top: const BorderSide(style: BorderStyle.none),
+        right: const BorderSide(style: BorderStyle.none),
+        bottom: const BorderSide(style: BorderStyle.solid, width: 0.0),
+      ).isUniform,
+      false,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(style: BorderStyle.none),
+        top: const BorderSide(style: BorderStyle.none),
+        right: const BorderSide(style: BorderStyle.none),
+        bottom: const BorderSide(style: BorderStyle.solid, width: 0.0),
+      ).isUniform,
+      false,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(style: BorderStyle.none),
+        top: const BorderSide(style: BorderStyle.none),
+        right: const BorderSide(style: BorderStyle.none),
+        bottom: BorderSide.none,
+      ).isUniform,
+      false,
+    );
+    expect(
+      const Border(
+        left: const BorderSide(style: BorderStyle.none, width: 0.0),
+        top: const BorderSide(style: BorderStyle.none, width: 0.0),
+        right: const BorderSide(style: BorderStyle.none, width: 0.0),
+        bottom: BorderSide.none,
+      ).isUniform,
+      true,
+    );
+    expect(
+      const Border().isUniform,
+      true,
+    );
+  });
+
+  test('Border.lerp', () {
+    final Border visualWithTop10 = const Border(top: const BorderSide(width: 10.0));
+    final Border atMinus100 = const Border(left: const BorderSide(width: 0.0), right: const BorderSide(width: 300.0));
+    final Border at0 = const Border(left: const BorderSide(width: 100.0), right: const BorderSide(width: 200.0));
+    final Border at25 = const Border(left: const BorderSide(width: 125.0), right: const BorderSide(width: 175.0));
+    final Border at75 = const Border(left: const BorderSide(width: 175.0), right: const BorderSide(width: 125.0));
+    final Border at100 = const Border(left: const BorderSide(width: 200.0), right: const BorderSide(width: 100.0));
+    final Border at200 = const Border(left: const BorderSide(width: 300.0), right: const BorderSide(width: 0.0));
+
+    expect(Border.lerp(null, null, -1.0), null);
+    expect(Border.lerp(visualWithTop10, null, -1.0), const Border(top: const BorderSide(width: 20.0)));
+    expect(Border.lerp(null, visualWithTop10, -1.0), const Border());
+    expect(Border.lerp(at0, at100, -1.0), atMinus100);
+
+    expect(Border.lerp(null, null, 0.0), null);
+    expect(Border.lerp(visualWithTop10, null, 0.0), const Border(top: const BorderSide(width: 10.0)));
+    expect(Border.lerp(null, visualWithTop10, 0.0), const Border());
+    expect(Border.lerp(at0, at100, 0.0), at0);
+
+    expect(Border.lerp(null, null, 0.25), null);
+    expect(Border.lerp(visualWithTop10, null, 0.25), const Border(top: const BorderSide(width: 7.5)));
+    expect(Border.lerp(null, visualWithTop10, 0.25), const Border(top: const BorderSide(width: 2.5)));
+    expect(Border.lerp(at0, at100, 0.25), at25);
+
+    expect(Border.lerp(null, null, 0.75), null);
+    expect(Border.lerp(visualWithTop10, null, 0.75), const Border(top: const BorderSide(width: 2.5)));
+    expect(Border.lerp(null, visualWithTop10, 0.75), const Border(top: const BorderSide(width: 7.5)));
+    expect(Border.lerp(at0, at100, 0.75), at75);
+
+    expect(Border.lerp(null, null, 1.0), null);
+    expect(Border.lerp(visualWithTop10, null, 1.0), const Border());
+    expect(Border.lerp(null, visualWithTop10, 1.0), const Border(top: const BorderSide(width: 10.0)));
+    expect(Border.lerp(at0, at100, 1.0), at100);
+
+    expect(Border.lerp(null, null, 2.0), null);
+    expect(Border.lerp(visualWithTop10, null, 2.0), const Border());
+    expect(Border.lerp(null, visualWithTop10, 2.0), const Border(top: const BorderSide(width: 20.0)));
+    expect(Border.lerp(at0, at100, 2.0), at200);
   });
 }

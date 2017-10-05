@@ -110,7 +110,14 @@ class BoxDecoration extends Decoration {
   /// A border to draw above the background [color], [gradient], or [image].
   ///
   /// Follows the [shape] and [borderRadius].
-  final Border border;
+  ///
+  /// Use [Border] objects to describe borders that do not depend on the reading
+  /// direction.
+  ///
+  /// Use [BoxBorder] objects to describe borders that should flip their left
+  /// and right edges based on whether the text is being read left-to-right or
+  /// right-to-left.
+  final BoxBorder border;
 
   /// If non-null, the corners of this box are rounded by this [BorderRadius].
   ///
@@ -137,7 +144,7 @@ class BoxDecoration extends Decoration {
   final BoxShape shape;
 
   @override
-  EdgeInsets get padding => border?.dimensions;
+  EdgeInsetsGeometry get padding => border?.dimensions;
 
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
@@ -145,7 +152,7 @@ class BoxDecoration extends Decoration {
     return new BoxDecoration(
       color: Color.lerp(null, color, factor),
       image: image,
-      border: Border.lerp(null, border, factor),
+      border: BoxBorder.lerp(null, border, factor),
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
       gradient: gradient,
@@ -192,7 +199,7 @@ class BoxDecoration extends Decoration {
     return new BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
       image: t < 0.5 ? a.image : b.image,
-      border: Border.lerp(a.border, b.border, t),
+      border: BoxBorder.lerp(a.border, b.border, t),
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
       gradient: t < 0.5 ? a.gradient : b.gradient,
@@ -238,7 +245,7 @@ class BoxDecoration extends Decoration {
 
     properties.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     properties.add(new DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Border>('border', border, defaultValue: null));
+    properties.add(new DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
     properties.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
     properties.add(new IterableProperty<BoxShadow>('boxShadow', boxShadow, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));
     properties.add(new DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
@@ -421,7 +428,8 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius
+      borderRadius: _decoration.borderRadius,
+      textDirection: configuration.textDirection,
     );
   }
 }
