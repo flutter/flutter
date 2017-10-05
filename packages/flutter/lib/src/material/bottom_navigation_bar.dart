@@ -63,13 +63,14 @@ class BottomNavigationBar extends StatefulWidget {
   ///
   /// The argument [items] should not be null.
   ///
-  /// The number of items passed should be equal to, or greater than, two.  If
+  /// The number of items passed should be equal to, or greater than, two. If
   /// three or fewer items are passed, then the default [type] (if [type] is
   /// null or not given) will be [BottomNavigationBarType.fixed], and if more
   /// than three items are passed, will be [BottomNavigationBarType.shifting].
   ///
   /// Passing a null [fixedColor] will cause a fallback to the theme's primary
-  /// color.
+  /// color. The [fixedColor] field will be ignored if the [BottomNavigationBar.type] is
+  /// not [BottomNavigationBarType.fixed].
   BottomNavigationBar({
     Key key,
     @required this.items,
@@ -81,7 +82,6 @@ class BottomNavigationBar extends StatefulWidget {
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(type == BottomNavigationBarType.fixed || fixedColor == null),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
@@ -99,28 +99,29 @@ class BottomNavigationBar extends StatefulWidget {
   /// The index into [items] of the current active item.
   final int currentIndex;
 
-  /// Defines the layout and behavior of a [BottomNavigationBar].  See
-  /// documentation for [BottomNavigationBarType] for information on the meaning
+  /// Defines the layout and behavior of a [BottomNavigationBar].
+  ///
+  /// See documentation for [BottomNavigationBarType] for information on the meaning
   /// of different types.
   final BottomNavigationBarType type;
 
   /// The color of the selected item when bottom navigation bar is
-  /// [BottomNavigationBarType.fixed].  [fixedColor] must be null if the [type]
-  /// is not [BottomNavigationBarType.fixed].
+  /// [BottomNavigationBarType.fixed].
+  ///
+  /// If [fixedColor] is null, it will use the theme's primary color. The [fixedColor]
+  /// field will be ignored if the [type] is not [BottomNavigationBarType.fixed].
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
-  /// This value is used to to configure the [IconTheme] for the navigation
-  /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the
-  /// widget should configure itself to match the icon theme's size and color.
+  /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
   @override
   _BottomNavigationBarState createState() => new _BottomNavigationBarState();
 }
 
-// This represents a single tile in the bottom navigation bar.  It is intended
+// This represents a single tile in the bottom navigation bar. It is intended
 // to go into a flex container.
 class _BottomNavigationTile extends StatelessWidget {
   _BottomNavigationTile(
@@ -128,8 +129,10 @@ class _BottomNavigationTile extends StatelessWidget {
     this.item,
     this.onTap,
     this.animation,
-    this.iconSize,
-    {this.colorTween, this.flex}
+    this.iconSize, {
+    this.colorTween,
+    this.flex
+    }
   );
 
   final BottomNavigationBarType type;
@@ -226,7 +229,7 @@ class _BottomNavigationTile extends StatelessWidget {
   Widget build(BuildContext context) {
     // In order to use the flex container to grow the tile during animation, we
     // need to divide the changes in flex allotment into smaller pieces to
-    // produce smooth animation.  We do this by multiplying the flex value
+    // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
     final int size = type == BottomNavigationBarType.shifting ? (flex * 1000.0).round() : 1;
     return new Expanded(
