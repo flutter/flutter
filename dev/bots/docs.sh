@@ -10,7 +10,7 @@ set -e
 bin/flutter --version
 
 # Install dartdoc.
-bin/cache/dart-sdk/bin/pub global activate dartdoc 0.13.0+3
+bin/cache/dart-sdk/bin/pub global activate dartdoc 0.14.1
 
 # This script generates a unified doc set, and creates
 # a custom index.html, placing everything into dev/docs/doc.
