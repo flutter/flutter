@@ -219,7 +219,7 @@ class _LocalizationsScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    return !identical(typeToResources, old.typeToResources);
+    return typeToResources != old.typeToResources;
   }
 }
 
