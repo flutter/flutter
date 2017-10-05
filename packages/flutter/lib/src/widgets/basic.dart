@@ -2116,6 +2116,42 @@ class SliverPadding extends SingleChildRenderObjectWidget {
 
 // LAYOUT NODES
 
+/// Returns the [AxisDirection] in the given [Axis] in the current
+/// [Directionality] (or the reverse if `reverse` is true).
+///
+/// If `axis` is [Axis.vertical], this function returns [AxisDirection.down]
+/// unless `reverse` is true, in which case this function returns
+/// [AxisDirection.up].
+///
+/// If `axis` is [Axis.horizontal], this function checks the current
+/// [Directionality]. If the current [Directionality] is right-to-left, then
+/// this function returns [AxisDirection.left] (unless `reverse` is true, in
+/// which case it returns [AxisDirection.right]). Similarly, if the current
+/// [Directionality] is left-to-right, then this function returns
+/// [AxisDirection.right] (unless `reverse` is true, in which case it returns
+/// [AxisDirection.left]).
+///
+/// This function is used by a number of scrolling widgets (e.g., [ListView],
+/// [GridView], [PageView], and [SingleChildScrollView]) as well as [ListBody]
+/// to translate their [Axis] and `reverse` properties into a concrete
+/// [AxisDirection].
+AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
+  BuildContext context,
+  Axis axis,
+  bool reverse,
+) {
+  switch (axis) {
+    case Axis.horizontal:
+      assert(debugCheckHasDirectionality(context));
+      final TextDirection textDirection = Directionality.of(context);
+      final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+      return reverse ? flipAxisDirection(axisDirection) : axisDirection;
+    case Axis.vertical:
+      return reverse ? AxisDirection.up : AxisDirection.down;
+  }
+  return null;
+}
+
 /// A widget that arranges its children sequentially along a given axis, forcing
 /// them to the dimension of the parent in the other axis.
 ///
@@ -2142,6 +2178,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   ListBody({
     Key key,
     this.mainAxis: Axis.vertical,
+    this.reverse: false,
     List<Widget> children: const <Widget>[],
   }) : assert(mainAxis != null),
        super(key: key, children: children);
@@ -2149,12 +2186,32 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// The direction to use as the main axis.
   final Axis mainAxis;
 
+  /// Whether the list body positions children in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [mainAxis] is [Axis.horizontal], then the list body positions children
+  /// from left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [mainAxis] is [Axis.vertical], then the list body positions
+  /// from top to bottom when [reverse] is false and from bottom to top when
+  /// [reverse] is true.
+  ///
+  /// Defaults to false.
+  final bool reverse;
+
+  AxisDirection _getDirection(BuildContext context) {
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, mainAxis, reverse);
+  }
+
   @override
-  RenderListBody createRenderObject(BuildContext context) => new RenderListBody(mainAxis: mainAxis);
+  RenderListBody createRenderObject(BuildContext context) {
+    return new RenderListBody(axisDirection: _getDirection(context));
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
-    renderObject.mainAxis = mainAxis;
+    renderObject.axisDirection = _getDirection(context);
   }
 }
 

@@ -649,11 +649,15 @@ class _MergeableMaterialListBody extends ListBody {
   final List<MergeableMaterialItem> items;
   final List<BoxShadow> boxShadows;
 
+  AxisDirection _getDirection(BuildContext context) {
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, mainAxis, false);
+  }
+
   @override
   RenderListBody createRenderObject(BuildContext context) {
     return new _RenderMergeableMaterialListBody(
-      mainAxis: mainAxis,
-      boxShadows: boxShadows
+      axisDirection: _getDirection(context),
+      boxShadows: boxShadows,
     );
   }
 
@@ -661,7 +665,7 @@ class _MergeableMaterialListBody extends ListBody {
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
     final _RenderMergeableMaterialListBody materialRenderListBody = renderObject;
     materialRenderListBody
-      ..mainAxis = mainAxis
+      ..axisDirection = _getDirection(context)
       ..boxShadows = boxShadows;
   }
 }
@@ -669,9 +673,9 @@ class _MergeableMaterialListBody extends ListBody {
 class _RenderMergeableMaterialListBody extends RenderListBody {
   _RenderMergeableMaterialListBody({
     List<RenderBox> children,
-    Axis mainAxis: Axis.vertical,
+    AxisDirection axisDirection: AxisDirection.down,
     this.boxShadows
-  }) : super(children: children, mainAxis: mainAxis);
+  }) : super(children: children, axisDirection: axisDirection);
 
   List<BoxShadow> boxShadows;
 
