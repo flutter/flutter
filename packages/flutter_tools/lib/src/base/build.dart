@@ -42,7 +42,6 @@ class GenSnapshot {
     final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
     final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
     final List<String> args = <String>[
-      '--assert_initializer',
       '--await_is_keyword',
       '--causal_async_stacks',
       '--vm_snapshot_data=$vmSnapshotData',
