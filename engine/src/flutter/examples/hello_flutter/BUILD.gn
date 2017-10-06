@@ -7,6 +7,8 @@ import("//flutter/build/flutter_app.gni")
 flutter_jit_app("hello_flutter") {
   main_dart = "lib/main.dart"
 
+  disable_analysis = true
+
   deps = [
     "//lib/flutter/packages/flutter",
   ]
@@ -14,6 +16,8 @@ flutter_jit_app("hello_flutter") {
 
 flutter_aot_app("hello_flutter_aot") {
   main_dart = "lib/main.dart"
+
+  disable_analysis = true
 
   deps = [
     "//lib/flutter/packages/flutter",
