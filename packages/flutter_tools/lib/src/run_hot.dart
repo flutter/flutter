@@ -128,10 +128,12 @@ class HotRunner extends ResidentRunner {
       printError('Error initializing DevFS: $error');
       return 3;
     }
+    final Stopwatch initialUpdateDevFSsTimer = new Stopwatch()..start();
     final bool devfsResult = await _updateDevFS();
-    if (!devfsResult) {
+    benchmarkData['hotReloadInitialDevFSSyncMilliseconds'] =
+        initialUpdateDevFSsTimer.elapsed.inMilliseconds;
+    if (!devfsResult)
       return 3;
-    }
 
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
@@ -331,8 +333,7 @@ class HotRunner extends ResidentRunner {
       await refreshViews();
     }
 
-    final Stopwatch restartTimer = new Stopwatch();
-    restartTimer.start();
+    final Stopwatch restartTimer = new Stopwatch()..start();
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
@@ -362,10 +363,8 @@ class HotRunner extends ResidentRunner {
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     // We are now running from sources.
     _runningFromSnapshot = false;
-    if (benchmarkMode) {
-      benchmarkData['hotRestartMillisecondsToFrame'] =
-          restartTimer.elapsed.inMilliseconds;
-    }
+    benchmarkData['hotRestartMillisecondsToFrame'] =
+        restartTimer.elapsed.inMilliseconds;
     flutterUsage.sendEvent('hot', 'restart');
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
     return OperationResult.ok;
@@ -454,36 +453,23 @@ class HotRunner extends ResidentRunner {
     // not be affected, so we resume reporting reload times on the second
     // reload.
     final bool shouldReportReloadTime = !_runningFromSnapshot;
-    final Stopwatch reloadTimer = new Stopwatch();
-    reloadTimer.start();
-    Stopwatch devFSTimer;
-    Stopwatch vmReloadTimer;
-    Stopwatch reassembleTimer;
-    if (benchmarkMode) {
-      devFSTimer = new Stopwatch();
-      devFSTimer.start();
-      vmReloadTimer = new Stopwatch();
-      reassembleTimer = new Stopwatch();
-    }
+    final Stopwatch reloadTimer = new Stopwatch()..start();
+
+    final Stopwatch devFSTimer = new Stopwatch()..start();
     final bool updatedDevFS = await _updateDevFS();
+    // Record time it took to synchronize to DevFS.
+    benchmarkData['hotReloadDevFSSyncMilliseconds'] =
+        devFSTimer.elapsed.inMilliseconds;
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
-    if (benchmarkMode) {
-      devFSTimer.stop();
-      // Record time it took to synchronize to DevFS.
-      benchmarkData['hotReloadDevFSSyncMilliseconds'] =
-            devFSTimer.elapsed.inMilliseconds;
-    }
-    if (!updatedDevFS)
-      return new OperationResult(1, 'Dart source error');
+
     String reloadMessage;
+    final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
       final String entryPath = fs.path.relative(
         previewDart2 ? mainPath + '.dill' : mainPath,
         from: projectRootPath
       );
-      if (benchmarkMode)
-        vmReloadTimer.start();
       final Completer<Map<String, dynamic>> retrieveFirstReloadReport = new Completer<Map<String, dynamic>>();
 
       int countExpectedReports = 0;
@@ -540,14 +526,10 @@ class HotRunner extends ResidentRunner {
       printError('Hot reload failed:\ncode = $errorCode\nmessage = $errorMessage\n$st');
       return new OperationResult(errorCode, errorMessage);
     }
-    if (benchmarkMode) {
-      // Record time it took for the VM to reload the sources.
-      vmReloadTimer.stop();
-      benchmarkData['hotReloadVMReloadMilliseconds'] =
-          vmReloadTimer.elapsed.inMilliseconds;
-    }
-    if (benchmarkMode)
-      reassembleTimer.start();
+    // Record time it took for the VM to reload the sources.
+    benchmarkData['hotReloadVMReloadMilliseconds'] =
+        vmReloadTimer.elapsed.inMilliseconds;
+    final Stopwatch reassembleTimer = new Stopwatch()..start();
     // Reload the isolate.
     for (FlutterDevice device in flutterDevices) {
       printTrace('Sending reload events to ${device.device.name}');
@@ -602,19 +584,16 @@ class HotRunner extends ResidentRunner {
         printError('Scheduling a frame for ${view.uiIsolate.name} failed: $error');
       }
     }
+    // Record time it took for Flutter to reassemble the application.
+    benchmarkData['hotReloadFlutterReassembleMilliseconds'] =
+        reassembleTimer.elapsed.inMilliseconds;
+
     reloadTimer.stop();
     printTrace('Hot reload performed in '
-               '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
-
-    if (benchmarkMode) {
-      // Record time it took for Flutter to reassemble the application.
-      reassembleTimer.stop();
-      benchmarkData['hotReloadFlutterReassembleMilliseconds'] =
-          reassembleTimer.elapsed.inMilliseconds;
-      // Record complete time it took for the reload.
-      benchmarkData['hotReloadMillisecondsToFrame'] =
-          reloadTimer.elapsed.inMilliseconds;
-    }
+        '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
+    // Record complete time it took for the reload.
+    benchmarkData['hotReloadMillisecondsToFrame'] =
+        reloadTimer.elapsed.inMilliseconds;
     // Only report timings if we reloaded a single view without any
     // errors or timeouts.
     if ((reassembleViews.length == 1) &&
