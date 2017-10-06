@@ -18,6 +18,10 @@ import 'typography.dart';
 
 const double _kActiveMaxWidth = 168.0;
 const double _kInactiveMaxWidth = 96.0;
+const double _kActiveFontSize = 14.0;
+const double _kInactiveFontSize = 12.0;
+const double _kTopMargin = 6.0;
+const double _kBottomMargin = 8.0;
 
 /// Defines the layout and behavior of a [BottomNavigationBar].
 ///
@@ -27,11 +31,13 @@ const double _kInactiveMaxWidth = 96.0;
 ///  * [BottomNavigationBarItem]
 ///  * <https://material.google.com/components/bottom-navigation.html#bottom-navigation-specs>
 enum BottomNavigationBarType {
-  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width.
+  /// The [BottomNavigationBar]'s [BottomNavigationBarItem]s have fixed width, always
+  /// display their text labels, and do not shift when tapped.
   fixed,
 
   /// The location and size of the [BottomNavigationBar] [BottomNavigationBarItem]s
-  /// animate larger when they are tapped.
+  /// animate and labels fade in when they are tapped. Only the selected item
+  /// displays its text label.
   shifting,
 }
 
@@ -39,12 +45,12 @@ enum BottomNavigationBarType {
 /// small number of views.
 ///
 /// The bottom navigation bar consists of multiple items in the form of
-/// labels, icons, or both, laid out on top of a piece of material. It provides
-/// quick navigation between the top-level views of an app. For larger screens,
-/// side navigation may be a better fit.
+/// text labels, icons, or both, laid out on top of a piece of material. It
+/// provides quick navigation between the top-level views of an app. For larger
+/// screens, side navigation may be a better fit.
 ///
-/// A bottom navigation bar is usually used in conjunction with [Scaffold] where
-/// it is provided as the [Scaffold.bottomNavigationBar] argument.
+/// A bottom navigation bar is usually used in conjunction with a [Scaffold],
+/// where it is provided as the [Scaffold.bottomNavigationBar] argument.
 ///
 /// See also:
 ///
@@ -55,26 +61,29 @@ class BottomNavigationBar extends StatefulWidget {
   /// Creates a bottom navigation bar, typically used in a [Scaffold] where it
   /// is provided as the [Scaffold.bottomNavigationBar] argument.
   ///
-  /// The arguments [items] and [type] should not be null.
+  /// The argument [items] should not be null.
   ///
-  /// The number of items passed should be equal or greater than 2.
+  /// The number of items passed should be equal to, or greater than, two. If
+  /// three or fewer items are passed, then the default [type] (if [type] is
+  /// null or not given) will be [BottomNavigationBarType.fixed], and if more
+  /// than three items are passed, will be [BottomNavigationBarType.shifting].
   ///
   /// Passing a null [fixedColor] will cause a fallback to the theme's primary
-  /// color.
+  /// color. The [fixedColor] field will be ignored if the [BottomNavigationBar.type] is
+  /// not [BottomNavigationBarType.fixed].
   BottomNavigationBar({
     Key key,
     @required this.items,
     this.onTap,
     this.currentIndex: 0,
-    this.type: BottomNavigationBarType.fixed,
+    BottomNavigationBarType type,
     this.fixedColor,
     this.iconSize: 24.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
-       assert(type != null),
-       assert(type == BottomNavigationBarType.fixed || fixedColor == null),
        assert(iconSize != null),
+       type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
        super(key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
@@ -91,34 +100,191 @@ class BottomNavigationBar extends StatefulWidget {
   final int currentIndex;
 
   /// Defines the layout and behavior of a [BottomNavigationBar].
+  ///
+  /// See documentation for [BottomNavigationBarType] for information on the meaning
+  /// of different types.
   final BottomNavigationBarType type;
 
   /// The color of the selected item when bottom navigation bar is
   /// [BottomNavigationBarType.fixed].
+  ///
+  /// If [fixedColor] is null, it will use the theme's primary color. The [fixedColor]
+  /// field will be ignored if the [type] is not [BottomNavigationBarType.fixed].
   final Color fixedColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
   ///
-  /// This value is used to to configure the [IconTheme] for the navigation
-  /// bar. When a [BottomNavigationBarItem.icon] widget is not an [Icon] the widget
-  /// should configure itself to match the icon theme's size and color.
+  /// See [BottomNavigationBarItem.icon] for more information.
   final double iconSize;
 
   @override
   _BottomNavigationBarState createState() => new _BottomNavigationBarState();
 }
 
+// This represents a single tile in the bottom navigation bar. It is intended
+// to go into a flex container.
+class _BottomNavigationTile extends StatelessWidget {
+  _BottomNavigationTile(
+    this.type,
+    this.item,
+    this.animation,
+    this.iconSize, {
+    this.onTap,
+    this.colorTween,
+    this.flex
+    }
+  );
+
+  final BottomNavigationBarType type;
+  final BottomNavigationBarItem item;
+  final Animation<double> animation;
+  final double iconSize;
+  final VoidCallback onTap;
+  final ColorTween colorTween;
+  final double flex;
+
+  Widget _buildIcon() {
+    double tweenStart;
+    Color iconColor;
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        tweenStart = 8.0;
+        iconColor = colorTween.evaluate(animation);
+        break;
+      case BottomNavigationBarType.shifting:
+        tweenStart = 16.0;
+        iconColor = Colors.white;
+        break;
+    }
+    return new Align(
+      alignment: Alignment.topCenter,
+      heightFactor: 1.0,
+      child: new Container(
+        margin: new EdgeInsets.only(
+          top: new Tween<double>(
+            begin: tweenStart,
+            end: _kTopMargin,
+          ).evaluate(animation),
+        ),
+        child: new IconTheme(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: item.icon,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFixedLabel() {
+    return new Align(
+      alignment: Alignment.bottomCenter,
+      heightFactor: 1.0,
+      child: new Container(
+        margin: const EdgeInsets.only(bottom: _kBottomMargin),
+        child: DefaultTextStyle.merge(
+          style: new TextStyle(
+            fontSize: _kActiveFontSize,
+            color: colorTween.evaluate(animation),
+          ),
+          // The font size should grow here when active, but because of the way
+          // font rendering works, it doesn't grow smoothly if we just animate
+          // the font size, so we use a transform instead.
+          child: new Transform(
+            transform: new Matrix4.diagonal3(
+              new Vector3.all(
+                new Tween<double>(
+                  begin: _kInactiveFontSize / _kActiveFontSize,
+                  end: 1.0,
+                ).evaluate(animation),
+              ),
+            ),
+            alignment: Alignment.bottomCenter,
+            child: item.title,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShiftingLabel() {
+    return  new Align(
+      alignment: Alignment.bottomCenter,
+      heightFactor: 1.0,
+      child: new Container(
+        margin: new EdgeInsets.only(
+          bottom: new Tween<double>(
+            // In the spec, they just remove the label for inactive items and
+            // specify a 16dp bottom margin. We don't want to actually remove
+            // the label because we want to fade it in and out, so this modifies
+            // the bottom margin to take that into account.
+            begin: 2.0,
+            end: _kBottomMargin,
+          ).evaluate(animation),
+        ),
+        child: new FadeTransition(
+          opacity: animation,
+          child: DefaultTextStyle.merge(
+              style: const TextStyle(
+                fontSize: _kActiveFontSize,
+                color: Colors.white,
+              ),
+              child: item.title,
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // In order to use the flex container to grow the tile during animation, we
+    // need to divide the changes in flex allotment into smaller pieces to
+    // produce smooth animation. We do this by multiplying the flex value
+    // (which is an integer) by a large number.
+    int size;
+    Widget label;
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+        label = _buildFixedLabel();
+        break;
+      case BottomNavigationBarType.shifting:
+        size = (flex * 1000.0).round();
+        label = _buildShiftingLabel();
+        break;
+    }
+    return new Expanded(
+      flex: size,
+      child: new InkResponse(
+        onTap: onTap,
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            _buildIcon(),
+            label,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerProviderStateMixin {
   List<AnimationController> _controllers;
   List<CurvedAnimation> _animations;
-  double _weight;
-  final Queue<_Circle> _circles = new Queue<_Circle>();
-  Color _backgroundColor; // Last growing circle's color.
 
-  static final Tween<double> _flexTween = new Tween<double>(
-    begin: 1.0,
-    end: 1.5
-  );
+  // A queue of color splashes currently being animated.
+  final Queue<_Circle> _circles = new Queue<_Circle>();
+
+  // Last splash circle's color, and the final color of the control after
+  // animation is complete.
+  Color _backgroundColor;
+
+  static final Tween<double> _flexTween = new Tween<double>(begin: 1.0, end: 1.5);
 
   @override
   void initState() {
@@ -140,6 +306,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
   }
 
+  void _rebuild() {
+    setState(() {
+      // Rebuilding when any of the controllers tick, i.e. when the items are
+      // animated.
+    });
+  }
+
   @override
   void dispose() {
     for (AnimationController controller in _controllers)
@@ -149,289 +322,151 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     super.dispose();
   }
 
-  void _rebuild() {
-    setState(() {
-      // Rebuilding when any of the controllers tick, i.e. when the items are
-      // animated.
-    });
-  }
-
-  double get _maxWidth {
-    assert(widget.type != null);
-    switch (widget.type) {
-      case BottomNavigationBarType.fixed:
-        return widget.items.length * _kActiveMaxWidth;
-      case BottomNavigationBarType.shifting:
-        return _kActiveMaxWidth + (widget.items.length - 1) * _kInactiveMaxWidth;
-    }
-    return null;
-  }
-
-  bool _isAnimating(Animation<double> animation) {
-    return animation.status == AnimationStatus.forward ||
-           animation.status == AnimationStatus.reverse;
-  }
-
-  // Because of non-linear nature of the animations, the animations that are
-  // currently animating might not add up to the flex weight we are expecting.
-  // (1.5 + N - 1, since the max flex that the animating ones can have is 1.5)
-  // This causes instability in the animation when multiple items are tapped.
-  // To solves this, we always store a weight that normalizes animating
-  // animations such that their resulting flex values will add up to the desired
-  // value.
-  void _computeWeight() {
-    final Iterable<Animation<double>> animating = _animations.where(_isAnimating);
-
-    if (animating.isNotEmpty) {
-      final double sum = animating.fold(0.0, (double sum, Animation<double> animation) {
-        return sum + _flexTween.evaluate(animation);
-      });
-      _weight = (animating.length + 0.5) / sum;
-    } else {
-      _weight = 1.0;
-    }
-  }
-
-  double _flex(Animation<double> animation) {
-    if (_isAnimating(animation)) {
-      assert(_weight != null);
-      return _flexTween.evaluate(animation) * _weight;
-    } else {
-      return _flexTween.evaluate(animation);
-    }
-  }
-
-  double _xOffset(int index) {
-    double weightSum(Iterable<Animation<double>> animations) {
-      // We're adding flex values instead of animation values to have correct ratios.
-      return animations.map(_flex).fold(0.0, (double sum, double value) => sum + value);
-    }
-
-    final double allWeights = weightSum(_animations);
-    // This weight corresponds to the left edge of the indexed item.
-    final double leftWeights = weightSum(_animations.sublist(0, index));
-
-    // Add half of its flex value in order to get the center.
-    return (leftWeights + _flex(_animations[index]) / 2.0) / allWeights;
-  }
-
-  Alignment _circleOffset(int index) {
-    final double iconSize = widget.iconSize;
-    final Tween<double> yOffsetTween = new Tween<double>(
-      begin: (18.0 + iconSize / 2.0) / kBottomNavigationBarHeight, // 18dp + icon center
-      end: (6.0 + iconSize / 2.0) / kBottomNavigationBarHeight     // 6dp + icon center
-    );
-
-    return new Alignment(
-      _xOffset(index),
-      yOffsetTween.evaluate(_animations[index])
-    );
-  }
+  double _evaluateFlex(Animation<double> animation) => _flexTween.evaluate(animation);
 
   void _pushCircle(int index) {
-    if (widget.items[index].backgroundColor != null)
+    if (widget.items[index].backgroundColor != null) {
       _circles.add(
         new _Circle(
           state: this,
           index: index,
           color: widget.items[index].backgroundColor,
           vsync: this,
-        )..controller.addStatusListener((AnimationStatus status) {
-          if (status == AnimationStatus.completed) {
-            setState(() {
-              final _Circle circle = _circles.removeFirst();
-              _backgroundColor = circle.color;
-              circle.dispose();
-            });
-          }
-        })
+        )..controller.addStatusListener(
+          (AnimationStatus status) {
+            switch (status) {
+              case AnimationStatus.completed:
+                setState(() {
+                  final _Circle circle = _circles.removeFirst();
+                  _backgroundColor = circle.color;
+                  circle.dispose();
+                });
+                break;
+              case AnimationStatus.dismissed:
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
+            }
+          },
+        ),
       );
+    }
   }
 
   @override
   void didUpdateWidget(BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.currentIndex != oldWidget.currentIndex) {
-      if (widget.type == BottomNavigationBarType.shifting)
-        _pushCircle(widget.currentIndex);
+      switch (widget.type) {
+        case BottomNavigationBarType.fixed:
+          break;
+        case BottomNavigationBarType.shifting:
+          _pushCircle(widget.currentIndex);
+          break;
+      }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    Widget bottomNavigation;
+  List<Widget> _createTiles() {
+    final List<Widget> children = <Widget>[];
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
-        final List<Widget> children = <Widget>[];
         final ThemeData themeData = Theme.of(context);
         final TextTheme textTheme = themeData.textTheme;
+        Color themeColor;
+        switch (themeData.brightness) {
+          case Brightness.light:
+            themeColor = themeData.primaryColor;
+            break;
+          case Brightness.dark:
+            themeColor = themeData.accentColor;
+            break;
+        }
         final ColorTween colorTween = new ColorTween(
           begin: textTheme.caption.color,
-          end: widget.fixedColor ?? (
-            themeData.brightness == Brightness.light ?
-                themeData.primaryColor : themeData.accentColor
-          )
+          end: widget.fixedColor ?? themeColor,
         );
         for (int i = 0; i < widget.items.length; i += 1) {
           children.add(
-            new Expanded(
-              child: new InkResponse(
-                onTap: () {
-                  if (widget.onTap != null)
-                    widget.onTap(i);
-                },
-                child: new Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    new Align(
-                      alignment: Alignment.topCenter,
-                      child: new Container(
-                        margin: new EdgeInsets.only(
-                          top: new Tween<double>(
-                            begin: 8.0,
-                            end: 6.0,
-                          ).evaluate(_animations[i]),
-                        ),
-                        child: new IconTheme(
-                          data: new IconThemeData(
-                            color: colorTween.evaluate(_animations[i]),
-                            size: widget.iconSize,
-                          ),
-                          child: widget.items[i].icon,
-                        ),
-                      ),
-                    ),
-                    new Align(
-                      alignment: Alignment.bottomCenter,
-                      child: new Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: DefaultTextStyle.merge(
-                          style: new TextStyle(
-                            fontSize: 14.0,
-                            color: colorTween.evaluate(_animations[i]),
-                          ),
-                          child: new Transform(
-                            transform: new Matrix4.diagonal3(new Vector3.all(
-                              new Tween<double>(
-                                begin: 0.85,
-                                end: 1.0,
-                              ).evaluate(_animations[i]),
-                            )),
-                            alignment: Alignment.bottomCenter,
-                            child: widget.items[i].title,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            new _BottomNavigationTile(
+              widget.type,
+              widget.items[i],
+              _animations[i],
+              widget.iconSize,
+              onTap: () {
+                if (widget.onTap != null)
+                  widget.onTap(i);
+              },
+              colorTween: colorTween),
           );
         }
-        bottomNavigation = new SizedBox(
-          width: _maxWidth,
-          child: new Row(children: children),
-        );
         break;
-
       case BottomNavigationBarType.shifting:
-        final List<Widget> children = <Widget>[];
-        _computeWeight();
         for (int i = 0; i < widget.items.length; i += 1) {
           children.add(
-            new Expanded(
-              // Since Flexible only supports integers, we're using large
-              // numbers in order to simulate floating point flex values.
-              flex: (_flex(_animations[i]) * 1000.0).round(),
-              child: new InkResponse(
-                onTap: () {
-                  if (widget.onTap != null)
-                    widget.onTap(i);
-                },
-                child: new Stack(
-                  alignment: Alignment.center,
-                  children: <Widget>[
-                    new Align(
-                      alignment: Alignment.topCenter,
-                      child: new Container(
-                        margin: new EdgeInsets.only(
-                          top: new Tween<double>(
-                            begin: 18.0,
-                            end: 6.0,
-                          ).evaluate(_animations[i]),
-                        ),
-                        child: new IconTheme(
-                          data: new IconThemeData(
-                            color: Colors.white,
-                            size: widget.iconSize,
-                          ),
-                          child: widget.items[i].icon,
-                        ),
-                      ),
-                    ),
-                    new Align(
-                      alignment: Alignment.bottomCenter,
-                      child: new Container(
-                        margin: const EdgeInsets.only(bottom: 10.0),
-                        child: new FadeTransition(
-                          opacity: _animations[i],
-                          child: DefaultTextStyle.merge(
-                            style: const TextStyle(
-                              fontSize: 14.0,
-                              color: Colors.white
-                            ),
-                            child: widget.items[i].title
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            new _BottomNavigationTile(
+              widget.type,
+              widget.items[i],
+              _animations[i],
+              widget.iconSize,
+              onTap: () {
+                if (widget.onTap != null)
+                  widget.onTap(i);
+              },
+              flex: _evaluateFlex(_animations[i])),
           );
         }
-        bottomNavigation = new SizedBox(
-          width: _maxWidth,
-          child: new Row(
-            children: children
-          )
-        );
         break;
     }
+    return children;
+  }
 
+  Widget _createContainer(List<Widget> tiles) {
+    return DefaultTextStyle.merge(
+      overflow: TextOverflow.ellipsis,
+      child: new Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: tiles,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Color backgroundColor;
+    switch (widget.type) {
+      case BottomNavigationBarType.fixed:
+        break;
+      case BottomNavigationBarType.shifting:
+        backgroundColor = _backgroundColor;
+        break;
+    }
     return new Stack(
       children: <Widget>[
         new Positioned.fill(
           child: new Material( // Casts shadow.
             elevation: 8.0,
-            color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null
-          )
+            color: backgroundColor,
+          ),
         ),
-        new SizedBox(
-          height: kBottomNavigationBarHeight,
-          child: new Center(
-            child: new Stack(
-              children: <Widget>[
-                new Positioned.fill(
-                  child: new CustomPaint(
-                    painter: new _RadialPainter(
-                      circles: _circles.toList(),
-                      bottomNavMaxWidth: _maxWidth,
-                    ),
+        new ConstrainedBox(
+          constraints: new BoxConstraints(minHeight: kBottomNavigationBarHeight),
+          child: new Stack(
+            children: <Widget>[
+              new Positioned.fill(
+                child: new CustomPaint(
+                  painter: new _RadialPainter(
+                    circles: _circles.toList(),
                   ),
                 ),
-                new Material( // Splashes.
-                  type: MaterialType.transparency,
-                  child: new Center(
-                    child: bottomNavigation
-                  ),
-                ),
-              ],
-            ),
+              ),
+              new Material( // Splashes.
+                type: MaterialType.transparency,
+                child: _createContainer(_createTiles()),
+              ),
+            ],
           ),
         ),
       ],
@@ -439,6 +474,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   }
 }
 
+// Describes an animating color splash circle.
 class _Circle {
   _Circle({
     @required this.state,
@@ -465,8 +501,19 @@ class _Circle {
   AnimationController controller;
   CurvedAnimation animation;
 
-  Alignment get offset {
-    return state._circleOffset(index);
+  double get horizontalOffset {
+    double weightSum(Iterable<Animation<double>> animations) {
+      // We're adding flex values instead of animation values to produce correct
+      // ratios.
+      return animations.map(state._evaluateFlex).fold(0.0, (double sum, double value) => sum + value);
+    }
+
+    final double allWeights = weightSum(state._animations);
+    // These weights sum to the left edge of the indexed item.
+    final double leftWeights = weightSum(state._animations.sublist(0, index));
+
+    // Add half of its flex value in order to get to the center.
+    return (leftWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
   }
 
   void dispose() {
@@ -474,62 +521,49 @@ class _Circle {
   }
 }
 
+// Paints the animating color splash circles.
 class _RadialPainter extends CustomPainter {
   _RadialPainter({
     this.circles,
-    this.bottomNavMaxWidth,
   });
 
   final List<_Circle> circles;
-  final double bottomNavMaxWidth;
 
   // Computes the maximum radius attainable such that at least one of the
-  // bounding rectangle's corners touches the egde of the circle. Drawing a
-  // circle beyond this radius is futile since there is no perceivable
+  // bounding rectangle's corners touches the edge of the circle. Drawing a
+  // circle larger than this radius is not needed, since there is no perceivable
   // difference within the cropped rectangle.
-  double _maxRadius(Alignment alignment, Size size) {
-    final double dx = alignment.x;
-    final double dy = alignment.y;
-    final double halfWidth = size.width / 2.0;
-    final double halfHeight = size.height / 2.0;
-    final double x = halfWidth + dx.abs() * halfWidth;
-    final double y = halfHeight + dy.abs() * halfHeight;
-    return math.sqrt(x * x + y * y);
+  static double _maxRadius(Offset center, Size size) {
+    final double maxX = math.max(center.dx, size.width - center.dx);
+    final double maxY = math.max(center.dy, size.height - center.dy);
+    return math.sqrt(maxX * maxX + maxY * maxY);
   }
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
-    if (bottomNavMaxWidth != oldPainter.bottomNavMaxWidth)
-      return true;
-
     if (circles == oldPainter.circles)
       return false;
     if (circles.length != oldPainter.circles.length)
       return true;
-
     for (int i = 0; i < circles.length; i += 1)
       if (circles[i] != oldPainter.circles[i])
         return true;
-
     return false;
   }
 
   @override
   void paint(Canvas canvas, Size size) {
     for (_Circle circle in circles) {
-      final Tween<double> radiusTween = new Tween<double>(
-        begin: 0.0,
-        end: _maxRadius(circle.offset, size),
-      );
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final double navWidth = math.min(bottomNavMaxWidth, size.width);
-      final double halfNavWidth = navWidth / 2.0;
-      final double halfHeight = size.height / 2.0;
       final Offset center = new Offset(
-        (size.width - navWidth) / 2.0 + halfNavWidth + circle.offset.x * halfNavWidth,
-        halfHeight + circle.offset.y * halfHeight,
+        circle.horizontalOffset * size.width,
+        size.height / 2.0,
+      );
+      final Tween<double> radiusTween = new Tween<double>(
+        begin: 0.0,
+        end: _maxRadius(center, size),
       );
       canvas.drawCircle(
         center,

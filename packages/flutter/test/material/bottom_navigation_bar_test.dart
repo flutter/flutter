@@ -57,7 +57,7 @@ void main() {
     );
 
     final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
-    expect(box.size.height, 60.0);
+    expect(box.size.height, kBottomNavigationBarHeight);
     expect(find.text('AC'), findsOneWidget);
     expect(find.text('Alarm'), findsOneWidget);
   });
@@ -85,8 +85,8 @@ void main() {
 
     Iterable<RenderBox> actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 158.4);
-    expect(actions.elementAt(1).size.width, 105.6);
+    expect(actions.elementAt(0).size.width, 480.0);
+    expect(actions.elementAt(1).size.width, 320.0);
 
     await tester.pumpWidget(
       new MaterialApp(
@@ -113,8 +113,8 @@ void main() {
 
     actions = tester.renderObjectList(find.byType(InkResponse));
     expect(actions.length, 2);
-    expect(actions.elementAt(0).size.width, 105.6);
-    expect(actions.elementAt(1).size.width, 158.4);
+    expect(actions.elementAt(0).size.width, 320.0);
+    expect(actions.elementAt(1).size.width, 480.0);
   });
 
   testWidgets('BottomNavigationBar multiple taps test', (WidgetTester tester) async {
@@ -288,4 +288,108 @@ void main() {
   });
 
 
+  testWidgets('BottomNavigationBar responds to textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            items: <BottomNavigationBarItem>[
+              const BottomNavigationBarItem(
+                title: const Text('A'),
+                icon: const Icon(Icons.ac_unit),
+              ),
+              const BottomNavigationBarItem(
+                title: const Text('B'),
+                icon: const Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox defaultBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(defaultBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            type: BottomNavigationBarType.shifting,
+            items: <BottomNavigationBarItem>[
+              const BottomNavigationBarItem(
+                title: const Text('A'),
+                icon: const Icon(Icons.ac_unit),
+              ),
+              const BottomNavigationBarItem(
+                title: const Text('B'),
+                icon: const Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox shiftingBox = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(shiftingBox.size.height, equals(kBottomNavigationBarHeight));
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 2.0),
+          child: new Scaffold(
+            bottomNavigationBar: new BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                const BottomNavigationBarItem(
+                  title: const Text('A'),
+                  icon: const Icon(Icons.ac_unit),
+                ),
+                const BottomNavigationBarItem(
+                  title: const Text('B'),
+                  icon: const Icon(Icons.battery_alert),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box.size.height, equals(68.0));
+  });
+
+  testWidgets('BottomNavigationBar limits width of tiles with long titles', (WidgetTester tester) async {
+    final Text longTextA = new Text(''.padLeft(100, 'A'));
+    final Text longTextB = new Text(''.padLeft(100, 'B'));
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          bottomNavigationBar: new BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              new BottomNavigationBarItem(
+                title: longTextA,
+                icon: const Icon(Icons.ac_unit),
+              ),
+              new BottomNavigationBarItem(
+                title: longTextB,
+                icon: const Icon(Icons.battery_alert),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box.size.height, equals(kBottomNavigationBarHeight));
+
+    final RenderBox itemBoxA = tester.renderObject(find.text(longTextA.data));
+    expect(itemBoxA.size, equals(const Size(400.0, 14.0)));
+    final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
+    expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
+  });
 }
