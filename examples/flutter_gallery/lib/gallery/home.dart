@@ -68,6 +68,8 @@ class GalleryHome extends StatefulWidget {
     @required this.onThemeChanged,
     this.timeDilation,
     @required this.onTimeDilationChanged,
+    this.textScaleFactor,
+    this.onTextScaleFactorChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
@@ -85,6 +87,9 @@ class GalleryHome extends StatefulWidget {
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
+
+  final double textScaleFactor;
+  final ValueChanged<double> onTextScaleFactorChanged;
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
@@ -159,6 +164,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onThemeChanged: widget.onThemeChanged,
         timeDilation: widget.timeDilation,
         onTimeDilationChanged: widget.onTimeDilationChanged,
+        textScaleFactor: widget.textScaleFactor,
+        onTextScaleFactorChanged: widget.onTextScaleFactorChanged,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,

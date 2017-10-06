@@ -22,7 +22,7 @@ final List<_Page> _allPages = <_Page>[
   new _Page(icon: Icons.android, text: 'ANDROID'),
   new _Page(icon: Icons.alarm, text: 'ALARM'),
   new _Page(icon: Icons.face, text: 'FACE'),
-  new _Page(icon: Icons.language, text: 'LANGAUGE'),
+  new _Page(icon: Icons.language, text: 'LANGUAGE'),
 ];
 
 class ScrollableTabsDemo extends StatefulWidget {
