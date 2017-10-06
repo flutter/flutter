@@ -42,6 +42,11 @@
 namespace txt {
 namespace {
 
+struct Range {
+  Range(size_t s, size_t e) : start(s), end(e) {}
+  size_t start, end;
+};
+
 const sk_sp<SkTypeface>& GetTypefaceForGlyph(const minikin::Layout& layout,
                                              size_t index) {
   const FontSkia* font = static_cast<const FontSkia*>(layout.getFont(index));
@@ -115,6 +120,26 @@ void GetPaint(const TextStyle& style, SkPaint* paint) {
   paint->setTextSize(style.font_size);
 }
 
+void FindWords(const std::vector<uint16_t>& text,
+               size_t start,
+               size_t end,
+               std::vector<Range>* words) {
+  bool in_word = false;
+  size_t word_start;
+  for (size_t i = start; i < end; ++i) {
+    bool is_space = minikin::isWordSpace(text[i]);
+    if (!in_word && !is_space) {
+      word_start = i;
+      in_word = true;
+    } else if (in_word && is_space) {
+      words->emplace_back(word_start - start, i - start);
+      in_word = false;
+    }
+  }
+  if (in_word)
+    words->emplace_back(word_start - start, end - start);
+}
+
 }  // namespace
 
 static const float kDoubleDecorationSpacing = 3.0f;
@@ -183,18 +208,6 @@ bool Paragraph::AddRunsToLineBreaker(
   return true;
 }
 
-void Paragraph::FillWhitespaceSet(size_t start,
-                                  size_t end,
-                                  hb_font_t* hb_font) {
-  uint32_t unusedGlyph;
-  for (size_t i = start; i < end; ++i) {
-    if (minikin::isWordSpace(text_[i])) {
-      hb_font_get_glyph(hb_font, text_[i], 0, &unusedGlyph);
-      whitespace_set_.insert(unusedGlyph);
-    }
-  }
-}
-
 void Paragraph::Layout(double width, bool force) {
   // Do not allow calling layout multiple times without changing anything.
   if (!needs_layout_ && width == width_ && !force) {
@@ -229,78 +242,85 @@ void Paragraph::Layout(double width, bool force) {
   breaks_count_ = breaker_.computeBreaks();
   const int* breaks = breaker_.getBreaks();
 
-  // Create a copy of text_ to use locally so that any changes made to the
-  // vector (such as removing newline characters) is not permanent.
-  std::vector<uint16_t> text(text_);
-
   SkPaint paint;
   paint.setAntiAlias(true);
   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
   paint.setSubpixelText(true);
 
-  minikin::FontStyle font;
-  minikin::MinikinPaint minikin_paint;
+  records_.clear();
+  line_heights_.clear();
+
   minikin::Layout layout;
-
   SkTextBlobBuilder builder;
+  size_t line_limit = std::min(paragraph_style_.max_lines, breaks_count_);
+  size_t run_index = 0;
+  double y_offset = 0;
+  double prev_max_descent = 0;
 
-  // Reset member variables so Layout still works when called more than once
-  lines_ = 0;
-  line_heights_ = std::vector<double>();
-  records_ = std::vector<PaintRecord>();
+  for (size_t line_number = 0; line_number < line_limit; ++line_number) {
+    size_t line_start = (line_number > 0) ? breaks[line_number - 1] : 0;
+    size_t line_end = breaks[line_number];
 
-  glyph_position_x_ = std::vector<GlyphLine>();
-  std::vector<GlyphPosition> glyph_single_line_position_x;
+    // Break the line into words if justification should be applied.
+    std::vector<Range> words;
+    double word_gap_width = 0;
+    size_t word_index = 0;
+    bool justify_line =
+        (paragraph_style_.text_align == TextAlign::justify &&
+         line_number != line_limit - 1 && text_[line_end - 1] != '\n');
+    if (justify_line) {
+      FindWords(text_, line_start, line_end, &words);
+      if (words.size() > 1) {
+        word_gap_width =
+            (width_ - breaker_.getWidths()[line_number]) / (words.size() - 1);
+      }
+    }
 
-  SkScalar x_offset = GetLineXOffset(0);
-  SkScalar y_offset = 0.0f;
-  size_t break_index = 0;
-  double max_line_spacing = 0.0f;
-  double max_descent = 0.0f;
-  double prev_max_descent = 0.0f;
-  std::vector<SkScalar> x_queue;
-  double justify_spacing = 0.0f;
-  double current_x_position = 0.0f;
+    // Find the runs comprising this line.
+    std::vector<StyledRuns::Run> line_runs;
+    while (run_index < runs_.size()) {
+      StyledRuns::Run run = runs_.GetRun(run_index);
+      if (run.start >= line_end)
+        break;
+      line_runs.push_back(run);
+      if (run.end > line_end)
+        break;
+      run_index++;
+    }
 
-  std::vector<const SkTextBlobBuilder::RunBuffer*> buffers;
-  std::vector<size_t> buffer_sizes;
-  int word_count = 0;
-  size_t max_lines = paragraph_style_.max_lines;
+    std::vector<GlyphPosition> glyph_single_line_position_x;
+    double run_x_offset = GetLineXOffset(line_number);
+    std::vector<PaintRecord> paint_records;
 
-  for (size_t run_index = 0; run_index < runs_.size(); ++run_index) {
-    auto run = runs_.GetRun(run_index);
-    bool is_newline = text_[run.start] == '\n' && run.end - run.start == 1;
-    // Replace '\n' with a null character so that a 'missing glyph' box is not
-    // drawn.
-    if (is_newline)
-      text[run.start] = '\0';
+    for (const StyledRuns::Run& run : line_runs) {
+      minikin::FontStyle font;
+      minikin::MinikinPaint minikin_paint;
+      GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
+      GetPaint(run.style, &paint);
 
-    GetFontAndMinikinPaint(run.style, &font, &minikin_paint);
-    GetPaint(run.style, &paint);
-
-    size_t layout_start = run.start;
-    // Layout until the end of the run or too many lines.
-    while (layout_start < run.end && lines_ < max_lines) {
-      const size_t next_break = (break_index > breaks_count_ - 1)
-                                    ? std::numeric_limits<size_t>::max()
-                                    : breaks[break_index];
-      const size_t layout_end = std::min(run.end, next_break);
-
-      bool bidiFlags = paragraph_style_.rtl;
       std::shared_ptr<minikin::FontCollection> minikin_font_collection =
           font_collection_->GetMinikinFontCollectionForFamily(
               run.style.font_family);
 
-      uint16_t* text_ptr = text.data() + layout_start;
-      size_t text_count = layout_end - layout_start;
-      std::vector<uint16_t> ellipsized_text;
+      // Lay out this run.
+      size_t line_run_start = std::max(run.start, line_start);
+      size_t line_run_end = std::min(run.end, line_end);
+      uint16_t* text_ptr = text_.data() + line_run_start;
+      size_t text_count = line_run_end - line_run_start;
+      bool bidiFlags = paragraph_style_.rtl;
+
+      if (text_count == 0)
+        continue;
+      if (text_ptr[text_count - 1] == '\n')
+        text_count--;
 
       // Apply ellipsizing if the run was not completely laid out and this
       // is the last line (or lines are unlimited).
       const std::u16string& ellipsis = paragraph_style_.ellipsis;
-      if (ellipsis.length() && !isinf(width_) && run.end != layout_end &&
-          (lines_ == max_lines - 1 ||
-           max_lines == std::numeric_limits<size_t>::max())) {
+      std::vector<uint16_t> ellipsized_text;
+      if (ellipsis.length() && !isinf(width_) && run.end > line_end &&
+          (line_number == line_limit - 1 ||
+           paragraph_style_.max_lines == std::numeric_limits<size_t>::max())) {
         float ellipsis_width = layout.measureText(
             reinterpret_cast<const uint16_t*>(ellipsis.data()), 0,
             ellipsis.length(), ellipsis.length(), bidiFlags, font,
@@ -308,8 +328,8 @@ void Paragraph::Layout(double width, bool force) {
 
         std::vector<float> text_advances(text_count);
         float text_width = layout.measureText(
-            text.data() + layout_start, 0, text_count, text_count, bidiFlags,
-            font, minikin_paint, minikin_font_collection, text_advances.data());
+            text_ptr, 0, text_count, text_count, bidiFlags, font, minikin_paint,
+            minikin_font_collection, text_advances.data());
 
         // Truncate characters from the text until the ellipsis fits.
         size_t truncate_count = 0;
@@ -322,8 +342,8 @@ void Paragraph::Layout(double width, bool force) {
         ellipsized_text.reserve(text_count - truncate_count +
                                 ellipsis.length());
         ellipsized_text.insert(ellipsized_text.begin(),
-                               text.begin() + layout_start,
-                               text.begin() + layout_end - truncate_count);
+                               text_.begin() + line_run_start,
+                               text_.begin() + line_run_end - truncate_count);
         ellipsized_text.insert(ellipsized_text.end(), ellipsis.begin(),
                                ellipsis.end());
         text_ptr = ellipsized_text.data();
@@ -331,65 +351,37 @@ void Paragraph::Layout(double width, bool force) {
 
         // If there is no line limit, then skip all lines after the ellipsized
         // line.
-        if (max_lines == std::numeric_limits<size_t>::max())
-          max_lines = lines_ + 1;
+        if (paragraph_style_.max_lines == std::numeric_limits<size_t>::max())
+          line_limit = line_number + 1;
       }
 
-      // Minikin Layout doLayout() has an O(N^2) (according to
-      // benchmarks) time complexity where N is the total number of characters.
-      // However, this is not significant for reasonably sized paragraphs. It is
-      // currently recommended to break up very long paragraphs (10k+
-      // characters) to ensure speedy layout.
       layout.doLayout(text_ptr, 0, text_count, text_count, bidiFlags, font,
                       minikin_paint, minikin_font_collection);
-      FillWhitespaceSet(layout_start, layout_end,
-                        minikin::getHbFontLocked(layout.getFont(0)));
 
-      const size_t glyph_count = layout.nGlyphs();
-      size_t blob_start = 0;
+      // Break the layout into blobs that share the same SkPaint parameters.
+      std::vector<Range> glyph_blobs;
+      for (size_t blob_start = 0; blob_start < layout.nGlyphs();) {
+        size_t blob_len = GetBlobLength(layout, blob_start);
+        glyph_blobs.emplace_back(blob_start, blob_start + blob_len);
+        blob_start += blob_len;
+      }
+
+      double current_x_position = 0;
       size_t code_unit_index = 0;
 
-      // Each blob.
-      buffers = std::vector<const SkTextBlobBuilder::RunBuffer*>();
-      buffer_sizes = std::vector<size_t>();
-      word_count = 0;
-      double temp_line_spacing = 0;
-      current_x_position = 0;
-      while (blob_start < glyph_count) {
-        const size_t blob_length = GetBlobLength(layout, blob_start);
-        buffer_sizes.push_back(blob_length);
-        // TODO(abarth): Precompute when we can use allocRunPosH.
-        paint.setTypeface(GetTypefaceForGlyph(layout, blob_start));
+      for (const Range& glyph_blob : glyph_blobs) {
+        paint.setTypeface(GetTypefaceForGlyph(layout, glyph_blob.start));
+        const SkTextBlobBuilder::RunBuffer& blob_buffer =
+            builder.allocRunPos(paint, glyph_blob.end - glyph_blob.start);
 
-        // Check if we should remove trailing whitespace of blobs.
-        size_t trailing_length = 0;
-        while ((paragraph_style_.text_align == TextAlign::center ||
-                paragraph_style_.text_align == TextAlign::right) &&
-               whitespace_set_.count(layout.getGlyphId(
-                   blob_start + blob_length - trailing_length - 1)) > 0 &&
-               layout_end == next_break) {
-          ++trailing_length;
-        }
+        for (size_t glyph_index = glyph_blob.start;
+             glyph_index < glyph_blob.end; ++glyph_index) {
+          size_t blob_index = glyph_index - glyph_blob.start;
+          blob_buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
-        buffers.push_back(
-            &builder.allocRunPos(paint, blob_length - trailing_length));
-
-        // TODO(garyq): Implement RTL.
-        // Each Glyph/Letter.
-        bool whitespace_ended = true;
-        float letter_spacing = 0;
-        for (size_t blob_index = 0; blob_index < blob_length - trailing_length;
-             ++blob_index) {
-          const size_t glyph_index = blob_start + blob_index;
-          buffers.back()->glyphs[blob_index] = layout.getGlyphId(glyph_index);
-
-          const size_t pos_index = 2 * blob_index;
-          // Extract the letter spacing by itself out of the minikin layout.
-          letter_spacing = run.style.letter_spacing == 0
-                               ? 0
-                               : layout.getX(glyph_index) - current_x_position;
-          buffers.back()->pos[pos_index] = current_x_position + letter_spacing;
-          buffers.back()->pos[pos_index + 1] = layout.getY(glyph_index);
+          size_t pos_index = blob_index * 2;
+          blob_buffer.pos[pos_index] = current_x_position;
+          blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
           float glyph_advance = layout.getCharAdvance(code_unit_index);
 
@@ -411,7 +403,7 @@ void Paragraph::Layout(double width, bool force) {
           float subglyph_advance =
               glyph_advance / subglyph_code_unit_counts.size();
           glyph_single_line_position_x.emplace_back(
-              x_offset + current_x_position + letter_spacing, subglyph_advance,
+              run_x_offset + current_x_position, subglyph_advance,
               subglyph_code_unit_counts[0]);
 
           // Compute positions for the additional characters in the ligature.
@@ -423,91 +415,60 @@ void Paragraph::Layout(double width, bool force) {
 
           current_x_position += glyph_advance;
 
-          // Check if the current Glyph is a whitespace and handle multiple
-          // whitespaces in a row.
-          if (whitespace_set_.count(layout.getGlyphId(glyph_index)) > 0) {
-            // Only increment word_count if it is the first in a series of
-            // whitespaces.
-            if (whitespace_ended) {
-              ++word_count;
-            }
-            whitespace_ended = false;
-          } else {
-            whitespace_ended = true;
+          if (justify_line && word_index < words.size() &&
+              code_unit_index == words[word_index].end) {
+            current_x_position += word_gap_width;
+            word_index++;
           }
         }
-        blob_start += blob_length;
       }
 
-      // TODO(abarth): We could keep the same SkTextBlobBuilder as long as the
-      // color stayed the same.
       SkPaint::FontMetrics metrics;
       paint.getFontMetrics(&metrics);
-      // Apply additional word spacing if the text is justified.
-      if (paragraph_style_.text_align == TextAlign::justify &&
-          buffer_sizes.size() > 0) {
-        JustifyLine(buffers, buffer_sizes, word_count, justify_spacing);
-      }
-      records_.push_back(PaintRecord{run.style, builder.make(), metrics, lines_,
-                                     layout.getAdvance()});
-      // Must adjust each line to the largest text in the line, so cannot
-      // directly push the offset property of PaintRecord until line is
-      // finished.
-      x_queue.push_back(x_offset);
+      paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
+                                 builder.make(), metrics, line_number,
+                                 current_x_position);
+      run_x_offset += current_x_position;
+    }
 
-      temp_line_spacing = lines_ == 0 ? -metrics.fAscent * run.style.height
-                                      : (-metrics.fAscent + metrics.fLeading) *
-                                            run.style.height;
-      if (max_line_spacing < temp_line_spacing) {
-        max_line_spacing = temp_line_spacing;
-        // Record the alphabetic_baseline_ and idegraphic_baseline_:
-        if (lines_ == 0) {
-          alphabetic_baseline_ = -metrics.fAscent * run.style.height;
+    double max_line_spacing = 0;
+    double max_descent = 0;
+    for (const PaintRecord& paint_record : paint_records) {
+      const SkPaint::FontMetrics& metrics = paint_record.metrics();
+      double style_height = paint_record.style().height;
+      double line_spacing =
+          (line_number == 0)
+              ? -metrics.fAscent * style_height
+              : (-metrics.fAscent + metrics.fLeading) * style_height;
+      if (line_spacing > max_line_spacing) {
+        max_line_spacing = line_spacing;
+        if (line_number == 0) {
+          alphabetic_baseline_ = line_spacing;
           // TODO(garyq): Properly implement ideographic_baseline_.
           ideographic_baseline_ =
-              (metrics.fUnderlinePosition - metrics.fAscent) * run.style.height;
+              (metrics.fUnderlinePosition - metrics.fAscent) * style_height;
         }
       }
-      temp_line_spacing = metrics.fDescent * run.style.height;
-      if (max_descent < temp_line_spacing)
-        max_descent = temp_line_spacing;
+      max_line_spacing = std::max(line_spacing, max_line_spacing);
 
-      if (layout_end == next_break || is_newline) {
-        y_offset += roundf(max_line_spacing + prev_max_descent);
-        for (size_t i = 0; i < x_queue.size(); ++i) {
-          PaintRecord& record = records_[records_.size() - x_queue.size() + i];
-          record.SetOffset(SkPoint::Make(x_queue[i], y_offset));
-        }
-        x_queue.clear();
-
-        line_heights_.push_back(
-            (line_heights_.empty() ? 0 : line_heights_.back()) +
-            roundf(max_line_spacing + max_descent));
-        glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x));
-        glyph_single_line_position_x.clear();
-
-        prev_max_descent = max_descent;
-
-        // Reset Variables for next line.
-        max_line_spacing = 0.0f;
-        max_descent = 0.0f;
-        current_x_position = 0.0f;
-        break_index += 1;
-        lines_++;
-        x_offset = GetLineXOffset(lines_);
-      } else {
-        x_offset += layout.getAdvance();
-      }
-
-      layout_start = layout_end;
+      double descent = metrics.fDescent * style_height;
+      max_descent = std::max(descent, max_descent);
     }
+
+    line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
+                            roundf(max_line_spacing + max_descent));
+    y_offset += roundf(max_line_spacing + prev_max_descent);
+    prev_max_descent = max_descent;
+
+    for (PaintRecord& paint_record : paint_records) {
+      paint_record.SetOffset(
+          SkPoint::Make(paint_record.offset().x(), y_offset));
+      records_.emplace_back(std::move(paint_record));
+    }
+
+    glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x));
   }
 
-  // Remove justification on the last line.
-  if (paragraph_style_.text_align == TextAlign::justify &&
-      buffer_sizes.size() > 0) {
-    JustifyLine(buffers, buffer_sizes, word_count, justify_spacing, -1);
-  }
   CalculateIntrinsicWidths();
   breaker_.finish();
 }
@@ -522,43 +483,6 @@ double Paragraph::GetLineXOffset(size_t line) {
     return (width_ - breaker_.getWidths()[line]) / 2;
   } else {
     return 0;
-  }
-}
-
-// Amends the buffers to incorporate justification.
-void Paragraph::JustifyLine(
-    std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
-    std::vector<size_t>& buffer_sizes,
-    int word_count,
-    double& justify_spacing,
-    double multiplier) {
-  // We will use the previous justification spacing when undoing justification.
-  if (multiplier > 0) {
-    justify_spacing =
-        (width_ - breaker_.getWidths()[lines_]) / (word_count - 1);
-  }
-  word_count = 0;
-  bool whitespace_ended = true;
-  for (size_t i = 0; i < buffers.size(); ++i) {
-    for (size_t glyph_index = 0; glyph_index < buffer_sizes[i]; ++glyph_index) {
-      // Check if the current Glyph is a whitespace and handle multiple
-      // whitespaces in a row.
-      if (whitespace_set_.count(buffers[i]->glyphs[glyph_index]) > 0) {
-        // Only increment word_count and add justification spacing to
-        // whitespace if it is the first in a series of whitespaces.
-        if (whitespace_ended) {
-          ++word_count;
-          buffers[i]->pos[glyph_index * 2] +=
-              justify_spacing * multiplier * word_count;
-        }
-        whitespace_ended = false;
-      } else {
-        // Add justification spacing for all non-whitespace glyphs.
-        buffers[i]->pos[glyph_index * 2] +=
-            justify_spacing * multiplier * word_count;
-        whitespace_ended = true;
-      }
-    }
   }
 }
 
@@ -578,7 +502,7 @@ double Paragraph::GetIdeographicBaseline() const {
 
 void Paragraph::CalculateIntrinsicWidths() {
   max_intrinsic_width_ = 0;
-  for (size_t i = 0; i < lines_; ++i) {
+  for (size_t i = 0; i < GetLineCount(); ++i) {
     max_intrinsic_width_ += breaker_.getWidths()[i];
   }
 
@@ -586,7 +510,7 @@ void Paragraph::CalculateIntrinsicWidths() {
   // intrinsic width. This is currently the longest line in the text after
   // layout.
   min_intrinsic_width_ = 0;
-  for (size_t i = 0; i < lines_; ++i) {
+  for (size_t i = 0; i < GetLineCount(); ++i) {
     min_intrinsic_width_ = fmax(min_intrinsic_width_, breaker_.getWidths()[i]);
   }
 
@@ -666,7 +590,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
 
   double width = 0;
   if (paragraph_style_.text_align == TextAlign::justify &&
-      record.line() != lines_ - 1) {
+      record.line() != GetLineCount() - 1) {
     width = width_;
   } else {
     width = record.GetRunWidth();
@@ -905,12 +829,12 @@ SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
       minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
 }
 
-int Paragraph::GetLineCount() const {
-  return lines_;
+size_t Paragraph::GetLineCount() const {
+  return line_heights_.size();
 }
 
 bool Paragraph::DidExceedMaxLines() const {
-  if (lines_ > paragraph_style_.max_lines)
+  if (GetLineCount() > paragraph_style_.max_lines)
     return true;
   return false;
 }
