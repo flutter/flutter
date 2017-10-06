@@ -128,8 +128,6 @@ action("generate_snapshot_bin") {
     "--vm_flag",
     "--await_is_keyword",
     "--vm_flag",
-    "--assert_initializer",
-    "--vm_flag",
     "--enable_mirrors=false",
     "--vm_output_bin",
     rebase_path(vm_snapshot_data, root_build_dir),

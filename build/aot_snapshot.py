@@ -40,7 +40,6 @@ def main():
     args.snapshotter_path,
     "--enable_mirrors=false",
     "--await_is_keyword",
-    "--assert_initializer",
     '--snapshot_kind=app-aot-assembly',
     '--packages=%s' % args.packages,
     '--assembly=%s' % args.assembly,
