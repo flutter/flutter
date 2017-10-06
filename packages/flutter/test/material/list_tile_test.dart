@@ -49,18 +49,21 @@ void main() {
     final Key trailingKey = new GlobalKey();
     bool hasSubtitle;
 
-    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false }) {
+    Widget buildFrame({bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0}) {
       hasSubtitle = isTwoLine || isThreeLine;
       return new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new ListTile(
-              leading: new Container(key: leadingKey, width: 24.0, height: 24.0),
-              title: const Text('title'),
-              subtitle: hasSubtitle ? const Text('subtitle') : null,
-              trailing: new Container(key: trailingKey, width: 24.0, height: 24.0),
-              dense: dense,
-              isThreeLine: isThreeLine,
+        home: new MediaQuery(
+          data: new MediaQueryData(textScaleFactor: textScaleFactor),
+          child: new Material(
+            child: new Center(
+              child: new ListTile(
+                leading: new Container(key: leadingKey, width: 24.0, height: 24.0),
+                title: const Text('title'),
+                subtitle: hasSubtitle ? const Text('subtitle') : null,
+                trailing: new Container(key: trailingKey, width: 24.0, height: 24.0),
+                dense: dense,
+                isThreeLine: isThreeLine,
+              ),
             ),
           ),
         ),
@@ -132,7 +135,38 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(76.0);
+
+    await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(64.0);
+
+    await tester.pumpWidget(buildFrame(dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(64.0);
+
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
   });
+
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
