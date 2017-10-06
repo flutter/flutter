@@ -398,6 +398,7 @@ template("flutter_app") {
                                "deps",
                                "manifest",
                                "analysis_options",
+                               "disable_analysis",
                                "source_dir",
                              ])
     }
@@ -411,6 +412,7 @@ template("flutter_app") {
                                "deps",
                                "manifest",
                                "analysis_options",
+                               "disable_analysis",
                                "source_dir",
                              ])
     }
