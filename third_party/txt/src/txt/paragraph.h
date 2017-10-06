@@ -71,6 +71,7 @@ class Paragraph {
   //
   // Layout calculates the positioning of all the glyphs. Must call this method
   // before Painting and getting any statistics from this class.
+  void OldLayout(double width, bool force = false);
   void Layout(double width, bool force = false);
 
   // Paints the Laid out text onto the supplied SkCanvas at (x, y) offset from
@@ -138,7 +139,7 @@ class Paragraph {
   // Returns the number of lines the paragraph takes up. If the text exceeds the
   // amount width and maxlines provides, Layout() truncates the extra text from
   // the layout and this will return the max lines allowed.
-  int GetLineCount() const;
+  size_t GetLineCount() const;
 
   // Checks if the layout extends past the maximum lines and had to be
   // truncated.
@@ -212,13 +213,9 @@ class Paragraph {
   // Holds the laid out x positions of each glyph.
   std::vector<GlyphLine> glyph_position_x_;
 
-  // Set of glyph IDs that correspond to whitespace.
-  std::set<GlyphID> whitespace_set_;
-
   // The max width of the paragraph as provided in the most recent Layout()
   // call.
   double width_ = -1.0f;
-  size_t lines_ = 0;
   double max_intrinsic_width_ = 0;
   double min_intrinsic_width_ = 0;
   double alphabetic_baseline_ = FLT_MAX;
@@ -253,21 +250,9 @@ class Paragraph {
       std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
           collection_map);
 
-  // Calculates the GlyphIDs of all whitespace characters present in the text
-  // between start and end. THis is used to correctly add extra whitespace when
-  // justifying.
-  void FillWhitespaceSet(size_t start, size_t end, hb_font_t* hb_font);
-
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
   double GetLineXOffset(size_t line);
-
-  // Calculates and amends the layout for one line to be justified.
-  void JustifyLine(std::vector<const SkTextBlobBuilder::RunBuffer*>& buffers,
-                   std::vector<size_t>& buffer_sizes,
-                   int word_count,
-                   double& justify_spacing,
-                   double multiplier = 1);
 
   // Creates and draws the decorations onto the canvas.
   void PaintDecorations(SkCanvas* canvas,

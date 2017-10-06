@@ -1260,7 +1260,7 @@ TEST_F(ParagraphTest, LongWordParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
-  ASSERT_EQ(paragraph->GetLineCount(), 4);
+  ASSERT_EQ(paragraph->GetLineCount(), 4ull);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -1446,7 +1446,7 @@ TEST_F(ParagraphTest, HyphenBreakParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
-  ASSERT_EQ(paragraph->GetLineCount(), 5);
+  ASSERT_EQ(paragraph->GetLineCount(), 5ull);
   ASSERT_TRUE(Snapshot());
 }
 
@@ -1490,7 +1490,7 @@ TEST_F(ParagraphTest, RepeatLayoutParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
-  ASSERT_EQ(paragraph->GetLineCount(), 12);
+  ASSERT_EQ(paragraph->GetLineCount(), 12ull);
 
   // Second Layout.
   SetUp();
@@ -1506,7 +1506,7 @@ TEST_F(ParagraphTest, RepeatLayoutParagraph) {
   ASSERT_EQ(paragraph->runs_.styles_.size(), 2ull);
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
-  ASSERT_EQ(paragraph->GetLineCount(), 6);
+  ASSERT_EQ(paragraph->GetLineCount(), 6ull);
   ASSERT_TRUE(Snapshot());
 }
 
