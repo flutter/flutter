@@ -971,9 +971,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
           ),
         ),
@@ -992,9 +992,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
@@ -1022,9 +1022,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
@@ -1063,9 +1063,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             bottom: new PreferredSize(
               preferredSize: const Size(0.0, kToolbarHeight),

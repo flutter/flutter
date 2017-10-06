@@ -39,6 +39,8 @@ void main() {
       ),
     ));
 
+    expect(tester.takeException(), contains('overflowed'));
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
@@ -108,6 +110,8 @@ void main() {
         ),
       ),
     ));
+
+    expect(tester.takeException(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(

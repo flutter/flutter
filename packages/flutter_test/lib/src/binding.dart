@@ -319,6 +319,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Zone _parentZone;
   Completer<Null> _currentTestCompleter;
+  String _currentTestDescription; // set from _runTest to _testCompletionHandler
 
   void _testCompletionHandler() {
     // This can get called twice, in the case of a Future without listeners failing, and then
@@ -333,15 +334,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // but the test package does, that's how the test package tracks errors. So really we could
       // get the same effect here by calling that error handler directly or indeed just throwing.
       // However, we call registerException because that's the semantically correct thing...
-      test_package.registerException('Test failed. See exception logs above.', _EmptyStack.instance);
+      String additional = '';
+      if (_currentTestDescription != '')
+        additional = '\nThe test description was: $_currentTestDescription';
+      test_package.registerException('Test failed. See exception logs above.$additional', _EmptyStack.instance);
       _pendingExceptionDetails = null;
     }
+    _currentTestDescription = null;
     if (!_currentTestCompleter.isCompleted)
       _currentTestCompleter.complete(null);
   }
 
   Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
     assert(description != null);
+    assert(_currentTestDescription == null);
+    _currentTestDescription = description; // cleared by _testCompletionHandler
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions

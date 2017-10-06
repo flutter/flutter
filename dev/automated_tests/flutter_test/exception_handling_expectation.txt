@@ -16,6 +16,7 @@ Exception handling in test harness - string
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 .*(this line has more of the test framework's output)?
   Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - string
  *
 [^═]*(this line contains the test framework's output with the clock and so forth)?
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
@@ -35,6 +36,7 @@ Exception handling in test harness - FlutterError
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 .*(this line has more of the test framework's output)?
   Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - FlutterError
  *
 [^═]*(this line contains the test framework's output with the clock and so forth)?
 ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
@@ -54,5 +56,6 @@ Exception handling in test harness - uncaught Future error
 ════════════════════════════════════════════════════════════════════════════════════════════════════
 .*(this line has more of the test framework's output)?
   Test failed\. See exception logs above\.
+  The test description was: Exception handling in test harness - uncaught Future error
  *
 .*..:.. \+0 -3: Some tests failed\. *

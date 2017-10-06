@@ -384,6 +384,8 @@ void main() {
       )
     ));
 
+    expect(tester.takeException(), contains('overflowed'));
+
     final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
     expect(renderBox.size.width, equals(0.0));
     expect(renderBox.size.height, equals(100.0));
@@ -776,6 +778,8 @@ void main() {
         )
       )
     ));
+
+    expect(tester.takeException(), contains('overflowed'));
 
     final RenderBox renderBox = tester.renderObject(find.byKey(childKey));
     expect(renderBox.size.width, equals(0.0));

@@ -72,4 +72,42 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Doesn\'t overflow because of floating point accumulated error', (WidgetTester tester) async {
+    // both of these cases have failed in the past due to floating point issues
+    await tester.pumpWidget(
+      new Center(
+        child: new Container(
+          height: 400.0,
+          child: new Column(
+            children: <Widget>[
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(
+      new Center(
+        child: new Container(
+          height: 199.0,
+          child: new Column(
+            children: <Widget>[
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+              new Expanded(child: new Container()),
+            ],
+          ),
+        ),
+      ),
+    );
+  });
 }
