@@ -53,7 +53,12 @@ abstract class Decoration extends Diagnosticable {
   /// does not take into account that the circle is drawn in the center of the
   /// box regardless of the ratio of the box; it does not provide the extra
   /// padding that is implied by changing the ratio.
-  EdgeInsets get padding => EdgeInsets.zero;
+  ///
+  /// The value returned by this getter must be resolved (using
+  /// [EdgeInsetsGeometry.resolve] to obtain an absolute [EdgeInsets]. (For
+  /// example, [BorderDirectional] will return an [EdgeInsetsDirectional] for
+  /// its [padding].)
+  EdgeInsetsGeometry get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;

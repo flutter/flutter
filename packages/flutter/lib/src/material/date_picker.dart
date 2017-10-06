@@ -9,8 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/date_symbols.dart' as intl show DateSymbols;
-import 'package:intl/intl.dart' as intl show DateFormat;
 
 import 'button.dart';
 import 'button_bar.dart';
@@ -83,6 +81,7 @@ class _DatePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextTheme headerTextTheme = themeData.primaryTextTheme;
     Color dayColor;
@@ -130,12 +129,12 @@ class _DatePickerHeader extends StatelessWidget {
     Widget yearButton = new _DateHeaderButton(
       color: backgroundColor,
       onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-      child: new Text(new intl.DateFormat('yyyy').format(selectedDate), style: yearStyle),
+      child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
     );
     Widget dayButton = new _DateHeaderButton(
       color: backgroundColor,
       onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
-      child: new Text(new intl.DateFormat('E, MMM\u00a0d').format(selectedDate), style: dayStyle),
+      child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
     );
 
     // Disable the button for the current mode.
@@ -275,12 +274,33 @@ class DayPicker extends StatelessWidget {
   /// Optional user supplied predicate function to customize selectable days.
   final SelectableDayPredicate selectableDayPredicate;
 
-  List<Widget> _getDayHeaders(TextStyle headerStyle) {
-    final intl.DateFormat dateFormat = new intl.DateFormat();
-    final intl.DateSymbols symbols = dateFormat.dateSymbols;
-    return symbols.NARROWWEEKDAYS.map((String weekDay) {
-      return new Center(child: new Text(weekDay, style: headerStyle));
-    }).toList(growable: false);
+  /// Builds widgets showing abbreviated days of week. The first widget in the
+  /// returned list corresponds to the first day of week for the current locale.
+  ///
+  /// Examples:
+  ///
+  /// ```
+  /// ┌ Sunday is the first day of week in the US (en_US)
+  /// |
+  /// S M T W T F S  <-- the returned list contains these widgets
+  /// _ _ _ _ _ 1 2
+  /// 3 4 5 6 7 8 9
+  ///
+  /// ┌ But it's Monday in the UK (en_GB)
+  /// |
+  /// M T W T F S S  <-- the returned list contains these widgets
+  /// _ _ _ _ 1 2 3
+  /// 4 5 6 7 8 9 10
+  /// ```
+  List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
+    final List<Widget> result = <Widget>[];
+    for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
+      final String weekDay = localizations.narrowWeekDays[i];
+      result.add(new Center(child: new Text(weekDay, style: headerStyle)));
+      if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
+        break;
+    }
+    return result;
   }
 
   // Do not use this directly - call getDaysInMonth instead.
@@ -301,18 +321,64 @@ class DayPicker extends StatelessWidget {
     return _kDaysInMonth[month - 1];
   }
 
+  /// Computes the offset from the first day of week that the first day of the
+  /// [month] falls on.
+  ///
+  /// For example, September 1, 2017 falls on a Friday, which in the calendar
+  /// localized for United States English appears as:
+  ///
+  /// ```
+  /// S M T W T F S
+  /// _ _ _ _ _ 1 2
+  /// ```
+  ///
+  /// The offset for the first day of the months is the number of leading blanks
+  /// in the calendar, i.e. 5.
+  ///
+  /// The same date localized for the Russian calendar has a different offset,
+  /// because the first day of week is Monday rather than Sunday:
+  ///
+  /// ```
+  /// M T W T F S S
+  /// _ _ _ _ 1 2 3
+  /// ```
+  ///
+  /// So the offset is 4, rather than 5.
+  ///
+  /// This code consolidates the following:
+  ///
+  /// - [DateTime.weekday] provides a 1-based index into days of week, with 1
+  ///   falling on Monday.
+  /// - [MaterialLocalizations.firstDayOfWeekIndex] provides a 0-based index
+  ///   into the [MaterialLocalizations.narrowWeekDays] list.
+  /// - [MaterialLocalizations.narrowWeekDays] list provides localized names of
+  ///   days of week, always starting with Sunday and ending with Saturday.
+  int _computeFirstDayOffset(int year, int month, MaterialLocalizations localizations) {
+    // 0-based day of week, with 0 representing Monday.
+    final int weekDayFromMonday = new DateTime(year, month).weekday - 1;
+    // 0-based day of week, with 0 representing Sunday.
+    final int firstDayOfWeekFromSunday = localizations.firstDayOfWeekIndex;
+    // firstDayOfWeekFromSunday recomputed to be Monday-based
+    final int firstDayOfWeekFromMonday = (firstDayOfWeekFromSunday - 1) % 7;
+    // Number of days between the first day of week appearing on the calendar,
+    // and the day corresponding to the 1-st of the month.
+    return (weekDayFromMonday - firstDayOfWeekFromMonday) % 7;
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final int year = displayedMonth.year;
     final int month = displayedMonth.month;
     final int daysInMonth = getDaysInMonth(year, month);
-    // This assumes a start day of SUNDAY, but could be changed.
-    final int firstWeekday = new DateTime(year, month).weekday % 7;
+    final int firstDayOffset = _computeFirstDayOffset(year, month, localizations);
     final List<Widget> labels = <Widget>[];
-    labels.addAll(_getDayHeaders(themeData.textTheme.caption));
-    for (int i = 0; true; ++i) {
-      final int day = i - firstWeekday + 1;
+    labels.addAll(_getDayHeaders(themeData.textTheme.caption, localizations));
+    for (int i = 0; true; i += 1) {
+      // 1-based day of month, e.g. 1-31 for January, and 1-29 for February on
+      // a leap year.
+      final int day = i - firstDayOffset + 1;
       if (day > daysInMonth)
         break;
       if (day < 1) {
@@ -370,7 +436,7 @@ class DayPicker extends StatelessWidget {
             child: new Center(
               child: new GestureDetector(
                 onTap: onMonthHeaderTap != null ? Feedback.wrapForTap(onMonthHeaderTap, context) : null,
-                child: new Text(new intl.DateFormat('yMMMM').format(displayedMonth),
+                child: new Text(localizations.formatMonthYear(displayedMonth),
                   style: themeData.textTheme.subhead,
                 ),
               ),
@@ -558,6 +624,7 @@ class _MonthPickerState extends State<MonthPicker> {
   @override
   Widget build(BuildContext context) {
     final TextDirection textDirection = Directionality.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
       height: _kMaxDayPickerHeight,
@@ -576,7 +643,7 @@ class _MonthPickerState extends State<MonthPicker> {
             start: 8.0,
             child: new IconButton(
               icon: _getPreviousMonthIcon(textDirection),
-              tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
+              tooltip: localizations.previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
           ),
@@ -585,7 +652,7 @@ class _MonthPickerState extends State<MonthPicker> {
             end: 8.0,
             child: new IconButton(
               icon: _getNextMonthIcon(textDirection),
-              tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
+              tooltip: localizations.nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),
           ),
@@ -882,6 +949,14 @@ typedef bool SelectableDayPredicate(DateTime day);
 /// date picker initially in the year or month+day picker mode. It defaults
 /// to month+day, and must not be null.
 ///
+/// An optional [locale] argument can be used to set the locale for the date
+/// picker. It defaults to the ambient locale provided by [Localizations].
+///
+/// An optional [textDirection] argument can be used to set the text direction
+/// (RTL or LTR) for the date picker. It defaults to the ambient text direction
+/// provided by [Directionality]. If both [locale] and [textDirection] are not
+/// null, [textDirection] overrides the direction chosen for the [locale].
+///
 /// See also:
 ///
 ///  * [showTimePicker]
@@ -893,6 +968,8 @@ Future<DateTime> showDatePicker({
   @required DateTime lastDate,
   SelectableDayPredicate selectableDayPredicate,
   DatePickerMode initialDatePickerMode: DatePickerMode.day,
+  Locale locale,
+  TextDirection textDirection,
 }) async {
   assert(!initialDate.isBefore(firstDate), 'initialDate must be on or after firstDate');
   assert(!initialDate.isAfter(lastDate), 'initialDate must be on or before lastDate');
@@ -902,14 +979,32 @@ Future<DateTime> showDatePicker({
     'Provided initialDate must satisfy provided selectableDayPredicate'
   );
   assert(initialDatePickerMode != null, 'initialDatePickerMode must not be null');
-  return await showDialog(
+
+  Widget child = new _DatePickerDialog(
+    initialDate: initialDate,
+    firstDate: firstDate,
+    lastDate: lastDate,
+    selectableDayPredicate: selectableDayPredicate,
+    initialDatePickerMode: initialDatePickerMode,
+  );
+
+  if (textDirection != null) {
+    child = new Directionality(
+      textDirection: textDirection,
+      child: child,
+    );
+  }
+
+  if (locale != null) {
+    child = new Localizations.override(
+      context: context,
+      locale: locale,
+      child: child,
+    );
+  }
+
+  return await showDialog<DateTime>(
     context: context,
-    child: new _DatePickerDialog(
-      initialDate: initialDate,
-      firstDate: firstDate,
-      lastDate: lastDate,
-      selectableDayPredicate: selectableDayPredicate,
-      initialDatePickerMode: initialDatePickerMode,
-    )
+    child: child,
   );
 }

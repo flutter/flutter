@@ -128,10 +128,11 @@ void main() {
     final BorderSide side0 = const BorderSide(width: 0.0);
     final BorderSide side1 = const BorderSide(width: 1.0);
     final BorderSide side2 = const BorderSide(width: 2.0);
-    expect(BorderSide.lerp(side2, side1, 10.0), side0);
-    expect(BorderSide.lerp(side1, side2, -10.0), side0);
+    expect(BorderSide.lerp(side2, side1, 10.0), BorderSide.none);
+    expect(BorderSide.lerp(side1, side2, -10.0), BorderSide.none);
     expect(BorderSide.lerp(side0, side1, 2.0), side2);
-    expect(BorderSide.lerp(side1, side0, 2.0), side0);
+    expect(BorderSide.lerp(side1, side0, 2.0), BorderSide.none);
+    expect(BorderSide.lerp(side2, side1, 2.0), side0);
   });
   test('BorderSide - toString', () {
     expect(

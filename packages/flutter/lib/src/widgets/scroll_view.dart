@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'debug.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
@@ -179,16 +178,7 @@ abstract class ScrollView extends StatelessWidget {
   /// [AxisDirection.right].
   @protected
   AxisDirection getDirection(BuildContext context) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
-      case Axis.vertical:
-        return reverse ? AxisDirection.up : AxisDirection.down;
-    }
-    return null;
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
   /// Subclasses should override this method to build the slivers for the inside
