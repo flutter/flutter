@@ -133,7 +133,7 @@ sk_sp<SkTypeface> FontCache::createTypeface(
   if (!data)
     return nullptr;
 
-  return sk_sp<SkTypeface>(SkFontMgr::RefDefault()->createFromData(data.get()));
+  return SkFontMgr::RefDefault()->makeFromData(std::move(data));
 }
 
 }  // namespace blink
