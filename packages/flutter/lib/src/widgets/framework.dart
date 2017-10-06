@@ -2145,6 +2145,11 @@ class BuildOwner {
 
   int _debugStateLockLevel = 0;
   bool get _debugStateLocked => _debugStateLockLevel > 0;
+
+  //  Whether this element is currently in the process of getting built.
+  //
+  //  Only valid when asserts are enabled.
+  bool get debugBuilding => _debugBuilding;
   bool _debugBuilding = false;
   Element _debugCurrentBuildTarget;
 
