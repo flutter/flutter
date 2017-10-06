@@ -127,9 +127,9 @@ class _BottomNavigationTile extends StatelessWidget {
   _BottomNavigationTile(
     this.type,
     this.item,
-    this.onTap,
     this.animation,
     this.iconSize, {
+    this.onTap,
     this.colorTween,
     this.flex
     }
@@ -144,19 +144,31 @@ class _BottomNavigationTile extends StatelessWidget {
   final double flex;
 
   Widget _buildIcon() {
+    double tweenStart;
+    Color iconColor;
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        tweenStart = 8.0;
+        iconColor = colorTween.evaluate(animation);
+        break;
+      case BottomNavigationBarType.shifting:
+        tweenStart = 16.0;
+        iconColor = Colors.white;
+        break;
+    }
     return new Align(
       alignment: Alignment.topCenter,
       heightFactor: 1.0,
       child: new Container(
         margin: new EdgeInsets.only(
           top: new Tween<double>(
-            begin: type == BottomNavigationBarType.fixed ? 8.0 : 16.0,
+            begin: tweenStart,
             end: _kTopMargin,
           ).evaluate(animation),
         ),
         child: new IconTheme(
           data: new IconThemeData(
-            color: type == BottomNavigationBarType.fixed ? colorTween.evaluate(animation) : Colors.white,
+            color: iconColor,
             size: iconSize,
           ),
           child: item.icon,
@@ -231,7 +243,18 @@ class _BottomNavigationTile extends StatelessWidget {
     // need to divide the changes in flex allotment into smaller pieces to
     // produce smooth animation. We do this by multiplying the flex value
     // (which is an integer) by a large number.
-    final int size = type == BottomNavigationBarType.shifting ? (flex * 1000.0).round() : 1;
+    int size;
+    Widget label;
+    switch (type) {
+      case BottomNavigationBarType.fixed:
+        size = 1;
+        label = _buildFixedLabel();
+        break;
+      case BottomNavigationBarType.shifting:
+        size = (flex * 1000.0).round();
+        label = _buildShiftingLabel();
+        break;
+    }
     return new Expanded(
       flex: size,
       child: new InkResponse(
@@ -242,9 +265,7 @@ class _BottomNavigationTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _buildIcon(),
-            type == BottomNavigationBarType.fixed
-                ? _buildFixedLabel()
-                : _buildShiftingLabel(),
+            label,
           ],
         ),
       ),
@@ -272,7 +293,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       return new AnimationController(
         duration: kThemeAnimationDuration,
         vsync: this,
-      )..addListener(() => setState((){}));
+      )..addListener(_rebuild);
     });
     _animations = new List<CurvedAnimation>.generate(widget.items.length, (int index) {
       return new CurvedAnimation(
@@ -283,6 +304,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     });
     _controllers[widget.currentIndex].value = 1.0;
     _backgroundColor = widget.items[widget.currentIndex].backgroundColor;
+  }
+
+  void _rebuild() {
+    setState(() {
+      // Rebuilding when any of the controllers tick, i.e. when the items are
+      // animated.
+    });
   }
 
   @override
@@ -323,8 +351,13 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   void didUpdateWidget(BottomNavigationBar oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.currentIndex != oldWidget.currentIndex) {
-      if (widget.type == BottomNavigationBarType.shifting)
-        _pushCircle(widget.currentIndex);
+      switch (widget.type) {
+        case BottomNavigationBarType.fixed:
+          break;
+        case BottomNavigationBarType.shifting:
+          _pushCircle(widget.currentIndex);
+          break;
+      }
       _controllers[oldWidget.currentIndex].reverse();
       _controllers[widget.currentIndex].forward();
     }
@@ -336,40 +369,47 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
       case BottomNavigationBarType.fixed:
         final ThemeData themeData = Theme.of(context);
         final TextTheme textTheme = themeData.textTheme;
+        Color themeColor;
+        switch (themeData.brightness) {
+          case Brightness.light:
+            themeColor = themeData.primaryColor;
+            break;
+          case Brightness.dark:
+            themeColor = themeData.accentColor;
+            break;
+        }
         final ColorTween colorTween = new ColorTween(
           begin: textTheme.caption.color,
-          end: widget.fixedColor ?? (
-            themeData.brightness == Brightness.light ?
-            themeData.primaryColor : themeData.accentColor
-          )
+          end: widget.fixedColor ?? themeColor,
         );
         for (int i = 0; i < widget.items.length; i += 1) {
-          children.add(new _BottomNavigationTile(
-            widget.type,
-            widget.items[i],
-            () {
-              if (widget.onTap != null)
-                widget.onTap(i);
-            },
-            _animations[i],
-            widget.iconSize,
-            colorTween: colorTween));
+          children.add(
+            new _BottomNavigationTile(
+              widget.type,
+              widget.items[i],
+              _animations[i],
+              widget.iconSize,
+              onTap: () {
+                if (widget.onTap != null)
+                  widget.onTap(i);
+              },
+              colorTween: colorTween),
+          );
         }
         break;
-
       case BottomNavigationBarType.shifting:
         for (int i = 0; i < widget.items.length; i += 1) {
           children.add(
             new _BottomNavigationTile(
               widget.type,
               widget.items[i],
-              () {
+              _animations[i],
+              widget.iconSize,
+              onTap: () {
                 if (widget.onTap != null)
                   widget.onTap(i);
               },
-              _animations[i],
-              widget.iconSize,
-            flex: _evaluateFlex(_animations[i])),
+              flex: _evaluateFlex(_animations[i])),
           );
         }
         break;
@@ -389,12 +429,20 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   Widget build(BuildContext context) {
+    Color backgroundColor;
+    switch (widget.type) {
+      case BottomNavigationBarType.fixed:
+        break;
+      case BottomNavigationBarType.shifting:
+        backgroundColor = _backgroundColor;
+        break;
+    }
     return new Stack(
       children: <Widget>[
         new Positioned.fill(
           child: new Material( // Casts shadow.
             elevation: 8.0,
-            color: widget.type == BottomNavigationBarType.shifting ? _backgroundColor : null,
+            color: backgroundColor,
           ),
         ),
         new ConstrainedBox(
