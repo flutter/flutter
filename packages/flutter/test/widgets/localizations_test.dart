@@ -159,6 +159,23 @@ Widget buildFrame({
   );
 }
 
+class SyncLoadTest extends StatefulWidget {
+  const SyncLoadTest();
+
+  @override
+  SyncLoadTestState createState() => new SyncLoadTestState();
+}
+
+class SyncLoadTestState extends State<SyncLoadTest> {
+  @override
+  Widget build(BuildContext context) {
+    return new Text(
+      TestLocalizations.of(context).message,
+      textDirection: TextDirection.rtl,
+    );
+  }
+}
+
 void main() {
   testWidgets('Localizations.localeFor in a WidgetsApp with system locale', (WidgetTester tester) async {
     BuildContext pageContext;
@@ -205,27 +222,27 @@ void main() {
   });
 
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
-    BuildContext pageContext;
-    await tester.pumpWidget(
-      buildFrame(
-        delegates: <LocalizationsDelegate<dynamic>>[
-          new SyncTestLocalizationsDelegate()
-        ],
-        buildContent: (BuildContext context) {
-          pageContext = context;
-          return new Text(TestLocalizations.of(context).message);
-        }
-      )
-    );
+    final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+      new SyncTestLocalizationsDelegate(),
+      const DefaultWidgetsLocalizationsDelegate(),
+    ];
 
-    expect(TestLocalizations.of(pageContext), isNotNull);
+    Future<Null> pumpTest(Locale locale) async {
+      await tester.pumpWidget(new Localizations(
+        locale: locale,
+        delegates: delegates,
+        child: const SyncLoadTest(),
+      ));
+    }
+
+    await pumpTest(const Locale('en', 'US'));
     expect(find.text('en_US'), findsOneWidget);
 
-    await tester.binding.setLocale('en', 'GB');
+    await pumpTest(const Locale('en', 'GB'));
     await tester.pump();
     expect(find.text('en_GB'), findsOneWidget);
 
-    await tester.binding.setLocale('en', 'US');
+    await pumpTest(const Locale('en', 'US'));
     await tester.pump();
     expect(find.text('en_US'), findsOneWidget);
   });
