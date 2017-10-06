@@ -114,8 +114,8 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  void nextPage({ @required Duration duration, @required Curve curve }) {
-    animateToPage(page.round() + 1, duration: duration, curve: curve);
+  Future<Null> nextPage({ @required Duration duration, @required Curve curve }) {
+    return animateToPage(page.round() + 1, duration: duration, curve: curve);
   }
 
   /// Animates the controlled [PageView] to the previous page.
@@ -124,8 +124,8 @@ class PageController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  void previousPage({ @required Duration duration, @required Curve curve }) {
-    animateToPage(page.round() - 1, duration: duration, curve: curve);
+  Future<Null> previousPage({ @required Duration duration, @required Curve curve }) {
+    return animateToPage(page.round() - 1, duration: duration, curve: curve);
   }
 
   @override
