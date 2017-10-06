@@ -334,12 +334,18 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
           vsync: this,
         )..controller.addStatusListener(
           (AnimationStatus status) {
-            if (status == AnimationStatus.completed) {
-              setState(() {
-                final _Circle circle = _circles.removeFirst();
-                _backgroundColor = circle.color;
-                circle.dispose();
-              });
+            switch (status) {
+              case AnimationStatus.completed:
+                setState(() {
+                  final _Circle circle = _circles.removeFirst();
+                  _backgroundColor = circle.color;
+                  circle.dispose();
+                });
+                break;
+              case AnimationStatus.dismissed:
+              case AnimationStatus.forward:
+              case AnimationStatus.reverse:
+                break;
             }
           },
         ),
