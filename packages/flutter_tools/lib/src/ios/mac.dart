@@ -83,7 +83,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key,]);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode != 0)
         throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout.trim();
