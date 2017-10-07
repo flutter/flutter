@@ -151,6 +151,9 @@ void main() {
       home: buildTable(source),
     ));
 
+    // the column overflows because we're forcing it to 600 pixels high
+    expect(tester.takeException(), contains('A vertical RenderFlex overflowed by'));
+
     expect(find.text('Gingerbread (0)'), findsOneWidget);
     expect(find.text('Gingerbread (1)'), findsNothing);
     expect(find.text('42'), findsNWidgets(10));

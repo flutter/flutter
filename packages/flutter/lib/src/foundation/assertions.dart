@@ -200,7 +200,11 @@ class FlutterError extends AssertionError {
     _errorCount = 0;
   }
 
-  static const int _kWrapWidth = 100;
+  /// The width to which [dumpErrorToConsole] will wrap lines.
+  ///
+  /// This can be used to ensure strings will not exceed the length at which
+  /// they will wrap, e.g. when placing ASCII art diagrams in messages.
+  static const int wrapWidth = 100;
 
   /// Prints the given exception details to the console.
   ///
@@ -227,13 +231,13 @@ class FlutterError extends AssertionError {
       return;
     if (_errorCount == 0 || forceReport) {
       final String header = '\u2550\u2550\u2561 EXCEPTION CAUGHT BY ${details.library} \u255E'.toUpperCase();
-      final String footer = '\u2550' * _kWrapWidth;
+      final String footer = '\u2550' * wrapWidth;
       debugPrint('$header${"\u2550" * (footer.length - header.length)}');
       final String verb = 'thrown${ details.context != null ? " ${details.context}" : ""}';
       if (details.exception is NullThrownError) {
-        debugPrint('The null value was $verb.', wrapWidth: _kWrapWidth);
+        debugPrint('The null value was $verb.', wrapWidth: wrapWidth);
       } else if (details.exception is num) {
-        debugPrint('The number ${details.exception} was $verb.', wrapWidth: _kWrapWidth);
+        debugPrint('The number ${details.exception} was $verb.', wrapWidth: wrapWidth);
       } else {
         String errorName;
         if (details.exception is AssertionError) {
@@ -252,7 +256,7 @@ class FlutterError extends AssertionError {
         String message = details.exceptionAsString();
         if (message.startsWith(prefix))
           message = message.substring(prefix.length);
-        debugPrint('The following $errorName was $verb:\n$message', wrapWidth: _kWrapWidth);
+        debugPrint('The following $errorName was $verb:\n$message', wrapWidth: wrapWidth);
       }
       Iterable<String> stackLines = (details.stack != null) ? details.stack.toString().trimRight().split('\n') : null;
       if ((details.exception is AssertionError) && (details.exception is! FlutterError)) {
@@ -276,25 +280,25 @@ class FlutterError extends AssertionError {
         if (ourFault) {
           debugPrint('\nEither the assertion indicates an error in the framework itself, or we should '
                      'provide substantially more information in this error message to help you determine '
-                     'and fix the underlying cause.', wrapWidth: _kWrapWidth);
-          debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: _kWrapWidth);
+                     'and fix the underlying cause.', wrapWidth: wrapWidth);
+          debugPrint('In either case, please report this assertion by filing a bug on GitHub:', wrapWidth: wrapWidth);
           debugPrint('  https://github.com/flutter/flutter/issues/new');
         }
       }
       if (details.stack != null) {
-        debugPrint('\nWhen the exception was thrown, this was the stack:', wrapWidth: _kWrapWidth);
+        debugPrint('\nWhen the exception was thrown, this was the stack:', wrapWidth: wrapWidth);
         if (details.stackFilter != null) {
           stackLines = details.stackFilter(stackLines);
         } else {
           stackLines = defaultStackFilter(stackLines);
         }
         for (String line in stackLines)
-          debugPrint(line, wrapWidth: _kWrapWidth);
+          debugPrint(line, wrapWidth: wrapWidth);
       }
       if (details.informationCollector != null) {
         final StringBuffer information = new StringBuffer();
         details.informationCollector(information);
-        debugPrint('\n${information.toString().trimRight()}', wrapWidth: _kWrapWidth);
+        debugPrint('\n${information.toString().trimRight()}', wrapWidth: wrapWidth);
       }
       debugPrint(footer);
     } else {

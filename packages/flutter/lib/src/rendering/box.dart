@@ -411,11 +411,15 @@ class BoxConstraints extends Constraints {
       return a * (1.0 - t);
     assert(a.debugAssertIsValid());
     assert(b.debugAssertIsValid());
+    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.INFINITY && b.minWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.INFINITY && b.maxWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.INFINITY && b.minHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.INFINITY && b.maxHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
     return new BoxConstraints(
-      minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
-      maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
-      minHeight: ui.lerpDouble(a.minHeight, b.minHeight, t),
-      maxHeight: ui.lerpDouble(a.maxHeight, b.maxHeight, t)
+      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.INFINITY,
+      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.INFINITY,
+      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.INFINITY,
+      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.INFINITY,
     );
   }
 
