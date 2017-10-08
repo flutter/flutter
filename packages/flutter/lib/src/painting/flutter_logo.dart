@@ -123,6 +123,13 @@ class FlutterLogoDecoration extends Decoration {
   ///
   /// Interpolates both the color and the style in a continuous fashion.
   ///
+  /// If both values are null, this returns null. Otherwise, it returns a
+  /// non-null value. If one of the values is null, then the result is obtained
+  /// by scaling the other value's opacity and [margin]. If neither value is
+  /// null and `t == 0.0`, then `a` is returned unmodified; if `t == 1.0` then
+  /// `b` is returned unmodified. Otherwise, the values are computed by
+  /// interpolating the properties appropriately.
+  ///
   /// See also [Decoration.lerp].
   static FlutterLogoDecoration lerp(FlutterLogoDecoration a, FlutterLogoDecoration b, double t) {
     assert(a == null || a.debugAssertIsValid());
@@ -151,6 +158,10 @@ class FlutterLogoDecoration extends Decoration {
         a._opacity * (1.0 - t).clamp(0.0, 1.0),
       );
     }
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
     return new FlutterLogoDecoration._(
       Color.lerp(a.lightColor, b.lightColor, t),
       Color.lerp(a.darkColor, b.darkColor, t),

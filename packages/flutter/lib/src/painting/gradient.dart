@@ -2,12 +2,37 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
+
+class _ColorsAndStops {
+  _ColorsAndStops(this.colors, this.stops);
+  final List<Color> colors;
+  final List<double> stops;
+}
+
+_ColorsAndStops interpolateColorsAndStops(List<Color> aColors, List<double> aStops, List<Color> bColors, List<double> bStops, double t) {
+  assert(aColors.length == bColors.length, 'Cannot interpolate between two gradients with a different number of colors.'); // TODO(ianh): remove limitation
+  assert((aStops == null && aColors.length == 2) || (aStops != null && aStops.length == aColors.length));
+  assert((bStops == null && bColors.length == 2) || (bStops != null && bStops.length == bColors.length));
+  final List<Color> interpolatedColors = <Color>[];
+  for (int i = 0; i < aColors.length; i += 1)
+    interpolatedColors.add(Color.lerp(aColors[i], bColors[i], t));
+  List<double> interpolatedStops;
+  if (aStops != null || bStops != null) {
+    aStops ??= const <double>[0.0, 1.0];
+    bStops ??= const <double>[0.0, 1.0];
+    assert(aStops.length == bStops.length);
+    for (int i = 0; i < aStops.length; i += 1)
+      interpolatedStops.add(ui.lerpDouble(aStops[i], bStops[i], t).clamp(0.0, 1.0));
+  }
+  return new _ColorsAndStops(interpolatedColors, interpolatedStops);
+}
 
 /// A 2D gradient.
 ///
@@ -30,6 +55,73 @@ abstract class Gradient {
   /// it uses [AlignmentDirectional] objects instead of [Alignment]
   /// objects, then the `textDirection` argument must not be null.
   Shader createShader(Rect rect, { TextDirection textDirection });
+
+  /// Returns a new gradient with its properties scaled by the given factor.
+  ///
+  /// A factor of 0.0 (or less) should result in a variant of the gradient that
+  /// is invisible; any two factors epsilon apart should be unnoticeably
+  /// different from each other at first glance. From this it follows that
+  /// scaling a gradient with values from 1.0 to 0.0 over time should cause the
+  /// gradient to smoothly disappear.
+  ///
+  /// Typically this is the same as interpolating from null (with [lerp]).
+  Gradient scale(double factor);
+
+  /// Linearly interpolates from `a` to [this].
+  ///
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
+  /// method instead.
+  ///
+  /// If `a` is null, this must not return null. The base class implements this
+  /// by deferring to [scale].
+  ///
+  /// Instead of calling this directly, use [Gradient.lerp].
+  @protected
+  Gradient lerpFrom(Gradient a, double t) {
+    if (a == null)
+      return scale(t);
+    return null;
+  }
+
+  /// Linearly interpolates from [this] to `b`.
+  ///
+  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  ///
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `b`. In that case, [lerp] will apply a default
+  /// behavior instead.
+  ///
+  /// If `b` is null, this must not return null. The base class implements this
+  /// by deferring to [scale].
+  ///
+  /// Instead of calling this directly, use [Gradient.lerp].
+  @protected
+  Gradient lerpTo(Gradient b, double t) {
+    if (b == null)
+      return scale(1.0 - t);
+    return null;
+  }
+
+  /// Linearly interpolates from `begin` to `end`.
+  ///
+  /// This defers to `end`'s [lerpTo] function if `end` is not null. If `end` is
+  /// null or if its [lerpTo] returns null, it uses `begin`'s [lerpFrom]
+  /// function instead. If both return null, it returns `begin` before `t=0.5`
+  /// and `end` after `t=0.5`.
+  static Gradient lerp(Gradient begin, Gradient end, double t) {
+    Gradient result;
+    if (end != null)
+      result = end.lerpFrom(begin, t); // if begin is null, this must return non-null
+    if (result == null && begin != null)
+      result = begin.lerpTo(end, t); // if end is null, this must return non-null
+    if (result != null)
+      return result;
+    if (begin == null && end == null)
+      return null;
+    assert(begin != null && end != null);
+    return t < 0.5 ? begin.scale(1.0 - (t * 2.0)) : end.scale((t - 0.5) * 2.0);
+  }
 }
 
 /// A 2D linear gradient.
@@ -173,9 +265,8 @@ class LinearGradient extends Gradient {
   /// Returns a new [LinearGradient] with its properties (in particular the
   /// colors) scaled by the given factor.
   ///
-  /// If the factor is 1.0 or greater, then the gradient is returned unmodified.
   /// If the factor is 0.0 or less, then the gradient is fully transparent.
-  /// Values in between scale the opacity of the colors.
+  @override
   LinearGradient scale(double factor) {
     return new LinearGradient(
       begin: begin,
@@ -184,6 +275,20 @@ class LinearGradient extends Gradient {
       stops: stops,
       tileMode: tileMode,
     );
+  }
+
+  @override
+  Gradient lerpFrom(Gradient a, double t) {
+    if (a == null || (a is LinearGradient && a.colors.length == colors.length)) // TODO(ianh): remove limitation
+      return LinearGradient.lerp(a, this, t);
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  Gradient lerpTo(Gradient b, double t) {
+    if (b == null || (b is LinearGradient && b.colors.length == colors.length)) // TODO(ianh): remove limitation
+      return LinearGradient.lerp(this, b, t);
+    return super.lerpTo(b, t);
   }
 
   /// Linearly interpolate between two [LinearGradient]s.
@@ -200,24 +305,13 @@ class LinearGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    assert(a.colors.length == b.colors.length, 'Cannot interpolate between two gradients with a different number of colors.');
-    assert(a.stops == null || b.stops == null || a.stops.length == b.stops.length);
-    final List<Color> interpolatedColors = <Color>[];
-    for (int i = 0; i < a.colors.length; i += 1)
-      interpolatedColors.add(Color.lerp(a.colors[i], b.colors[i], t));
-    List<double> interpolatedStops;
-    if (a.stops != null && b.stops != null) {
-      for (int i = 0; i < a.stops.length; i += 1)
-        interpolatedStops.add(ui.lerpDouble(a.stops[i], b.stops[i], t));
-    } else {
-      interpolatedStops = a.stops ?? b.stops;
-    }
+    final _ColorsAndStops interpolated = interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
     return new LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
-      colors: interpolatedColors,
-      stops: interpolatedStops,
-      tileMode: t < 0.5 ? a.tileMode : b.tileMode,
+      colors: interpolated.colors,
+      stops: interpolated.stops,
+      tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
     );
   }
 
@@ -400,6 +494,58 @@ class RadialGradient extends Gradient {
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, stops, tileMode,
+    );
+  }
+
+  /// Returns a new [RadialGradient] with its colors scaled by the given factor.
+  ///
+  /// If the factor is 0.0 or less, then the gradient is fully transparent.
+  @override
+  RadialGradient scale(double factor) {
+    return new RadialGradient(
+      center: center,
+      radius: radius,
+      colors: colors.map<Color>((Color color) => Color.lerp(null, color, factor)).toList(),
+      stops: stops,
+      tileMode: tileMode,
+    );
+  }
+
+  @override
+  Gradient lerpFrom(Gradient a, double t) {
+    if (a == null || (a is RadialGradient && a.colors.length == colors.length)) // TODO(ianh): remove limitation
+      return RadialGradient.lerp(a, this, t);
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  Gradient lerpTo(Gradient b, double t) {
+    if (b == null || (b is RadialGradient && b.colors.length == colors.length)) // TODO(ianh): remove limitation
+      return RadialGradient.lerp(this, b, t);
+    return super.lerpTo(b, t);
+  }
+
+  /// Linearly interpolate between two [RadialGradient]s.
+  ///
+  /// If either gradient is null, this function linearly interpolates from a
+  /// a gradient that matches the other gradient in [center], [radius], [stops] and
+  /// [tileMode] and with the same [colors] but transparent (using [scale]).
+  ///
+  /// If neither gradient is null, they must have the same number of [colors].
+  static RadialGradient lerp(RadialGradient a, RadialGradient b, double t) {
+    if (a == null && b == null)
+      return null;
+    if (a == null)
+      return b.scale(t);
+    if (b == null)
+      return a.scale(1.0 - t);
+    final _ColorsAndStops interpolated = interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    return new RadialGradient(
+      center: AlignmentGeometry.lerp(a.center, b.center, t),
+      radius: math.max(0.0, ui.lerpDouble(a.radius, b.radius, t)),
+      colors: interpolated.colors,
+      stops: interpolated.stops,
+      tileMode: t < 0.5 ? a.tileMode : b.tileMode, // TODO(ianh): interpolate tile mode
     );
   }
 
