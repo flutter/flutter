@@ -61,12 +61,29 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
   GlobalMaterialLocalizations(this.locale)
-      : this._localeName = _computeLocaleName(locale) {
-    assert(locale != null);
+      : assert(locale != null),
+        this._localeName = _computeLocaleName(locale) {
+    _loadDateIntlDataIfNotLoaded();
+
     if (localizations.containsKey(locale.languageCode))
       _nameToValue.addAll(localizations[locale.languageCode]);
     if (localizations.containsKey(_localeName))
       _nameToValue.addAll(localizations[_localeName]);
+
+    const String kMediumDatePattern = 'E, MMM\u00a0d';
+    if (intl.DateFormat.localeExists(_localeName)) {
+      _fullYearFormat = new intl.DateFormat.y(_localeName);
+      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, _localeName);
+      _yearMonthFormat = new intl.DateFormat('yMMMM', _localeName);
+    } else if (intl.DateFormat.localeExists(locale.languageCode)) {
+      _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
+      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, locale.languageCode);
+      _yearMonthFormat = new intl.DateFormat('yMMMM', locale.languageCode);
+    } else {
+      _fullYearFormat = new intl.DateFormat.y();
+      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern);
+      _yearMonthFormat = new intl.DateFormat('yMMMM');
+    }
 
     if (intl.NumberFormat.localeExists(_localeName)) {
       _decimalFormat = new intl.NumberFormat.decimalPattern(_localeName);
@@ -88,15 +105,15 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   final Map<String, String> _nameToValue = <String, String>{};
 
-  /// Formats numbers using variable length format with no zero padding.
-  ///
-  /// See also [_twoDigitZeroPaddedFormat].
   intl.NumberFormat _decimalFormat;
 
-  /// Formats numbers as two-digits.
-  ///
-  /// If the number is less than 10, zero-pads it.
   intl.NumberFormat _twoDigitZeroPaddedFormat;
+
+  intl.DateFormat _fullYearFormat;
+
+  intl.DateFormat _mediumDateFormat;
+
+  intl.DateFormat _yearMonthFormat;
 
   static String _computeLocaleName(Locale locale) {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
@@ -139,6 +156,29 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String formatMinute(TimeOfDay timeOfDay) {
     return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
   }
+
+  @override
+  String formatYear(DateTime date) {
+    return _fullYearFormat.format(date);
+  }
+
+  @override
+  String formatMediumDate(DateTime date) {
+    return _mediumDateFormat.format(date);
+  }
+
+  @override
+  String formatMonthYear(DateTime date) {
+    return _yearMonthFormat.format(date);
+  }
+
+  @override
+  List<String> get narrowWeekDays {
+    return _fullYearFormat.dateSymbols.NARROWWEEKDAYS;
+  }
+
+  @override
+  int get firstDayOfWeekIndex => (_fullYearFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
   /// Formats a [number] using local decimal number format.
   ///
@@ -352,6 +392,22 @@ const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDa
   'a h:mm': TimeOfDayFormat.a_space_h_colon_mm,
   'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
 };
+
+/// Tracks if date i18n data has been loaded.
+bool _dateIntlDataInitialized = false;
+
+/// Loads i18n data for dates if it hasn't be loaded yet.
+///
+/// Only the first invocation of this function has the effect of loading the
+/// data. Subsequent invocations have no effect.
+void _loadDateIntlDataIfNotLoaded() {
+  if (!_dateIntlDataInitialized) {
+    // The returned Future is intentionally dropped on the floor. The
+    // function only returns it to be compatible with the async counterparts.
+    // The Future has no value otherwise.
+    intl_local_date_data.initializeDateFormatting();
+    _dateIntlDataInitialized = true;
+  }
 
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();

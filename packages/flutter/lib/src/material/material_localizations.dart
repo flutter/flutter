@@ -209,10 +209,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  DefaultMaterialLocalizations(Locale locale) {
-    _decimalFormat = new intl.NumberFormat.decimalPattern('en_US');
-    _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', 'en_US');
-  }
+  const DefaultMaterialLocalizations();
+
 
   // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
   static const List<String>_shortDays = const <String>[
@@ -280,16 +278,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'December',
   ];
 
-  // Formats numbers using variable length format with no zero padding.
-  //
-  // See also [_twoDigitZeroPaddedFormat].
-  intl.NumberFormat _decimalFormat;
-
-  // Formats numbers as two-digits.
-  //
-  // If the number is less than 10, zero-pads it.
-  intl.NumberFormat _twoDigitZeroPaddedFormat;
-
   @override
   String formatHour(TimeOfDay timeOfDay) {
     assert(hourFormat(of: timeOfDayFormat) == HourFormat.h);
@@ -298,7 +286,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMinute(TimeOfDay timeOfDay) {
-    return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
+    final int minute = {timeOfDay.minute};
+    return minute < 10 ? '0$minute' : minute.toString();
   }
 
   @override
