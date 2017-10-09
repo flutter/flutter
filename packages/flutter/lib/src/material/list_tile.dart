@@ -461,7 +461,10 @@ class ListTile extends StatelessWidget {
         constraints: new BoxConstraints(minHeight: tileHeight),
         child: new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new Row(children: children),
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[new Row(children: children)],
+          ),
         )
       ),
     );
