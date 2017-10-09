@@ -322,9 +322,12 @@ template("generate_vm_patched_sdk") {
   # libraries.
   generate_patched_sdk(target_name) {
     mode = "flutter"
-    deps = concatenation_target_names + ["//dart/runtime/vm:patched_sdk"]
+    deps = concatenation_target_names + ["//dart/runtime/vm:kernel_platform_files"]
     input_patches_dir = "$target_gen_dir/patches"
     patched_sdk_dir = "flutter_patched_sdk"
+    outputs = [
+        "$root_out_dir/${patched_sdk_dir}/lib/libraries.json",
+    ]
   }
 }
 
@@ -385,5 +388,38 @@ generate_vm_patched_sdk("flutter_patched_sdk") {
       typed_data_runtime_sources,
       "//dart/runtime/lib",
     ],
+  ]
+}
+
+action("compile_platform") {
+  script = "//dart/tools/compile_platform.py"
+
+  sources = [
+    "$root_out_dir/flutter_patched_sdk/lib/libraries.json",
+  ]
+
+  outputs = [
+    "$root_out_dir/flutter_patched_sdk/platform.dill",
+    "$root_out_dir/flutter_patched_sdk/vm_outline.dill",
+  ]
+
+  inputs = []
+
+  deps = [
+    ":flutter_patched_sdk",
+  ]
+
+  depfile = "$root_out_dir/flutter_patched_sdk/platform.dill.d"
+
+  args = [
+            "--target=flutter",
+            "dart:core"
+         ] + rebase_path(sources, root_build_dir) +
+         rebase_path(outputs, root_build_dir)
+}
+
+group("kernel_platform_files") {
+  public_deps = [
+    ":compile_platform",
   ]
 }
