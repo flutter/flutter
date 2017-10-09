@@ -85,6 +85,7 @@ void main() {
 
     expect(tester.getSize(find.byType(FlatButton)), equals(const Size(88.0, 36.0)));
     // Scaled text rendering is different on Linux and Mac by one pixel.
+    // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(19.0));
 
@@ -108,6 +109,7 @@ void main() {
     );
 
     // Scaled text rendering is different on Linux and Mac by one pixel.
+    // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(FlatButton)).width, isIn(<double>[158.0, 159.0]));
     expect(tester.getSize(find.byType(FlatButton)).height, equals(42.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));

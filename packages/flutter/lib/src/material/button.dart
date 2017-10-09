@@ -125,7 +125,7 @@ class ButtonTheme extends InheritedWidget {
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// The button will expand to fit the child widget.
+/// The button will expand to fit the child widget if necessary.
 ///
 /// See also:
 ///
@@ -197,7 +197,7 @@ class MaterialButton extends StatefulWidget {
   /// The secondary color of the button when the button is in the down (pressed)
   /// state.
   ///
-  /// The higlight color is represented as a solid color that is overlaid over
+  /// The highlight color is represented as a solid color that is overlaid over
   /// the button color (if any). If the highlight color has transparency, the
   /// button color will show through. The highlight fades in quickly as the
   /// button is held down.
@@ -349,12 +349,17 @@ class _MaterialButtonState extends State<MaterialButton> {
         child: contents
       );
     }
-    return new ConstrainedBox(
-      constraints: new BoxConstraints(
-        minWidth: widget.minWidth ?? buttonTheme.minWidth,
-        minHeight: height,
-      ),
-      child: new IntrinsicHeight(child: contents),
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        new ConstrainedBox(
+          constraints: new BoxConstraints(
+            minWidth: widget.minWidth ?? buttonTheme.minWidth,
+            minHeight: height,
+          ),
+          child: contents,
+        ),
+      ],
     );
   }
 }

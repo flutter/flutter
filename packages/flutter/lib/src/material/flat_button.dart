@@ -34,7 +34,7 @@ import 'theme.dart';
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// Flat buttons will expand to fit the child widget.
+/// Flat buttons will expand to fit the child widget if necessary.
 ///
 /// See also:
 ///
