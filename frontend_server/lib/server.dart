@@ -82,6 +82,10 @@ abstract class CompilerInterface {
 
   /// This let's compiler know that source file identifed by `uri` was changed.
   void invalidate(Uri uri);
+
+  /// Resets incremental compiler accept/reject status so that next time
+  /// recompile is requested, complete kernel file is produced.
+  void resetIncrementalCompiler();
 }
 
 /// Class that for test mocking purposes encapsulates creation of [BinaryPrinter].
@@ -191,6 +195,11 @@ class _FrontendCompiler implements CompilerInterface {
     _generator.invalidate(uri);
   }
 
+  @override
+  void resetIncrementalCompiler() {
+    _generator.reset();
+  }
+
   Uri _ensureFolderPath(String path) {
     // This is a URI, not a file path, so the forward slash is correct even
     // on Windows.
@@ -257,6 +266,8 @@ Future<int> starter(List<String> args, {
           compiler.acceptLastDelta();
         else if (string == 'reject')
           compiler.rejectLastDelta();
+        else if (string == 'reset')
+          compiler.resetIncrementalCompiler();
         else if (string == 'quit')
           exit(0);
         break;
