@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
+import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
 
 import 'l10n/localizations.dart';
 
@@ -173,7 +174,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  List<String> get narrowWeekDays {
+  List<String> get narrowWeekdays {
     return _fullYearFormat.dateSymbols.NARROWWEEKDAYS;
   }
 
@@ -408,6 +409,7 @@ void _loadDateIntlDataIfNotLoaded() {
     intl_local_date_data.initializeDateFormatting();
     _dateIntlDataInitialized = true;
   }
+}
 
 class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   const _MaterialLocalizationsDelegate();

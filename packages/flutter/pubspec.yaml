@@ -34,7 +34,6 @@ dev_dependencies:
   html: 0.13.2 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  intl_translation: 0.15.0 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY

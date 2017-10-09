@@ -6,9 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
-import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
 
 import 'time.dart';
 import 'typography.dart';
@@ -156,17 +153,17 @@ abstract class MaterialLocalizations {
   /// - US English: S, M, T, W, T, F, S
   /// - Russian: вс, пн, вт, ср, чт, пт, сб - notice that the list begins with
   ///   вс (Sunday) even though the first day of week for Russian is Monday.
-  List<String> get narrowWeekDays;
+  List<String> get narrowWeekdays;
 
   /// Index of the first day of week, where 0 points to Sunday, and 6 points to
   /// Saturday.
   ///
-  /// This getter is compatible with [narrowWeekDays]. For example:
+  /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
   /// var localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekDays[localizations.firstDayOfWeekIndex];
+  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -213,7 +210,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
 
   // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
-  static const List<String>_shortDays = const <String>[
+  static const List<String>_shortWeekdays = const <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -223,7 +220,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Sun',
   ];
 
-  static const List<String> _narrowWeekDays = const <String>[
+  static const List<String> _narrowWeekdays = const <String>[
     'S',
     'M',
     'T',
@@ -231,21 +228,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'T',
     'F',
     'S',
-  ];
-
-  static const List<String> _shortMonths = const <String>[
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
   ];
 
   static const List<String> _shortMonths = const <String>[
@@ -286,7 +268,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMinute(TimeOfDay timeOfDay) {
-    final int minute = {timeOfDay.minute};
+    final int minute = timeOfDay.minute;
     return minute < 10 ? '0$minute' : minute.toString();
   }
 
@@ -295,9 +277,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatMediumDate(DateTime date) {
-    final String day = _shortWeekDays[date.weekday - DateTime.MONDAY];
+    final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
     final String month = _shortMonths[date.month - DateTime.JANUARY];
-    return '$day, $month ${date.day}'
+    return '$day, $month ${date.day}';
   }
 
   @override
@@ -308,10 +290,10 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  List<String> get narrowWeekDays => _narrowWeekDays;
+  List<String> get narrowWeekdays => _narrowWeekdays;
 
   @override
-  int get firstDayOfWeekIndex => 0; // narrowWeekDays[0] is 'S' for Sunday
+  int get firstDayOfWeekIndex => 0; // narrowWeekdays[0] is 'S' for Sunday
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
@@ -448,10 +430,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
   ///
+  /// The locale parameter is ignored.
+  ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(new DefaultMaterialLocalizations(locale));
+    return new SynchronousFuture<MaterialLocalizations>(const DefaultMaterialLocalizations());
   }
 
   /// A [LocalizationsDelegate] that uses [DefaultMaterialLocalizations.load]

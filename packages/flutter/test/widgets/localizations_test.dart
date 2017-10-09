@@ -213,7 +213,7 @@ void main() {
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
     final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
       new SyncTestLocalizationsDelegate(),
-      const DefaultWidgetsLocalizationsDelegate(),
+      DefaultWidgetsLocalizations.delegate,
     ];
 
     Future<Null> pumpTest(Locale locale) async {
