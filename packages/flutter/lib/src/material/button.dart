@@ -125,7 +125,7 @@ class ButtonTheme extends InheritedWidget {
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// The button will expand to fit the child widget if necessary.
+/// The button will expand to fit the child widget, if necessary.
 ///
 /// See also:
 ///

@@ -28,7 +28,7 @@ import 'theme.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons will expand to fit the child widget if necessary.
+/// Raised buttons will expand to fit the child widget, if necessary.
 ///
 /// See also:
 ///
