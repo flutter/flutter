@@ -367,8 +367,9 @@ class ListTile extends StatelessWidget {
           style = theme.textTheme.subhead;
           break;
       }
+    } else {
+      style = theme.textTheme.subhead;
     }
-    style ??= theme.textTheme.subhead;
     final Color color = _textColor(theme, tileTheme, style.color);
     return _denseLayout(tileTheme)
       ? style.copyWith(fontSize: 13.0, color: color)
@@ -460,7 +461,7 @@ class ListTile extends StatelessWidget {
         constraints: new BoxConstraints(minHeight: tileHeight),
         child: new Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new IntrinsicHeight(child: new Row(children: children)),
+          child: new Row(children: children),
         )
       ),
     );

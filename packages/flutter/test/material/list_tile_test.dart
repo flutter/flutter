@@ -49,7 +49,7 @@ void main() {
     final Key trailingKey = new GlobalKey();
     bool hasSubtitle;
 
-    Widget buildFrame({bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0}) {
+    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0 }) {
       hasSubtitle = isTwoLine || isThreeLine;
       return new MaterialApp(
         home: new MediaQuery(
