@@ -15,8 +15,6 @@ void main() {
     firstDate = new DateTime(2001, DateTime.JANUARY, 1);
     lastDate = new DateTime(2031, DateTime.DECEMBER, 31);
     initialDate = new DateTime(2016, DateTime.JANUARY, 15);
-    selectableDayPredicate = null;
-    initialDatePickerMode = null;
   });
 
   group(DayPicker, () {

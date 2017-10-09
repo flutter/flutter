@@ -425,7 +425,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory('English-like');
+  TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.
@@ -441,6 +441,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// Automatically added to [MaterialApp.localizationsDelegates].
+  /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
   static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
 }

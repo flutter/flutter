@@ -7,26 +7,26 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('translations exist for all supported languages', (WidgetTester tester) async {
-    final List<String> languages = <String>[
-      'ar', // Arabic
-      'de', // German
-      'en', // English
-      'es', // Spanish
-      'fa', // Farsi (Persian)
-      'fr', // French
-      'he', // Hebrew
-      'it', // Italian
-      'ja', // Japanese
-      'ps', // Pashto
-      'pt', // Portugese
-      'ru', // Russian
-      'sd', // Sindhi
-      'ur', // Urdu
-      'zh', // Chinese (simplified)
-    ];
+  final List<String> languages = <String>[
+    'ar', // Arabic
+    'de', // German
+    'en', // English
+    'es', // Spanish
+    'fa', // Farsi (Persian)
+    'fr', // French
+    'he', // Hebrew
+    'it', // Italian
+    'ja', // Japanese
+    'ps', // Pashto
+    'pt', // Portugese
+    'ru', // Russian
+    'sd', // Sindhi
+    'ur', // Urdu
+    'zh', // Chinese (simplified)
+  ];
 
-    for (String language in languages) {
+  for (String language in languages) {
+    testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = new Locale(language, '');
       final MaterialLocalizations localizations = new GlobalMaterialLocalizations(locale);
 
@@ -70,8 +70,8 @@ void main() {
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
-    }
-  });
+    });
+  }
 
   testWidgets('spot check selectedRowCount translations', (WidgetTester tester) async {
     MaterialLocalizations localizations = new GlobalMaterialLocalizations(const Locale('en', ''));

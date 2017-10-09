@@ -214,7 +214,7 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// Automatically added to [WidgetApp.localizationsDelegates].
+  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
   static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
 }
 
