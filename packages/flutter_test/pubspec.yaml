@@ -1,5 +1,5 @@
 name: flutter_test
-version: 0.0.14-dev
+version: 0.0.14
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
 
