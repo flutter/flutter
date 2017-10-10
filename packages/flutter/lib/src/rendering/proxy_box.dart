@@ -27,7 +27,7 @@ export 'package:flutter/gestures.dart' show
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
 /// child by calling through to the child for each function in the render box
-/// protocol. For example, a proxy box determines its size by askings its child
+/// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
 ///
 /// A proxy box isn't useful on its own because you might as well just replace
