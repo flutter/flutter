@@ -224,6 +224,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [AnimatedContainer], a variant that smoothly animates the properties when
 ///    they change.
 ///  * [Border], which has a sample which uses [Container] heavily.
+///  * The [catalog of layout containers](https://flutter.io/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///

@@ -346,6 +346,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
+///  * The [catalog of layout containers](https://flutter.io/widgets/layout/).
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
