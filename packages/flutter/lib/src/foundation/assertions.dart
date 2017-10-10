@@ -329,7 +329,7 @@ class FlutterError extends AssertionError {
       '_FakeAsync',
       '_FrameCallbackEntry',
     ];
-    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/.+:[0-9]+(?::[0-9]+)?\)$');
+    final RegExp stackParser = new RegExp(r'^#[0-9]+ +([^.]+).* \(([^/]*)/[^:]+:[0-9]+(?::[0-9]+)?\)$');
     final RegExp packageParser = new RegExp(r'^([^:]+):(.+)$');
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
