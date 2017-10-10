@@ -96,9 +96,7 @@ void main() {
         const Locale('en', 'US'),
         const Locale('fr', 'CA'),
       ],
-      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
@@ -181,9 +179,7 @@ void main() {
         const Locale('en', 'US'),
         const Locale('fr', 'CA'),
       ],
-      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
         child: new Builder(
           builder: (BuildContext context) {
@@ -233,10 +229,7 @@ Future<Null> _pumpBoilerplate(
     textDirection: TextDirection.ltr,
     child: new Localizations(
       locale: locale,
-      delegates: <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-        DefaultWidgetsLocalizations.delegate,
-      ],
+      delegates: GlobalMaterialLocalizations.delegates,
       child: child,
     ),
   ));

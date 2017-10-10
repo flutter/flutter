@@ -6,3 +6,4 @@
 library flutter_localizations;
 
 export 'src/material_localizations.dart' show GlobalMaterialLocalizations;
+export 'src/widgets_localizations.dart' show GlobalWidgetsLocalizations;

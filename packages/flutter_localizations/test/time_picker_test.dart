@@ -17,9 +17,7 @@ class _TimePickerLauncher extends StatelessWidget {
   Widget build(BuildContext context) {
     return new MaterialApp(
       locale: locale,
-      localizationsDelegates: const <LocalizationsDelegate<dynamic>>[
-        GlobalMaterialLocalizations.delegate,
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: new Material(
         child: new Center(
           child: new Builder(

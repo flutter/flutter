@@ -122,6 +122,7 @@ class StocksAppState extends State<StocksApp> {
       localizationsDelegates: <LocalizationsDelegate<dynamic>>[
         new _StocksLocalizationsDelegate(),
         GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const <Locale>[
         const Locale('en', 'US'),

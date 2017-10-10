@@ -14,10 +14,7 @@ void main() {
           new LocalizationTracker(key: const ValueKey<String>('outer')),
           new Localizations(
             locale: const Locale('zh', 'CN'),
-            delegates: <LocalizationsDelegate<dynamic>>[
-              GlobalMaterialLocalizations.delegate,
-              DefaultWidgetsLocalizations.delegate,
-            ],
+            delegates: GlobalMaterialLocalizations.delegates,
             child: new LocalizationTracker(key: const ValueKey<String>('inner')),
           ),
         ],

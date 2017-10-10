@@ -10,19 +10,18 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
 
 import 'l10n/localizations.dart';
+import 'widgets_localizations.dart';
 
 /// Localized strings for the material widgets.
 ///
 /// To include the localizations provided by this class in a [MaterialApp],
-/// add [GlobalMaterialLocalizations.delegate] to
+/// add [GlobalMaterialLocalizations.delegates] to
 /// [MaterialApp.localizationsDelegates], and specify the locales your
 /// app supports with [MaterialApp.supportedLocales]:
 ///
 /// ```dart
 /// new MaterialApp(
-///   localizationsDelegates: [
-///     GlobalMaterialLocalizations.delegate,
-///   ],
+///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
 ///   supportedLocales: [
 ///     const Locale('en', 'US'), // English
 ///     const Locale('he', 'IL'), // Hebrew
@@ -363,16 +362,23 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// To include the localizations provided by this class in a [MaterialApp],
-  /// add [GlobalMaterialLocalizations.delegate] to
+  /// Most internationlized apps will use [GlobalMaterialLocalizations.delegates]
+  /// as the value of [MaterialApp.localizationsDelegates] to include
+  /// the localizations for both the material and widget libraries.
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+
+  /// A value for [MaterialApp.localizationsDelegates] that's typically used by
+  /// internationalized apps.
+  ///
+  /// To include the localizations provided by this class and by
+  /// [GlobalWidgetsLocalizations] in a [MaterialApp],
+  /// use [GlobalMaterialLocalizations.delegates] as the value of
   /// [MaterialApp.localizationsDelegates], and specify the locales your
   /// app supports with [MaterialApp.supportedLocales]:
   ///
   /// ```dart
   /// new MaterialApp(
-  ///   localizationsDelegates: [
-  ///     GlobalMaterialLocalizations.delegate,
-  ///   ],
+  ///   localizationsDelegates: GlobalMaterialLocalizations.delegates,
   ///   supportedLocales: [
   ///     const Locale('en', 'US'), // English
   ///     const Locale('he', 'IL'), // Hebrew
@@ -380,7 +386,10 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///   // ...
   /// )
   /// ```
-  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
+  static const List<LocalizationsDelegate<dynamic>> delegates = const <LocalizationsDelegate<dynamic>>[
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 }
 
 const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{

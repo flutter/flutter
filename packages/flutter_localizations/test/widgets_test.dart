@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class TestLocalizations {
   TestLocalizations(this.locale, this.prefix);
@@ -104,8 +105,6 @@ class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizat
 }
 
 class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
-  OnlyRTLDefaultWidgetsLocalizations(Locale locale) : super(locale);
-
   @override
   TextDirection get textDirection => TextDirection.rtl;
 }
@@ -115,7 +114,7 @@ class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<W
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations(locale));
+    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations());
   }
 
   @override
@@ -465,6 +464,9 @@ void main() {
 
     await tester.pumpWidget(
       buildFrame(
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalWidgetsLocalizations.delegate,
+        ],
         supportedLocales: const <Locale>[
           const Locale('en', 'GB'),
           const Locale('ar', 'EG'),
@@ -546,6 +548,9 @@ void main() {
       buildFrame(
         // Accept whatever locale we're given
         localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalWidgetsLocalizations.delegate,
+        ],
         buildContent: (BuildContext context) {
           return new Localizations.override(
             context: context,

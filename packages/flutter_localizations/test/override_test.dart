@@ -28,9 +28,7 @@ class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLoc
 
 Widget buildFrame({
   Locale locale,
-  Iterable<LocalizationsDelegate<dynamic>> delegates: const <LocalizationsDelegate<dynamic>>[
-    GlobalMaterialLocalizations.delegate,
-  ],
+  Iterable<LocalizationsDelegate<dynamic>> delegates: GlobalMaterialLocalizations.delegates,
   WidgetBuilder buildContent,
   LocaleResolutionCallback localeResolutionCallback,
   Iterable<Locale> supportedLocales: const <Locale>[
