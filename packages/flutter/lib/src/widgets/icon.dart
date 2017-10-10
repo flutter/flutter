@@ -35,7 +35,8 @@ class Icon extends StatelessWidget {
   const Icon(this.icon, {
     Key key,
     this.size,
-    this.color
+    this.color,
+    this.semanticLabel,
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -83,6 +84,14 @@ class Icon extends StatelessWidget {
   /// ```
   final Color color;
 
+  /// Semantic label for the icon.
+  ///
+  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This label does not show in the UI.
+  ///
+  /// See [Semantics.label];
+  final String semanticLabel;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
@@ -93,32 +102,45 @@ class Icon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (icon == null)
-      return new SizedBox(width: iconSize, height: iconSize);
+      return _wrapWithSemantics(new SizedBox(width: iconSize, height: iconSize));
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return new ExcludeSemantics(
-      child: new SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: new Center(
-          child: new RichText(
-            textDirection: textDirection, // Since we already fetched it for the assert...
-            text: new TextSpan(
-              text: new String.fromCharCode(icon.codePoint),
-              style: new TextStyle(
-                inherit: false,
-                color: iconColor,
-                fontSize: iconSize,
-                fontFamily: icon.fontFamily,
+    return _wrapWithSemantics(
+      new ExcludeSemantics(
+        child: new SizedBox(
+          width: iconSize,
+          height: iconSize,
+          child: new Center(
+            child: new RichText(
+              textDirection: textDirection, // Since we already fetched it for the assert...
+              text: new TextSpan(
+                text: new String.fromCharCode(icon.codePoint),
+                style: new TextStyle(
+                  inherit: false,
+                  color: iconColor,
+                  fontSize: iconSize,
+                  fontFamily: icon.fontFamily,
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  /// Wraps the widget with a Semantics widget if [semanticLabel] is set.
+  Widget _wrapWithSemantics(Widget widget) {
+    if (semanticLabel == null)
+      return widget;
+
+    return new Semantics(
+      child: widget,
+      label: semanticLabel,
     );
   }
 
