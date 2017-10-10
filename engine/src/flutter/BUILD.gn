@@ -6,7 +6,7 @@ group("flutter") {
   testonly = true
 
   deps = [
-    "//flutter/lib/snapshot:flutter_patched_sdk",
+    "//flutter/lib/snapshot:compile_platform",
     "//flutter/lib/snapshot:generate_snapshot_bin",
     "//flutter/sky",
     "//flutter/third_party/txt",
