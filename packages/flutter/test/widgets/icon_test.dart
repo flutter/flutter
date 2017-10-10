@@ -5,6 +5,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -121,5 +123,23 @@ void main() {
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style.fontFamily, equals('Roboto'));
+  });
+
+  testWidgets('Icon with semantic label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+              null,
+              label: 'a label'
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root( label: 'a label')));
   });
 }

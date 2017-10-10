@@ -35,7 +35,8 @@ class Icon extends StatelessWidget {
   const Icon(this.icon, {
     Key key,
     this.size,
-    this.color
+    this.color,
+    this.label
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -83,6 +84,11 @@ class Icon extends StatelessWidget {
   /// ```
   final Color color;
 
+  /// Semantic label for the icon.
+  ///
+  /// See [Semantics.label];
+  final String label;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
@@ -93,15 +99,15 @@ class Icon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (icon == null)
-      return new SizedBox(width: iconSize, height: iconSize);
+      return wrapWithSemantics(new SizedBox(width: iconSize, height: iconSize));
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return new ExcludeSemantics(
-      child: new SizedBox(
+    return wrapWithSemantics(
+      new SizedBox(
         width: iconSize,
         height: iconSize,
         child: new Center(
@@ -120,6 +126,18 @@ class Icon extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Wraps the widget with a Semantics widget if [label] is set.
+  Widget wrapWithSemantics(Widget widget) {
+    if (label == null) {
+      return new ExcludeSemantics(child: widget);
+    } else {
+      return new Semantics(
+        child: widget,
+        label: label
+      );
+    }
   }
 
   @override
