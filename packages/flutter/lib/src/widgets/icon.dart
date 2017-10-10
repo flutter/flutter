@@ -101,27 +101,29 @@ class Icon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (icon == null)
-      return wrapWithSemantics(new SizedBox(width: iconSize, height: iconSize));
+      return _wrapWithSemantics(new SizedBox(width: iconSize, height: iconSize));
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return wrapWithSemantics(
-      new SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: new Center(
-          child: new RichText(
-            textDirection: textDirection, // Since we already fetched it for the assert...
-            text: new TextSpan(
-              text: new String.fromCharCode(icon.codePoint),
-              style: new TextStyle(
-                inherit: false,
-                color: iconColor,
-                fontSize: iconSize,
-                fontFamily: icon.fontFamily,
+    return _wrapWithSemantics(
+      new ExcludeSemantics(
+        child: new SizedBox(
+          width: iconSize,
+          height: iconSize,
+          child: new Center(
+            child: new RichText(
+              textDirection: textDirection, // Since we already fetched it for the assert...
+              text: new TextSpan(
+                text: new String.fromCharCode(icon.codePoint),
+                style: new TextStyle(
+                  inherit: false,
+                  color: iconColor,
+                  fontSize: iconSize,
+                  fontFamily: icon.fontFamily,
+                ),
               ),
             ),
           ),
@@ -131,17 +133,16 @@ class Icon extends StatelessWidget {
   }
 
   /// Wraps the widget with a Semantics widget if [label] is set.
-  Widget wrapWithSemantics(Widget widget) {
+  Widget _wrapWithSemantics(Widget widget) {
     if (label == null) {
-      return new ExcludeSemantics(child: widget);
-    } else {
-      return new Semantics(
-        child: new ExcludeSemantics(
-          child: widget,
-        ),
-        label: label,
-      );
+      return widget;
     }
+    return new Semantics(
+      child: new ExcludeSemantics(
+        child: widget,
+      ),
+      label: label,
+    );
   }
 
   @override
