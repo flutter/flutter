@@ -413,8 +413,7 @@ action("compile_platform") {
 
   args = [
             "--target=flutter",
-            "dart:core",
-            "dart:vmservice_sky",
+            "dart:core"
          ] + rebase_path(sources, root_build_dir) +
          rebase_path(outputs, root_build_dir)
 }
