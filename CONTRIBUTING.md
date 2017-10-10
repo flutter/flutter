@@ -3,6 +3,17 @@ Contributing to the Flutter engine
 
 [![Build Status](https://travis-ci.org/flutter/engine.svg)](https://travis-ci.org/flutter/engine)
 
+I built it before. Remind me, how do I do it again?
+--------------------
+
+If you have previously built the engine (i.e. your environment is already setup) and just want a refresher, then feel free to skip to one of the following sections:
+
+- [Build for Android](#android-cross-compiling-from-mac-or-linux)
+- [Build for iOS](#ios-cross-compiling-from-mac)
+- [Build flutter_tester](#desktop-mac-and-linux-for-tests)
+
+Otherwise, begin from the next section, which will help you prepare your environment.
+
 Things you will need
 --------------------
 
