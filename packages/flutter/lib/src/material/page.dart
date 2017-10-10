@@ -70,8 +70,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     this.maintainState: true,
     bool fullscreenDialog: false,
   }) : assert(builder != null),
-       assert(opaque),
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    assert(opaque);
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;

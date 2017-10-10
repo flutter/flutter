@@ -88,8 +88,9 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(settings != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque), // PageRoute makes it return true.
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    assert(opaque); // PageRoute makes it return true.
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
