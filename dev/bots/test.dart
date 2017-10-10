@@ -156,7 +156,7 @@ Future<Null> _runTests() async {
 
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizaions'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
