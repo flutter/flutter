@@ -7,8 +7,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('$MaterialLocalizations localizes text inside the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+  testWidgets('Nested Localizations', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp( // Creates the outer Localizations widget.
       home: new ListView(
         children: <Widget>[
           new LocalizationTracker(key: const ValueKey<String>('outer')),
