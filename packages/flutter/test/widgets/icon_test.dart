@@ -135,7 +135,7 @@ void main() {
         child: const Center(
           child: const Icon(
             Icons.title,
-            label: 'a label',
+            semanticLabel: 'a label',
           ),
         ),
       ),
@@ -153,7 +153,7 @@ void main() {
         child: const Center(
           child: const Icon(
             null,
-            label: 'a label',
+            semanticLabel: 'a label',
           ),
         ),
       ),
