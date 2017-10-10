@@ -7,6 +7,7 @@
 #include <thread>
 #include <utility>
 
+#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
@@ -22,6 +23,13 @@ static App* g_app = nullptr;
 
 void QuitMessageLoop() {
   fsl::MessageLoop::GetCurrent()->QuitNow();
+}
+
+void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
+  runner->PostTask([name]() {
+    zx::thread::self().set_property(ZX_PROP_NAME, name.c_str(), name.size());
+    Dart_SetThreadName(name.c_str());
+  });
 }
 
 std::string GetLabelFromURL(const std::string& url) {
@@ -49,6 +57,10 @@ App::App() {
   auto ui_task_runner = fsl::MessageLoop::GetCurrent()->task_runner();
   auto gpu_task_runner = gpu_thread_->TaskRunner();
   auto io_task_runner = io_thread_->TaskRunner();
+
+  SetThreadName(ui_task_runner, "ui");
+  SetThreadName(gpu_task_runner, "gpu");
+  SetThreadName(io_task_runner, "io");
 
   // Notice that the Platform and UI threads are actually the same.
   blink::Threads::Set(blink::Threads(ui_task_runner,   // Platform
