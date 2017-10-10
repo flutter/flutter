@@ -36,7 +36,7 @@ class Icon extends StatelessWidget {
     Key key,
     this.size,
     this.color,
-    this.label
+    this.label,
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -86,6 +86,8 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
+  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  ///
   /// See [Semantics.label];
   final String label;
 
@@ -134,8 +136,10 @@ class Icon extends StatelessWidget {
       return new ExcludeSemantics(child: widget);
     } else {
       return new Semantics(
-        child: widget,
-        label: label
+        child: new ExcludeSemantics(
+          child: widget,
+        ),
+        label: label,
       );
     }
   }

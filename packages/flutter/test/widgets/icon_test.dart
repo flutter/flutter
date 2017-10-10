@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -133,8 +134,26 @@ void main() {
         textDirection: TextDirection.ltr,
         child: const Center(
           child: const Icon(
-              null,
-              label: 'a label'
+            Icons.title,
+            label: 'a label',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root( label: 'a label')));
+  });
+
+  testWidgets('Null icon with semantic label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            null,
+            label: 'a label',
           ),
         ),
       ),
