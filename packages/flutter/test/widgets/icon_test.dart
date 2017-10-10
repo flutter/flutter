@@ -135,13 +135,13 @@ void main() {
         child: const Center(
           child: const Icon(
             Icons.title,
-            label: 'a label',
+            semanticLabel: 'a label',
           ),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root( label: 'a label')));
+    expect(semantics, hasSemantics(new TestSemantics.root(label: 'a label')));
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
@@ -153,12 +153,12 @@ void main() {
         child: const Center(
           child: const Icon(
             null,
-            label: 'a label',
+            semanticLabel: 'a label',
           ),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root( label: 'a label')));
+    expect(semantics, hasSemantics(new TestSemantics.root(label: 'a label')));
   });
 }

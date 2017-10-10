@@ -36,7 +36,7 @@ class Icon extends StatelessWidget {
     Key key,
     this.size,
     this.color,
-    this.label,
+    this.semanticLabel,
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -87,9 +87,10 @@ class Icon extends StatelessWidget {
   /// Semantic label for the icon.
   ///
   /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This label does not show in the UI.
   ///
   /// See [Semantics.label];
-  final String label;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -132,16 +133,14 @@ class Icon extends StatelessWidget {
     );
   }
 
-  /// Wraps the widget with a Semantics widget if [label] is set.
+  /// Wraps the widget with a Semantics widget if [semanticLabel] is set.
   Widget _wrapWithSemantics(Widget widget) {
-    if (label == null) {
+    if (semanticLabel == null)
       return widget;
-    }
+
     return new Semantics(
-      child: new ExcludeSemantics(
-        child: widget,
-      ),
-      label: label,
+      child: widget,
+      label: semanticLabel,
     );
   }
 
