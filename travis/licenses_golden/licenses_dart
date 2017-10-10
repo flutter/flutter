@@ -1,4 +1,4 @@
-Signature: ec2f9d17b9193fc1d549c977d8f8cc81
+Signature: f93fa3d84b2f6b614c3b21540266d51c
 
 UNUSED LICENSES:
 
@@ -342,7 +342,6 @@ FILE: ../../../dart/runtime/vm/constants_ia32.h
 FILE: ../../../dart/runtime/vm/constants_x64.h
 FILE: ../../../dart/runtime/vm/dart.cc
 FILE: ../../../dart/runtime/vm/dart_api_impl.cc
-FILE: ../../../dart/runtime/vm/debugger_test.cc
 FILE: ../../../dart/runtime/vm/deferred_objects.cc
 FILE: ../../../dart/runtime/vm/deferred_objects.h
 FILE: ../../../dart/runtime/vm/deopt_instructions.cc
@@ -698,6 +697,7 @@ FILE: ../../../dart/sdk/lib/_internal/js_runtime/.packages
 FILE: ../../../dart/sdk/lib/html/html_common/conversions_dart2js.dart
 FILE: ../../../dart/sdk/lib/html/html_common/html_common.dart
 FILE: ../../../dart/sdk/lib/libraries.json
+FILE: ../../../dart/sdk/lib/vmservice_libraries.json
 FILE: ../../../dart/third_party/7zip.tar.gz.sha1
 FILE: ../../../dart/third_party/clang.tar.gz.sha1
 FILE: ../../../dart/third_party/gsutil.tar.gz.sha1
@@ -971,7 +971,6 @@ FILE: ../../../dart/runtime/vm/dart_entry_test.cc
 FILE: ../../../dart/runtime/vm/datastream.h
 FILE: ../../../dart/runtime/vm/debugger.cc
 FILE: ../../../dart/runtime/vm/debugger.h
-FILE: ../../../dart/runtime/vm/debugger_api_impl.cc
 FILE: ../../../dart/runtime/vm/debugger_api_impl_test.cc
 FILE: ../../../dart/runtime/vm/double_internals.h
 FILE: ../../../dart/runtime/vm/exceptions_test.cc
@@ -1568,10 +1567,14 @@ FILE: ../../../dart/runtime/platform/allocation.h
 FILE: ../../../dart/runtime/platform/growable_array.h
 FILE: ../../../dart/runtime/vm/compilation_trace.cc
 FILE: ../../../dart/runtime/vm/compilation_trace.h
+FILE: ../../../dart/runtime/vm/compiler/backend/locations_helpers.h
+FILE: ../../../dart/runtime/vm/compiler/backend/locations_helpers_arm.h
+FILE: ../../../dart/runtime/vm/compiler/backend/locations_helpers_test.cc
 FILE: ../../../dart/runtime/vm/compiler/call_specializer.cc
 FILE: ../../../dart/runtime/vm/compiler/call_specializer.h
 FILE: ../../../dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.h
 FILE: ../../../dart/runtime/vm/compiler/jit/jit_call_specializer.h
+FILE: ../../../dart/runtime/vm/debugger_api_impl_test.h
 FILE: ../../../dart/runtime/vm/dwarf.cc
 FILE: ../../../dart/runtime/vm/dwarf.h
 FILE: ../../../dart/runtime/vm/fixed_cache.h
