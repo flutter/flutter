@@ -334,6 +334,12 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch restartTimer = new Stopwatch()..start();
+    if (previewDart2)
+      for (FlutterDevice device in flutterDevices)
+        // Reset generator so that full kernel file is produced for VM to
+        // restart from.
+        if (device.generator != null)
+          device.generator.reset();
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
@@ -357,7 +363,7 @@ class HotRunner extends ResidentRunner {
     }
     // We are now running from source.
     _runningFromSnapshot = false;
-    await _launchFromDevFS(mainPath);
+    await _launchFromDevFS(previewDart2 ? mainPath + '.dill' : mainPath);
     restartTimer.stop();
     printTrace('Restart performed in '
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
