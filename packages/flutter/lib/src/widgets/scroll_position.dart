@@ -371,6 +371,18 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   Set<SemanticsAction> _semanticActions;
 
+  /// Called whenever the scroll position or the dimensions of the scroll view
+  /// change to schedule an update of the available semantics actions. The
+  /// actual update will be performed in the nxt frame. If non is pending
+  /// a frame will be scheduled.
+  ///
+  /// For example: If the scroll view has been scrolled all the way to the top,
+  /// the action to scroll further up needs to be removed as the scroll view
+  /// cannot be scrolled in that direction anymore.
+  ///
+  /// This method is potentially called twice per frame (if scroll position and
+  /// scroll view dimensions both change) and therefore shouldn't do anything
+  /// expensive.
   void _updateSemanticActions() {
     SemanticsAction forward;
     SemanticsAction backward;
@@ -409,7 +421,6 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
       applyNewDimensions();
       _didChangeViewportDimension = false;
     }
-    _updateSemanticActions();
     return true;
   }
 
@@ -437,6 +448,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void applyNewDimensions() {
     assert(pixels != null);
     activity.applyNewDimensions();
+    _updateSemanticActions();  // will potentially request a semantics update.
   }
 
   /// Animates the position such that the given object is as visible as possible
@@ -611,6 +623,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    _updateSemanticActions();  // will potentially request a semantics update.
+    super.notifyListeners();
   }
 
   @override

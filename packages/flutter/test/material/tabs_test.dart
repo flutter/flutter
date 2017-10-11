@@ -1038,6 +1038,56 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('correct scrolling semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Tab> tabs = new List<Tab>.generate(20, (int index) {
+      return new Tab(text: 'This is a very wide tab #$index');
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new Semantics(
+          container: true,
+          child: new TabBar(
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #10')));
+
+    controller.index = 10;
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #0')));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(label: 'This is a very wide tab #10'));
+
+    controller.index = 19;
+    await tester.pumpAndSettle();
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+
+    controller.index = 0;
+    await tester.pumpAndSettle();
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(label: 'This is a very wide tab #0'));
+
+    semantics.dispose();
+  });
+
   testWidgets('TabBar etc with zero tabs', (WidgetTester tester) async {
     final TabController controller = new TabController(
       vsync: const TestVSync(),
