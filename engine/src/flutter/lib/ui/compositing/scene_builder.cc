@@ -50,8 +50,7 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
        FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
-SceneBuilder::SceneBuilder()
-    : layer_builder_(std::make_unique<flow::LayerBuilder>()){};
+SceneBuilder::SceneBuilder() : layer_builder_(flow::LayerBuilder::Create()) {}
 
 SceneBuilder::~SceneBuilder() = default;
 
