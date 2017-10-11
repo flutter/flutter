@@ -209,7 +209,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "backButtonTooltip": r"אחורה",
     "closeButtonTooltip": r"סגור",
     "nextMonthTooltip": r"חודש הבא",
-    "previousMonthTooltip": r"חודש שעבר",
+    "previousMonthTooltip": r"חודש קודם",
     "nextPageTooltip": r"עמוד הבא",
     "previousPageTooltip": r"עמוד קודם",
     "showMenuTooltip": r"הצג תפריט",
@@ -221,13 +221,13 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "selectedRowCountTitleOther": r"$selectedRowCount פריטים שנבחרו",
     "cancelButtonLabel": r"ביטול",
     "closeButtonLabel": r"סגור",
-    "continueButtonLabel": r"לְהַמשִׁיך",
-    "copyButtonLabel": r"קיבלתי!",
+    "continueButtonLabel": r"המשך",
+    "copyButtonLabel": r"העתק",
     "cutButtonLabel": r"גזור",
-    "okButtonLabel": r"בסדר",
+    "okButtonLabel": r"אישור",
     "pasteButtonLabel": r"הדבק",
     "selectAllButtonLabel": r"בחר הכל",
-    "viewLicensesButtonLabel": r"ראה רישיונות",
+    "viewLicensesButtonLabel": r"הצג רישיונות",
   },
   "it": const <String, String>{
     "scriptCategory": r"English-like",
@@ -452,3 +452,4 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "postMeridiemAbbreviation": r"下午",
   },
 };
+
