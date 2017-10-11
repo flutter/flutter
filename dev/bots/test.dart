@@ -57,13 +57,13 @@ Future<Null> _verifyInternationalizations() async {
     dart,
     <String>[
       path.join('dev', 'tools', 'gen_localizations.dart'),
-      path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n'),
+      path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'),
       'material'
     ],
     workingDirectory: flutterRoot,
   );
 
-  final String localizationsFile = path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n', 'localizations.dart');
+  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
   final EvalResult sourceContents = await _evalCommand(
     'cat',
@@ -156,6 +156,7 @@ Future<Null> _runTests() async {
 
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));

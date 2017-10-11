@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart' show
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
   debugRepaintRainbowEnabled;
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'stock_data.dart';
 import 'stock_home.dart';
@@ -118,8 +119,10 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizationsDelegates: <_StocksLocalizationsDelegate>[
+      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
         new _StocksLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const <Locale>[
         const Locale('en', 'US'),

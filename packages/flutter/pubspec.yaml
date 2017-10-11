@@ -8,7 +8,6 @@ dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   collection: 1.14.3
   http: 0.11.3+14
-  intl: 0.15.1 # TODO(ianh): remove this, see https://github.com/flutter/flutter/issues/12050
   meta: 1.1.1
   typed_data: 1.1.4
   vector_math: 2.0.5
@@ -23,7 +22,7 @@ dev_dependencies:
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
-  barback: 0.15.2+12 # TRANSITIVE DEPENDENCY
+  barback: 0.15.2+13 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   cli_util: 0.1.2+1 # TRANSITIVE DEPENDENCY
@@ -35,6 +34,7 @@ dev_dependencies:
   html: 0.13.2 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
+  intl: 0.15.1 # TRANSITIVE DEPENDENCY
   intl_translation: 0.15.0 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY

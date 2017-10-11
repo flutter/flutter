@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 class TestLocalizations {
   TestLocalizations(this.locale, this.prefix);
@@ -103,20 +104,7 @@ class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizat
   bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
 }
 
-// Same as _WidgetsLocalizationsDelegate in widgets/app.dart
-class DefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const DefaultWidgetsLocalizationsDelegate();
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(DefaultWidgetsLocalizationsDelegate old) => false;
-}
-
 class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
-  OnlyRTLDefaultWidgetsLocalizations(Locale locale) : super(locale);
-
   @override
   TextDirection get textDirection => TextDirection.rtl;
 }
@@ -126,7 +114,7 @@ class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<W
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations(locale));
+    return new SynchronousFuture<WidgetsLocalizations>(new OnlyRTLDefaultWidgetsLocalizations());
   }
 
   @override
@@ -224,7 +212,7 @@ void main() {
   testWidgets('Synchronously loaded localizations in a WidgetsApp', (WidgetTester tester) async {
     final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
       new SyncTestLocalizationsDelegate(),
-      const DefaultWidgetsLocalizationsDelegate(),
+      DefaultWidgetsLocalizations.delegate,
     ];
 
     Future<Null> pumpTest(Locale locale) async {
@@ -349,7 +337,7 @@ void main() {
                 locale: const Locale('en', 'GB'),
                 delegates: <LocalizationsDelegate<dynamic>>[
                   new SyncTestLocalizationsDelegate(),
-                  const DefaultWidgetsLocalizationsDelegate(),
+                  DefaultWidgetsLocalizations.delegate,
                 ],
                 // Create a new context within the en_GB Localization
                 child: new Builder(
@@ -476,6 +464,9 @@ void main() {
 
     await tester.pumpWidget(
       buildFrame(
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalWidgetsLocalizations.delegate,
+        ],
         supportedLocales: const <Locale>[
           const Locale('en', 'GB'),
           const Locale('ar', 'EG'),
@@ -557,6 +548,9 @@ void main() {
       buildFrame(
         // Accept whatever locale we're given
         localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          GlobalWidgetsLocalizations.delegate,
+        ],
         buildContent: (BuildContext context) {
           return new Localizations.override(
             context: context,

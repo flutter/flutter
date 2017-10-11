@@ -295,8 +295,8 @@ class DayPicker extends StatelessWidget {
   List<Widget> _getDayHeaders(TextStyle headerStyle, MaterialLocalizations localizations) {
     final List<Widget> result = <Widget>[];
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
-      final String weekDay = localizations.narrowWeekDays[i];
-      result.add(new Center(child: new Text(weekDay, style: headerStyle)));
+      final String weekday = localizations.narrowWeekdays[i];
+      result.add(new Center(child: new Text(weekday, style: headerStyle)));
       if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
         break;
     }
@@ -350,19 +350,19 @@ class DayPicker extends StatelessWidget {
   /// - [DateTime.weekday] provides a 1-based index into days of week, with 1
   ///   falling on Monday.
   /// - [MaterialLocalizations.firstDayOfWeekIndex] provides a 0-based index
-  ///   into the [MaterialLocalizations.narrowWeekDays] list.
-  /// - [MaterialLocalizations.narrowWeekDays] list provides localized names of
+  ///   into the [MaterialLocalizations.narrowWeekdays] list.
+  /// - [MaterialLocalizations.narrowWeekdays] list provides localized names of
   ///   days of week, always starting with Sunday and ending with Saturday.
   int _computeFirstDayOffset(int year, int month, MaterialLocalizations localizations) {
     // 0-based day of week, with 0 representing Monday.
-    final int weekDayFromMonday = new DateTime(year, month).weekday - 1;
+    final int weekdayFromMonday = new DateTime(year, month).weekday - 1;
     // 0-based day of week, with 0 representing Sunday.
     final int firstDayOfWeekFromSunday = localizations.firstDayOfWeekIndex;
     // firstDayOfWeekFromSunday recomputed to be Monday-based
     final int firstDayOfWeekFromMonday = (firstDayOfWeekFromSunday - 1) % 7;
     // Number of days between the first day of week appearing on the calendar,
     // and the day corresponding to the 1-st of the month.
-    return (weekDayFromMonday - firstDayOfWeekFromMonday) % 7;
+    return (weekdayFromMonday - firstDayOfWeekFromMonday) % 7;
   }
 
   @override

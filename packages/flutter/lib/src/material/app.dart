@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -25,17 +23,6 @@ const TextStyle _errorTextStyle = const TextStyle(
   decorationColor: const Color(0xFFFFFF00),
   decorationStyle: TextDecorationStyle.double
 );
-
-class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const _MaterialLocalizationsDelegate();
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
-}
-
 
 /// An application that uses material design.
 ///
@@ -463,7 +450,7 @@ class _MaterialAppState extends State<MaterialApp> {
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
-    yield const _MaterialLocalizationsDelegate();
+    yield DefaultMaterialLocalizations.delegate;
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {

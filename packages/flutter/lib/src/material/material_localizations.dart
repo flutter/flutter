@@ -6,11 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbols.dart' as intl;
-import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
 
-import 'i18n/localizations.dart';
 import 'time.dart';
 import 'typography.dart';
 
@@ -18,8 +14,10 @@ import 'typography.dart';
 ///
 /// See also:
 ///
-///  * [DefaultMaterialLocalizations], which implements this interface
-///    and supports a variety of locales.
+///  * [DefaultMaterialLocalizations], the default, English-only, implementation
+///    of this interface.
+///  * [GlobalMaterialLocalizations], which provides material localizations for
+///    many languages.
 abstract class MaterialLocalizations {
   /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button.
   String get openAppDrawerTooltip;
@@ -155,17 +153,17 @@ abstract class MaterialLocalizations {
   /// - US English: S, M, T, W, T, F, S
   /// - Russian: вс, пн, вт, ср, чт, пт, сб - notice that the list begins with
   ///   вс (Sunday) even though the first day of week for Russian is Monday.
-  List<String> get narrowWeekDays;
+  List<String> get narrowWeekdays;
 
   /// Index of the first day of week, where 0 points to Sunday, and 6 points to
   /// Saturday.
   ///
-  /// This getter is compatible with [narrowWeekDays]. For example:
+  /// This getter is compatible with [narrowWeekdays]. For example:
   ///
   /// ```dart
   /// var localizations = MaterialLocalizations.of(context);
   /// // The name of the first day of week for the current locale.
-  /// var firstDayOfWeek = localizations.narrowWeekDays[localizations.firstDayOfWeekIndex];
+  /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
 
@@ -186,173 +184,118 @@ abstract class MaterialLocalizations {
   }
 }
 
-/// Localized strings for the material widgets.
+class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
+  const _MaterialLocalizationsDelegate();
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
+
+  @override
+  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
+}
+
+/// US English strings for the material widgets.
+///
+/// See also:
+///
+///  * [GlobalMaterialLocalizations], which provides material localizations for
+///    many languages.
+///  * [MaterialApp.delegates], which automatically includes
+///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
-  /// for the given `locale`.
+  /// for US English (only).
   ///
   /// [LocalizationsDelegate] implementations typically call the static [load]
   /// function, rather than constructing this class directly.
-  DefaultMaterialLocalizations(this.locale)
-      : assert(locale != null),
-        this._localeName = _computeLocaleName(locale) {
-    _loadDateIntlDataIfNotLoaded();
+  const DefaultMaterialLocalizations();
 
-    if (localizations.containsKey(locale.languageCode))
-      _nameToValue.addAll(localizations[locale.languageCode]);
-    if (localizations.containsKey(_localeName))
-      _nameToValue.addAll(localizations[_localeName]);
 
-    const String kMediumDatePattern = 'E, MMM\u00a0d';
-    if (intl.DateFormat.localeExists(_localeName)) {
-      _fullYearFormat = new intl.DateFormat.y(_localeName);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, _localeName);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', _localeName);
-    } else if (intl.DateFormat.localeExists(locale.languageCode)) {
-      _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, locale.languageCode);
-      _yearMonthFormat = new intl.DateFormat('yMMMM', locale.languageCode);
-    } else {
-      _fullYearFormat = new intl.DateFormat.y();
-      _mediumDateFormat = new intl.DateFormat(kMediumDatePattern);
-      _yearMonthFormat = new intl.DateFormat('yMMMM');
-    }
+  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  static const List<String>_shortWeekdays = const <String>[
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+    'Sat',
+    'Sun',
+  ];
 
-    if (intl.NumberFormat.localeExists(_localeName)) {
-      _decimalFormat = new intl.NumberFormat.decimalPattern(_localeName);
-      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', _localeName);
-    } else if (intl.NumberFormat.localeExists(locale.languageCode)) {
-      _decimalFormat = new intl.NumberFormat.decimalPattern(locale.languageCode);
-      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00', locale.languageCode);
-    } else {
-      _decimalFormat = new intl.NumberFormat.decimalPattern();
-      _twoDigitZeroPaddedFormat = new intl.NumberFormat('00');
-    }
-  }
+  static const List<String> _narrowWeekdays = const <String>[
+    'S',
+    'M',
+    'T',
+    'W',
+    'T',
+    'F',
+    'S',
+  ];
 
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  final Locale locale;
+  static const List<String> _shortMonths = const <String>[
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
 
-  final String _localeName;
-
-  final Map<String, String> _nameToValue = <String, String>{};
-
-  /// Formats numbers using variable length format with no zero padding.
-  ///
-  /// See also [_twoDigitZeroPaddedFormat].
-  intl.NumberFormat _decimalFormat;
-
-  /// Formats numbers as two-digits.
-  ///
-  /// If the number is less than 10, zero-pads it.
-  intl.NumberFormat _twoDigitZeroPaddedFormat;
-
-  /// Full unabbreviated year format, e.g. 2017 rather than 17.
-  intl.DateFormat _fullYearFormat;
-
-  intl.DateFormat _mediumDateFormat;
-
-  intl.DateFormat _yearMonthFormat;
-
-  static String _computeLocaleName(Locale locale) {
-    final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
-    return intl.Intl.canonicalizedLocale(localeName);
-  }
-
-  // TODO(hmuller): the rules for mapping from an integer value to
-  // "one" or "two" etc. are locale specific and an additional "few" category
-  // is needed. See http://cldr.unicode.org/index/cldr-spec/plural-rules
-  String _nameToPluralValue(int count, String key) {
-    String text;
-    if (count == 0)
-      text = _nameToValue['${key}Zero'];
-    else if (count == 1)
-      text = _nameToValue['${key}One'];
-    else if (count == 2)
-      text = _nameToValue['${key}Two'];
-    else if (count > 2)
-      text = _nameToValue['${key}Many'];
-    text ??= _nameToValue['${key}Other'];
-    assert(text != null);
-    return text;
-  }
+  static const List<String> _months = const <String>[
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
 
   @override
   String formatHour(TimeOfDay timeOfDay) {
-    switch (hourFormat(of: timeOfDayFormat)) {
-      case HourFormat.HH:
-        return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
-      case HourFormat.H:
-        return formatDecimal(timeOfDay.hour);
-      case HourFormat.h:
-        final int hour = timeOfDay.hourOfPeriod;
-        return formatDecimal(hour == 0 ? 12 : hour);
-    }
-    return null;
+    assert(hourFormat(of: timeOfDayFormat) == HourFormat.h);
+    return formatDecimal(timeOfDay.hour);
   }
 
   @override
   String formatMinute(TimeOfDay timeOfDay) {
-    return _twoDigitZeroPaddedFormat.format(timeOfDay.minute);
+    final int minute = timeOfDay.minute;
+    return minute < 10 ? '0$minute' : minute.toString();
   }
 
   @override
-  String formatYear(DateTime date) {
-    return _fullYearFormat.format(date);
-  }
+  String formatYear(DateTime date) => date.year.toString();
 
   @override
   String formatMediumDate(DateTime date) {
-    return _mediumDateFormat.format(date);
+    final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
+    final String month = _shortMonths[date.month - DateTime.JANUARY];
+    return '$day, $month ${date.day}';
   }
 
   @override
   String formatMonthYear(DateTime date) {
-    return _yearMonthFormat.format(date);
+    final String year = formatYear(date);
+    final String month = _months[date.month - DateTime.JANUARY];
+    return '$month $year';
   }
 
   @override
-  List<String> get narrowWeekDays {
-    return _fullYearFormat.dateSymbols.NARROWWEEKDAYS;
-  }
+  List<String> get narrowWeekdays => _narrowWeekdays;
 
   @override
-  int get firstDayOfWeekIndex => (_fullYearFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
-
-  /// Formats a [number] using local decimal number format.
-  ///
-  /// Inserts locale-appropriate thousands separator, if necessary.
-  String formatDecimal(int number) {
-    return _decimalFormat.format(number);
-  }
-
-  @override
-  String formatTimeOfDay(TimeOfDay timeOfDay) {
-    // Not using intl.DateFormat for two reasons:
-    //
-    // - DateFormat supports more formats than our material time picker does,
-    //   and we want to be consistent across time picker format and the string
-    //   formatting of the time of day.
-    // - DateFormat operates on DateTime, which is sensitive to time eras and
-    //   time zones, while here we want to format hour and minute within one day
-    //   no matter what date the day falls on.
-    switch (timeOfDayFormat) {
-      case TimeOfDayFormat.h_colon_mm_space_a:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
-      case TimeOfDayFormat.H_colon_mm:
-      case TimeOfDayFormat.HH_colon_mm:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
-      case TimeOfDayFormat.HH_dot_mm:
-        return '${formatHour(timeOfDay)}.${formatMinute(timeOfDay)}';
-      case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
-      case TimeOfDayFormat.frenchCanadian:
-        return '${formatHour(timeOfDay)} h ${formatMinute(timeOfDay)}';
-    }
-
-    return null;
-  }
+  int get firstDayOfWeekIndex => 0; // narrowWeekdays[0] is 'S' for Sunday
 
   String _formatDayPeriod(TimeOfDay timeOfDay) {
     switch (timeOfDay.period) {
@@ -364,166 +307,142 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return null;
   }
 
-  @override
-  String get openAppDrawerTooltip => _nameToValue['openAppDrawerTooltip'];
+  /// Formats an integer, inserting thousands separators as needed.
+  String formatDecimal(int number) {
+    if (number > -1000 && number < 1000)
+      return number.toString();
 
-  @override
-  String get backButtonTooltip => _nameToValue['backButtonTooltip'];
-
-  @override
-  String get closeButtonTooltip => _nameToValue['closeButtonTooltip'];
-
-  @override
-  String get nextMonthTooltip => _nameToValue['nextMonthTooltip'];
-
-  @override
-  String get previousMonthTooltip => _nameToValue['previousMonthTooltip'];
-
-  @override
-  String get nextPageTooltip => _nameToValue['nextPageTooltip'];
-
-  @override
-  String get previousPageTooltip => _nameToValue['previousPageTooltip'];
-
-  @override
-  String get showMenuTooltip => _nameToValue['showMenuTooltip'];
-
-  @override
-  String aboutListTileTitle(String applicationName) {
-    final String text = _nameToValue['aboutListTileTitle'];
-    return text.replaceFirst(r'$applicationName', applicationName);
+    final String digits = number.abs().toString();
+    final StringBuffer result = new StringBuffer(number < 0 ? '-' : '');
+    final int maxDigitIndex = digits.length - 1;
+    for (int i = 0; i <= maxDigitIndex; i += 1) {
+      result.write(digits[i]);
+      if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
+        result.write(',');
+    }
+    return result.toString();
   }
 
   @override
-  String get licensesPageTitle => _nameToValue['licensesPageTitle'];
+  String formatTimeOfDay(TimeOfDay timeOfDay) {
+    assert(timeOfDayFormat == TimeOfDayFormat.h_colon_mm_space_a);
+    // Not using intl.DateFormat for two reasons:
+    //
+    // - DateFormat supports more formats than our material time picker does,
+    //   and we want to be consistent across time picker format and the string
+    //   formatting of the time of day.
+    // - DateFormat operates on DateTime, which is sensitive to time eras and
+    //   time zones, while here we want to format hour and minute within one day
+    //   no matter what date the day falls on.
+    return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+  }
+
+  @override
+  String get openAppDrawerTooltip => 'Open navigation menu';
+
+  @override
+  String get backButtonTooltip => 'Back';
+
+  @override
+  String get closeButtonTooltip => 'Close';
+
+  @override
+  String get nextMonthTooltip => 'Next month';
+
+  @override
+  String get previousMonthTooltip => 'Previous month';
+
+  @override
+  String get nextPageTooltip => 'Next page';
+
+  @override
+  String get previousPageTooltip => 'Previous page';
+
+  @override
+  String get showMenuTooltip => 'Show menu';
+
+  @override
+  String aboutListTileTitle(String applicationName) => 'About $applicationName';
+
+  @override
+  String get licensesPageTitle => 'Licenses';
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    String text = rowCountIsApproximate ? _nameToValue['pageRowsInfoTitleApproximate'] : null;
-    text ??= _nameToValue['pageRowsInfoTitle'];
-    assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
-    // TODO(hansmuller): this could be more efficient.
-    return text
-      .replaceFirst(r'$firstRow', formatDecimal(firstRow))
-      .replaceFirst(r'$lastRow', formatDecimal(lastRow))
-      .replaceFirst(r'$rowCount', formatDecimal(rowCount));
+    return rowCountIsApproximate
+      ? '$firstRow–$lastRow of about $rowCount'
+      : '$firstRow–$lastRow of $rowCount';
   }
 
   @override
-  String get rowsPerPageTitle => _nameToValue['rowsPerPageTitle'];
+  String get rowsPerPageTitle => 'Rows per page';
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
-    return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
-      .replaceFirst(r'$selectedRowCount', formatDecimal(selectedRowCount));
+    switch (selectedRowCount) {
+      case 0:
+        return 'No items selected';
+      case 1:
+        return '1 item selected';
+      default:
+        return '$selectedRowCount items selected';
+    }
   }
 
   @override
-  String get cancelButtonLabel => _nameToValue['cancelButtonLabel'];
+  String get cancelButtonLabel => 'CANCEL';
 
   @override
-  String get closeButtonLabel => _nameToValue['closeButtonLabel'];
+  String get closeButtonLabel => 'CLOSE';
 
   @override
-  String get continueButtonLabel => _nameToValue['continueButtonLabel'];
+  String get continueButtonLabel => 'CONTINUE';
 
   @override
-  String get copyButtonLabel => _nameToValue['copyButtonLabel'];
+  String get copyButtonLabel => 'COPY';
 
   @override
-  String get cutButtonLabel => _nameToValue['cutButtonLabel'];
+  String get cutButtonLabel => 'CUT';
 
   @override
-  String get okButtonLabel => _nameToValue['okButtonLabel'];
+  String get okButtonLabel => 'OK';
 
   @override
-  String get pasteButtonLabel => _nameToValue['pasteButtonLabel'];
+  String get pasteButtonLabel => 'PASTE';
 
   @override
-  String get selectAllButtonLabel => _nameToValue['selectAllButtonLabel'];
+  String get selectAllButtonLabel => 'SELECT ALL';
 
   @override
-  String get viewLicensesButtonLabel => _nameToValue['viewLicensesButtonLabel'];
+  String get viewLicensesButtonLabel => 'VIEW LICENSES';
 
   @override
-  String get anteMeridiemAbbreviation => _nameToValue['anteMeridiemAbbreviation'];
+  String get anteMeridiemAbbreviation => 'AM';
 
   @override
-  String get postMeridiemAbbreviation => _nameToValue['postMeridiemAbbreviation'];
+  String get postMeridiemAbbreviation => 'PM';
 
-  /// The [TimeOfDayFormat] corresponding to one of the following supported
-  /// patterns:
-  ///
-  ///  * `HH:mm`
-  ///  * `HH.mm`
-  ///  * `HH 'h' mm`
-  ///  * `HH:mm น.`
-  ///  * `H:mm`
-  ///  * `h:mm a`
-  ///  * `a h:mm`
-  ///  * `ah:mm`
-  ///
-  /// See also:
-  ///
-  ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
-  ///    short time pattern used in locale en_US
   @override
-  TimeOfDayFormat get timeOfDayFormat {
-    final String icuShortTimePattern = _nameToValue['timeOfDayFormat'];
-
-    assert(() {
-      if (!_icuTimeOfDayToEnum.containsKey(icuShortTimePattern)) {
-        throw new FlutterError(
-          '"$icuShortTimePattern" is not one of the ICU short time patterns '
-          'supported by the material library. Here is the list of supported '
-          'patterns:\n  ' +
-          _icuTimeOfDayToEnum.keys.join('\n  ')
-        );
-      }
-      return true;
-    }());
-
-    return _icuTimeOfDayToEnum[icuShortTimePattern];
-  }
+  TimeOfDayFormat get timeOfDayFormat => TimeOfDayFormat.h_colon_mm_space_a;
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_nameToValue["scriptCategory"]);
+  TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
 
-  /// Creates an object that provides localized resource values for the
-  /// for the widgets of the material library.
+  /// Creates an object that provides US English resource values for the material
+  /// library widgets.
+  ///
+  /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [MaterialApp] does so by default.
   static Future<MaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<MaterialLocalizations>(new DefaultMaterialLocalizations(locale));
+    return new SynchronousFuture<MaterialLocalizations>(const DefaultMaterialLocalizations());
   }
-}
 
-const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDayFormat>{
-  'HH:mm': TimeOfDayFormat.HH_colon_mm,
-  'HH.mm': TimeOfDayFormat.HH_dot_mm,
-  "HH 'h' mm": TimeOfDayFormat.frenchCanadian,
-  'HH:mm น.': TimeOfDayFormat.HH_colon_mm,
-  'H:mm': TimeOfDayFormat.H_colon_mm,
-  'h:mm a': TimeOfDayFormat.h_colon_mm_space_a,
-  'a h:mm': TimeOfDayFormat.a_space_h_colon_mm,
-  'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
-};
-
-/// Tracks if date i18n data has been loaded.
-bool _dateIntlDataInitialized = false;
-
-/// Loads i18n data for dates if it hasn't be loaded yet.
-///
-/// Only the first invocation of this function has the effect of loading the
-/// data. Subsequent invocations have no effect.
-void _loadDateIntlDataIfNotLoaded() {
-  if (!_dateIntlDataInitialized) {
-    // The returned Future is intentionally dropped on the floor. The
-    // function only returns it to be compatible with the async counterparts.
-    // The Future has no value otherwise.
-    intl_local_date_data.initializeDateFormatting();
-    _dateIntlDataInitialized = true;
-  }
+  /// A [LocalizationsDelegate] that uses [DefaultMaterialLocalizations.load]
+  /// to create an instance of this class.
+  ///
+  /// [MaterialApp] automatically adds this value to [MaterialApp.localizationsDelegates].
+  static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();
 }

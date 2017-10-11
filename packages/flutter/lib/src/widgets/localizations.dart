@@ -161,44 +161,50 @@ abstract class WidgetsLocalizations {
   }
 }
 
-/// Localized values for widgets.
-class DefaultWidgetsLocalizations implements WidgetsLocalizations {
-  /// Construct an object that defines the localized values for the widgets
-  /// library for the given `locale`.
-  ///
-  /// [LocalizationsDelegate] implementations typically call the static [load]
-  /// function, rather than constructing this class directly.
-  DefaultWidgetsLocalizations(this.locale) {
-    final String language = locale.languageCode.toLowerCase();
-    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
-  }
-
-  // See http://en.wikipedia.org/wiki/Right-to-left
-  static const List<String> _rtlLanguages = const <String>[
-    'ar',  // Arabic
-    'fa',  // Farsi
-    'he',  // Hebrew
-    'ps',  // Pashto
-    'sd',  // Sindhi
-    'ur',  // Urdu
-  ];
-
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  final Locale locale;
+class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _WidgetsLocalizationsDelegate();
 
   @override
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
-  /// Creates an object that provides localized resource values for the
-  /// lowest levels of the Flutter framework.
+  @override
+  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+}
+
+/// US English localizations for the widgets library.
+///
+/// See also:
+///
+///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
+///    many languages.
+///  * [WidgetsApp.delegates], which automatically includes
+///    [DefaultWidgetsLocalizations.delegate] by default.
+class DefaultWidgetsLocalizations implements WidgetsLocalizations {
+  /// Construct an object that defines the localized values for the widgets
+  /// library for US English (only).
+  ///
+  /// [LocalizationsDelegate] implementations typically call the static [load]
+  const DefaultWidgetsLocalizations();
+
+  @override
+  TextDirection get textDirection => TextDirection.ltr;
+
+  /// Creates an object that provides US English resource values for the
+  /// lowest levels of the widgets library.
+  ///
+  /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [WidgetsApp] does so by default.
   static Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new DefaultWidgetsLocalizations(locale));
+    return new SynchronousFuture<WidgetsLocalizations>(const DefaultWidgetsLocalizations());
   }
+
+  /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
+  /// to create an instance of this class.
+  ///
+  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {

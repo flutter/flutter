@@ -1,12 +1,12 @@
-# Material Library Internationalization
+# Material Library Localizations
 
 The `.arb` files in this directory contain localized values (primarily
 strings) used by the material library.  The `localizations.dart` file
-combines all of the localizations into a single Dart Map that is
-linked with the rest of the material library.
+combines all of the localizations into a single Map that is
+linked with the rest of flutter_localizations package.
 
 If you're looking for information about internationalizing Flutter
-apps in general, see th
+apps in general, see the
 [Internationalizing Flutter Apps](https://flutter.io/tutorials/internationalization/) tutorial.
 
 
@@ -54,7 +54,7 @@ translation of "CANCEL" which is defined for the `cancelButtonLabel`
 resource ID.
 
 Each of the language-specific .arb files contains an entry for
-`cancelButtonLabel`. They're all represented by the Dart `Map` in the
+`cancelButtonLabel`. They're all represented by the `Map` in the
 generated `localizations.dart` file. The Map is used by the
 MaterialLocalizations class.
 
@@ -123,18 +123,18 @@ the "Other" suffix. For example the English translations
 ```
 
 
-### Generated file localizations.dart: all of the localizations as a Dart Map
+### Generated file localizations.dart: all of the localizations as a Map
 
 If you look at the comment at the top of `localizations.dart` you'll
 see that it was manually generated using a `dev/tools` app called
 `gen_localizations` roughly like this:
 
 ```dart
-dev/tools/gen_localizations.dart packages/flutter/lib/src/material/i18n material
+dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
 ```
 
 The gen_localizations app just combines the contents of all of the
-.arb files into a single Dart `Map` that has entries for each .arb
+.arb files into a single `Map` that has entries for each .arb
 file's locale. The `MaterialLocalizations` class implementation uses
 this Map to implement the methods that lookup localized resource
 values.
