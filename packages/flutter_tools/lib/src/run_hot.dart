@@ -334,12 +334,14 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch restartTimer = new Stopwatch()..start();
-    if (previewDart2)
-      for (FlutterDevice device in flutterDevices)
+    if (previewDart2) {
+      for (FlutterDevice device in flutterDevices) {
         // Reset generator so that full kernel file is produced for VM to
         // restart from.
         if (device.generator != null)
           device.generator.reset();
+      }
+    }
     final bool updatedDevFS = await _updateDevFS();
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
