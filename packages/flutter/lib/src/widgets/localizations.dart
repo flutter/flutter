@@ -177,6 +177,8 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
 ///
 ///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
 ///    many languages.
+///  * [WidgetsApp.delegates], which automatically includes
+///    [DefaultWidgetsLocalizations.delegate] by default.
 class DefaultWidgetsLocalizations implements WidgetsLocalizations {
   /// Construct an object that defines the localized values for the widgets
   /// library for US English (only).

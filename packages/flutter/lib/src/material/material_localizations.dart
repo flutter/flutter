@@ -200,6 +200,8 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
+///  * [MaterialApp.delegates], which automatically includes
+///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings
   /// for US English (only).
@@ -313,7 +315,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String digits = number.abs().toString();
     final StringBuffer result = new StringBuffer(number < 0 ? '-' : '');
     final int maxDigitIndex = digits.length - 1;
-    for (int i = 0; i <= maxDigitIndex; i++) {
+    for (int i = 0; i <= maxDigitIndex; i += 1) {
       result.write(digits[i]);
       if (i < maxDigitIndex && (maxDigitIndex - i) % 3 == 0)
         result.write(',');
