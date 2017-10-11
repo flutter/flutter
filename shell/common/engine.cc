@@ -234,11 +234,23 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
   std::string packages_path = packages;
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
-  if (!bundle_path.empty())
-    ConfigureAssetBundle(bundle_path);
-  ConfigureRuntime(GetScriptUriFromPath(main));
-  load_script_error_ =
-      runtime_->dart_controller()->RunFromSource(main, packages_path);
+
+  std::vector<uint8_t> platform_kernel;
+  if (!bundle_path.empty()) {
+    GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
+  }
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
+
+  if (!platform_kernel.empty()) {
+    std::vector<uint8_t> kernel;
+    if (!files::ReadFileToVector(main, &kernel)) {
+      load_script_error_ = tonic::kUnknownErrorType;
+    }
+    load_script_error_ = runtime_->dart_controller()->RunFromKernel(kernel);
+  } else {
+    load_script_error_ =
+        runtime_->dart_controller()->RunFromSource(main, packages_path);
+  }
 }
 
 void Engine::BeginFrame(fxl::TimePoint frame_time) {
