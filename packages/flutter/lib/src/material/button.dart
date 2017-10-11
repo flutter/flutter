@@ -329,6 +329,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           padding: widget.padding ?? ButtonTheme.of(context).padding,
           child: new Center(
             widthFactor: 1.0,
+            heightFactor: 1.0,
             child: widget.child
           )
         )
@@ -349,17 +350,12 @@ class _MaterialButtonState extends State<MaterialButton> {
         child: contents
       );
     }
-    return new Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        new ConstrainedBox(
-          constraints: new BoxConstraints(
-            minWidth: widget.minWidth ?? buttonTheme.minWidth,
-            minHeight: height,
-          ),
-          child: contents,
-        ),
-      ],
+    return new ConstrainedBox(
+      constraints: new BoxConstraints(
+        minWidth: widget.minWidth ?? buttonTheme.minWidth,
+        minHeight: height,
+      ),
+      child: contents
     );
   }
 }
