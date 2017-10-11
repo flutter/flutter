@@ -538,6 +538,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   /// This method can be called outside of the build phase to filter the list of
   /// available semantic actions.
   ///
+  /// The actual filtering is happening in the next frame and a frame will be
+  /// scheduled if non is pending.
+  ///
   /// This is used by [Scrollable] to configure system accessibility tools so
   /// that they know in which direction a particular list can be scrolled.
   ///
