@@ -32,7 +32,7 @@ void TransformLayer::UpdateScene(SceneUpdateContext& context) {
 
 #endif  // defined(OS_FUCHSIA)
 
-void TransformLayer::Paint(PaintContext& context) {
+void TransformLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "TransformLayer::Paint");
   FXL_DCHECK(needs_painting());
 

@@ -10,7 +10,7 @@ ColorFilterLayer::ColorFilterLayer() = default;
 
 ColorFilterLayer::~ColorFilterLayer() = default;
 
-void ColorFilterLayer::Paint(PaintContext& context) {
+void ColorFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   FXL_DCHECK(needs_painting());
 

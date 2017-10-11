@@ -62,7 +62,7 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 }
 #endif
 
-void LayerTree::Paint(CompositorContext::ScopedFrame& frame) {
+void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
   Layer::PaintContext context = {*frame.canvas(), frame.context().frame_time(),
                                  frame.context().engine_time(),
                                  frame.context().memory_usage(),

@@ -10,7 +10,7 @@ ShaderMaskLayer::ShaderMaskLayer() = default;
 
 ShaderMaskLayer::~ShaderMaskLayer() = default;
 
-void ShaderMaskLayer::Paint(PaintContext& context) {
+void ShaderMaskLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
   FXL_DCHECK(needs_painting());
 

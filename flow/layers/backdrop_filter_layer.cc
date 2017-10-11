@@ -12,7 +12,7 @@ BackdropFilterLayer::BackdropFilterLayer() = default;
 
 BackdropFilterLayer::~BackdropFilterLayer() = default;
 
-void BackdropFilterLayer::Paint(PaintContext& context) {
+void BackdropFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
   FXL_DCHECK(needs_painting());
 

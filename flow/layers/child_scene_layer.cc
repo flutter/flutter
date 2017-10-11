@@ -14,7 +14,7 @@ void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_needs_system_composite(true);
 }
 
-void ChildSceneLayer::Paint(PaintContext& context) {
+void ChildSceneLayer::Paint(PaintContext& context) const {
   FXL_NOTREACHED() << "This layer never needs painting.";
 }
 

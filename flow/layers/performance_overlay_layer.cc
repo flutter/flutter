@@ -90,7 +90,7 @@ void VisualizeCounterValuesBytes(SkCanvas& canvas,
 PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options)
     : options_(options) {}
 
-void PerformanceOverlayLayer::Paint(PaintContext& context) {
+void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   if (!options_)
     return;
 

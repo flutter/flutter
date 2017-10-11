@@ -10,7 +10,7 @@ OpacityLayer::OpacityLayer() = default;
 
 OpacityLayer::~OpacityLayer() = default;
 
-void OpacityLayer::Paint(PaintContext& context) {
+void OpacityLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   FXL_DCHECK(needs_painting());
 

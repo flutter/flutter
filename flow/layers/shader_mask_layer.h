@@ -22,7 +22,7 @@ class ShaderMaskLayer : public ContainerLayer {
 
   void set_blend_mode(SkBlendMode blend_mode) { blend_mode_ = blend_mode; }
 
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext& context) const override;
 
  private:
   sk_sp<SkShader> shader_;
