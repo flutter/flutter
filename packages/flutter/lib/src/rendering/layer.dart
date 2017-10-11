@@ -167,28 +167,27 @@ class PictureLayer extends Layer {
   }
 }
 
-/// A composited layer backed by a platform surface.
+/// A composited layer backed by a texture.
 ///
-/// Platform surface layers are always leaves in the layer tree.
-class PlatformSurfaceLayer extends Layer {
-  /// Creates a platform surface layer bounded by [rect] and identified
-  /// by [surfaceId].
-  PlatformSurfaceLayer({
+/// Texture layers are always leaves in the layer tree.
+class TextureLayer extends Layer {
+  /// Creates a texture layer bounded by [rect] and identified by [textureId].
+  TextureLayer({
     @required this.rect,
-    @required this.surfaceId,
+    @required this.textureId,
   });
 
   /// Bounding rectangle of this layer.
   final Rect rect;
 
-  /// Identity of the platform surface backing this layer.
-  final int surfaceId;
+  /// Identity of the texture backing this layer.
+  final int textureId;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     final Rect shiftedRect = rect.shift(layerOffset);
-    builder.addPlatformSurface(
-      surfaceId,
+    builder.addTexture(
+      textureId,
       offset: shiftedRect.topLeft,
       width: shiftedRect.width,
       height: shiftedRect.height,

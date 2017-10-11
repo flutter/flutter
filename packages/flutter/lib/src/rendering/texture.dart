@@ -6,23 +6,23 @@ import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
 
-/// A [RenderBox] backed by a platform surface.
-class PlatformSurfaceBox extends RenderBox {
-  /// Creates a box backed by the platform surface identified by [surfaceId].
-  PlatformSurfaceBox({ int surfaceId }) : _surfaceId = surfaceId;
+/// A [RenderBox] backed by a texture.
+class TextureBox extends RenderBox {
+  /// Creates a box backed by the texture identified by [textureId].
+  TextureBox({ int textureId }) : _textureId = textureId;
 
-  int _surfaceId;
+  int _textureId;
 
-  /// Sets the platform surface ID.
-  set surfaceId(int value) {
-    if (value != _surfaceId) {
-      _surfaceId = value;
+  /// Sets the texture ID.
+  set textureId(int value) {
+    if (value != _textureId) {
+      _textureId = value;
       markNeedsPaint();
     }
   }
 
-  /// Returns the platform surface ID.
-  int get surfaceId => _surfaceId;
+  /// The identity of the backing texture.
+  int get textureId => _textureId;
 
   @override
   bool get sizedByParent => true;
@@ -45,12 +45,12 @@ class PlatformSurfaceBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_surfaceId == null) {
+    if (_textureId == null) {
       return;
     }
-    context.addLayer(new PlatformSurfaceLayer(
+    context.addLayer(new TextureLayer(
       rect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height),
-      surfaceId: _surfaceId,
+      textureId: _textureId,
     ));
   }
 }
