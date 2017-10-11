@@ -117,9 +117,14 @@ class CircleAvatar extends StatelessWidget {
         shape: BoxShape.circle,
       ),
       child: child != null ? new Center(
-        child: new DefaultTextStyle(
-          style: textStyle.copyWith(color: foregroundColor),
-          child: child,
+        child: new MediaQuery(
+          // Need to reset the textScaleFactor here so that the
+          // text doesn't escape the avatar when the textScaleFactor is large.
+          data: const MediaQueryData(textScaleFactor: 1.0),
+          child: new DefaultTextStyle(
+            style: textStyle.copyWith(color: foregroundColor),
+            child: child,
+          ),
         )
       ) : null,
     );
