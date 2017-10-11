@@ -22,7 +22,6 @@
 #include "txt/font_weight.h"
 #include "txt/paragraph.h"
 #include "txt/paragraph_builder.h"
-#include "txt/text_align.h"
 #include "utils.h"
 
 namespace txt {
@@ -809,7 +808,7 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.max_lines = 14;
   paragraph_style.text_align = TextAlign::right;
-  paragraph_style.rtl = true;
+  paragraph_style.text_direction = TextDirection::rtl;
   txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
 
   txt::TextStyle text_style;
@@ -838,7 +837,7 @@ TEST_F(ParagraphTest, DISABLED_ArabicParagraph) {
   ASSERT_TRUE(paragraph->runs_.styles_[1].equals(text_style));
   ASSERT_EQ(paragraph->records_[0].style().color, text_style.color);
   ASSERT_EQ(paragraph->records_.size(), 2ull);
-  ASSERT_EQ(paragraph->paragraph_style_.rtl, true);
+  ASSERT_EQ(paragraph->paragraph_style_.text_direction, TextDirection::rtl);
 
   for (size_t i = 0; i < u16_text.length(); i++) {
     ASSERT_EQ(paragraph->text_[i], u16_text[u16_text.length() - i]);
@@ -978,7 +977,7 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
   EXPECT_EQ(rects.size(), 1ull);
   EXPECT_FLOAT_EQ(rects[0].left(), 56.835938);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 177.97266);
+  EXPECT_FLOAT_EQ(rects[0].right(), 177.44922);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   paint.setColor(SK_ColorGREEN);
@@ -987,9 +986,9 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 1ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 177.97266);
+  EXPECT_FLOAT_EQ(rects[0].left(), 177);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 507.02344);
+  EXPECT_FLOAT_EQ(rects[0].right(), 506.08984);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   paint.setColor(SK_ColorRED);
@@ -998,9 +997,9 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 4ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 211.375);
+  EXPECT_FLOAT_EQ(rects[0].left(), 210.83594);
   EXPECT_FLOAT_EQ(rects[0].top(), 59);
-  EXPECT_FLOAT_EQ(rects[0].right(), 463.61719);
+  EXPECT_FLOAT_EQ(rects[0].right(), 463.44922);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 118);
 
   // TODO(garyq): The following set of vals are definetly wrong and
@@ -1016,9 +1015,9 @@ TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
     GetCanvas()->drawRect(rects[i], paint);
   }
   EXPECT_EQ(rects.size(), 1ull);
-  EXPECT_FLOAT_EQ(rects[0].left(), 450.1875);
+  EXPECT_FLOAT_EQ(rects[0].left(), 449.25391);
   EXPECT_FLOAT_EQ(rects[0].top(), 0);
-  EXPECT_FLOAT_EQ(rects[0].right(), 519.47266);
+  EXPECT_FLOAT_EQ(rects[0].right(), 519.44922);
   EXPECT_FLOAT_EQ(rects[0].bottom(), 59);
 
   paint.setColor(SK_ColorRED);

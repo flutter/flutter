@@ -307,7 +307,9 @@ void Paragraph::Layout(double width, bool force) {
       size_t line_run_end = std::min(run.end, line_end);
       uint16_t* text_ptr = text_.data() + line_run_start;
       size_t text_count = line_run_end - line_run_start;
-      bool bidiFlags = paragraph_style_.rtl;
+      int bidiFlags = (paragraph_style_.text_direction == TextDirection::rtl)
+                          ? minikin::kBidi_RTL
+                          : minikin::kBidi_LTR;
 
       if (text_count == 0)
         continue;
@@ -366,7 +368,7 @@ void Paragraph::Layout(double width, bool force) {
         blob_start += blob_len;
       }
 
-      double current_x_position = 0;
+      double justify_x_offset = 0;
       size_t code_unit_index = 0;
 
       for (const Range& glyph_blob : glyph_blobs) {
@@ -380,7 +382,8 @@ void Paragraph::Layout(double width, bool force) {
           blob_buffer.glyphs[blob_index] = layout.getGlyphId(glyph_index);
 
           size_t pos_index = blob_index * 2;
-          blob_buffer.pos[pos_index] = current_x_position;
+          double glyph_x_offset = layout.getX(glyph_index) + justify_x_offset;
+          blob_buffer.pos[pos_index] = glyph_x_offset;
           blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
           float glyph_advance = layout.getCharAdvance(code_unit_index);
@@ -403,7 +406,7 @@ void Paragraph::Layout(double width, bool force) {
           float subglyph_advance =
               glyph_advance / subglyph_code_unit_counts.size();
           glyph_single_line_position_x.emplace_back(
-              run_x_offset + current_x_position, subglyph_advance,
+              run_x_offset + glyph_x_offset, subglyph_advance,
               subglyph_code_unit_counts[0]);
 
           // Compute positions for the additional characters in the ligature.
@@ -413,11 +416,9 @@ void Paragraph::Layout(double width, bool force) {
                 subglyph_advance, subglyph_code_unit_counts[i]);
           }
 
-          current_x_position += glyph_advance;
-
           if (justify_line && word_index < words.size() &&
               code_unit_index == words[word_index].end) {
-            current_x_position += word_gap_width;
+            justify_x_offset += word_gap_width;
             word_index++;
           }
         }
@@ -427,8 +428,8 @@ void Paragraph::Layout(double width, bool force) {
       paint.getFontMetrics(&metrics);
       paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
                                  builder.make(), metrics, line_number,
-                                 current_x_position);
-      run_x_offset += current_x_position;
+                                 layout.getAdvance());
+      run_x_offset += layout.getAdvance();
     }
 
     double max_line_spacing = 0;
@@ -477,7 +478,12 @@ double Paragraph::GetLineXOffset(size_t line) {
   if (line >= breaks_count_)
     return 0;
 
-  if (paragraph_style_.text_align == TextAlign::right) {
+  TextAlign align = paragraph_style_.text_align;
+  TextDirection direction = paragraph_style_.text_direction;
+
+  if (align == TextAlign::right ||
+      (align == TextAlign::start && direction == TextDirection::rtl) ||
+      (align == TextAlign::end && direction == TextDirection::ltr)) {
     return width_ - breaker_.getWidths()[line];
   } else if (paragraph_style_.text_align == TextAlign::center) {
     return (width_ - breaker_.getWidths()[line]) / 2;

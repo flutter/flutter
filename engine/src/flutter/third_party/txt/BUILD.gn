@@ -89,7 +89,6 @@ source_set("txt") {
     "src/txt/platform.h",
     "src/txt/styled_runs.cc",
     "src/txt/styled_runs.h",
-    "src/txt/text_align.h",
     "src/txt/text_baseline.h",
     "src/txt/text_decoration.cc",
     "src/txt/text_decoration.h",
