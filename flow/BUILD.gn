@@ -24,6 +24,8 @@ source_set("flow") {
     "layers/container_layer.h",
     "layers/layer.cc",
     "layers/layer.h",
+    "layers/layer_builder.cc",
+    "layers/layer_builder.h",
     "layers/layer_tree.cc",
     "layers/layer_tree.h",
     "layers/opacity_layer.cc",

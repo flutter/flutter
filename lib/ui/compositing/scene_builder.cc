@@ -4,18 +4,6 @@
 
 #include "flutter/lib/ui/compositing/scene_builder.h"
 
-#include "flutter/flow/layers/backdrop_filter_layer.h"
-#include "flutter/flow/layers/clip_path_layer.h"
-#include "flutter/flow/layers/clip_rect_layer.h"
-#include "flutter/flow/layers/clip_rrect_layer.h"
-#include "flutter/flow/layers/color_filter_layer.h"
-#include "flutter/flow/layers/container_layer.h"
-#include "flutter/flow/layers/opacity_layer.h"
-#include "flutter/flow/layers/performance_overlay_layer.h"
-#include "flutter/flow/layers/physical_model_layer.h"
-#include "flutter/flow/layers/picture_layer.h"
-#include "flutter/flow/layers/shader_mask_layer.h"
-#include "flutter/flow/layers/transform_layer.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -26,10 +14,6 @@
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
-
-#if defined(OS_FUCHSIA)
-#include "flutter/flow/layers/child_scene_layer.h"
-#endif
 
 namespace blink {
 
@@ -67,81 +51,40 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
 }
 
 SceneBuilder::SceneBuilder()
-    : m_currentLayer(nullptr),
-      m_currentRasterizerTracingThreshold(0),
-      m_checkerboardRasterCacheImages(false),
-      m_checkerboardOffscreenLayers(false) {
-  m_cullRects.push(SkRect::MakeLargest());
-}
+    : layer_builder_(std::make_unique<flow::LayerBuilder>()){};
 
-SceneBuilder::~SceneBuilder() {}
+SceneBuilder::~SceneBuilder() = default;
 
 void SceneBuilder::pushTransform(const tonic::Float64List& matrix4) {
-  SkMatrix sk_matrix = ToSkMatrix(matrix4);
-  SkMatrix inverse_sk_matrix;
-  SkRect cullRect;
-  if (sk_matrix.invert(&inverse_sk_matrix))
-    inverse_sk_matrix.mapRect(&cullRect, m_cullRects.top());
-  else
-    cullRect = SkRect::MakeLargest();
-
-  std::unique_ptr<flow::TransformLayer> layer(new flow::TransformLayer());
-  layer->set_transform(sk_matrix);
-  addLayer(std::move(layer), cullRect);
+  layer_builder_->PushTransform(ToSkMatrix(matrix4));
 }
 
 void SceneBuilder::pushClipRect(double left,
                                 double right,
                                 double top,
                                 double bottom) {
-  const SkRect clipRect = SkRect::MakeLTRB(left, top, right, bottom);
-  SkRect cullRect;
-  if (!cullRect.intersect(clipRect, m_cullRects.top()))
-    cullRect = SkRect::MakeEmpty();
-
-  std::unique_ptr<flow::ClipRectLayer> layer(new flow::ClipRectLayer());
-  layer->set_clip_rect(clipRect);
-  addLayer(std::move(layer), cullRect);
+  layer_builder_->PushClipRect(SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void SceneBuilder::pushClipRRect(const RRect& rrect) {
-  SkRect cullRect;
-  if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
-    cullRect = SkRect::MakeEmpty();
-
-  std::unique_ptr<flow::ClipRRectLayer> layer(new flow::ClipRRectLayer());
-  layer->set_clip_rrect(rrect.sk_rrect);
-  addLayer(std::move(layer), cullRect);
+  layer_builder_->PushClipRoundedRect(rrect.sk_rrect);
 }
 
 void SceneBuilder::pushClipPath(const CanvasPath* path) {
-  SkRect cullRect;
-  if (!cullRect.intersect(path->path().getBounds(), m_cullRects.top()))
-    cullRect = SkRect::MakeEmpty();
-
-  std::unique_ptr<flow::ClipPathLayer> layer(new flow::ClipPathLayer());
-  layer->set_clip_path(path->path());
-  addLayer(std::move(layer), cullRect);
+  layer_builder_->PushClipPath(path->path());
 }
 
 void SceneBuilder::pushOpacity(int alpha) {
-  std::unique_ptr<flow::OpacityLayer> layer(new flow::OpacityLayer());
-  layer->set_alpha(alpha);
-  addLayer(std::move(layer), m_cullRects.top());
+  layer_builder_->PushOpacity(alpha);
 }
 
 void SceneBuilder::pushColorFilter(int color, int blendMode) {
-  std::unique_ptr<flow::ColorFilterLayer> layer(new flow::ColorFilterLayer());
-  layer->set_color(static_cast<SkColor>(color));
-  layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  addLayer(std::move(layer), m_cullRects.top());
+  layer_builder_->PushColorFilter(static_cast<SkColor>(color),
+                                  static_cast<SkBlendMode>(blendMode));
 }
 
 void SceneBuilder::pushBackdropFilter(ImageFilter* filter) {
-  std::unique_ptr<flow::BackdropFilterLayer> layer(
-      new flow::BackdropFilterLayer());
-  layer->set_filter(filter->filter());
-  addLayer(std::move(layer), m_cullRects.top());
+  layer_builder_->PushBackdropFilter(filter->filter());
 }
 
 void SceneBuilder::pushShaderMask(Shader* shader,
@@ -150,77 +93,36 @@ void SceneBuilder::pushShaderMask(Shader* shader,
                                   double maskRectTop,
                                   double maskRectBottom,
                                   int blendMode) {
-  std::unique_ptr<flow::ShaderMaskLayer> layer(new flow::ShaderMaskLayer());
-  layer->set_shader(shader->shader());
-  layer->set_mask_rect(SkRect::MakeLTRB(maskRectLeft, maskRectTop,
-                                        maskRectRight, maskRectBottom));
-  layer->set_blend_mode(static_cast<SkBlendMode>(blendMode));
-  addLayer(std::move(layer), m_cullRects.top());
+  layer_builder_->PushShaderMask(
+      shader->shader(),
+      SkRect::MakeLTRB(maskRectLeft, maskRectTop, maskRectRight,
+                       maskRectBottom),
+      static_cast<SkBlendMode>(blendMode));
 }
 
 void SceneBuilder::pushPhysicalModel(const RRect& rrect,
                                      double elevation,
                                      int color) {
-  SkRect cullRect;
-  if (!cullRect.intersect(rrect.sk_rrect.rect(), m_cullRects.top()))
-    cullRect = SkRect::MakeEmpty();
-
-  SkScalar dpr =
-      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio;
-
-  std::unique_ptr<flow::PhysicalModelLayer> layer(
-      new flow::PhysicalModelLayer());
-  layer->set_rrect(rrect.sk_rrect);
-  layer->set_elevation(elevation);
-  layer->set_color(color);
-  layer->set_device_pixel_ratio(dpr);
-  addLayer(std::move(layer), cullRect);
-}
-
-void SceneBuilder::addLayer(std::unique_ptr<flow::ContainerLayer> layer,
-                            const SkRect& cullRect) {
-  FXL_DCHECK(layer);
-
-  m_cullRects.push(cullRect);
-
-  if (!m_rootLayer) {
-    FXL_DCHECK(!m_currentLayer);
-    m_rootLayer = std::move(layer);
-    m_currentLayer = m_rootLayer.get();
-    return;
-  }
-  if (!m_currentLayer)
-    return;
-  flow::ContainerLayer* newLayer = layer.get();
-  m_currentLayer->Add(std::move(layer));
-  m_currentLayer = newLayer;
+  layer_builder_->PushPhysicalModel(
+      rrect.sk_rrect,               //
+      elevation,                    //
+      static_cast<SkColor>(color),  //
+      UIDartState::Current()->window()->viewport_metrics().device_pixel_ratio);
 }
 
 void SceneBuilder::pop() {
-  if (!m_currentLayer)
-    return;
-  m_cullRects.pop();
-  m_currentLayer = m_currentLayer->parent();
+  layer_builder_->Pop();
 }
 
 void SceneBuilder::addPicture(double dx,
                               double dy,
                               Picture* picture,
                               int hints) {
-  if (!m_currentLayer)
-    return;
-
-  SkRect pictureRect = picture->picture()->cullRect();
-  pictureRect.offset(dx, dy);
-  if (!SkRect::Intersects(pictureRect, m_cullRects.top()))
-    return;
-
-  std::unique_ptr<flow::PictureLayer> layer(new flow::PictureLayer());
-  layer->set_offset(SkPoint::Make(dx, dy));
-  layer->set_picture(picture->picture());
-  layer->set_is_complex(!!(hints & 1));
-  layer->set_will_change(!!(hints & 2));
-  m_currentLayer->Add(std::move(layer));
+  layer_builder_->PushPicture(SkPoint::Make(dx, dy),  //
+                              picture->picture(),     //
+                              !!(hints & 1),          // picture is complex
+                              !!(hints & 2)           // picture will change
+  );
 }
 
 void SceneBuilder::addChildScene(double dx,
@@ -230,20 +132,11 @@ void SceneBuilder::addChildScene(double dx,
                                  SceneHost* sceneHost,
                                  bool hitTestable) {
 #if defined(OS_FUCHSIA)
-  if (!m_currentLayer)
-    return;
-
-  SkRect sceneRect = SkRect::MakeXYWH(dx, dy, width, height);
-  if (!SkRect::Intersects(sceneRect, m_cullRects.top()))
-    return;
-
-  std::unique_ptr<flow::ChildSceneLayer> layer(new flow::ChildSceneLayer());
-  layer->set_offset(SkPoint::Make(dx, dy));
-  layer->set_size(SkSize::Make(width, height));
-  layer->set_export_node_holder(sceneHost->export_node_holder());
-  layer->set_hit_testable(hitTestable);
-  m_currentLayer->Add(std::move(layer));
-#endif
+  layer_builder_->PushChildScene(SkPoint::Make(dx, dy),            //
+                                 SkSize::Make(width, height),      //
+                                 sceneHost->export_node_holder(),  //
+                                 hitTestable);
+#endif  // defined(OS_FUCHSIA)
 }
 
 void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
@@ -251,34 +144,30 @@ void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
                                          double right,
                                          double top,
                                          double bottom) {
-  if (!m_currentLayer)
-    return;
-  std::unique_ptr<flow::PerformanceOverlayLayer> layer(
-      new flow::PerformanceOverlayLayer(enabledOptions));
-  layer->set_paint_bounds(SkRect::MakeLTRB(left, top, right, bottom));
-  m_currentLayer->Add(std::move(layer));
+  layer_builder_->PushPerformanceOverlay(
+      enabledOptions, SkRect::MakeLTRB(left, top, right, bottom));
 }
 
 void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval) {
-  m_currentRasterizerTracingThreshold = frameInterval;
+  layer_builder_->SetRasterizerTracingThreshold(frameInterval);
 }
 
 void SceneBuilder::setCheckerboardRasterCacheImages(bool checkerboard) {
-  m_checkerboardRasterCacheImages = checkerboard;
+  layer_builder_->SetCheckerboardRasterCacheImages(checkerboard);
 }
 
 void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
-  m_checkerboardOffscreenLayers = checkerboard;
+  layer_builder_->SetCheckerboardOffscreenLayers(checkerboard);
 }
 
 fxl::RefPtr<Scene> SceneBuilder::build() {
-  m_currentLayer = nullptr;
-  int32_t threshold = m_currentRasterizerTracingThreshold;
-  m_currentRasterizerTracingThreshold = 0;
-  fxl::RefPtr<Scene> scene = Scene::create(std::move(m_rootLayer), threshold,
-                                           m_checkerboardRasterCacheImages,
-                                           m_checkerboardOffscreenLayers);
+  fxl::RefPtr<Scene> scene =
+      Scene::create(layer_builder_->TakeLayer(),
+                    layer_builder_->GetRasterizerTracingThreshold(),
+                    layer_builder_->GetCheckerboardRasterCacheImages(),
+                    layer_builder_->GetCheckerboardOffscreenLayers());
   ClearDartWrapper();
+  layer_builder_.reset();
   return scene;
 }
 

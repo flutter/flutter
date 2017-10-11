@@ -9,7 +9,7 @@
 #include <memory>
 #include <stack>
 
-#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/layer_builder.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/compositing/scene_host.h"
 #include "flutter/lib/ui/painting/image_filter.h"
@@ -76,15 +76,7 @@ class SceneBuilder : public fxl::RefCountedThreadSafe<SceneBuilder>,
  private:
   SceneBuilder();
 
-  void addLayer(std::unique_ptr<flow::ContainerLayer> layer,
-                const SkRect& cullRect);
-
-  std::unique_ptr<flow::ContainerLayer> m_rootLayer;
-  flow::ContainerLayer* m_currentLayer;
-  int32_t m_currentRasterizerTracingThreshold;
-  bool m_checkerboardRasterCacheImages;
-  bool m_checkerboardOffscreenLayers;
-  std::stack<SkRect> m_cullRects;
+  std::unique_ptr<flow::LayerBuilder> layer_builder_;
 };
 
 }  // namespace blink
