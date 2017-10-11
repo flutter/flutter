@@ -6,9 +6,8 @@
 #define FLUTTER_FLOW_LAYERS_LAYER_BUILDER_H_
 
 #include <memory>
-#include <stack>
 
-#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/layer.h"
 #include "garnet/public/lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkBlendMode.h"
 #include "third_party/skia/include/core/SkColor.h"
@@ -24,48 +23,54 @@ namespace flow {
 
 class LayerBuilder {
  public:
+  static std::unique_ptr<LayerBuilder> Create();
+
   LayerBuilder();
 
-  ~LayerBuilder();
+  virtual ~LayerBuilder();
 
-  void PushTransform(const SkMatrix& matrix);
+  virtual void PushTransform(const SkMatrix& matrix) = 0;
 
-  void PushClipRect(const SkRect& rect);
+  virtual void PushClipRect(const SkRect& rect) = 0;
 
-  void PushClipRoundedRect(const SkRRect& rect);
+  virtual void PushClipRoundedRect(const SkRRect& rect) = 0;
 
-  void PushClipPath(const SkPath& path);
+  virtual void PushClipPath(const SkPath& path) = 0;
 
-  void PushOpacity(int alpha);
+  virtual void PushOpacity(int alpha) = 0;
 
-  void PushColorFilter(SkColor color, SkBlendMode blend_mode);
+  virtual void PushColorFilter(SkColor color, SkBlendMode blend_mode) = 0;
 
-  void PushBackdropFilter(sk_sp<SkImageFilter> filter);
+  virtual void PushBackdropFilter(sk_sp<SkImageFilter> filter) = 0;
 
-  void PushShaderMask(sk_sp<SkShader> shader,
-                      const SkRect& rect,
-                      SkBlendMode blend_mode);
+  virtual void PushShaderMask(sk_sp<SkShader> shader,
+                              const SkRect& rect,
+                              SkBlendMode blend_mode) = 0;
 
-  void PushPhysicalModel(const SkRRect& rect,
-                         double elevation,
-                         SkColor color,
-                         SkScalar device_pixel_ratio);
+  virtual void PushPhysicalModel(const SkRRect& rect,
+                                 double elevation,
+                                 SkColor color,
+                                 SkScalar device_pixel_ratio) = 0;
 
-  void PushPerformanceOverlay(uint64_t enabled_options, const SkRect& rect);
+  virtual void PushPerformanceOverlay(uint64_t enabled_options,
+                                      const SkRect& rect) = 0;
 
-  void PushPicture(const SkPoint& offset,
-                   sk_sp<SkPicture> picture,
-                   bool picture_is_complex,
-                   bool picture_will_change);
+  virtual void PushPicture(const SkPoint& offset,
+                           sk_sp<SkPicture> picture,
+                           bool picture_is_complex,
+                           bool picture_will_change) = 0;
 
 #if defined(OS_FUCHSIA)
-  void PushChildScene(const SkPoint& offset,
-                      const SkSize& size,
-                      fxl::RefPtr<flow::ExportNodeHolder> export_token_holder,
-                      bool hit_testable);
+  virtual void PushChildScene(
+      const SkPoint& offset,
+      const SkSize& size,
+      fxl::RefPtr<flow::ExportNodeHolder> export_token_holder,
+      bool hit_testable) = 0;
 #endif  // defined(OS_FUCHSIA)
 
-  void Pop();
+  virtual void Pop() = 0;
+
+  virtual std::unique_ptr<flow::Layer> TakeLayer() = 0;
 
   int GetRasterizerTracingThreshold() const;
 
@@ -79,18 +84,10 @@ class LayerBuilder {
 
   void SetCheckerboardOffscreenLayers(bool checkerboard);
 
-  std::unique_ptr<flow::Layer> TakeLayer();
-
  private:
-  std::unique_ptr<flow::ContainerLayer> root_layer_;
-  flow::ContainerLayer* current_layer_ = nullptr;
   int rasterizer_tracing_threshold_ = 0;
   bool checkerboard_raster_cache_images_ = false;
   bool checkerboard_offscreen_layers_ = false;
-  std::stack<SkRect> cull_rects_;
-
-  void PushLayer(std::unique_ptr<flow::ContainerLayer> layer,
-                 const SkRect& cullRect);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(LayerBuilder);
 };
