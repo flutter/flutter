@@ -16,7 +16,6 @@
 #include "flutter/third_party/txt/src/txt/font_style.h"
 #include "flutter/third_party/txt/src/txt/font_weight.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
-#include "flutter/third_party/txt/src/txt/text_align.h"
 #include "flutter/third_party/txt/src/txt/text_decoration.h"
 #include "flutter/third_party/txt/src/txt/text_style.h"
 #include "lib/fxl/tasks/task_runner.h"
@@ -217,22 +216,21 @@ ParagraphBuilder::ParagraphBuilder(tonic::Int32List& encoded,
     if (mask & psTextAlignMask)
       style.text_align = txt::TextAlign(encoded[psTextAlignIndex]);
 
-    if (mask & (psFontWeightMask | psFontStyleMask | psFontFamilyMask |
-                psFontSizeMask)) {
-      if (mask & psFontWeightMask)
-        style.font_weight =
-            static_cast<txt::FontWeight>(encoded[psFontWeightIndex]);
+    if (mask & psTextDirectionMask)
+      style.text_direction = txt::TextDirection(encoded[psTextDirectionIndex]);
 
-      if (mask & psFontStyleMask)
-        style.font_style =
-            static_cast<txt::FontStyle>(encoded[psFontStyleIndex]);
+    if (mask & psFontWeightMask)
+      style.font_weight =
+          static_cast<txt::FontWeight>(encoded[psFontWeightIndex]);
 
-      if (mask & psFontFamilyMask)
-        style.font_family = fontFamily;
+    if (mask & psFontStyleMask)
+      style.font_style = static_cast<txt::FontStyle>(encoded[psFontStyleIndex]);
 
-      if (mask & psFontSizeMask)
-        style.font_size = fontSize;
-    }
+    if (mask & psFontFamilyMask)
+      style.font_family = fontFamily;
+
+    if (mask & psFontSizeMask)
+      style.font_size = fontSize;
 
     if (mask & psLineHeightMask)
       style.line_height = lineHeight;

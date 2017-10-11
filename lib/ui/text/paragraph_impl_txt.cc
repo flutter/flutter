@@ -66,9 +66,9 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(unsigned start,
   std::vector<TextBox> result;
   std::vector<SkRect> rects = m_paragraph->GetRectsForRange(start, end);
   for (size_t i = 0; i < rects.size(); ++i) {
-    result.push_back(TextBox(rects[i], m_paragraph->GetParagraphStyle().rtl
-                                           ? TextDirection::RTL
-                                           : TextDirection::LTR));
+    result.push_back(TextBox(
+        rects[i], static_cast<TextDirection>(
+                      m_paragraph->GetParagraphStyle().text_direction)));
   }
   return result;
 }

@@ -37,6 +37,8 @@ namespace {
 const std::vector<SkUnichar> fallback_characters{
     0x1f600,  // emoji
     0x4e00,   // CJK
+    0x5d0,    // Hebrew
+    0x627,    // Arabic
 };
 
 }  // anonymous namespace

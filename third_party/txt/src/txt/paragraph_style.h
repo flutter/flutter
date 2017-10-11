@@ -23,9 +23,22 @@
 #include "font_style.h"
 #include "font_weight.h"
 #include "minikin/LineBreaker.h"
-#include "text_align.h"
 
 namespace txt {
+
+enum class TextAlign {
+  left,
+  right,
+  center,
+  justify,
+  start,
+  end,
+};
+
+enum class TextDirection {
+  rtl,
+  ltr,
+};
 
 class ParagraphStyle {
  public:
@@ -34,7 +47,8 @@ class ParagraphStyle {
   std::string font_family = "";
   double font_size = 14;
 
-  TextAlign text_align = TextAlign::left;
+  TextAlign text_align = TextAlign::start;
+  TextDirection text_direction = TextDirection::ltr;
   size_t max_lines = std::numeric_limits<size_t>::max();
   double line_height = 1.0;
   std::u16string ellipsis;
@@ -44,9 +58,6 @@ class ParagraphStyle {
   // kBreakStrategy_Balanced will balance between the two.
   minikin::BreakStrategy break_strategy =
       minikin::BreakStrategy::kBreakStrategy_Greedy;
-  // TODO(garyq): Implement right to left.
-  // Right to left (Arabic, Hebrew, etc).
-  bool rtl = false;
 };
 
 }  // namespace txt
