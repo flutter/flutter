@@ -29,7 +29,7 @@ class ChildSceneLayer : public Layer {
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext& context) const override;
 
   void UpdateScene(SceneUpdateContext& context) override;
 

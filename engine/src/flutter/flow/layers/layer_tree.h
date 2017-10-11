@@ -39,7 +39,7 @@ class LayerTree {
                    scenic_lib::ContainerNode& container);
 #endif
 
-  void Paint(CompositorContext::ScopedFrame& frame);
+  void Paint(CompositorContext::ScopedFrame& frame) const;
 
   Layer* root_layer() const { return root_layer_.get(); }
 

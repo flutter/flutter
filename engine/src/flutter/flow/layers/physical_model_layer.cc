@@ -53,7 +53,7 @@ void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
 
 #endif  // defined(OS_FUCHSIA)
 
-void PhysicalModelLayer::Paint(PaintContext& context) {
+void PhysicalModelLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
   FXL_DCHECK(needs_painting());
 

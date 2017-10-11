@@ -42,7 +42,7 @@ void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
 
 #endif  // defined(OS_FUCHSIA)
 
-void ClipRRectLayer::Paint(PaintContext& context) {
+void ClipRRectLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
   FXL_DCHECK(needs_painting());
 

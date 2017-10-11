@@ -16,7 +16,7 @@ class BackdropFilterLayer : public ContainerLayer {
 
   void set_filter(sk_sp<SkImageFilter> filter) { filter_ = std::move(filter); }
 
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext& context) const override;
 
  private:
   sk_sp<SkImageFilter> filter_;

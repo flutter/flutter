@@ -21,7 +21,7 @@ class PerformanceOverlayLayer : public Layer {
  public:
   explicit PerformanceOverlayLayer(uint64_t options);
 
-  void Paint(PaintContext& context) override;
+  void Paint(PaintContext& context) const override;
 
  private:
   int options_;
