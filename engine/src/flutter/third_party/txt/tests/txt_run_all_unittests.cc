@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   txt::SetFontDir(dir);
   if (txt::GetFontDir().length() <= 0) {
     FXL_LOG(ERROR) << "Font directory must be specified with "
-                      "--font-directoy=\"<directoy>\" to run this test.";
+                      "--font-directory=\"<directory>\" to run this test.";
     return EXIT_FAILURE;
   }
   FXL_DCHECK(txt::GetFontDir().length() > 0);
