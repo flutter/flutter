@@ -1177,4 +1177,12 @@ class SemanticsConfiguration {
   /// wants to contribute to the semantics tree.
   bool get isEmpty => _isEmpty;
   bool _isEmpty = true;
+
+  @override
+  String toString() {
+    final List<String> options = <String>[];
+    if (_label != '')
+      options.add('label: "$label"');
+    return '$runtimeType(${options.join(', ')})';
+  }
 }

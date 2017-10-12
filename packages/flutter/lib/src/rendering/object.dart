@@ -2346,7 +2346,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// hooks them together. The second walk is a sparse walk; it only walks the
   /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
-    // TODO(goderbauer): assert that this obj will have a semantics node.
+    assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsForParent().single;
     assert(fragment.config == null);  // I don't have any semantics to add to parent ...
     assert(fragment.children.single == _semantics);  // ... except for my node as a child.
@@ -2356,60 +2356,53 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Iterable<_SemanticsFragment> _getSemanticsForParent() sync* {
     if (!_needsSemanticsUpdate && _semanticsConfiguration.isSemanticBoundary) {
       // Nothing has changed, re-use old fragment.
-      yield new _SemanticsFragmentWrapper(_semantics);
+      assert(_semantics != null);
+      yield new _CleanSemanticsFragment(_semantics);
       return;
     }
 
     final SemanticsConfiguration config = _semanticsConfiguration;
-
     final List<_SemanticsFragment> fragments = <_SemanticsFragment>[];
-    final Set<_SemanticsFragment> isolatedFragments = new Set<_SemanticsFragment>();
 
     visitChildrenForSemantics((RenderObject renderChild) {
       for (_SemanticsFragment fragment in renderChild._getSemanticsForParent()) {
         fragments.add(fragment);
-        if (fragment.config == null) {
-          // Doesn't want to merge anything into parent.
-          return;
+        if (config.explicitChildNodes || parent is! RenderObject) {
+          fragment.markAsExplicit();
+          continue;
         }
-        if (!config.explicitChildNodes && !fragment.config.isSemanticBoundary) {
-//        if (config.communePreference != SemanticsPreference.noCommune && fragment.config.communePreference == SemanticsPreference.communeWithParentAndChildren) {
-          if (!config.isCompatibleWith(fragment.config)) {
-            isolatedFragments.add(fragment);
-            return;
+        if (!fragment.hasConfigForParent || config.isEmpty)
+          continue;
+        if (!config.isCompatibleWith(fragment.config)) {
+          fragment.markAsExplicit();
+          continue;
+        }
+        for (_SemanticsFragment siblingFragment in fragments) {
+          if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
+            fragment.markAsExplicit();
+            siblingFragment.markAsExplicit();
           }
-          for (_SemanticsFragment siblingFragment in fragments) {
-            if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
-              isolatedFragments.add(siblingFragment);
-              isolatedFragments.add(fragment);
-            }
-          }
-        } else {
-          isolatedFragments.add(fragment);
         }
       }
     });
 
-    if (config.isEmpty && parent is RenderObject) {
+    _needsSemanticsUpdate = false;
+
+    _SemanticsFragment result;
+    if (parent is! RenderObject) {
+      assert(config.isEmpty);
+      result = new _RootSemanticsFragment(this);
+    } else if (config.isEmpty) {
       yield* fragments;
       return;
+    } else {
+      result = new _InterestingSemanticsFragment(this, config);
+      if (config.isSemanticBoundary)
+        result.markAsExplicit();
     }
 
-    _SemanticsFragment result = new _CommuningSemanticsFragment(this, config);
+    result.addAll(fragments);
 
-    for (_SemanticsFragment fragment in fragments) {
-      if (isolatedFragments.contains(fragment)) {
-        result.addChild(fragment.toSemanticsNode());
-      } else {
-        fragment.addTo(result);
-      }
-    }
-
-    if (config.isSemanticBoundary || parent is! RenderObject) {
-      result = new _SemanticsFragmentWrapper(result.toSemanticsNode());
-    }
-
-    _needsSemanticsUpdate = false;
     yield result;
   }
 
@@ -2993,107 +2986,124 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
   final RenderObject renderObject;
 }
 
-
+/// Describes what semantics information a [RenderObject] wants to add to its
+/// parent.
 abstract class _SemanticsFragment {
+  /// The children to be added to the parent.
+  Iterable<SemanticsNode> get children;
+
+  /// The [SemanticsConfiguration] the child wants to merge into the parent's
+  /// [SemanticsNode] or null if it doesn't want to merge anything.
   SemanticsConfiguration get config;
-  List<SemanticsNode> get children;
 
-  SemanticsNode toSemanticsNode();
-  void addChild(SemanticsNode child);
+  /// Disallows this fragment to merge anything into its parent's
+  /// [SemanticsNode].
+  ///
+  /// After calling this, the fragment may only produce [children] to be added
+  /// to the parent, but it has to return null for [config].
+  void markAsExplicit();
 
-  void addTo(_SemanticsFragment other) {
-    if (children != null)
-      other.children.addAll(children);
-    if (config != null)
-      other.absorbChildConfig(config);
-//      other.config.absorb(config);
-  }
+  void addAll(Iterable<_SemanticsFragment> fragments);
 
-  void absorbChildConfig(SemanticsConfiguration other);
-
-  @override
-  String toString() {
-    return 'SemanticsFragemnt($config, $children)';
-  }
+  bool get hasConfigForParent => config != null;
 }
 
-class _CommuningSemanticsFragment extends _SemanticsFragment {
-
-  _CommuningSemanticsFragment(this._owner, this._config);
-
-  final RenderObject _owner;
+class _CleanSemanticsFragment extends _SemanticsFragment {
+  _CleanSemanticsFragment(SemanticsNode node) : children = <SemanticsNode>[node];
 
   @override
-  SemanticsConfiguration get config => _config;
-
-  SemanticsConfiguration _config;
-
-  @override
-  final List<SemanticsNode> children = <SemanticsNode>[];
-
-  bool _isConfigWritable = false;
-
-  @override
-  SemanticsNode toSemanticsNode() {
-    _owner._semantics ??= _createSemanticsNode();
-    _owner._semantics.update(config, children);
-    return _owner._semantics;
-  }
-
-  @override
-  void addTo(_SemanticsFragment other) {
-    _owner._semantics = null;
-    super.addTo(other);
-  }
-
-  @override
-  void addChild(SemanticsNode child) {
-    children.add(child);
-  }
-
-  SemanticsNode _createSemanticsNode() {
-    if (_owner.parent is! RenderObject)
-      return new SemanticsNode.root(showOnScreen: _owner.showOnScreen, owner: _owner.owner.semanticsOwner);
-    return new SemanticsNode(showOnScreen: _owner.showOnScreen);
-  }
-
-  @override
-  void absorbChildConfig(SemanticsConfiguration other) {
-    if (!_isConfigWritable) {
-      _config = config.copy();
-      _isConfigWritable = true;
-    }
-    _config.absorb(other);
-  }
-}
-
-class _SemanticsFragmentWrapper extends _SemanticsFragment {
-
-  _SemanticsFragmentWrapper(SemanticsNode node) {
-    children.add(node);
-  }
-
-  @override
-  final List<SemanticsNode> children = <SemanticsNode>[];
+  final Iterable<SemanticsNode> children;
 
   @override
   SemanticsConfiguration get config => null;
 
-  // Unavailable methods below.
-
   @override
-  void absorbChildConfig(SemanticsConfiguration other) {
-    assert(false);
+  void markAsExplicit() {
+    // nothing to do, we are already explicit.
   }
 
   @override
-  void addChild(SemanticsNode child) {
-    assert(false);
+  void addAll(Iterable<_SemanticsFragment> fragments) {
+    assert(false, 'cannot add semantic information to a $runtimeType');
+  }
+}
+
+class _RootSemanticsFragment extends _SemanticsFragment {
+  _RootSemanticsFragment(this._owner);
+
+  RenderObject _owner;
+
+  @override
+  Iterable<SemanticsNode> get children sync* {
+    _owner._semantics ??= new SemanticsNode.root(showOnScreen: _owner.showOnScreen, owner: _owner.owner.semanticsOwner);
+    yield _owner._semantics;
   }
 
   @override
-  SemanticsNode toSemanticsNode() {
-    assert(false);
-    return null;
+  SemanticsConfiguration get config => null;
+
+  @override
+  void markAsExplicit() {
+    // nothing to do, we are already explicit.
+  }
+
+  @override
+  void addAll(Iterable<_SemanticsFragment> fragments) {
+    final SemanticsNode root = children.first;
+    for (_SemanticsFragment fragment in fragments) {
+      assert(fragment.config == null);
+      root.addChildren(fragment.children);
+    }
+    root.finalizeChildren();
+  }
+}
+
+class _InterestingSemanticsFragment extends _SemanticsFragment {
+
+  _InterestingSemanticsFragment(this._owner, this._config);
+
+  final RenderObject _owner;
+  SemanticsConfiguration _config;
+  bool _isConfigWritable = false;
+  final List<SemanticsNode> _children = <SemanticsNode>[];
+  SemanticsNode _explicitNode;
+
+  @override
+  Iterable<SemanticsNode> get children sync* {
+    if (!_isExplicit) {
+      _owner._semantics = null;
+      yield* _children;
+      return;
+    }
+    if (_explicitNode == null) {
+      _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
+      _explicitNode = _owner._semantics;
+     _explicitNode.update(_config, _children);
+    }
+    yield _explicitNode;
+  }
+
+  @override
+  SemanticsConfiguration get config => _isExplicit ? null : _config;
+
+  @override
+  void addAll(Iterable<_SemanticsFragment> fragments) {
+    for (_SemanticsFragment fragment in fragments) {
+      _children.addAll(fragment.children);
+      if (fragment.config == null)
+        continue;
+      if (!_isConfigWritable) {
+        _config = _config.copy();
+        _isConfigWritable = true;
+      }
+      _config.absorb(fragment.config);
+    }
+  }
+
+  bool _isExplicit = false;
+
+  @override
+  void markAsExplicit() {
+    _isExplicit = true;
   }
 }
