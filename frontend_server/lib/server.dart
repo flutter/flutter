@@ -26,7 +26,11 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       help: 'Run compiler in incremental mode', defaultsTo: false)
   ..addOption('sdk-root',
       help: 'Path to sdk root',
-      defaultsTo: '../../out/android_debug/flutter_patched_sdk');
+      defaultsTo: '../../out/android_debug/flutter_patched_sdk')
+  ..addOption('byte-store',
+      help: 'Path to file byte store used to keep incremental compiler state.'
+          ' If omitted, then memory byte store is used.',
+      defaultsTo: null);
 
 String _usage = '''
 Usage: server [options] [input.dart]
@@ -120,8 +124,11 @@ class _FrontendCompiler implements CompilerInterface {
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
     final Uri sdkRoot = _ensureFolderPath(options['sdk-root']);
+    final String byteStorePath = options['byte-store'];
     final CompilerOptions compilerOptions = new CompilerOptions()
-      ..byteStore = new MemoryByteStore()
+      ..byteStore = byteStorePath != null
+          ? new FileByteStore(byteStorePath)
+          : new MemoryByteStore()
       ..sdkRoot = sdkRoot
       ..strongMode = false
       ..target = new FlutterTarget(new TargetFlags())

@@ -47,6 +47,63 @@ Future<int> main() async {
         ).captured;
       expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
     });
+
+    test('compile from command line with file byte store', () async {
+      final List<String> args = <String>[
+        'server.dart',
+        '--sdk-root',
+        'sdkroot',
+        '--byte-store',
+        'path/to/bytestore'
+      ];
+      final int exitcode = await starter(args, compiler: compiler);
+      expect(exitcode, equals(0));
+      final List<ArgResults> capturedArgs =
+          verify(
+              compiler.compile(
+                argThat(equals('server.dart')),
+                captureAny,
+                generator: any,
+              )
+          ).captured;
+      expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
+      expect(capturedArgs.single['byte-store'], equals('path/to/bytestore'));
+    });
+  });
+
+  group('interactive file store compile with mocked compiler', () {
+    final CompilerInterface compiler = new _MockedCompiler();
+
+    final List<String> args = <String>[
+      '--sdk-root',
+      'sdkroot',
+      '--byte-store',
+      'path/to/bytestore',
+    ];
+
+    test('compile one file', () async {
+      final StreamController<List<int>> inputStreamController =
+      new StreamController<List<int>>();
+      final ReceivePort compileCalled = new ReceivePort();
+      when(compiler.compile(any, any, generator: any)).thenAnswer(
+              (Invocation invocation) {
+            expect(invocation.positionalArguments[0], equals('server.dart'));
+            expect(invocation.positionalArguments[1]['sdk-root'],
+                equals('sdkroot'));
+            expect(invocation.positionalArguments[1]['byte-store'],
+                equals('path/to/bytestore'));
+            compileCalled.sendPort.send(true);
+          }
+      );
+
+      final int exitcode = await starter(args, compiler: compiler,
+        input: inputStreamController.stream,
+      );
+      expect(exitcode, equals(0));
+      inputStreamController.add('compile server.dart\n'.codeUnits);
+      await compileCalled.first;
+      inputStreamController.close();
+    });
   });
 
   group('interactive compile with mocked compiler', () {
