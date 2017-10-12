@@ -101,6 +101,33 @@ void main() {
     final RenderParagraph paragraph = tester.renderObject(find.text('Z'));
     expect(paragraph.text.style.color, equals(theme.primaryTextTheme.title.color));
   });
+
+  testWidgets('CircleAvatar text does not expand with textScaleFactor', (WidgetTester tester) async {
+    final Color foregroundColor = Colors.red.shade100;
+    await tester.pumpWidget(
+      wrap(
+        child: new CircleAvatar(
+          foregroundColor: foregroundColor,
+          child: const Text('Z'),
+        ),
+      ),
+    );
+
+    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+
+    await tester.pumpWidget(
+      wrap(
+        child: new MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 2.0),
+          child: new CircleAvatar(
+            foregroundColor: foregroundColor,
+            child: const Text('Z'),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.text('Z')), equals(const Size(20.0, 20.0)));
+  });
 }
 
 Widget wrap({ Widget child }) {
