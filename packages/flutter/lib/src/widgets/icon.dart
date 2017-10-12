@@ -89,7 +89,10 @@ class Icon extends StatelessWidget {
   /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
-  /// See [Semantics.label];
+  /// See also:
+  ///
+  ///  * [Semantics.label] which is set with [semanticLabel] in the underlying
+  ///    [Semantics] widget.
   final String semanticLabel;
 
   @override
@@ -102,15 +105,19 @@ class Icon extends StatelessWidget {
     final double iconSize = size ?? iconTheme.size;
 
     if (icon == null)
-      return _wrapWithSemantics(new SizedBox(width: iconSize, height: iconSize));
+      return new Semantics(
+        label: semanticLabel,
+        child: new SizedBox(width: iconSize, height: iconSize)
+      );
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return _wrapWithSemantics(
-      new ExcludeSemantics(
+    return new Semantics(
+      label: semanticLabel,
+      child: new ExcludeSemantics(
         child: new SizedBox(
           width: iconSize,
           height: iconSize,
@@ -130,17 +137,6 @@ class Icon extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-  /// Wraps the widget with a Semantics widget if [semanticLabel] is set.
-  Widget _wrapWithSemantics(Widget widget) {
-    if (semanticLabel == null)
-      return widget;
-
-    return new Semantics(
-      child: widget,
-      label: semanticLabel,
     );
   }
 
