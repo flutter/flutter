@@ -59,6 +59,6 @@ dart_tool("fuchsia_tester") {
   ]
 
   non_dart_deps = [
-    "//flutter/shell",
+    "$flutter_root/shell",
   ]
 }

@@ -20,6 +20,6 @@ dart_package("flutter") {
   ]
 
   if (is_fuchsia) {
-    deps += [ "//flutter/sky/packages/sky_engine:sky_engine_dart" ]
+    deps += [ "$flutter_root/sky/packages/sky_engine:sky_engine_dart" ]
   }
 }
