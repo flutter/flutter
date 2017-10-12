@@ -445,6 +445,71 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Slider)).size, const Size(144.0 + 2.0 * 16.0, 32.0));
   });
 
+  testWidgets('discrete Slider respects textScaleFactor', (WidgetTester tester) async {
+    final Key sliderKey = new UniqueKey();
+    double value = 0.0;
+
+    Widget buildSlider({ double textScaleFactor }) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return new MediaQuery(
+              data: new MediaQueryData(textScaleFactor: textScaleFactor),
+              child: new Material(
+                child: new Center(
+                  child: new OverflowBox(
+                    maxWidth: double.INFINITY,
+                    maxHeight: double.INFINITY,
+                    child: new Slider(
+                      key: sliderKey,
+                      min: 0.0,
+                      max: 100.0,
+                      divisions: 10,
+                      label: '${value.round()}',
+                      value: value,
+                      onChanged: (double newValue) {
+                        setState(() {
+                          value = newValue;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildSlider(textScaleFactor: 1.0));
+    Offset center = tester.getCenter(find.byType(Slider));
+    TestGesture gesture = await tester.startGesture(center);
+    await gesture.moveBy(const Offset(10.0, 0.0));
+
+    expect(
+      tester.renderObject(find.byType(Slider)),
+      paints..circle(radius: 6.0, x: 16.0, y: 44.0)
+    );
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.pumpWidget(buildSlider(textScaleFactor: 2.0));
+    center = tester.getCenter(find.byType(Slider));
+    gesture = await tester.startGesture(center);
+    await gesture.moveBy(const Offset(10.0, 0.0));
+
+    expect(
+      tester.renderObject(find.byType(Slider)),
+      paints..circle(radius: 12.0, x: 16.0, y: 44.0)
+    );
+
+    await gesture.up();
+    await tester.pump(const Duration(seconds: 1));
+  });
+
   testWidgets('Slider Semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 

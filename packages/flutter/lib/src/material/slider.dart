@@ -170,10 +170,27 @@ class Slider extends StatefulWidget {
 }
 
 class _SliderState extends State<Slider> with TickerProviderStateMixin {
+  _SliderState() {
+    _reactionController = new AnimationController(
+      duration: kRadialReactionDuration,
+      vsync: this,
+    );
+  }
+
   void _handleChanged(double value) {
     assert(widget.onChanged != null);
     widget.onChanged(value * (widget.max - widget.min) + widget.min);
   }
+
+  @override
+  void dispose() {
+    _reactionController?.dispose();
+    super.dispose();
+  }
+
+  // Have to keep the reaction controller here so that we may dispose of it
+  // properly.
+  AnimationController _reactionController;
 
   @override
   Widget build(BuildContext context) {
@@ -187,8 +204,10 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       inactiveColor: widget.inactiveColor ?? theme.unselectedWidgetColor,
       thumbOpenAtMin: widget.thumbOpenAtMin,
       textTheme: theme.accentTextTheme,
+      textScaleFactor: MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       vsync: this,
+      reactionController: _reactionController,
     );
   }
 }
@@ -203,8 +222,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.inactiveColor,
     this.thumbOpenAtMin,
     this.textTheme,
+    this.textScaleFactor,
     this.onChanged,
     this.vsync,
+    this.reactionController,
   }) : super(key: key);
 
   final double value;
@@ -214,8 +235,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final Color inactiveColor;
   final bool thumbOpenAtMin;
   final TextTheme textTheme;
+  final double textScaleFactor;
   final ValueChanged<double> onChanged;
   final TickerProvider vsync;
+  final AnimationController reactionController;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -227,8 +250,10 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       inactiveColor: inactiveColor,
       thumbOpenAtMin: thumbOpenAtMin,
       textTheme: textTheme,
+      textScaleFactor: textScaleFactor,
       onChanged: onChanged,
       vsync: vsync,
+      reactionController: reactionController,
       textDirection: Directionality.of(context),
     );
   }
@@ -243,6 +268,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveColor = inactiveColor
       ..thumbOpenAtMin = thumbOpenAtMin
       ..textTheme = textTheme
+      ..textScaleFactor = textScaleFactor
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context);
       // Ticker provider cannot change since there's a 1:1 relationship between
@@ -290,9 +316,11 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     Color inactiveColor,
     bool thumbOpenAtMin,
     TextTheme textTheme,
+    double textScaleFactor,
     ValueChanged<double> onChanged,
     TickerProvider vsync,
     @required TextDirection textDirection,
+    @required AnimationController reactionController,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(textDirection != null),
        _label = label,
@@ -302,6 +330,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
        _inactiveColor = inactiveColor,
        _thumbOpenAtMin = thumbOpenAtMin,
        _textTheme = textTheme,
+       _textScaleFactor = textScaleFactor,
        _onChanged = onChanged,
        _textDirection = textDirection {
     _updateLabelPainter();
@@ -314,10 +343,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     _tap = new TapGestureRecognizer()
       ..team = team
       ..onTapUp = _handleTapUp;
-    _reactionController = new AnimationController(
-      duration: kRadialReactionDuration,
-      vsync: vsync,
-    );
+    _reactionController = reactionController;
     _reaction = new CurvedAnimation(
       parent: _reactionController,
       curve: Curves.fastOutSlowIn
@@ -396,6 +422,16 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     markNeedsPaint();
   }
 
+  double get textScaleFactor => _textScaleFactor;
+  double _textScaleFactor;
+  set textScaleFactor(double value) {
+    if (value == _textScaleFactor)
+      return;
+    _textScaleFactor = value;
+    _updateLabelPainter();
+    markNeedsPaint();
+  }
+
   ValueChanged<double> get onChanged => _onChanged;
   ValueChanged<double> _onChanged;
   set onChanged(ValueChanged<double> value) {
@@ -421,10 +457,9 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
 
   void _updateLabelPainter() {
     if (label != null) {
-      // TODO(abarth): Handle textScaleFactor. https://github.com/flutter/flutter/issues/5938
       _labelPainter
         ..text = new TextSpan(
-          style: _textTheme.body1.copyWith(fontSize: 10.0),
+          style: _textTheme.body1.copyWith(fontSize: 10.0 * _textScaleFactor),
           text: label,
         )
         ..textDirection = textDirection
@@ -628,9 +663,15 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
       }
 
       if (label != null) {
-        final Offset center = new Offset(trackActive, _kLabelBalloonCenterTween.evaluate(_reaction) + trackCenter);
-        final double radius = _kLabelBalloonRadiusTween.evaluate(_reaction);
-        final Offset tip = new Offset(trackActive, _kLabelBalloonTipTween.evaluate(_reaction) + trackCenter);
+        final Offset center = new Offset(
+          trackActive,
+          _kLabelBalloonCenterTween.evaluate(_reaction) * textScaleFactor + trackCenter
+        );
+        final double radius = _kLabelBalloonRadiusTween.evaluate(_reaction) * textScaleFactor;
+        final Offset tip = new Offset(
+          trackActive,
+          _kLabelBalloonTipTween.evaluate(_reaction) * textScaleFactor + trackCenter
+        );
         final double tipAttachment = _kLabelBalloonTipAttachmentRatio * radius;
 
         canvas.drawCircle(center, radius, primaryPaint);
