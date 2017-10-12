@@ -7,7 +7,7 @@
   "backButtonTooltip": "אחורה",
   "closeButtonTooltip": "סגור",
   "nextMonthTooltip": "חודש הבא",
-  "previousMonthTooltip": "חודש שעבר",
+  "previousMonthTooltip": "חודש קודם",
   "nextPageTooltip": "עמוד הבא",
   "previousPageTooltip": "עמוד קודם",
   "showMenuTooltip": "הצג תפריט",
@@ -19,11 +19,11 @@
   "selectedRowCountTitleOther": "$selectedRowCount פריטים שנבחרו",
   "cancelButtonLabel": "ביטול",
   "closeButtonLabel": "סגור",
-  "continueButtonLabel": "לְהַמשִׁיך",
-  "copyButtonLabel": "קיבלתי!",
+  "continueButtonLabel": "המשך",
+  "copyButtonLabel": "העתק",
   "cutButtonLabel": "גזור",
-  "okButtonLabel": "בסדר",
+  "okButtonLabel": "אישור",
   "pasteButtonLabel": "הדבק",
   "selectAllButtonLabel": "בחר הכל",
-  "viewLicensesButtonLabel": "ראה רישיונות"
+  "viewLicensesButtonLabel": "הצג רישיונות"
 }
