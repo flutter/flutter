@@ -166,7 +166,6 @@ fxl::RefPtr<Scene> SceneBuilder::build() {
                     layer_builder_->GetCheckerboardRasterCacheImages(),
                     layer_builder_->GetCheckerboardOffscreenLayers());
   ClearDartWrapper();
-  layer_builder_.reset();
   return scene;
 }
 
