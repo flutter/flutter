@@ -69,6 +69,27 @@ Future<int> main() async {
       expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
       expect(capturedArgs.single['byte-store'], equals('path/to/bytestore'));
     });
+
+    test('compile from command line with link platform', () async {
+      final List<String> args = <String>[
+        'server.dart',
+        '--sdk-root',
+        'sdkroot',
+        '--link-platform',
+      ];
+      final int exitcode = await starter(args, compiler: compiler);
+      expect(exitcode, equals(0));
+      final List<ArgResults> capturedArgs =
+          verify(
+              compiler.compile(
+                argThat(equals('server.dart')),
+                captureAny,
+                generator: any,
+              )
+          ).captured;
+      expect(capturedArgs.single['sdk-root'], equals('sdkroot'));
+      expect(capturedArgs.single['link-platform'], equals(true));
+    });
   });
 
   group('interactive file store compile with mocked compiler', () {
