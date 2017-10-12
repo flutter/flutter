@@ -4,82 +4,159 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
 void main() {
-  testWidgets('Semantics 1', (WidgetTester tester) async {
+  testWidgets('Implicit Semantics merge behavior', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
-        new Semantics(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Semantics(
+            container: true,
+            explicitChildNodes: false,
+            child: new Column(
+                children: <Widget>[
+                  const Text('Michael Goderbauer'),
+                  const Text('goderbauer@google.com'),
+                ]
+            ),
+          ),
+        ),
+    );
+
+   // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+   //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Michael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            label: 'Michael Goderbauer\ngoderbauer@google.com',
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
           container: true,
-          forceExplicitChildNodes: true,
-          child: new Column(
-              children: <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
-              ]
-          ),
-        ),
-    );
-
-    //SemanticsNode(label: "Michael Goderbauer\ngoderbauer@google.com")
-
-    await tester.pumpWidget(
-      new Semantics(
-        container: true,
-        forceExplicitChildNodes: false,
-        child: new Column(
-            children: <Widget>[
-              const Text('Michael Goderbauer'),
-              const Text('goderbauer@google.com'),
-            ]
+          explicitChildNodes: true,
+          child: new Column(children: <Widget>[
+            const Text('Michael Goderbauer'),
+            const Text('goderbauer@google.com'),
+          ]),
         ),
       ),
     );
 
-    //SemanticsNode()
-    //   - SemanticsNode(label: "Michael Goderbauer")
-    //   - SemanticsNode(label: "goderbauer@google.com")
+    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //    ├SemanticsNode#2(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Michael Goderbauer", textDirection: ltr)
+    //    └SemanticsNode#3(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "goderbauer@google.com", textDirection: ltr)
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 2,
+                label: 'Michael Goderbauer',
+              ),
+              new TestSemantics(
+                id: 3,
+                label: 'goderbauer@google.com',
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     await tester.pumpWidget(
-      new Semantics(
-        container: true,
-        forceExplicitChildNodes: false,
+      new Directionality(
+        textDirection: TextDirection.ltr,
         child: new Semantics(
-          label: "Signed in as ",
-          child: new Column(
-              children: <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
-              ]
+          container: true,
+          explicitChildNodes: true,
+          child: new Semantics(
+            label: 'Signed in as',
+            child: new Column(
+                children: <Widget>[
+                  const Text('Michael Goderbauer'),
+                  const Text('goderbauer@google.com'),
+                ]
+            ),
           ),
         ),
       ),
     );
 
-    //SemanticsNode()
-    //   - SemanticsNode(label: "Signed in as Michael Goderbauer\ngoderbauer@google.com")
+    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //    └SemanticsNode#4(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            children: <TestSemantics>[
+              new TestSemantics(
+                id: 4,
+                label: 'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
+              ),
+            ],
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     await tester.pumpWidget(
-      new Semantics(
-        container: true,
-        forceExplicitChildNodes: true,
+      new Directionality(
+        textDirection: TextDirection.ltr,
         child: new Semantics(
-          label: "Signed in as ",
-          child: new Column(
-              children: <Widget>[
-                const Text('Michael Goderbauer'),
-                const Text('goderbauer@google.com'),
-              ]
+          container: true,
+          explicitChildNodes: false,
+          child: new Semantics(
+            label: 'Signed in as',
+            child: new Column(
+                children: <Widget>[
+                  const Text('Michael Goderbauer'),
+                  const Text('goderbauer@google.com'),
+                ]
+            ),
           ),
         ),
       ),
     );
 
-    //SemanticsNode(label: "Signed in as Michael Goderbauer\ngoderbauer@google.com")
+    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            label: 'Signed in as\nMichael Goderbauer\ngoderbauer@google.com',
+          ),
+        ],
+      ),
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
 
     semantics.dispose();
   });

@@ -4434,7 +4434,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Key key,
     Widget child,
     this.container: false,
-    this.communePreference: SemanticsPreference.communeWithParentAndChildren,
+    this.explicitChildNodes: false,
     this.checked,
     this.selected,
     this.label,
@@ -4454,7 +4454,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// you can use a [MergeSemantics] widget.
   final bool container;
 
-  final SemanticsPreference communePreference;
+  final bool explicitChildNodes;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -4487,7 +4487,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
-      communePreference: communePreference,
+      explicitChildNodes: explicitChildNodes,
       checked: checked,
       selected: selected,
       label: label,
@@ -4499,7 +4499,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
-      ..communePreference = communePreference
+      ..explicitChildNodes = explicitChildNodes
       ..checked = checked
       ..selected = selected
       ..label = label

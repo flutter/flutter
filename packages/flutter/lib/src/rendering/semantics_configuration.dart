@@ -7,7 +7,12 @@ import 'dart:ui';
 import 'package:flutter/foundation.dart';
 
 class SemanticsConfiguration {
-  SemanticsPreference communePreference = SemanticsPreference.communeWithParentAndChildren;
+  SemanticsPreference _communePreference = SemanticsPreference.communeWithParentAndChildren;
+  SemanticsPreference get communePreference => _communePreference;
+  set communePreference(SemanticsPreference communePreference) {
+    _communePreference = communePreference;
+    _isEmpty = false;
+  }
 
   final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
@@ -72,6 +77,9 @@ class SemanticsConfiguration {
   }
 
   void absorb(SemanticsConfiguration other) {
+    if (other._isEmpty)
+      return;
+
     _actions.addAll(other.actions);
     _flags |= other._flags;
 
@@ -94,7 +102,18 @@ class SemanticsConfiguration {
         label = '$label\n$nestedLabel';
     }
 
-    _isEmpty = false;
+    _isEmpty = _isEmpty || other._isEmpty;
+  }
+
+  SemanticsConfiguration copy() {
+    return new SemanticsConfiguration()
+        .._isEmpty = _isEmpty
+        .._textDirection = _textDirection
+        .._label = _label
+        .._flags = _flags
+        ..communePreference = _communePreference
+        ..dropsSemanticsOfPreviouslyPaintedNodes = dropsSemanticsOfPreviouslyPaintedNodes
+        .._actions.addAll(_actions);
   }
 
   bool get isSemanticBoundary {

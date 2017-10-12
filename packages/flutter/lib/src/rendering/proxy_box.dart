@@ -3154,14 +3154,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
-    SemanticsPreference communePreference,
+    bool explicitChildNodes,
     bool checked,
     bool selected,
     String label,
     TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
-       _communePreference = communePreference,
+       _explicitChildNodes = explicitChildNodes,
        _checked = checked,
        _selected = selected,
        _label = label,
@@ -3188,13 +3188,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  SemanticsPreference get communePreference => _communePreference;
-  SemanticsPreference _communePreference;
-  set communePreference(SemanticsPreference value) {
+  bool get explicitChildNodes => _explicitChildNodes;
+  bool _explicitChildNodes;
+  set explicitChildNodes(bool value) {
     assert(value != null);
-    if (_communePreference == value)
+    if (_explicitChildNodes == value)
       return;
-    _communePreference = value;
+    _explicitChildNodes = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3248,12 +3248,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    print('>>> $this');
-    if (_communePreference != null) {
-      config.communePreference = _communePreference;
-    } else if (container) {
-      print('>>> container');
-      config.communePreference = SemanticsPreference.communeWithChildren;
+    if (container) {
+      if (explicitChildNodes) {
+        config.communePreference = SemanticsPreference.noCommune;
+      } else {
+        config.communePreference = SemanticsPreference.communeWithChildren;
+      }
+    } else {
+      if (explicitChildNodes) {
+        assert(false);
+      } else {
+        config.communePreference = SemanticsPreference.communeWithParentAndChildren;
+      }
     }
 
     if (checked != null)
