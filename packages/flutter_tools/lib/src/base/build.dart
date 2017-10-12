@@ -167,6 +167,7 @@ class Snapshotter {
     final List<String> args = <String>[
       '--snapshot_kind=script',
       '--script_snapshot=$snapshotPath',
+      '--enable-mirrors=false',
       mainPath,
     ];
 
