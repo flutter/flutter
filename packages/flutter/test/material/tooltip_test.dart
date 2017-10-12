@@ -133,7 +133,7 @@ void main() {
      *********************/
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
-    expect(tip.size.height, equals(20.0)); // 10.0 height + 5.0 padding * 2 (top, bottom)
+    expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
   });
 
@@ -358,10 +358,10 @@ void main() {
      *********************/
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
-    expect(tip.size.height, equals(10.0));
+    expect(tip.size.height, equals(14.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
@@ -413,10 +413,10 @@ void main() {
      *********************/
 
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
-    expect(tip.size.height, equals(10.0));
+    expect(tip.size.height, equals(14.0));
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
-    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(320.0));
+    expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
   testWidgets('Tooltip stays around', (WidgetTester tester) async {
@@ -524,6 +524,49 @@ void main() {
     expect(find.text(tooltipText), findsNothing);
     await tester.longPress(find.byType(Tooltip));
     expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
+    Widget buildApp(String text, { double textScaleFactor }) {
+      return new MediaQuery(
+        data: new MediaQueryData(textScaleFactor: textScaleFactor),
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              return new MaterialPageRoute<dynamic>(
+                builder: (BuildContext context) {
+                  return new Center(
+                    child: new Tooltip(
+                      message: text,
+                      child: new Container(
+                        width: 100.0,
+                        height: 100.0,
+                        color: Colors.green[500],
+                      ),
+                    ),
+                  );
+                }
+              );
+            },
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 1.0));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    expect(tester.getSize(find.text(tooltipText)), equals(const Size(42.0, 14.0)));
+    RenderBox tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(32.0));
+
+    await tester.pumpWidget(buildApp(tooltipText, textScaleFactor: 4.0));
+    await tester.longPress(find.byType(Tooltip));
+    expect(find.text(tooltipText), findsOneWidget);
+    expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
+    tip = tester.renderObject(find.text(tooltipText)).parent;
+    expect(tip.size.height, equals(56.0));
   });
 
   testWidgets('Haptic feedback', (WidgetTester tester) async {
