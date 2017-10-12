@@ -48,7 +48,7 @@ using GlyphID = uint32_t;
 //   paragraph->Paint(<someSkCanvas>, <xpos>, <ypos>);
 class Paragraph {
  public:
-  // Constructor. I is highly recommended to construct a paragrph with a
+  // Constructor. It is highly recommended to construct a paragraph with a
   // ParagraphBuilder.
   Paragraph();
 
