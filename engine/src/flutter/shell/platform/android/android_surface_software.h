@@ -39,13 +39,8 @@ class AndroidSurfaceSoftware : public AndroidSurface,
   bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                        PlatformView::SurfaceConfig config) override;
 
-  void SetFlutterView(
-      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
-
  private:
   sk_sp<SkSurface> sk_surface_;
-
-  fml::jni::JavaObjectWeakGlobalRef flutter_view_;
 
   fxl::RefPtr<AndroidNativeWindow> native_window_;
   SkColorType target_color_type_;

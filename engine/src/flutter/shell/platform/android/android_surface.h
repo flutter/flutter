@@ -35,9 +35,6 @@ class AndroidSurface {
 
   virtual bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                                PlatformView::SurfaceConfig config = {}) = 0;
-
-  virtual void SetFlutterView(
-      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) = 0;
 };
 
 }  // namespace shell
