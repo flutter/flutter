@@ -30,7 +30,6 @@
 #include "txt/font_weight.h"
 #include "txt/paragraph.h"
 #include "txt/paragraph_builder.h"
-#include "txt/text_align.h"
 #include "utils.h"
 
 namespace txt {
