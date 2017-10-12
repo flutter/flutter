@@ -176,8 +176,8 @@ class _FrontendCompiler implements CompilerInterface {
       final IOSink sink = new File(_kernelBinaryFilename).openWrite();
       final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
       printer.writeProgramFile(program);
-      _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
       await sink.close();
+      _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
     } else
       _outputStream.writeln(boundaryKey);
     return null;
@@ -191,8 +191,8 @@ class _FrontendCompiler implements CompilerInterface {
     final IOSink sink = new File(_kernelBinaryFilename).openWrite();
     final BinaryPrinter printer = printerFactory.newBinaryPrinter(sink);
     printer.writeProgramFile(deltaProgram.newProgram);
-    _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
     await sink.close();
+    _outputStream.writeln("$boundaryKey $_kernelBinaryFilename");
     return null;
   }
 
