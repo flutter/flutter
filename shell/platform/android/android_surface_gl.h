@@ -49,9 +49,6 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
 
   bool SurfaceSupportsSRGB() const override;
 
-  void SetFlutterView(
-      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
-
  private:
   fxl::RefPtr<AndroidContextGL> onscreen_context_;
   fxl::RefPtr<AndroidContextGL> offscreen_context_;

@@ -148,9 +148,4 @@ bool AndroidSurfaceSoftware::SetNativeWindow(
   return true;
 }
 
-void AndroidSurfaceSoftware::SetFlutterView(
-    const fml::jni::JavaObjectWeakGlobalRef& flutter_view) {
-  flutter_view_ = flutter_view;
-}
-
 }  // namespace shell

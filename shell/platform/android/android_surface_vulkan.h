@@ -35,9 +35,6 @@ class AndroidSurfaceVulkan : public AndroidSurface {
   bool SetNativeWindow(fxl::RefPtr<AndroidNativeWindow> window,
                        PlatformView::SurfaceConfig config) override;
 
-  void SetFlutterView(
-      const fml::jni::JavaObjectWeakGlobalRef& flutter_view) override;
-
  private:
   fxl::RefPtr<vulkan::VulkanProcTable> proc_table_;
   fxl::RefPtr<AndroidNativeWindow> native_window_;
