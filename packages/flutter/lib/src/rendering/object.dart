@@ -2271,6 +2271,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// warning.
   void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false, bool noGeometry: false }) {
     assert(!attached || !owner._debugDoingSemantics);
+    _cachedSemanticsConfiguration = null;
     if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyLocalUpdates && (_needsSemanticsGeometryUpdate || noGeometry)))
       return;
     if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
@@ -2337,8 +2338,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
-  _SemanticsFragment _semanticsForParent;
-
   /// Updates the semantic information of the render object.
   ///
   /// This is essentially a two-pass walk of the render tree. The first pass
@@ -2373,13 +2372,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           // Doesn't want to merge anything into parent.
           return;
         }
-        if (config.communePreference != SemanticsPreference.noCommune && fragment.config.communePreference == SemanticsPreference.communeWithParentAndChildren) {
-          if (!config.communeCompatibleWith(fragment.config)) {
+        if (!config.explicitChildNodes && !fragment.config.isSemanticBoundary) {
+//        if (config.communePreference != SemanticsPreference.noCommune && fragment.config.communePreference == SemanticsPreference.communeWithParentAndChildren) {
+          if (!config.isCompatibleWith(fragment.config)) {
             isolatedFragments.add(fragment);
             return;
           }
           for (_SemanticsFragment siblingFragment in fragments) {
-            if (!fragment.config.communeCompatibleWith(siblingFragment.config)) {
+            if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
               isolatedFragments.add(siblingFragment);
               isolatedFragments.add(fragment);
             }
@@ -2395,22 +2395,22 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
     }
 
-    _semanticsForParent = new _CommuningSemanticsFragment(this, config);
+    _SemanticsFragment result = new _CommuningSemanticsFragment(this, config);
 
     for (_SemanticsFragment fragment in fragments) {
       if (isolatedFragments.contains(fragment)) {
-        _semanticsForParent.addChild(fragment.toSemanticsNode());
+        result.addChild(fragment.toSemanticsNode());
       } else {
-        fragment.addTo(_semanticsForParent);
+        fragment.addTo(result);
       }
     }
 
-    if (config.communePreference != SemanticsPreference.communeWithParentAndChildren || parent is! RenderObject) {
-      _semanticsForParent = new _SemanticsFragmentWrapper(_semanticsForParent.toSemanticsNode());
+    if (config.isSemanticBoundary || parent is! RenderObject) {
+      result = new _SemanticsFragmentWrapper(result.toSemanticsNode());
     }
 
     _needsSemanticsUpdate = false;
-    yield _semanticsForParent;
+    yield result;
   }
 
   /// Called when collecting the semantics of this node.

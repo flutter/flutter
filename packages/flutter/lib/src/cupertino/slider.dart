@@ -382,11 +382,10 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
+    config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
       config.addAction(SemanticsAction.increase, _increaseAction);
       config.addAction(SemanticsAction.decrease, _decreaseAction);
-    } else {
-      config.isDisabled = true;
     }
   }
 

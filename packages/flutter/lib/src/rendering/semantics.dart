@@ -13,11 +13,9 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'node.dart';
-import 'semantics_configuration.dart';
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
-export 'semantics_configuration.dart';
 export 'semantics_event.dart';
 
 /// Signature for a function that is called for each [SemanticsNode].
@@ -622,10 +620,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   void update(SemanticsConfiguration config, List<SemanticsNode> children) {
-    _flags = config.flags;
+    _flags = config._flags;
     _label = config.label;
     _textDirection = config.textDirection;
-    _actions = config.actions;
+    _actions = config._actions;
     addChildren(children);
     finalizeChildren();
     _markDirty();
@@ -982,4 +980,201 @@ class SemanticsOwner extends ChangeNotifier {
 
   @override
   String toString() => describeIdentity(this);
+}
+
+/// Describes the semantic information associated with the owning
+/// [RenderObject].
+///
+/// The information provided in the configuration is used to to generate the
+/// semantics tree.
+class SemanticsConfiguration {
+
+  // SEMANTIC BOUNDARY BEHAVIOR
+
+  /// Whether the [RenderObject] owner of this configuration wants to own its
+  /// own [SemanticsNode].
+  ///
+  /// When set to true semantic information associated with the [RenderObject]
+  /// owner of this configuration or any of its defendants will not leak into
+  /// parents. The [SemanticsNode] generated out of this configuration will
+  /// act as a boundary.
+  ///
+  /// Whether decedents of the owning [RenderObject] can add their semantic
+  /// information to the [SemanticsNode] introduced by this configuration
+  /// is controlled by [explicitChildNodes].
+  bool get isSemanticBoundary => _isSemanticBoundary;
+  bool _isSemanticBoundary = false;
+  set isSemanticBoundary(bool value) {
+    if (value == _isSemanticBoundary)
+      return;
+    _isSemanticBoundary = value;
+    _isEmpty = false;
+  }
+
+  /// Whether the configuration forces all children of the owning [RenderObject]
+  /// that want to contribute semantic information to the semantics tree to do
+  /// so in the form of explicit [SemanticsNode]s.
+  ///
+  /// When set to false children of the owning [RenderObject] are allowed to
+  /// annotate [SemanticNode]s of their parent with the semantic information
+  /// they want to contribute to the semantic tree.
+  /// When set to true the only way for children of the owning [RenderObject]
+  /// to contribute semantic information to the semantic tree is to introduce
+  /// new explicit [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  bool get explicitChildNodes => _explicitChildNodes;
+  bool _explicitChildNodes = false;
+  set explicitChildNodes(bool value) {
+    if (value == _explicitChildNodes)
+      return;
+    _explicitChildNodes = value;
+    _isEmpty = false;
+  }
+
+  // SEMANTIC ANNOTATIONS
+  // These will end up on [SemanticNode]s generated from
+  // [SemanticsConfiguration]s.
+
+  /// The actions (with associated action handlers) that this configuration
+  /// would like to contribute to the semantics tree.
+  ///
+  /// See also:
+  /// * [addAction] to add an action.
+//  Map<SemanticsAction, VoidCallback> get actions => new Map<SemanticsAction, VoidCallback>.unmodifiable(_actions);
+  final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
+
+  /// Adds an `action` to the semantics tree.
+  ///
+  /// Whenever the user performs `action` the provided `handler` is called.
+  void addAction(SemanticsAction action, VoidCallback handler) {
+    if (_actions[action] == handler)
+      return;
+    _actions[action] = handler;
+    _isEmpty = false;
+  }
+
+  /// A textual description of the owning [RenderObject].
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get label => _label;
+  String _label = '';
+  set label(String label) {
+    if (_label == label)
+      return;
+    _label = label;
+    _isEmpty = false;
+  }
+
+  /// The reading direction for the text in [label].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection textDirection) {
+    if (_textDirection == textDirection)
+      return;
+    _textDirection = textDirection;
+    _isEmpty = false;
+  }
+
+  /// Whether the owning [RenderObject] is selected (true) or not (false).
+  set isSelected(bool value) {
+    _setFlag(SemanticsFlags.isSelected, value);
+  }
+
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is on or off, corresponding to true and false, respectively.
+  ///
+  /// Do not set this to any value if the owning [RenderObject] doesn't have
+  /// Booleans state that can be controlled by the user.
+  set isChecked(bool value) {
+    _setFlag(SemanticsFlags.hasCheckedState, true);
+    _setFlag(SemanticsFlags.isChecked, value);
+  }
+
+  // INTERNAL FLAG MANAGEMENT
+
+  int _flags = 0;
+  void _setFlag(SemanticsFlags flag, bool value) {
+    final int oldFlags = _flags;
+    if (value) {
+      _flags |= flag.index;
+    } else {
+      _flags &= ~flag.index;
+    }
+    _isEmpty = _isEmpty || oldFlags != _flags;
+  }
+
+  /// Whether this configuration is compatible with the provided `other`
+  /// configuration.
+  ///
+  /// Two configurations are said to be compatible if they can be added to the
+  /// same [SemanticsNode] without losing any semantics information.
+  bool isCompatibleWith(SemanticsConfiguration other) {
+    if (other == null || other.isEmpty || isEmpty)
+      return true;
+    if (_actions.keys.toSet().intersection(other._actions.keys.toSet()).isNotEmpty)
+      return false;
+    if ((_flags & other._flags) != 0)
+      return false;
+    return true;
+  }
+
+  /// Absorb the semantic information from `other` into this configuration.
+  ///
+  /// This adds the semantic information of both configurations and saves the
+  /// result in this configuration.
+  ///
+  /// Only configurations that have [explicitChildNodes] set to false can
+  /// absorb other configurations and its recommended to only absorb compatible
+  /// configurations as determined by [isCompatibleWith].
+  void absorb(SemanticsConfiguration other) {
+    assert(!explicitChildNodes);
+
+    if (other._isEmpty)
+      return;
+
+    _actions.addAll(other._actions);
+    _flags |= other._flags;
+
+    textDirection ??= other.textDirection;
+    if (other.label.isNotEmpty) {
+      String nestedLabel = other.label;
+      if (textDirection != other.textDirection && other.textDirection != null) {
+        switch (other.textDirection) {
+          case TextDirection.rtl:
+            nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+            break;
+          case TextDirection.ltr:
+            nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+            break;
+        }
+      }
+      if (label.isEmpty)
+        label = nestedLabel;
+      else
+        label = '$label\n$nestedLabel';
+    }
+
+    _isEmpty = _isEmpty || other._isEmpty;
+  }
+
+  /// Returns an exact copy of this configuration.
+  SemanticsConfiguration copy() {
+    return new SemanticsConfiguration()
+      .._isEmpty = _isEmpty
+      .._textDirection = _textDirection
+      .._label = _label
+      .._flags = _flags
+      .._isSemanticBoundary = _isSemanticBoundary
+      .._explicitChildNodes = _explicitChildNodes
+      .._actions.addAll(_actions);
+  }
+
+  /// Whether this configuration is empty.
+  ///
+  /// An empty configuration doesn't contain any semantic information that it
+  /// wants to contribute to the semantics tree.
+  bool get isEmpty => _isEmpty;
+  bool _isEmpty = true;
 }

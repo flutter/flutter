@@ -2998,35 +2998,32 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    if (onHorizontalDragUpdate != null || onVerticalDragUpdate != null) {
-      config.communePreference = SemanticsPreference.noCommune;
-    } else if (onTap != null || onLongPress != null) {
-      config.communePreference = SemanticsPreference.communeWithChildren;
-    }
+    config.isSemanticBoundary = onTap != null
+        || onLongPress != null
+        || onHorizontalDragUpdate != null
+        || onVerticalDragUpdate != null;
 
-    List<SemanticsAction> actions = <SemanticsAction>[];
+    final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
     if (onTap != null)
-      actions.add(SemanticsAction.tap);
+      actions[SemanticsAction.tap] = onTap;
     if (onLongPress != null)
-      actions.add(SemanticsAction.longPress);
+      actions[SemanticsAction.longPress] = onLongPress;
     if (onHorizontalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollRight);
-      actions.add(SemanticsAction.scrollLeft);
+      actions[SemanticsAction.scrollRight] = _performSemanticScrollRight;
+      actions[SemanticsAction.scrollLeft] = _performSemanticScrollLeft;
     }
     if (onVerticalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollUp);
-      actions.add(SemanticsAction.scrollDown);
+      actions[SemanticsAction.scrollUp] = _performSemanticScrollUp;
+      actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
     }
 
-    // If a set of validActions has been provided only expose those.
-    if (validActions != null)
-      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
+    final List<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
 
-    print('>>>>>>>>>>>>>>>>>> $this -- ${config.communePreference}');
-    actions.forEach((SemanticsAction action) {
-      print('>>>>>>>>>>>>> addign $action');
-      config.addAction(action, () => _performAction(action));
-    });
+    for (SemanticsAction action in actionsToAdd) {
+      final VoidCallback handler = actions[action];
+      if (handler != null)
+        config.addAction(action, handler);
+    }
   }
 
   SemanticsNode _innerNode;
@@ -3073,56 +3070,43 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     super.resetSemantics();
   }
 
-  void _performAction(SemanticsAction action) {
-    switch (action) {
-      case SemanticsAction.tap:
-        if (onTap != null)
-          onTap();
-        break;
-      case SemanticsAction.longPress:
-        if (onLongPress != null)
-          onLongPress();
-        break;
-      case SemanticsAction.scrollLeft:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * -scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollRight:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollUp:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * -scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollDown:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.increase:
-      case SemanticsAction.decrease:
-        assert(false);
-        break;
+  void _performSemanticScrollLeft() {
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * -scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollRight() {
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollUp() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * -scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollDown() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
     }
   }
 
@@ -3248,19 +3232,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    if (container) {
-      if (explicitChildNodes) {
-        config.communePreference = SemanticsPreference.noCommune;
-      } else {
-        config.communePreference = SemanticsPreference.communeWithChildren;
-      }
-    } else {
-      if (explicitChildNodes) {
-        assert(false);
-      } else {
-        config.communePreference = SemanticsPreference.communeWithParentAndChildren;
-      }
-    }
+    config.isSemanticBoundary = container;
+    config.explicitChildNodes = explicitChildNodes;
 
     if (checked != null)
       config.isChecked = checked;
@@ -3271,26 +3244,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (textDirection != null)
       config.textDirection = textDirection;
   }
-
-//  @override
-//  bool get isSemanticBoundary => container;
-//
-//  @override
-//  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
-
-//  void _annotate(SemanticsNode node) {
-//    if (checked != null) {
-//      node
-//        ..hasCheckedState = true
-//        ..isChecked = checked;
-//    }
-//    if (selected != null)
-//      node.isSelected = selected;
-//    if (label != null)
-//      node.label = label;
-//    if (textDirection != null)
-//      node.textDirection = textDirection;
-//  }
 }
 
 /// Causes the semantics of all earlier render objects below the same semantic
@@ -3303,12 +3256,11 @@ class RenderBlockSemantics extends RenderProxyBox {
   /// order.
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.dropsSemanticsOfPreviouslyPaintedNodes = true;
-  }
-
+//  @override
+//  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+//    super.describeSemanticsConfiguration(config);
+//    // TODO(goderbauer)
+//  }
 
 }
 
