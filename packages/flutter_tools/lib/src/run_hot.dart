@@ -615,7 +615,7 @@ class HotRunner extends ResidentRunner {
     String unusedElementMessage;
     if (!reassembleAndScheduleErrors && !reassembleTimedOut) {
       final List<Future<List<ProgramElement>>> unusedReports =
-          <Future<List<ProgramElement>>>[];
+        <Future<List<ProgramElement>>>[];
       for (FlutterDevice device in flutterDevices)
         unusedReports.add(device.unusedChangesInLastReload());
       final List<ProgramElement> unusedElements = <ProgramElement>[];
@@ -624,20 +624,19 @@ class HotRunner extends ResidentRunner {
 
       if (unusedElements.isNotEmpty) {
         unusedElementMessage =
-            '\nThe following program elements were changed by the reload, '
-            'but did not run when the view was reassembled. If this code '
-            'only runs at start-up, you will need to restart ("R") for '
-            'the changes to have an effect.';
+          '\nThe following program elements were changed by the reload, '
+          'but did not run when the view was reassembled. If this code '
+          'only runs at start-up, you will need to restart ("R") for '
+          'the changes to have an effect.';
         for (ProgramElement unusedElement in unusedElements) {
           final String name = unusedElement.qualifiedName;
           final String path = _uriToRelativePath(unusedElement.uri);
           final int line = unusedElement.line;
           String elementDescription;
-          if (line == null) {
+          if (line == null)
             elementDescription = '$name ($path)';
-          } else {
+          else
             elementDescription = '$name ($path:$line)';
-          }
           unusedElementMessage += '\n - $elementDescription';
         }
       }

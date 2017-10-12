@@ -143,18 +143,16 @@ class FlutterDevice {
   // since executed.
   Future<List<ProgramElement>> unusedChangesInLastReload() async {
     final List<Future<List<ProgramElement>>> reports =
-        <Future<List<ProgramElement>>>[];
-    for (FlutterView view in views) {
+      <Future<List<ProgramElement>>>[];
+    for (FlutterView view in views)
       reports.add(view.uiIsolate.getUnusedChangesInLastReload());
-    }
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
-      for (ProgramElement element in await report) {
+      for (ProgramElement element in await report)
         elements.add(new ProgramElement(element.qualifiedName,
                                         devFS.deviceUriToHostUri(element.uri),
                                         element.line,
                                         element.column));
-      }
     }
     return elements;
   }

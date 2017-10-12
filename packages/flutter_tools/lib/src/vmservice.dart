@@ -908,11 +908,10 @@ class ProgramElement {
 
   @override
   String toString() {
-    if (line == null) {
+    if (line == null)
       return '$qualifiedName ($uri)';
-    } else {
+    else
       return '$qualifiedName ($uri:$line)';
-    }
   }
 }
 
@@ -1092,9 +1091,9 @@ class Isolate extends ServiceObjectOwner {
   // since executed.
   Future<List<ProgramElement>> getUnusedChangesInLastReload() async {
     final Map<String, dynamic> response =
-        await invokeRpcRaw('_getUnusedChangesInLastReload');
+      await invokeRpcRaw('_getUnusedChangesInLastReload');
     final List<Future<ProgramElement>> unusedElements =
-        <Future<ProgramElement>>[];
+      <Future<ProgramElement>>[];
     for (Map<String, dynamic> element in response['unused'])
       unusedElements.add(_describeElement(element));
     return Future.wait(unusedElements);
