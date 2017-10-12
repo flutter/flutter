@@ -92,7 +92,7 @@ class Icon extends StatelessWidget {
   /// See also:
   ///
   ///  * [Semantics.label] which is set with [semanticLabel] in the underlying
-  ///  [Semantics] node.
+  ///    [Semantics] widget.
   final String semanticLabel;
 
   @override
