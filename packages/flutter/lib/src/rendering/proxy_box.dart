@@ -2857,7 +2857,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsActionHandler {
+class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// Creates a render object that listens for specific semantic gestures.
   ///
   /// The [scrollFactor] argument must not be null.
@@ -2934,11 +2934,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -2947,11 +2947,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -2960,11 +2960,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls up or down.
@@ -2973,11 +2973,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -2987,8 +2987,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// leftwards drag.
   double scrollFactor;
 
-  @override
-  bool get isSemanticBoundary {
+  bool get _hasHandlers {
     return onTap != null
         || onLongPress != null
         || onHorizontalDragUpdate != null
@@ -2996,54 +2995,15 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  SemanticsNode _innerNode;
-  SemanticsNode _annotatedNode;
-
-  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
-  /// annotated with this object's semantics information.
-  void sendSemanticsEvent(SemanticsEvent event) {
-    _annotatedNode?.sendEvent(event);
-  }
-
-  @override
-  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-    if (!node.hasTag(useTwoPaneSemantics)) {
-      super.assembleSemanticsNode(node, children);
-      return;
+    if (onHorizontalDragUpdate != null || onVerticalDragUpdate != null) {
+      config.communePreference = SemanticsPreference.noCommune;
+    } else if (onTap != null || onLongPress != null) {
+      config.communePreference = SemanticsPreference.communeWithChildren;
     }
 
-    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
-    _innerNode
-      ..wasAffectedByClip = node.wasAffectedByClip
-      ..isMergedIntoParent = node.isPartOfNodeMerging
-      ..rect = Offset.zero & node.rect.size;
-
-    semanticsAnnotator(_innerNode);
-
-    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
-    final List<SemanticsNode> included = <SemanticsNode>[];
-    for (SemanticsNode child in children) {
-      if (child.hasTag(excludeFromScrolling))
-        excluded.add(child);
-      else
-        included.add(child);
-    }
-    node.addChildren(excluded);
-    _innerNode.addChildren(included);
-    _innerNode.finalizeChildren();
-    node.finalizeChildren();
-  }
-
-  @override
-  void resetSemantics() {
-    _innerNode?.reset();
-    super.resetSemantics();
-  }
-
-  void _annotate(SemanticsNode node) {
-    _annotatedNode = node;
     List<SemanticsAction> actions = <SemanticsAction>[];
     if (onTap != null)
       actions.add(SemanticsAction.tap);
@@ -3062,11 +3022,58 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
     if (validActions != null)
       actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
 
-    actions.forEach(node.addAction);
+    print('>>>>>>>>>>>>>>>>>> $this -- ${config.communePreference}');
+    actions.forEach((SemanticsAction action) {
+      print('>>>>>>>>>>>>> addign $action');
+      config.addAction(action, () => _performAction(action));
+    });
   }
 
+  SemanticsNode _innerNode;
+  SemanticsNode _annotatedNode;
+
+  /// Sends a [SemanticsEvent] in the context of the [SemanticsNode] that is
+  /// annotated with this object's semantics information.
+  void sendSemanticsEvent(SemanticsEvent event) {
+    _annotatedNode?.sendEvent(event);
+  }
+
+//  @override
+//  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
+//    if (!node.hasTag(useTwoPaneSemantics)) {
+//      super.assembleSemanticsNode(node, children);
+//      return;
+//    }
+//
+//    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
+//    _innerNode
+//      ..wasAffectedByClip = node.wasAffectedByClip
+//      ..isMergedIntoParent = node.isPartOfNodeMerging
+//      ..rect = Offset.zero & node.rect.size;
+//
+//    semanticsAnnotator(_innerNode);
+//
+//    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
+//    final List<SemanticsNode> included = <SemanticsNode>[];
+//    for (SemanticsNode child in children) {
+//      if (child.hasTag(excludeFromScrolling))
+//        excluded.add(child);
+//      else
+//        included.add(child);
+//    }
+//    node.addChildren(excluded);
+//    _innerNode.addChildren(included);
+//    _innerNode.finalizeChildren();
+//    node.finalizeChildren();
+//  }
+
   @override
-  void performAction(SemanticsAction action) {
+  void resetSemantics() {
+    _innerNode?.reset();
+    super.resetSemantics();
+  }
+
+  void _performAction(SemanticsAction action) {
     switch (action) {
       case SemanticsAction.tap:
         if (onTap != null)
@@ -3147,12 +3154,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
+    SemanticsPreference communePreference,
     bool checked,
     bool selected,
     String label,
     TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
+       _communePreference = communePreference,
        _checked = checked,
        _selected = selected,
        _label = label,
@@ -3176,6 +3185,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (container == value)
       return;
     _container = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  SemanticsPreference get communePreference => _communePreference;
+  SemanticsPreference _communePreference;
+  set communePreference(SemanticsPreference value) {
+    assert(value != null);
+    if (_communePreference == value)
+      return;
+    _communePreference = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3228,24 +3247,44 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   @override
-  bool get isSemanticBoundary => container;
-
-  @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
-
-  void _annotate(SemanticsNode node) {
-    if (checked != null) {
-      node
-        ..hasCheckedState = true
-        ..isChecked = checked;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    print('>>> $this');
+    if (_communePreference != null) {
+      config.communePreference = _communePreference;
+    } else if (container) {
+      print('>>> container');
+      config.communePreference = SemanticsPreference.communeWithChildren;
     }
+
+    if (checked != null)
+      config.isChecked = checked;
     if (selected != null)
-      node.isSelected = selected;
+      config.isSelected = selected;
     if (label != null)
-      node.label = label;
+      config.label = label;
     if (textDirection != null)
-      node.textDirection = textDirection;
+      config.textDirection = textDirection;
   }
+
+//  @override
+//  bool get isSemanticBoundary => container;
+//
+//  @override
+//  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
+
+//  void _annotate(SemanticsNode node) {
+//    if (checked != null) {
+//      node
+//        ..hasCheckedState = true
+//        ..isChecked = checked;
+//    }
+//    if (selected != null)
+//      node.isSelected = selected;
+//    if (label != null)
+//      node.label = label;
+//    if (textDirection != null)
+//      node.textDirection = textDirection;
+//  }
 }
 
 /// Causes the semantics of all earlier render objects below the same semantic
@@ -3259,7 +3298,12 @@ class RenderBlockSemantics extends RenderProxyBox {
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
   @override
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.dropsSemanticsOfPreviouslyPaintedNodes = true;
+  }
+
+
 }
 
 /// Causes the semantics of all descendants to be merged into this
@@ -3273,8 +3317,11 @@ class RenderMergeSemantics extends RenderProxyBox {
   /// Creates a render object that merges the semantics from its descendants.
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
-  @override
-  bool get isMergingSemanticsOfDescendants => true;
+//  @override
+//  SemanticsConfiguration get semanticsConfiguration {
+//    return (super.semanticsConfiguration ?? new SemanticsConfiguration())
+//      ..communePreference = SemanticsPreference.forceChildrenToCommune;
+//  }
 
 }
 

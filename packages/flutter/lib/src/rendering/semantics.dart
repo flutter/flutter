@@ -13,35 +13,12 @@ import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
 import 'node.dart';
+import 'semantics_configuration.dart';
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
+export 'semantics_configuration.dart';
 export 'semantics_event.dart';
-
-/// Interface for [RenderObject]s to implement when they want to support
-/// being tapped, etc.
-///
-/// The handler will only be called for a particular flag if that flag is set
-/// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
-/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
-abstract class SemanticsActionHandler { // ignore: one_member_abstracts
-  /// Called when the object implementing this interface receives a
-  /// [SemanticsAction]. For example, if the user of an accessibility tool
-  /// instructs their device that they wish to tap a button, the [RenderObject]
-  /// behind that button would have its [performAction] method called with the
-  /// [SemanticsAction.tap] action.
-  void performAction(SemanticsAction action);
-}
-
-/// Signature for functions returned by [RenderObject.semanticsAnnotator].
-///
-/// These callbacks are called with the [SemanticsNode] object that
-/// corresponds to the [RenderObject]. (One [SemanticsNode] can
-/// correspond to multiple [RenderObject] objects.)
-///
-/// See [RenderObject.semanticsAnnotator] for details on the
-/// contract that semantic annotators must follow.
-typedef void SemanticsAnnotator(SemanticsNode semantics);
 
 /// Signature for a function that is called for each [SemanticsNode].
 ///
@@ -223,22 +200,18 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
-    SemanticsActionHandler handler,
     VoidCallback showOnScreen,
   }) : id = _generateNewId(),
-       _showOnScreen = showOnScreen,
-       _actionHandler = handler;
+       _showOnScreen = showOnScreen;
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
-    SemanticsActionHandler handler,
     VoidCallback showOnScreen,
     SemanticsOwner owner,
   }) : id = 0,
-       _showOnScreen = showOnScreen,
-       _actionHandler = handler {
+       _showOnScreen = showOnScreen {
     attach(owner);
   }
 
@@ -254,7 +227,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// they are created.
   final int id;
 
-  final SemanticsActionHandler _actionHandler;
   final VoidCallback _showOnScreen;
 
   // GEOMETRY
@@ -307,42 +279,24 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // FLAGS AND LABELS
   // These are supposed to be set by SemanticsAnnotator obtained from getSemanticsAnnotators
 
-  int _actions = 0;
+  Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
   /// Adds the given action to the set of semantic actions.
   ///
   /// If the user chooses to perform an action,
   /// [SemanticsActionHandler.performAction] will be called with the chosen
   /// action.
-  void addAction(SemanticsAction action) {
+  void addAction(SemanticsAction action, VoidCallback handler) {
     assert(action != null);
-    final int index = action.index;
-    if ((_actions & index) == 0) {
-      _actions |= index;
+    assert(handler != null);
+    if (!_actions.containsKey(action)) {
+      _actions[action] = handler;
       _markDirty();
     }
   }
 
-  /// Adds the [SemanticsAction.scrollLeft] and [SemanticsAction.scrollRight] actions.
-  void addHorizontalScrollingActions() {
-    addAction(SemanticsAction.scrollLeft);
-    addAction(SemanticsAction.scrollRight);
-  }
-
-  /// Adds the [SemanticsAction.scrollUp] and [SemanticsAction.scrollDown] actions.
-  void addVerticalScrollingActions() {
-    addAction(SemanticsAction.scrollUp);
-    addAction(SemanticsAction.scrollDown);
-  }
-
-  /// Adds the [SemanticsAction.increase] and [SemanticsAction.decrease] actions.
-  void addAdjustmentActions() {
-    addAction(SemanticsAction.increase);
-    addAction(SemanticsAction.decrease);
-  }
-
   bool _canPerformAction(SemanticsAction action) {
-    return _actionHandler != null && (_actions & action.index) != 0;
+    return _actions.containsKey(action);
   }
 
   /// Whether this node and all of its descendants should be treated as one logical entity.
@@ -457,7 +411,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Restore this node to its default state.
   void reset() {
-    _actions = 0;
+    _actions.clear();
     _flags = 0;
     _label = '';
     _textDirection = null;
@@ -535,7 +489,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (_newChildren != null) {
       for (SemanticsNode child in _newChildren) {
-        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
+//        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
         child._dead = false;
       }
     }
@@ -667,44 +621,54 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
+  void update(SemanticsConfiguration config, List<SemanticsNode> children) {
+    _flags = config.flags;
+    _label = config.label;
+    _textDirection = config.textDirection;
+    _actions = config.actions;
+    addChildren(children);
+    finalizeChildren();
+    _markDirty();
+  }
+
   /// Returns a summary of the semantics for this node.
   ///
   /// If this node has [mergeAllDescendantsIntoThisNode], then the returned data
   /// includes the information from this node's descendants. Otherwise, the
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
-    int flags = _flags;
-    int actions = _actions;
-    String label = _label;
-    TextDirection textDirection = _textDirection;
+    final int flags = _flags;
+    final int actions = _actions.keys.fold(0, (int prev, SemanticsAction action) => prev |= action.index);
+    final String label = _label;
+    final TextDirection textDirection = _textDirection;
     final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
 
-    if (mergeAllDescendantsIntoThisNode) {
-      _visitDescendants((SemanticsNode node) {
-        flags |= node._flags;
-        actions |= node._actions;
-        textDirection ??= node._textDirection;
-        tags.addAll(node._tags);
-        if (node.label.isNotEmpty) {
-          String nestedLabel = node.label;
-          if (textDirection != node.textDirection && node.textDirection != null) {
-            switch (node.textDirection) {
-              case TextDirection.rtl:
-                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
-                break;
-              case TextDirection.ltr:
-                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
-                break;
-            }
-          }
-          if (label.isEmpty)
-            label = nestedLabel;
-          else
-            label = '$label\n$nestedLabel';
-        }
-        return true;
-      });
-    }
+//    if (mergeAllDescendantsIntoThisNode) {
+//      _visitDescendants((SemanticsNode node) {
+//        flags |= node._flags;
+//        actions |= node._actions;
+//        textDirection ??= node._textDirection;
+//        tags.addAll(node._tags);
+//        if (node.label.isNotEmpty) {
+//          String nestedLabel = node.label;
+//          if (textDirection != node.textDirection && node.textDirection != null) {
+//            switch (node.textDirection) {
+//              case TextDirection.rtl:
+//                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+//                break;
+//              case TextDirection.ltr:
+//                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+//                break;
+//            }
+//          }
+//          if (label.isEmpty)
+//            label = nestedLabel;
+//          else
+//            label = '$label\n$nestedLabel';
+//        }
+//        return true;
+//      });
+//    }
 
     return new SemanticsData(
       flags: flags,
@@ -798,12 +762,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
-    final List<String> actions = <String>[];
-    for (SemanticsAction action in SemanticsAction.values.values) {
-      if ((_actions & action.index) != 0)
-        actions.add(describeEnum(action));
-    }
-    properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
+//    final List<String> actions = <String>[];
+//    for (SemanticsAction action in SemanticsAction.values.values) {
+//      if ((_actions & action.index) != 0)
+//        actions.add(describeEnum(action));
+//    }
+    properties.add(new IterableProperty<String>('actions', _actions.keys.map((SemanticsAction action) => action.toString()), ifEmpty: null));
     properties.add(new IterableProperty<SemanticsTag>('tags', _tags, ifEmpty: null));
     if (hasCheckedState)
       properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
@@ -939,7 +903,7 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  VoidCallback _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
@@ -952,7 +916,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (result == null || !result._canPerformAction(action))
       return null;
-    return result._actionHandler;
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -961,9 +925,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// this function does nothing.
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
-    final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
+    final VoidCallback handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
-      handler.performAction(action);
+      handler();
       return;
     }
 
@@ -972,7 +936,7 @@ class SemanticsOwner extends ChangeNotifier {
       _nodes[id]._showOnScreen();
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
+  VoidCallback _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
@@ -990,16 +954,16 @@ class SemanticsOwner extends ChangeNotifier {
         }
         return true;
       });
-      return result?._actionHandler;
+      return result?._actions[action];
     }
     if (node.hasChildren) {
       for (SemanticsNode child in node._children.reversed) {
-        final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final VoidCallback handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
     }
-    return node._canPerformAction(action) ? node._actionHandler : null;
+    return node._canPerformAction(action) ? node._actions[action] : null;
   }
 
   /// Asks the [SemanticsNode] at the given position to perform the given action.
@@ -1011,8 +975,9 @@ class SemanticsOwner extends ChangeNotifier {
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
       return;
-    final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
-    handler?.performAction(action);
+    final VoidCallback handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    if (handler != null)
+      handler();
   }
 
   @override

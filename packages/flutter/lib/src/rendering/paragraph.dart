@@ -404,11 +404,11 @@ class RenderParagraph extends RenderBox {
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  void _annotate(SemanticsNode node) {
-    node.label = text.toPlainText();
-    node.textDirection = textDirection;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..label = text.toPlainText()
+      ..textDirection = textDirection;
   }
 
   @override

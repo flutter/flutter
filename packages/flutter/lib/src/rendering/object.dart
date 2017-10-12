@@ -546,418 +546,71 @@ typedef void RenderObjectVisitor(RenderObject child);
 /// Used by [RenderObject.invokeLayoutCallback].
 typedef void LayoutCallback<T extends Constraints>(T constraints);
 
-class _SemanticsGeometry {
-  _SemanticsGeometry() : _transform = new Matrix4.identity();
-
-  _SemanticsGeometry.withClipFrom(_SemanticsGeometry other) {
-    _clipRect = other?._clipRect;
-    _transform = new Matrix4.identity();
-  }
-
-  _SemanticsGeometry.copy(_SemanticsGeometry other) {
-    if (other != null) {
-      _clipRect = other._clipRect;
-      _transform = new Matrix4.copy(other._transform);
-    } else {
-      _transform = new Matrix4.identity();
-    }
-  }
-
-  Rect _clipRect;
-
-  Rect _intersectClipRect(Rect other) {
-    if (_clipRect == null)
-      return other;
-    if (other == null)
-      return _clipRect;
-    return _clipRect.intersect(other);
-  }
-
-  Matrix4 _transform;
-
-  void applyAncestorChain(List<RenderObject> ancestorChain) {
-    for (int index = ancestorChain.length-1; index > 0; index -= 1) {
-      final RenderObject parent = ancestorChain[index];
-      final RenderObject child = ancestorChain[index-1];
-      _clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
-      if (_clipRect != null) {
-        if (_clipRect.isEmpty) {
-          _clipRect = Rect.zero;
-        } else {
-          final Matrix4 clipTransform = new Matrix4.identity();
-          parent.applyPaintTransform(child, clipTransform);
-          _clipRect = MatrixUtils.inverseTransformRect(clipTransform, _clipRect);
-        }
-      }
-      parent.applyPaintTransform(child, _transform);
-    }
-  }
-
-  void updateSemanticsNode({
-    @required RenderObject rendering,
-    @required SemanticsNode semantics,
-  }) {
-    assert(rendering != null);
-    assert(semantics != null);
-    semantics.transform = _transform;
-    final Rect semanticBounds = rendering.semanticBounds;
-    if (_clipRect != null) {
-      final Rect rect = _clipRect.intersect(semanticBounds);
-      semantics.rect = rect;
-      semantics.wasAffectedByClip = rect != semanticBounds;
-    } else {
-      semantics.rect = semanticBounds;
-      semantics.wasAffectedByClip = false;
-    }
-  }
-}
-
-/// Describes the shape of the semantic tree.
-///
-/// A [_SemanticsFragment] object is a node in a short-lived tree which is used
-/// to create the final [SemanticsNode] tree that is sent to the semantics
-/// server. These objects have a [SemanticsAnnotator], and a list of
-/// [_SemanticsFragment] children.
-abstract class _SemanticsFragment {
-  _SemanticsFragment({
-    @required RenderObject renderObjectOwner,
-    this.annotator,
-    List<_SemanticsFragment> children,
-    this.dropSemanticsOfPreviousSiblings,
-  }) : assert(renderObjectOwner != null),
-       assert(() {
-         if (children == null)
-           return true;
-         final Set<_SemanticsFragment> seenChildren = new Set<_SemanticsFragment>();
-         for (_SemanticsFragment child in children)
-           assert(seenChildren.add(child)); // check for duplicate adds
-         return true;
-       }()),
-       _ancestorChain = <RenderObject>[renderObjectOwner],
-       _children = children ?? const <_SemanticsFragment>[];
-
-  final SemanticsAnnotator annotator;
-  bool dropSemanticsOfPreviousSiblings;
-
-  bool get producesSemanticNodes => true;
-
-  List<RenderObject> _ancestorChain;
-  void addAncestor(RenderObject ancestor) {
-    _ancestorChain.add(ancestor);
-  }
-
-  RenderObject get renderObjectOwner => _ancestorChain.first;
-
-  List<_SemanticsFragment> _children;
-
-  bool _debugCompiled = false;
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics });
-
-  @override
-  String toString() => describeIdentity(this);
-}
-
-/// A SemanticsFragment that doesn't produce any [SemanticsNode]s when compiled.
-class _EmptySemanticsFragment extends _SemanticsFragment {
-  _EmptySemanticsFragment({
-    @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(renderObjectOwner: renderObjectOwner, dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
-
-  @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics }) sync* { }
-
-  @override
-  bool get producesSemanticNodes => false;
-}
-
-/// Represents a [RenderObject] which is in no way dirty.
-///
-/// This class has no children and no annotators, and when compiled, it returns
-/// the [SemanticsNode] that the [RenderObject] already has. (We still update
-/// the matrix, since that comes from the (dirty) ancestors.)
-class _CleanSemanticsFragment extends _SemanticsFragment {
-  _CleanSemanticsFragment({
-    @required RenderObject renderObjectOwner,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : assert(renderObjectOwner != null),
-       assert(renderObjectOwner._semantics != null),
-       super(
-         renderObjectOwner: renderObjectOwner,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
-       );
-
-  @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics }) sync* {
-    assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; }());
-    final SemanticsNode node = renderObjectOwner._semantics;
-    assert(node != null);
-    if (geometry != null) {
-      geometry.applyAncestorChain(_ancestorChain);
-      geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node);
-      if (node.isInvisible)
-        return; // drop the node
-    } else {
-      assert(_ancestorChain.length == 1);
-    }
-    yield node;
-  }
-}
-
-abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
-  _InterestingSemanticsFragment({
-    RenderObject renderObjectOwner,
-    SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(
-         renderObjectOwner: renderObjectOwner,
-         annotator: annotator,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-       );
-
-  @override
-  Iterable<SemanticsNode> compile({ _SemanticsGeometry geometry, SemanticsNode currentSemantics }) sync* {
-    assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; }());
-    final SemanticsNode node = establishSemanticsNode(geometry, currentSemantics);
-    if (node.isInvisible)
-      return; // drop the node
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_SemanticsFragment child in _children) {
-      assert(child._ancestorChain.last == renderObjectOwner);
-      children.addAll(child.compile(
-        geometry: createSemanticsGeometryForChild(geometry),
-        currentSemantics: _children.length > 1 ? null : node,
-      ));
-    }
-    yield* finalizeSemanticsNode(node, children);
-  }
-
-  SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics);
-  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children);
-  _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry);
-}
-
-/// Represents the [RenderObject] found at the top of the render tree.
-///
-/// This class always compiles to a [SemanticsNode] with ID 0.
-class _RootSemanticsFragment extends _InterestingSemanticsFragment {
-  _RootSemanticsFragment({
-    RenderObject renderObjectOwner,
-    SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : super(
-         renderObjectOwner: renderObjectOwner,
-         annotator: annotator,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-       );
-
-  @override
-  SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics) {
-    assert(_ancestorChain.length == 1);
-    assert(geometry == null);
-    assert(currentSemantics == null);
-    renderObjectOwner._semantics ??= new SemanticsNode.root(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      owner: renderObjectOwner.owner.semanticsOwner,
-      showOnScreen: renderObjectOwner.showOnScreen,
-    );
-    final SemanticsNode node = renderObjectOwner._semantics;
-    assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
-    assert(!node.wasAffectedByClip);
-    node.rect = renderObjectOwner.semanticBounds;
-    return node;
-  }
-
-  @override
-  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
-    if (annotator != null)
-      annotator(node);
-    node.addChildren(children);
-    node.finalizeChildren();
-    yield node;
-  }
-
-  @override
-  _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
-    return new _SemanticsGeometry();
-  }
-}
-
-/// Represents a RenderObject that has [isSemanticBoundary] set to true.
-///
-/// It returns the SemanticsNode for that [RenderObject].
-class _ConcreteSemanticsFragment extends _InterestingSemanticsFragment {
-  _ConcreteSemanticsFragment({
-    RenderObject renderObjectOwner,
-    SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-    bool mergeIntoParent,
-    bool mergesAllDescendants,
-  }) : _mergeIntoParent = mergeIntoParent,
-       _mergesAllDescendants = mergesAllDescendants,
-       super(
-         renderObjectOwner: renderObjectOwner,
-         annotator: annotator,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-       );
-
-  final bool _mergeIntoParent;
-  final bool _mergesAllDescendants;
-
-  @override
-  SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics) {
-    renderObjectOwner._semantics ??= new SemanticsNode(
-      handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-      showOnScreen: renderObjectOwner.showOnScreen,
-    );
-    final SemanticsNode node = renderObjectOwner._semantics;
-    node.isMergedIntoParent = _mergeIntoParent;
-    node.mergeAllDescendantsIntoThisNode = _mergesAllDescendants;
-    if (geometry != null) {
-      geometry.applyAncestorChain(_ancestorChain);
-      geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node);
-    } else {
-      assert(_ancestorChain.length == 1);
-    }
-    return node;
-  }
-
-  @override
-  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
-    renderObjectOwner.assembleSemanticsNode(node, children);
-    yield node;
-  }
-
-  @override
-  _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
-    return new _SemanticsGeometry.withClipFrom(geometry);
-  }
-}
-
-/// Represents a RenderObject that does not have [isSemanticBoundary] set to
-/// true, but which does have some semantic annotators.
-///
-/// When it is compiled, if the nearest ancestor [_SemanticsFragment] that isn't
-/// also an [_ImplicitSemanticsFragment] is a [_RootSemanticsFragment] or a
-/// [_ConcreteSemanticsFragment], then the [SemanticsNode] from that object is
-/// reused. Otherwise, a new one is created.
-class _ImplicitSemanticsFragment extends _InterestingSemanticsFragment {
-  _ImplicitSemanticsFragment({
-    RenderObject renderObjectOwner,
-    SemanticsAnnotator annotator,
-    Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-    bool mergeIntoParent,
-    bool mergesAllDescendants,
-  }) : _mergeIntoParent = mergeIntoParent,
-       _mergesAllDescendants = mergesAllDescendants,
-       super(
-         renderObjectOwner: renderObjectOwner,
-         annotator: annotator,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-       );
-
-  // If true, this fragment will introduce its own node into the Semantics Tree.
-  // If false, a borrowed semantics node from an ancestor is used.
-  bool _introducesOwnNode;
-
-  final bool _mergeIntoParent;
-  final bool _mergesAllDescendants;
-
-  @override
-  SemanticsNode establishSemanticsNode(_SemanticsGeometry geometry, SemanticsNode currentSemantics) {
-    SemanticsNode node;
-    assert(_introducesOwnNode == null);
-    assert(annotator != null || _mergesAllDescendants);
-    _introducesOwnNode = currentSemantics == null;
-    if (_introducesOwnNode) {
-      renderObjectOwner._semantics ??= new SemanticsNode(
-        handler: renderObjectOwner is SemanticsActionHandler ? renderObjectOwner as dynamic : null,
-        showOnScreen: renderObjectOwner.showOnScreen,
-      );
-      node = renderObjectOwner._semantics;
-      node.isMergedIntoParent = _mergeIntoParent;
-    } else {
-      renderObjectOwner._semantics = null;
-      node = currentSemantics;
-    }
-    if (!node.mergeAllDescendantsIntoThisNode)
-      node.mergeAllDescendantsIntoThisNode = _mergesAllDescendants;
-    if (geometry != null) {
-      geometry.applyAncestorChain(_ancestorChain);
-      if (_introducesOwnNode)
-        geometry.updateSemanticsNode(rendering: renderObjectOwner, semantics: node);
-    } else {
-      assert(_ancestorChain.length == 1);
-    }
-    return node;
-  }
-
-  @override
-  Iterable<SemanticsNode> finalizeSemanticsNode(SemanticsNode node, List<SemanticsNode> children) sync* {
-    if (annotator != null)
-      annotator(node);
-    if (_introducesOwnNode) {
-      node.addChildren(children);
-      node.finalizeChildren();
-      yield node;
-    } else {
-      // Transparently forward children to the borrowed node.
-      yield* children;
-    }
-  }
-
-  @override
-  _SemanticsGeometry createSemanticsGeometryForChild(_SemanticsGeometry geometry) {
-    if (_introducesOwnNode)
-      return new _SemanticsGeometry.withClipFrom(geometry);
-    return new _SemanticsGeometry.copy(geometry);
-  }
-}
-
-/// Represents a [RenderObject] that introduces no semantics of its own, but
-/// which has two or more descendants that do introduce semantics
-/// (and which are not ancestors or descendants of each other).
-class _ForkingSemanticsFragment extends _SemanticsFragment {
-  _ForkingSemanticsFragment({
-    RenderObject renderObjectOwner,
-    @required Iterable<_SemanticsFragment> children,
-    bool dropSemanticsOfPreviousSiblings,
-  }) : assert(children != null),
-       assert(children.length > 1),
-       super(
-         renderObjectOwner: renderObjectOwner,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings
-       );
-
-  @override
-  Iterable<SemanticsNode> compile({
-    @required _SemanticsGeometry geometry,
-    SemanticsNode currentSemantics,
-  }) sync* {
-    assert(!_debugCompiled);
-    assert(() { _debugCompiled = true; return true; }());
-    assert(geometry != null);
-    geometry.applyAncestorChain(_ancestorChain);
-    for (_SemanticsFragment child in _children) {
-      assert(child._ancestorChain.last == renderObjectOwner);
-      yield* child.compile(
-        geometry: new _SemanticsGeometry.copy(geometry),
-        currentSemantics: null,
-      );
-    }
-  }
-}
+//class _SemanticsGeometry {
+//  _SemanticsGeometry() : _transform = new Matrix4.identity();
+//
+//  _SemanticsGeometry.withClipFrom(_SemanticsGeometry other) {
+//    _clipRect = other?._clipRect;
+//    _transform = new Matrix4.identity();
+//  }
+//
+//  _SemanticsGeometry.copy(_SemanticsGeometry other) {
+//    if (other != null) {
+//      _clipRect = other._clipRect;
+//      _transform = new Matrix4.copy(other._transform);
+//    } else {
+//      _transform = new Matrix4.identity();
+//    }
+//  }
+//
+//  Rect _clipRect;
+//
+//  Rect _intersectClipRect(Rect other) {
+//    if (_clipRect == null)
+//      return other;
+//    if (other == null)
+//      return _clipRect;
+//    return _clipRect.intersect(other);
+//  }
+//
+//  Matrix4 _transform;
+//
+//  void applyAncestorChain(List<RenderObject> ancestorChain) {
+//    for (int index = ancestorChain.length-1; index > 0; index -= 1) {
+//      final RenderObject parent = ancestorChain[index];
+//      final RenderObject child = ancestorChain[index-1];
+//      _clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
+//      if (_clipRect != null) {
+//        if (_clipRect.isEmpty) {
+//          _clipRect = Rect.zero;
+//        } else {
+//          final Matrix4 clipTransform = new Matrix4.identity();
+//          parent.applyPaintTransform(child, clipTransform);
+//          _clipRect = MatrixUtils.inverseTransformRect(clipTransform, _clipRect);
+//        }
+//      }
+//      parent.applyPaintTransform(child, _transform);
+//    }
+//  }
+//
+//  void updateSemanticsNode({
+//    @required RenderObject rendering,
+//    @required SemanticsNode semantics,
+//  }) {
+//    assert(rendering != null);
+//    assert(semantics != null);
+//    semantics.transform = _transform;
+//    final Rect semanticBounds = rendering.semanticBounds;
+//    if (_clipRect != null) {
+//      final Rect rect = _clipRect.intersect(semanticBounds);
+//      semantics.rect = rect;
+//      semantics.wasAffectedByClip = rect != semanticBounds;
+//    } else {
+//      semantics.rect = semanticBounds;
+//      semantics.wasAffectedByClip = false;
+//    }
+//  }
+//}
 
 /// A reference to the semantics tree.
 ///
@@ -1629,7 +1282,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       _needsPaint = false;
       markNeedsPaint();
     }
-    if (_needsSemanticsUpdate && isSemanticBoundary) {
+    if (_needsSemanticsUpdate && _semanticsConfiguration.isSemanticBoundary) {
       // Don't enter this block if we've never updated semantics at all;
       // scheduleInitialSemantics() will handle it
       _needsSemanticsUpdate = false;
@@ -2528,37 +2181,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner.requestVisualUpdate();
   }
 
-  /// Whether this [RenderObject] introduces a new box for accessibility purposes.
-  ///
-  /// See also:
-  ///
-  ///  * [semanticsAnnotator], which fills in the [SemanticsNode] implied by
-  ///    setting [isSemanticBoundary] to true.
-  bool get isSemanticBoundary => false;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    // Nothing to do by default.
+  }
 
-  /// Whether this [RenderObject] makes other [RenderObject]s previously painted
-  /// within the same semantic boundary unreachable for accessibility purposes.
-  ///
-  /// If true is returned, the [SemanticsNode]s for all siblings and cousins
-  /// of this node, that are earlier in a depth-first pre-order traversal, are
-  /// dropped from the semantics tree up until a semantic boundary (as defined
-  /// by [isSemanticBoundary]) is reached.
-  ///
-  /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
-  /// is set on the same node, all previously painted siblings and cousins
-  /// up until the next ancestor that is a semantic boundary are dropped.
-  ///
-  /// Paint order as established by [visitChildrenForSemantics] is used to
-  /// determine if a node is previous to this one.
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => false;
+  SemanticsConfiguration _cachedSemanticsConfiguration;
 
-  /// Whether the semantic information provided by this [RenderObject] and all
-  /// of its descendants should be treated as one logical entity.
-  ///
-  /// If true is returned, the descendants of this [RenderObject]'s
-  /// [SemanticsNode] will merge their semantic information into the
-  /// [SemanticsNode] representing this [RenderObject].
-  bool get isMergingSemanticsOfDescendants => false;
+  SemanticsConfiguration get _semanticsConfiguration {
+    if (_cachedSemanticsConfiguration == null) {
+      _cachedSemanticsConfiguration = new SemanticsConfiguration();
+      describeSemanticsConfiguration(_cachedSemanticsConfiguration);
+    }
+    return _cachedSemanticsConfiguration;
+  }
 
   /// The bounding box, in the local coordinate system, of this
   /// object, for accessibility purposes.
@@ -2651,6 +2286,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       while (node._semantics == null && node.parent is RenderObject) {
         if (node._needsSemanticsUpdate)
           return;
+        node._cachedSemanticsConfiguration = null;
         node._needsSemanticsUpdate = true;
         node.resetSemantics();
         node = node.parent;
@@ -2658,6 +2294,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       if (!node._needsSemanticsUpdate) {
         node.resetSemantics();
         node._needsSemanticsUpdate = true;
+        node._cachedSemanticsConfiguration = null;
         if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
           owner.requestVisualUpdate();
@@ -2674,6 +2311,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (node.parent is! RenderObject)
           break;
         node._needsSemanticsUpdate = true;
+        node._cachedSemanticsConfiguration = null;
         node.resetSemantics();
         node = node.parent;
       } while (node._semantics == null);
@@ -2689,6 +2327,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         owner._nodesNeedingSemantics.remove(this);
       }
       if (!node._needsSemanticsUpdate) {
+        node._cachedSemanticsConfiguration = null;
         node._needsSemanticsUpdate = true;
         if (owner != null) {
           owner._nodesNeedingSemantics.add(node);
@@ -2698,6 +2337,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
   }
 
+  _SemanticsFragment _semanticsForParent;
+
   /// Updates the semantic information of the render object.
   ///
   /// This is essentially a two-pass walk of the render tree. The first pass
@@ -2706,115 +2347,68 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// hooks them together. The second walk is a sparse walk; it only walks the
   /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
-    try {
-      assert(_needsSemanticsUpdate);
-      assert(_semantics != null || parent is! RenderObject);
-      final _SemanticsFragment fragment = _getSemanticsFragment(mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false);
-      assert(fragment is _InterestingSemanticsFragment);
-      final SemanticsNode node = fragment.compile().single;
-      assert(node != null);
-      assert(!node.isInvisible);
-      assert(node == _semantics);
-    } catch (e, stack) {
-      _debugReportException('_updateSemantics', e, stack);
-    }
+    // TODO(goderbauer): assert that this obj will have a semantics node.
+    final _SemanticsFragment fragment = _getSemanticsForParent();
+    print(fragment);
+    print(fragment.config);
+    assert(fragment.config == null);  // I don't have any semantics to add to parent ...
+    assert(fragment.children.single == _semantics);  // ... except for my node as a child.
   }
 
-  /// Core function that walks the render tree to obtain the semantics.
-  ///
-  /// It collects semantic annotators for this RenderObject, then walks its
-  /// children collecting [_SemanticsFragments] for them, and then returns an
-  /// appropriate [_SemanticsFragment] object that describes the RenderObject's
-  /// semantics.
-  _SemanticsFragment _getSemanticsFragment({ bool mergeIntoParent: false }) {
-    // early-exit if we're not dirty and have our own semantics
-    if (!_needsSemanticsUpdate && isSemanticBoundary) {
-      assert(_semantics != null);
-      if (mergeIntoParent == _semantics.isMergedIntoParent) {
-        return new _CleanSemanticsFragment(
-          renderObjectOwner: this,
-          dropSemanticsOfPreviousSiblings: isBlockingSemanticsOfPreviouslyPaintedNodes,
-        );
-      }
+  /// Returns the Semantics that this node would like to add to its parent.
+  _SemanticsFragment _getSemanticsForParent() {
+    if (!_needsSemanticsUpdate && _semanticsForParent != null) {
+      // Nothing has changed, re-use old fragment.
+      return _semanticsForParent;
     }
-    List<_SemanticsFragment> children;
-    bool dropSemanticsOfPreviousSiblings = isBlockingSemanticsOfPreviouslyPaintedNodes;
-    final bool childrenMergeIntoParent = mergeIntoParent || isMergingSemanticsOfDescendants;
-    visitChildrenForSemantics((RenderObject child) {
-      if (_needsSemanticsGeometryUpdate) {
-        // If our geometry changed, make sure the child also does a
-        // full update so that any changes to the clip are fully
-        // applied.
-        child._needsSemanticsUpdate = true;
-        child._needsSemanticsGeometryUpdate = true;
+
+    final SemanticsConfiguration config = _semanticsConfiguration;
+    print('$this, $config');
+
+    final List<_SemanticsFragment> fragments = <_SemanticsFragment>[];
+    final Set<_SemanticsFragment> isolatedFragments = new Set<_SemanticsFragment>();
+
+    visitChildrenForSemantics((RenderObject renderChild) {
+      final _SemanticsFragment fragment = renderChild._getSemanticsForParent();
+      fragments.add(fragment);
+      if (fragment.config == null) {
+        // Doesn't want to merge anything into parent.
+        return;
       }
-      final _SemanticsFragment fragment = child._getSemanticsFragment(mergeIntoParent: childrenMergeIntoParent);
-      assert(fragment != null);
-      if (fragment.dropSemanticsOfPreviousSiblings) {
-        children = null; // throw away all left siblings of [child].
-        dropSemanticsOfPreviousSiblings = true;
-      }
-      if (fragment.producesSemanticNodes) {
-        fragment.addAncestor(this);
-        children ??= <_SemanticsFragment>[];
-        assert(!children.contains(fragment));
-        children.add(fragment);
+      if (config.communePreference != SemanticsPreference.noCommune && fragment.config.communePreference == SemanticsPreference.communeWithParentAndChildren) {
+        if (!config.communeCompatibleWith(fragment.config)) {
+          isolatedFragments.add(fragment);
+          return;
+        }
+        for (_SemanticsFragment siblingFragment in fragments) {
+          if (!fragment.config.communeCompatibleWith(siblingFragment.config)) {
+            isolatedFragments.add(siblingFragment);
+            isolatedFragments.add(fragment);
+          }
+        }
+      } else {
+        isolatedFragments.add(fragment);
       }
     });
-    if (isSemanticBoundary && !isBlockingSemanticsOfPreviouslyPaintedNodes) {
-      // Don't propagate [dropSemanticsOfPreviousSiblings] up through a semantic boundary.
-      dropSemanticsOfPreviousSiblings = false;
+
+    // TODO(goderbauer): Optimize if no new semantics have been added
+
+    _semanticsForParent = new _CommuningSemanticsFragment(this, config);
+
+    for (_SemanticsFragment fragment in fragments) {
+      if (isolatedFragments.contains(fragment)) {
+        _semanticsForParent.addChild(fragment.toSemanticsNode());
+      } else {
+        fragment.addTo(_semanticsForParent);
+      }
     }
+
+    if (config.communePreference != SemanticsPreference.communeWithParentAndChildren || parent is! RenderObject) {
+      _semanticsForParent = new _SemanticsFragmentWrapper(_semanticsForParent.toSemanticsNode());
+    }
+
     _needsSemanticsUpdate = false;
-    _needsSemanticsGeometryUpdate = false;
-    final SemanticsAnnotator annotator = semanticsAnnotator;
-    if (parent is! RenderObject) {
-      assert(!mergeIntoParent);
-      assert(!isMergingSemanticsOfDescendants);
-      return new _RootSemanticsFragment(
-        renderObjectOwner: this,
-        annotator: annotator,
-        children: children,
-        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-      );
-    }
-    if (isSemanticBoundary) {
-      return new _ConcreteSemanticsFragment(
-        renderObjectOwner: this,
-        annotator: annotator,
-        children: children,
-        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-        mergeIntoParent: mergeIntoParent,
-        mergesAllDescendants: isMergingSemanticsOfDescendants,
-      );
-    }
-     if (annotator != null || isMergingSemanticsOfDescendants) {
-       return new _ImplicitSemanticsFragment(
-         renderObjectOwner: this,
-         annotator: annotator,
-         children: children,
-         dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-         mergeIntoParent: mergeIntoParent,
-         mergesAllDescendants: isMergingSemanticsOfDescendants,
-       );
-     }
-    _semantics = null;
-    if (children == null) {
-      // Introduces no semantics and has no descendants that introduce semantics.
-      return new _EmptySemanticsFragment(
-        renderObjectOwner: this,
-        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-      );
-    }
-    if (children.length > 1) {
-      return new _ForkingSemanticsFragment(
-        renderObjectOwner: this,
-        children: children,
-        dropSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
-      );
-    }
-    assert(children.length == 1);
-    return children.single..dropSemanticsOfPreviousSiblings = dropSemanticsOfPreviousSiblings;
+    return _semanticsForParent;
   }
 
   /// Called when collecting the semantics of this node.
@@ -2829,34 +2423,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     visitChildren(visitor);
   }
 
-  /// Returns a function that will annotate a [SemanticsNode] with the semantics
-  /// of this [RenderObject].
-  ///
-  /// To annotate a [SemanticsNode] for this node, return an annotator that adds
-  /// the annotations. When the behavior of the annotator would change (e.g. the
-  /// box is now checked rather than unchecked), call [markNeedsSemanticsUpdate]
-  /// to indicate to the rendering system that the semantics tree needs to be
-  /// rebuilt.
-  ///
-  /// To introduce a new [SemanticsNode], set [isSemanticBoundary] to true for
-  /// this object. The function returned by this function will be used to
-  /// annotate the [SemanticsNode] for this object.
-  ///
-  /// Semantic annotations are not persisted between subsequent calls to an
-  /// annotator. The [SemanticsAnnotator] should always set all options
-  /// (e.g. flags, labels, actions, etc.) to the values it cares about given
-  /// the current state of the [RenderObject].
-  ///
-  /// If the return value will change from null to non-null (or vice versa), and
-  /// [isSemanticBoundary] isn't true, then the associated call to
-  /// [markNeedsSemanticsUpdate] must not have `onlyLocalUpdates` set, as it is
-  /// possible that the node should be entirely removed.
-  ///
-  /// If the annotation should only happen under certain conditions, null
-  /// should be returned if those conditions are currently not met to avoid
-  /// the creation of an empty [SemanticsNode].
-  SemanticsAnnotator get semanticsAnnotator => null;
-
   /// Assemble the [SemanticsNode] for this [RenderObject].
   ///
   /// If [isSemanticBoundary] is true, this method is called with the semantics
@@ -2869,11 +2435,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// needs to override [resetSemantics] to call [SemanticsNode.reset] on those
   /// additional [SemanticsNode]s.
   void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-    assert(node == _semantics);
-    if (semanticsAnnotator != null)
-      semanticsAnnotator(node);
-    node.addChildren(children);
-    node.finalizeChildren();
+//    assert(node == _semantics);
+//    if (semanticsAnnotator != null)
+//      semanticsAnnotator(node);
+//    node.addChildren(children);
+//    node.finalizeChildren();
+  // TODO(goderbauer)
   }
 
   // EVENTS
@@ -2976,12 +2543,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
     description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    description.add(new FlagProperty(
-      'isBlockingSemanticsOfPreviouslyPaintedNodes',
-      value: isBlockingSemanticsOfPreviouslyPaintedNodes,
-      ifTrue: 'blocks semantics of earlier render objects below the common boundary',
-    ));
-    description.add(new FlagProperty('isSemanticBoundary', value: isSemanticBoundary, ifTrue: 'semantic boundary'));
+    // TODO(goderbauer): add some semantic config stuff back
+//    description.add(new FlagProperty(
+//      'isBlockingSemanticsOfPreviouslyPaintedNodes',
+//      value: isBlockingSemanticsOfPreviouslyPaintedNodes,
+//      ifTrue: 'blocks semantics of earlier render objects below the common boundary',
+//    ));
+//    description.add(new FlagProperty('isSemanticBoundary', value: isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override
@@ -3421,4 +2989,88 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
 
   /// The RenderObject that was being processed when the exception was caught.
   final RenderObject renderObject;
+}
+
+
+abstract class _SemanticsFragment {
+  SemanticsConfiguration get config;
+  List<SemanticsNode> get children;
+
+  SemanticsNode toSemanticsNode();
+  void addChild(SemanticsNode child);
+
+  void addTo(_SemanticsFragment other) {
+    if (children != null)
+      other.children.addAll(children);
+    if (config != null)
+      other.config.absorb(config);
+  }
+
+  @override
+  String toString() {
+    return 'SemanticsFragemnt($config, $children)';
+  }
+}
+
+class _CommuningSemanticsFragment extends _SemanticsFragment {
+
+  _CommuningSemanticsFragment(this._owner, this.config);
+
+  final RenderObject _owner;
+
+  @override
+  final SemanticsConfiguration config;
+
+  @override
+  final List<SemanticsNode> children = <SemanticsNode>[];
+
+  @override
+  SemanticsNode toSemanticsNode() {
+    _owner._semantics ??= _createSemanticsNode();
+    _owner._semantics.update(config, children);
+    return _owner._semantics;
+  }
+
+  @override
+  void addTo(_SemanticsFragment other) {
+    _owner._semantics = null;
+    super.addTo(other);
+  }
+
+  @override
+  void addChild(SemanticsNode child) {
+    children.add(child);
+  }
+
+  SemanticsNode _createSemanticsNode() {
+    if (_owner.parent is! RenderObject)
+      return new SemanticsNode.root(showOnScreen: _owner.showOnScreen, owner: _owner.owner.semanticsOwner);
+    return new SemanticsNode(showOnScreen: _owner.showOnScreen);
+  }
+}
+
+class _SemanticsFragmentWrapper extends _SemanticsFragment {
+
+  _SemanticsFragmentWrapper(SemanticsNode node) {
+    children.add(node);
+  }
+
+  @override
+  final List<SemanticsNode> children = <SemanticsNode>[];
+
+  @override
+  SemanticsConfiguration get config => null;
+
+  // Unavailable methods below.
+
+  @override
+  void addChild(SemanticsNode child) {
+    assert(false);
+  }
+
+  @override
+  SemanticsNode toSemanticsNode() {
+    assert(false);
+    return null;
+  }
 }
