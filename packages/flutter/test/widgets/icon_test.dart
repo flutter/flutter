@@ -161,4 +161,35 @@ void main() {
 
     expect(semantics, hasSemantics(new TestSemantics.root(label: 'a label')));
   });
+
+  testWidgets('Changing semantic label from null doesn\'t rebuild tree ', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(Icons.time_to_leave),
+        ),
+      ),
+    );
+
+    final Element richText1 = tester.element(find.byType(RichText));
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            Icons.time_to_leave,
+            semanticLabel: 'a label',
+          ),
+        ),
+      ),
+    );
+
+    final Element richText2 = tester.element(find.byType(RichText));
+
+    // Compare a leaf Element in the Icon subtree before and after changing the
+    // semanticLabel to make sure the subtree was not rebuilt.
+    expect(richText2, same(richText1));
+  });
 }
