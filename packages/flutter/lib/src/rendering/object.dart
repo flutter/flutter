@@ -2371,7 +2371,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           fragment.markAsExplicit();
           continue;
         }
-        if (!fragment.hasConfigForParent || config.isEmpty)
+        if (!fragment.hasConfigForParent || !config.hasBeenAnnotated)
           continue;
         if (!config.isCompatibleWith(fragment.config)) {
           fragment.markAsExplicit();
@@ -2390,9 +2390,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     _SemanticsFragment result;
     if (parent is! RenderObject) {
-      assert(config.isEmpty);
+      assert(!config.hasBeenAnnotated);
       result = new _RootSemanticsFragment(this);
-    } else if (config.isEmpty) {
+    } else if (!config.hasBeenAnnotated && !config.isSemanticBoundary) {
       yield* fragments;
       return;
     } else {

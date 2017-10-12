@@ -1005,10 +1005,7 @@ class SemanticsConfiguration {
   bool get isSemanticBoundary => _isSemanticBoundary;
   bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
-    if (value == _isSemanticBoundary)
-      return;
     _isSemanticBoundary = value;
-    _isEmpty = false;
   }
 
   /// Whether the configuration forces all children of the owning [RenderObject]
@@ -1027,10 +1024,7 @@ class SemanticsConfiguration {
   bool get explicitChildNodes => _explicitChildNodes;
   bool _explicitChildNodes = false;
   set explicitChildNodes(bool value) {
-    if (value == _explicitChildNodes)
-      return;
     _explicitChildNodes = value;
-    _isEmpty = false;
   }
 
   // SEMANTIC ANNOTATIONS
@@ -1049,10 +1043,8 @@ class SemanticsConfiguration {
   ///
   /// Whenever the user performs `action` the provided `handler` is called.
   void addAction(SemanticsAction action, VoidCallback handler) {
-    if (_actions[action] == handler)
-      return;
     _actions[action] = handler;
-    _isEmpty = false;
+    _hasBeenAnnotated = true;
   }
 
   /// A textual description of the owning [RenderObject].
@@ -1061,20 +1053,16 @@ class SemanticsConfiguration {
   String get label => _label;
   String _label = '';
   set label(String label) {
-    if (_label == label)
-      return;
     _label = label;
-    _isEmpty = false;
+    _hasBeenAnnotated = true;
   }
 
   /// The reading direction for the text in [label].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection textDirection) {
-    if (_textDirection == textDirection)
-      return;
     _textDirection = textDirection;
-    _isEmpty = false;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
@@ -1096,13 +1084,12 @@ class SemanticsConfiguration {
 
   int _flags = 0;
   void _setFlag(SemanticsFlags flag, bool value) {
-    final int oldFlags = _flags;
     if (value) {
       _flags |= flag.index;
     } else {
       _flags &= ~flag.index;
     }
-    _isEmpty = _isEmpty || oldFlags != _flags;
+    _hasBeenAnnotated = true;
   }
 
   /// Whether this configuration is compatible with the provided `other`
@@ -1111,7 +1098,7 @@ class SemanticsConfiguration {
   /// Two configurations are said to be compatible if they can be added to the
   /// same [SemanticsNode] without losing any semantics information.
   bool isCompatibleWith(SemanticsConfiguration other) {
-    if (other == null || other.isEmpty || isEmpty)
+    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
       return true;
     if (_actions.keys.toSet().intersection(other._actions.keys.toSet()).isNotEmpty)
       return false;
@@ -1131,7 +1118,7 @@ class SemanticsConfiguration {
   void absorb(SemanticsConfiguration other) {
     assert(!explicitChildNodes);
 
-    if (other._isEmpty)
+    if (!other.hasBeenAnnotated)
       return;
 
     _actions.addAll(other._actions);
@@ -1156,13 +1143,13 @@ class SemanticsConfiguration {
         label = '$label\n$nestedLabel';
     }
 
-    _isEmpty = _isEmpty || other._isEmpty;
+    _hasBeenAnnotated = _hasBeenAnnotated || other._hasBeenAnnotated;
   }
 
   /// Returns an exact copy of this configuration.
   SemanticsConfiguration copy() {
     return new SemanticsConfiguration()
-      .._isEmpty = _isEmpty
+      .._hasBeenAnnotated = _hasBeenAnnotated
       .._textDirection = _textDirection
       .._label = _label
       .._flags = _flags
@@ -1175,8 +1162,8 @@ class SemanticsConfiguration {
   ///
   /// An empty configuration doesn't contain any semantic information that it
   /// wants to contribute to the semantics tree.
-  bool get isEmpty => _isEmpty;
-  bool _isEmpty = true;
+  bool get hasBeenAnnotated => _hasBeenAnnotated;
+  bool _hasBeenAnnotated = false;
 
   @override
   String toString() {
