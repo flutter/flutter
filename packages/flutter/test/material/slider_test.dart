@@ -488,8 +488,10 @@ void main() {
     TestGesture gesture = await tester.startGesture(center);
     await gesture.moveBy(const Offset(10.0, 0.0));
 
-    expect(tester.renderObject(find.byType(Slider)),
-      paints..circle(radius: 6.0, x: 16.0, y: 44.0));
+    expect(
+      tester.renderObject(find.byType(Slider)),
+      paints..circle(radius: 6.0, x: 16.0, y: 44.0)
+    );
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
@@ -499,8 +501,10 @@ void main() {
     gesture = await tester.startGesture(center);
     await gesture.moveBy(const Offset(10.0, 0.0));
 
-    expect(tester.renderObject(find.byType(Slider)),
-      paints..circle(radius: 12.0, x: 16.0, y: 44.0));
+    expect(
+      tester.renderObject(find.byType(Slider)),
+      paints..circle(radius: 12.0, x: 16.0, y: 44.0)
+    );
 
     await gesture.up();
     await tester.pump(const Duration(seconds: 1));
