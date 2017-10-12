@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -369,6 +370,7 @@ class DevFS {
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
+    bool fullRestart: false,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -441,7 +443,11 @@ class DevFS {
         if (content is DevFSFileContent)
           invalidatedFiles.add(content.file.uri.toString());
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-      final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
+      final String compiledBinary = fullRestart
+        ? await compile(
+              sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+              mainPath: mainPath)
+        : await generator.recompile(mainPath, invalidatedFiles);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
           Uri.parse(target + '.dill'),

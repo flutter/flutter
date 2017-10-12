@@ -174,4 +174,11 @@ class ResidentCompiler {
   void reject() {
     _server.stdin.writeln('reject');
   }
+
+  /// Should be invoked when frontend server compiler should forget what was
+  /// accepted previously so that next call to [recompile] produces complete
+  /// kernel file.
+  void reset() {
+    _server.stdin.writeln('reset');
+  }
 }
