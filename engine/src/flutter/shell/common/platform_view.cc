@@ -29,6 +29,13 @@ PlatformView::~PlatformView() {
   blink::Threads::UI()->PostTask([engine]() { delete engine; });
 }
 
+void PlatformView::SetRasterizer(std::unique_ptr<Rasterizer> rasterizer) {
+  Rasterizer* r = rasterizer_.release();
+  blink::Threads::Gpu()->PostTask([r]() { delete r; });
+  rasterizer_ = std::move(rasterizer);
+  engine_->set_rasterizer(rasterizer_->GetWeakRasterizerPtr());
+}
+
 void PlatformView::CreateEngine() {
   engine_.reset(new Engine(this));
 }

@@ -24,6 +24,10 @@ class Animator {
 
   ~Animator();
 
+  void set_rasterizer(fxl::WeakPtr<Rasterizer> rasterizer) {
+    rasterizer_ = rasterizer;
+  }
+
   void RequestFrame();
 
   void Render(std::unique_ptr<flow::LayerTree> layer_tree);

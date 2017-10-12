@@ -82,6 +82,10 @@ Engine::Engine(PlatformView* platform_view)
 
 Engine::~Engine() {}
 
+void Engine::set_rasterizer(fxl::WeakPtr<Rasterizer> rasterizer) {
+  animator_->set_rasterizer(rasterizer);
+}
+
 fxl::WeakPtr<Engine> Engine::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }

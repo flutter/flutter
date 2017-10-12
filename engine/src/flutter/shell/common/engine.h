@@ -70,6 +70,8 @@ class Engine : public blink::RuntimeDelegate {
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
 
+  void set_rasterizer(fxl::WeakPtr<Rasterizer> rasterizer);
+
  private:
   // RuntimeDelegate methods:
   std::string DefaultRouteName() override;

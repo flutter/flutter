@@ -16,6 +16,7 @@
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
 #include "flutter/runtime/dart_service_isolate.h"
+#include "flutter/shell/common/null_rasterizer.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
@@ -126,7 +127,7 @@ static std::unique_ptr<AndroidSurface> InitializePlatformSurface() {
 }
 
 PlatformViewAndroid::PlatformViewAndroid()
-    : PlatformView(std::make_unique<GPURasterizer>(nullptr)),
+    : PlatformView(std::make_unique<NullRasterizer>()),
       android_surface_(InitializePlatformSurface()) {}
 
 PlatformViewAndroid::~PlatformViewAndroid() = default;
@@ -140,14 +141,6 @@ void PlatformViewAndroid::Attach() {
   UpdateThreadPriorities();
 
   PostAddToShellTask();
-
-  rasterizer_->AddNextFrameCallback([this]() {
-    JNIEnv* env = fml::jni::AttachCurrentThread();
-    fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
-    if (!view.is_null()) {
-      FlutterViewOnFirstFrame(env, view.obj());
-    }
-  });
 }
 
 void PlatformViewAndroid::Detach() {
@@ -161,6 +154,17 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
   // ANativeWindow_fromSurface are released immediately. This is needed as a
   // workaround for https://code.google.com/p/android/issues/detail?id=68174
   fml::jni::ScopedJavaLocalFrame scoped_local_reference_frame(env);
+
+  // We have a drawing surface, so swap in a non-Null rasterizer.
+  SetRasterizer(std::make_unique<GPURasterizer>(nullptr));
+
+  rasterizer_->AddNextFrameCallback([this]() {
+    JNIEnv* env = fml::jni::AttachCurrentThread();
+    fml::jni::ScopedJavaLocalRef<jobject> view = flutter_view_.get(env);
+    if (!view.is_null()) {
+      FlutterViewOnFirstFrame(env, view.obj());
+    }
+  });
 
   auto native_window = fxl::MakeRefCounted<AndroidNativeWindow>(
       ANativeWindow_fromSurface(env, jsurface));
@@ -406,6 +410,7 @@ void PlatformViewAndroid::SetSemanticsEnabled(jboolean enabled) {
 void PlatformViewAndroid::ReleaseSurface() {
   NotifyDestroyed();
   android_surface_->TeardownOnScreenContext();
+  SetRasterizer(std::make_unique<NullRasterizer>());
 }
 
 VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
@@ -415,6 +420,7 @@ VsyncWaiter* PlatformViewAndroid::GetVsyncWaiter() {
 }
 
 bool PlatformViewAndroid::ResourceContextMakeCurrent() {
+  FXL_CHECK(android_surface_);
   return android_surface_->ResourceContextMakeCurrent();
 }
 

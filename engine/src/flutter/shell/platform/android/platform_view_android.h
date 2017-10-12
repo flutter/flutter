@@ -102,7 +102,7 @@ class PlatformViewAndroid : public PlatformView {
   }
 
  private:
-  const std::unique_ptr<AndroidSurface> android_surface_;
+  std::unique_ptr<AndroidSurface> android_surface_;
   fml::jni::JavaObjectWeakGlobalRef flutter_view_;
   // We use id 0 to mean that no response is expected.
   int next_response_id_ = 1;
