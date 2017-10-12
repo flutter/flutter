@@ -30,7 +30,14 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addOption('byte-store',
       help: 'Path to file byte store used to keep incremental compiler state.'
           ' If omitted, then memory byte store is used.',
-      defaultsTo: null);
+      defaultsTo: null)
+  ..addFlag('link-platform',
+      help: 'When in batch mode, link platform kernel file into result kernel file.'
+          ' Intended use is to satisfy different loading strategies implemented'
+          ' by gen_snapshot(which needs platform embedded) vs'
+          ' Flutter engine(which does not)',
+      defaultsTo: true);
+
 
 String _usage = '''
 Usage: server [options] [input.dart]
@@ -156,11 +163,13 @@ class _FrontendCompiler implements CompilerInterface {
       final DeltaProgram deltaProgram = await _generator.computeDelta();
       program = deltaProgram.newProgram;
     } else {
-      // TODO(aam): Remove linkedDependencies once platform is directly embedded
-      // into VM snapshot and http://dartbug.com/30111 is fixed.
-      compilerOptions.linkedDependencies = <Uri>[
-        sdkRoot.resolve('platform.dill')
-      ];
+      if (options['link-platform']) {
+        // TODO(aam): Remove linkedDependencies once platform is directly embedded
+        // into VM snapshot and http://dartbug.com/30111 is fixed.
+        compilerOptions.linkedDependencies = <Uri>[
+          sdkRoot.resolve('platform.dill')
+        ];
+      }
       program = await kernelForProgram(Uri.base.resolve(_filename), compilerOptions);
     }
     if (program != null) {
