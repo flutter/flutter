@@ -61,6 +61,8 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   virtual void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message);
 
+  void SetRasterizer(std::unique_ptr<Rasterizer> rasterizer);
+
   Rasterizer& rasterizer() { return *rasterizer_; }
   Engine& engine() { return *engine_; }
 
