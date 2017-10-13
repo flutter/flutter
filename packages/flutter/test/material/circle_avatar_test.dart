@@ -118,10 +118,26 @@ void main() {
     await tester.pumpWidget(
       wrap(
         child: new MediaQuery(
-          data: const MediaQueryData(textScaleFactor: 2.0),
+          data: const MediaQueryData(
+            textScaleFactor: 2.0,
+            size: const Size(111.0, 111.0),
+            devicePixelRatio: 1.1,
+            padding: const EdgeInsets.all(11.0)),
           child: new CircleAvatar(
-            foregroundColor: foregroundColor,
-            child: const Text('Z'),
+            child: new Builder(
+              builder: (BuildContext context) {
+                final MediaQueryData data = MediaQuery.of(context);
+
+                // These should not change.
+                expect(data.size, equals(const Size(111.0, 111.0)));
+                expect(data.devicePixelRatio, equals(1.1));
+                expect(data.padding, equals(const EdgeInsets.all(11.0)));
+
+                // This should be overridden to 1.0.
+                expect(data.textScaleFactor, equals(1.0));
+                return const Text('Z');
+              }
+            ),
           ),
         ),
       ),
@@ -133,6 +149,9 @@ void main() {
 Widget wrap({ Widget child }) {
   return new Directionality(
     textDirection: TextDirection.ltr,
-    child: new Center(child: child),
+    child: new MediaQuery(
+      data: const MediaQueryData(),
+      child: new Center(child: child),
+    ),
   );
 }
