@@ -104,11 +104,12 @@ class Icon extends StatelessWidget {
 
     final double iconSize = size ?? iconTheme.size;
 
-    if (icon == null)
+    if (icon == null) {
       return new Semantics(
         label: semanticLabel,
         child: new SizedBox(width: iconSize, height: iconSize)
       );
+    }
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
