@@ -392,7 +392,8 @@ class FlutterTask extends BaseFlutterTask {
 
     CopySpec getAssets() {
         return project.copySpec {
-            from "${intermediateDir}/app.flx"
+	     from "${intermediateDir}/app.flx"
+	     from "${intermediateDir}/snapshot_blob.bin"
             if (buildMode != 'debug') {
                 from "${intermediateDir}/vm_snapshot_data"
                 from "${intermediateDir}/vm_snapshot_instr"
