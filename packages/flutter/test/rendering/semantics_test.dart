@@ -195,9 +195,9 @@ void main() {
       ..mergeAllDescendantsIntoThisNode = true
       ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
       ..wasAffectedByClip = true
-      ..addAction(SemanticsAction.scrollUp)
-      ..addAction(SemanticsAction.longPress)
-      ..addAction(SemanticsAction.showOnScreen)
+      ..addAction(SemanticsAction.scrollUp, () { })
+      ..addAction(SemanticsAction.longPress, () { })
+      ..addAction(SemanticsAction.showOnScreen, () { })
       ..isChecked = false
       ..isSelected = true
       ..label = "Use all the properties"
@@ -244,16 +244,16 @@ class TestRender extends RenderProxyBox {
 
   TestRender({ this.action, this.isSemanticBoundary, RenderObject child }) : super(child);
 
-  @override
   final bool isSemanticBoundary;
 
   SemanticsAction action;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  void _annotate(SemanticsNode node) {
-    node.addAction(action);
+    config
+      ..isSemanticBoundary = isSemanticBoundary
+      ..addAction(action, () { });
   }
-
 }

@@ -55,9 +55,9 @@ class TestRenderObject extends RenderObject {
   Rect get semanticBounds => new Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 
   @override
-  SemanticsConfiguration get semanticsConfiguration {
-    return (super.semanticsConfiguration ?? new SemanticsConfiguration())
-      ..communePreference = SemanticsPreference.communeWithChildren;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
   }
 }
 

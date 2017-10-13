@@ -1063,6 +1063,13 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  /// Returns the action handler registered for [action] or null if none was
+  /// registered.
+  ///
+  /// See also:
+  ///  * [addAction] to add an action.
+  VoidCallback getActionHandler(SemanticsAction action) => _actions[action];
+
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
   ///
