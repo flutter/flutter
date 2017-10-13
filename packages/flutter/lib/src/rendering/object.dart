@@ -2348,12 +2348,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsFragment();
+    assert(fragment is _InterestingSemanticsFragment);
+    final _InterestingSemanticsFragment interestingFragment = fragment;
+    final SemanticsNode node = interestingFragment.compileChildren().single;
     // Fragment only wants to add this node's SemanticsNode to the parent.
-    assert(
-        fragment is _InterestingSemanticsFragment &&
-        fragment.config == null &&
-        fragment.children.single == _semantics
-    );
+    assert(interestingFragment.config == null && node == _semantics);
   }
 
   /// Returns the Semantics that this node would like to add to its parent.
@@ -3052,43 +3051,32 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 /// A [_SemanticsFragment] that describes which concrete semantic information
 /// a [RenderObject] wants to add to the [SemanticsNode] of its parent.
 ///
-/// Specifically, it describes what [children] should be added to the parent's
-/// [SemanticsNode] and what [config] should be merged into the parent's
-/// [SemanticsNode].
+/// Specifically, it describes what children (as returned by [compileChildren])
+/// should be added to the parent's [SemanticsNode] and what [config] should be
+/// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// The children to be added to the parent.
-  ///
-  /// This getter should only be used after all relevant fragments have been
-  /// added via [addAll]. Calling [addAll] after accessing this getter is
-  /// illegal and will throw asserts. Similarity, [markAsExplicit] should not
-  /// be called after this getter had been accessed.
-  Iterable<SemanticsNode> get children;
+  Iterable<SemanticsNode> compileChildren();
 
   /// The [SemanticsConfiguration] the child wants to merge into the parent's
   /// [SemanticsNode] or null if it doesn't want to merge anything.
   SemanticsConfiguration get config;
 
-  /// Disallows this fragment to merge anything into its parent's
+  /// Disallows this fragment to merge any configuration into its parent's
   /// [SemanticsNode].
   ///
-  /// After calling this the fragment will only produce [children] to be added
-  /// to the parent and it will to return null for [config].
-  ///
-  /// This method should not be called after [children] have been accessed.
+  /// After calling this the fragment will only produce children to be added
+  /// to the parent and it will return null for [config].
   void markAsExplicit();
 
   /// Consume the fragments of children.
   ///
-  /// For each provided fragment it will add that fragment's [children] to
-  /// this fragment's [children] and merge that fragment's [config] into this
-  /// fragment's [config].
+  /// For each provided fragment it will add that fragment's children to
+  /// this fragment's children (as returned by [compileChildren]) and merge that
+  /// fragment's [config] into this fragment's [config].
   ///
   /// If a provided fragment should not merge anything into [config] call
   /// [markAsExplicit] before passing the fragment to this method.
-  ///
-  /// All relevant fragments have to be added with this method before [children]
-  /// is accessed. Calling this method after [children] have been accessed is
-  /// illegal and will throw asserts.
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
@@ -3105,10 +3093,14 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// An [_InterestingSemanticsFragment] that just wants to add a single
 /// pre-compiled [SemanticsNode] to the parent.
 class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
-  _CleanSemanticsFragment(SemanticsNode node, this.dropsSemanticsOfPreviousSiblings) : children = <SemanticsNode>[node];
+  _CleanSemanticsFragment(this._node, this.dropsSemanticsOfPreviousSiblings);
+
+  final SemanticsNode _node;
 
   @override
-  final Iterable<SemanticsNode> children;
+  Iterable<SemanticsNode> compileChildren() sync* {
+    yield _node;
+  }
 
   @override
   SemanticsConfiguration get config => null;
@@ -3141,7 +3133,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   RenderObject _owner;
 
   @override
-  Iterable<SemanticsNode> get children sync* {
+  Iterable<SemanticsNode> compileChildren() sync* {
     _owner._semantics ??= new SemanticsNode.root(
       showOnScreen: _owner.showOnScreen,
       owner: _owner.owner.semanticsOwner,
@@ -3159,10 +3151,10 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    final SemanticsNode root = children.first;
+    final SemanticsNode root = compileChildren().first;
     for (_InterestingSemanticsFragment fragment in fragments) {
       assert(fragment.config == null);
-      root.addChildren(fragment.children);
+      root.addChildren(fragment.compileChildren());
     }
     root.finalizeChildren();
   }
@@ -3193,27 +3185,21 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
   final List<SemanticsNode> _children = <SemanticsNode>[];
-  SemanticsNode _explicitNode;
 
   @override
   final bool dropsSemanticsOfPreviousSiblings;
 
-  bool _debugChildrenHaveBeenAccessed = false;
-
   @override
-  Iterable<SemanticsNode> get children sync* {
-    assert(_debugChildrenHaveBeenAccessed = true);
+  Iterable<SemanticsNode> compileChildren() sync* {
     if (!_isExplicit) {
       _owner._semantics = null;
       yield* _children;
       return;
     }
-    if (_explicitNode == null) {
-      _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
-      _explicitNode = _owner._semantics;
-     _explicitNode.update(_config, _children);
-    }
-    yield _explicitNode;
+    _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
+    final SemanticsNode node = _owner._semantics;
+    node.update(_config, _children);
+    yield node;
   }
 
   @override
@@ -3223,9 +3209,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    assert(!_debugChildrenHaveBeenAccessed);
     for (_InterestingSemanticsFragment fragment in fragments) {
-      _children.addAll(fragment.children);
+      _children.addAll(fragment.compileChildren());
       if (fragment.config == null)
         continue;
       if (!_isConfigWritable) {
@@ -3240,7 +3225,6 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void markAsExplicit() {
-    assert(!_debugChildrenHaveBeenAccessed);
     _isExplicit = true;
   }
 }
