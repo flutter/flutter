@@ -30,9 +30,9 @@ PassRefPtr<FontData> TestFontSelector::getFontData(
   bool syntheticItalic =
       (fontDescription.style() || fontDescription.isSyntheticItalic());
   FontPlatformData platform_data(
-      test_typeface_, "Ahem", fontDescription.effectiveFontSize(),
-      syntheticBold, syntheticItalic, fontDescription.orientation(),
-      fontDescription.useSubpixelPositioning());
+      test_typeface_, GetTestFontFamilyName().c_str(),
+      fontDescription.effectiveFontSize(), syntheticBold, syntheticItalic,
+      fontDescription.orientation(), fontDescription.useSubpixelPositioning());
 
   return SimpleFontData::create(platform_data, CustomFontData::create());
 }

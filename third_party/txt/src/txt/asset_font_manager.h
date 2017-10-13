@@ -30,6 +30,10 @@ class AssetFontManager : public SkFontMgr {
 
   ~AssetFontManager() override;
 
+ protected:
+  // |SkFontMgr|
+  SkFontStyleSet* onMatchFamily(const char familyName[]) const override;
+
  private:
   std::unique_ptr<AssetDataProvider> data_provider_;
 
@@ -41,9 +45,6 @@ class AssetFontManager : public SkFontMgr {
 
   // |SkFontMgr|
   SkFontStyleSet* onCreateStyleSet(int index) const override;
-
-  // |SkFontMgr|
-  SkFontStyleSet* onMatchFamily(const char familyName[]) const override;
 
   // |SkFontMgr|
   SkTypeface* onMatchFamilyStyle(const char familyName[],

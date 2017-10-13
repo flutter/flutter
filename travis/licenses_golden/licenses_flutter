@@ -9565,6 +9565,8 @@ FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.cc
 FILE: ../../../flutter/third_party/txt/src/txt/paragraph_style.h
 FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.cc
 FILE: ../../../flutter/third_party/txt/src/txt/styled_runs.h
+FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.cc
+FILE: ../../../flutter/third_party/txt/src/txt/test_font_manager.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_baseline.h
 FILE: ../../../flutter/third_party/txt/src/txt/text_decoration.cc
 FILE: ../../../flutter/third_party/txt/src/txt/text_decoration.h

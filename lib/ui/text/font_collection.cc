@@ -3,12 +3,16 @@
 // found in the LICENSE file.
 
 #include "flutter/lib/ui/text/font_collection.h"
+
 #include <mutex>
+
+#include "flutter/runtime/test_font_data.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/rapidjson.h"
 #include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 #include "txt/asset_font_manager.h"
+#include "txt/test_font_manager.h"
 
 namespace blink {
 
@@ -102,6 +106,20 @@ void FontCollection::RegisterFontsFromAssetStore(
 
   collection_->PushFront(
       sk_make_sp<txt::AssetFontManager>(std::move(font_asset_data_provider)));
+}
+
+void FontCollection::RegisterTestFonts() {
+  sk_sp<SkTypeface> test_typeface =
+      SkTypeface::MakeFromStream(GetTestFontData().release());
+
+  std::unique_ptr<txt::AssetDataProvider> asset_data_provider =
+      std::make_unique<txt::AssetDataProvider>();
+
+  asset_data_provider->RegisterTypeface(std::move(test_typeface),
+                                        GetTestFontFamilyName());
+
+  collection_->PushFront(sk_make_sp<txt::TestFontManager>(
+      std::move(asset_data_provider), GetTestFontFamilyName()));
 }
 
 }  // namespace blink

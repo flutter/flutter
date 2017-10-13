@@ -6,11 +6,14 @@
 #define FLUTTER_RUNTIME_TEST_FONT_DATA_H_
 
 #include <memory>
+#include <string>
+
 #include "third_party/skia/include/core/SkStream.h"
 
 namespace blink {
 
 std::unique_ptr<SkStreamAsset> GetTestFontData();
+std::string GetTestFontFamilyName();
 
 }  // namespace blink
 

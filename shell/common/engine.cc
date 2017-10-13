@@ -506,6 +506,8 @@ void Engine::ConfigureRuntime(const std::string& script_uri,
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
   if (blink::Settings::Get().use_test_fonts) {
     blink::TestFontSelector::Install();
+    if (!blink::Settings::Get().using_blink)
+      blink::FontCollection::ForProcess().RegisterTestFonts();
   } else if (asset_store_) {
     blink::AssetFontSelector::Install(asset_store_);
     if (!blink::Settings::Get().using_blink) {
