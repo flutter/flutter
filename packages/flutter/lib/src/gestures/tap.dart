@@ -176,6 +176,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new FlagProperty('wonArena', value: _wonArenaForPrimaryPointer, ifTrue: 'wonArena'));
-    description.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition));
+    description.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
+    description.add(new FlagProperty('sentTapDown', value: _wonArenaForPrimaryPointer, ifTrue: 'sentTapDown'));
   }
 }
