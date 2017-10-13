@@ -3017,7 +3017,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
       actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
     }
 
-    final List<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
+    final Iterable<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
 
     for (SemanticsAction action in actionsToAdd) {
       final VoidCallback handler = actions[action];
