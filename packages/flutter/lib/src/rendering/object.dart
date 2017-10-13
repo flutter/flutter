@@ -2348,8 +2348,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsFragment();
-    // Fragment only wants to add this node's SemanticNode to the parent.
-    assert(fragment is _InterestingSemanticsFragment && fragment.config == null && fragment.children.single == _semantics);
+    // Fragment only wants to add this node's SemanticsNode to the parent.
+    assert(
+        fragment is _InterestingSemanticsFragment &&
+        fragment.config == null &&
+        fragment.children.single == _semantics
+    );
   }
 
   /// Returns the Semantics that this node would like to add to its parent.
@@ -2407,10 +2411,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     } else if (!config.hasBeenAnnotated && !config.isSemanticBoundary) {
       result = new _ForkingSemanticsFragment(dropSemanticsOfPreviousSiblings);
     } else {
-      final _InterestingSemanticsFragment fragment = new _SwitchableSemanticsFragment(this, config, dropSemanticsOfPreviousSiblings);
-      if (config.isSemanticBoundary)
+      result = new _SwitchableSemanticsFragment(this, config, dropSemanticsOfPreviousSiblings);
+      if (config.isSemanticBoundary) {
+        final _SwitchableSemanticsFragment fragment = result;
         fragment.markAsExplicit();
-      result = fragment;
+      }
     }
 
     result.addAll(fragments);
@@ -2998,28 +3003,36 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
   final RenderObject renderObject;
 }
 
-/// Describes what semantics information a [RenderObject] wants to add to its
+/// Describes the semantics information a [RenderObject] wants to add to its
 /// parent.
+/// 
+/// It has two notable subclasses:
+///  * [_InterestingSemanticsFragment] describing actual semantic information to
+///    be added to the parent.
+///  * [_ForkingSemanticsFragment]: a container class to transport the semantic
+///    information of multiple [_InterestingSemanticsFragment] to a parent.
 abstract class _SemanticsFragment {
-  /// Consume the fragments of children.
-  ///
-  /// For each provided fragment it will add that fragment's [children] to
-  /// this fragment's [children] and merge that fragment's [config] into this
-  /// fragment's [config].
-  ///
-  /// If a provided fragment should not merge anything in [config] call
-  /// [markAsExplicit] before passing the fragment to this method.
-  ///
-  /// All relevant fragments have to be added with this method before [children]
-  /// is accessed. Calling this method after [children] have been accessed is
-  /// illegal and will throw asserts.
+  /// Incorporate the fragments of children into this fragment.
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
+  /// Whether this fragment wants to make the semantics information of
+  /// previously painted [RenderObject]s unreachable for accessibility purposes.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes]
+  ///    describes what semantics are dropped in more detail.
   bool get dropsSemanticsOfPreviousSiblings;
 
+  /// Returns [_InterestingSemanticsFragment] describing the actual semantic
+  /// information that this fragment wants to add to the parent.
   Iterable<_InterestingSemanticsFragment> get interestingFragments;
 }
 
+/// A container used when a [RenderObject] wants to add multiple independent
+/// [_InterestingSemanticsFragment] to its parent.
+///
+/// The [_InterestingSemanticsFragment] to be added to the parent can be
+/// obtained via [interestingFragments].
 class _ForkingSemanticsFragment extends _SemanticsFragment {
 
   _ForkingSemanticsFragment(this.dropsSemanticsOfPreviousSiblings);
@@ -3030,12 +3043,18 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
   }
 
   @override
-  List<_InterestingSemanticsFragment> interestingFragments = <_InterestingSemanticsFragment>[];
+  final List<_InterestingSemanticsFragment> interestingFragments = <_InterestingSemanticsFragment>[];
 
   @override
   final bool dropsSemanticsOfPreviousSiblings;
 }
 
+/// A [_SemanticsFragment] that describes which concrete semantic information
+/// a [RenderObject] wants to add to the [SemanticsNode] of its parent.
+///
+/// Specifically, it describes what [children] should be added to the parent's
+/// [SemanticsNode] and what [config] should be merged into the parent's
+/// [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// The children to be added to the parent.
   ///
@@ -3058,6 +3077,20 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   /// This method should not be called after [children] have been accessed.
   void markAsExplicit();
 
+  /// Consume the fragments of children.
+  ///
+  /// For each provided fragment it will add that fragment's [children] to
+  /// this fragment's [children] and merge that fragment's [config] into this
+  /// fragment's [config].
+  ///
+  /// If a provided fragment should not merge anything into [config] call
+  /// [markAsExplicit] before passing the fragment to this method.
+  ///
+  /// All relevant fragments have to be added with this method before [children]
+  /// is accessed. Calling this method after [children] have been accessed is
+  /// illegal and will throw asserts.
+  @override
+  void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
   /// Whether this fragment wants to add any semantic information to the parent
   /// [SemanticsNode].
@@ -3069,8 +3102,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   }
 }
 
-/// A [_SemanticsFragment] that just wants to add a single pre-compiled
-/// [SemanticsNode] to the parent.
+/// An [_InterestingSemanticsFragment] that just wants to add a single
+/// pre-compiled [SemanticsNode] to the parent.
 class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
   _CleanSemanticsFragment(SemanticsNode node, this.dropsSemanticsOfPreviousSiblings) : children = <SemanticsNode>[node];
 
@@ -3094,8 +3127,8 @@ class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
   final bool dropsSemanticsOfPreviousSiblings;
 }
 
-/// A [_SemanticsFragment] that produces the root [SemanticsNode] of the
-/// semantics tree.
+/// A [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
+/// the semantics tree.
 ///
 /// The root node is available as only element in the Iterable returned by
 /// [children].
@@ -3135,7 +3168,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// A [_SemanticsFragment] that can be told to only add explicit
+/// A [_SwitchableSemanticsFragment] that can be told to only add explicit
 /// [SemanticsNode]s to the parent.
 ///
 /// If [markAsExplicit] was not called before this fragment is added to
@@ -3143,12 +3176,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// [SemanticsNode] and add its [children] to it.
 ///
 /// If [markAsExplicit] was called before adding this fragment to another
-/// fragment it will create a new [SemanticsNode] when added to another
-/// fragment. The newly created node will be annotated with the
-/// [SemanticsConfiguration] that - without the call to [markAsExplicit] -
-/// would have been merged into the parent's [SemanticsNode]. Similarity,
-/// the new node will also take over the children that otherwise would have been
-/// added to the parent's [SemanticsNode].
+/// fragment it will create a new [SemanticsNode]. The newly created node will
+/// be annotated with the [SemanticsConfiguration] that - without the call to
+/// [markAsExplicit] - would have been merged into the parent's [SemanticsNode].
+/// Similarity, the new node will also take over the children that otherwise
+/// would have been added to the parent's [SemanticsNode].
+///
 /// After a call to [markAsExplicit] the only element returned by [children]
 /// is the newly created node and [config] will return null as the fragment
 /// no longer wants to merge any semantic information into the parent's
