@@ -3275,11 +3275,12 @@ class RenderMergeSemantics extends RenderProxyBox {
   /// Creates a render object that merges the semantics from its descendants.
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
-//  @override
-//  SemanticsConfiguration get semanticsConfiguration {
-//    return (super.semanticsConfiguration ?? new SemanticsConfiguration())
-//      ..communePreference = SemanticsPreference.forceChildrenToCommune;
-//  }
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isMergingSemanticsOfDescendants = true;
+  }
 
 }
 

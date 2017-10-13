@@ -1002,11 +1002,7 @@ class SemanticsConfiguration {
   /// Whether decedents of the owning [RenderObject] can add their semantic
   /// information to the [SemanticsNode] introduced by this configuration
   /// is controlled by [explicitChildNodes].
-  bool get isSemanticBoundary => _isSemanticBoundary;
-  bool _isSemanticBoundary = false;
-  set isSemanticBoundary(bool value) {
-    _isSemanticBoundary = value;
-  }
+  bool isSemanticBoundary = false;
 
   /// Whether the configuration forces all children of the owning [RenderObject]
   /// that want to contribute semantic information to the semantics tree to do
@@ -1021,15 +1017,18 @@ class SemanticsConfiguration {
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
   /// create semantic boundaries that are either writable or not for children.
-  bool get explicitChildNodes => _explicitChildNodes;
-  bool _explicitChildNodes = false;
-  set explicitChildNodes(bool value) {
-    _explicitChildNodes = value;
-  }
+  bool explicitChildNodes = false;
 
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
   // [SemanticsConfiguration]s.
+
+  /// Whether this configuration is empty.
+  ///
+  /// An empty configuration doesn't contain any semantic information that it
+  /// wants to contribute to the semantics tree.
+  bool get hasBeenAnnotated => _hasBeenAnnotated;
+  bool _hasBeenAnnotated = false;
 
   /// The actions (with associated action handlers) that this configuration
   /// would like to contribute to the semantics tree.
@@ -1044,6 +1043,19 @@ class SemanticsConfiguration {
   /// Whenever the user performs `action` the provided `handler` is called.
   void addAction(SemanticsAction action, VoidCallback handler) {
     _actions[action] = handler;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Whether the semantic information provided by the owning [RenderObject] and
+  /// all of its descendants should be treated as one logical entity.
+  ///
+  /// If set to true, the descendants of the owning [RenderObject]'s
+  /// [SemanticsNode] will merge their semantic information into the
+  /// [SemanticsNode] representing the owning [RenderObject].
+  bool get isMergingSemanticsOfDescendants => _isMergingSemanticsOfDescendants;
+  bool _isMergingSemanticsOfDescendants = false;
+  set isMergingSemanticsOfDescendants(bool value) {
+    _isMergingSemanticsOfDescendants = value;
     _hasBeenAnnotated = true;
   }
 
@@ -1091,6 +1103,8 @@ class SemanticsConfiguration {
     }
     _hasBeenAnnotated = true;
   }
+
+  // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
   /// configuration.
@@ -1149,21 +1163,14 @@ class SemanticsConfiguration {
   /// Returns an exact copy of this configuration.
   SemanticsConfiguration copy() {
     return new SemanticsConfiguration()
+      ..isSemanticBoundary = isSemanticBoundary
+      ..explicitChildNodes = explicitChildNodes
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._textDirection = _textDirection
       .._label = _label
       .._flags = _flags
-      .._isSemanticBoundary = _isSemanticBoundary
-      .._explicitChildNodes = _explicitChildNodes
       .._actions.addAll(_actions);
   }
-
-  /// Whether this configuration is empty.
-  ///
-  /// An empty configuration doesn't contain any semantic information that it
-  /// wants to contribute to the semantics tree.
-  bool get hasBeenAnnotated => _hasBeenAnnotated;
-  bool _hasBeenAnnotated = false;
 
   @override
   String toString() {

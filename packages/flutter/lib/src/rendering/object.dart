@@ -2363,7 +2363,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     final List<_SemanticsFragment> fragments = <_SemanticsFragment>[];
-    final List<_SemanticsFragment> toBeMarkedExplicit = <_SemanticsFragment>[];
+    final Set<_SemanticsFragment> toBeMarkedExplicit = new Set<_SemanticsFragment>();
 
     visitChildrenForSemantics((RenderObject renderChild) {
       for (_SemanticsFragment fragment in renderChild._getSemanticsForParent()) {
