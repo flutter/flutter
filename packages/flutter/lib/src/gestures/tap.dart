@@ -145,8 +145,9 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkUp() {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
-      if (!_wonArenaForPrimaryPointer) {
-        // It is possible that resolve has just recursively called _checkUp (see #12470).
+      if (!_wonArenaForPrimaryPointer || _finalPosition == null) {
+        // It is possible that resolve has just recursively called _checkUp
+        // (see https://github.com/flutter/flutter/issues/12470).
         // In that case _wonArenaForPrimaryPointer will be false (as _checkUp
         // calls _reset) and we return here to avoid double invocation of the
         // tap callbacks.
