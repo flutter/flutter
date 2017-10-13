@@ -504,7 +504,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 
   @override
   void performLayout() {
-     if (child == null || (constraints.maxWidth == double.INFINITY && constraints.maxHeight == double.INFINITY)) {
+    if (child == null || (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight)) {
       size = constraints.constrain(Size.zero);
       return;
     }
