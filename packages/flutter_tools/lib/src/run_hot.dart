@@ -335,14 +335,8 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch restartTimer = new Stopwatch()..start();
-    if (previewDart2) {
-      for (FlutterDevice device in flutterDevices) {
-        // Reset generator so that full kernel file is produced for VM to
-        // restart from.
-        if (device.generator != null)
-          device.generator.reset();
-      }
-    }
+    // TODO(aam): Add generator reset logic once we switch to using incremental
+    // compiler for full application recompilation on restart.
     final bool updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
@@ -574,6 +568,7 @@ class HotRunner extends ResidentRunner {
       printTrace('Skipping reassemble because all isolates are paused.');
       return new OperationResult(OperationResult.ok.code, reloadMessage);
     }
+    printTrace('Evicting dirty assets');
     await _evictDirtyAssets();
     printTrace('Reassembling application');
     bool reassembleAndScheduleErrors = false;

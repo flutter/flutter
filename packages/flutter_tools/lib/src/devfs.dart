@@ -53,6 +53,13 @@ abstract class DevFSContent {
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
+  static DevFSFileContent clone(DevFSFileContent fsFileContent) {
+    final DevFSFileContent newFsFileContent = new DevFSFileContent(fsFileContent.file);
+    newFsFileContent._linkTarget = fsFileContent._linkTarget;
+    newFsFileContent._fileStat = fsFileContent._fileStat;
+    return newFsFileContent;
+  }
+
   final FileSystemEntity file;
   FileSystemEntity _linkTarget;
   FileStat _fileStat;
@@ -435,6 +442,15 @@ class DevFS {
       String archivePath;
       if (deviceUri.path.startsWith(assetBuildDirPrefix))
         archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+      // When doing full restart in preview-dart-2 mode, copy content so
+      // that isModified does not reset last check timestamp because we
+      // want to report all modified files to incremental compiler next time
+      // user does hot reload.
+      // TODO(aam): Remove this logic once we switch to using incremental
+      // compiler for full application compilation when doing full restart.
+      if (fullRestart && generator != null && content is DevFSFileContent) {
+        content = DevFSFileContent.clone(content);
+      }
       if (content.isModified || (bundleDirty && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
