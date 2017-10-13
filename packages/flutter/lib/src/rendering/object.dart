@@ -2362,7 +2362,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!_needsSemanticsUpdate && config.isSemanticBoundary) {
       // Nothing has changed, re-use old fragment.
       assert(_semantics != null);
-      return new _CleanSemanticsFragment(_semantics, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
+      return new _CleanSemanticsFragment(config.isBlockingSemanticsOfPreviouslyPaintedNodes, _semantics);
     }
 
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
@@ -2370,6 +2370,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
 
     visitChildrenForSemantics((RenderObject renderChild) {
+      if (_needsSemanticsGeometryUpdate) {
+        // Child geometry needs to be recalculated if our geometry changed.
+        renderChild._needsSemanticsUpdate = true;
+        renderChild._needsSemanticsGeometryUpdate = true;
+      }
       final _SemanticsFragment fragment = renderChild._getSemanticsFragment();
       if (fragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
@@ -2377,6 +2382,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         if (!config.isSemanticBoundary)
           dropSemanticsOfPreviousSiblings = true;
       }
+      // Figure out which child fragments are to be made explicit.
       for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
         fragments.add(fragment);
         if (config.explicitChildNodes || parent is! RenderObject) {
@@ -2385,10 +2391,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         }
         if (!fragment.hasConfigForParent || (!config.hasBeenAnnotated && !config.isSemanticBoundary))
           continue;
-        if (!config.isCompatibleWith(fragment.config)) {
+        if (!config.isCompatibleWith(fragment.config))
           toBeMarkedExplicit.add(fragment);
-          continue;
-        }
         for (_InterestingSemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
           if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
             toBeMarkedExplicit.add(fragment);
@@ -2410,7 +2414,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     } else if (!config.hasBeenAnnotated && !config.isSemanticBoundary) {
       result = new _ForkingSemanticsFragment(dropSemanticsOfPreviousSiblings);
     } else {
-      result = new _SwitchableSemanticsFragment(this, config, dropSemanticsOfPreviousSiblings);
+      result = new _SwitchableSemanticsFragment(this, dropSemanticsOfPreviousSiblings, config);
       if (config.isSemanticBoundary) {
         final _SwitchableSemanticsFragment fragment = result;
         fragment.markAsExplicit();
@@ -2554,13 +2558,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // don't access it via the "layer" getter since that's only valid when we don't need paint
     description.add(new DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
     description.add(new DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
-    // TODO(goderbauer): add some semantic config stuff back
-//    description.add(new FlagProperty(
-//      'isBlockingSemanticsOfPreviouslyPaintedNodes',
-//      value: isBlockingSemanticsOfPreviouslyPaintedNodes,
-//      ifTrue: 'blocks semantics of earlier render objects below the common boundary',
-//    ));
-//    description.add(new FlagProperty('isSemanticBoundary', value: isSemanticBoundary, ifTrue: 'semantic boundary'));
+    description.add(new FlagProperty(
+      'isBlockingSemanticsOfPreviouslyPaintedNodes',
+      value: _semanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes,
+      ifTrue: 'blocks semantics of earlier render objects below the common boundary',
+    ));
+    description.add(new FlagProperty('isSemanticBoundary', value: _semanticsConfiguration.isSemanticBoundary, ifTrue: 'semantic boundary'));
   }
 
   @override
@@ -3011,6 +3014,8 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
 ///  * [_ForkingSemanticsFragment]: a container class to transport the semantic
 ///    information of multiple [_InterestingSemanticsFragment] to a parent.
 abstract class _SemanticsFragment {
+  _SemanticsFragment(this.dropsSemanticsOfPreviousSiblings);
+
   /// Incorporate the fragments of children into this fragment.
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
@@ -3020,7 +3025,7 @@ abstract class _SemanticsFragment {
   /// See also:
   ///  * [SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes]
   ///    describes what semantics are dropped in more detail.
-  bool get dropsSemanticsOfPreviousSiblings;
+  final bool dropsSemanticsOfPreviousSiblings;
 
   /// Returns [_InterestingSemanticsFragment] describing the actual semantic
   /// information that this fragment wants to add to the parent.
@@ -3034,7 +3039,7 @@ abstract class _SemanticsFragment {
 /// obtained via [interestingFragments].
 class _ForkingSemanticsFragment extends _SemanticsFragment {
 
-  _ForkingSemanticsFragment(this.dropsSemanticsOfPreviousSiblings);
+  _ForkingSemanticsFragment(bool dropsSemanticsOfPreviousSiblings) : super(dropsSemanticsOfPreviousSiblings);
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
@@ -3043,9 +3048,6 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 
   @override
   final List<_InterestingSemanticsFragment> interestingFragments = <_InterestingSemanticsFragment>[];
-
-  @override
-  final bool dropsSemanticsOfPreviousSiblings;
 }
 
 /// A [_SemanticsFragment] that describes which concrete semantic information
@@ -3055,6 +3057,8 @@ class _ForkingSemanticsFragment extends _SemanticsFragment {
 /// should be added to the parent's [SemanticsNode] and what [config] should be
 /// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
+  _InterestingSemanticsFragment(bool dropsSemanticsOfPreviousSiblings) : super(dropsSemanticsOfPreviousSiblings);
+
   /// The children to be added to the parent.
   Iterable<SemanticsNode> compileChildren();
 
@@ -3093,7 +3097,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// An [_InterestingSemanticsFragment] that just wants to add a single
 /// pre-compiled [SemanticsNode] to the parent.
 class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
-  _CleanSemanticsFragment(this._node, this.dropsSemanticsOfPreviousSiblings);
+  _CleanSemanticsFragment(bool dropsSemanticsOfPreviousSiblings, this._node) : super(dropsSemanticsOfPreviousSiblings);
 
   final SemanticsNode _node;
 
@@ -3114,9 +3118,6 @@ class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     assert(false, 'cannot add semantic information to a $runtimeType');
   }
-
-  @override
-  final bool dropsSemanticsOfPreviousSiblings;
 }
 
 /// A [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
@@ -3125,12 +3126,9 @@ class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
 /// The root node is available as only element in the Iterable returned by
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
-  _RootSemanticsFragment(this._owner, this.dropsSemanticsOfPreviousSiblings);
+  _RootSemanticsFragment(this._owner, bool dropsSemanticsOfPreviousSiblings) : super(dropsSemanticsOfPreviousSiblings);
 
-  @override
-  final bool dropsSemanticsOfPreviousSiblings;
-
-  RenderObject _owner;
+  final RenderObject _owner;
 
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
@@ -3179,15 +3177,13 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
-  _SwitchableSemanticsFragment(this._owner, this._config, this.dropsSemanticsOfPreviousSiblings);
+  _SwitchableSemanticsFragment(this._owner, bool dropsSemanticsOfPreviousSiblings, this._config) : super(dropsSemanticsOfPreviousSiblings);
 
   final RenderObject _owner;
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
   final List<SemanticsNode> _children = <SemanticsNode>[];
 
-  @override
-  final bool dropsSemanticsOfPreviousSiblings;
 
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
