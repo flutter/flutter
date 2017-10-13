@@ -91,6 +91,7 @@ source_set("ui") {
     "//flutter/common",
     "//flutter/flow",
     "//flutter/glue",
+    "//flutter/runtime:test_font",
     "//flutter/sky/engine",
     "//flutter/third_party/txt",
     "//third_party/rapidjson",

@@ -24,6 +24,8 @@ class FontCollection {
   void RegisterFontsFromAssetStore(
       fxl::RefPtr<blink::ZipAssetStore> asset_store);
 
+  void RegisterTestFonts();
+
  private:
   std::shared_ptr<txt::FontCollection> collection_;
 

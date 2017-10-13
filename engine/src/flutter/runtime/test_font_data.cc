@@ -1225,4 +1225,8 @@ std::unique_ptr<SkStreamAsset> GetTestFontData() {
                                           false /* copy data */);
 }
 
+std::string GetTestFontFamilyName() {
+  return "Ahem";
+}
+
 }  // namespace blink

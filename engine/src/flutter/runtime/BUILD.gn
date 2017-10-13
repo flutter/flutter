@@ -39,6 +39,23 @@ source_set("embedded_resources_cc") {
   ]
 }
 
+source_set("test_font") {
+  sources = [
+    "test_font_data.cc",
+    "test_font_data.h",
+  ]
+  deps = [
+    "//third_party/skia",
+  ]
+  defines = []
+  if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {
+    # Though the test font data is small, we dont want to add to the binary size
+    # on the device (in profile and release modes). We only add the same on the
+    # host test shells and the debug device shell.
+    defines += [ "EMBED_TEST_FONT_DATA=1" ]
+  }
+}
+
 source_set("runtime") {
 
   sources = [
@@ -62,14 +79,13 @@ source_set("runtime") {
     "runtime_init.h",
     "start_up.cc",
     "start_up.h",
-    "test_font_data.cc",
-    "test_font_data.h",
     "test_font_selector.cc",
     "test_font_selector.h",
   ]
 
   deps = [
     ":embedded_resources_cc",
+    ":test_font",
     "//dart/runtime:dart_api",
     "//dart/runtime/bin:embedded_dart_io",
     "//flutter/assets",
@@ -85,15 +101,6 @@ source_set("runtime") {
     "//third_party/skia",
     "//topaz/lib/tonic",
   ]
-
-  defines = []
-
-  if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {
-    # Though the test font data is small, we dont want to add to the binary size
-    # on the device (in profile and release modes). We only add the same on the
-    # host test shells and the debug device shell.
-    defines += [ "EMBED_TEST_FONT_DATA=1" ]
-  }
 
   # In AOT mode, precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
