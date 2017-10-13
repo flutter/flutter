@@ -2363,6 +2363,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     final List<_SemanticsFragment> fragments = <_SemanticsFragment>[];
+    final List<_SemanticsFragment> toBeMarkedExplicit = <_SemanticsFragment>[];
 
     visitChildrenForSemantics((RenderObject renderChild) {
       for (_SemanticsFragment fragment in renderChild._getSemanticsForParent()) {
@@ -2371,20 +2372,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           fragment.markAsExplicit();
           continue;
         }
-        if (!fragment.hasConfigForParent || !config.hasBeenAnnotated)
+        if (!fragment.hasConfigForParent || (!config.hasBeenAnnotated && !config.isSemanticBoundary))
           continue;
         if (!config.isCompatibleWith(fragment.config)) {
-          fragment.markAsExplicit();
+          toBeMarkedExplicit.add(fragment);
           continue;
         }
-        for (_SemanticsFragment siblingFragment in fragments) {
+        for (_SemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
           if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
-            fragment.markAsExplicit();
-            siblingFragment.markAsExplicit();
+            toBeMarkedExplicit.add(fragment);
+            toBeMarkedExplicit.add(siblingFragment);
           }
         }
       }
     });
+
+    for (_SemanticsFragment fragment in toBeMarkedExplicit)
+      fragment.markAsExplicit();
 
     _needsSemanticsUpdate = false;
 
