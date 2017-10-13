@@ -2990,6 +2990,11 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
 /// parent.
 abstract class _SemanticsFragment {
   /// The children to be added to the parent.
+  ///
+  /// This getter should only be used after all relevant fragments have been
+  /// added via [addAll]. Calling [addAll] after accessing this getter is
+  /// illegal and will throw asserts. Similarity, [markAsExplicit] should not
+  /// be called after this getter had been accessed.
   Iterable<SemanticsNode> get children;
 
   /// The [SemanticsConfiguration] the child wants to merge into the parent's
@@ -2999,15 +3004,33 @@ abstract class _SemanticsFragment {
   /// Disallows this fragment to merge anything into its parent's
   /// [SemanticsNode].
   ///
-  /// After calling this, the fragment may only produce [children] to be added
-  /// to the parent, but it has to return null for [config].
+  /// After calling this the fragment will only produce [children] to be added
+  /// to the parent and it will to return null for [config].
+  ///
+  /// This method should not be called after [children] have been accessed.
   void markAsExplicit();
 
+  /// Consume the fragments of children.
+  ///
+  /// For each provided fragment it will add that fragment's [children] to
+  /// this fragment's [children] and merge that fragment's [config] into this
+  /// fragment's [config].
+  ///
+  /// If a provided fragment should not merge anything in [config] call
+  /// [markAsExplicit] before passing the fragment to this method.
+  ///
+  /// All relevant fragments have to be added with this method before [children]
+  /// is accessed. Calling this method after [children] have been accessed is
+  /// illegal and will throw asserts.
   void addAll(Iterable<_SemanticsFragment> fragments);
 
+  /// Whether this fragment wants to add any semantic information to the parent
+  /// [SemanticsNode].
   bool get hasConfigForParent => config != null;
 }
 
+/// A [_SemanticsFragment] that just wants to add a single pre-compiled
+/// [SemanticsNode] to the parent.
 class _CleanSemanticsFragment extends _SemanticsFragment {
   _CleanSemanticsFragment(SemanticsNode node) : children = <SemanticsNode>[node];
 
@@ -3019,7 +3042,7 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
 
   @override
   void markAsExplicit() {
-    // nothing to do, we are already explicit.
+    // nothing to do, we are always explicit.
   }
 
   @override
@@ -3028,6 +3051,11 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+/// A [_SemanticsFragment] that produces the root [SemanticsNode] of the
+/// semantics tree.
+///
+/// The root node is available as only element in the Iterable returned by
+/// [children].
 class _RootSemanticsFragment extends _SemanticsFragment {
   _RootSemanticsFragment(this._owner);
 
@@ -3035,7 +3063,10 @@ class _RootSemanticsFragment extends _SemanticsFragment {
 
   @override
   Iterable<SemanticsNode> get children sync* {
-    _owner._semantics ??= new SemanticsNode.root(showOnScreen: _owner.showOnScreen, owner: _owner.owner.semanticsOwner);
+    _owner._semantics ??= new SemanticsNode.root(
+      showOnScreen: _owner.showOnScreen,
+      owner: _owner.owner.semanticsOwner,
+    );
     yield _owner._semantics;
   }
 
@@ -3044,7 +3075,7 @@ class _RootSemanticsFragment extends _SemanticsFragment {
 
   @override
   void markAsExplicit() {
-    // nothing to do, we are already explicit.
+    // nothing to do, we are always explicit.
   }
 
   @override
@@ -3058,8 +3089,25 @@ class _RootSemanticsFragment extends _SemanticsFragment {
   }
 }
 
+/// A [_SemanticsFragment] that can be told to only add explicit
+/// [SemanticsNode]s to the parent.
+///
+/// If [markAsExplicit] was not called before this fragment is added to
+/// another fragment via [addAll] it will merge [config] into the parent's
+/// [SemanticsNode] and add its [children] to it.
+///
+/// If [markAsExplicit] was called before adding this fragment to another
+/// fragment it will create a new [SemanticsNode] when added to another
+/// fragment. The newly created node will be annotated with the
+/// [SemanticsConfiguration] that - without the call to [markAsExplicit] -
+/// would have been merged into the parent's [SemanticsNode]. Similarity,
+/// the new node will also take over the children that otherwise would have been
+/// added to the parent's [SemanticsNode].
+/// After a call to [markAsExplicit] the only element returned by [children]
+/// is the newly created node and [config] will return null as the fragment
+/// no longer wants to merge any semantic information into the parent's
+/// [SemanticsNode].
 class _InterestingSemanticsFragment extends _SemanticsFragment {
-
   _InterestingSemanticsFragment(this._owner, this._config);
 
   final RenderObject _owner;
@@ -3068,8 +3116,11 @@ class _InterestingSemanticsFragment extends _SemanticsFragment {
   final List<SemanticsNode> _children = <SemanticsNode>[];
   SemanticsNode _explicitNode;
 
+  bool _debugChildrenHaveBeenAccessed = false;
+
   @override
   Iterable<SemanticsNode> get children sync* {
+    assert(_debugChildrenHaveBeenAccessed = true);
     if (!_isExplicit) {
       _owner._semantics = null;
       yield* _children;
@@ -3084,10 +3135,13 @@ class _InterestingSemanticsFragment extends _SemanticsFragment {
   }
 
   @override
-  SemanticsConfiguration get config => _isExplicit ? null : _config;
+  SemanticsConfiguration get config {
+    return _isExplicit ? null : _config;
+  }
 
   @override
   void addAll(Iterable<_SemanticsFragment> fragments) {
+    assert(!_debugChildrenHaveBeenAccessed);
     for (_SemanticsFragment fragment in fragments) {
       _children.addAll(fragment.children);
       if (fragment.config == null)
@@ -3104,6 +3158,7 @@ class _InterestingSemanticsFragment extends _SemanticsFragment {
 
   @override
   void markAsExplicit() {
+    assert(!_debugChildrenHaveBeenAccessed);
     _isExplicit = true;
   }
 }
