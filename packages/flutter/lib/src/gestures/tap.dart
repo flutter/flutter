@@ -154,7 +154,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       }
       if (onTapUp != null)
         invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
-      if (onTap != null) 
+      if (onTap != null)
         invokeCallback<Null>('onTap', onTap);
       _reset();
     }
