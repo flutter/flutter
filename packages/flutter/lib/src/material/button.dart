@@ -22,10 +22,12 @@ import 'theme.dart';
 ///  * [RaisedButton], which styles itself based on the ambient [ButtonTheme].
 ///  * [FlatButton], which styles itself based on the ambient [ButtonTheme].
 enum ButtonTextTheme {
-  /// The button should use the normal color (e.g., black or white depending on the [ThemeData.brightness]) for its text.
+  /// The button should use the normal color (e.g., black or white depending on
+  /// the [ThemeData.brightness]) for its text.
   normal,
 
-  /// The button should use the accent color (e.g., [ThemeData.accentColor]) for its text.
+  /// The button should use the accent color (e.g., [ThemeData.accentColor]) for
+  /// its text.
   accent,
 }
 
@@ -123,6 +125,8 @@ class ButtonTheme extends InheritedWidget {
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
+/// The button will expand to fit the child widget, if necessary.
+///
 /// See also:
 ///
 ///  * [IconButton], to create buttons that contain icons rather than text.
@@ -177,20 +181,26 @@ class MaterialButton extends StatefulWidget {
   /// ```
   final Color color;
 
-  /// The primary color of the button when the button is in the down (pressed) state.
+  /// The primary color of the button when the button is in the down (pressed)
+  /// state.
+  ///
   /// The splash is represented as a circular overlay that appears above the
-  /// [highlightColor] overlay. The splash overlay has a center point that matches
-  /// the hit point of the user touch event. The splash overlay will expand to
-  /// fill the button area if the touch is held for long enough time. If the splash
-  /// color has transparency then the highlight and button color will show through.
+  /// [highlightColor] overlay. The splash overlay has a center point that
+  /// matches the hit point of the user touch event. The splash overlay will
+  /// expand to fill the button area if the touch is held for long enough time.
+  /// If the splash color has transparency then the highlight and button color
+  /// will show through.
   ///
   /// Defaults to the Theme's splash color, [ThemeData.splashColor].
   final Color splashColor;
 
   /// The secondary color of the button when the button is in the down (pressed)
-  /// state. The higlight color is represented as a solid color that is overlaid over the
-  /// button color (if any). If the highlight color has transparency, the button color
-  /// will show through. The highlight fades in quickly as the button is held down.
+  /// state.
+  ///
+  /// The highlight color is represented as a solid color that is overlaid over
+  /// the button color (if any). If the highlight color has transparency, the
+  /// button color will show through. The highlight fades in quickly as the
+  /// button is held down.
   ///
   /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
   final Color highlightColor;
@@ -319,6 +329,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           padding: widget.padding ?? ButtonTheme.of(context).padding,
           child: new Center(
             widthFactor: 1.0,
+            heightFactor: 1.0,
             child: widget.child
           )
         )
@@ -343,7 +354,6 @@ class _MaterialButtonState extends State<MaterialButton> {
       constraints: new BoxConstraints(
         minWidth: widget.minWidth ?? buttonTheme.minWidth,
         minHeight: height,
-        maxHeight: height
       ),
       child: contents
     );
