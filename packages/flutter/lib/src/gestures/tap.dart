@@ -90,6 +90,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
       _checkUp();
+    } else if (event is PointerCancelEvent) {
+      _reset();
     }
   }
 
@@ -143,9 +145,16 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkUp() {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
+      if (!_wonArenaForPrimaryPointer) {
+        // It is possible that resolve has just recursively called _checkUp (see #12470).
+        // In that case _wonArenaForPrimaryPointer will be false (as _checkUp
+        // calls _reset) and we return here to avoid double invocation of the
+        // tap callbacks.
+        return;
+      }
       if (onTapUp != null)
         invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
-      if (onTap != null)
+      if (onTap != null) 
         invokeCallback<Null>('onTap', onTap);
       _reset();
     }
