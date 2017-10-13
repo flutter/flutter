@@ -68,13 +68,14 @@ class MaterialApp extends StatefulWidget {
   ///
   /// This class creates an instance of [WidgetsApp].
   ///
-  /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
+  /// The boolean arguments, [routes] and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
     this.title: '',
     this.onGenerateTitle,
     this.color,
     this.theme,
+    this.defaultTextStyle,
     this.home,
     this.routes: const <String, WidgetBuilder>{},
     this.initialRoute,
@@ -146,6 +147,17 @@ class MaterialApp extends StatefulWidget {
 
   /// The colors to use for the application's widgets.
   final ThemeData theme;
+
+  /// The top-level default text style to use for the application.
+  ///
+  /// Most subtrees in your application will have a [DefaultTextStyle] set to
+  /// apply to that specific subtree. For those that do not, this text style
+  /// will serve as the top-level default.
+  ///
+  /// If unspecified, this will default to a text style that calls attention to
+  /// the users, to indicate that the application is probably lacking some
+  /// theming somewhere.
+  final TextStyle defaultTextStyle;
 
   /// The widget for the default route of the app ([Navigator.defaultRouteName],
   /// which is `/`).
@@ -517,7 +529,7 @@ class _MaterialAppState extends State<MaterialApp> {
         key: new GlobalObjectKey(this),
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
-        textStyle: _errorTextStyle,
+        textStyle: widget.defaultTextStyle ?? _errorTextStyle,
         // blue is the primary color of the default theme
         color: widget.color ?? theme?.primaryColor ?? Colors.blue,
         navigatorObservers:

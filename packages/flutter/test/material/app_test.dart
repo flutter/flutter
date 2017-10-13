@@ -317,4 +317,21 @@ void main() {
     expect(textScaleFactor, isNotNull);
     expect(textScaleFactor, equals(1.0));
   });
+
+  testWidgets('Defaults to error text style if unspecified', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Text('text'),
+    ));
+    TextSpan text = tester.firstWidget(find.byType(RichText)).text;
+    expect(text.style.decoration, TextDecoration.underline);
+  });
+
+  testWidgets('Uses default text style if specified', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Text('text'),
+      defaultTextStyle: const TextStyle(),
+    ));
+    TextSpan text = tester.firstWidget(find.byType(RichText)).text;
+    expect(text.style.decoration, isNull);
+  });
 }
