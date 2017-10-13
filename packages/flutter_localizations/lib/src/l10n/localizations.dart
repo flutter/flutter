@@ -262,7 +262,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     "openAppDrawerTooltip": r"ナビゲーションメニューを開く",
     "backButtonTooltip": r"戻る",
     "closeButtonTooltip": r"閉じる",
-    "nextMonthTooltip": r"前の月へ",
+    "nextMonthTooltip": r"次の月へ",
     "previousMonthTooltip": r"前の月へ",
     "nextPageTooltip": r"次のページ",
     "previousPageTooltip": r"前のページ",
