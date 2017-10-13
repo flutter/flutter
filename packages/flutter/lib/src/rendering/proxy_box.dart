@@ -3256,12 +3256,11 @@ class RenderBlockSemantics extends RenderProxyBox {
   /// order.
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
-//  @override
-//  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-//    super.describeSemanticsConfiguration(config);
-//    // TODO(goderbauer)
-//  }
-
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+  }
 }
 
 /// Causes the semantics of all descendants to be merged into this
@@ -3278,10 +3277,8 @@ class RenderMergeSemantics extends RenderProxyBox {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-
     config.isMergingSemanticsOfDescendants = true;
   }
-
 }
 
 /// Excludes this subtree from the semantic tree.

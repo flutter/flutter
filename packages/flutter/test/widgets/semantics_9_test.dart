@@ -145,10 +145,14 @@ class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
 class RenderBoundaryBlockSemantics extends RenderProxyBox {
   RenderBoundaryBlockSemantics({ RenderBox child }) : super(child);
 
-  @override
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
 
   @override
-  bool get isSemanticBoundary => true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config
+      ..isBlockingSemanticsOfPreviouslyPaintedNodes = true
+      ..isSemanticBoundary = true;
+  }
 }
 

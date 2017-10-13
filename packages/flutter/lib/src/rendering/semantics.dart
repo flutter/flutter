@@ -1019,6 +1019,23 @@ class SemanticsConfiguration {
   /// create semantic boundaries that are either writable or not for children.
   bool explicitChildNodes = false;
 
+  /// Whether the owning [RenderObject] makes other [RenderObjects] previously
+  /// painted within the same semantic boundary unreachable for accessibility
+  /// purposes.
+  ///
+  /// If set to true, the semantic information for all siblings and cousins of
+  /// this node, that are earlier in a depth-first pre-order traversal, are
+  /// dropped from the semantics tree up until a semantic boundary (as defined
+  /// by [isSemanticBoundary]) is reached.
+  ///
+  /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
+  /// is set on the same node, all previously painted siblings and cousins up
+  /// until the next ancestor that is a semantic boundary are dropped.
+  ///
+  /// Paint order as established by [visitChildrenForSemantics] is used to
+  /// determine if a node is previous to this one.
+  bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
+
   // SEMANTIC ANNOTATIONS
   // These will end up on [SemanticNode]s generated from
   // [SemanticsConfiguration]s.

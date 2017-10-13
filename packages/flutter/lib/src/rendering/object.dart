@@ -2354,19 +2354,26 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Returns the Semantics that this node would like to add to its parent.
   Iterable<_SemanticsFragment> _getSemanticsForParent() sync* {
-    if (!_needsSemanticsUpdate && _semanticsConfiguration.isSemanticBoundary) {
+    final SemanticsConfiguration config = _semanticsConfiguration;
+
+    if (!_needsSemanticsUpdate && config.isSemanticBoundary) {
       // Nothing has changed, re-use old fragment.
       assert(_semantics != null);
-      yield new _CleanSemanticsFragment(_semantics);
+      yield new _CleanSemanticsFragment(_semantics, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
       return;
     }
 
-    final SemanticsConfiguration config = _semanticsConfiguration;
+    bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
     final List<_SemanticsFragment> fragments = <_SemanticsFragment>[];
     final Set<_SemanticsFragment> toBeMarkedExplicit = new Set<_SemanticsFragment>();
 
     visitChildrenForSemantics((RenderObject renderChild) {
       for (_SemanticsFragment fragment in renderChild._getSemanticsForParent()) {
+        if (fragment.dropsSemanticsOfPreviousSiblings) {
+          fragments.clear();
+          if (!config.isSemanticBoundary)
+            dropSemanticsOfPreviousSiblings = true;
+        }
         fragments.add(fragment);
         if (config.explicitChildNodes || parent is! RenderObject) {
           fragment.markAsExplicit();
@@ -2395,12 +2402,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _SemanticsFragment result;
     if (parent is! RenderObject) {
       assert(!config.hasBeenAnnotated);
-      result = new _RootSemanticsFragment(this);
+      result = new _RootSemanticsFragment(this, dropSemanticsOfPreviousSiblings);
     } else if (!config.hasBeenAnnotated && !config.isSemanticBoundary) {
       yield* fragments;
       return;
     } else {
-      result = new _InterestingSemanticsFragment(this, config);
+      result = new _InterestingSemanticsFragment(this, config, dropSemanticsOfPreviousSiblings);
       if (config.isSemanticBoundary)
         result.markAsExplicit();
     }
@@ -3031,12 +3038,14 @@ abstract class _SemanticsFragment {
   /// Whether this fragment wants to add any semantic information to the parent
   /// [SemanticsNode].
   bool get hasConfigForParent => config != null;
+
+  bool get dropsSemanticsOfPreviousSiblings;
 }
 
 /// A [_SemanticsFragment] that just wants to add a single pre-compiled
 /// [SemanticsNode] to the parent.
 class _CleanSemanticsFragment extends _SemanticsFragment {
-  _CleanSemanticsFragment(SemanticsNode node) : children = <SemanticsNode>[node];
+  _CleanSemanticsFragment(SemanticsNode node, this.dropsSemanticsOfPreviousSiblings) : children = <SemanticsNode>[node];
 
   @override
   final Iterable<SemanticsNode> children;
@@ -3053,6 +3062,9 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
   void addAll(Iterable<_SemanticsFragment> fragments) {
     assert(false, 'cannot add semantic information to a $runtimeType');
   }
+
+  @override
+  final bool dropsSemanticsOfPreviousSiblings;
 }
 
 /// A [_SemanticsFragment] that produces the root [SemanticsNode] of the
@@ -3061,7 +3073,10 @@ class _CleanSemanticsFragment extends _SemanticsFragment {
 /// The root node is available as only element in the Iterable returned by
 /// [children].
 class _RootSemanticsFragment extends _SemanticsFragment {
-  _RootSemanticsFragment(this._owner);
+  _RootSemanticsFragment(this._owner, this.dropsSemanticsOfPreviousSiblings);
+
+  @override
+  final bool dropsSemanticsOfPreviousSiblings;
 
   RenderObject _owner;
 
@@ -3112,13 +3127,16 @@ class _RootSemanticsFragment extends _SemanticsFragment {
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
 class _InterestingSemanticsFragment extends _SemanticsFragment {
-  _InterestingSemanticsFragment(this._owner, this._config);
+  _InterestingSemanticsFragment(this._owner, this._config, this.dropsSemanticsOfPreviousSiblings);
 
   final RenderObject _owner;
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
   final List<SemanticsNode> _children = <SemanticsNode>[];
   SemanticsNode _explicitNode;
+
+  @override
+  final bool dropsSemanticsOfPreviousSiblings;
 
   bool _debugChildrenHaveBeenAccessed = false;
 
