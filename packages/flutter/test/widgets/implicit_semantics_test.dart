@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -175,8 +177,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Implicit Semantics merge behavior with conflicts',
-      (WidgetTester tester) async {
+  testWidgets('Do not merge with conflicts', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -205,8 +206,42 @@ void main() {
       ),
     );
 
-    debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
-    fail('TODO');
+    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //  └SemanticsNode#8(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
+    //   ├SemanticsNode#5(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 1", textDirection: ltr)
+    //   ├SemanticsNode#6(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 2", textDirection: ltr)
+    //   └SemanticsNode#7(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 3", textDirection: ltr)
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics.root(
+          children: <TestSemantics>[
+            new TestSemantics.rootChild(
+              id: 8,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  id: 5,
+                  flags: SemanticsFlags.isSelected.index,
+                  label: 'node 1',
+                ),
+                new TestSemantics(
+                  id: 6,
+                  flags: SemanticsFlags.isSelected.index,
+                  label: 'node 2',
+                ),
+                new TestSemantics(
+                  id: 7,
+                  flags: SemanticsFlags.isSelected.index,
+                  label: 'node 3',
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreRect: true,
+        ignoreTransform: true,
+      ),
+    );
 
     semantics.dispose();
   });
