@@ -6,14 +6,24 @@ import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
 
-/// A [RenderBox] backed by a texture.
+/// A rectangle upon which a backend texture is mapped. Backend textures are
+/// created, managed, and updated through platform-specific means. This is
+/// typically handled by a plugin written using the host platform video player,
+/// camera, or OpenGL APIs.
+///
+/// Texture boxes are repainted autonomously as dictated by the backend (e.g.
+/// on arrival of a video frame). Such repainting generally does not involve
+/// executing Dart code.
+///
+/// The size of the rectangle is determined by the parent, and the texture is
+/// automatically scaled to fit.
 class TextureBox extends RenderBox {
   /// Creates a box backed by the texture identified by [textureId].
   TextureBox({ int textureId }) : _textureId = textureId;
 
   int _textureId;
 
-  /// Sets the texture ID.
+  /// Sets the identity of the backend texture to map.
   set textureId(int value) {
     if (value != _textureId) {
       _textureId = value;
@@ -21,7 +31,7 @@ class TextureBox extends RenderBox {
     }
   }
 
-  /// The identity of the backing texture.
+  /// The identity of the backend texture.
   int get textureId => _textureId;
 
   @override

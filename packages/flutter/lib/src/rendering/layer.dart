@@ -30,7 +30,7 @@ import 'debug.dart';
 /// See also:
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
-///    for painting [RenderObject] trees on the the display.
+///    for painting [RenderObject] trees on the display.
 abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's parent in the layer tree.
   ///
@@ -128,7 +128,7 @@ class PictureLayer extends Layer {
 
   /// The picture recorded for this layer.
   ///
-  /// The picture's coodinate system matches this layer's coodinate system.
+  /// The picture's coordinate system matches this layer's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -167,11 +167,12 @@ class PictureLayer extends Layer {
   }
 }
 
-/// A composited layer backed by a texture.
+/// A composited layer that maps a backend texture to a rectangle.
 ///
 /// Texture layers are always leaves in the layer tree.
 class TextureLayer extends Layer {
-  /// Creates a texture layer bounded by [rect] and identified by [textureId].
+  /// Creates a texture layer bounded by [rect] and with backend texture
+  /// identified by [textureId].
   TextureLayer({
     @required this.rect,
     @required this.textureId,
@@ -180,7 +181,7 @@ class TextureLayer extends Layer {
   /// Bounding rectangle of this layer.
   final Rect rect;
 
-  /// Identity of the texture backing this layer.
+  /// Identity of the backend texture.
   final int textureId;
 
   @override
