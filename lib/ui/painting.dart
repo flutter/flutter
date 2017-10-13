@@ -2005,7 +2005,6 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(rects != null);
     assert(colors != null);
     assert(blendMode != null);
-    assert(cullRect != null);
     assert(paint != null);
 
     final int rectCount = rects.length;
@@ -2071,7 +2070,6 @@ class Canvas extends NativeFieldWrapperClass2 {
     assert(rects != null);
     assert(colors != null);
     assert(blendMode != null);
-    assert(cullRect != null);
     assert(paint != null);
 
     final int rectCount = rects.length;
