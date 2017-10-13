@@ -335,6 +335,8 @@ class HotRunner extends ResidentRunner {
     }
 
     final Stopwatch restartTimer = new Stopwatch()..start();
+    // TODO(aam): Add generator reset logic once we switch to using incremental
+    // compiler for full application recompilation on restart.
     final bool updatedDevFS = await _updateDevFS(fullRestart: true);
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
