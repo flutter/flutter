@@ -167,9 +167,9 @@ class HotRunner extends ResidentRunner {
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
-      if (stayResident)
+      if (stayResident) {
         await waitForAppToFinish();
-      else {
+      } else {
         printStatus('Benchmark completed. Exiting application.');
         await _cleanupDevFS();
         await stopEchoingDeviceLog();

@@ -15,21 +15,6 @@ import '../framework/utils.dart';
 final Directory _editedFlutterGalleryDir = dir(path.join(Directory.systemTemp.path, 'edited_flutter_gallery'));
 final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'examples/flutter_gallery'));
 
-void _copy(Directory source, Directory target) {
-  if (!target.existsSync())
-    target.createSync();
-
-  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
-    final String name = path.basename(entity.path);
-    if (entity is Directory)
-      _copy(entity, new Directory(path.join(target.path, name)));
-    else if (entity is File) {
-      final File dest = new File(path.join(target.path, name));
-      dest.writeAsBytesSync(entity.readAsBytesSync());
-    }
-  }
-}
-
 TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
   return () async {
     final Device device = await devices.workingDevice;
@@ -45,7 +30,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     await inDirectory(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);
       mkdirs(_editedFlutterGalleryDir);
-      _copy(flutterGalleryDir, _editedFlutterGalleryDir);
+      recursiveCopy(flutterGalleryDir, _editedFlutterGalleryDir);
       await inDirectory(_editedFlutterGalleryDir, () async {
         final Process process = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
