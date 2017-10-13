@@ -446,6 +446,8 @@ class DevFS {
       // that isModified does not reset last check timestamp because we
       // want to report all modified files to incremental compiler next time
       // user does hot reload.
+      // TODO(aam): Remove this logic once we switch to using incremental
+      // compiler for full application compilation when doing full restart.
       if (fullRestart && generator != null && content is DevFSFileContent) {
         content = DevFSFileContent.clone(content);
       }
