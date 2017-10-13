@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -169,4 +171,11 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   String get debugDescription => 'tap';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('wonArena', value: _wonArenaForPrimaryPointer, ifTrue: 'wonArena'));
+    description.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition));
+  }
 }
