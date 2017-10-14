@@ -7,6 +7,7 @@
 #include <thread>
 #include <utility>
 
+#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"

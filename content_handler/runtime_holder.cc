@@ -45,6 +45,13 @@ constexpr char kAssetChannel[] = "flutter/assets";
 constexpr char kKeyEventChannel[] = "flutter/keyevent";
 constexpr char kTextInputChannel[] = "flutter/textinput";
 
+void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
+  runner->PostTask([name]() {
+    zx::thread::self().set_property(ZX_PROP_NAME, name.c_str(), name.size());
+    Dart_SetThreadName(name.c_str());
+  });
+}
+
 blink::PointerData::Change GetChangeFromPointerEventPhase(
     mozart::PointerEvent::Phase phase) {
   switch (phase) {
@@ -157,6 +164,11 @@ void RuntimeHolder::Init(
     blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                        default_isolate_snapshot_data,
                        default_isolate_snapshot_instr);
+
+    // This has to happen after the Dart runtime is initialized.
+    SetThreadName(blink::Threads::UI(), "ui");
+    SetThreadName(blink::Threads::Gpu(), "gpu");
+    SetThreadName(blink::Threads::IO(), "io");
 
     blink::SetRegisterNativeServiceProtocolExtensionHook(
         ServiceProtocolHooks::RegisterHooks);
