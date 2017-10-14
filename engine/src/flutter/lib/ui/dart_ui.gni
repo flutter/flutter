@@ -3,18 +3,18 @@
 # found in the LICENSE file.
 
 dart_ui_files = [
-  "//flutter/lib/ui/compositing.dart",
-  "//flutter/lib/ui/geometry.dart",
-  "//flutter/lib/ui/hash_codes.dart",
-  "//flutter/lib/ui/hooks.dart",
-  "//flutter/lib/ui/lerp.dart",
-  "//flutter/lib/ui/natives.dart",
-  "//flutter/lib/ui/painting.dart",
-  "//flutter/lib/ui/pointer.dart",
-  "//flutter/lib/ui/semantics.dart",
-  "//flutter/lib/ui/text.dart",
-  "//flutter/lib/ui/ui.dart",
-  "//flutter/lib/ui/window.dart",
+  "$flutter_root/lib/ui/compositing.dart",
+  "$flutter_root/lib/ui/geometry.dart",
+  "$flutter_root/lib/ui/hash_codes.dart",
+  "$flutter_root/lib/ui/hooks.dart",
+  "$flutter_root/lib/ui/lerp.dart",
+  "$flutter_root/lib/ui/natives.dart",
+  "$flutter_root/lib/ui/painting.dart",
+  "$flutter_root/lib/ui/pointer.dart",
+  "$flutter_root/lib/ui/semantics.dart",
+  "$flutter_root/lib/ui/text.dart",
+  "$flutter_root/lib/ui/ui.dart",
+  "$flutter_root/lib/ui/window.dart",
 ]
 
-dart_ui_path = "//flutter/lib/ui/ui.dart"
+dart_ui_path = "$flutter_root/lib/ui/ui.dart"

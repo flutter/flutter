@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/common/config.gni")
-import("//flutter/shell/config.gni")
+import("$flutter_root/common/config.gni")
+import("$flutter_root/shell/config.gni")
 import("//build/config/android/config.gni")
 import("//build/config/android/rules.gni")
 
@@ -37,13 +37,13 @@ shared_library("flutter_shell_native") {
   ]
 
   deps = [
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/lib/ui",
-    "//flutter/runtime",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/fml",
+    "$flutter_root/lib/ui",
+    "$flutter_root/runtime",
+    "$flutter_root/shell/common",
+    "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
@@ -53,6 +53,10 @@ shared_library("flutter_shell_native") {
     deps += [ "//dart/runtime:libdart_precompiled_runtime" ]
   }
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   defines = []
 
   if (shell_enable_vulkan) {
@@ -61,7 +65,7 @@ shared_library("flutter_shell_native") {
       "android_surface_vulkan.h",
     ]
 
-    deps += [ "//flutter/vulkan" ]
+    deps += [ "$flutter_root/vulkan" ]
 
     defines += [ "SHELL_ENABLE_VULKAN" ]
   }

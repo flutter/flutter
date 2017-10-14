@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/shell/config.gni")
+import("$flutter_root/shell/config.gni")
 
 source_set("gpu") {
   sources = [
@@ -22,17 +22,21 @@ source_set("gpu") {
   }
 
   deps = [
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/shell/common",
-    "//flutter/synchronization",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/glue",
+    "$flutter_root/shell/common",
+    "$flutter_root/synchronization",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   if (shell_enable_vulkan) {
-    deps += [ "//flutter/vulkan" ]
+    deps += [ "$flutter_root/vulkan" ]
   }
 }

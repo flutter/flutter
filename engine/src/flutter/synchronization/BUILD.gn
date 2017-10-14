@@ -11,8 +11,12 @@ source_set("synchronization") {
     "semaphore.h",
   ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   public_deps = [
-    "//flutter/glue",
+    "$flutter_root/glue",
     "//garnet/public/lib/fxl",
   ]
 }
@@ -26,7 +30,7 @@ executable("synchronization_unittests") {
 
   deps = [
     ":synchronization",
-    "//flutter/testing",
+    "$flutter_root/testing",
     "//dart/runtime:libdart_jit",
   ]
 }

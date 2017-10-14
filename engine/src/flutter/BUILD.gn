@@ -6,48 +6,54 @@ group("flutter") {
   testonly = true
 
   deps = [
-    "//flutter/lib/snapshot:compile_platform",
-    "//flutter/lib/snapshot:generate_snapshot_bin",
-    "//flutter/sky",
-    "//flutter/third_party/txt",
+    "$flutter_root/lib/snapshot:compile_platform",
+    "$flutter_root/lib/snapshot:generate_snapshot_bin",
+    "$flutter_root/sky",
+    "$flutter_root/third_party/txt",
   ]
 
   if (!is_fuchsia) {
     if (current_toolchain == host_toolchain) {
       deps += [
         "//dart:create_sdk",
-        "//flutter/frontend_server",
+        "$flutter_root/frontend_server",
       ]
     }
   }
 
   if (is_fuchsia) {
     deps += [
-      "//flutter/content_handler",
-      "//flutter/content_handler:aot_content_handler",
-      "//flutter/examples",
-      "//flutter/flow",
+      "$flutter_root/content_handler",
+      "$flutter_root/content_handler:aot_content_handler",
+      "$flutter_root/examples",
+      "$flutter_root/flow",
     ]
   }
 
   # If on the host, compile all unittests targets.
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
-      deps += [ "//flutter/shell/platform/darwin:flutter_channels_unittests" ]
+      deps += [ "$flutter_root/shell/platform/darwin:flutter_channels_unittests" ]
     }
     if (!is_win) {
-      deps += [ "//flutter/shell/platform/embedder:flutter_engine" ]
+      deps += [ "$flutter_root/shell/platform/embedder:flutter_engine" ]
     }
     deps += [
-      "//flutter/flow:flow_unittests",
-      "//flutter/fml:fml_unittests",
-      "//flutter/sky/engine/wtf:wtf_unittests",
-      "//flutter/synchronization:synchronization_unittests",
-      "//flutter/third_party/txt:txt_benchmarks",
-      "//flutter/third_party/txt:txt_unittests",
+      "$flutter_root/flow:flow_unittests",
+      "$flutter_root/fml:fml_unittests",
+      "$flutter_root/sky/engine/wtf:wtf_unittests",
+      "$flutter_root/synchronization:synchronization_unittests",
+      "$flutter_root/third_party/txt:txt_benchmarks",
+      "$flutter_root/third_party/txt:txt_unittests",
       "//garnet/public/lib/fxl:fxl_unittests",
     ]
   }
+}
+
+config("config") {
+  include_dirs = [
+    "..",
+  ]
 }
 
 if (!is_fuchsia) {
@@ -55,7 +61,7 @@ if (!is_fuchsia) {
     testonly = true
 
     deps = [
-      "//flutter/sky/dist",
+      "$flutter_root/sky/dist",
     ]
   }
 }

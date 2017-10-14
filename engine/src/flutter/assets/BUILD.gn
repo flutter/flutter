@@ -13,12 +13,16 @@ source_set("assets") {
   ]
 
   deps = [
-    "//flutter/glue",
+    "$flutter_root/glue",
     "//garnet/public/lib/fxl",
     "//garnet/public/lib/zip",
   ]
 
   public_deps = [
     "//third_party/zlib:minizip",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }

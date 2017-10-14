@@ -3,7 +3,7 @@
 # found in the LICENSE file.
 
 import("//dart/runtime/bin/vmservice/vmservice_sources.gni")
-import("//flutter/common/config.gni")
+import("$flutter_root/common/config.gni")
 
 action("gen_embedded_resources_cc") {
   script = "//dart/runtime/tools/create_resources.py"
@@ -37,6 +37,9 @@ source_set("embedded_resources_cc") {
   deps = [
     ":gen_embedded_resources_cc",
   ]
+  public_configs = [
+    "$flutter_root:config",
+  ]
 }
 
 source_set("test_font") {
@@ -46,6 +49,9 @@ source_set("test_font") {
   ]
   deps = [
     "//third_party/skia",
+  ]
+  public_configs = [
+    "$flutter_root:config",
   ]
   defines = []
   if (flutter_runtime_mode == "debug" || current_toolchain == host_toolchain) {
@@ -88,24 +94,28 @@ source_set("runtime") {
     ":test_font",
     "//dart/runtime:dart_api",
     "//dart/runtime/bin:embedded_dart_io",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/lib/io",
-    "//flutter/lib/ui",
-    "//flutter/sky/engine/platform",
-    "//flutter/third_party/txt",
+    "$flutter_root/assets",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/glue",
+    "$flutter_root/lib/io",
+    "$flutter_root/lib/ui",
+    "$flutter_root/sky/engine/platform",
+    "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//topaz/lib/tonic",
   ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   # In AOT mode, precompiled snapshots contain the instruction buffer.
   # Generation of the same requires all application specific script code to be
   # specified up front. In such cases, there can be no generic snapshot.
   if (!flutter_aot) {
-    deps += [ "//flutter/lib/snapshot" ]
+    deps += [ "$flutter_root/lib/snapshot" ]
   }
 }

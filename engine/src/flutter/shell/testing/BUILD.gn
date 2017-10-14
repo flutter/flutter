@@ -13,9 +13,13 @@ source_set("testing") {
   ]
 
   deps = [
-    "//flutter/common",
-    "//flutter/shell/common",
+    "$flutter_root/common",
+    "$flutter_root/shell/common",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }

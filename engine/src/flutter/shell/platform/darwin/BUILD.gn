@@ -39,16 +39,20 @@ source_set("flutter_channels") {
   set_sources_assignment_filter(sources_assignment_filter)
 
   deps = [
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/runtime",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu",
-    "//flutter/shell/testing",
-    "//flutter/sky/engine/wtf",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/fml",
+    "$flutter_root/runtime",
+    "$flutter_root/shell/common",
+    "$flutter_root/shell/gpu",
+    "$flutter_root/shell/testing",
+    "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }
 
@@ -65,6 +69,6 @@ executable("flutter_channels_unittests") {
   deps = [
     ":flutter_channels",
     "//dart/runtime:libdart_jit",
-    "//flutter/testing",
+    "$flutter_root/testing",
   ]
 }

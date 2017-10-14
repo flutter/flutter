@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/lib/ui/dart_ui.gni")
+import("$flutter_root/lib/ui/dart_ui.gni")
 
 import("//dart/runtime/bin/io_sources.gni")
 import("//dart/runtime/lib/async_sources.gni")

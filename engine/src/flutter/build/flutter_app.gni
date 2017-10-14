@@ -5,7 +5,7 @@
 assert(is_fuchsia)
 
 import("//build/dart/dart_package.gni")
-import("//flutter/lib/ui/dart_ui.gni")
+import("$flutter_root/lib/ui/dart_ui.gni")
 import("//topaz/public/dart-pkg/fuchsia/sdk_ext.gni")
 import("//topaz/public/dart-pkg/zircon/sdk_ext.gni")
 import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
@@ -18,9 +18,9 @@ gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
 gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
 gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
 
-flutter_root = "//lib/flutter"
+flutter_base = "//lib/flutter"
 flutter_tools_label =
-    "$flutter_root/packages/flutter_tools:fuchsia_builder($host_toolchain)"
+    "$flutter_base/packages/flutter_tools:fuchsia_builder($host_toolchain)"
 flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")
 flutter_tools_bin = "$flutter_tools_out_dir/dart-tools/fuchsia_builder"
 
@@ -50,7 +50,7 @@ template("flutter_jit_app") {
     bundle_name = "${target_name}.flx"
   }
 
-  flutter_core_snapshot_label = "//flutter/lib/snapshot:generate_snapshot_bin"
+  flutter_core_snapshot_label = "$flutter_root/lib/snapshot:generate_snapshot_bin"
   flutter_core_snapshot_gen_dir =
       get_label_info(flutter_core_snapshot_label, "target_gen_dir")
   flutter_core_snapshot_vm_data =
@@ -91,7 +91,7 @@ template("flutter_jit_app") {
       sources = invoker.sources
     }
 
-    script = "//flutter/build/script_snapshot.py"
+    script = "$flutter_root/build/script_snapshot.py"
 
     args = [
       "--snapshotter-path",
@@ -144,11 +144,11 @@ template("flutter_jit_app") {
       bundle_path,
     ]
 
-    script = "//flutter/build/package.py"
+    script = "$flutter_root/build/package.py"
 
     args = [
       "--flutter-root",
-      rebase_path(flutter_root),
+      rebase_path(flutter_base),
       "--flutter-tools",
       rebase_path(flutter_tools_bin),
       "--working-dir",
@@ -225,8 +225,8 @@ template("flutter_aot_app") {
              mozart_dart_sdk_ext_files +
              [
                main_dart,
-               "//flutter/runtime/dart_vm_entry_points.txt",
-               "//flutter/runtime/dart_vm_entry_points_fuchsia.txt",
+               "$flutter_root/runtime/dart_vm_entry_points.txt",
+               "$flutter_root/runtime/dart_vm_entry_points_fuchsia.txt",
                "//dart/runtime/bin/dart_io_entries.txt",
              ]
 
@@ -238,7 +238,7 @@ template("flutter_aot_app") {
       sources = invoker.sources
     }
 
-    script = "//flutter/build/aot_snapshot.py"
+    script = "$flutter_root/build/aot_snapshot.py"
     args = [
       "--snapshotter-path",
       rebase_path(gen_snapshot),
@@ -262,9 +262,9 @@ template("flutter_aot_app") {
               "$root_gen_dir/dart-pkg/sky_engine/sdk_ext/vmservice_io.dart"),
 
       "--entry-points-manifest",
-      rebase_path("//flutter/runtime/dart_vm_entry_points.txt"),
+      rebase_path("$flutter_root/runtime/dart_vm_entry_points.txt"),
       "--entry-points-manifest",
-      rebase_path("//flutter/runtime/dart_vm_entry_points_fuchsia.txt"),
+      rebase_path("$flutter_root/runtime/dart_vm_entry_points_fuchsia.txt"),
       "--entry-points-manifest",
       rebase_path("//dart/runtime/bin/dart_io_entries.txt"),
 
@@ -279,7 +279,7 @@ template("flutter_aot_app") {
 
     deps = [
       ":$dart_package_name",
-      "//flutter/lib/snapshot:generate_dart_ui",
+      "$flutter_root/lib/snapshot:generate_dart_ui",
       gen_snapshot_label,
     ]
 
@@ -323,11 +323,11 @@ template("flutter_aot_app") {
       bundle_path,
     ]
 
-    script = "//flutter/build/package.py"
+    script = "$flutter_root/build/package.py"
 
     args = [
       "--flutter-root",
-      rebase_path(flutter_root),
+      rebase_path(flutter_base),
       "--flutter-tools",
       rebase_path(flutter_tools_bin),
       "--working-dir",

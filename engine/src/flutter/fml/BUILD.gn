@@ -33,6 +33,10 @@ source_set("fml") {
 
   configs += [ "//third_party/icu:icu_config" ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   libs = []
 
   if (is_ios || is_mac) {
@@ -111,8 +115,8 @@ executable("fml_unittests") {
 
   deps = [
     "//dart/runtime:libdart_jit",
-    "//flutter/fml",
-    "//flutter/testing",
+    "$flutter_root/fml",
+    "$flutter_root/testing",
     "//garnet/public/lib/fxl",
   ]
 }

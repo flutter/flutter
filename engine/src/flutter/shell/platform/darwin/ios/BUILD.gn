@@ -4,7 +4,7 @@
 
 assert(is_ios)
 
-import("//flutter/common/config.gni")
+import("$flutter_root/common/config.gni")
 import("//build/config/ios/ios_sdk.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
@@ -66,15 +66,15 @@ shared_library("flutter_framework_dylib") {
   ]
 
   deps = [
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/glue",
-    "//flutter/lib/ui",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu",
-    "//flutter/shell/platform/darwin/common",
-    "//flutter/sky/engine/platform",
-    "//flutter/sky/engine/wtf",
+    "$flutter_root/flow",
+    "$flutter_root/fml",
+    "$flutter_root/glue",
+    "$flutter_root/lib/ui",
+    "$flutter_root/shell/common",
+    "$flutter_root/shell/gpu",
+    "$flutter_root/shell/platform/darwin/common",
+    "$flutter_root/sky/engine/platform",
+    "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
   ]
@@ -83,6 +83,10 @@ shared_library("flutter_framework_dylib") {
   } else {
     deps += [ "//dart/runtime:libdart_precompiled_runtime" ]
   }
+
+  public_configs = [
+    "$flutter_root:config",
+  ]
 
   defines = [ "FLUTTER_FRAMEWORK" ]
 
@@ -112,7 +116,7 @@ copy("framework_dylib") {
 action("framework_install_name") {
   visibility = [ ":*" ]
   stamp_file = "$root_out_dir/flutter_install_name_stamp"
-  script = "//flutter/sky/tools/change_install_name.py"
+  script = "$flutter_root/sky/tools/change_install_name.py"
 
   inputs = [
     "$_flutter_framework_dir/Flutter",

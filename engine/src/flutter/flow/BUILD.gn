@@ -57,10 +57,14 @@ source_set("flow") {
     "//garnet/public/lib/fxl",
   ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   deps = [
-    "//flutter/common",
-    "//flutter/glue",
-    "//flutter/synchronization",
+    "$flutter_root/common",
+    "$flutter_root/glue",
+    "$flutter_root/synchronization",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
@@ -96,7 +100,7 @@ executable("flow_unittests") {
   deps = [
     ":flow",
     "//dart/runtime:libdart_jit",  # for tracing
-    "//flutter/testing",
+    "$flutter_root/testing",
     "//third_party/skia",
   ]
 }

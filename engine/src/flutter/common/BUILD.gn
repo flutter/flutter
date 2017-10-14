@@ -20,5 +20,8 @@ source_set("common") {
     "//garnet/public/lib/fxl",
   ]
 
-  public_configs = [ ":flutter_config" ]
+  public_configs = [
+    ":flutter_config",
+    "$flutter_root:config",
+  ]
 }
