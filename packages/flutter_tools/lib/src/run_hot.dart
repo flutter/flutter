@@ -57,10 +57,15 @@ class HotRunner extends ResidentRunner {
   Set<String> _dartDependencies;
 
   final bool benchmarkMode;
-  final Map<String, int> benchmarkData = <String, int>{};
+  final Map<String, List<int>> benchmarkData = <String, List<int>>{};
   // The initial launch is from a snapshot.
   bool _runningFromSnapshot = true;
   bool previewDart2 = false;
+
+  void _addBenchmarkData(String name, int value) {
+    benchmarkData[name] ??= <int>[];
+    benchmarkData[name].add(value);
+  }
 
   bool _refreshDartDependencies() {
     if (!hotRunnerConfig.computeDartDependencies) {
@@ -130,8 +135,8 @@ class HotRunner extends ResidentRunner {
     }
     final Stopwatch initialUpdateDevFSsTimer = new Stopwatch()..start();
     final bool devfsResult = await _updateDevFS();
-    benchmarkData['hotReloadInitialDevFSSyncMilliseconds'] =
-        initialUpdateDevFSsTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotReloadInitialDevFSSyncMilliseconds',
+        initialUpdateDevFSsTimer.elapsed.inMilliseconds);
     if (!devfsResult)
       return 3;
 
@@ -162,12 +167,17 @@ class HotRunner extends ResidentRunner {
       printStatus('Benchmarking hot reload');
       // Measure time to perform a hot reload.
       await restart(fullRestart: false);
-      printStatus('Benchmark completed. Exiting application.');
-      await _cleanupDevFS();
-      await stopEchoingDeviceLog();
-      await stopApp();
+      if (stayResident) {
+        await waitForAppToFinish();
+      } else {
+        printStatus('Benchmark completed. Exiting application.');
+        await _cleanupDevFS();
+        await stopEchoingDeviceLog();
+        await stopApp();
+      }
       final File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
+      return 0;
     }
 
     if (stayResident)
@@ -362,8 +372,8 @@ class HotRunner extends ResidentRunner {
         '${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
     // We are now running from sources.
     _runningFromSnapshot = false;
-    benchmarkData['hotRestartMillisecondsToFrame'] =
-        restartTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotRestartMillisecondsToFrame',
+        restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart');
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
     return OperationResult.ok;
@@ -467,11 +477,10 @@ class HotRunner extends ResidentRunner {
     final Stopwatch devFSTimer = new Stopwatch()..start();
     final bool updatedDevFS = await _updateDevFS();
     // Record time it took to synchronize to DevFS.
-    benchmarkData['hotReloadDevFSSyncMilliseconds'] =
-        devFSTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotReloadDevFSSyncMilliseconds',
+        devFSTimer.elapsed.inMilliseconds);
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
-
     String reloadMessage;
     final Stopwatch vmReloadTimer = new Stopwatch()..start();
     try {
@@ -536,8 +545,8 @@ class HotRunner extends ResidentRunner {
       return new OperationResult(errorCode, errorMessage);
     }
     // Record time it took for the VM to reload the sources.
-    benchmarkData['hotReloadVMReloadMilliseconds'] =
-        vmReloadTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotReloadVMReloadMilliseconds',
+        vmReloadTimer.elapsed.inMilliseconds);
     final Stopwatch reassembleTimer = new Stopwatch()..start();
     // Reload the isolate.
     for (FlutterDevice device in flutterDevices) {
@@ -595,15 +604,15 @@ class HotRunner extends ResidentRunner {
       }
     }
     // Record time it took for Flutter to reassemble the application.
-    benchmarkData['hotReloadFlutterReassembleMilliseconds'] =
-        reassembleTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotReloadFlutterReassembleMilliseconds',
+        reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
     printTrace('Hot reload performed in '
         '${getElapsedAsMilliseconds(reloadTimer.elapsed)}.');
     // Record complete time it took for the reload.
-    benchmarkData['hotReloadMillisecondsToFrame'] =
-        reloadTimer.elapsed.inMilliseconds;
+    _addBenchmarkData('hotReloadMillisecondsToFrame',
+        reloadTimer.elapsed.inMilliseconds);
     // Only report timings if we reloaded a single view without any
     // errors or timeouts.
     if ((reassembleViews.length == 1) &&
