@@ -44,7 +44,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
           .transform(UTF8.decoder)
           .transform(const LineSplitter())
           .listen((String line) {
-          if (line.contains('\] Hot reload performed in')) {
+          if (line.contains('\] Reloaded ')) {
             if (hotReloadCount == 0) {
               // Update the file and reload again.
               final File appDartSource = file(path.join(
