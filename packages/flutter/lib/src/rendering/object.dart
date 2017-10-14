@@ -2366,6 +2366,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     }
 
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
+    final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
 
@@ -2389,7 +2390,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           fragment.markAsExplicit();
           continue;
         }
-        if (!fragment.hasConfigForParent || (!config.hasBeenAnnotated && !config.isSemanticBoundary))
+        if (!fragment.hasConfigForParent || producesForkingFragment)
           continue;
         if (!config.isCompatibleWith(fragment.config))
           toBeMarkedExplicit.add(fragment);
@@ -2406,12 +2407,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       fragment.markAsExplicit();
 
     _needsSemanticsUpdate = false;
+    _needsSemanticsGeometryUpdate = false;
 
     _SemanticsFragment result;
     if (parent is! RenderObject) {
       assert(!config.hasBeenAnnotated);
       result = new _RootSemanticsFragment(this, dropSemanticsOfPreviousSiblings);
-    } else if (!config.hasBeenAnnotated && !config.isSemanticBoundary) {
+    } else if (producesForkingFragment) {
       result = new _ForkingSemanticsFragment(dropSemanticsOfPreviousSiblings);
     } else {
       result = new _SwitchableSemanticsFragment(this, dropSemanticsOfPreviousSiblings, config);
