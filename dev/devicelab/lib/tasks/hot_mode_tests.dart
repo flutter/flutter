@@ -77,16 +77,29 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     });
     final Map<String, dynamic> twoReloadsData = JSON.decode(
       benchmarkFile.readAsStringSync());
-    return new TaskResult.success(<String, dynamic> {
-      'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
-      'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],
-      'hotReloadMillisecondsToFrame' : twoReloadsData['hotReloadMillisecondsToFrame'][0],
-      'hotReloadDevFSSyncMilliseconds': twoReloadsData['hotReloadDevFSSyncMilliseconds'][0],
-      'hotReloadFlutterReassembleMilliseconds': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][0],
-      'hotReloadVMReloadMilliseconds': twoReloadsData['hotReloadVMReloadMilliseconds'][0],
-      'hotReloadDevFSSyncMillisecondsAfterChange': twoReloadsData['hotReloadDevFSSyncMilliseconds'][1],
-      'hotReloadFlutterReassembleMillisecondsAfterChange': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
-      'hotReloadVMReloadMillisecondsAfterChange': twoReloadsData['hotReloadVMReloadMilliseconds'][1]
-    });
+    return new TaskResult.success(
+      <String, dynamic> {
+        'hotReloadInitialDevFSSyncMilliseconds': twoReloadsData['hotReloadInitialDevFSSyncMilliseconds'][0],
+        'hotRestartMillisecondsToFrame': twoReloadsData['hotRestartMillisecondsToFrame'][0],
+        'hotReloadMillisecondsToFrame' : twoReloadsData['hotReloadMillisecondsToFrame'][0],
+        'hotReloadDevFSSyncMilliseconds': twoReloadsData['hotReloadDevFSSyncMilliseconds'][0],
+        'hotReloadFlutterReassembleMilliseconds': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][0],
+        'hotReloadVMReloadMilliseconds': twoReloadsData['hotReloadVMReloadMilliseconds'][0],
+        'hotReloadDevFSSyncMillisecondsAfterChange': twoReloadsData['hotReloadDevFSSyncMilliseconds'][1],
+        'hotReloadFlutterReassembleMillisecondsAfterChange': twoReloadsData['hotReloadFlutterReassembleMilliseconds'][1],
+        'hotReloadVMReloadMillisecondsAfterChange': twoReloadsData['hotReloadVMReloadMilliseconds'][1],
+      },
+      benchmarkScoreKeys: <String>[
+        'hotReloadInitialDevFSSyncMilliseconds',
+        'hotRestartMillisecondsToFrame',
+        'hotReloadMillisecondsToFrame',
+        'hotReloadDevFSSyncMilliseconds',
+        'hotReloadFlutterReassembleMilliseconds',
+        'hotReloadVMReloadMilliseconds',
+        'hotReloadDevFSSyncMillisecondsAfterChange',
+        'hotReloadFlutterReassembleMillisecondsAfterChange',
+        'hotReloadVMReloadMillisecondsAfterChange',
+      ]
+    );
   };
 }
