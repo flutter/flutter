@@ -2,20 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/common/config.gni")
-import("//flutter/sky/engine/core/core.gni")
+import("$flutter_root/common/config.gni")
+import("$flutter_root/sky/engine/core/core.gni")
 
 visibility = [
-  "//flutter/sky/engine/*",
-  "//flutter/sky/shell/*",
+  "$flutter_root/sky/engine/*",
+  "$flutter_root/sky/shell/*",
 ]
 
 static_library("core") {
   output_name = "sky_core"
 
   deps = [
-    "//flutter/assets",
-    "//flutter/sky/engine/platform",
+    "$flutter_root/assets",
+    "$flutter_root/sky/engine/platform",
   ]
 
   if (flutter_runtime_mode != "release") {
@@ -24,17 +24,21 @@ static_library("core") {
   }
 
   configs += [
-    "//flutter/sky/engine:config",
-    "//flutter/sky/engine:inside_blink",
+    "$flutter_root/sky/engine:config",
+    "$flutter_root/sky/engine:inside_blink",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 
   sources = sky_core_files
 
   public_deps = [
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/sky/engine/wtf",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/glue",
+    "$flutter_root/sky/engine/wtf",
     "//garnet/public/lib/fxl",
     "//third_party/libpng",
     "//third_party/skia",

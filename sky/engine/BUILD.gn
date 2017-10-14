@@ -41,9 +41,9 @@ group("engine") {
   public_configs = [ ":config" ]
 
   public_deps = [
-    "//flutter/sky/engine/core",
-    "//flutter/sky/engine/platform",
-    "//flutter/sky/engine/web",
-    "//flutter/sky/engine/wtf",
+    "$flutter_root/sky/engine/core",
+    "$flutter_root/sky/engine/platform",
+    "$flutter_root/sky/engine/web",
+    "$flutter_root/sky/engine/wtf",
   ]
 }

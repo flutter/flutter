@@ -8,19 +8,23 @@ source_set("web") {
   ]
 
   deps = [
-    "//flutter/sky/engine/core",
-    "//flutter/sky/engine/platform",
+    "$flutter_root/sky/engine/core",
+    "$flutter_root/sky/engine/platform",
   ]
 
   configs += [
-    "//flutter/sky/engine:config",
-    "//flutter/sky/engine:inside_blink",
-    "//flutter/sky/engine:non_test_config",
+    "$flutter_root/sky/engine:config",
+    "$flutter_root/sky/engine:inside_blink",
+    "$flutter_root/sky/engine:non_test_config",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 
   if (is_fuchsia) {
     deps += [ "//garnet/public/lib/fsl" ]
   } else {
-    deps += [ "//flutter/fml" ]
+    deps += [ "$flutter_root/fml" ]
   }
 }

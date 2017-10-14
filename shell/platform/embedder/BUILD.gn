@@ -14,18 +14,26 @@ source_set("embedder") {
   deps = [
     "//dart/runtime:libdart_jit",
     "//dart/runtime/bin:embedded_dart_io",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu",
+    "$flutter_root/common",
+    "$flutter_root/fml",
+    "$flutter_root/shell/common",
+    "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//topaz/lib/tonic",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }
 
 shared_library("flutter_engine") {
   deps = [
     ":embedder",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }

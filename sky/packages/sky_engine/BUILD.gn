@@ -14,9 +14,9 @@ import("//dart/sdk/lib/isolate/isolate_sources.gni")
 import("//dart/sdk/lib/math/math_sources.gni")
 import("//dart/sdk/lib/typed_data/typed_data_sources.gni")
 
-import("//flutter/build/dart/rules.gni")
-import("//flutter/lib/ui/dart_ui.gni")
-import("//flutter/sky/engine/core/core.gni")
+import("$flutter_root/build/dart/rules.gni")
+import("$flutter_root/lib/ui/dart_ui.gni")
+import("$flutter_root/sky/engine/core/core.gni")
 
 if (!is_fuchsia) {
   copy("copy_sky_engine_authors") {

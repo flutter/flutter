@@ -18,4 +18,8 @@ source_set("io") {
   configs += [
     "//dart/runtime:dart_config",
   ]
+
+  public_configs = [
+    "$flutter_root:config",
+  ]
 }

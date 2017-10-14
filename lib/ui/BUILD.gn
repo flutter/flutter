@@ -85,15 +85,19 @@ source_set("ui") {
     "window/window.h",
   ]
 
+  public_configs = [
+    "$flutter_root:config",
+  ]
+
   deps = [
     "//dart/runtime/bin:embedded_dart_io",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/glue",
-    "//flutter/runtime:test_font",
-    "//flutter/sky/engine",
-    "//flutter/third_party/txt",
+    "$flutter_root/assets",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/glue",
+    "$flutter_root/runtime:test_font",
+    "$flutter_root/sky/engine",
+    "$flutter_root/third_party/txt",
     "//third_party/rapidjson",
     "//third_party/skia",
     "//third_party/skia:gpu",

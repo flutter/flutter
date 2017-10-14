@@ -57,9 +57,9 @@ template("dart_embedder_resources") {
 
 dart_embedder_resources("generate_embedder_diagnostic_server_resources_cc") {
   inputs = [
-    "//flutter/shell/common/diagnostic/diagnostic_server.dart",
+    "$flutter_root/shell/common/diagnostic/diagnostic_server.dart",
   ]
-  root_prefix = "//flutter/shell/common/diagnostic/"
+  root_prefix = "$flutter_root/shell/common/diagnostic/"
   output = "$target_gen_dir/embedder_diagnostic_server_resources.cc"
   table_name = "sky_embedder_diagnostic_server"
 }
@@ -103,16 +103,16 @@ source_set("common") {
     ":generate_embedder_diagnostic_server_resources_cc",
     "//dart/runtime:dart_api",
     "//dart/runtime/platform:libdart_platform",
-    "//flutter/assets",
-    "//flutter/common",
-    "//flutter/flow",
-    "//flutter/fml",
-    "//flutter/glue",
-    "//flutter/lib/ui",
-    "//flutter/runtime",
-    "//flutter/sky/engine/wtf",
-    "//flutter/synchronization",
-    "//flutter/third_party/txt",
+    "$flutter_root/assets",
+    "$flutter_root/common",
+    "$flutter_root/flow",
+    "$flutter_root/fml",
+    "$flutter_root/glue",
+    "$flutter_root/lib/ui",
+    "$flutter_root/runtime",
+    "$flutter_root/sky/engine/wtf",
+    "$flutter_root/synchronization",
+    "$flutter_root/third_party/txt",
     "//garnet/public/lib/fxl",
     "//third_party/rapidjson",
     "//third_party/skia",
@@ -121,5 +121,9 @@ source_set("common") {
 
   public_deps = [
     "//topaz/lib/tonic",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }

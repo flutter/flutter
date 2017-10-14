@@ -187,12 +187,13 @@ source_set("wtf") {
 
   configs += [
     ":clang_warnings",
-    "//flutter/sky/engine:config",
-    "//flutter/sky/engine:non_test_config",
+    "$flutter_root/sky/engine:config",
+    "$flutter_root/sky/engine:non_test_config",
   ]
 
   public_configs = [
-    "//flutter/common:flutter_config",
+    "$flutter_root/common:flutter_config",
+    "$flutter_root:config",
     "//third_party/icu:icu_config",
   ]
 
@@ -202,7 +203,7 @@ source_set("wtf") {
   ]
 
   deps = [
-    "//flutter/glue",
+    "$flutter_root/glue",
   ]
 
   if (is_android) {
@@ -248,14 +249,14 @@ executable("wtf_unittests") {
 
   configs += [
     ":clang_warnings",
-    "//flutter/sky/engine:config",
+    "$flutter_root/sky/engine:config",
   ]
 
   deps = [
     ":wtf",
     "//dart/runtime:libdart_jit",
 
-    # Does not use //flutter/testing because it needs and provides its own main
+    # Does not use $flutter_root/testing because it needs and provides its own main
     # function in RunAllTests.cpp.
     "//third_party/gtest",
   ]

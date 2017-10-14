@@ -23,15 +23,19 @@ source_set("mac_desktop_platform") {
 
   deps = [
     "//dart/runtime:libdart_jit",
-    "//flutter/common",
-    "//flutter/fml",
-    "//flutter/shell/common",
-    "//flutter/shell/gpu",
-    "//flutter/shell/platform/darwin/common",
-    "//flutter/shell/testing",
-    "//flutter/synchronization",
+    "$flutter_root/common",
+    "$flutter_root/fml",
+    "$flutter_root/shell/common",
+    "$flutter_root/shell/gpu",
+    "$flutter_root/shell/platform/darwin/common",
+    "$flutter_root/shell/testing",
+    "$flutter_root/synchronization",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }
 

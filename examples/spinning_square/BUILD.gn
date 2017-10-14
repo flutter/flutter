@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/build/flutter_app.gni")
+import("$flutter_root/build/flutter_app.gni")
 
 flutter_app("spinning_square") {
   main_dart = "lib/main.dart"

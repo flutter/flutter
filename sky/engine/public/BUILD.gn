@@ -4,7 +4,7 @@
 
 group("test_support") {
   deps = [
-    "//flutter/sky/engine/web:test_support",
+    "$flutter_root/sky/engine/web:test_support",
   ]
 }
 
@@ -15,10 +15,18 @@ source_set("platform_headers") {
     "platform/WebCommon.h",
     "platform/WebDiscardableMemory.h",
   ]
+
+  public_configs = [
+    "$flutter_root:config",
+  ]
 }
 
 source_set("web_headers") {
   public = [
     "web/Sky.h",
+  ]
+
+  public_configs = [
+    "$flutter_root:config",
   ]
 }
