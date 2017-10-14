@@ -12,15 +12,6 @@ import 'home.dart';
 import 'item.dart';
 import 'updates.dart';
 
-final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
-  // For a different example of how to set up an application routing table,
-  // consider the Stocks example:
-  // https://github.com/flutter/flutter/blob/master/examples/stocks/lib/main.dart
-  kAllGalleryItems,
-  key: (GalleryItem item) => item.routeName,
-  value: (GalleryItem item) => item.buildRoute,
-);
-
 final ThemeData _kGalleryLightTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.blue,
@@ -62,6 +53,9 @@ class GalleryAppState extends State<GalleryApp> {
   bool _checkerboardOffscreenLayers = false;
   double _timeDilation = 1.0;
   TargetPlatform _platform;
+
+  // A null value indicates "use system default".
+  double _textScaleFactor;
 
   Timer _timeDilationTimer;
 
@@ -128,12 +122,45 @@ class GalleryAppState extends State<GalleryApp> {
           }
         });
       },
+      textScaleFactor: _textScaleFactor,
+      onTextScaleFactorChanged: (double value) {
+        setState(() {
+          _textScaleFactor = value;
+        });
+      },
       onSendFeedback: widget.onSendFeedback,
     );
 
     if (widget.updateUrlFetcher != null) {
       home = new Updater(
         updateUrlFetcher: widget.updateUrlFetcher,
+        child: home,
+      );
+    }
+
+    final Map<String, WidgetBuilder> _kRoutes = new Map<String,
+      WidgetBuilder>.fromIterable(
+      // For a different example of how to set up an application routing table
+      // using named routes, consider the example in the Navigator class documentation:
+      // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+      kAllGalleryItems,
+      key: (GalleryItem item) => item.routeName,
+      value: (GalleryItem item) =>
+        (BuildContext context) {
+        if (_textScaleFactor != null) {
+          return new MediaQuery(
+            data: new MediaQueryData(textScaleFactor: _textScaleFactor),
+            child: item.buildRoute(context),
+          );
+        } else {
+          return item.buildRoute(context);
+        }
+      }
+    );
+
+    if (_textScaleFactor != null) {
+      home = new MediaQuery(
+        data: new MediaQueryData(textScaleFactor: _textScaleFactor),
         child: home,
       );
     }
