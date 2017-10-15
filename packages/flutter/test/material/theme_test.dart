@@ -367,6 +367,54 @@ void main() {
 
     expect(actualFontSize, _kMagicFontSize);
   });
+
+  testWidgets('Default Theme provides all basic TextStyle properties', (WidgetTester tester) async {
+    ThemeData theme;
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Builder(
+        builder: (BuildContext context) {
+          theme = Theme.of(context);
+          return const Text('A');
+        },
+      ),
+    ));
+
+    List<TextStyle> extractStyles(TextTheme textTheme) {
+      return <TextStyle>[
+        textTheme.display4,
+        textTheme.display3,
+        textTheme.display2,
+        textTheme.display1,
+        textTheme.headline,
+        textTheme.title,
+        textTheme.subhead,
+        textTheme.body2,
+        textTheme.body1,
+        textTheme.caption,
+        textTheme.button,
+      ];
+    }
+
+    for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+      for (TextStyle style in extractStyles(textTheme)) {
+        expect(style.decoration, TextDecoration.none);
+        expect(style.decorationColor, null);
+        expect(style.decorationStyle, null);
+        expect(style.fontFamily, isNotNull);
+        expect(style.color, isNotNull);
+        expect(style.fontFamily, isNotNull);
+        expect(style.package, null);
+        expect(style.fontSize, isNotNull);
+        expect(style.fontWeight, isNotNull);
+        expect(style.fontStyle, null);
+        expect(style.letterSpacing, null);
+        expect(style.wordSpacing, null);
+        expect(style.textBaseline, isNotNull);
+        expect(style.height, null);
+      }
+    }
+  });
 }
 
 int testBuildCalled;

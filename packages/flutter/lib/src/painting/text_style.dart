@@ -335,8 +335,14 @@ class TextStyle extends Diagnosticable {
     );
   }
 
-  /// Creates a copy of this text style but with the numeric fields multiplied
-  /// by the given factors and then incremented by the given deltas.
+  /// Creates a copy of this text style replacing or altering the specified
+  /// properties.
+  ///
+  /// The non-numeric properties [color], [fontFamily], [decoration],
+  /// [decorationColor] and [decorationStyle] are replaced with the new values.
+  ///
+  /// The numeric properties are multiplied by the given factors and then
+  /// incremented by the given deltas.
   ///
   /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would
   /// return a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
@@ -346,14 +352,15 @@ class TextStyle extends Diagnosticable {
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
   ///
-  /// The arguments must not be null.
+  /// The numeric arguments must not be null.
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
-  ///
-  /// The non-numeric fields can be controlled using the corresponding arguments.
   TextStyle apply({
     Color color,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
     String fontFamily,
     double fontSizeFactor: 1.0,
     double fontSizeDelta: 0.0,
@@ -390,9 +397,9 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
-      decoration: decoration,
-      decorationColor: decorationColor,
-      decorationStyle: decorationStyle,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
     );
   }
 
