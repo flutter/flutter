@@ -398,10 +398,6 @@ void main() {
 
     for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
       for (TextStyle style in extractStyles(textTheme)) {
-        expect(style.decoration, TextDecoration.none);
-        expect(style.decorationColor, null);
-        expect(style.decorationStyle, null);
-        expect(style.fontFamily, isNotNull);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
         expect(style.package, null);
@@ -412,6 +408,9 @@ void main() {
         expect(style.wordSpacing, null);
         expect(style.textBaseline, isNotNull);
         expect(style.height, null);
+        expect(style.decoration, TextDecoration.none);
+        expect(style.decorationColor, null);
+        expect(style.decorationStyle, null);
       }
     }
   });
