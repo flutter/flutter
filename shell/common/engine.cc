@@ -241,6 +241,7 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
 
   std::vector<uint8_t> platform_kernel;
   if (!bundle_path.empty()) {
+    ConfigureAssetBundle(bundle_path);
     GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
   }
   ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
