@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported material design icons.
 ///
-/// Use with with the [Icon] class to show specific icons.
+/// Use with the [Icon] class to show specific icons.
 ///
 /// Icons are identified by their name as listed below.
 ///
