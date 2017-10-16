@@ -760,7 +760,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
-//    final List<String> actions = <String>[];
+    final Iterable<String> actions = _actions.keys.map((SemanticsAction action) => action.toString());
 //    for (SemanticsAction action in SemanticsAction.values.values) {
 //      if ((_actions & action.index) != 0)
 //        actions.add(describeEnum(action));
