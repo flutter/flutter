@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported Cupertino icons.
 ///
-/// Use with with the [Icon] class to show specific icons.
+/// Use with the [Icon] class to show specific icons.
 ///
 /// Icons are identified by their name as listed below.
 ///
@@ -27,33 +27,35 @@ import 'package:flutter/widgets.dart';
 class CupertinoIcons {
   CupertinoIcons._();
 
+  static const String iconFont = 'packages/cupertino_icons/CupertinoIcons';
+
   // Manually maintained list
 
-  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont);
 
-  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont);
 
-  static const IconData share = const IconData(0xf4ca, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData share = const IconData(0xf4ca, fontFamily: iconFont);
 
-  static const IconData book = const IconData(0xf3e7, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData book = const IconData(0xf3e7, fontFamily: iconFont);
 
-  static const IconData info = const IconData(0xf44c, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData info = const IconData(0xf44c, fontFamily: iconFont);
 
-  static const IconData reply = const IconData(0xf4c6, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont);
 
-  static const IconData conversation_bubble = const IconData(0xf3fb, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData conversation_bubble = const IconData(0xf3fb, fontFamily: iconFont);
 
-  static const IconData profile_circled = const IconData(0xf419, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData profile_circled = const IconData(0xf419, fontFamily: iconFont);
 
-  static const IconData plus_circled = const IconData(0xf48a, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData plus_circled = const IconData(0xf48a, fontFamily: iconFont);
 
-  static const IconData minus_circled = const IconData(0xf463, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData minus_circled = const IconData(0xf463, fontFamily: iconFont);
 
-  static const IconData flag = const IconData(0xf42c, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData flag = const IconData(0xf42c, fontFamily: iconFont);
 
-  static const IconData search = const IconData(0xf4c6, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData search = const IconData(0xf4c6, fontFamily: iconFont);
 
-  static const IconData check_mark = const IconData(0xf41e, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData check_mark = const IconData(0xf41e, fontFamily: iconFont);
 
-  static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: 'packages/cupertino_icons/CupertinoIcons');
+  static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont);
 }
