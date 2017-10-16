@@ -87,7 +87,7 @@ void main() {
     // Scaled text rendering is different on Linux and Mac by one pixel.
     // TODO(#12357): Update this test when text rendering is fixed.
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[54.0, 55.0]));
-    expect(tester.getSize(find.byType(Text)).height, equals(19.0));
+    expect(tester.getSize(find.byType(Text)).height, isIn(<double>[18.0, 19.0]));
 
 
     // Set text scale large enough to expand text and button.
