@@ -260,8 +260,6 @@ class Paragraph {
                         double y,
                         size_t record_index);
 
-  void CalculateIntrinsicWidths();
-
   FXL_DISALLOW_COPY_AND_ASSIGN(Paragraph);
 };
 
