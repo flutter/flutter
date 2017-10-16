@@ -441,7 +441,7 @@ class _RenderSlider extends RenderBox {
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
     }
   }
 

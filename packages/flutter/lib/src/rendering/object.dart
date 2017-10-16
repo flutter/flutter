@@ -2134,7 +2134,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Rect get semanticBounds;
 
   bool _needsSemanticsUpdate = true;
-  bool _needsSemanticsGeometryUpdate = true;
   SemanticsNode _semantics;
 
   /// The semantics of this render object.
@@ -2159,7 +2158,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Should only be called on objects whose [parent] is not a [RenderObject].
   void clearSemantics() {
     _needsSemanticsUpdate = true;
-    _needsSemanticsGeometryUpdate = true;
     _semantics = null;
     visitChildren((RenderObject child) {
       child.clearSemantics();
@@ -2176,10 +2174,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Mark this node as needing an update to its semantics description.
   ///
-  /// The parameters `onlyLocalUpdates` and `noGeometry` tell the framework
-  /// how much of the semantics have changed. Bigger changes (indicated by
-  /// setting one or both parameters to false) are more expansive to compute.
-  ///
   /// `onlyLocalUpdates` should be set to true to reduce cost if the semantics
   /// update does not in any way change the shape of the semantics tree (e.g.
   /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
@@ -2195,23 +2189,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// 2. [semanticsAnnotator] changed from or to returning null and
   ///    [isSemanticBoundary] isn't true.
   ///
-  /// `noGeometry` should be set to true to reduce cost if the geometry (e.g.
-  /// size and position) of the corresponding [SemanticsNode] has not
-  /// changed. Examples for such semantic updates that don't require a geometry
-  /// update are changes to flags, labels, or actions.
-  ///
-  /// If `onlyLocalUpdates` or `noGeometry` are incorrectly set to true, asserts
+  /// If `onlyLocalUpdates` is incorrectly set to true, asserts
   /// might throw or the computed semantics tree might be out-of-date without
   /// warning.
-  void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false, bool noGeometry: false }) {
+  void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false }) {
     assert(!attached || !owner._debugDoingSemantics);
     _cachedSemanticsConfiguration = null;
-    if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyLocalUpdates && (_needsSemanticsGeometryUpdate || noGeometry)))
+    if ((attached && owner._semanticsOwner == null))
       return;
-    if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
-      // Since the geometry might have changed, we need to make sure to reapply any clips.
-      _needsSemanticsGeometryUpdate = true;
-    }
     if (onlyLocalUpdates) {
       // The shape of the tree didn't change, but the details did.
       // If we have our own SemanticsNode (our _semantics isn't null)
@@ -2273,12 +2258,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   }
 
   /// Updates the semantic information of the render object.
-  ///
-  /// This is essentially a two-pass walk of the render tree. The first pass
-  /// determines the shape of the output tree (captured in
-  /// [_SemanticsFragment]s), and the second creates the nodes of this tree and
-  /// hooks them together. The second walk is a sparse walk; it only walks the
-  /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsFragment(_semanticsClippingRect);
@@ -2287,10 +2266,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsNode node = interestingFragment.compileChildren().single;
     // Fragment only wants to add this node's SemanticsNode to the parent.
     assert(interestingFragment.config == null && node == _semantics);
-    debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
   }
 
-  // Value may be out-of-date if [_needsSemanticsGeometryUpdate] is true.
   Rect _semanticsClippingRect;
 
   /// Returns the Semantics that this node would like to add to its parent.
@@ -2312,11 +2289,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
 
     visitChildrenForSemantics((RenderObject renderChild) {
-      if (_needsSemanticsGeometryUpdate) {
-        // Child geometry needs to be recalculated if our geometry changed.
-        renderChild._needsSemanticsUpdate = true;
-        renderChild._needsSemanticsGeometryUpdate = true;
-      }
+      // Make sure that potential geometry changes are applied to child.
+      renderChild._needsSemanticsUpdate = true;
       final _SemanticsFragment fragment = renderChild._getSemanticsFragment(_semanticsClippingRect);
       if (fragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
@@ -2349,7 +2323,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       fragment.markAsExplicit();
 
     _needsSemanticsUpdate = false;
-    _needsSemanticsGeometryUpdate = false;
 
     _SemanticsFragment result;
     if (parent is! RenderObject) {

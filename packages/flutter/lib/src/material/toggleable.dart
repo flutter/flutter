@@ -122,7 +122,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true, noGeometry: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
@@ -178,7 +178,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
     }
   }
 

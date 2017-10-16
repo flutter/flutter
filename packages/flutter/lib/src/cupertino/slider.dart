@@ -253,7 +253,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive)
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
   }
 
   TextDirection get textDirection => _textDirection;
