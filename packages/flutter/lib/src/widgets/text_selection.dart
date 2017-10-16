@@ -509,7 +509,10 @@ class _TextSelectionHandleOverlayState extends State<_TextSelectionHandleOverlay
               child: widget.selectionControls.buildHandle(
                 context,
                 type,
-                widget.renderObject.size.height / widget.renderObject.maxLines,
+                widget.renderObject.maxLines != null
+                    ? widget.renderObject.size.height /
+                        widget.renderObject.maxLines
+                    : widget.renderObject.size.height,
               ),
             ),
           ],
