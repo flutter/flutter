@@ -16,7 +16,7 @@ class TestAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     if (key == 'AssetManifest.json')
-      return new ByteData.view(new Uint8List.fromList(new Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+      return new ByteData.view(new Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
 
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
@@ -51,7 +51,7 @@ void main() {
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
     // This is a regression test for https://github.com/flutter/flutter/issues/12392
     final AssetImage assetImage = new AssetImage('one', bundle: new TestAssetBundle());
-    AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
+    final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
     expect(key.name, 'one');
     expect(key.scale, 1.0);
   });
