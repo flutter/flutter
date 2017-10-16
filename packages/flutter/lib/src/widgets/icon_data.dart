@@ -14,16 +14,23 @@ class IconData {
   ///
   /// Rarely used directly. Instead, consider using one of the predefined icons
   /// like the [Icons] collection.
+  ///
+  /// The [package] argument must be non-null when using a font family that is
+  /// included in a package.
   const IconData(
     this.codePoint, {
-    this.fontFamily,
-  });
+    String fontFamily,
+    this.package,
+  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily';
 
   /// The Unicode code point at which this icon is stored in the icon font.
   final int codePoint;
 
   /// The font family from which the glyph for the [codePoint] will be selected.
   final String fontFamily;
+
+  // The name of the package from which the font family is included.
+  final String package;
 
   @override
   bool operator ==(dynamic other) {
