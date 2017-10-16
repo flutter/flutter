@@ -218,7 +218,7 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {
-    if (candidates == null || candidates.isEmpty)
+    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
