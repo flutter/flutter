@@ -82,7 +82,9 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
   // Some basic sanity checking.
   uint64_t expected_pixmap_data_size = pixmap.width() * pixmap.height() * 4;
 
-  if (expected_pixmap_data_size != pixmap.getSize64()) {
+  const size_t pixmap_size = pixmap.computeByteSize();
+
+  if (expected_pixmap_data_size != pixmap_size) {
     return false;
   }
 
@@ -90,10 +92,10 @@ bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
 
   // Setup the data provider that gives CG a view into the pixmap.
   fml::CFRef<CGDataProviderRef> pixmap_data_provider(CGDataProviderCreateWithData(
-      nullptr,             // info
-      pixmap.addr32(),     // data
-      pixmap.getSize64(),  // size
-      nullptr              // release callback
+      nullptr,          // info
+      pixmap.addr32(),  // data
+      pixmap_size,      // size
+      nullptr           // release callback
       ));
 
   if (!pixmap_data_provider) {
