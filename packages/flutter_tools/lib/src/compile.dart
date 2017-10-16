@@ -59,6 +59,7 @@ class _StdoutHandler {
 Future<String> compile(
     {String sdkRoot,
     String mainPath,
+    bool linkPlatformKernelIn : false,
     List<String> extraFrontEndOptions}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
@@ -73,6 +74,8 @@ Future<String> compile(
     '--sdk-root',
     sdkRoot,
   ];
+  if (!linkPlatformKernelIn)
+    command.add('--no-link-platform');
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
