@@ -2208,7 +2208,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _cachedSemanticsConfiguration = null;
     if ((attached && owner._semanticsOwner == null) || (_needsSemanticsUpdate && onlyLocalUpdates && (_needsSemanticsGeometryUpdate || noGeometry)))
       return;
-    print('^^^^ $this');
     if (!noGeometry && (_semantics == null || (_semantics.hasChildren && _semantics.wasAffectedByClip))) {
       // Since the geometry might have changed, we need to make sure to reapply any clips.
       _needsSemanticsGeometryUpdate = true;
@@ -2281,7 +2280,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// hooks them together. The second walk is a sparse walk; it only walks the
   /// nodes that are interesting for the purpose of semantics.
   void _updateSemantics() {
-    print('>>>>>>$this<<<<<<<');
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsFragment(_semanticsClippingRect);
     assert(fragment is _InterestingSemanticsFragment);
@@ -2289,7 +2287,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final SemanticsNode node = interestingFragment.compileChildren().single;
     // Fragment only wants to add this node's SemanticsNode to the parent.
     assert(interestingFragment.config == null && node == _semantics);
-    print('>>>>>ende<<<<<');
     debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest);
   }
 
