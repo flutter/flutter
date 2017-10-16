@@ -249,6 +249,7 @@ void Paragraph::Layout(double width, bool force) {
 
   records_.clear();
   line_heights_.clear();
+  glyph_position_x_.clear();
 
   minikin::Layout layout;
   SkTextBlobBuilder builder;
@@ -256,6 +257,7 @@ void Paragraph::Layout(double width, bool force) {
   size_t run_index = 0;
   double y_offset = 0;
   double prev_max_descent = 0;
+  double max_word_width = 0;
 
   for (size_t line_number = 0; line_number < line_limit; ++line_number) {
     size_t line_start = (line_number > 0) ? breaks[line_number - 1] : 0;
@@ -268,8 +270,8 @@ void Paragraph::Layout(double width, bool force) {
     bool justify_line =
         (paragraph_style_.text_align == TextAlign::justify &&
          line_number != line_limit - 1 && text_[line_end - 1] != '\n');
+    FindWords(text_, line_start, line_end, &words);
     if (justify_line) {
-      FindWords(text_, line_start, line_end, &words);
       if (words.size() > 1) {
         word_gap_width =
             (width_ - breaker_.getWidths()[line_number]) / (words.size() - 1);
@@ -370,6 +372,7 @@ void Paragraph::Layout(double width, bool force) {
 
       double justify_x_offset = 0;
       size_t code_unit_index = 0;
+      double word_start_position = std::numeric_limits<double>::quiet_NaN();
 
       for (const Range& glyph_blob : glyph_blobs) {
         paint.setTypeface(GetTypefaceForGlyph(layout, glyph_blob.start));
@@ -385,6 +388,11 @@ void Paragraph::Layout(double width, bool force) {
           double glyph_x_offset = layout.getX(glyph_index) + justify_x_offset;
           blob_buffer.pos[pos_index] = glyph_x_offset;
           blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
+
+          if (word_index < words.size() &&
+              code_unit_index == words[word_index].start) {
+            word_start_position = run_x_offset + glyph_x_offset;
+          }
 
           float glyph_advance = layout.getCharAdvance(code_unit_index);
 
@@ -416,10 +424,19 @@ void Paragraph::Layout(double width, bool force) {
                 subglyph_advance, subglyph_code_unit_counts[i]);
           }
 
-          if (justify_line && word_index < words.size() &&
+          if (word_index < words.size() &&
               code_unit_index == words[word_index].end) {
-            justify_x_offset += word_gap_width;
+            if (justify_line)
+              justify_x_offset += word_gap_width;
             word_index++;
+
+            if (!isnan(word_start_position)) {
+              double word_width =
+                  glyph_single_line_position_x.back().glyph_end() -
+                  word_start_position;
+              max_word_width = std::max(word_width, max_word_width);
+              word_start_position = std::numeric_limits<double>::quiet_NaN();
+            }
           }
         }
       }
@@ -470,12 +487,17 @@ void Paragraph::Layout(double width, bool force) {
     glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x));
   }
 
-  CalculateIntrinsicWidths();
+  max_intrinsic_width_ = 0;
+  for (size_t i = 0; i < breaks_count_; ++i) {
+    max_intrinsic_width_ += breaker_.getWidths()[i];
+  }
+  min_intrinsic_width_ = std::min(max_word_width, max_intrinsic_width_);
+
   breaker_.finish();
 }
 
 double Paragraph::GetLineXOffset(size_t line) {
-  if (line >= breaks_count_)
+  if (line >= breaks_count_ || isinf(width_))
     return 0;
 
   TextAlign align = paragraph_style_.text_align;
@@ -504,25 +526,6 @@ double Paragraph::GetAlphabeticBaseline() const {
 double Paragraph::GetIdeographicBaseline() const {
   // TODO(garyq): Currently -fAscent + fUnderlinePosition. Verify this.
   return ideographic_baseline_;
-}
-
-void Paragraph::CalculateIntrinsicWidths() {
-  max_intrinsic_width_ = 0;
-  for (size_t i = 0; i < GetLineCount(); ++i) {
-    max_intrinsic_width_ += breaker_.getWidths()[i];
-  }
-
-  // TODO(garyq): Investigate correctness of the following implementation of min
-  // intrinsic width. This is currently the longest line in the text after
-  // layout.
-  min_intrinsic_width_ = 0;
-  for (size_t i = 0; i < GetLineCount(); ++i) {
-    min_intrinsic_width_ = fmax(min_intrinsic_width_, breaker_.getWidths()[i]);
-  }
-
-  // Ensure that min < max widths.
-  min_intrinsic_width_ = std::min(max_intrinsic_width_, min_intrinsic_width_);
-  max_intrinsic_width_ = std::max(max_intrinsic_width_, min_intrinsic_width_);
 }
 
 double Paragraph::GetMaxIntrinsicWidth() const {
