@@ -112,15 +112,18 @@ static void ReleaseFetchedBytes(uint8_t* buffer) {
 tonic::DartErrorHandleType DartController::RunFromKernel(
     const std::vector<uint8_t>& kernel) {
   tonic::DartState::Scope scope(dart_state());
-  // Copy kernel bytes and pass ownership of the copy to the Dart_LoadKernel,
-  // which is expected to release them.
-  uint8_t* kernel_bytes = nullptr;
-  CopyVectorBytes(kernel, kernel_bytes);
+  tonic::DartErrorHandleType error = tonic::kNoError;
+  if (Dart_IsNull(Dart_RootLibrary())) {
+    // Copy kernel bytes and pass ownership of the copy to the Dart_LoadKernel,
+    // which is expected to release them.
+    uint8_t* kernel_bytes = nullptr;
+    CopyVectorBytes(kernel, kernel_bytes);
 
-  Dart_Handle result = Dart_LoadKernel(
-      Dart_ReadKernelBinary(kernel_bytes, kernel.size(), ReleaseFetchedBytes));
-  LogIfError(result);
-  tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
+    Dart_Handle result = Dart_LoadKernel(Dart_ReadKernelBinary(
+        kernel_bytes, kernel.size(), ReleaseFetchedBytes));
+    LogIfError(result);
+    error = tonic::GetErrorHandleType(result);
+  }
   if (SendStartMessage(Dart_RootLibrary())) {
     return tonic::kUnknownErrorType;
   }
@@ -141,9 +144,12 @@ tonic::DartErrorHandleType DartController::RunFromScriptSnapshot(
     const uint8_t* buffer,
     size_t size) {
   tonic::DartState::Scope scope(dart_state());
-  Dart_Handle result = Dart_LoadScriptFromSnapshot(buffer, size);
-  LogIfError(result);
-  tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
+  tonic::DartErrorHandleType error = tonic::kNoError;
+  if (Dart_IsNull(Dart_RootLibrary())) {
+    Dart_Handle result = Dart_LoadScriptFromSnapshot(buffer, size);
+    LogIfError(result);
+    error = tonic::GetErrorHandleType(result);
+  }
   if (SendStartMessage(Dart_RootLibrary())) {
     return tonic::kUnknownErrorType;
   }
@@ -154,12 +160,15 @@ tonic::DartErrorHandleType DartController::RunFromSource(
     const std::string& main,
     const std::string& packages) {
   tonic::DartState::Scope scope(dart_state());
-  tonic::FileLoader& loader = dart_state()->file_loader();
-  if (!packages.empty() && !loader.LoadPackagesMap(ResolvePath(packages)))
-    FXL_LOG(WARNING) << "Failed to load package map: " << packages;
-  Dart_Handle result = loader.LoadScript(main);
-  LogIfError(result);
-  tonic::DartErrorHandleType error = tonic::GetErrorHandleType(result);
+  tonic::DartErrorHandleType error = tonic::kNoError;
+  if (Dart_IsNull(Dart_RootLibrary())) {
+    tonic::FileLoader& loader = dart_state()->file_loader();
+    if (!packages.empty() && !loader.LoadPackagesMap(ResolvePath(packages)))
+      FXL_LOG(WARNING) << "Failed to load package map: " << packages;
+    Dart_Handle result = loader.LoadScript(main);
+    LogIfError(result);
+    error = tonic::GetErrorHandleType(result);
+  }
   if (SendStartMessage(Dart_RootLibrary())) {
     return tonic::kCompilationErrorType;
   }
