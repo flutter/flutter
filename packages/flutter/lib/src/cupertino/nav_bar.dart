@@ -291,19 +291,19 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       color: actionsForegroundColor,
     );
 
-    final Widget styledLeading = leading == null ? null : DefaultTextStyle.merge(
+    final Widget styledLeading = leading == null ? null : new DefaultTextStyle(
       style: actionsStyle,
       child: leading,
     );
 
-    final Widget styledTrailing = trailing == null ? null : DefaultTextStyle.merge(
+    final Widget styledTrailing = trailing == null ? null : new DefaultTextStyle(
       style: actionsStyle,
       child: trailing,
     );
 
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
-    final Widget styledMiddle = middle == null ? null : DefaultTextStyle.merge(
+    final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
       style: actionsStyle.copyWith(
         fontWeight: FontWeight.w600,
         letterSpacing: -0.72,
