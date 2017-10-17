@@ -222,7 +222,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
+    super.describeSemanticsConfiguration(config);
+
+    if (_excludeFromSemanticsScrolling)
+      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
   }
 
   @override
