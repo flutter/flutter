@@ -160,7 +160,7 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
-  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'), testPath: 'integration_test', retries: 3);
+  await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'), testPath: 'integration_test', maxAttempts: 3);
 
   await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
@@ -205,17 +205,17 @@ Future<Null> _runCoverage() async {
 Future<Null> _pubRunTest(
   String workingDirectory, {
   String testPath,
-  int retries = 1,
+  int maxAttempts = 1,
 }) async {
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  for (int i = 0; i < retries; ++i) {
-    if(await _runCommand(pub, args, workingDirectory: workingDirectory))
+  for (int i = 0; i < maxAttempts; ++i) {
+    if (await _runCommand(pub, args, workingDirectory: workingDirectory))
       return;
 
-    if (i < retries)
-      print('Retrying $workingDirectory/$testPath (${i + 2} of $retries)');
+    if (i < maxAttempts)
+      print('Retrying $workingDirectory/$testPath (${i + 2} of $maxAttempts)');
   }
   exit(1);
 }
