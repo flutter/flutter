@@ -77,4 +77,6 @@ class CupertinoIcons {
 
   /// A checkmark in a circle.
   static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  static const IconData back = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
