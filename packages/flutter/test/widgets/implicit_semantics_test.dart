@@ -31,8 +31,8 @@ void main() {
       ),
     );
 
-    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Michael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    // SemanticsNode#0()
+    //  └SemanticsNode#1(label: "Michael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(
@@ -65,10 +65,10 @@ void main() {
       ),
     );
 
-    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //    ├SemanticsNode#2(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Michael Goderbauer", textDirection: ltr)
-    //    └SemanticsNode#3(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "goderbauer@google.com", textDirection: ltr)
+    // SemanticsNode#0()
+    //  └SemanticsNode#1()
+    //    ├SemanticsNode#2(label: "Michael Goderbauer", textDirection: ltr)
+    //    └SemanticsNode#3(label: "goderbauer@google.com", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(
@@ -113,9 +113,9 @@ void main() {
       ),
     );
 
-    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //    └SemanticsNode#4(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    // SemanticsNode#0()
+    //  └SemanticsNode#1()
+    //    └SemanticsNode#4(label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(
@@ -156,8 +156,8 @@ void main() {
       ),
     );
 
-    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //  └SemanticsNode#1(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
+    // SemanticsNode#0()
+    //  └SemanticsNode#1(label: "Signed in as\nMichael Goderbauer\ngoderbauer@google.com", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(
@@ -188,17 +188,29 @@ void main() {
           explicitChildNodes: false,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 label: 'node 1',
                 selected: true,
+                child: new Container(
+                  width: 10.0,
+                  height: 10.0,
+                ),
               ),
-              const Semantics(
+              new Semantics(
                 label: 'node 2',
                 selected: true,
+                child: new Container(
+                  width: 10.0,
+                  height: 10.0,
+                ),
               ),
-              const Semantics(
+              new Semantics(
                 label: 'node 3',
                 selected: true,
+                child: new Container(
+                  width: 10.0,
+                  height: 10.0,
+                ),
               ),
             ],
           ),
@@ -206,11 +218,11 @@ void main() {
       ),
     );
 
-    // SemanticsNode#0(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //  └SemanticsNode#8(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0))
-    //   ├SemanticsNode#5(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 1", textDirection: ltr)
-    //   ├SemanticsNode#6(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 2", textDirection: ltr)
-    //   └SemanticsNode#7(Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), selected, label: "node 3", textDirection: ltr)
+    // SemanticsNode#0()
+    //  └SemanticsNode#8()
+    //   ├SemanticsNode#5(selected, label: "node 1", textDirection: ltr)
+    //   ├SemanticsNode#6(selected, label: "node 2", textDirection: ltr)
+    //   └SemanticsNode#7(selected, label: "node 3", textDirection: ltr)
     expect(
       semantics,
       hasSemantics(

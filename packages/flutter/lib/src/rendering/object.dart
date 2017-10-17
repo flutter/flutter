@@ -2273,9 +2273,14 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Returns the Semantics that this node would like to add to its parent.
   _SemanticsFragment _getSemanticsFragment(Rect parentClippingRect, bool mergeIntoParent) {
     final SemanticsConfiguration config = _semanticsConfiguration;
+    bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
 
     final _SemanticsGeometry geometry = new _SemanticsGeometry(this, parentClippingRect);
     _semanticsClippingRect = geometry.clipRect;
+
+    // Shortcut if this fragment cannot be exposed to user.
+    if (_semanticsConfiguration.isSemanticBoundary && !mergeIntoParent && geometry.isInvisible)
+      return new _ContainerSemanticsFragment(dropSemanticsOfPreviousSiblings);
 
     if (!_needsSemanticsUpdate && config.isSemanticBoundary) {
       // Nothing has changed, re-use old fragment.
@@ -2284,7 +2289,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         return new _CleanSemanticsFragment(_semantics, geometry, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
     }
 
-    bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
@@ -3026,6 +3030,7 @@ class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
     geometry.updateNode(_node);
+    assert(!_node.isInvisible);
     yield _node;
   }
 
@@ -3063,6 +3068,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
     assert(!node.wasAffectedByClip);
     node.rect = _owner.semanticBounds;
+    assert(!node.isInvisible);
     yield node;
   }
 
@@ -3120,6 +3126,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
       yield* _children;
       return;
     }
+    if (!_mergeIntoParent && geometry.rect.isEmpty)
+      return;  // Drop the node, it's not going to be visible.
     _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
     final SemanticsNode node = _owner._semantics;
     geometry.updateNode(node);
@@ -3164,12 +3172,12 @@ class _SemanticsGeometry {
 
   Rect get clipRect {
     if (!_isClipRectValid) {
-      _clipRect = _computeClipRect();
+      __clipRect = _computeClipRect();
       _isClipRectValid = true;
     }
-    return _clipRect;
+    return __clipRect;
   }
-  Rect _clipRect;
+  Rect __clipRect;
   bool _isClipRectValid = false;
 
   Rect _computeClipRect() {
@@ -3197,6 +3205,15 @@ class _SemanticsGeometry {
     return MatrixUtils.inverseTransformRect(clipTransform, clip);
   }
 
+  Rect get rect {
+    if (__rect == null)
+      __rect = _computeRect();
+    return __rect;
+  }
+  Rect __rect;
+
+  Rect _computeRect() => clipRect == null ? _owner.semanticBounds : clipRect.intersect(_owner.semanticBounds);
+
   Matrix4 _computeTransformation() {
     assert(_ancestorChain.length > 1);
     final Matrix4 transform = new Matrix4.identity();
@@ -3212,18 +3229,15 @@ class _SemanticsGeometry {
   void updateNode(SemanticsNode node) {
     if (_ancestorChain.length > 1)
       node.transform = _computeTransformation();
-    final Rect semanticBounds = _owner.semanticBounds;
-    if (_clipRect != null) {
-      final Rect rect = _clipRect.intersect(semanticBounds);
-      node.rect = rect;
-      node.wasAffectedByClip = true;
-    } else {
-      node.rect = semanticBounds;
-      node.wasAffectedByClip = false;
-    }
+    node.rect = rect;
+    node.wasAffectedByClip = rect != _owner.semanticBounds;
   }
 
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
+  }
+
+  bool get isInvisible {
+    return clipRect != null && clipRect.isEmpty || rect.isEmpty;
   }
 }

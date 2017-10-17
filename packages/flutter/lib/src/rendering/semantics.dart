@@ -487,7 +487,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
     if (_newChildren != null) {
       for (SemanticsNode child in _newChildren) {
-//        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
+        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
         child._dead = false;
       }
     }
