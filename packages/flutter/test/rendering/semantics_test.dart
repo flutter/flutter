@@ -21,39 +21,38 @@ void main() {
       expect(node.hasTag(tag1), isFalse);
       expect(node.hasTag(tag2), isFalse);
 
-      node.addTag(tag1);
+      node.tags = new Set<SemanticsTag>()..add(tag1);
       expect(node.hasTag(tag1), isTrue);
       expect(node.hasTag(tag2), isFalse);
 
-      node.addTag(tag2);
+      node.tags.add(tag2);
       expect(node.hasTag(tag1), isTrue);
       expect(node.hasTag(tag2), isTrue);
     });
 
     test('getSemanticsData includes tags', () {
-      final SemanticsNode node = new SemanticsNode()
-        ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
-        ..addTag(tag1)
-        ..addTag(tag2);
-
-      final Set<SemanticsTag> expected = new Set<SemanticsTag>()
+      final Set<SemanticsTag> tags = new Set<SemanticsTag>()
         ..add(tag1)
         ..add(tag2);
 
-      expect(node.getSemanticsData().tags, expected);
+      final SemanticsNode node = new SemanticsNode()
+        ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..tags = tags;
+
+      expect(node.getSemanticsData().tags, tags);
+
+      tags.add(tag3);
 
       node.mergeAllDescendantsIntoThisNode = true;
       node.addChildren(<SemanticsNode>[
         new SemanticsNode()
           ..isMergedIntoParent = true
           ..rect = new Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
-          ..addTag(tag3),
+          ..tags = tags,
       ]);
       node.finalizeChildren();
 
-      expected.add(tag3);
-
-      expect(node.getSemanticsData().tags, expected);
+      expect(node.getSemanticsData().tags, tags);
     });
 
     test('after markNeedsSemanticsUpdate(onlyLocalUpdates: true) all render objects between two semantic boundaries are asked for annotations', () {
@@ -188,7 +187,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], tags: [], isSelected: false, label: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], isSelected: false, label: "", textDirection: null)\n',
     );
 
     final SemanticsNode allProperties = new SemanticsNode()
@@ -231,7 +230,7 @@ void main() {
 
     expect(node.hasTag(tag), isFalse);
 
-    node.addTag(tag);
+    node.tags = new Set<SemanticsTag>()..add(tag);
 
     expect(node.hasTag(tag), isTrue);
 

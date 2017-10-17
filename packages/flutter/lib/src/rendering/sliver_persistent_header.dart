@@ -13,6 +13,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
@@ -219,12 +220,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     markNeedsSemanticsUpdate();
   }
 
-//  @override
-//  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
-//
-//  void _annotate(SemanticsNode node) {
-//    node.addTag(RenderSemanticsGestureHandler.excludeFromScrolling);
-//  }
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

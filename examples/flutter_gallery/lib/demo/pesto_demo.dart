@@ -251,48 +251,46 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MergeSemantics(
-      child: new GestureDetector(
-        onTap: onTap,
-        child: new Card(
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Hero(
-                tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
-                child: new Image.asset(
-                  recipe.imagePath,
-                  package: recipe.imagePackage,
-                  fit: BoxFit.contain,
-                ),
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Card(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Hero(
+              tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
+              child: new Image.asset(
+                recipe.imagePath,
+                package: recipe.imagePackage,
+                fit: BoxFit.contain,
               ),
-              new Expanded(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: new Image.asset(
-                        recipe.ingredientsImagePath,
-                        package: recipe.ingredientsImagePackage,
-                        width: 48.0,
-                        height: 48.0,
-                      ),
+            ),
+            new Expanded(
+              child: new Row(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Image.asset(
+                      recipe.ingredientsImagePath,
+                      package: recipe.ingredientsImagePackage,
+                      width: 48.0,
+                      height: 48.0,
                     ),
-                    new Expanded(
-                      child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
-                          new Text(recipe.author, style: authorStyle),
-                        ],
-                      ),
+                  ),
+                  new Expanded(
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
+                        new Text(recipe.author, style: authorStyle),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

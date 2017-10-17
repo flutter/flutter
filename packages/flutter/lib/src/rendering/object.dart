@@ -2282,21 +2282,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (_semanticsConfiguration.isSemanticBoundary && !mergeIntoParent && geometry.isInvisible)
       return new _ContainerSemanticsFragment(dropSemanticsOfPreviousSiblings);
 
-    if (!_needsSemanticsUpdate && config.isSemanticBoundary) {
-      // Nothing has changed, re-use old fragment.
-      assert(_semantics != null);
-      if (mergeIntoParent == _semantics.isMergedIntoParent)
-        return new _CleanSemanticsFragment(_semantics, geometry, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
-    }
-
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
-      // Make sure that potential geometry changes are applied to child.
-      renderChild._needsSemanticsUpdate = true;
       final _SemanticsFragment fragment = renderChild._getSemanticsFragment(_semanticsClippingRect, childrenMergeIntoParent);
       if (fragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
@@ -2308,6 +2299,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
         fragments.add(fragment);
         fragment.geometry.addAncestor(this);
+        fragment.addTags(config.tagsForChildren);
         if (config.explicitChildNodes || parent is! RenderObject) {
           fragment.markAsExplicit();
           continue;
@@ -2373,13 +2365,13 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to the tree. If a subclass adds additional nodes in this method, it also
   /// needs to override [resetSemantics] to call [SemanticsNode.reset] on those
   /// additional [SemanticsNode]s.
-  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-//    assert(node == _semantics);
-//    if (semanticsAnnotator != null)
-//      semanticsAnnotator(node);
-//    node.addChildren(children);
-//    node.finalizeChildren();
-  // TODO(goderbauer)
+  void assembleSemanticsNode(
+      SemanticsNode node,
+      SemanticsConfiguration config,
+      Iterable<SemanticsNode> children,
+  ) {
+    assert(node == _semantics);
+    node.replaceWith(config, children);
   }
 
   // EVENTS
@@ -3018,33 +3010,13 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   Iterable<_InterestingSemanticsFragment> get interestingFragments sync* {
     yield this;
   }
-}
 
-/// An [_InterestingSemanticsFragment] that just wants to add a single
-/// pre-compiled [SemanticsNode] to the parent.
-class _CleanSemanticsFragment extends _InterestingSemanticsFragment {
-  _CleanSemanticsFragment(this._node, _SemanticsGeometry geometry, bool dropsSemanticsOfPreviousSiblings ) : super(geometry, dropsSemanticsOfPreviousSiblings);
-
-  final SemanticsNode _node;
-
-  @override
-  Iterable<SemanticsNode> compileChildren() sync* {
-    geometry.updateNode(_node);
-    assert(!_node.isInvisible);
-    yield _node;
-  }
-
-  @override
-  SemanticsConfiguration get config => null;
-
-  @override
-  void markAsExplicit() {
-    // nothing to do, we are always explicit.
-  }
-
-  @override
-  void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    assert(false, 'cannot add semantic information to a $runtimeType');
+  Set<SemanticsTag> _tagsForChildren;
+  void addTags(Iterable<SemanticsTag> tags) {
+    if (tags == null || tags.isEmpty)
+      return;
+    _tagsForChildren ??= new Set<SemanticsTag>();
+    _tagsForChildren.addAll(tags);
   }
 }
 
@@ -3060,6 +3032,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
+    assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
     _owner._semantics ??= new SemanticsNode.root(
       showOnScreen: _owner.showOnScreen,
       owner: _owner.owner.semanticsOwner,
@@ -3129,9 +3102,18 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     if (!_mergeIntoParent && geometry.rect.isEmpty)
       return;  // Drop the node, it's not going to be visible.
     _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
-    final SemanticsNode node = _owner._semantics;
+    final SemanticsNode node = _owner._semantics
+      ..isMergedIntoParent = _mergeIntoParent
+      ..tags = _tagsForChildren;
+
     geometry.updateNode(node);
-    node.replaceWith(_config, _children, _mergeIntoParent);
+
+    if (_config.isSemanticBoundary) {
+      _owner.assembleSemanticsNode(node, _config, _children);
+    } else {
+      node.replaceWith(_config, _children);
+    }
+
     yield node;
   }
 

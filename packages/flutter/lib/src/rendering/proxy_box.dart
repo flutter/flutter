@@ -3037,34 +3037,32 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     _annotatedNode?.sendEvent(event);
   }
 
-//  @override
-//  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-//    if (!node.hasTag(useTwoPaneSemantics)) {
-//      super.assembleSemanticsNode(node, children);
-//      return;
-//    }
-//
-//    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
-//    _innerNode
-//      ..wasAffectedByClip = node.wasAffectedByClip
-//      ..isMergedIntoParent = node.isPartOfNodeMerging
-//      ..rect = Offset.zero & node.rect.size;
-//
-//    semanticsAnnotator(_innerNode);
-//
-//    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
-//    final List<SemanticsNode> included = <SemanticsNode>[];
-//    for (SemanticsNode child in children) {
-//      if (child.hasTag(excludeFromScrolling))
-//        excluded.add(child);
-//      else
-//        included.add(child);
-//    }
-//    node.addChildren(excluded);
-//    _innerNode.addChildren(included);
-//    _innerNode.finalizeChildren();
-//    node.finalizeChildren();
-//  }
+  @override
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty || !children.first.hasTag(useTwoPaneSemantics)) {
+      super.assembleSemanticsNode(node, config, children);
+      return;
+    }
+
+    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
+    _innerNode
+      ..wasAffectedByClip = node.wasAffectedByClip
+      ..isMergedIntoParent = node.isPartOfNodeMerging
+      ..rect = Offset.zero & node.rect.size;
+
+    final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
+    final List<SemanticsNode> included = <SemanticsNode>[];
+    for (SemanticsNode child in children) {
+      assert(child.hasTag(useTwoPaneSemantics));
+      if (child.hasTag(excludeFromScrolling))
+        excluded.add(child);
+      else
+        included.add(child);
+    }
+    node.addChildren(excluded);
+    _innerNode.replaceWith(config, included);
+    node.finalizeChildren();
+  }
 
   @override
   void resetSemantics() {

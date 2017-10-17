@@ -78,14 +78,13 @@ class SemanticsData extends Diagnosticable {
     @required this.label,
     @required this.textDirection,
     @required this.rect,
-    @required this.tags,
+    this.tags,
     this.transform,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
        assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
-       assert(rect != null),
-       assert(tags != null);
+       assert(rect != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
@@ -382,30 +381,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  final Set<SemanticsTag> _tags = new Set<SemanticsTag>();
+  Set<SemanticsTag> tags;
 
-  /// Tags the [SemanticsNode] with [tag].
-  ///
-  /// Tags are not sent to the engine. They can be used by a parent
-  /// [SemanticsNode] to figure out how to add the node as a child.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
-  ///  * [hasTag] to check if the node has a certain tag.
-  void addTag(SemanticsTag tag) {
-    assert(tag != null);
-    _tags.add(tag);
-  }
-
-  /// Check if the [SemanticsNode] is tagged with [tag].
-  ///
-  /// Tags can be added and removed with [ensureTag].
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
-  bool hasTag(SemanticsTag tag) => _tags.contains(tag);
+  bool hasTag(SemanticsTag tag) => tags != null && tags.contains(tag);
 
   /// Restore this node to its default state.
   void reset() {
@@ -414,7 +392,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _label = '';
     _textDirection = null;
     _mergeAllDescendantsIntoThisNode = false;
-    _tags.clear();
+    tags = null;
     _markDirty();
   }
 
@@ -618,13 +596,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  void replaceWith(SemanticsConfiguration config, List<SemanticsNode> children, bool isMergedIntoParent) {
+  void replaceWith(SemanticsConfiguration config, List<SemanticsNode> children) {
     _flags = config._flags;
     _label = config.label;
     _textDirection = config.textDirection;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _actions = config._actions;
-    _isMergedIntoParent = isMergedIntoParent;
     addChildren(children);
     finalizeChildren();
     _markDirty();
@@ -642,7 +619,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int actions = _actionsAsBitMap;
     String label = _label;
     TextDirection textDirection = _textDirection;
-    final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
+    Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
@@ -650,7 +627,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBitMap;
         textDirection ??= node._textDirection;
-        tags.addAll(node._tags);
+        if (node.tags != null) {
+          mergedTags ??= new Set<SemanticsTag>();
+          mergedTags.addAll(node.tags);
+        }
         if (node.label.isNotEmpty) {
           String nestedLabel = node.label;
           if (textDirection != node.textDirection && node.textDirection != null) {
@@ -679,7 +659,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: textDirection,
       rect: rect,
       transform: transform,
-      tags: tags,
+      tags: mergedTags,
     );
   }
 
@@ -766,7 +746,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, ifEmpty: null));
     if (hasCheckedState)
       properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: isSelected, ifTrue: 'selected'));
@@ -1136,6 +1115,16 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlags.isChecked, value);
   }
 
+  // TAGS
+
+  Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
+  Set<SemanticsTag> _tagsForChildren;
+
+  void addTagForChildren(SemanticsTag tag) {
+    _tagsForChildren ??= new Set<SemanticsTag>();
+    _tagsForChildren.add(tag);
+  }
+
   // INTERNAL FLAG MANAGEMENT
 
   int _flags = 0;
@@ -1214,13 +1203,5 @@ class SemanticsConfiguration {
       .._label = _label
       .._flags = _flags
       .._actions.addAll(_actions);
-  }
-
-  @override
-  String toString() {
-    final List<String> options = <String>[];
-    if (_label != '')
-      options.add('label: "$label"');
-    return '$runtimeType(${options.join(', ')})';
   }
 }
