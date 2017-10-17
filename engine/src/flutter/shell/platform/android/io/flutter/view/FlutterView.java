@@ -173,11 +173,16 @@ public class FlutterView extends SurfaceView
             StringCodec.INSTANCE);
         mFlutterSystemChannel = new BasicMessageChannel<>(this, "flutter/system",
             JSONMessageCodec.INSTANCE);
-        PlatformPlugin platformPlugin = new PlatformPlugin((Activity) getContext());
-        MethodChannel flutterPlatformChannel = new MethodChannel(this,
-            "flutter/platform", JSONMethodCodec.INSTANCE);
-        flutterPlatformChannel.setMethodCallHandler(platformPlugin);
-        addActivityLifecycleListener(platformPlugin);
+
+        // TODO(plugins): Change PlatformPlugin to accept a Context. Disable the
+        // operations that require an Activity when a Context is passed.
+        if (getContext() instanceof Activity) {
+            PlatformPlugin platformPlugin = new PlatformPlugin((Activity) getContext());
+            MethodChannel flutterPlatformChannel = new MethodChannel(this,
+                "flutter/platform", JSONMethodCodec.INSTANCE);
+            flutterPlatformChannel.setMethodCallHandler(platformPlugin);
+            addActivityLifecycleListener(platformPlugin);
+        }
         mTextInputPlugin = new TextInputPlugin(this);
 
         setLocale(getResources().getConfiguration().locale);
@@ -285,7 +290,7 @@ public class FlutterView extends SurfaceView
       message.put("textScaleFactor", textScaleFactor);
       mFlutterSystemChannel.send(message);
     }
-    
+
     private void setLocale(Locale locale) {
         mFlutterLocalizationChannel.invokeMethod("setLocale",
             Arrays.asList(locale.getLanguage(), locale.getCountry()));

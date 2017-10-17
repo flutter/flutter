@@ -496,14 +496,16 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 
 void Engine::ConfigureRuntime(const std::string& script_uri,
                               const std::vector<uint8_t>& platform_kernel) {
-  runtime_ = blink::RuntimeController::Create(this);
-  runtime_->CreateDartController(
-      std::move(script_uri), default_isolate_snapshot_data,
-      default_isolate_snapshot_instr, platform_kernel);
-  runtime_->SetViewportMetrics(viewport_metrics_);
-  runtime_->SetLocale(language_code_, country_code_);
-  runtime_->SetTextScaleFactor(text_scale_factor_);
-  runtime_->SetSemanticsEnabled(semantics_enabled_);
+  if (!runtime_) {
+    runtime_ = blink::RuntimeController::Create(this);
+    runtime_->CreateDartController(
+        std::move(script_uri), default_isolate_snapshot_data,
+        default_isolate_snapshot_instr, platform_kernel);
+    runtime_->SetViewportMetrics(viewport_metrics_);
+    runtime_->SetLocale(language_code_, country_code_);
+    runtime_->SetTextScaleFactor(text_scale_factor_);
+    runtime_->SetSemanticsEnabled(semantics_enabled_);
+  }
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {
