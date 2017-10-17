@@ -971,6 +971,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return;
     }
 
+    // There's no point in drawing the children if we're empty.
+    if (size.isEmpty)
+      return;
+
     // We have overflow. Clip it.
     context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
