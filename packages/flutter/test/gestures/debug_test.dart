@@ -43,7 +43,7 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(log, hasLength(2));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Sweeping with 1 member.'));
-    expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready)'));
+    expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0))'));
     log.clear();
 
     tap.dispose();
@@ -83,9 +83,9 @@ void main() {
 
     GestureBinding.instance.gestureArena.sweep(1);
     expect(log, hasLength(3));
-    expect(log[0], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready) calling onTapDown callback.'));
-    expect(log[1], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready) calling onTapUp callback.'));
-    expect(log[2], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready) calling onTap callback.'));
+    expect(log[0], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0)) calling onTapDown callback.'));
+    expect(log[1], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready, won arena, finalPosition: Offset(12.0, 8.0), sent tap down) calling onTapUp callback.'));
+    expect(log[2], equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready, won arena, finalPosition: Offset(12.0, 8.0), sent tap down) calling onTap callback.'));
     log.clear();
 
     tap.dispose();
@@ -132,10 +132,10 @@ void main() {
     GestureBinding.instance.gestureArena.sweep(1);
     expect(log, hasLength(5));
     expect(log[0], equalsIgnoringHashCodes('Gesture arena 1    ❙ Sweeping with 1 member.'));
-    expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready)'));
-    expect(log[2], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready) calling onTapDown callback.'));
-    expect(log[3], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready) calling onTapUp callback.'));
-    expect(log[4], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready) calling onTap callback.'));
+    expect(log[1], equalsIgnoringHashCodes('Gesture arena 1    ❙ Winner: TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0))'));
+    expect(log[2], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready, finalPosition: Offset(12.0, 8.0)) calling onTapDown callback.'));
+    expect(log[3], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready, won arena, finalPosition: Offset(12.0, 8.0), sent tap down) calling onTapUp callback.'));
+    expect(log[4], equalsIgnoringHashCodes('                   ❙ TapGestureRecognizer#00000(state: ready, won arena, finalPosition: Offset(12.0, 8.0), sent tap down) calling onTap callback.'));
     log.clear();
 
     tap.dispose();
@@ -144,5 +144,14 @@ void main() {
     debugPrintGestureArenaDiagnostics = false;
     debugPrintRecognizerCallbacksTrace = false;
     debugPrint = oldCallback;
+  });
+
+  test('TapGestureRecognizer _sentTapDown toString', () {
+    final TapGestureRecognizer tap = new TapGestureRecognizer();
+    expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: ready)'));
+    final PointerEvent event = const PointerDownEvent(pointer: 1, position: const Offset(10.0, 10.0));
+    tap.addPointer(event);
+    tap.didExceedDeadline();
+    expect(tap.toString(), equalsIgnoringHashCodes('TapGestureRecognizer#00000(state: possible, sent tap down)'));
   });
 }
