@@ -132,11 +132,9 @@ void IsolateShutdownCallback(void* callback_data) {
     FXL_CHECK(LogIfError(sticky_error));
   }
   UIDartState* dart_state = static_cast<UIDartState*>(callback_data);
-  IsolateClient* isolate_client = dart_state->isolate_client();
-  if (isolate_client) {
-    isolate_client->WillShutDownIsolate(dart_state->isolate());
+  if ((dart_state != NULL) && !dart_state->is_controller_state()) {
+    delete dart_state;
   }
-  delete dart_state;
 }
 
 bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
@@ -296,6 +294,7 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
                                g_default_isolate_snapshot_instructions, nullptr,
                                dart_state, error);
   FXL_CHECK(isolate) << error;
+  dart_state->set_debug_name_prefix(script_uri);
   dart_state->SetIsolate(isolate);
   FXL_CHECK(!LogIfError(
       Dart_SetLibraryTagHandler(tonic::DartState::HandleLibraryTag)));

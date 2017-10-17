@@ -62,7 +62,6 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void HandlePlatformMessage(fxl::RefPtr<PlatformMessage> message) override;
 
   void DidCreateSecondaryIsolate(Dart_Isolate isolate) override;
-  void WillShutDownIsolate(Dart_Isolate isolate) override;
 
   RuntimeDelegate* client_;
   std::string language_code_;
