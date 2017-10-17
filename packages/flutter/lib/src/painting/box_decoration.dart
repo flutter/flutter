@@ -148,14 +148,13 @@ class BoxDecoration extends Decoration {
 
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
-    // TODO(abarth): Scale ALL the things.
     return new BoxDecoration(
       color: Color.lerp(null, color, factor),
-      image: image,
+      image: image, // TODO(ianh): fade the image from transparent
       border: BoxBorder.lerp(null, border, factor),
       borderRadius: BorderRadius.lerp(null, borderRadius, factor),
       boxShadow: BoxShadow.lerpList(null, boxShadow, factor),
-      gradient: gradient,
+      gradient: gradient?.scale(factor),
       shape: shape,
     );
   }
@@ -165,6 +164,8 @@ class BoxDecoration extends Decoration {
 
   @override
   BoxDecoration lerpFrom(Decoration a, double t) {
+    if (a == null)
+      return scale(t);
     if (a is BoxDecoration)
       return BoxDecoration.lerp(a, this, t);
     return super.lerpFrom(a, t);
@@ -172,6 +173,8 @@ class BoxDecoration extends Decoration {
 
   @override
   BoxDecoration lerpTo(Decoration b, double t) {
+    if (b == null)
+      return scale(1.0 - t);
     if (b is BoxDecoration)
       return BoxDecoration.lerp(this, b, t);
     return super.lerpTo(b, t);
@@ -180,6 +183,16 @@ class BoxDecoration extends Decoration {
   /// Linearly interpolate between two box decorations.
   ///
   /// Interpolates each parameter of the box decoration separately.
+  ///
+  /// The [shape] is not interpolated. To interpolate the shape, consider using
+  /// a [ShapeDecoration] with different border shapes.
+  ///
+  /// If both values are null, this returns null. Otherwise, it returns a
+  /// non-null value. If one of the values is null, then the result is obtained
+  /// by applying [scale] to the other value. If neither value is null and `t ==
+  /// 0.0`, then `a` is returned unmodified; if `t == 1.0` then `b` is returned
+  /// unmodified. Otherwise, the values are computed by interpolating the
+  /// properties appropriately.
   ///
   /// See also:
   ///
@@ -195,14 +208,17 @@ class BoxDecoration extends Decoration {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    // TODO(abarth): lerp ALL the fields.
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
     return new BoxDecoration(
       color: Color.lerp(a.color, b.color, t),
-      image: t < 0.5 ? a.image : b.image,
+      image: t < 0.5 ? a.image : b.image, // TODO(ianh): cross-fade the image
       border: BoxBorder.lerp(a.border, b.border, t),
       borderRadius: BorderRadius.lerp(a.borderRadius, b.borderRadius, t),
       boxShadow: BoxShadow.lerpList(a.boxShadow, b.boxShadow, t),
-      gradient: t < 0.5 ? a.gradient : b.gradient,
+      gradient: Gradient.lerp(a.gradient, b.gradient, t),
       shape: t < 0.5 ? a.shape : b.shape,
     );
   }

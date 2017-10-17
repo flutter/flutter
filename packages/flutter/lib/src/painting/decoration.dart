@@ -95,26 +95,26 @@ abstract class Decoration extends Diagnosticable {
 
   /// Linearly interpolates from `begin` to `end`.
   ///
-  /// This defers to `end`'s [lerpTo] function if `end` is not null. If `end` is
-  /// null or if its [lerpTo] returns null, it uses `begin`'s [lerpFrom]
-  /// function instead. If both return null, it attempts to lerp from `begin` to
-  /// null if `t<0.5`, or null to `end` if `t≥0.5`.
+  /// This attempts to use [lerpFrom] and [lerpTo] on `end` and `begin`
+  /// respectively to find a solution. If the two values can't directly be
+  /// interpolated, then the interpolation is done via null (at `t == 0.5`).
+  ///
+  /// If the values aren't null, then for `t == 0.0` and `t == 1.0` the values
+  /// `begin` and `end` are return verbatim.
   static Decoration lerp(Decoration begin, Decoration end, double t) {
-    Decoration result;
-    if (end != null)
-      result = end.lerpFrom(begin, t);
-    if (result == null && begin != null)
-      result = begin.lerpTo(end, t);
-    if (result == null && begin != null && end != null) {
-      if (t < 0.5) {
-        result = begin.lerpTo(null, t * 2.0);
-      } else {
-        result = end.lerpFrom(null, (t - 0.5) * 2.0);
-      }
-    }
-    if (result == null)
-      result = t < 0.5 ? begin : end;
-    return result;
+    if (begin == null && end == null)
+      return null;
+    if (begin == null)
+      return end.lerpFrom(null, t) ?? end;
+    if (end == null)
+      return begin.lerpTo(null, t) ?? begin;
+    if (t == 0.0)
+      return begin;
+    if (t == 1.0)
+      return end;
+    return end.lerpFrom(begin, t)
+        ?? begin.lerpTo(end, t)
+        ?? (t < 0.5 ? begin.lerpTo(null, t * 2.0) : end.lerpFrom(null, (t - 0.5) * 2.0));
   }
 
   /// Tests whether the given point, on a rectangle of a given size,

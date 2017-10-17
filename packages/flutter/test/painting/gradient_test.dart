@@ -38,7 +38,6 @@ void main() {
         const Color(0x66666666),
       ],
     );
-
     final LinearGradient testGradient2 = const LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.topLeft,
@@ -47,8 +46,8 @@ void main() {
         const Color(0x88888888),
       ],
     );
-    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
 
+    final LinearGradient actual = LinearGradient.lerp(testGradient1, testGradient2, 0.5);
     expect(actual, const LinearGradient(
       begin: const Alignment(0.0, -1.0),
       end: const Alignment(-1.0, 0.0),
@@ -151,5 +150,91 @@ void main() {
       },
       returnsNormally,
     );
+  });
+
+  test('RadialGradient lerp test', () {
+    final RadialGradient testGradient1 = const RadialGradient(
+      center: Alignment.topLeft,
+      radius: 20.0,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    final RadialGradient testGradient2 = const RadialGradient(
+      center: Alignment.topRight,
+      radius: 10.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    final RadialGradient actual = RadialGradient.lerp(testGradient1, testGradient2, 0.5);
+    expect(actual, const RadialGradient(
+      center: const Alignment(0.0, -1.0),
+      radius: 15.0,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    ));
+  });
+
+  test('Gradient lerp test (with RadialGradient)', () {
+    final RadialGradient testGradient1 = const RadialGradient(
+      center: Alignment.topLeft,
+      radius: 20.0,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    final RadialGradient testGradient2 = const RadialGradient(
+      center: const Alignment(0.0, -1.0),
+      radius: 15.0,
+      colors: const <Color>[
+        const Color(0x3B3B3B3B),
+        const Color(0x77777777),
+      ],
+    );
+    final RadialGradient testGradient3 = const RadialGradient(
+      center: Alignment.topRight,
+      radius: 10.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    expect(Gradient.lerp(testGradient1, testGradient3, 0.0), testGradient1);
+    expect(Gradient.lerp(testGradient1, testGradient3, 0.5), testGradient2);
+    expect(Gradient.lerp(testGradient1, testGradient3, 1.0), testGradient3);
+    expect(Gradient.lerp(testGradient3, testGradient1, 0.0), testGradient3);
+    expect(Gradient.lerp(testGradient3, testGradient1, 0.5), testGradient2);
+    expect(Gradient.lerp(testGradient3, testGradient1, 1.0), testGradient1);
+  });
+
+  test('Gradient lerp test (LinearGradient to RadialGradient)', () {
+    final LinearGradient testGradient1 = const LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: const <Color>[
+        const Color(0x33333333),
+        const Color(0x66666666),
+      ],
+    );
+    final RadialGradient testGradient2 = const RadialGradient(
+      center: Alignment.center,
+      radius: 20.0,
+      colors: const <Color>[
+        const Color(0x44444444),
+        const Color(0x88888888),
+      ],
+    );
+
+    expect(Gradient.lerp(testGradient1, testGradient2, 0.0), testGradient1);
+    expect(Gradient.lerp(testGradient1, testGradient2, 1.0), testGradient2);
+    expect(Gradient.lerp(testGradient1, testGradient2, 0.5), testGradient2.scale(0.0));
   });
 }

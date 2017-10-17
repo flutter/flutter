@@ -282,15 +282,14 @@ void main() {
   });
 
   test('BoxDecoration.lerp - gradients', () {
-    // We don't lerp the gradients, we just switch from one to the other at t=0.5.
-    final Gradient gradient = new LinearGradient(colors: <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
+    final Gradient gradient = const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
     expect(
       BoxDecoration.lerp(
         const BoxDecoration(),
         new BoxDecoration(gradient: gradient),
         -1.0,
       ),
-      const BoxDecoration()
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x00FFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
@@ -306,7 +305,7 @@ void main() {
         new BoxDecoration(gradient: gradient),
         0.25,
       ),
-      const BoxDecoration()
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x40FFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
@@ -314,7 +313,7 @@ void main() {
         new BoxDecoration(gradient: gradient),
         0.75,
       ),
-      new BoxDecoration(gradient: gradient)
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xBFFFFFFF) ]))
     );
     expect(
       BoxDecoration.lerp(
