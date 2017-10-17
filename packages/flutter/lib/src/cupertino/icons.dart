@@ -27,35 +27,36 @@ import 'package:flutter/widgets.dart';
 class CupertinoIcons {
   CupertinoIcons._();
 
-  static const String iconFont = 'packages/cupertino_icons/CupertinoIcons';
+  static const String iconFont = 'CupertinoIcons';
+  static const String iconFontPackage = 'cupertino_icons';
 
   // Manually maintained list
 
-  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont);
+  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont);
+  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData share = const IconData(0xf4ca, fontFamily: iconFont);
+  static const IconData share = const IconData(0xf4ca, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData book = const IconData(0xf3e7, fontFamily: iconFont);
+  static const IconData book = const IconData(0xf3e7, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData info = const IconData(0xf44c, fontFamily: iconFont);
+  static const IconData info = const IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont);
+  static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData conversation_bubble = const IconData(0xf3fb, fontFamily: iconFont);
+  static const IconData conversation_bubble = const IconData(0xf3fb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData profile_circled = const IconData(0xf419, fontFamily: iconFont);
+  static const IconData profile_circled = const IconData(0xf419, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData plus_circled = const IconData(0xf48a, fontFamily: iconFont);
+  static const IconData plus_circled = const IconData(0xf48a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData minus_circled = const IconData(0xf463, fontFamily: iconFont);
+  static const IconData minus_circled = const IconData(0xf463, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData flag = const IconData(0xf42c, fontFamily: iconFont);
+  static const IconData flag = const IconData(0xf42c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData search = const IconData(0xf4c6, fontFamily: iconFont);
+  static const IconData search = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData check_mark = const IconData(0xf41e, fontFamily: iconFont);
+  static const IconData check_mark = const IconData(0xf41e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont);
+  static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont, fontPackage: iconFontPackage);
 }

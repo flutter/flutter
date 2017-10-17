@@ -132,6 +132,7 @@ class Icon extends StatelessWidget {
                   color: iconColor,
                   fontSize: iconSize,
                   fontFamily: icon.fontFamily,
+                  package: icon.fontPackage,
                 ),
               ),
             ),
