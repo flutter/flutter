@@ -45,6 +45,7 @@ void main() {
       node.mergeAllDescendantsIntoThisNode = true;
       node.addChildren(<SemanticsNode>[
         new SemanticsNode()
+          ..isMergedIntoParent = true
           ..rect = new Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
           ..addTag(tag3),
       ]);

@@ -61,6 +61,7 @@ void main() {
           new Semantics(
             label: '#2',
             container: true,
+            explicitChildNodes: true,
             child: new Stack(
               children: <Widget>[
                 new Semantics(

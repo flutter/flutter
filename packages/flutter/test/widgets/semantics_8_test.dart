@@ -39,9 +39,15 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
-        label: 'label',
-        textDirection: TextDirection.ltr,
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 3,
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            label: 'label',
+            textDirection: TextDirection.ltr,
+            rect: TestSemantics.fullScreen,
+          )
+        ]
       )
     ));
 
@@ -71,10 +77,16 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
-        label: 'label',
-        textDirection: TextDirection.ltr,
-      )
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 3,
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            label: 'label',
+            textDirection: TextDirection.ltr,
+            rect: TestSemantics.fullScreen,
+          )
+        ],
+      ),
     ));
 
     semantics.dispose();

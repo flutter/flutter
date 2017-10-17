@@ -2260,7 +2260,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Updates the semantic information of the render object.
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
-    final _SemanticsFragment fragment = _getSemanticsFragment(_semanticsClippingRect);
+    final _SemanticsFragment fragment = _getSemanticsFragment(_semanticsClippingRect, _semantics?.parent?.isPartOfNodeMerging ?? false);
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment;
     final SemanticsNode node = interestingFragment.compileChildren().single;
@@ -2271,7 +2271,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   Rect _semanticsClippingRect;
 
   /// Returns the Semantics that this node would like to add to its parent.
-  _SemanticsFragment _getSemanticsFragment(Rect parentClippingRect) {
+  _SemanticsFragment _getSemanticsFragment(Rect parentClippingRect, bool mergeIntoParent) {
     final SemanticsConfiguration config = _semanticsConfiguration;
 
     final _SemanticsGeometry geometry = new _SemanticsGeometry(this, parentClippingRect);
@@ -2280,18 +2280,20 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (!_needsSemanticsUpdate && config.isSemanticBoundary) {
       // Nothing has changed, re-use old fragment.
       assert(_semantics != null);
-      return new _CleanSemanticsFragment(_semantics, geometry, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
+      if (mergeIntoParent == _semantics.isMergedIntoParent)
+        return new _CleanSemanticsFragment(_semantics, geometry, config.isBlockingSemanticsOfPreviouslyPaintedNodes);
     }
 
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
     final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = new Set<_InterestingSemanticsFragment>();
+    final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
       // Make sure that potential geometry changes are applied to child.
       renderChild._needsSemanticsUpdate = true;
-      final _SemanticsFragment fragment = renderChild._getSemanticsFragment(_semanticsClippingRect);
+      final _SemanticsFragment fragment = renderChild._getSemanticsFragment(_semanticsClippingRect, childrenMergeIntoParent);
       if (fragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
         toBeMarkedExplicit.clear();
@@ -2327,11 +2329,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     _SemanticsFragment result;
     if (parent is! RenderObject) {
       assert(!config.hasBeenAnnotated);
+      assert(!mergeIntoParent);
       result = new _RootSemanticsFragment(this, dropSemanticsOfPreviousSiblings);
     } else if (producesForkingFragment) {
       result = new _ContainerSemanticsFragment(dropSemanticsOfPreviousSiblings);
     } else {
-      result = new _SwitchableSemanticsFragment(this, geometry, dropSemanticsOfPreviousSiblings, config);
+      result = new _SwitchableSemanticsFragment(this, mergeIntoParent, geometry, dropSemanticsOfPreviousSiblings, config);
       if (config.isSemanticBoundary) {
         final _SwitchableSemanticsFragment fragment = result;
         fragment.markAsExplicit();
@@ -3101,9 +3104,10 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
-  _SwitchableSemanticsFragment(this._owner, _SemanticsGeometry geometry, bool dropsSemanticsOfPreviousSiblings, this._config) : super(geometry, dropsSemanticsOfPreviousSiblings);
+  _SwitchableSemanticsFragment(this._owner, this._mergeIntoParent, _SemanticsGeometry geometry, bool dropsSemanticsOfPreviousSiblings, this._config) : super(geometry, dropsSemanticsOfPreviousSiblings);
 
   final RenderObject _owner;
+  final bool _mergeIntoParent;
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
   final List<SemanticsNode> _children = <SemanticsNode>[];
@@ -3119,7 +3123,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
     final SemanticsNode node = _owner._semantics;
     geometry.updateNode(node);
-    node.update(_config, _children);
+    node.replaceWith(_config, _children, _mergeIntoParent);
     yield node;
   }
 

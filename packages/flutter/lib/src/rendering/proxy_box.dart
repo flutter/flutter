@@ -3004,9 +3004,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     //    for this to become a scroll view.
     config.explicitChildNodes = onHorizontalDragUpdate != null
         || onVerticalDragUpdate != null;
-    if (config.explicitChildNodes) {
-      print('?>>>> $this');
-    }
 
     final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
     if (onTap != null)
@@ -3279,11 +3276,13 @@ class RenderMergeSemantics extends RenderProxyBox {
   /// Creates a render object that merges the semantics from its descendants.
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
-//  @override
-//  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-//    super.describeSemanticsConfiguration(config);
-//    config.isMergingSemanticsOfDescendants = true;
-//  }
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true;
+  }
 }
 
 /// Excludes this subtree from the semantic tree.
