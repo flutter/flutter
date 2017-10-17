@@ -25,29 +25,31 @@ static void Path_constructor(Dart_NativeArguments args) {
 IMPLEMENT_WRAPPERTYPEINFO(ui, Path);
 
 #define FOR_EACH_BINDING(V)          \
-  V(Path, getFillType)               \
-  V(Path, setFillType)               \
-  V(Path, moveTo)                    \
-  V(Path, relativeMoveTo)            \
-  V(Path, lineTo)                    \
-  V(Path, relativeLineTo)            \
-  V(Path, quadraticBezierTo)         \
-  V(Path, relativeQuadraticBezierTo) \
-  V(Path, cubicTo)                   \
-  V(Path, relativeCubicTo)           \
-  V(Path, conicTo)                   \
-  V(Path, relativeConicTo)           \
-  V(Path, arcTo)                     \
-  V(Path, addRect)                   \
-  V(Path, addOval)                   \
   V(Path, addArc)                    \
-  V(Path, addPolygon)                \
-  V(Path, addRRect)                  \
+  V(Path, addOval)                   \
   V(Path, addPath)                   \
-  V(Path, extendWithPath)            \
+  V(Path, addPolygon)                \
+  V(Path, addRect)                   \
+  V(Path, addRRect)                  \
+  V(Path, arcTo)                     \
+  V(Path, arcToPoint)                \
   V(Path, close)                     \
-  V(Path, reset)                     \
+  V(Path, conicTo)                   \
   V(Path, contains)                  \
+  V(Path, cubicTo)                   \
+  V(Path, extendWithPath)            \
+  V(Path, getFillType)               \
+  V(Path, lineTo)                    \
+  V(Path, moveTo)                    \
+  V(Path, quadraticBezierTo)         \
+  V(Path, relativeArcToPoint)        \
+  V(Path, relativeConicTo)           \
+  V(Path, relativeCubicTo)           \
+  V(Path, relativeLineTo)            \
+  V(Path, relativeMoveTo)            \
+  V(Path, relativeQuadraticBezierTo) \
+  V(Path, reset)                     \
+  V(Path, setFillType)               \
   V(Path, shift)                     \
   V(Path, transform)
 
@@ -137,6 +139,39 @@ void CanvasPath::arcTo(float left,
   path_.arcTo(SkRect::MakeLTRB(left, top, right, bottom),
               startAngle * 180.0 / M_PI, sweepAngle * 180.0 / M_PI,
               forceMoveTo);
+}
+
+void CanvasPath::arcToPoint(float arcEndX,
+                            float arcEndY,
+                            float radiusX,
+                            float radiusY,
+                            float xAxisRotation,
+                            bool isLargeArc,
+                            bool isClockwiseDirection) {
+  const auto arcSize = isLargeArc ? SkPath::ArcSize::kLarge_ArcSize
+                                  : SkPath::ArcSize::kSmall_ArcSize;
+  const auto direction = isClockwiseDirection
+                             ? SkPath::Direction::kCW_Direction
+                             : SkPath::Direction::kCCW_Direction;
+
+  path_.arcTo(radiusX, radiusY, xAxisRotation, arcSize, direction, arcEndX,
+              arcEndY);
+}
+
+void CanvasPath::relativeArcToPoint(float arcEndDeltaX,
+                                    float arcEndDeltaY,
+                                    float radiusX,
+                                    float radiusY,
+                                    float xAxisRotation,
+                                    bool isLargeArc,
+                                    bool isClockwiseDirection) {
+  const auto arcSize = isLargeArc ? SkPath::ArcSize::kLarge_ArcSize
+                                  : SkPath::ArcSize::kSmall_ArcSize;
+  const auto direction = isClockwiseDirection
+                             ? SkPath::Direction::kCW_Direction
+                             : SkPath::Direction::kCCW_Direction;
+  path_.rArcTo(radiusX, radiusY, xAxisRotation, arcSize, direction,
+               arcEndDeltaX, arcEndDeltaY);
 }
 
 void CanvasPath::addRect(float left, float top, float right, float bottom) {
