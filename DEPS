@@ -98,7 +98,11 @@ vars = {
   'dart_web_socket_channel_tag': '1.0.6',
   'dart_yaml_tag': '2.1.12',
 
+  # Chromium build tooling used for Mac/iOS builds
+  'chromium_build_revision': 'b6fbb0db634b8e8380b718eba27f077d94a6d09c',
+
   # Build bot tooling for iOS
+  # TODO(cbracken) delete once migrated to chromium tooling above
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
 
   'buildtools_revision': '5b8eb38aaf523f0124756454276cd0a5b720c17e',
@@ -150,6 +154,9 @@ deps = {
 
   'src/ios_tools':
    Var('chromium_git') + '/chromium/src/ios.git' + '@' + Var('ios_tools_revision'),
+
+  'third_party/chromium_build':
+   Var('chromium_git') + '/chromium/src/build.git' + '@' + Var('chromium_build_revision'),
 
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + '08cb956852a5ccdba7f9c941728bb833529ba3c6',

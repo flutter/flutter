@@ -1200,6 +1200,12 @@ class RepositoryGenericThirdPartyDirectory extends RepositoryDirectory {
 
   @override
   bool get subdirectoriesAreLicenseRoots => true;
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'chromium_build' // only used by build
+        && super.shouldRecurse(entry);
+  }
 }
 
 class RepositoryReachOutFile extends RepositoryLicensedFile {
