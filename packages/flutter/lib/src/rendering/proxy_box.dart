@@ -3040,6 +3040,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
     if (children.isEmpty || !children.first.hasTag(useTwoPaneSemantics)) {
+      _annotatedNode = node;
       super.assembleSemanticsNode(node, config, children);
       return;
     }
@@ -3049,6 +3050,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
       ..wasAffectedByClip = node.wasAffectedByClip
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
+    _annotatedNode = _innerNode;
 
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
