@@ -23,8 +23,11 @@ const double _kNavBarLargeTitleHeightExtension = 56.0;
 const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
+
 // The back chevron has a special padding in iOS.
-const double _kNavBarBackButtonPadding = 7.0;
+const double _kNavBarBackButtonPadding = 0.0;
+
+const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
@@ -352,7 +355,15 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       if (currentRoute?.canPop == true) {
         useBackButton = !(currentRoute is PageRoute && currentRoute?.fullscreenDialog == true);
         backOrCloseButton = new CupertinoButton(
-          child: useBackButton ? const Icon(CupertinoIcons.back) : const Text('Close'),
+          child: useBackButton
+              ? new Container(
+                height: _kNavBarPersistentHeight,
+                width: _kNavBarBackButtonTapWidth,
+                alignment: Alignment.centerLeft,
+                child: const Icon(CupertinoIcons.back, size: 34.0,)
+              )
+              : const Text('Close'),
+          padding: EdgeInsets.zero,
           onPressed: () { Navigator.of(context).maybePop(); },
         );
       }
