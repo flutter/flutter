@@ -307,6 +307,7 @@ Future<String> _buildAotSnapshot(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       extraFrontEndOptions: extraFrontEndOptions,
+      linkPlatformKernelIn : true,
     );
   }
 
