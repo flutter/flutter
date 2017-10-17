@@ -36,6 +36,7 @@ public class FlutterMain {
     private static final String AOT_ISOLATE_SNAPSHOT_DATA_KEY = "isolate-snapshot-data";
     private static final String AOT_ISOLATE_SNAPSHOT_INSTR_KEY = "isolate-snapshot-instr";
     private static final String FLX_KEY = "flx";
+    private static final String SNAPSHOT_BLOB_KEY = "snapshot-blob";
 
     // XML Attribute keys supported in AndroidManifest.xml
     public static final String PUBLIC_AOT_VM_SNAPSHOT_DATA_KEY =
@@ -48,6 +49,8 @@ public class FlutterMain {
         FlutterMain.class.getName() + '.' + AOT_ISOLATE_SNAPSHOT_INSTR_KEY;
     public static final String PUBLIC_FLX_KEY =
         FlutterMain.class.getName() + '.' + FLX_KEY;
+    public static final String PUBLIC_SNAPSHOT_BLOB_KEY =
+        FlutterMain.class.getName() + '.' + SNAPSHOT_BLOB_KEY;
 
     // Resource names used for components of the precompiled snapshot.
     private static final String DEFAULT_AOT_VM_SNAPSHOT_DATA = "vm_snapshot_data";
@@ -55,6 +58,7 @@ public class FlutterMain {
     private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA = "isolate_snapshot_data";
     private static final String DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR = "isolate_snapshot_instr";
     private static final String DEFAULT_FLX = "app.flx";
+    private static final String DEFAULT_SNAPSHOT_BLOB = "snapshot_blob.bin";
 
     private static final String MANIFEST = "flutter.yaml";
 
@@ -69,6 +73,7 @@ public class FlutterMain {
     private static String sAotIsolateSnapshotData = DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA;
     private static String sAotIsolateSnapshotInstr = DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR;
     private static String sFlx = DEFAULT_FLX;
+    private static String sSnapshotBlob = DEFAULT_SNAPSHOT_BLOB;
 
     private static boolean sInitialized = false;
     private static ResourceExtractor sResourceExtractor;
@@ -209,6 +214,7 @@ public class FlutterMain {
                 sAotIsolateSnapshotData = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_DATA_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_DATA);
                 sAotIsolateSnapshotInstr = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR);
                 sFlx = metadata.getString(PUBLIC_FLX_KEY, DEFAULT_FLX);
+                sSnapshotBlob = metadata.getString(PUBLIC_SNAPSHOT_BLOB_KEY, DEFAULT_SNAPSHOT_BLOB);
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
@@ -225,6 +231,7 @@ public class FlutterMain {
             .addResource(sAotIsolateSnapshotData)
             .addResource(sAotIsolateSnapshotInstr)
             .addResource(sFlx)
+            .addResource(sSnapshotBlob)
             .start();
     }
 
