@@ -43,7 +43,7 @@ class Engine : public blink::RuntimeDelegate {
   void RunBundleAndSnapshot(const std::string& bundle_path,
                             const std::string& snapshot_override);
 
-  // Uses the given source code instead of looking inside the bindle for the
+  // Uses the given source code instead of looking inside the bundle for the
   // source code.
   void RunBundleAndSource(const std::string& bundle_path,
                           const std::string& main,
