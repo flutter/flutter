@@ -54,8 +54,8 @@ DartController::~DartController() {
     Dart_EnterIsolate(ui_dart_state_->isolate());
     // Clear the message notify callback.
     Dart_SetMessageNotifyCallback(nullptr);
-    Dart_ShutdownIsolate();  // deletes ui_dart_state_
-    ui_dart_state_ = nullptr;
+    Dart_ShutdownIsolate();
+    delete ui_dart_state_;
   }
   if (platform_kernel_bytes) {
     free(platform_kernel_bytes);
@@ -204,6 +204,7 @@ void DartController::CreateIsolateFor(
   }
   FXL_CHECK(isolate) << error;
   ui_dart_state_ = state.release();
+  ui_dart_state_->set_is_controller_state(true);
   dart_state()->message_handler().Initialize(blink::Threads::UI());
 
   Dart_SetShouldPauseOnStart(Settings::Get().start_paused);
@@ -225,10 +226,6 @@ void DartController::CreateIsolateFor(
                                                std::move(ui_class_provider));
   }
   Dart_ExitIsolate();
-}
-
-void DartController::IsolateShuttingDown() {
-  ui_dart_state_ = nullptr;
 }
 
 }  // namespace blink

@@ -40,8 +40,9 @@ class DartController {
  private:
   bool SendStartMessage(Dart_Handle root_library);
 
-  // The DartState associated with the main isolate.  This will be deleted
-  // during isolate shutdown.
+  // The DartState associated with the main isolate.  This is not deleted
+  // during isolate shutdown, instead it is deleted when the controller
+  // object is deleted.
   UIDartState* ui_dart_state_;
 
   // Kernel binary image of platform core libraries. This is copied and
