@@ -289,7 +289,7 @@ List<GalleryItem> _buildGalleryItems() {
       title: 'Navigation',
       subtitle: 'Cupertino styled navigation patterns',
       category: 'Cupertino Components',
-      routeName: CupertinoDialogDemo.routeName,
+      routeName: CupertinoNavigationDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
     ),
     new GalleryItem(

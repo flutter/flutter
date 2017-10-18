@@ -8,6 +8,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class CupertinoNavigationDemo extends StatelessWidget {
+  static const String routeName = '/cupertino/navigation';
+
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
@@ -108,6 +110,7 @@ class Tab1RowItemState extends State<Tab1RowItem> {
   @override
   Widget build(BuildContext context) {
     final Widget row = new GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: () {
         Navigator.of(context).push(new CupertinoPageRoute<Null>(
           builder: (BuildContext context) => new Tab1ItemPage(
