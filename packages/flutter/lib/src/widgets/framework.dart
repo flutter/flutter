@@ -1587,7 +1587,7 @@ abstract class InheritedWidget extends ProxyWidget {
     : super(key: key, child: child);
 
   @override
-  InheritedElement createElement() => new InheritedElement(this);
+  InheritedElement createElement() => new DefaultInheritedElement(this);
 
   /// Whether the framework should notify widgets that inherit from this widget.
   ///
@@ -3023,7 +3023,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
       for (InheritedElement dependency in _dependencies)
-        dependency._dependents.remove(this);
+        dependency.removeDependent(this);
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
       // get re-used, it doesn't matter. If we do, then we'll clear the list in
@@ -3213,7 +3213,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       assert(ancestor is InheritedElement);
       _dependencies ??= new HashSet<InheritedElement>();
       _dependencies.add(ancestor);
-      ancestor._dependents.add(this);
+      ancestor.addDependent(this);
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -3923,14 +3923,21 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
 }
 
 /// An [Element] that uses a [InheritedWidget] as its configuration.
-class InheritedElement extends ProxyElement {
+abstract class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);
 
   @override
   InheritedWidget get widget => super.widget;
 
-  final Set<Element> _dependents = new HashSet<Element>();
+  @protected
+  Iterable<Element> get dependents;
+
+  void addDependent(Element element);
+
+  void removeDependent(Element element);
+
+  bool containsDependent(Element element);
 
   @override
   void _updateInheritance() {
@@ -3946,7 +3953,7 @@ class InheritedElement extends ProxyElement {
   @override
   void debugDeactivated() {
     assert(() {
-      assert(_dependents.isEmpty);
+      assert(dependents.isEmpty);
       return true;
     }());
     super.debugDeactivated();
@@ -3969,7 +3976,7 @@ class InheritedElement extends ProxyElement {
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDidChangeDependencies() {
     assert(_debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies'));
-    for (Element dependent in _dependents) {
+    for (Element dependent in dependents) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -3981,6 +3988,31 @@ class InheritedElement extends ProxyElement {
       assert(dependent._dependencies.contains(this));
       dependent.didChangeDependencies();
     }
+  }
+}
+
+/// Default implementation for [InheritedElement].
+class DefaultInheritedElement extends InheritedElement {
+  DefaultInheritedElement(InheritedWidget widget) : super(widget);
+
+  final Set<Element> _dependents = new HashSet<Element>();
+
+  @override
+  Iterable<Element> get dependents => _dependents;
+
+  @override
+  void addDependent(Element element) {
+    _dependents.add(element);
+  }
+
+  @override
+  void removeDependent(Element element) {
+    _dependents.remove(element);
+  }
+
+  @override
+  bool containsDependent(Element element) {
+    return _dependents.contains(element);
   }
 }
 
