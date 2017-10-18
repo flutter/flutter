@@ -75,7 +75,7 @@ void main() {
 
   testWidgets('Custom padding', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(child: const CupertinoButton(
-      child: const Text(' ', style: testStyle),
+      child: const Text('X', style: testStyle),
       onPressed: null,
       padding: const EdgeInsets.all(100.0),
     )));
