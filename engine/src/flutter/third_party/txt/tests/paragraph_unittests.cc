@@ -1332,32 +1332,16 @@ TEST_F(ParagraphTest, NewlineParagraph) {
 
   ASSERT_TRUE(Snapshot());
 
-  ASSERT_EQ(paragraph->runs_.size(), 9ull);
-  ASSERT_EQ(paragraph->runs_.GetRun(1).end - paragraph->runs_.GetRun(1).start,
-            1ull);
-  ASSERT_EQ(paragraph->runs_.GetRun(3).end - paragraph->runs_.GetRun(3).start,
-            1ull);
-  ASSERT_EQ(paragraph->runs_.GetRun(5).end - paragraph->runs_.GetRun(5).start,
-            1ull);
-  ASSERT_EQ(paragraph->runs_.GetRun(7).end - paragraph->runs_.GetRun(7).start,
-            1ull);
-
-  ASSERT_EQ(paragraph->records_.size(), 10ull);
+  ASSERT_EQ(paragraph->records_.size(), 7ull);
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 127.69921875);
-  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().y(),
-                   paragraph->records_[0].offset().y());
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().y(), 126);
   EXPECT_DOUBLE_EQ(paragraph->records_[2].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 586.9921875);
-  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().y(),
-                   paragraph->records_[4].offset().y());
+  EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 0);
+  EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().y(), 266);
   EXPECT_DOUBLE_EQ(paragraph->records_[5].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 127.69921875);
-  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[7].offset().y(), 336);
-  EXPECT_DOUBLE_EQ(paragraph->records_[8].offset().y(), 406);
+  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 0);
 }
 
 TEST_F(ParagraphTest, EmojiParagraph) {

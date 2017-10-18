@@ -169,8 +169,7 @@ class LineBreaker {
                     FontStyle style,
                     size_t start,
                     size_t end,
-                    bool isRtl,
-                    double letterSpacing = 0);
+                    bool isRtl);
 
   void addReplacement(size_t start, size_t end, float width);
 

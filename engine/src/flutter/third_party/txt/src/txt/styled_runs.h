@@ -60,9 +60,6 @@ class StyledRuns {
 
   Run GetRun(size_t index) const;
 
-  // Break any newline '\n' characters into their own runs.
-  void SplitNewlineRuns(std::list<size_t> newline_positions);
-
  private:
   FRIEND_TEST(ParagraphTest, SimpleParagraph);
   FRIEND_TEST(ParagraphTest, SimpleRedParagraph);

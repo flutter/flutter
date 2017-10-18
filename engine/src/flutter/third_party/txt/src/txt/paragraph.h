@@ -71,7 +71,6 @@ class Paragraph {
   //
   // Layout calculates the positioning of all the glyphs. Must call this method
   // before Painting and getting any statistics from this class.
-  void OldLayout(double width, bool force = false);
   void Layout(double width, bool force = false);
 
   // Paints the Laid out text onto the supplied SkCanvas at (x, y) offset from
@@ -181,12 +180,20 @@ class Paragraph {
   std::shared_ptr<FontCollection> font_collection_;
 
   minikin::LineBreaker breaker_;
-  size_t breaks_count_ = 0;
+
+  struct LineRange {
+    LineRange(size_t s, size_t e, bool h) : start(s), end(e), hard_break(h) {}
+    size_t start, end;
+    bool hard_break;
+  };
+  std::vector<LineRange> line_ranges_;
+  std::vector<double> line_widths_;
 
   // Stores the result of Layout().
   std::vector<PaintRecord> records_;
 
   std::vector<double> line_heights_;
+  bool did_exceed_max_lines_;
 
   struct GlyphPosition {
     const double start;
@@ -203,7 +210,7 @@ class Paragraph {
     const std::vector<GlyphPosition> positions;
     const size_t total_code_units;
 
-    GlyphLine(std::vector<GlyphPosition>&& p);
+    GlyphLine(std::vector<GlyphPosition>&& p, size_t tcu);
 
     // Return the GlyphPosition containing the given code unit index within
     // the line.
@@ -237,18 +244,12 @@ class Paragraph {
   // into breaker_ in InitBreaker(), which is called in Layout().
   void SetText(std::vector<uint16_t> text, StyledRuns runs);
 
-  // Sets up breaker_ with the contents of text_ and runs_. This is called every
-  // Layout() call to allow for different widths to be used.
-  void InitBreaker();
-
   void SetParagraphStyle(const ParagraphStyle& style);
 
   void SetFontCollection(std::shared_ptr<FontCollection> font_collection);
 
-  FXL_WARN_UNUSED_RESULT
-  bool AddRunsToLineBreaker(
-      std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
-          collection_map);
+  // Break the text into lines.
+  bool ComputeLineBreaks();
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.

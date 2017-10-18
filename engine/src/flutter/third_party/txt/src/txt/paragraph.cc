@@ -144,13 +144,8 @@ void FindWords(const std::vector<uint16_t>& text,
 
 static const float kDoubleDecorationSpacing = 3.0f;
 
-Paragraph::GlyphLine::GlyphLine(std::vector<GlyphPosition>&& p)
-    : positions(std::move(p)),
-      total_code_units(std::accumulate(
-          positions.begin(),
-          positions.end(),
-          0,
-          [](size_t a, const auto& b) { return a + b.code_units; })) {}
+Paragraph::GlyphLine::GlyphLine(std::vector<GlyphPosition>&& p, size_t tcu)
+    : positions(std::move(p)), total_code_units(tcu) {}
 
 const Paragraph::GlyphPosition& Paragraph::GlyphLine::GetGlyphPosition(
     size_t pos) const {
@@ -168,7 +163,9 @@ const Paragraph::GlyphPosition& Paragraph::GlyphLine::GetGlyphPosition(
   return positions.back();
 }
 
-Paragraph::Paragraph() = default;
+Paragraph::Paragraph() {
+  breaker_.setLocale(icu::Locale(), nullptr);
+}
 
 Paragraph::~Paragraph() = default;
 
@@ -180,31 +177,80 @@ void Paragraph::SetText(std::vector<uint16_t> text, StyledRuns runs) {
   runs_ = std::move(runs);
 }
 
-void Paragraph::InitBreaker() {
-  breaker_.setLocale(icu::Locale(), nullptr);
-  breaker_.resize(text_.size());
-  memcpy(breaker_.buffer(), text_.data(), text_.size() * sizeof(text_[0]));
-  breaker_.setText();
-}
+bool Paragraph::ComputeLineBreaks() {
+  line_ranges_.clear();
+  line_widths_.clear();
 
-bool Paragraph::AddRunsToLineBreaker(
-    std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>&
-        collection_map /* TODO: Cache the font collection here. */) {
-  minikin::FontStyle font;
-  minikin::MinikinPaint paint;
-  for (size_t i = 0; i < runs_.size(); ++i) {
-    auto run = runs_.GetRun(i);
-    GetFontAndMinikinPaint(run.style, &font, &paint);
-    auto collection = font_collection_->GetMinikinFontCollectionForFamily(
-        run.style.font_family);
-    if (collection == nullptr) {
-      FXL_LOG(INFO) << "Could not find font collection for family \""
-                    << run.style.font_family << "\".";
-      return false;
-    }
-    breaker_.addStyleRun(&paint, collection, font, run.start, run.end, false,
-                         run.style.letter_spacing);
+  std::vector<size_t> newline_positions;
+  for (size_t i = 0; i < text_.size(); ++i) {
+    ULineBreak ulb = static_cast<ULineBreak>(
+        u_getIntPropertyValue(text_[i], UCHAR_LINE_BREAK));
+    if (ulb == U_LB_LINE_FEED || ulb == U_LB_MANDATORY_BREAK)
+      newline_positions.push_back(i);
   }
+  newline_positions.push_back(text_.size());
+
+  size_t run_index = 0;
+  for (size_t newline_index = 0; newline_index < newline_positions.size();
+       ++newline_index) {
+    size_t block_start =
+        (newline_index > 0) ? newline_positions[newline_index - 1] + 1 : 0;
+    size_t block_end = newline_positions[newline_index];
+    size_t block_size = block_end - block_start;
+
+    if (block_size == 0) {
+      line_ranges_.emplace_back(block_start, block_start, true);
+      line_widths_.push_back(0);
+      continue;
+    }
+
+    breaker_.setLineWidths(0.0f, 0, width_);
+    breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
+    breaker_.setStrategy(paragraph_style_.break_strategy);
+    breaker_.resize(block_size);
+    memcpy(breaker_.buffer(), text_.data() + block_start,
+           block_size * sizeof(text_[0]));
+    breaker_.setText();
+
+    // Add the runs that include this line to the LineBreaker.
+    while (run_index < runs_.size()) {
+      StyledRuns::Run run = runs_.GetRun(run_index);
+      if (run.start >= block_end)
+        break;
+
+      minikin::FontStyle font;
+      minikin::MinikinPaint paint;
+      GetFontAndMinikinPaint(run.style, &font, &paint);
+      std::shared_ptr<minikin::FontCollection> collection =
+          font_collection_->GetMinikinFontCollectionForFamily(
+              run.style.font_family);
+      if (collection == nullptr) {
+        FXL_LOG(INFO) << "Could not find font collection for family \""
+                      << run.style.font_family << "\".";
+        return false;
+      }
+      size_t run_start = std::max(run.start, block_start) - block_start;
+      size_t run_end = std::min(run.end, block_end) - block_start;
+      bool isRtl = (paragraph_style_.text_direction == TextDirection::rtl);
+      breaker_.addStyleRun(&paint, collection, font, run_start, run_end, isRtl);
+
+      if (run.end > block_end)
+        break;
+      run_index++;
+    }
+
+    size_t breaks_count = breaker_.computeBreaks();
+    const int* breaks = breaker_.getBreaks();
+    for (size_t i = 0; i < breaks_count; ++i) {
+      size_t break_start = (i > 0) ? breaks[i - 1] : 0;
+      line_ranges_.emplace_back(break_start + block_start,
+                                breaks[i] + block_start, i == breaks_count - 1);
+      line_widths_.push_back(breaker_.getWidths()[i]);
+    }
+
+    breaker_.finish();
+  }
+
   return true;
 }
 
@@ -217,30 +263,9 @@ void Paragraph::Layout(double width, bool force) {
 
   width_ = width;
 
-  std::unordered_map<std::string, std::shared_ptr<minikin::FontCollection>>
-      collection_map;
-
-  breaker_.setLineWidths(0.0f, 0, width_);
-
-  // TODO(garyq): Get hyphenator working. Hyphenator should be created with
-  // a pattern binary dataset. Should be something along these lines:
-  //
-  //   minikin::Hyphenator* hyph =
-  //     minikin::Hyphenator::loadBinary(<paramsgohere>);
-  //   breaker_.setLocale(icu::Locale::getRoot(), &hyph);
-  //
-
-  // TODO: Maybe create a new breaker altogether.
-  InitBreaker();
-
-  if (!AddRunsToLineBreaker(collection_map)) {
+  if (!ComputeLineBreaks()) {
     return;
   }
-
-  breaker_.setJustified(paragraph_style_.text_align == TextAlign::justify);
-  breaker_.setStrategy(paragraph_style_.break_strategy);
-  breaks_count_ = breaker_.computeBreaks();
-  const int* breaks = breaker_.getBreaks();
 
   SkPaint paint;
   paint.setAntiAlias(true);
@@ -253,28 +278,29 @@ void Paragraph::Layout(double width, bool force) {
 
   minikin::Layout layout;
   SkTextBlobBuilder builder;
-  size_t line_limit = std::min(paragraph_style_.max_lines, breaks_count_);
   size_t run_index = 0;
   double y_offset = 0;
   double prev_max_descent = 0;
   double max_word_width = 0;
 
+  size_t line_limit = std::min(paragraph_style_.max_lines, line_ranges_.size());
+  did_exceed_max_lines_ = (line_ranges_.size() > paragraph_style_.max_lines);
+
   for (size_t line_number = 0; line_number < line_limit; ++line_number) {
-    size_t line_start = (line_number > 0) ? breaks[line_number - 1] : 0;
-    size_t line_end = breaks[line_number];
+    const LineRange& line_range = line_ranges_[line_number];
 
     // Break the line into words if justification should be applied.
     std::vector<Range> words;
     double word_gap_width = 0;
     size_t word_index = 0;
-    bool justify_line =
-        (paragraph_style_.text_align == TextAlign::justify &&
-         line_number != line_limit - 1 && text_[line_end - 1] != '\n');
-    FindWords(text_, line_start, line_end, &words);
+    bool justify_line = (paragraph_style_.text_align == TextAlign::justify &&
+                         line_number != line_limit - 1 &&
+                         !line_ranges_[line_number].hard_break);
+    FindWords(text_, line_range.start, line_range.end, &words);
     if (justify_line) {
       if (words.size() > 1) {
         word_gap_width =
-            (width_ - breaker_.getWidths()[line_number]) / (words.size() - 1);
+            (width_ - line_widths_[line_number]) / (words.size() - 1);
       }
     }
 
@@ -282,10 +308,10 @@ void Paragraph::Layout(double width, bool force) {
     std::vector<StyledRuns::Run> line_runs;
     while (run_index < runs_.size()) {
       StyledRuns::Run run = runs_.GetRun(run_index);
-      if (run.start >= line_end)
+      if (run.start >= line_range.end)
         break;
       line_runs.push_back(run);
-      if (run.end > line_end)
+      if (run.end > line_range.end)
         break;
       run_index++;
     }
@@ -305,24 +331,19 @@ void Paragraph::Layout(double width, bool force) {
               run.style.font_family);
 
       // Lay out this run.
-      size_t line_run_start = std::max(run.start, line_start);
-      size_t line_run_end = std::min(run.end, line_end);
+      size_t line_run_start = std::max(run.start, line_range.start);
+      size_t line_run_end = std::min(run.end, line_range.end);
       uint16_t* text_ptr = text_.data() + line_run_start;
       size_t text_count = line_run_end - line_run_start;
       int bidiFlags = (paragraph_style_.text_direction == TextDirection::rtl)
                           ? minikin::kBidi_RTL
                           : minikin::kBidi_LTR;
 
-      if (text_count == 0)
-        continue;
-      if (text_ptr[text_count - 1] == '\n')
-        text_count--;
-
       // Apply ellipsizing if the run was not completely laid out and this
       // is the last line (or lines are unlimited).
       const std::u16string& ellipsis = paragraph_style_.ellipsis;
       std::vector<uint16_t> ellipsized_text;
-      if (ellipsis.length() && !isinf(width_) && run.end > line_end &&
+      if (ellipsis.length() && !isinf(width_) && !line_range.hard_break &&
           (line_number == line_limit - 1 ||
            paragraph_style_.max_lines == std::numeric_limits<size_t>::max())) {
         float ellipsis_width = layout.measureText(
@@ -355,8 +376,10 @@ void Paragraph::Layout(double width, bool force) {
 
         // If there is no line limit, then skip all lines after the ellipsized
         // line.
-        if (paragraph_style_.max_lines == std::numeric_limits<size_t>::max())
+        if (paragraph_style_.max_lines == std::numeric_limits<size_t>::max()) {
           line_limit = line_number + 1;
+          did_exceed_max_lines_ = true;
+        }
       }
 
       layout.doLayout(text_ptr, 0, text_count, text_count, bidiFlags, font,
@@ -484,20 +507,22 @@ void Paragraph::Layout(double width, bool force) {
       records_.emplace_back(std::move(paint_record));
     }
 
-    glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x));
+    size_t next_line_start = (line_number < line_ranges_.size() - 1)
+                                 ? line_ranges_[line_number + 1].start
+                                 : text_.size();
+    glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x),
+                                   next_line_start - line_range.start);
   }
 
   max_intrinsic_width_ = 0;
-  for (size_t i = 0; i < breaks_count_; ++i) {
-    max_intrinsic_width_ += breaker_.getWidths()[i];
+  for (double line_width : line_widths_) {
+    max_intrinsic_width_ += line_width;
   }
   min_intrinsic_width_ = std::min(max_word_width, max_intrinsic_width_);
-
-  breaker_.finish();
 }
 
 double Paragraph::GetLineXOffset(size_t line) {
-  if (line >= breaks_count_ || isinf(width_))
+  if (line >= line_widths_.size() || isinf(width_))
     return 0;
 
   TextAlign align = paragraph_style_.text_align;
@@ -506,9 +531,9 @@ double Paragraph::GetLineXOffset(size_t line) {
   if (align == TextAlign::right ||
       (align == TextAlign::start && direction == TextDirection::rtl) ||
       (align == TextAlign::end && direction == TextDirection::ltr)) {
-    return width_ - breaker_.getWidths()[line];
+    return width_ - line_widths_[line];
   } else if (paragraph_style_.text_align == TextAlign::center) {
-    return (width_ - breaker_.getWidths()[line]) / 2;
+    return (width_ - line_widths_[line]) / 2;
   } else {
     return 0;
   }
@@ -843,9 +868,7 @@ size_t Paragraph::GetLineCount() const {
 }
 
 bool Paragraph::DidExceedMaxLines() const {
-  if (GetLineCount() > paragraph_style_.max_lines)
-    return true;
-  return false;
+  return did_exceed_max_lines_;
 }
 
 void Paragraph::SetDirty(bool dirty) {
