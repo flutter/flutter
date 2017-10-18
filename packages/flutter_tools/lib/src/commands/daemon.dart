@@ -143,7 +143,8 @@ class Daemon {
 
   void shutdown({dynamic error}) {
     _commandSubscription?.cancel();
-    _domainMap.values.forEach((Domain domain) => domain.dispose());
+    for (Domain domain in _domainMap.values)
+      domain.dispose();
     if (!_onExitCompleter.isCompleted) {
       if (error == null)
         _onExitCompleter.complete(0);

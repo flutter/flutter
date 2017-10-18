@@ -82,7 +82,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
   if (!destDir.existsSync())
     destDir.createSync(recursive: true);
 
-  srcDir.listSync().forEach((FileSystemEntity entity) {
+  for (FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
@@ -94,7 +94,7 @@ void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(F
     } else {
       throw new Exception('${entity.path} is neither File nor Directory');
     }
-  });
+  }
 }
 
 /// Gets a directory to act as a recording destination, creating the directory
