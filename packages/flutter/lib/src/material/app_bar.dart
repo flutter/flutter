@@ -465,9 +465,7 @@ class _AppBarState extends State<AppBar> {
     return new Material(
       color: widget.backgroundColor ?? themeData.primaryColor,
       elevation: widget.elevation,
-      child: new Semantics(
-        child: appBar,
-      ),
+      child: appBar,
     );
   }
 }

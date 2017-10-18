@@ -379,7 +379,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isInteractive;
-    config.addAction(SemanticsAction.tap, _handleTap);
+    if (isInteractive)
+      config.addAction(SemanticsAction.tap, _handleTap);
     config.isChecked = _value;
   }
 
