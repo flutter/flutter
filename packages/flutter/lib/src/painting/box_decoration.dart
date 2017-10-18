@@ -140,7 +140,14 @@ class BoxDecoration extends Decoration {
   /// The shape to fill the background [color], [gradient], and [image] into and
   /// to cast as the [boxShadow].
   ///
-  /// If this is [BoxShape.rectangle] then [borderRadius] is ignored.
+  /// If this is [BoxShape.circle] then [borderRadius] is ignored.
+  ///
+  /// The [shape] cannot be interpolated; animating between two [BoxDecoration]s
+  /// with different [shape]s will result in a discontinuity in the rendering.
+  /// To interpolate between two shapes, consider using [ShapeDecoration] and
+  /// different [ShapeBorder]s; in particular, [CircleBorder] instead of
+  /// [BoxShape.circle] and [RoundedRectangleBorder] instead of
+  /// [BoxShape.rectangle].
   final BoxShape shape;
 
   @override

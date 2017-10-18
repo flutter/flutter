@@ -10,16 +10,29 @@ import 'borders.dart';
 import 'edge_insets.dart';
 
 /// The shape to use when rendering a [Border] or [BoxDecoration].
+///
+/// Consider using [ShapeBorder] subclasses directly (with [ShapeDecoration]),
+/// instead of using [BoxShape] and [Border], if the shapes will need to be
+/// interpolated or animated. The [Border] class cannot interpolate between
+/// different shapes.
 enum BoxShape {
   /// An axis-aligned, 2D rectangle. May have rounded corners (described by a
   /// [BorderRadius]). The edges of the rectangle will match the edges of the box
   /// into which the [Border] or [BoxDecoration] is painted.
+  ///
+  /// See also:
+  ///
+  ///  * [RoundedRectangleBorder], the equivalent [ShapeBorder].
   rectangle,
 
   /// A circle centered in the middle of the box into which the [Border] or
   /// [BoxDecoration] is painted. The diameter of the circle is the shortest
   /// dimension of the box, either the width or the height, such that the circle
   /// touches the edges of the box.
+  ///
+  /// See also:
+  ///
+  ///  * [CircleBorder], the equivalent [ShapeBorder].
   circle,
 }
 
