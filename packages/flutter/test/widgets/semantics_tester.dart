@@ -31,7 +31,7 @@ class TestSemantics {
   ///  * [TestSemantics.fullScreen] 800x600, the test screen's size in logical
   ///    pixels, useful for other full-screen widgets.
   TestSemantics({
-    @required this.id,
+    this.id,
     this.flags: 0,
     this.actions: 0,
     this.label: '',
@@ -40,8 +40,7 @@ class TestSemantics {
     this.transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(id != null),
-       assert(flags != null),
+  }) : assert(flags != null),
        assert(label != null),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -73,7 +72,7 @@ class TestSemantics {
   /// [TestSemantics.fullScreen] property may be useful as a value; it describes
   /// an 800x600 rectangle, which is the test screen's size in logical pixels.
   TestSemantics.rootChild({
-    @required this.id,
+    this.id,
     this.flags: 0,
     this.actions: 0,
     this.label: '',
@@ -152,7 +151,7 @@ class TestSemantics {
   /// The tags of this node.
   final Set<SemanticsTag> tags;
 
-  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false }) {
+  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false, bool ignoreId: false }) {
     final SemanticsData nodeData = node.getSemanticsData();
 
     bool fail(String message) {
@@ -162,7 +161,7 @@ class TestSemantics {
 
     if (node == null)
       return fail('could not find node with id $id.');
-    if (id != node.id)
+    if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
     if (flags != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
@@ -188,7 +187,7 @@ class TestSemantics {
     final Iterator<TestSemantics> it = children.iterator;
     node.visitChildren((SemanticsNode node) {
       it.moveNext();
-      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform)) {
+      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId)) {
         result = false;
         return false;
       }
@@ -233,15 +232,16 @@ class SemanticsTester {
 }
 
 class _HasSemantics extends Matcher {
-  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreTransform != null);
+  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false, this.ignoreId: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreId != null), assert(ignoreTransform != null);
 
   final TestSemantics _semantics;
   final bool ignoreRect;
   final bool ignoreTransform;
+  final bool ignoreId;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect);
+    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
   }
 
   @override
@@ -259,7 +259,8 @@ class _HasSemantics extends Matcher {
 Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect: false,
   bool ignoreTransform: false,
-}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform);
+  bool ignoreId: false,
+}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId);
 
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({

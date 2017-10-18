@@ -2860,7 +2860,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsActionHandler {
+class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// Creates a render object that listens for specific semantic gestures.
   ///
   /// The [scrollFactor] argument must not be null.
@@ -2937,11 +2937,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -2950,11 +2950,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -2963,11 +2963,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls up or down.
@@ -2976,11 +2976,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -2990,8 +2990,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// leftwards drag.
   double scrollFactor;
 
-  @override
-  bool get isSemanticBoundary {
+  bool get _hasHandlers {
     return onTap != null
         || onLongPress != null
         || onHorizontalDragUpdate != null
@@ -2999,7 +2998,38 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = _hasHandlers;
+
+    // TODO(goderbauer): this needs to be set even when there is only potential
+    //    for this to become a scroll view.
+    config.explicitChildNodes = onHorizontalDragUpdate != null
+        || onVerticalDragUpdate != null;
+
+    final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
+    if (onTap != null)
+      actions[SemanticsAction.tap] = onTap;
+    if (onLongPress != null)
+      actions[SemanticsAction.longPress] = onLongPress;
+    if (onHorizontalDragUpdate != null) {
+      actions[SemanticsAction.scrollRight] = _performSemanticScrollRight;
+      actions[SemanticsAction.scrollLeft] = _performSemanticScrollLeft;
+    }
+    if (onVerticalDragUpdate != null) {
+      actions[SemanticsAction.scrollUp] = _performSemanticScrollUp;
+      actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
+    }
+
+    final Iterable<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
+
+    for (SemanticsAction action in actionsToAdd) {
+      final VoidCallback handler = actions[action];
+      if (handler != null)
+        config.addAction(action, handler);
+    }
+  }
 
   SemanticsNode _innerNode;
   SemanticsNode _annotatedNode;
@@ -3011,114 +3041,70 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-    if (!node.hasTag(useTwoPaneSemantics)) {
-      super.assembleSemanticsNode(node, children);
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty || !children.first.isTagged(useTwoPaneSemantics)) {
+      _annotatedNode = node;
+      super.assembleSemanticsNode(node, config, children);
       return;
     }
 
-    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
+    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
       ..wasAffectedByClip = node.wasAffectedByClip
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
-
-    semanticsAnnotator(_innerNode);
+    _annotatedNode = _innerNode;
 
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
-      if (child.hasTag(excludeFromScrolling))
+      assert(child.isTagged(useTwoPaneSemantics));
+      if (child.isTagged(excludeFromScrolling))
         excluded.add(child);
       else
         included.add(child);
     }
-    node.addChildren(excluded);
-    _innerNode.addChildren(included);
-    _innerNode.finalizeChildren();
-    node.finalizeChildren();
+    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
+    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }
 
-  @override
-  void resetSemantics() {
-    _innerNode?.reset();
-    super.resetSemantics();
-  }
-
-  void _annotate(SemanticsNode node) {
-    _annotatedNode = node;
-    List<SemanticsAction> actions = <SemanticsAction>[];
-    if (onTap != null)
-      actions.add(SemanticsAction.tap);
-    if (onLongPress != null)
-      actions.add(SemanticsAction.longPress);
+  void _performSemanticScrollLeft() {
     if (onHorizontalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollRight);
-      actions.add(SemanticsAction.scrollLeft);
+      final double primaryDelta = size.width * -scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
     }
-    if (onVerticalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollUp);
-      actions.add(SemanticsAction.scrollDown);
-    }
-
-    // If a set of validActions has been provided only expose those.
-    if (validActions != null)
-      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
-
-    actions.forEach(node.addAction);
   }
 
-  @override
-  void performAction(SemanticsAction action) {
-    switch (action) {
-      case SemanticsAction.tap:
-        if (onTap != null)
-          onTap();
-        break;
-      case SemanticsAction.longPress:
-        if (onLongPress != null)
-          onLongPress();
-        break;
-      case SemanticsAction.scrollLeft:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * -scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollRight:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollUp:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * -scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollDown:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.increase:
-      case SemanticsAction.decrease:
-        assert(false);
-        break;
+  void _performSemanticScrollRight() {
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollUp() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * -scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollDown() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
     }
   }
 
@@ -3150,28 +3136,27 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
+    bool explicitChildNodes,
     bool checked,
     bool selected,
     String label,
     TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
+       _explicitChildNodes = explicitChildNodes,
        _checked = checked,
        _selected = selected,
        _label = label,
        _textDirection = textDirection,
        super(child);
 
-  /// If 'container' is true, this RenderObject will introduce a new
+  /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
-  /// semantics-providing descendants of a node where multiple
-  /// children have semantics or have descendants providing semantics.
-  /// In other words, the semantics of siblings are not merged. To
-  /// merge the semantics of an entire subtree, including siblings,
-  /// you can use a [RenderMergeSemantics].
+  /// Whether descendants of this [RenderObject] can add their semantic information
+  /// to the [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
   bool get container => _container;
   bool _container;
   set container(bool value) {
@@ -3179,6 +3164,28 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (container == value)
       return;
     _container = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether descendants of this [RenderObject] are allowed to add semantic
+  /// information to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  bool get explicitChildNodes => _explicitChildNodes;
+  bool _explicitChildNodes;
+  set explicitChildNodes(bool value) {
+    assert(value != null);
+    if (_explicitChildNodes == value)
+      return;
+    _explicitChildNodes = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3231,23 +3238,18 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   @override
-  bool get isSemanticBoundary => container;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    config.isSemanticBoundary = container;
+    config.explicitChildNodes = explicitChildNodes;
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
-
-  void _annotate(SemanticsNode node) {
-    if (checked != null) {
-      node
-        ..hasCheckedState = true
-        ..isChecked = checked;
-    }
+    if (checked != null)
+      config.isChecked = checked;
     if (selected != null)
-      node.isSelected = selected;
+      config.isSelected = selected;
     if (label != null)
-      node.label = label;
+      config.label = label;
     if (textDirection != null)
-      node.textDirection = textDirection;
+      config.textDirection = textDirection;
   }
 }
 
@@ -3262,7 +3264,10 @@ class RenderBlockSemantics extends RenderProxyBox {
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
   @override
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+  }
 }
 
 /// Causes the semantics of all descendants to be merged into this
@@ -3277,8 +3282,12 @@ class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
-  bool get isMergingSemanticsOfDescendants => true;
-
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true;
+  }
 }
 
 /// Excludes this subtree from the semantic tree.

@@ -156,7 +156,7 @@ const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
 const Duration _kReactionDuration = const Duration(milliseconds: 300);
 const Duration _kToggleDuration = const Duration(milliseconds: 200);
 
-class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsActionHandler {
+class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({
     @required bool value,
     @required Color activeColor,
@@ -214,7 +214,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true, noGeometry: true);
+    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
     _position
       ..curve = Curves.ease
       ..reverseCurve = Curves.ease.flipped;
@@ -254,7 +254,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -375,23 +375,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool get isSemanticBoundary => isInteractive;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  void _annotate(SemanticsNode semantics) {
-    semantics
-      ..hasCheckedState = true
-      ..isChecked = _value;
+    config.isSemanticBoundary = isInteractive;
     if (isInteractive)
-      semantics.addAction(SemanticsAction.tap);
-  }
-
-  @override
-  void performAction(SemanticsAction action) {
-    if (action == SemanticsAction.tap)
-      _handleTap();
+      config.addAction(SemanticsAction.tap, _handleTap);
+    config.isChecked = _value;
   }
 
   final CupertinoThumbPainter _thumbPainter = new CupertinoThumbPainter();

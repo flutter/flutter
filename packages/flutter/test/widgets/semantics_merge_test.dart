@@ -53,7 +53,14 @@ void main() {
     );
 
     expect(semantics, hasSemantics(
-      new TestSemantics.root(label: 'test1\ntest2'),
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 3,
+            label: 'test1\ntest2',
+          ),
+        ]
+      ),
       ignoreRect: true,
       ignoreTransform: true,
     ));
@@ -74,8 +81,8 @@ void main() {
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[
-          new TestSemantics.rootChild(id: 5, label: 'test1'),
-          new TestSemantics.rootChild(id: 6, label: 'test2'),
+          new TestSemantics.rootChild(id: 4, label: 'test1'),
+          new TestSemantics.rootChild(id: 5, label: 'test2'),
         ],
       ),
       ignoreRect: true,

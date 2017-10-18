@@ -18,41 +18,45 @@ void main() {
     test('tagging', () {
       final SemanticsNode node = new SemanticsNode();
 
-      expect(node.hasTag(tag1), isFalse);
-      expect(node.hasTag(tag2), isFalse);
+      expect(node.isTagged(tag1), isFalse);
+      expect(node.isTagged(tag2), isFalse);
 
-      node.addTag(tag1);
-      expect(node.hasTag(tag1), isTrue);
-      expect(node.hasTag(tag2), isFalse);
+      node.tags = new Set<SemanticsTag>()..add(tag1);
+      expect(node.isTagged(tag1), isTrue);
+      expect(node.isTagged(tag2), isFalse);
 
-      node.addTag(tag2);
-      expect(node.hasTag(tag1), isTrue);
-      expect(node.hasTag(tag2), isTrue);
+      node.tags.add(tag2);
+      expect(node.isTagged(tag1), isTrue);
+      expect(node.isTagged(tag2), isTrue);
     });
 
     test('getSemanticsData includes tags', () {
-      final SemanticsNode node = new SemanticsNode()
-        ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
-        ..addTag(tag1)
-        ..addTag(tag2);
-
-      final Set<SemanticsTag> expected = new Set<SemanticsTag>()
+      final Set<SemanticsTag> tags = new Set<SemanticsTag>()
         ..add(tag1)
         ..add(tag2);
 
-      expect(node.getSemanticsData().tags, expected);
+      final SemanticsNode node = new SemanticsNode()
+        ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..tags = tags;
 
-      node.mergeAllDescendantsIntoThisNode = true;
-      node.addChildren(<SemanticsNode>[
-        new SemanticsNode()
-          ..rect = new Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
-          ..addTag(tag3),
-      ]);
-      node.finalizeChildren();
+      expect(node.getSemanticsData().tags, tags);
 
-      expected.add(tag3);
+      tags.add(tag3);
 
-      expect(node.getSemanticsData().tags, expected);
+      final SemanticsConfiguration config = new SemanticsConfiguration()
+        ..isMergingSemanticsOfDescendants = true;
+
+      node.updateWith(
+        config: config,
+        childrenInInversePaintOrder: <SemanticsNode>[
+          new SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = new Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+            ..tags = tags,
+        ],
+      );
+
+      expect(node.getSemanticsData().tags, tags);
     });
 
     test('after markNeedsSemanticsUpdate(onlyLocalUpdates: true) all render objects between two semantic boundaries are asked for annotations', () {
@@ -88,7 +92,6 @@ void main() {
 
       middle.action = SemanticsAction.scrollDown;
       middle.markNeedsSemanticsUpdate(onlyLocalUpdates: true);
-      expect(root.debugSemantics.getSemanticsData().actions, 0); // SemanticsNode is reset
 
       pumpFrame(phase: EnginePhase.flushSemantics);
 
@@ -104,8 +107,10 @@ void main() {
       ..rect = new Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
     final SemanticsNode root = new SemanticsNode()
       ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
-    root.addChildren(<SemanticsNode>[child1, child2]);
-    root.finalizeChildren();
+    root.updateWith(
+      config: null,
+      childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
+    );
 
     expect(root.transform, isNull);
     expect(child1.transform, isNull);
@@ -126,8 +131,10 @@ void main() {
       ..rect = new Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
     final SemanticsNode root = new SemanticsNode()
       ..rect = new Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
-    root.addChildren(<SemanticsNode>[child1, child2]);
-    root.finalizeChildren();
+    root.updateWith(
+      config: null,
+      childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
+    );
     expect(
       root.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
       'SemanticsNode#11(STALE, owner: null, Rect.fromLTRB(0.0, 0.0, 20.0, 5.0))\n'
@@ -144,18 +151,22 @@ void main() {
 
     final SemanticsNode child3 = new SemanticsNode()
       ..rect = new Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
-    child3.addChildren(<SemanticsNode>[
-      new SemanticsNode()
-        ..rect = new Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
-      new SemanticsNode()
-        ..rect = new Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
-    ]);
-    child3.finalizeChildren();
+    child3.updateWith(
+      config: null,
+      childrenInInversePaintOrder: <SemanticsNode>[
+        new SemanticsNode()
+          ..rect = new Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+        new SemanticsNode()
+          ..rect = new Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+      ],
+    );
 
     final SemanticsNode rootComplex = new SemanticsNode()
       ..rect = new Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
-    rootComplex.addChildren(<SemanticsNode>[child1, child2, child3]);
-    rootComplex.finalizeChildren();
+    rootComplex.updateWith(
+        config: null,
+        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3]
+    );
 
     expect(
       rootComplex.toStringDeep(childOrder: DebugSemanticsDumpOrder.traversal),
@@ -187,28 +198,30 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], tags: [], isSelected: false, label: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], isSelected: false, label: "", textDirection: null)\n',
     );
 
-    final SemanticsNode allProperties = new SemanticsNode()
-      ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
-      ..mergeAllDescendantsIntoThisNode = true
-      ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
-      ..wasAffectedByClip = true
-      ..addAction(SemanticsAction.scrollUp)
-      ..addAction(SemanticsAction.longPress)
-      ..addAction(SemanticsAction.showOnScreen)
+    final SemanticsConfiguration config = new SemanticsConfiguration()
+      ..isMergingSemanticsOfDescendants = true
+      ..addAction(SemanticsAction.scrollUp, () { })
+      ..addAction(SemanticsAction.longPress, () { })
+      ..addAction(SemanticsAction.showOnScreen, () { })
       ..isChecked = false
       ..isSelected = true
       ..label = "Use all the properties"
       ..textDirection = TextDirection.rtl;
+    final SemanticsNode allProperties = new SemanticsNode()
+      ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
+      ..wasAffectedByClip = true
+      ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], selected, label: "Use all the properties", textDirection: rtl)\n',
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], unchecked, selected, label: "Use all the properties", textDirection: rtl)\n',
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [isSelected], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected], label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = new SemanticsNode()
@@ -223,37 +236,22 @@ void main() {
       'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [10.0,0.0,0.0,0.0; 0.0,10.0,0.0,0.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0])',
     );
   });
-
-  test('reset clears tags', () {
-    const SemanticsTag tag = const SemanticsTag('tag for testing');
-    final SemanticsNode node = new SemanticsNode();
-
-    expect(node.hasTag(tag), isFalse);
-
-    node.addTag(tag);
-
-    expect(node.hasTag(tag), isTrue);
-
-    node.reset();
-
-    expect(node.hasTag(tag), isFalse);
-  });
 }
 
 class TestRender extends RenderProxyBox {
 
   TestRender({ this.action, this.isSemanticBoundary, RenderObject child }) : super(child);
 
-  @override
   final bool isSemanticBoundary;
 
   SemanticsAction action;
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  void _annotate(SemanticsNode node) {
-    node.addAction(action);
+    config
+      ..isSemanticBoundary = isSemanticBoundary
+      ..addAction(action, () { });
   }
-
 }

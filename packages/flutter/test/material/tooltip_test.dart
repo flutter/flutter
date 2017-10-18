@@ -473,7 +473,7 @@ void main() {
                       child: new Tooltip(
                         key: key,
                         message: tooltipText,
-                        child: new Container(width: 0.0, height: 0.0),
+                        child: new Container(width: 10.0, height: 10.0),
                       ),
                     ),
                   ],
@@ -485,14 +485,23 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: tooltipText)));
+    final TestSemantics expected = new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            label: tooltipText,
+          ),
+        ]
+    );
+
+    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
     // before using "as dynamic" in your code, see note top of file
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: tooltipText)));
+    expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
     semantics.dispose();
   });

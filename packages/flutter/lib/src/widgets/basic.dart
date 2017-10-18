@@ -4434,6 +4434,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Key key,
     Widget child,
     this.container: false,
+    this.explicitChildNodes: false,
     this.checked,
     this.selected,
     this.label,
@@ -4441,17 +4442,28 @@ class Semantics extends SingleChildRenderObjectWidget {
   }) : assert(container != null),
        super(key: key, child: child);
 
-  /// If 'container' is true, this Widget will introduce a new node in
-  /// the semantics tree. Otherwise, the semantics will be merged with
-  /// the semantics of any ancestors.
+  /// If 'container' is true, this widget will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
-  /// semantics-providing descendants of a node where multiple
-  /// children have semantics or have descendants providing semantics.
-  /// In other words, the semantics of siblings are not merged. To
-  /// merge the semantics of an entire subtree, including siblings,
-  /// you can use a [MergeSemantics] widget.
+  /// Whether descendants of this widget can add their semantic information to the
+  /// [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
   final bool container;
+
+  /// Whether descendants of this widget are allowed to add semantic information
+  /// to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  final bool explicitChildNodes;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -4484,6 +4496,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
+      explicitChildNodes: explicitChildNodes,
       checked: checked,
       selected: selected,
       label: label,
@@ -4495,6 +4508,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
+      ..explicitChildNodes = explicitChildNodes
       ..checked = checked
       ..selected = selected
       ..label = label

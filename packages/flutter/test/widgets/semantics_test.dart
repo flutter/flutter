@@ -13,8 +13,12 @@ void main() {
     SemanticsTester semantics = new SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-      label: 'test1',
-      textDirection: TextDirection.ltr,
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'test1',
+          textDirection: TextDirection.ltr,
+        )
+      ],
     );
 
     await tester.pumpWidget(
@@ -27,7 +31,12 @@ void main() {
       )
     );
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
 
     semantics.dispose();
     semantics = null;
@@ -37,7 +46,12 @@ void main() {
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(
+      expectedSemantics,
+      ignoreTransform: true,
+      ignoreRect: true,
+      ignoreId: true,
+    ));
     semantics.dispose();
   });
 
@@ -62,15 +76,20 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        label: 'test1',
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 1,
-            label: 'test2a',
-            rect: TestSemantics.fullScreen,
+            label: 'test1',
+            children: <TestSemantics>[
+              new TestSemantics(
+                label: 'test2a',
+              )
+            ]
           )
         ]
-      )
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
     ));
 
     await tester.pumpWidget(new Directionality(
@@ -94,22 +113,25 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        label: 'test1',
-        children: <TestSemantics>[
-          new TestSemantics.rootChild(
-            id: 2,
-            label: 'middle',
-            rect: TestSemantics.fullScreen,
-            children: <TestSemantics>[
-              new TestSemantics(
-                id: 1,
-                label: 'test2b',
-                rect: TestSemantics.fullScreen,
-              )
-            ]
-          )
-        ]
-      )
+          children: <TestSemantics>[
+            new TestSemantics.rootChild(
+                label: 'test1',
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    label: 'middle',
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        label: 'test2b',
+                      ),
+                    ],
+                  )
+                ]
+            )
+          ]
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
     ));
 
     semantics.dispose();
@@ -117,11 +139,6 @@ void main() {
 
   testWidgets('Semantics and Directionality - RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-
-    final TestSemantics expectedSemantics = new TestSemantics.root(
-      label: 'test1',
-      textDirection: TextDirection.rtl,
-    );
 
     await tester.pumpWidget(
       new Directionality(
@@ -133,16 +150,11 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, includesNodeWith(label: 'test1', textDirection: TextDirection.rtl));
   });
 
   testWidgets('Semantics and Directionality - LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-
-    final TestSemantics expectedSemantics = new TestSemantics.root(
-      label: 'test1',
-      textDirection: TextDirection.ltr,
-    );
 
     await tester.pumpWidget(
       new Directionality(
@@ -154,15 +166,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, includesNodeWith(label: 'test1', textDirection: TextDirection.ltr));
   });
 
-  testWidgets('Semantics and Directionality - overriding RTL with LTR', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - cannot override RTL with LTR', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-      label: 'test1',
-      textDirection: TextDirection.ltr,
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          label: 'test1',
+          textDirection: TextDirection.ltr,
+        )
+      ]
     );
 
     await tester.pumpWidget(
@@ -176,15 +192,19 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
   });
 
-  testWidgets('Semantics and Directionality - overriding LTR with RTL', (WidgetTester tester) async {
+  testWidgets('Semantics and Directionality - cannot override LTR with RTL', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final TestSemantics expectedSemantics = new TestSemantics.root(
-      label: 'test1',
-      textDirection: TextDirection.rtl,
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            label: 'test1',
+            textDirection: TextDirection.rtl,
+          )
+        ]
     );
 
     await tester.pumpWidget(
@@ -198,6 +218,6 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
   });
 }

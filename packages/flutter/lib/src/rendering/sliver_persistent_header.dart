@@ -221,10 +221,11 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  void _annotate(SemanticsNode node) {
-    node.addTag(RenderSemanticsGestureHandler.excludeFromScrolling);
+    if (_excludeFromSemanticsScrolling)
+      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
   }
 
   @override

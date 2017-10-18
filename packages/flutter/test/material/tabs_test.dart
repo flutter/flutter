@@ -1011,11 +1011,11 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 3,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 2,
+              id: 1,
               actions: SemanticsAction.tap.index,
               flags: SemanticsFlags.isSelected.index,
               label: 'TAB #0\nTab 1 of 2',
@@ -1023,13 +1023,14 @@ void main() {
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
             ),
             new TestSemantics(
-              id: 5,
+              id: 2,
               actions: SemanticsAction.tap.index,
               label: 'TAB #1\nTab 2 of 2',
               rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
             ),
-          ]),
+          ],
+        ),
       ],
     );
 
@@ -1064,15 +1065,19 @@ void main() {
       ),
     );
 
+    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
+    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
-    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #10')));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
 
     controller.index = 10;
     await tester.pumpAndSettle();
 
-    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #0')));
+    expect(semantics, isNot(includesNodeWith(label: tab0title)));
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
-    expect(semantics, includesNodeWith(label: 'This is a very wide tab #10'));
+    expect(semantics, includesNodeWith(label: tab10title));
 
     controller.index = 19;
     await tester.pumpAndSettle();
@@ -1083,7 +1088,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
-    expect(semantics, includesNodeWith(label: 'This is a very wide tab #0'));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
 
     semantics.dispose();
   });

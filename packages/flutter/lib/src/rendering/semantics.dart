@@ -18,31 +18,6 @@ import 'semantics_event.dart';
 export 'dart:ui' show SemanticsAction;
 export 'semantics_event.dart';
 
-/// Interface for [RenderObject]s to implement when they want to support
-/// being tapped, etc.
-///
-/// The handler will only be called for a particular flag if that flag is set
-/// (e.g. [performAction] will only be called with [SemanticsAction.tap] if
-/// [SemanticsNode.addAction] was called for [SemanticsAction.tap].)
-abstract class SemanticsActionHandler { // ignore: one_member_abstracts
-  /// Called when the object implementing this interface receives a
-  /// [SemanticsAction]. For example, if the user of an accessibility tool
-  /// instructs their device that they wish to tap a button, the [RenderObject]
-  /// behind that button would have its [performAction] method called with the
-  /// [SemanticsAction.tap] action.
-  void performAction(SemanticsAction action);
-}
-
-/// Signature for functions returned by [RenderObject.semanticsAnnotator].
-///
-/// These callbacks are called with the [SemanticsNode] object that
-/// corresponds to the [RenderObject]. (One [SemanticsNode] can
-/// correspond to multiple [RenderObject] objects.)
-///
-/// See [RenderObject.semanticsAnnotator] for details on the
-/// contract that semantic annotators must follow.
-typedef void SemanticsAnnotator(SemanticsNode semantics);
-
 /// Signature for a function that is called for each [SemanticsNode].
 ///
 /// Return false to stop visiting nodes.
@@ -103,14 +78,13 @@ class SemanticsData extends Diagnosticable {
     @required this.label,
     @required this.textDirection,
     @required this.rect,
-    @required this.tags,
+    this.tags,
     this.transform,
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
        assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
-       assert(rect != null),
-       assert(tags != null);
+       assert(rect != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
   final int flags;
@@ -223,22 +197,18 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
-    SemanticsActionHandler handler,
     VoidCallback showOnScreen,
   }) : id = _generateNewId(),
-       _showOnScreen = showOnScreen,
-       _actionHandler = handler;
+       _showOnScreen = showOnScreen;
 
   /// Creates a semantic node to represent the root of the semantics tree.
   ///
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
-    SemanticsActionHandler handler,
     VoidCallback showOnScreen,
     SemanticsOwner owner,
   }) : id = 0,
-       _showOnScreen = showOnScreen,
-       _actionHandler = handler {
+       _showOnScreen = showOnScreen {
     attach(owner);
   }
 
@@ -254,11 +224,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// they are created.
   final int id;
 
-  final SemanticsActionHandler _actionHandler;
   final VoidCallback _showOnScreen;
 
   // GEOMETRY
-  // These are automatically handled by RenderObject's own logic
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
@@ -285,11 +253,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] was clipped by ancestors.
+  /// Whether [rect] was affected by a clip from an ancestors.
   ///
-  /// This is only true if the [rect] of this [SemanticsNode] has been altered
-  /// due to clipping by an ancestor. If ancestors have been clipped, but the
-  /// [rect] of this node was unaffected it will be false.
+  /// If this is true it means that an ancestor imposed a clip on this
+  /// [SemanticsNode]. However, it does not mean that the clip had any effect
+  /// on the [rect] whatsoever.
   bool wasAffectedByClip = false;
 
   /// Whether the node is invisible.
@@ -304,57 +272,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// currently shown on screen.
   bool get isInvisible => !isMergedIntoParent && rect.isEmpty;
 
-  // FLAGS AND LABELS
-  // These are supposed to be set by SemanticsAnnotator obtained from getSemanticsAnnotators
-
-  int _actions = 0;
-
-  /// Adds the given action to the set of semantic actions.
-  ///
-  /// If the user chooses to perform an action,
-  /// [SemanticsActionHandler.performAction] will be called with the chosen
-  /// action.
-  void addAction(SemanticsAction action) {
-    assert(action != null);
-    final int index = action.index;
-    if ((_actions & index) == 0) {
-      _actions |= index;
-      _markDirty();
-    }
-  }
-
-  /// Adds the [SemanticsAction.scrollLeft] and [SemanticsAction.scrollRight] actions.
-  void addHorizontalScrollingActions() {
-    addAction(SemanticsAction.scrollLeft);
-    addAction(SemanticsAction.scrollRight);
-  }
-
-  /// Adds the [SemanticsAction.scrollUp] and [SemanticsAction.scrollDown] actions.
-  void addVerticalScrollingActions() {
-    addAction(SemanticsAction.scrollUp);
-    addAction(SemanticsAction.scrollDown);
-  }
-
-  /// Adds the [SemanticsAction.increase] and [SemanticsAction.decrease] actions.
-  void addAdjustmentActions() {
-    addAction(SemanticsAction.increase);
-    addAction(SemanticsAction.decrease);
-  }
-
-  bool _canPerformAction(SemanticsAction action) {
-    return _actionHandler != null && (_actions & action.index) != 0;
-  }
-
-  /// Whether this node and all of its descendants should be treated as one logical entity.
-  bool get mergeAllDescendantsIntoThisNode => _mergeAllDescendantsIntoThisNode;
-  bool _mergeAllDescendantsIntoThisNode = false;
-  set mergeAllDescendantsIntoThisNode(bool value) {
-    assert(value != null);
-    if (_mergeAllDescendantsIntoThisNode == value)
-      return;
-    _mergeAllDescendantsIntoThisNode = value;
-    _markDirty();
-  }
+  // MERGING
 
   /// Whether this node merges its semantic information into an ancestor node.
   bool get isMergedIntoParent => _isMergedIntoParent;
@@ -377,129 +295,91 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///  * [mergeAllDescendantsIntoThisNode]
   bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
 
-  int _flags = 0;
-  void _setFlag(SemanticsFlags flag, bool value) {
-    final int index = flag.index;
-    if (value) {
-      if ((_flags & index) == 0) {
-        _flags |= index;
-        _markDirty();
-      }
-    } else {
-      if ((_flags & index) != 0) {
-        _flags &= ~index;
-        _markDirty();
-      }
-    }
-  }
+  /// Whether this node and all of its descendants should be treated as one logical entity.
+  bool get mergeAllDescendantsIntoThisNode => _mergeAllDescendantsIntoThisNode;
+  bool _mergeAllDescendantsIntoThisNode = _kEmptyConfig.isMergingSemanticsOfDescendants;
 
-  /// Whether this node has Boolean state that can be controlled by the user.
-  bool get hasCheckedState => (_flags & SemanticsFlags.hasCheckedState.index) != 0;
-  set hasCheckedState(bool value) => _setFlag(SemanticsFlags.hasCheckedState, value);
 
-  /// If this node has Boolean state that can be controlled by the user, whether
-  /// that state is on or off, corresponding to true and false, respectively.
-  bool get isChecked => (_flags & SemanticsFlags.isChecked.index) != 0;
-  set isChecked(bool value) => _setFlag(SemanticsFlags.isChecked, value);
+  // CHILDREN
 
-  /// Whether the current node is selected (true) or not (false).
-  bool get isSelected => (_flags & SemanticsFlags.isSelected.index) != 0;
-  set isSelected(bool value) => _setFlag(SemanticsFlags.isSelected, value);
+  /// Contains the children in inverse hit test order (i.e. paint order).
+  List<SemanticsNode> _children;
 
-  /// A textual description of this node.
-  ///
-  /// The text's reading direction is given by [textDirection].
-  String get label => _label;
-  String _label = '';
-  set label(String value) {
-    assert(value != null);
-    if (_label != value) {
-      _label = value;
-      _markDirty();
-    }
-  }
-
-  /// The reading direction for the text in [label].
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    assert(value != null);
-    if (_textDirection != value) {
-      _textDirection = value;
-      _markDirty();
-    }
-  }
-
-  final Set<SemanticsTag> _tags = new Set<SemanticsTag>();
-
-  /// Tags the [SemanticsNode] with [tag].
-  ///
-  /// Tags are not sent to the engine. They can be used by a parent
-  /// [SemanticsNode] to figure out how to add the node as a child.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
-  ///  * [hasTag] to check if the node has a certain tag.
-  void addTag(SemanticsTag tag) {
-    assert(tag != null);
-    _tags.add(tag);
-  }
-
-  /// Check if the [SemanticsNode] is tagged with [tag].
-  ///
-  /// Tags can be added and removed with [ensureTag].
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsTag], whose documentation discusses the purposes of tags.
-  bool hasTag(SemanticsTag tag) => _tags.contains(tag);
-
-  /// Restore this node to its default state.
-  void reset() {
-    _actions = 0;
-    _flags = 0;
-    _label = '';
-    _textDirection = null;
-    _mergeAllDescendantsIntoThisNode = false;
-    _tags.clear();
-    _markDirty();
-  }
-
-  List<SemanticsNode> _newChildren;
-
-  /// Append the given children as children of this node.
-  ///
-  /// Children must be added in inverse hit test order (i.e. paint order).
-  ///
-  /// The [finalizeChildren] method must be called after all children have been
-  /// added.
-  void addChildren(Iterable<SemanticsNode> childrenInInverseHitTestOrder) {
-    _newChildren ??= <SemanticsNode>[];
-    _newChildren.addAll(childrenInInverseHitTestOrder);
-    // we do the asserts afterwards because children is an Iterable
-    // and doing the asserts before would mean the behavior is
-    // different in checked mode vs release mode (if you walk an
-    // iterator after having reached the end, it'll just start over;
-    // the values are not cached).
-    assert(!_newChildren.any((SemanticsNode child) => child == this));
+  void _replaceChildren(List<SemanticsNode> newChildren) {
+    assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
         ancestor = ancestor.parent;
-      assert(!_newChildren.any((SemanticsNode child) => child == ancestor));
+      assert(!newChildren.any((SemanticsNode child) => child == ancestor));
       return true;
     }());
     assert(() {
       final Set<SemanticsNode> seenChildren = new Set<SemanticsNode>();
-      for (SemanticsNode child in _newChildren)
+      for (SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
     }());
-  }
 
-  /// Contains the children in inverse hit test order (i.e. paint order).
-  List<SemanticsNode> _children;
+    // The goal of this function is updating sawChange.
+    if (_children != null) {
+      for (SemanticsNode child in _children)
+        child._dead = true;
+    }
+    if (newChildren != null) {
+      for (SemanticsNode child in newChildren) {
+        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
+        child._dead = false;
+      }
+    }
+    bool sawChange = false;
+    if (_children != null) {
+      for (SemanticsNode child in _children) {
+        if (child._dead) {
+          if (child.parent == this) {
+            // we might have already had our child stolen from us by
+            // another node that is deeper in the tree.
+            dropChild(child);
+          }
+          sawChange = true;
+        }
+      }
+    }
+    if (newChildren != null) {
+      for (SemanticsNode child in newChildren) {
+        if (child.parent != this) {
+          if (child.parent != null) {
+            // we're rebuilding the tree from the bottom up, so it's possible
+            // that our child was, in the last pass, a child of one of our
+            // ancestors. In that case, we drop the child eagerly here.
+            // TODO(ianh): Find a way to assert that the same node didn't
+            // actually appear in the tree in two places.
+            child.parent?.dropChild(child);
+          }
+          assert(!child.attached);
+          adoptChild(child);
+          sawChange = true;
+        }
+      }
+    }
+    if (!sawChange && _children != null) {
+      assert(newChildren != null);
+      assert(newChildren.length == _children.length);
+      // Did the order change?
+      for (int i = 0; i < _children.length; i++) {
+        if (_children[i].id != newChildren[i].id) {
+          sawChange = true;
+          break;
+        }
+      }
+    }
+    final List<SemanticsNode> oldChildren = _children;
+    _children = newChildren;
+    oldChildren?.clear();
+    newChildren = oldChildren;
+    if (sawChange)
+      _markDirty();
+  }
 
   /// Whether this node has a non-zero number of children.
   bool get hasChildren => _children?.isNotEmpty ?? false;
@@ -522,86 +402,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Called during the compilation phase after all the children of this node have been compiled.
-  ///
-  /// This function lets the semantic node respond to all the changes to its
-  /// child list for the given frame at once instead of needing to process the
-  /// changes incrementally as new children are compiled.
-  void finalizeChildren() {
-    // The goal of this function is updating sawChange.
-    if (_children != null) {
-      for (SemanticsNode child in _children)
-        child._dead = true;
-    }
-    if (_newChildren != null) {
-      for (SemanticsNode child in _newChildren) {
-        assert(!child.isInvisible, 'Child with id ${child.id} is invisible and should not be added to tree.');
-        child._dead = false;
-      }
-    }
-    bool sawChange = false;
-    if (_children != null) {
-      for (SemanticsNode child in _children) {
-        if (child._dead) {
-          if (child.parent == this) {
-            // we might have already had our child stolen from us by
-            // another node that is deeper in the tree.
-            dropChild(child);
-          }
-          sawChange = true;
-        }
-      }
-    }
-    if (_newChildren != null) {
-      for (SemanticsNode child in _newChildren) {
-        if (child.parent != this) {
-          if (child.parent != null) {
-            // we're rebuilding the tree from the bottom up, so it's possible
-            // that our child was, in the last pass, a child of one of our
-            // ancestors. In that case, we drop the child eagerly here.
-            // TODO(ianh): Find a way to assert that the same node didn't
-            // actually appear in the tree in two places.
-            child.parent?.dropChild(child);
-          }
-          assert(!child.attached);
-          adoptChild(child);
-          sawChange = true;
-        }
-      }
-    }
-    if (!sawChange && _children != null) {
-      assert(_newChildren != null);
-      assert(_newChildren.length == _children.length);
-      // Did the order change?
-      for (int i = 0; i < _children.length; i++) {
-        if (_children[i].id != _newChildren[i].id) {
-          sawChange = true;
-          break;
-        }
-      }
-    }
-    final List<SemanticsNode> oldChildren = _children;
-    _children = _newChildren;
-    oldChildren?.clear();
-    _newChildren = oldChildren;
-    if (sawChange)
-      _markDirty();
-  }
-
-  @override
-  SemanticsOwner get owner => super.owner;
-
-  @override
-  SemanticsNode get parent => super.parent;
-
-  @override
-  void redepthChildren() {
-    if (_children != null) {
-      for (SemanticsNode child in _children)
-        redepthChild(child);
-    }
-  }
-
   /// Visit all the descendants of this node.
   ///
   /// This function calls visitor for each descendant in a pre-order travseral
@@ -617,6 +417,22 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return true;
   }
 
+  // AbstractNode OVERRIDES
+
+  @override
+  SemanticsOwner get owner => super.owner;
+
+  @override
+  SemanticsNode get parent => super.parent;
+
+  @override
+  void redepthChildren() {
+    if (_children != null) {
+      for (SemanticsNode child in _children)
+        redepthChild(child);
+    }
+  }
+
   @override
   void attach(SemanticsOwner owner) {
     super.attach(owner);
@@ -627,7 +443,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _dirty = false;
       _markDirty();
     }
-    assert(isMergedIntoParent == (parent?.isPartOfNodeMerging ?? false));
     if (_children != null) {
       for (SemanticsNode child in _children)
         child.attach(owner);
@@ -656,6 +471,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _markDirty();
   }
 
+  // DIRTY MANAGEMENT
+
   bool _dirty = false;
   void _markDirty() {
     if (_dirty)
@@ -667,6 +484,66 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
+  bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
+    return _label != config.label ||
+        _flags != config._flags ||
+        _textDirection != config.textDirection ||
+        _actionsAsBitMap(_actions) != _actionsAsBitMap(config._actions) ||
+        _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
+  }
+
+  // TAGS, LABELS, ACTIONS
+
+  Map<SemanticsAction, VoidCallback> _actions = _kEmptyConfig._actions;
+
+  /// The [SemanticsTag]s this node is tagged with.
+  ///
+  /// Tags are used during the construction of the semantics tree. They are not
+  /// transfered to the engine.
+  Set<SemanticsTag> tags;
+
+  /// Whether this node is tagged with `tag`.
+  bool isTagged(SemanticsTag tag) => tags != null && tags.contains(tag);
+
+  int _flags = _kEmptyConfig._flags;
+
+  bool _hasFlag(SemanticsFlags flag) => _flags & flag.index != 0;
+
+  /// A textual description of this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get label => _label;
+  String _label = _kEmptyConfig.label;
+
+  /// The reading direction for [label].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection = _kEmptyConfig.textDirection;
+
+  int _actionsAsBitMap(Map<SemanticsAction, VoidCallback> actions) {
+    return actions.keys.fold(0, (int prev, SemanticsAction action) => prev |= action.index);
+  }
+
+  bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
+
+  static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
+
+  void updateWith({
+    @required SemanticsConfiguration config,
+    @required  List<SemanticsNode> childrenInInversePaintOrder,
+  }) {
+    config ??= _kEmptyConfig;
+    if (_isDifferentFromCurrentSemanticAnnotation(config))
+      _markDirty();
+
+    _label = config.label;
+    _flags = config._flags;
+    _textDirection = config.textDirection;
+    _actions = new Map<SemanticsAction, VoidCallback>.from(config._actions);
+    _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
+    _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
+  }
+
+
   /// Returns a summary of the semantics for this node.
   ///
   /// If this node has [mergeAllDescendantsIntoThisNode], then the returned data
@@ -674,21 +551,25 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
     int flags = _flags;
-    int actions = _actions;
+    int actions = _actionsAsBitMap(_actions);
     String label = _label;
     TextDirection textDirection = _textDirection;
-    final Set<SemanticsTag> tags = new Set<SemanticsTag>.from(_tags);
+    Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
 
     if (mergeAllDescendantsIntoThisNode) {
       _visitDescendants((SemanticsNode node) {
+        assert(node.isMergedIntoParent);
         flags |= node._flags;
-        actions |= node._actions;
+        actions |= _actionsAsBitMap(node._actions);
         textDirection ??= node._textDirection;
-        tags.addAll(node._tags);
-        if (node.label.isNotEmpty) {
-          String nestedLabel = node.label;
-          if (textDirection != node.textDirection && node.textDirection != null) {
-            switch (node.textDirection) {
+        if (node.tags != null) {
+          mergedTags ??= new Set<SemanticsTag>();
+          mergedTags.addAll(node.tags);
+        }
+        if (node._label.isNotEmpty) {
+          String nestedLabel = node._label;
+          if (textDirection != node._textDirection && node._textDirection != null) {
+            switch (node._textDirection) {
               case TextDirection.rtl:
                 nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
                 break;
@@ -713,7 +594,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: textDirection,
       rect: rect,
       transform: transform,
-      tags: tags,
+      tags: mergedTags,
     );
   }
 
@@ -798,18 +679,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
     properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
-    final List<String> actions = <String>[];
-    for (SemanticsAction action in SemanticsAction.values.values) {
-      if ((_actions & action.index) != 0)
-        actions.add(describeEnum(action));
-    }
+    final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
-    properties.add(new IterableProperty<SemanticsTag>('tags', _tags, ifEmpty: null));
-    if (hasCheckedState)
-      properties.add(new FlagProperty('isChecked', value: isChecked, ifTrue: 'checked', ifFalse: 'unchecked'));
-    properties.add(new FlagProperty('isSelected', value: isSelected, ifTrue: 'selected'));
-    properties.add(new StringProperty('label', label, defaultValue: ''));
-    properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    if (_hasFlag(SemanticsFlags.hasCheckedState))
+      properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
+    properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
+    properties.add(new StringProperty('label', _label, defaultValue: ''));
+    properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -939,7 +815,7 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  VoidCallback _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
@@ -952,7 +828,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (result == null || !result._canPerformAction(action))
       return null;
-    return result._actionHandler;
+    return result._actions[action];
   }
 
   /// Asks the [SemanticsNode] with the given id to perform the given action.
@@ -961,9 +837,9 @@ class SemanticsOwner extends ChangeNotifier {
   /// this function does nothing.
   void performAction(int id, SemanticsAction action) {
     assert(action != null);
-    final SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
+    final VoidCallback handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
-      handler.performAction(action);
+      handler();
       return;
     }
 
@@ -972,7 +848,7 @@ class SemanticsOwner extends ChangeNotifier {
       _nodes[id]._showOnScreen();
   }
 
-  SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
+  VoidCallback _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
@@ -990,16 +866,16 @@ class SemanticsOwner extends ChangeNotifier {
         }
         return true;
       });
-      return result?._actionHandler;
+      return result?._actions[action];
     }
     if (node.hasChildren) {
       for (SemanticsNode child in node._children.reversed) {
-        final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final VoidCallback handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
     }
-    return node._canPerformAction(action) ? node._actionHandler : null;
+    return node._canPerformAction(action) ? node._actions[action] : null;
   }
 
   /// Asks the [SemanticsNode] at the given position to perform the given action.
@@ -1011,10 +887,256 @@ class SemanticsOwner extends ChangeNotifier {
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
       return;
-    final SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
-    handler?.performAction(action);
+    final VoidCallback handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    if (handler != null)
+      handler();
   }
 
   @override
   String toString() => describeIdentity(this);
+}
+
+/// Describes the semantic information associated with the owning
+/// [RenderObject].
+///
+/// The information provided in the configuration is used to to generate the
+/// semantics tree.
+class SemanticsConfiguration {
+
+  // SEMANTIC BOUNDARY BEHAVIOR
+
+  /// Whether the [RenderObject] owner of this configuration wants to own its
+  /// own [SemanticsNode].
+  ///
+  /// When set to true semantic information associated with the [RenderObject]
+  /// owner of this configuration or any of its defendants will not leak into
+  /// parents. The [SemanticsNode] generated out of this configuration will
+  /// act as a boundary.
+  ///
+  /// Whether descendants of the owning [RenderObject] can add their semantic
+  /// information to the [SemanticsNode] introduced by this configuration
+  /// is controlled by [explicitChildNodes].
+  ///
+  /// This has to be true if [isMergingDescendantsIntoOneNode] is also true.
+  bool get isSemanticBoundary => _isSemanticBoundary;
+  bool _isSemanticBoundary = false;
+  set isSemanticBoundary(bool value) {
+    assert(!isMergingDescendantsIntoOneNode || value);
+    _isSemanticBoundary = value;
+  }
+
+  /// Whether the configuration forces all children of the owning [RenderObject]
+  /// that want to contribute semantic information to the semantics tree to do
+  /// so in the form of explicit [SemanticsNode]s.
+  ///
+  /// When set to false children of the owning [RenderObject] are allowed to
+  /// annotate [SemanticNode]s of their parent with the semantic information
+  /// they want to contribute to the semantic tree.
+  /// When set to true the only way for children of the owning [RenderObject]
+  /// to contribute semantic information to the semantic tree is to introduce
+  /// new explicit [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  bool explicitChildNodes = false;
+
+  /// Whether the owning [RenderObject] makes other [RenderObjects] previously
+  /// painted within the same semantic boundary unreachable for accessibility
+  /// purposes.
+  ///
+  /// If set to true, the semantic information for all siblings and cousins of
+  /// this node, that are earlier in a depth-first pre-order traversal, are
+  /// dropped from the semantics tree up until a semantic boundary (as defined
+  /// by [isSemanticBoundary]) is reached.
+  ///
+  /// If [isSemanticBoundary] and [isBlockingSemanticsOfPreviouslyPaintedNodes]
+  /// is set on the same node, all previously painted siblings and cousins up
+  /// until the next ancestor that is a semantic boundary are dropped.
+  ///
+  /// Paint order as established by [visitChildrenForSemantics] is used to
+  /// determine if a node is previous to this one.
+  bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
+
+  /// Whether the semantics information of all descendants should be merged
+  /// into the owning [RenderObject] semantics node.
+  ///
+  /// When this is set to true the [SemanticsNode] of the owning [RenderObject]
+  /// will not have any children.
+  ///
+  /// Setting this to true requires that [isSemanticBoundary] is also true.
+  bool get isMergingDescendantsIntoOneNode => _isMergingDescendantsIntoOneNode;
+  bool _isMergingDescendantsIntoOneNode = false;
+  set isMergingDescendantsIntoOneNode(bool value) {
+    assert(isSemanticBoundary);
+    _isMergingDescendantsIntoOneNode = isMergingDescendantsIntoOneNode;
+  }
+
+  // SEMANTIC ANNOTATIONS
+  // These will end up on [SemanticNode]s generated from
+  // [SemanticsConfiguration]s.
+
+  /// Whether this configuration is empty.
+  ///
+  /// An empty configuration doesn't contain any semantic information that it
+  /// wants to contribute to the semantics tree.
+  bool get hasBeenAnnotated => _hasBeenAnnotated;
+  bool _hasBeenAnnotated = false;
+
+  /// The actions (with associated action handlers) that this configuration
+  /// would like to contribute to the semantics tree.
+  ///
+  /// See also:
+  /// * [addAction] to add an action.
+  final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
+
+  /// Adds an `action` to the semantics tree.
+  ///
+  /// Whenever the user performs `action` the provided `handler` is called.
+  void addAction(SemanticsAction action, VoidCallback handler) {
+    _actions[action] = handler;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Returns the action handler registered for [action] or null if none was
+  /// registered.
+  ///
+  /// See also:
+  ///  * [addAction] to add an action.
+  VoidCallback getActionHandler(SemanticsAction action) => _actions[action];
+
+  /// Whether the semantic information provided by the owning [RenderObject] and
+  /// all of its descendants should be treated as one logical entity.
+  ///
+  /// If set to true, the descendants of the owning [RenderObject]'s
+  /// [SemanticsNode] will merge their semantic information into the
+  /// [SemanticsNode] representing the owning [RenderObject].
+  bool get isMergingSemanticsOfDescendants => _isMergingSemanticsOfDescendants;
+  bool _isMergingSemanticsOfDescendants = false;
+  set isMergingSemanticsOfDescendants(bool value) {
+    _isMergingSemanticsOfDescendants = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// A textual description of the owning [RenderObject].
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get label => _label;
+  String _label = '';
+  set label(String label) {
+    _label = label;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The reading direction for the text in [label].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection textDirection) {
+    _textDirection = textDirection;
+    _hasBeenAnnotated = true;
+  }
+
+  /// Whether the owning [RenderObject] is selected (true) or not (false).
+  set isSelected(bool value) {
+    _setFlag(SemanticsFlags.isSelected, value);
+  }
+
+  /// If this node has Boolean state that can be controlled by the user, whether
+  /// that state is on or off, corresponding to true and false, respectively.
+  ///
+  /// Do not set this to any value if the owning [RenderObject] doesn't have
+  /// Booleans state that can be controlled by the user.
+  set isChecked(bool value) {
+    _setFlag(SemanticsFlags.hasCheckedState, true);
+    _setFlag(SemanticsFlags.isChecked, value);
+  }
+
+  // TAGS
+
+  Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
+  Set<SemanticsTag> _tagsForChildren;
+
+  void addTagForChildren(SemanticsTag tag) {
+    _tagsForChildren ??= new Set<SemanticsTag>();
+    _tagsForChildren.add(tag);
+  }
+
+  // INTERNAL FLAG MANAGEMENT
+
+  int _flags = 0;
+  void _setFlag(SemanticsFlags flag, bool value) {
+    if (value) {
+      _flags |= flag.index;
+    } else {
+      _flags &= ~flag.index;
+    }
+    _hasBeenAnnotated = true;
+  }
+
+  // CONFIGURATION COMBINATION LOGIC
+
+  /// Whether this configuration is compatible with the provided `other`
+  /// configuration.
+  ///
+  /// Two configurations are said to be compatible if they can be added to the
+  /// same [SemanticsNode] without losing any semantics information.
+  bool isCompatibleWith(SemanticsConfiguration other) {
+    if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
+      return true;
+    if (_actions.keys.toSet().intersection(other._actions.keys.toSet()).isNotEmpty)
+      return false;
+    if ((_flags & other._flags) != 0)
+      return false;
+    return true;
+  }
+
+  /// Absorb the semantic information from `other` into this configuration.
+  ///
+  /// This adds the semantic information of both configurations and saves the
+  /// result in this configuration.
+  ///
+  /// Only configurations that have [explicitChildNodes] set to false can
+  /// absorb other configurations and its recommended to only absorb compatible
+  /// configurations as determined by [isCompatibleWith].
+  void absorb(SemanticsConfiguration other) {
+    assert(!explicitChildNodes);
+
+    if (!other.hasBeenAnnotated)
+      return;
+
+    _actions.addAll(other._actions);
+    _flags |= other._flags;
+
+    textDirection ??= other.textDirection;
+    if (other.label.isNotEmpty) {
+      String nestedLabel = other.label;
+      if (textDirection != other.textDirection && other.textDirection != null) {
+        switch (other.textDirection) {
+          case TextDirection.rtl:
+            nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+            break;
+          case TextDirection.ltr:
+            nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+            break;
+        }
+      }
+      if (label.isEmpty)
+        label = nestedLabel;
+      else
+        label = '$label\n$nestedLabel';
+    }
+
+    _hasBeenAnnotated = _hasBeenAnnotated || other._hasBeenAnnotated;
+  }
+
+  /// Returns an exact copy of this configuration.
+  SemanticsConfiguration copy() {
+    return new SemanticsConfiguration()
+      ..isSemanticBoundary = isSemanticBoundary
+      ..explicitChildNodes = explicitChildNodes
+      .._hasBeenAnnotated = _hasBeenAnnotated
+      .._textDirection = _textDirection
+      .._label = _label
+      .._flags = _flags
+      .._actions.addAll(_actions);
+  }
 }

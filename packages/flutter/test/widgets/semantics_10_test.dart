@@ -94,12 +94,19 @@ class TestWidget extends SingleChildRenderObjectWidget {
 }
 
 class RenderTest extends RenderProxyBox {
-  @override
-  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
 
-  void _annotate(SemanticsNode node) {
-    node.label = _label;
-    node.textDirection = TextDirection.ltr;
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    if (!_isSemanticBoundary)
+      return;
+
+    config
+      ..isSemanticBoundary = _isSemanticBoundary
+      ..label = _label
+      ..textDirection = TextDirection.ltr;
+
   }
 
   String _label;
@@ -111,8 +118,7 @@ class RenderTest extends RenderProxyBox {
     callLog.add('markNeedsSemanticsUpdate(onlyChanges: true)');
   }
 
-  @override
-  bool get isSemanticBoundary => _isSemanticBoundary;
+
   bool _isSemanticBoundary;
   set isSemanticBoundary(bool value) {
     if (_isSemanticBoundary == value)

@@ -104,11 +104,11 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 2,
+              id: 1,
               rect: TestSemantics.fullScreen,
               actions: SemanticsAction.tap.index,
             ),

@@ -62,15 +62,9 @@ void main() {
 
     final SemanticsNode node1 = tester.renderObject(find.byWidget(const Text('1'))).debugSemantics;
     final SemanticsNode node2 = tester.renderObject(find.byWidget(const Text('2'))).debugSemantics;
-    final SemanticsNode node3 = tester.renderObject(find.byWidget(const Text('3'))).debugSemantics;
 
     expect(node1.wasAffectedByClip, false);
     expect(node2.wasAffectedByClip, true);
-    expect(node3.wasAffectedByClip, true);
-
-    expect(node1.isInvisible, isFalse);
-    expect(node2.isInvisible, isFalse);
-    expect(node3.isInvisible, isTrue);
 
     semantics.dispose();
   });
@@ -117,12 +111,12 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics(
-            id: 4,
+            id: 3,
             label: '1',
             rect: new Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           new TestSemantics(
-            id: 5,
+            id: 4,
             label: '2\n3',
             rect: new Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),

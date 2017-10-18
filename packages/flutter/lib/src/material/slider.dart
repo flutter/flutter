@@ -307,7 +307,7 @@ double _getPreferredTotalHeight(String label) {
   return 2 * _kReactionRadius + _getAdditionalHeightForLabel(label);
 }
 
-class _RenderSlider extends RenderBox implements SemanticsActionHandler {
+class _RenderSlider extends RenderBox {
   _RenderSlider({
     @required double value,
     int divisions,
@@ -441,7 +441,7 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
     _onChanged = value;
     if (wasInteractive != isInteractive) {
       markNeedsPaint();
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
     }
   }
 
@@ -708,31 +708,25 @@ class _RenderSlider extends RenderBox implements SemanticsActionHandler {
   }
 
   @override
-  bool get isSemanticBoundary => isInteractive;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  void _annotate(SemanticsNode semantics) {
-    if (isInteractive)
-      semantics.addAdjustmentActions();
+    config.isSemanticBoundary = isInteractive;
+    if (isInteractive) {
+      config.addAction(SemanticsAction.increase, _increaseAction);
+      config.addAction(SemanticsAction.decrease, _decreaseAction);
+    }
   }
 
-  @override
-  void performAction(SemanticsAction action) {
-    final double unit = divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
-    switch (action) {
-      case SemanticsAction.increase:
-        if (isInteractive)
-          onChanged((value + unit).clamp(0.0, 1.0));
-        break;
-      case SemanticsAction.decrease:
-        if (isInteractive)
-          onChanged((value - unit).clamp(0.0, 1.0));
-        break;
-      default:
-        assert(false);
-        break;
-    }
+  double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
+
+  void _increaseAction() {
+    if (isInteractive)
+      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0));
+  }
+
+  void _decreaseAction() {
+    if (isInteractive)
+      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0));
   }
 }

@@ -16,81 +16,112 @@ void main() {
 
     // implicit annotators
     await tester.pumpWidget(
-      new Container(
-        child: new Semantics(
-          label: 'test',
-          textDirection: TextDirection.ltr,
-          child: new Container(
-            child: const Semantics(
-              checked: true
-            )
-          )
-        )
-      )
+      new Semantics(
+        container: true,
+        child: new Container(
+          child: new Semantics(
+            label: 'test',
+            textDirection: TextDirection.ltr,
+            child: new Container(
+              child: const Semantics(
+                checked: true
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
-        label: 'test',
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            label: 'test',
+            rect: TestSemantics.fullScreen,
+          )
+        ]
       )
     ));
 
     // remove one
     await tester.pumpWidget(
-      new Container(
+      new Semantics(
+        container: true,
         child: new Container(
           child: const Semantics(
-            checked: true
-          )
-        )
-      )
+             checked: true,
+          ),
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            rect: TestSemantics.fullScreen,
+          ),
+        ]
       )
     ));
 
     // change what it says
     await tester.pumpWidget(
-      new Container(
+      new Semantics(
+        container: true,
         child: new Container(
           child: const Semantics(
             label: 'test',
             textDirection: TextDirection.ltr,
-          )
-        )
-      )
+          ),
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        label: 'test',
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            label: 'test',
+            textDirection: TextDirection.ltr,
+            rect: TestSemantics.fullScreen,
+          ),
+        ]
       )
     ));
 
     // add a node
     await tester.pumpWidget(
-      new Container(
-        child: new Semantics(
-          checked: true,
-          child: new Container(
+      new Semantics(
+        container: true,
+        child: new Container(
+          child: const Semantics(
+            checked: true,
             child: const Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
-        label: 'test',
-      )
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 1,
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            label: 'test',
+            rect: TestSemantics.fullScreen,
+          )
+        ],
+      ),
     ));
 
     int changeCount = 0;
@@ -100,17 +131,18 @@ void main() {
 
     // make no changes
     await tester.pumpWidget(
-      new Container(
-        child: new Semantics(
-          checked: true,
-          child: new Container(
+      new Semantics(
+        container: true,
+        child: new Container(
+          child: const Semantics(
+            checked: true,
             child: const Semantics(
               label: 'test',
               textDirection: TextDirection.ltr,
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(changeCount, 0);

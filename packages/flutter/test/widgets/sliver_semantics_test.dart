@@ -50,7 +50,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 1,
+            id: 4,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
@@ -58,15 +58,15 @@ void main() {
                 actions: SemanticsAction.scrollUp.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 2,
+                    id: 1,
                     label: 'Item 0',
                   ),
                   new TestSemantics(
-                    id: 3,
+                    id: 2,
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 4,
+                    id: 3,
                     label: 'Semantics Test with Slivers',
                   ),
                 ],
@@ -88,7 +88,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 1,
+            id: 4,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
@@ -96,11 +96,11 @@ void main() {
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 2,
+                    id: 1,
                     label: 'Item 0',
                   ),
                   new TestSemantics(
-                    id: 3,
+                    id: 2,
                     label: 'Item 1',
                   ),
                   new TestSemantics(
@@ -110,7 +110,7 @@ void main() {
                 ],
               ),
               new TestSemantics(
-                id: 7,
+                id: 3,
                 label: 'Semantics Test with Slivers',
                 tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
               ),
@@ -131,7 +131,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 1,
+            id: 4,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
@@ -139,11 +139,11 @@ void main() {
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 2,
+                    id: 1,
                     label: 'Item 0',
                   ),
                   new TestSemantics(
-                    id: 3,
+                    id: 2,
                     label: 'Item 1',
                   ),
                   new TestSemantics(
@@ -151,7 +151,7 @@ void main() {
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 8,
+                    id: 3,
                     label: 'Semantics Test with Slivers',
                   ),
                 ],
@@ -206,16 +206,16 @@ void main() {
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 12,
+                id: 10,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 10,
+                    id: 7,
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 11,
+                    id: 8,
                     label: 'Item 1',
                     textDirection: TextDirection.ltr,
                   ),
@@ -256,34 +256,34 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 13,
+            id: 16,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 19,
+                id: 17,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 14,
+                    id: 11,
                     label: 'Item 4',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 15,
+                    id: 12,
                     label: 'Item 3',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 16,
+                    id: 13,
                     label: 'Item 2',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 17,
+                    id: 14,
                     label: 'Item 1',
                     textDirection: TextDirection.ltr,
                   ),
                   new TestSemantics(
-                    id: 18,
+                    id: 15,
                     label: 'Item 0',
                     textDirection: TextDirection.ltr,
                   ),
@@ -319,6 +319,7 @@ void main() {
             const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
+              title: const Text('AppBar'),
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(listChildren),
@@ -336,31 +337,31 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 20,
+            id: 22,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 25,
+                id: 23,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
-                    id: 21,
+                    id: 18,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 22,
+                    id: 19,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 23,
+                    id: 20,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
                     label: 'Item 3',
@@ -368,14 +369,16 @@ void main() {
                 ],
               ),
               new TestSemantics(
-                id: 24,
-                rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                id: 21,
+                rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                label: 'AppBar',
               ),
             ],
           )
         ],
       ),
+      ignoreTransform: true,
     ));
 
     semantics.dispose();
@@ -403,6 +406,7 @@ void main() {
             const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
+              title: const Text('AppBar'),
             ),
           ]..addAll(slivers),
         ),
@@ -416,29 +420,29 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 26,
+            id: 28,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 31,
+                id: 29,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 27,
+                    id: 24,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 420.0, 0.0)),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
-                    id: 28,
+                    id: 25,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 220.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 29,
+                    id: 26,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 starts 20.0dp below edge, so there would be room for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 20.0, 0.0)),
@@ -448,14 +452,16 @@ void main() {
                 ],
               ),
               new TestSemantics(
-                id: 30,
-                rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                id: 27,
+                rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                label: 'AppBar'
               ),
             ],
           )
         ],
       ),
+      ignoreTransform: true,
     ));
 
     semantics.dispose();
@@ -481,6 +487,7 @@ void main() {
             const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
+              title: const Text('AppBar'),
             ),
             new SliverList(
               delegate: new SliverChildListDelegate(listChildren),
@@ -498,31 +505,31 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 32,
+            id: 34,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 37,
+                id: 35,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   // Item 0 is missing because its covered by the app bar.
                   new TestSemantics(
-                    id: 33,
+                    id: 30,
                     // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
                     label: 'Item 1',
                   ),
                   new TestSemantics(
-                    id: 34,
+                    id: 31,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 35,
+                    id: 32,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
                     label: 'Item 3',
@@ -530,15 +537,17 @@ void main() {
                 ],
               ),
               new TestSemantics(
-                id: 36,
-                rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                id: 33,
+                rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                label: 'AppBar'
               ),
             ],
           )
         ],
       ),
+      ignoreTransform: true,
     ));
 
     semantics.dispose();
@@ -567,6 +576,7 @@ void main() {
             const SliverAppBar(
               pinned: true,
               expandedHeight: 100.0,
+              title: const Text('AppBar'),
             ),
           ]..addAll(slivers),
         ),
@@ -580,29 +590,29 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 38,
+            id: 40,
             rect: TestSemantics.fullScreen,
             tags: <SemanticsTag>[RenderSemanticsGestureHandler.useTwoPaneSemantics],
             children: <TestSemantics>[
               new TestSemantics(
-                id: 43,
+                id: 41,
                 actions: SemanticsAction.scrollUp.index | SemanticsAction.scrollDown.index,
                 rect: TestSemantics.fullScreen,
                 children: <TestSemantics>[
                   new TestSemantics(
-                    id: 39,
+                    id: 36,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, -20.0, 0.0)),
                     label: 'Item 3',
                   ),
                   new TestSemantics(
-                    id: 40,
+                    id: 37,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     transform: new Matrix4.translation(new Vector3(0.0, 180.0, 0.0)),
                     label: 'Item 2',
                   ),
                   new TestSemantics(
-                    id: 41,
+                    id: 38,
                     rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
                     // Item 1 ends at 580dp, so there would be 20dp space for Item 0.
                     transform: new Matrix4.translation(new Vector3(0.0, 380.0, 0.0)),
@@ -612,15 +622,17 @@ void main() {
                 ],
               ),
               new TestSemantics(
-                id: 42,
-                rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 56.0),
+                id: 39,
+                rect: new Rect.fromLTRB(0.0, 0.0, 120.0, 20.0),
                 transform: new Matrix4.translation(new Vector3(0.0, 544.0, 0.0)),
                 tags: <SemanticsTag>[RenderSemanticsGestureHandler.excludeFromScrolling],
+                label: 'AppBar'
               ),
             ],
           )
         ],
       ),
+      ignoreTransform: true,
     ));
 
     semantics.dispose();

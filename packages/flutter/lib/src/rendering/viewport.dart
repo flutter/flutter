@@ -91,11 +91,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        _crossAxisDirection = crossAxisDirection,
        _offset = offset;
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
 
-  void _annotate(SemanticsNode node) {
-    node.addTag(RenderSemanticsGestureHandler.useTwoPaneSemantics);
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.addTagForChildren(RenderSemanticsGestureHandler.useTwoPaneSemantics);
   }
 
   @override

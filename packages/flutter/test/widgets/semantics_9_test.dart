@@ -61,6 +61,7 @@ void main() {
           new Semantics(
             label: '#2',
             container: true,
+            explicitChildNodes: true,
             child: new Stack(
               children: <Widget>[
                 new Semantics(
@@ -146,9 +147,12 @@ class RenderBoundaryBlockSemantics extends RenderProxyBox {
   RenderBoundaryBlockSemantics({ RenderBox child }) : super(child);
 
   @override
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  @override
-  bool get isSemanticBoundary => true;
+    config
+      ..isBlockingSemanticsOfPreviouslyPaintedNodes = true
+      ..isSemanticBoundary = true;
+  }
 }
 

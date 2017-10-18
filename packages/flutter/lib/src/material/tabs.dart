@@ -754,22 +754,20 @@ class _TabBarState extends State<TabBar> {
     // reflect the intrinsic width of their labels.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index++) {
-      wrappedTabs[index] = new MergeSemantics(
-        child: new Stack(
-          children: <Widget>[
-            new InkWell(
-              onTap: () { _handleTap(index); },
-              child: new Padding(
-                padding: new EdgeInsets.only(bottom: widget.indicatorWeight),
-                child: wrappedTabs[index],
+      wrappedTabs[index] = new InkWell(
+        onTap: () { _handleTap(index); },
+        child: new Padding(
+          padding: new EdgeInsets.only(bottom: widget.indicatorWeight),
+          child: new Stack(
+            children: <Widget>[
+              wrappedTabs[index],
+              new Semantics(
+                selected: index == _currentIndex,
+                // TODO(goderbauer): I10N-ify
+                label: 'Tab ${index + 1} of $tabCount',
               ),
-            ),
-            new Semantics(
-              selected: index == _currentIndex,
-              // TODO(goderbauer): I10N-ify
-              label: 'Tab ${index + 1} of $tabCount',
-            ),
-          ],
+            ]
+          ),
         ),
       );
       if (!widget.isScrollable)
