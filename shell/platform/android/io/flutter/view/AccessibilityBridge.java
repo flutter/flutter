@@ -352,13 +352,13 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     public void onMessage(Object message, BasicMessageChannel.Reply<Object> reply) {
         @SuppressWarnings("unchecked")
         final HashMap<String, Object> annotatedEvent = (HashMap<String, Object>)message;
-        final int nodeId = (int)annotatedEvent.get("nodeId");
         final String type = (String)annotatedEvent.get("type");
         @SuppressWarnings("unchecked")
         final HashMap<String, Object> data = (HashMap<String, Object>)annotatedEvent.get("data");
 
         switch (type) {
             case "scroll":
+                final int nodeId = (int)annotatedEvent.get("nodeId");
                 AccessibilityEvent event =
                     obtainAccessibilityEvent(nodeId, AccessibilityEvent.TYPE_VIEW_SCROLLED);
                 char axis = ((String)data.get("axis")).charAt(0);
@@ -374,6 +374,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     event.setMaxScrollX((int)maxPosition);
                 }
                 sendAccessibilityEvent(event);
+                break;
+            case "announce":
+                mOwner.announceForAccessibility((String) data.get("message"));
                 break;
             default:
                 assert false;
