@@ -20,10 +20,15 @@ class DartController {
   DartController();
   ~DartController();
 
-  tonic::DartErrorHandleType RunFromKernel(const std::vector<uint8_t>& kernel);
-  tonic::DartErrorHandleType RunFromPrecompiledSnapshot();
-  tonic::DartErrorHandleType RunFromScriptSnapshot(const uint8_t* buffer,
-                                                   size_t size);
+  tonic::DartErrorHandleType RunFromKernel(
+      const std::vector<uint8_t>& kernel,
+      const std::string& entrypoint = main_entrypoint_);
+  tonic::DartErrorHandleType RunFromPrecompiledSnapshot(
+      const std::string& entrypoint = main_entrypoint_);
+  tonic::DartErrorHandleType RunFromScriptSnapshot(
+      const uint8_t* buffer,
+      size_t size,
+      const std::string& entrypoint = main_entrypoint_);
   tonic::DartErrorHandleType RunFromSource(const std::string& main,
                                            const std::string& packages);
 
@@ -38,7 +43,10 @@ class DartController {
   void IsolateShuttingDown();
 
  private:
-  bool SendStartMessage(Dart_Handle root_library);
+  bool SendStartMessage(Dart_Handle root_library,
+                        const std::string& entrypoint = main_entrypoint_);
+
+  static const std::string main_entrypoint_;
 
   // The DartState associated with the main isolate.  This is not deleted
   // during isolate shutdown, instead it is deleted when the controller

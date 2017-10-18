@@ -62,7 +62,10 @@ DartController::~DartController() {
   }
 }
 
-bool DartController::SendStartMessage(Dart_Handle root_library) {
+const std::string DartController::main_entrypoint_ = "main";
+
+bool DartController::SendStartMessage(Dart_Handle root_library,
+                                      const std::string& entrypoint) {
   if (LogIfError(root_library))
     return true;
 
@@ -79,8 +82,8 @@ bool DartController::SendStartMessage(Dart_Handle root_library) {
   // main by sending a message to the isolate.
 
   // Get the closure of main().
-  Dart_Handle main_closure =
-      Dart_GetClosure(root_library, Dart_NewStringFromCString("main"));
+  Dart_Handle main_closure = Dart_GetClosure(
+      root_library, Dart_NewStringFromCString(entrypoint.c_str()));
   if (LogIfError(main_closure))
     return true;
 
@@ -110,7 +113,8 @@ static void ReleaseFetchedBytes(uint8_t* buffer) {
 }
 
 tonic::DartErrorHandleType DartController::RunFromKernel(
-    const std::vector<uint8_t>& kernel) {
+    const std::vector<uint8_t>& kernel,
+    const std::string& entrypoint) {
   tonic::DartState::Scope scope(dart_state());
   tonic::DartErrorHandleType error = tonic::kNoError;
   if (Dart_IsNull(Dart_RootLibrary())) {
@@ -124,17 +128,18 @@ tonic::DartErrorHandleType DartController::RunFromKernel(
     LogIfError(result);
     error = tonic::GetErrorHandleType(result);
   }
-  if (SendStartMessage(Dart_RootLibrary())) {
+  if (SendStartMessage(Dart_RootLibrary(), entrypoint)) {
     return tonic::kUnknownErrorType;
   }
   return error;
 }
 
-tonic::DartErrorHandleType DartController::RunFromPrecompiledSnapshot() {
+tonic::DartErrorHandleType DartController::RunFromPrecompiledSnapshot(
+    const std::string& entrypoint) {
   TRACE_EVENT0("flutter", "DartController::RunFromPrecompiledSnapshot");
   FXL_DCHECK(Dart_CurrentIsolate() == nullptr);
   tonic::DartState::Scope scope(dart_state());
-  if (SendStartMessage(Dart_RootLibrary())) {
+  if (SendStartMessage(Dart_RootLibrary(), entrypoint)) {
     return tonic::kUnknownErrorType;
   }
   return tonic::kNoError;
@@ -142,7 +147,8 @@ tonic::DartErrorHandleType DartController::RunFromPrecompiledSnapshot() {
 
 tonic::DartErrorHandleType DartController::RunFromScriptSnapshot(
     const uint8_t* buffer,
-    size_t size) {
+    size_t size,
+    const std::string& entrypoint) {
   tonic::DartState::Scope scope(dart_state());
   tonic::DartErrorHandleType error = tonic::kNoError;
   if (Dart_IsNull(Dart_RootLibrary())) {
@@ -150,7 +156,7 @@ tonic::DartErrorHandleType DartController::RunFromScriptSnapshot(
     LogIfError(result);
     error = tonic::GetErrorHandleType(result);
   }
-  if (SendStartMessage(Dart_RootLibrary())) {
+  if (SendStartMessage(Dart_RootLibrary(), entrypoint)) {
     return tonic::kUnknownErrorType;
   }
   return error;

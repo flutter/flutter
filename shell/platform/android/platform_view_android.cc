@@ -209,14 +209,17 @@ void PlatformViewAndroid::SurfaceDestroyed() {
 }
 
 void PlatformViewAndroid::RunBundleAndSnapshot(std::string bundle_path,
-                                               std::string snapshot_override) {
+                                               std::string snapshot_override,
+                                               std::string entrypoint) {
   blink::Threads::UI()->PostTask([
     engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
-    snapshot_override = std::move(snapshot_override)
+    snapshot_override = std::move(snapshot_override),
+    entrypoint = std::move(entrypoint)
   ] {
     if (engine)
       engine->RunBundleAndSnapshot(std::move(bundle_path),
-                                   std::move(snapshot_override));
+                                   std::move(snapshot_override),
+                                   std::move(entrypoint));
   });
 }
 

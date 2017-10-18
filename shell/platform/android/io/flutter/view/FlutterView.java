@@ -561,9 +561,13 @@ public class FlutterView extends SurfaceView
     }
 
     public void runFromBundle(String bundlePath, String snapshotOverride) {
+        runFromBundle(bundlePath, snapshotOverride, "main");
+    }
+
+    public void runFromBundle(String bundlePath, String snapshotOverride, String entrypoint) {
         assertAttached();
         preRun();
-        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride);
+        nativeRunBundleAndSnapshot(mNativePlatformView, bundlePath, snapshotOverride, entrypoint);
         postRun();
     }
 
@@ -622,7 +626,8 @@ public class FlutterView extends SurfaceView
 
     private static native void nativeRunBundleAndSnapshot(long nativePlatformViewAndroid,
         String bundlePath,
-        String snapshotOverride);
+        String snapshotOverride,
+        String entrypoint);
 
     private static native void nativeRunBundleAndSource(long nativePlatformViewAndroid,
         String bundlePath,
