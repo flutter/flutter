@@ -97,7 +97,7 @@ class Engine : public blink::RuntimeDelegate {
   bool HandleNavigationPlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message);
   bool HandleLocalizationPlatformMessage(blink::PlatformMessage* message);
-  bool HandleSystemPlatformMessage(blink::PlatformMessage* message);
+  void HandleSettingsPlatformMessage(blink::PlatformMessage* message);
 
   void HandleAssetPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
@@ -112,7 +112,7 @@ class Engine : public blink::RuntimeDelegate {
   blink::ViewportMetrics viewport_metrics_;
   std::string language_code_;
   std::string country_code_;
-  double text_scale_factor_;
+  std::string user_settings_data_;
   bool semantics_enabled_ = false;
   // TODO(abarth): Unify these two behind a common interface.
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;

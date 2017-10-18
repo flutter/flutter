@@ -72,6 +72,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterMethodChannel*> _textInputChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _lifecycleChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _systemChannel;
+  fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _settingsChannel;
   fml::scoped_nsprotocol<UIView*> _launchView;
   bool _platformSupportsTouchTypes;
   bool _platformSupportsTouchPressure;
@@ -177,6 +178,11 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
       binaryMessenger:self
                 codec:[FlutterJSONMessageCodec sharedInstance]]);
 
+  _settingsChannel.reset([[FlutterBasicMessageChannel alloc]
+         initWithName:@"flutter/settings"
+      binaryMessenger:self
+                codec:[FlutterJSONMessageCodec sharedInstance]]);
+
   _platformPlugin.reset([[FlutterPlatformPlugin alloc] init]);
   [_platformChannel.get() setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [_platformPlugin.get() handleMethodCall:call result:result];
@@ -246,6 +252,11 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   [center addObserver:self
              selector:@selector(onMemoryWarning:)
                  name:UIApplicationDidReceiveMemoryWarningNotification
+               object:nil];
+
+  [center addObserver:self
+             selector:@selector(onUserSettingsChanged:)
+                 name:UIContentSizeCategoryDidChangeNotification
                object:nil];
 }
 
@@ -340,6 +351,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 - (void)viewDidAppear:(BOOL)animated {
   TRACE_EVENT0("flutter", "viewDidAppear");
   [self onLocaleUpdated:nil];
+  [self onUserSettingsChanged:nil];
   [self onVoiceOverChanged:nil];
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.resumed"];
 
@@ -691,6 +703,60 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   NSString* languageCode = [currentLocale objectForKey:NSLocaleLanguageCode];
   NSString* countryCode = [currentLocale objectForKey:NSLocaleCountryCode];
   [_localizationChannel.get() invokeMethod:@"setLocale" arguments:@[ languageCode, countryCode ]];
+}
+
+#pragma mark - Set user settings
+
+- (void)onUserSettingsChanged:(NSNotification*)notification {
+  [_settingsChannel.get() sendMessage:@{
+    @"textScaleFactor" : @([self textScaleFactor]),
+    @"alwaysUse24HourFormat" : @([self isAlwaysUse24HourFormat]),
+  }];
+}
+
+- (CGFloat)textScaleFactor {
+  UIContentSizeCategory category = [UIApplication sharedApplication].preferredContentSizeCategory;
+  // The delta is computed based on the following:
+  // - L (large) is the default 1.0 scale.
+  // - The scale is linear spanning from XS to XXXL.
+  // - XXXL = 1.4 * XS.
+  //
+  // L    = 1.0      = XS + 3 * delta
+  // XXXL = 1.4 * XS = XS + 6 * delta
+  const CGFloat delta = 0.055555;
+  if ([category isEqualToString:UIContentSizeCategoryExtraSmall])
+    return 1.0 - 3 * delta;
+  else if ([category isEqualToString:UIContentSizeCategorySmall])
+    return 1.0 - 2 * delta;
+  else if ([category isEqualToString:UIContentSizeCategoryMedium])
+    return 1.0 - delta;
+  else if ([category isEqualToString:UIContentSizeCategoryLarge])
+    return 1.0;
+  else if ([category isEqualToString:UIContentSizeCategoryExtraLarge])
+    return 1.0 + delta;
+  else if ([category isEqualToString:UIContentSizeCategoryExtraExtraLarge])
+    return 1.0 + 2 * delta;
+  else if ([category isEqualToString:UIContentSizeCategoryExtraExtraExtraLarge])
+    return 1.0 + 3 * delta;
+  else
+    return 1.0;
+}
+
+- (BOOL)isAlwaysUse24HourFormat {
+  // iOS does not report its "24-Hour Time" user setting in the API. Instead, it applies
+  // it automatically to NSDateFormatter when used with [NSLocale currentLocale]. It is
+  // essential that [NSLocale currentLocale] is used. Any custom locale, even the one
+  // that's the same as [NSLocale currentLocale] will ignore the 24-hour option (there
+  // must be some internal field that's not exposed to developers).
+  //
+  // Therefore this option behaves differently across Android and iOS. On Android this
+  // setting is exposed standalone, and can therefore be applied to all locales, whether
+  // the "current system locale" or a custom one. On iOS it only applies to the current
+  // system locale. Widget implementors must take this into account in order to provide
+  // platform-idiomatic behavior in their widgets.
+  NSString* dateFormat =
+      [NSDateFormatter dateFormatFromTemplate:@"j" options:0 locale:[NSLocale currentLocale]];
+  return [dateFormat rangeOfString:@"a"].location == NSNotFound;
 }
 
 #pragma mark - Status Bar touch event handling

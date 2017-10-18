@@ -163,15 +163,15 @@ void Window::UpdateLocale(const std::string& language_code,
                   });
 }
 
-void Window::UpdateTextScaleFactor(double text_scale_factor) {
+void Window::UpdateUserSettingsData(const std::string& data) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_updateTextScaleFactor",
+  DartInvokeField(library_.value(), "_updateUserSettingsData",
                   {
-                      ToDart(static_cast<double>(text_scale_factor)),
+                      StdStringToDart(data),
                   });
 }
 

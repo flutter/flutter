@@ -35,7 +35,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void SetViewportMetrics(const ViewportMetrics& metrics);
   void SetLocale(const std::string& language_code,
                  const std::string& country_code);
-  void SetTextScaleFactor(double textScaleFactor);
+  void SetUserSettingsData(const std::string& data);
   void SetSemanticsEnabled(bool enabled);
 
   void BeginFrame(fxl::TimePoint frame_time);
@@ -66,7 +66,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
   RuntimeDelegate* client_;
   std::string language_code_;
   std::string country_code_;
-  double text_scale_factor_ = 1.0;
+  std::string user_settings_data_ = "{}";
   bool semantics_enabled_ = false;
   std::unique_ptr<DartController> dart_controller_;
 

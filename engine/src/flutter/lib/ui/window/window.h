@@ -45,7 +45,7 @@ class Window {
   void UpdateWindowMetrics(const ViewportMetrics& metrics);
   void UpdateLocale(const std::string& language_code,
                     const std::string& country_code);
-  void UpdateTextScaleFactor(double text_scale_factor);
+  void UpdateUserSettingsData(const std::string& data);
   void UpdateSemanticsEnabled(bool enabled);
   void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
