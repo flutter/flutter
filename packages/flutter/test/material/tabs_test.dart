@@ -1261,11 +1261,11 @@ void main() {
     final TestSemantics expectedSemantics = new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 64,
+          id: 25,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 65,
+              id: 23,
               actions: SemanticsAction.tap.index,
               flags: SemanticsFlags.isSelected.index,
               label: 'Semantics override 0\nTab 1 of 2',
@@ -1273,7 +1273,7 @@ void main() {
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
             ),
             new TestSemantics(
-              id: 68,
+              id: 24,
               actions: SemanticsAction.tap.index,
               label: 'Semantics override 1\nTab 2 of 2',
               rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
