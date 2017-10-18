@@ -169,7 +169,7 @@ import 'basic_types.dart';
 /// ```
 ///
 /// If the package internally uses the font it defines, it should still specify
-/// the [package] argument when creating the text style as in the example above.
+/// the `package` argument when creating the text style as in the example above.
 ///
 /// A package can also provide font files without declaring a font. These files
 /// should then be in the `lib/` folder of the package. The font files will not
@@ -194,6 +194,13 @@ import 'basic_types.dart';
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
 ///
+/// In this case, since it is a locally defined font, the TextStyle is created
+/// without the `package` argument:
+///
+///```dart
+/// const TextStyle(fontFamily: 'Raleway')
+/// ```
+///
 /// See also:
 ///
 ///  * [Text], the widget for showing text in a single style.
@@ -206,8 +213,9 @@ import 'basic_types.dart';
 class TextStyle extends Diagnosticable {
   /// Creates a text style.
   ///
-  /// The [package] argument must be non-null if the font family is defined in a
-  /// package. See the documentation for the [TextStyle] class itself for details.
+  /// The `package` argument must be non-null if the font family is defined in a
+  /// package. It is combined with the `fontFamily` argument to set the
+  /// [fontFamily] property.
   const TextStyle({
     this.inherit: true,
     this.color,
@@ -240,7 +248,9 @@ class TextStyle extends Diagnosticable {
 
   /// The name of the font to use when painting the text (e.g., Roboto). If the
   /// font is defined in a package, this will be prefixed with
-  /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto').
+  /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
+  /// prefixing is done by the constructor when the `package` argument is
+  /// provided.
   final String fontFamily;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
