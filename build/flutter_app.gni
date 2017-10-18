@@ -45,9 +45,9 @@ template("flutter_jit_app") {
   }
 
   if (defined(invoker.output_name)) {
-    bundle_name = invoker.output_name
+    bundle_path = "$root_build_dir/${invoker.output_name}"
   } else {
-    bundle_name = "${target_name}.flx"
+    bundle_path = "$target_gen_dir/${target_name}.flx"
   }
 
   flutter_core_snapshot_label = "$flutter_root/lib/snapshot:generate_snapshot_bin"
@@ -63,8 +63,7 @@ template("flutter_jit_app") {
       "$flutter_core_snapshot_gen_dir/isolate_snapshot_instructions.bin"
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
-  bundle_path = "$target_gen_dir/$bundle_name"
-  bundle_depfile = "$target_gen_dir/$bundle_name.d"
+  bundle_depfile = "$bundle_path.d"
   snapshot_path = "$target_gen_dir/${target_name}_snapshot.bin"
   snapshot_depfile = "${snapshot_path}.d"
 
@@ -203,14 +202,13 @@ template("flutter_aot_app") {
   }
 
   if (defined(invoker.output_name)) {
-    bundle_name = invoker.output_name
+    bundle_path = "$root_build_dir/${invoker.output_name}"
   } else {
-    bundle_name = "${target_name}.flx"
+    bundle_path = "$target_gen_dir/${target_name}.flx"
   }
 
   dot_packages = "$target_gen_dir/$dart_package_name.packages"
-  bundle_path = "$target_gen_dir/$bundle_name"
-  bundle_depfile = "$target_gen_dir/$bundle_name.d"
+  bundle_depfile = "$bundle_path.d"
   assembly_path = "$target_gen_dir/$target_name.S"
   assembly_depfile = "${assembly_path}.d"
 
