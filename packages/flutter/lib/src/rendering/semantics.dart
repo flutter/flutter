@@ -773,7 +773,6 @@ class SemanticsOwner extends ChangeNotifier {
 
   /// Update the semantics using [Window.updateSemantics].
   void sendSemanticsUpdate() {
-    print('ff');
     if (_dirtyNodes.isEmpty)
       return;
     final List<SemanticsNode> visitedNodes = <SemanticsNode>[];
