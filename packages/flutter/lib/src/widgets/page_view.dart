@@ -307,6 +307,7 @@ class PageScrollPhysics extends ScrollPhysics {
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = new PageController();
 const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
+const ScrollPhysics _kNonSnappingPhysics = const ScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///
@@ -344,6 +345,7 @@ class PageView extends StatefulWidget {
     this.reverse: false,
     PageController controller,
     this.physics,
+    this.pageSnapping: true,
     this.onPageChanged,
     List<Widget> children: const <Widget>[],
   }) : controller = controller ?? _defaultPageController,
@@ -368,6 +370,7 @@ class PageView extends StatefulWidget {
     this.reverse: false,
     PageController controller,
     this.physics,
+    this.pageSnapping: true,
     this.onPageChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
@@ -383,6 +386,7 @@ class PageView extends StatefulWidget {
     this.reverse: false,
     PageController controller,
     this.physics,
+    this.pageSnapping: true,
     this.onPageChanged,
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
@@ -422,6 +426,9 @@ class PageView extends StatefulWidget {
   ///
   /// Defaults to matching platform conventions.
   final ScrollPhysics physics;
+
+  /// Set to false to disable page snapping, useful for custom scroll behavior.
+  final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int> onPageChanged;
@@ -463,6 +470,13 @@ class _PageViewState extends State<PageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
+    ScrollPhysics physics = widget.physics;
+    if (physics == null) {
+      physics = widget.pageSnapping ? _kPagePhysics : _kNonSnappingPhysics;
+    } else if (widget.pageSnapping) {
+      physics = _kPagePhysics.applyTo(physics);
+    }
+
     return new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
@@ -478,7 +492,7 @@ class _PageViewState extends State<PageView> {
       child: new Scrollable(
         axisDirection: axisDirection,
         controller: widget.controller,
-        physics: widget.physics == null ? _kPagePhysics : _kPagePhysics.applyTo(widget.physics),
+        physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return new Viewport(
             axisDirection: axisDirection,
@@ -502,5 +516,6 @@ class _PageViewState extends State<PageView> {
     description.add(new FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
     description.add(new DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
     description.add(new DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
+    description.add(new FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'noSnapping'));
   }
 }
