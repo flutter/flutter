@@ -62,8 +62,9 @@ class _ZipToolBuilder extends ZipBuilder {
       return;
     }
 
-    if (outFile.existsSync())
-      outFile.deleteSync();
+    final File tmpFile = fs.file('${outFile.path}.tmp');
+    if (tmpFile.existsSync())
+      tmpFile.deleteSync();
 
     if (zipBuildDir.existsSync())
       zipBuildDir.deleteSync(recursive: true);
@@ -87,7 +88,7 @@ class _ZipToolBuilder extends ZipBuilder {
     final Iterable<String> compressedNames = _getCompressedNames();
     if (compressedNames.isNotEmpty) {
       await runCheckedAsync(
-        <String>['zip', '-q', outFile.absolute.path]..addAll(compressedNames),
+        <String>['zip', '-q', tmpFile.absolute.path]..addAll(compressedNames),
         workingDirectory: zipBuildDir.path
       );
     }
@@ -95,10 +96,12 @@ class _ZipToolBuilder extends ZipBuilder {
     final Iterable<String> storedNames = _getStoredNames();
     if (storedNames.isNotEmpty) {
       await runCheckedAsync(
-        <String>['zip', '-q', '-0', outFile.absolute.path]..addAll(storedNames),
+        <String>['zip', '-q', '-0', tmpFile.absolute.path]..addAll(storedNames),
         workingDirectory: zipBuildDir.path
       );
     }
+
+    tmpFile.renameSync(outFile.absolute.path);
   }
 
   static const List<String> _kNoCompressFileExtensions = const <String>['.png', '.jpg'];
