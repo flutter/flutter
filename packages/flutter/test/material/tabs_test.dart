@@ -1065,15 +1065,19 @@ void main() {
       ),
     );
 
+    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
+    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
-    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #10')));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
 
     controller.index = 10;
     await tester.pumpAndSettle();
 
-    expect(semantics, isNot(includesNodeWith(label: 'This is a very wide tab #0')));
+    expect(semantics, isNot(includesNodeWith(label: tab0title)));
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
-    expect(semantics, includesNodeWith(label: 'This is a very wide tab #10'));
+    expect(semantics, includesNodeWith(label: tab10title));
 
     controller.index = 19;
     await tester.pumpAndSettle();
@@ -1084,7 +1088,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
-    expect(semantics, includesNodeWith(label: 'This is a very wide tab #0'));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
 
     semantics.dispose();
   });

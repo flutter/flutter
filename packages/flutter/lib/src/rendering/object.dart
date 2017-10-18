@@ -2164,14 +2164,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     });
   }
 
-  /// Restore the [SemanticsNode]s owned by this render object to its default
-  /// state.
-  @mustCallSuper
-  @protected
-  void resetSemantics() {
-    _semantics?.reset();
-  }
-
   /// Mark this node as needing an update to its semantics description.
   ///
   /// `onlyLocalUpdates` should be set to true to reduce cost if the semantics
@@ -2208,11 +2200,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           return;
         node._cachedSemanticsConfiguration = null;
         node._needsSemanticsUpdate = true;
-        node.resetSemantics();
         node = node.parent;
       }
       if (!node._needsSemanticsUpdate) {
-        node.resetSemantics();
         node._needsSemanticsUpdate = true;
         node._cachedSemanticsConfiguration = null;
         if (owner != null) {
@@ -2232,10 +2222,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           break;
         node._needsSemanticsUpdate = true;
         node._cachedSemanticsConfiguration = null;
-        node.resetSemantics();
         node = node.parent;
       } while (node._semantics == null);
-      node.resetSemantics();
       if (node != this && _semantics != null && _needsSemanticsUpdate) {
         // If [this] node has already been added to [owner._nodesNeedingSemantics]
         // remove it as it is no longer guaranteed that its semantics
@@ -2371,7 +2359,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       Iterable<SemanticsNode> children,
   ) {
     assert(node == _semantics);
-    node.replaceWith(config, children);
+    node.updateWith(config: config, childrenInInversePaintOrder: children);
   }
 
   // EVENTS
@@ -3056,11 +3044,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     final SemanticsNode root = compileChildren().first;
+    final List<SemanticsNode> children = <SemanticsNode>[];
     for (_InterestingSemanticsFragment fragment in fragments) {
       assert(fragment.config == null);
-      root.addChildren(fragment.compileChildren());
+      children.addAll(fragment.compileChildren());
     }
-    root.finalizeChildren();
+    root.updateWith(config: null, childrenInInversePaintOrder: children);
   }
 }
 
@@ -3111,7 +3100,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
     if (_config.isSemanticBoundary) {
       _owner.assembleSemanticsNode(node, _config, _children);
     } else {
-      node.replaceWith(_config, _children);
+      node.updateWith(config: _config, childrenInInversePaintOrder: _children);
     }
 
     yield node;

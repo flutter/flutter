@@ -3039,7 +3039,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
 
   @override
   void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
-    if (children.isEmpty || !children.first.hasTag(useTwoPaneSemantics)) {
+    if (children.isEmpty || !children.first.isTagged(useTwoPaneSemantics)) {
       _annotatedNode = node;
       super.assembleSemanticsNode(node, config, children);
       return;
@@ -3055,21 +3055,14 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
-      assert(child.hasTag(useTwoPaneSemantics));
-      if (child.hasTag(excludeFromScrolling))
+      assert(child.isTagged(useTwoPaneSemantics));
+      if (child.isTagged(excludeFromScrolling))
         excluded.add(child);
       else
         included.add(child);
     }
-    node.addChildren(excluded);
-    _innerNode.replaceWith(config, included);
-    node.finalizeChildren();
-  }
-
-  @override
-  void resetSemantics() {
-    _innerNode?.reset();
-    super.resetSemantics();
+    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
+    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }
 
   void _performSemanticScrollLeft() {

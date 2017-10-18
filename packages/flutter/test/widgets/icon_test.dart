@@ -141,7 +141,7 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'a label')));
+    expect(semantics, includesNodeWith(label: 'a label'));
   });
 
   testWidgets('Null icon with semantic label', (WidgetTester tester) async {
@@ -159,7 +159,7 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(label: 'a label')));
+    expect(semantics, includesNodeWith(label: 'a label'));
   });
 
   testWidgets('Changing semantic label from null doesn\'t rebuild tree ', (WidgetTester tester) async {

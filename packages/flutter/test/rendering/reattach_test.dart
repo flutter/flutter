@@ -29,6 +29,7 @@ class TestTree {
                 child: new RenderPositionedBox(
                   child: child = new RenderConstrainedBox(
                     additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
+                    child: new RenderSemanticsAnnotations(label: 'Hello there foo', textDirection: TextDirection.ltr)
                   ),
                 ),
               ),
@@ -127,7 +128,7 @@ void main() {
     layout(testTree.root, phase: EnginePhase.paint);
     expect(testTree.painted, isTrue);
   });
-  test('objects can be detached and re-attached: semantics', () {
+  test('objects can be detached and re-attached: semantics (no change)', () {
     final TestTree testTree = new TestTree();
     int semanticsUpdateCount = 0;
     final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
@@ -147,7 +148,31 @@ void main() {
     expect(semanticsUpdateCount, 0);
     // Lay out, composite, paint, and update semantics again
     layout(testTree.root, phase: EnginePhase.flushSemantics);
+    expect(semanticsUpdateCount, 0);  // no semantics have changed.
+    semanticsHandle.dispose();
+  });
+  test('objects can be detached and re-attached: semantics (with change)', () {
+    final TestTree testTree = new TestTree();
+    int semanticsUpdateCount = 0;
+    final SemanticsHandle semanticsHandle = renderer.pipelineOwner.ensureSemantics(
+        listener: () {
+          ++semanticsUpdateCount;
+        }
+    );
+    // Lay out, composite, paint, and update semantics
+    layout(testTree.root, phase: EnginePhase.flushSemantics);
     expect(semanticsUpdateCount, 1);
+    // Remove testTree from the custom render view
+    renderer.renderView.child = null;
+    expect(testTree.child.owner, isNull);
+    // Dirty one of the elements
+    semanticsUpdateCount = 0;
+    testTree.child.additionalConstraints = const BoxConstraints.tightFor(height: 20.0, width: 30.0);
+    testTree.child.markNeedsSemanticsUpdate();
+    expect(semanticsUpdateCount, 0);
+    // Lay out, composite, paint, and update semantics again
+    layout(testTree.root, phase: EnginePhase.flushSemantics);
+    expect(semanticsUpdateCount, 1);  // semantics have changed.
     semanticsHandle.dispose();
   });
 }
