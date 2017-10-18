@@ -37,8 +37,17 @@ void main() {
   testWidgets('Simple tree is simple - material', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
+    // Not using Text widget because of https://github.com/flutter/flutter/issues/12357.
     await tester.pumpWidget(new MaterialApp(
-      home: const Center(child: const Text('Hello!')),
+      home: new Center(
+        child: new Semantics(
+          label: 'Hello!',
+          child: new Container(
+            width: 10.0,
+            height: 10.0,
+          ),
+        ),
+      ),
     ));
 
     expect(semantics, hasSemantics(new TestSemantics.root(
@@ -47,8 +56,8 @@ void main() {
           id: 2,
           label: 'Hello!',
           textDirection: TextDirection.ltr,
-          rect: new Rect.fromLTRB(0.0, 0.0, 288.0, 48.0),
-          transform: new Matrix4.translationValues(256.0, 276.0, 0.0),
+          rect: new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          transform: new Matrix4.translationValues(395.0, 295.0, 0.0),
         )
       ],
     )));
