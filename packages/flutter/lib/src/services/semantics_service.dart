@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show TextDirection;
 
 import 'system_channels.dart';
 
@@ -20,10 +21,13 @@ class SemanticsService {
   ///
   /// For example a camera application can use this method to make accessibility
   /// announcements regarding objects in the viewfinder.
-  static Future<Null> announce(String message) async {
+  static Future<Null> announce(String message, TextDirection textDirection) async {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': 'announce',
-      'data': <String, String> {'message': message},
+      'data': <String, dynamic> {
+        'message': message,
+        'textDirection': textDirection.index,
+      },
     };
     await SystemChannels.accessibility.send(event);
   }
