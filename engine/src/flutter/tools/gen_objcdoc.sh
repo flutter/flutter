@@ -25,7 +25,7 @@ jazzy \
   --github_url 'https://github.com/flutter'\
   --github-file-prefix 'http://github.com/flutter/engine/blob/master'\
   --module-version 1.0.0\
-  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,$(xcrun --show-sdk-path),-I,$(pwd)\
+  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,$(xcrun --show-sdk-path --sdk iphoneos),-I,$(pwd)\
   --module Flutter\
   --root-url https://docs.flutter.io/objc/\
   --output $1\
