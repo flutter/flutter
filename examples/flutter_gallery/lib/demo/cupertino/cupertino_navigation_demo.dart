@@ -38,7 +38,17 @@ class CupertinoNavigationDemo extends StatelessWidget {
             color: CupertinoColors.black,
           ),
           child: new CupertinoTabView(
-            builder: (BuildContext context) => new CupertinoDemoTab1(),
+            builder: (BuildContext context) {
+              switch (index) {
+                case 0:
+                  return new CupertinoDemoTab1();
+                  break;
+                case 2:
+                  return new CupertinoDemoTab3();
+                  break;
+                default:
+              }
+            }
           ),
         );
       },
@@ -52,7 +62,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
     return new CupertinoPageScaffold(
       child: new CustomScrollView(
         slivers: <Widget>[
-          new CupertinoSliverNavigationBar(
+          const CupertinoSliverNavigationBar(
             largeTitle: const Text('Home'),
           ),
           new SliverList(
@@ -213,13 +223,90 @@ class Tab1ItemPage extends StatelessWidget {
               borderRadius: new BorderRadius.circular(24.0),
             ),
           ),
-          const Padding(padding: const EdgeInsets.only(left: 16.0)),
+          const Padding(padding: const EdgeInsets.only(left: 24.0)),
           new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              new Text(colorName),
+              new Text(
+                colorName,
+                style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+              ),
+              const Padding(padding: const EdgeInsets.only(top: 8.0)),
+              new Text(
+                'Item number $index',
+                style: const TextStyle(color: const Color(0xff8e8e93)),
+              )
             ],
           ),
         ]),
+      ),
+    );
+  }
+}
+
+class CupertinoDemoTab3 extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => new CupertinoDemoTab3State();
+}
+
+class CupertinoDemoTab3State extends State<CupertinoDemoTab3> {
+  bool signedIn = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return new CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: const Text('Account'),
+      ),
+      child: new DecoratedBox(
+        decoration: const BoxDecoration(color: const Color(0xffefeff4)),
+        child: new ListView(
+          children: <Widget>[
+            const Padding(padding: const EdgeInsets.only(top: 100.0)),
+            new GestureDetector(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).push(
+                  new CupertinoPageRoute<bool>(
+                    fullscreenDialog: true,
+                    builder: (BuildContext context) {
+                       return new CupertinoPageScaffold(
+                         navigationBar: new CupertinoNavigationBar(
+                           leading: new CupertinoButton(
+                             child: const Text('Cancel'),
+                             onPressed: () {
+                               Navigator.of(context).pop(false);
+                             },
+                           ),
+                         ),
+                         child: new Center(
+
+                         ),
+                       );
+                    },
+                  ),
+                );
+              },
+              child: new Container(
+                decoration: const BoxDecoration(
+                  color: CupertinoColors.white,
+                  border: const Border(
+                    top: const BorderSide(color: const Color(0xffbcbbbc1), width: 0.0),
+                    bottom: const BorderSide(color: const Color(0xffbcbbbc1), width: 0.0),
+                  ),
+                ),
+                height: 44.0,
+                child: new Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: new Row(children: <Widget>[ new Text(
+                    signedIn ? 'Sign out' : 'Sign in',
+                    style: const TextStyle(color: CupertinoColors.activeBlue),
+                  ) ]),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
