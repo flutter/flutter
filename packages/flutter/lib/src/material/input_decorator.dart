@@ -397,20 +397,15 @@ class InputDecorator extends StatelessWidget {
   }
 
   Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild, double subTextHeight) {
-    final double bottomHeight = subTextHeight + (isDense ? _kDensePadding : _kNormalPadding) + _kBottomBorderHeight;
-    final EdgeInsets padding = new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding - _kBottomBorderHeight);
-
     if (decoration.hideDivider) {
       return new Container(
-        margin: new EdgeInsets.only(bottom: bottomHeight),
-        padding: padding,
+        padding: new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding),
         child: inputChild,
       );
     }
 
     return new AnimatedContainer(
-      margin: new EdgeInsets.only(bottom: bottomHeight - _kBottomBorderHeight),
-      padding: padding,
+      padding: new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding - _kBottomBorderHeight),
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       decoration: new BoxDecoration(
@@ -540,21 +535,23 @@ class InputDecorator extends StatelessWidget {
       inputChild = new Row(children: rowContents);
     }
 
+    // The inputChild and the helper/error text need to be in a column so that if the inputChild is
+    // a multiline input or a non-text widget, it lays out with the helper/error text below the
+    // inputChild.
+    final List<Widget> columnChildren = <Widget>[];
     if (isCollapsed) {
-      stackChildren.add(inputChild);
+      columnChildren.add(inputChild);
     } else {
       final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      stackChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild, subTextHeight));
+      columnChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild, subTextHeight));
     }
 
     if (errorText != null || helperText != null) {
       assert(!isCollapsed);
-      final double linePadding = _kBottomBorderHeight + _kNormalPadding + (isDense ? _kDensePadding : _kNormalPadding);
-      stackChildren.add(
-        new AnimatedPositionedDirectional(
-          start: 0.0,
-          end: 0.0,
-          top: topPadding + entryTextHeight + linePadding,
+      final double linePadding = _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding) - 4.0;
+      columnChildren.add(
+        new AnimatedContainer(
+          padding: new EdgeInsets.only(top: linePadding),
           duration: _kTransitionDuration,
           curve: _kTransitionCurve,
           child: new Text(
@@ -566,6 +563,14 @@ class InputDecorator extends StatelessWidget {
         ),
       );
     }
+
+    stackChildren.add(
+      new Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: columnChildren,
+      ),
+    );
 
     final Widget stack = new Stack(
       fit: StackFit.passthrough,
@@ -579,13 +584,15 @@ class InputDecorator extends StatelessWidget {
       return new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Container(
+          new AnimatedContainer(
             margin: new EdgeInsets.only(top: iconTop),
+            duration: _kTransitionDuration,
+            curve: _kTransitionCurve,
             width: isDense ? 40.0 : 48.0,
             child: IconTheme.merge(
               data: new IconThemeData(
                 color: isFocused ? activeColor : Colors.black45,
-                size: isDense ? 18.0 : 24.0,
+                size: iconSize,
               ),
               child: decoration.icon,
             ),

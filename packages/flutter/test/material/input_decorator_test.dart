@@ -72,14 +72,17 @@ void main() {
 
     // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
-        tester.getRect(find.text('Label')),
-        anyOf(<Rect>[
-          new Rect.fromLTWH(0.0, 281.0, 60.0, 12.0),
-          new Rect.fromLTWH(0.0, 281.0, 61.0, 12.0),
-        ])
+        tester.getRect(find.text('Label')).size,
+        anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 297.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 330.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(282.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(298.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(321.5));
 
     await tester.pumpWidget(new MaterialApp(
       home: new Material(
@@ -96,14 +99,17 @@ void main() {
     ));
 
     expect(
-        tester.getRect(find.text('Label')),
-        anyOf(<Rect>[
-          new Rect.fromLTWH(0.0, 281.0, 60.0, 12.0),
-          new Rect.fromLTWH(0.0, 281.0, 61.0, 12.0),
-        ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 297.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Error')), equals(new Rect.fromLTWH(0.0, 330.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(282.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(298.5));
+    expect(tester.getRect(find.text('Error')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Error')).left, equals(0.0));
+    expect(tester.getRect(find.text('Error')).top, equals(321.5));
   });
 
   testWidgets('InputDecorator animates properly', (WidgetTester tester) async {
@@ -129,14 +135,17 @@ void main() {
 
     // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
-      tester.getRect(find.text('Label')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 294.0, 80.0, 16.0),
-        new Rect.fromLTWH(0.0, 294.0, 81.0, 16.0),
-      ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(80.0, 16.0), const Size(81.0, 16.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 294.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 327.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(295.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(295.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(324.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
@@ -144,28 +153,34 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
-      tester.getRect(find.text('Label')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 294.0, 60.0, 12.0),
-        new Rect.fromLTWH(0.0, 294.0, 61.0, 12.0),
-      ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 294.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 327.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(295.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(295.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(324.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
     await tester.pump(const Duration(seconds: 1));
 
     expect(
-      tester.getRect(find.text('Label')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 278.0, 60.0, 12.0),
-        new Rect.fromLTWH(0.0, 278.0, 61.0, 12.0),
-      ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 294.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 327.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(279.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(295.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(324.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
@@ -173,53 +188,55 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
 
     expect(
-      tester.getRect(find.text('Label')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 278.0, 60.0, 12.0),
-        new Rect.fromLTWH(0.0, 278.0, 61.0, 12.0),
-      ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 294.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 327.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(279.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(295.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(324.5));
     expect(
-      tester.getRect(find.text('P')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 294.0, 16.0, 16.0),
-        new Rect.fromLTWH(0.0, 294.0, 17.0, 16.0),
-      ]),
+      tester.getRect(find.text('P')).size,
+      anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),
     );
+    expect(tester.getRect(find.text('P')).left, equals(0.0));
+    expect(tester.getRect(find.text('P')).top, equals(295.5));
     expect(
-      tester.getRect(find.text('S')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(784.0, 294.0, 16.0, 16.0),
-        new Rect.fromLTWH(783.0, 294.0, 17.0, 16.0),
-      ]),
+      tester.getRect(find.text('S')).size,
+      anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),
     );
+    expect(tester.getRect(find.text('S')).left, anyOf(783.0, 784.0));
+    expect(tester.getRect(find.text('S')).top, equals(295.5));
 
     await tester.pump(const Duration(seconds: 1));
 
     expect(
-      tester.getRect(find.text('Label')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 278.0, 60.0, 12.0),
-        new Rect.fromLTWH(0.0, 278.0, 61.0, 12.0),
-      ]),
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
     );
-    expect(tester.getRect(find.text('Hint')), equals(new Rect.fromLTWH(0.0, 294.0, 800.0, 16.0)));
-    expect(tester.getRect(find.text('Helper')), equals(new Rect.fromLTWH(0.0, 327.0, 800.0, 12.0)));
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(279.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(295.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(324.5));
     expect(
-      tester.getRect(find.text('P')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(0.0, 294.0, 16.0, 16.0),
-        new Rect.fromLTWH(0.0, 294.0, 17.0, 16.0),
-      ]),
+      tester.getRect(find.text('P')).size,
+      anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),
     );
+    expect(tester.getRect(find.text('P')).left, equals(0.0));
+    expect(tester.getRect(find.text('P')).top, equals(295.5));
     expect(
-      tester.getRect(find.text('S')),
-      anyOf(<Rect>[
-        new Rect.fromLTWH(784.0, 294.0, 16.0, 16.0),
-        new Rect.fromLTWH(783.0, 294.0, 17.0, 16.0),
-      ]),
+      tester.getRect(find.text('S')).size,
+      anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),
     );
+    expect(tester.getRect(find.text('S')).left, anyOf(783.0, 784.0));
+    expect(tester.getRect(find.text('S')).top, equals(295.5));
   });
 }

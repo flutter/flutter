@@ -2377,7 +2377,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // yet (that is, our layer might not have been detached yet), because the
     // same node that skipped us in layout is above us in the tree (obviously)
     // and therefore may not have had a chance to paint yet (since the tree
-    // paints in reverse order). In particular this will happen if they are have
+    // paints in reverse order). In particular this will happen if they have
     // a different layer, because there's a repaint boundary between us.
     if (_needsLayout)
       return;
