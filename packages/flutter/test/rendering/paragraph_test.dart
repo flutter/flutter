@@ -51,7 +51,7 @@ void main() {
 
   test('getBoxesForSelection control test', () {
     final RenderParagraph paragraph = new RenderParagraph(
-      const TextSpan(text: _kText),
+      const TextSpan(text: _kText, style: const TextStyle(fontSize: 10.0)),
       textDirection: TextDirection.ltr,
     );
     layout(paragraph);
@@ -66,7 +66,8 @@ void main() {
         const TextSelection(baseOffset: 25, extentOffset: 50)
     );
 
-    expect(boxes.length, equals(3));
+    expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
+    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
   });
 
   test('getWordBoundary control test', () {
