@@ -35,13 +35,15 @@ class Engine : public blink::RuntimeDelegate {
 
   static void Init();
 
-  void RunBundle(const std::string& bundle_path);
+  void RunBundle(const std::string& bundle_path,
+                 const std::string& entrypoint = main_entrypoint_);
 
   // Uses the given snapshot instead of looking inside the bundle for the
   // snapshot. If |snapshot_override| is empty, this function looks for the
   // snapshot in the bundle itself.
   void RunBundleAndSnapshot(const std::string& bundle_path,
-                            const std::string& snapshot_override);
+                            const std::string& snapshot_override,
+                            const std::string& entrypoint = main_entrypoint_);
 
   // Uses the given source code instead of looking inside the bundle for the
   // source code.
@@ -99,6 +101,8 @@ class Engine : public blink::RuntimeDelegate {
 
   void HandleAssetPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
+
+  static const std::string main_entrypoint_;
 
   std::weak_ptr<PlatformView> platform_view_;
   std::unique_ptr<Animator> animator_;

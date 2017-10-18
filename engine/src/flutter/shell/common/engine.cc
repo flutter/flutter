@@ -186,7 +186,10 @@ void Engine::Init() {
                      default_isolate_snapshot_instr);
 }
 
-void Engine::RunBundle(const std::string& bundle_path) {
+const std::string Engine::main_entrypoint_ = "main";
+
+void Engine::RunBundle(const std::string& bundle_path,
+                       const std::string& entrypoint) {
   TRACE_EVENT0("flutter", "Engine::RunBundle");
   ConfigureAssetBundle(bundle_path);
   std::vector<uint8_t> platform_kernel;
@@ -194,38 +197,39 @@ void Engine::RunBundle(const std::string& bundle_path) {
   ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
 
   if (blink::IsRunningPrecompiledCode()) {
-    runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+    runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
   } else {
     std::vector<uint8_t> kernel;
     if (GetAssetAsBuffer(blink::kKernelAssetKey, &kernel)) {
-      runtime_->dart_controller()->RunFromKernel(kernel);
+      runtime_->dart_controller()->RunFromKernel(kernel, entrypoint);
       return;
     }
     std::vector<uint8_t> snapshot;
     if (!GetAssetAsBuffer(blink::kSnapshotAssetKey, &snapshot))
       return;
-    runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
-                                                       snapshot.size());
+    runtime_->dart_controller()->RunFromScriptSnapshot(
+        snapshot.data(), snapshot.size(), entrypoint);
   }
 }
 
 void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
-                                  const std::string& snapshot_override) {
+                                  const std::string& snapshot_override,
+                                  const std::string& entrypoint) {
   TRACE_EVENT0("flutter", "Engine::RunBundleAndSnapshot");
   if (snapshot_override.empty()) {
-    RunBundle(bundle_path);
+    RunBundle(bundle_path, entrypoint);
     return;
   }
   ConfigureAssetBundle(bundle_path);
   ConfigureRuntime(GetScriptUriFromPath(bundle_path));
   if (blink::IsRunningPrecompiledCode()) {
-    runtime_->dart_controller()->RunFromPrecompiledSnapshot();
+    runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
   } else {
     std::vector<uint8_t> snapshot;
     if (!files::ReadFileToVector(snapshot_override, &snapshot))
       return;
-    runtime_->dart_controller()->RunFromScriptSnapshot(snapshot.data(),
-                                                       snapshot.size());
+    runtime_->dart_controller()->RunFromScriptSnapshot(
+        snapshot.data(), snapshot.size(), entrypoint);
   }
 }
 
