@@ -402,8 +402,7 @@ static void BM_ParagraphMinikinAddStyleRun(benchmark::State& state) {
     for (int i = 0; i < 20; ++i) {
       breaker.addStyleRun(
           &paint, font_collection->GetMinikinFontCollectionForFamily("Roboto"),
-          font, state.range(0) / 20 * i, state.range(0) / 20 * (i + 1), false,
-          0);
+          font, state.range(0) / 20 * i, state.range(0) / 20 * (i + 1), false);
     }
   }
   state.SetComplexityN(state.range(0));

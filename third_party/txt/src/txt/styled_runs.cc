@@ -71,40 +71,4 @@ StyledRuns::Run StyledRuns::GetRun(size_t index) const {
   return Run{styles_[run.style_index], run.start, run.end};
 }
 
-void StyledRuns::SplitNewlineRuns(std::list<size_t> newline_positions) {
-  std::vector<IndexedRun> result;
-  for (size_t i = 0; i < runs_.size(); ++i) {
-    if (runs_[i].end <= newline_positions.front() ||
-        newline_positions.empty()) {
-      result.push_back(runs_[i]);
-    } else {
-      size_t start = runs_[i].start;
-      size_t end = runs_[i].end;
-      while (end > newline_positions.front() && !newline_positions.empty() &&
-             start < end) {
-        IndexedRun temp_run;
-        temp_run.style_index = runs_[i].style_index;
-        temp_run.start = start;
-        temp_run.end = newline_positions.front();
-        newline_positions.pop_front();
-        result.push_back(temp_run);
-
-        temp_run.start = temp_run.end;
-        temp_run.end = temp_run.end + 1;
-        result.push_back(temp_run);
-
-        start = temp_run.end;
-      }
-      if (start < end) {
-        IndexedRun temp_run;
-        temp_run.style_index = runs_[i].style_index;
-        temp_run.start = start;
-        temp_run.end = end;
-        result.push_back(temp_run);
-      }
-    }
-  }
-  runs_ = result;
-}
-
 }  // namespace txt

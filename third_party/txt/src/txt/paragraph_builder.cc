@@ -85,21 +85,8 @@ void ParagraphBuilder::AddText(const char* text) {
   AddText(u16_text);
 }
 
-void ParagraphBuilder::SplitNewlineRuns() {
-  std::list<size_t> newline_positions;
-  for (size_t i = 0; i < text_.size(); ++i) {
-    if (text_[i] == '\n') {
-      newline_positions.push_back(i);
-    }
-  }
-  if (newline_positions.size() > 0)
-    runs_.SplitNewlineRuns(newline_positions);
-}
-
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
   runs_.EndRunIfNeeded(text_.size());
-
-  SplitNewlineRuns();
 
   std::unique_ptr<Paragraph> paragraph = std::make_unique<Paragraph>();
   paragraph->SetText(std::move(text_), std::move(runs_));

@@ -79,10 +79,6 @@ class ParagraphBuilder {
   StyledRuns runs_;
   ParagraphStyle paragraph_style_;
 
-  // Break any newline '\n' characters into their own runs. This allows
-  // Paragraph::Layout to cleanly discover and handle newlines.
-  void SplitNewlineRuns();
-
   FXL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
 
