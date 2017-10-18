@@ -138,7 +138,7 @@ void main() {
       expect(border.left.width, closeTo(1.9, 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF151515));
-      expect(actualDecoration.borderRadius.topLeft.x, closeTo(6.8, 0.1));
+      expect(actualDecoration.borderRadius.resolve(TextDirection.ltr).topLeft.x, closeTo(6.8, 0.1));
       expect(actualDecoration.shape, BoxShape.rectangle);
       expect(actualDecoration.boxShadow[0].blurRadius, closeTo(3.1, 0.1));
       expect(actualDecoration.boxShadow[0].spreadRadius, closeTo(1.2, 0.1));

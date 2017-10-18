@@ -38,7 +38,7 @@ class RoundedRectangleBorder extends ShapeBorder {
   final BorderSide side;
 
   /// The radii for each corner.
-  final BorderRadius borderRadius;
+  final BorderRadiusGeometry borderRadius;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -92,13 +92,13 @@ class RoundedRectangleBorder extends ShapeBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return new Path()
-      ..addRRect(borderRadius.toRRect(rect).deflate(side.width));
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(side.width));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
     return new Path()
-      ..addRRect(borderRadius.toRRect(rect));
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
   @override
@@ -109,9 +109,9 @@ class RoundedRectangleBorder extends ShapeBorder {
       case BorderStyle.solid:
         final double width = side.width;
         if (width == 0.0) {
-          canvas.drawRRect(borderRadius.toRRect(rect), side.toPaint());
+          canvas.drawRRect(borderRadius.resolve(textDirection).toRRect(rect), side.toPaint());
         } else {
-          final RRect outer = borderRadius.toRRect(rect);
+          final RRect outer = borderRadius.resolve(textDirection).toRRect(rect);
           final RRect inner = outer.deflate(width);
           final Paint paint = new Paint()
             ..color = side.color;

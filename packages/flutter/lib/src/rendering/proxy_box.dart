@@ -1482,7 +1482,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     @required Decoration decoration,
     DecorationPosition position: DecorationPosition.background,
     ImageConfiguration configuration: ImageConfiguration.empty,
-    RenderBox child
+    RenderBox child,
   }) : assert(decoration != null),
        assert(position != null),
        assert(configuration != null),
@@ -1522,6 +1522,9 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// The settings to pass to the decoration when painting, so that it can
   /// resolve images appropriately. See [ImageProvider.resolve] and
   /// [BoxPainter.paint].
+  ///
+  /// The [ImageConfiguration.textDirection] field is also used by
+  /// direction-sensitive [Decoration]s for painting and hit-testing.
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
@@ -1541,7 +1544,7 @@ class RenderDecoratedBox extends RenderProxyBox {
 
   @override
   bool hitTestSelf(Offset position) {
-    return _decoration.hitTest(size, position);
+    return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }
 
   @override

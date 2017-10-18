@@ -122,7 +122,12 @@ abstract class Decoration extends Diagnosticable {
   /// if the decoration only draws a circle, this function might
   /// return true if the point was inside the circle and false
   /// otherwise.
-  bool hitTest(Size size, Offset position) => true;
+  ///
+  /// The decoration may be sensitive to the [TextDirection]. The
+  /// `textDirection` argument should therefore be provided. If it is known that
+  /// the decoration is not affected by the text direction, then the argument
+  /// may be ommitted or set to null.
+  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///

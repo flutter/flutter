@@ -117,8 +117,9 @@ abstract class BorderRadiusGeometry {
 
   /// Linearly interpolate between two [BorderRadiusGeometry] objects.
   ///
-  /// If either is null, this function interpolates from [BorderRadius.zero], and
-  /// the result is an object of the same type as the non-null argument.
+  /// If either is null, this function interpolates from [BorderRadius.zero],
+  /// and the result is an object of the same type as the non-null argument. (If
+  /// both are null, this returns null.)
   ///
   /// If [lerp] is applied to two objects of the same type ([BorderRadius] or
   /// [BorderRadiusDirectional]), an object of that type will be returned (though
@@ -126,6 +127,8 @@ abstract class BorderRadiusGeometry {
   /// representing a combination of both is returned. That object can be turned
   /// into a concrete [BorderRadius] using [resolve].
   static BorderRadiusGeometry lerp(BorderRadiusGeometry a, BorderRadiusGeometry b, double t) {
+    if (a == null && b == null)
+      return null;
     a ??= BorderRadius.zero;
     b ??= BorderRadius.zero;
     return a.add((b.subtract(a)) * t);
