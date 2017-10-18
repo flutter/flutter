@@ -17,15 +17,18 @@ if [ $# -eq 0 ]
       exit 1
 fi
 
+# Use iPhoneSimulator SDK
+# See: https://github.com/realm/jazzy/issues/791
 jazzy \
   --objc\
+  --sdk iphonesimulator\
   --clean\
   --author Flutter Team\
   --author_url 'https://flutter.io'\
   --github_url 'https://github.com/flutter'\
   --github-file-prefix 'http://github.com/flutter/engine/blob/master'\
   --module-version 1.0.0\
-  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,$(xcrun --show-sdk-path --sdk iphoneos),-I,$(pwd)\
+  --xcodebuild-arguments --objc,shell/platform/darwin/ios/framework/Headers/Flutter.h,--,-x,objective-c,-isysroot,$(xcrun --show-sdk-path),-I,$(pwd)\
   --module Flutter\
   --root-url https://docs.flutter.io/objc/\
   --output $1\
