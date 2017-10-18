@@ -3147,11 +3147,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _textDirection = textDirection,
        super(child);
 
-  /// If 'container' is true, this RenderObject will introduce a new
+  /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// Whether decedents of this RenderObject can add their semantic information
+  /// Whether descendants of this [RenderObject] can add their semantic information
   /// to the [SemanticsNode] introduced by this configuration is controlled by
   /// [explicitChildNodes].
   bool get container => _container;
@@ -3164,13 +3164,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// Whether decedents of this RenderObject are allowed to add semantic
+  /// Whether descendants of this [RenderObject] are allowed to add semantic
   /// information to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false decedents are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
-  /// When set to true the only way for decedents to contribute semantic
+  /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
   /// [SemanticNode]s to the tree.
   ///

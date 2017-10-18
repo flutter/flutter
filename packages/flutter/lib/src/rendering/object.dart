@@ -2115,6 +2115,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner.requestVisualUpdate();
   }
 
+  @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
   }

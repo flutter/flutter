@@ -4446,18 +4446,18 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
-  /// Whether decedents of this widget can add their semantic information to the
+  /// Whether descendants of this widget can add their semantic information to the
   /// [SemanticsNode] introduced by this configuration is controlled by
   /// [explicitChildNodes].
   final bool container;
 
-  /// Whether decedents of this widget are allowed to add semantic information
+  /// Whether descendants of this widget are allowed to add semantic information
   /// to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false decedents are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
-  /// When set to true the only way for decedents to contribute semantic
+  /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
   /// [SemanticNode]s to the tree.
   ///

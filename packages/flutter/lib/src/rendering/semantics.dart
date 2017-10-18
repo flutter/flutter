@@ -913,7 +913,7 @@ class SemanticsConfiguration {
   /// parents. The [SemanticsNode] generated out of this configuration will
   /// act as a boundary.
   ///
-  /// Whether decedents of the owning [RenderObject] can add their semantic
+  /// Whether descendants of the owning [RenderObject] can add their semantic
   /// information to the [SemanticsNode] introduced by this configuration
   /// is controlled by [explicitChildNodes].
   ///
