@@ -1461,6 +1461,18 @@ enum PointMode {
   polygon,
 }
 
+/// Defines how a new clip region should be merged with the existing clip
+/// region.
+///
+/// Used by [Canvas.clipRect].
+enum ClipOp {
+  /// Subtract the new region from the existing region.
+  difference,
+
+  /// Intersect the new region from the existing region.
+  intersect,
+}
+
 /// An interface for recording graphical operations.
 ///
 /// [Canvas] objects are used in creating [Picture] objects, which can
@@ -1692,14 +1704,19 @@ class Canvas extends NativeFieldWrapperClass2 {
   /// intersect with the clip boundary, this can result in incorrect blending at
   /// the clip boundary. See [saveLayer] for a discussion of how to address
   /// that.
-  void clipRect(Rect rect) {
+  ///
+  /// Use [ClipOp.difference] to subtract the provided rectangle from the
+  /// current clip.
+  void clipRect(Rect rect, { ClipOp clipOp: ClipOp.intersect }) {
     assert(_rectIsValid(rect));
-    _clipRect(rect.left, rect.top, rect.right, rect.bottom);
+    assert(clipOp != null);
+    _clipRect(rect.left, rect.top, rect.right, rect.bottom, clipOp.index);
   }
   void _clipRect(double left,
                  double top,
                  double right,
-                 double bottom) native "Canvas_clipRect";
+                 double bottom,
+                 int clipOp) native "Canvas_clipRect";
 
   /// Reduces the clip region to the intersection of the current clip and the
   /// given rounded rectangle.

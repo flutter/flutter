@@ -56,7 +56,11 @@ class Canvas : public fxl::RefCountedThreadSafe<Canvas>,
   void skew(double sx, double sy);
   void transform(const tonic::Float64List& matrix4);
 
-  void clipRect(double left, double top, double right, double bottom);
+  void clipRect(double left,
+                double top,
+                double right,
+                double bottom,
+                SkClipOp clipOp);
   void clipRRect(const RRect& rrect);
   void clipPath(const CanvasPath* path);
 
