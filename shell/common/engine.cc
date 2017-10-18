@@ -44,7 +44,7 @@ constexpr char kAssetChannel[] = "flutter/assets";
 constexpr char kLifecycleChannel[] = "flutter/lifecycle";
 constexpr char kNavigationChannel[] = "flutter/navigation";
 constexpr char kLocalizationChannel[] = "flutter/localization";
-constexpr char kSystemChannel[] = "flutter/system";
+constexpr char kSettingsChannel[] = "flutter/settings";
 
 bool PathExists(const std::string& path) {
   return access(path.c_str(), R_OK) == 0;
@@ -75,7 +75,7 @@ Engine::Engine(PlatformView* platform_view)
           platform_view->GetVsyncWaiter(),
           this)),
       load_script_error_(tonic::kNoError),
-      text_scale_factor_(1.0),
+      user_settings_data_("{}"),
       activity_running_(false),
       have_surface_(false),
       weak_factory_(this) {}
@@ -337,11 +337,9 @@ void Engine::DispatchPlatformMessage(
   } else if (message->channel() == kLocalizationChannel) {
     if (HandleLocalizationPlatformMessage(message.get()))
       return;
-  } else if (message->channel() == kSystemChannel) {
-    // This only handles textScaleFactor changes: other system messages are
-    // handled by DispatchPlatformMessage below.
-    if (HandleSystemPlatformMessage(message.get()))
-      return;
+  } else if (message->channel() == kSettingsChannel) {
+    HandleSettingsPlatformMessage(message.get());
+    return;
   }
 
   if (runtime_) {
@@ -424,35 +422,15 @@ bool Engine::HandleLocalizationPlatformMessage(
   return true;
 }
 
-bool Engine::HandleSystemPlatformMessage(blink::PlatformMessage* message) {
+void Engine::HandleSettingsPlatformMessage(blink::PlatformMessage* message) {
   const auto& data = message->data();
-  rapidjson::Document document;
-  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
-
-  if (document.HasParseError() || !document.IsObject())
-    return false;
-
-  auto root = document.GetObject();
-  auto type = root.FindMember("type");
-  if (type == root.MemberEnd() || type->value != "systemSettings")
-    return false;
-
-  // This only handles textScaleFactor changes: other system messages
-  // are handled by DispatchPlatformMessage.
-  auto text_scale_factor = root.FindMember("textScaleFactor");
-  if (text_scale_factor == root.MemberEnd() ||
-      !text_scale_factor->value.IsDouble()) {
-    return false;
-  }
-  text_scale_factor_ = text_scale_factor->value.GetDouble();
+  std::string jsonData(reinterpret_cast<const char*>(data.data()), data.size());
+  user_settings_data_ = jsonData;
   if (runtime_) {
-    runtime_->SetTextScaleFactor(text_scale_factor_);
+    runtime_->SetUserSettingsData(user_settings_data_);
     if (have_surface_)
       ScheduleFrame();
   }
-  // If the only members were "type" and "textScaleFactor", then we're done.
-  // If there are more members, then we need to send it on to other handlers.
-  return root.MemberCount() == 2;
 }
 
 void Engine::DispatchPointerDataPacket(const PointerDataPacket& packet) {
@@ -507,7 +485,7 @@ void Engine::ConfigureRuntime(const std::string& script_uri,
         default_isolate_snapshot_instr, platform_kernel);
     runtime_->SetViewportMetrics(viewport_metrics_);
     runtime_->SetLocale(language_code_, country_code_);
-    runtime_->SetTextScaleFactor(text_scale_factor_);
+    runtime_->SetUserSettingsData(user_settings_data_);
     runtime_->SetSemanticsEnabled(semantics_enabled_);
   }
 }

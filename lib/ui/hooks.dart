@@ -32,9 +32,19 @@ void _updateLocale(String languageCode, String countryCode) {
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
 }
 
+void _updateUserSettingsData(String json) {
+  final Map<String, dynamic> data = JSON.decode(json);
+  _updateTextScaleFactor(data['textScaleFactor'].toDouble());
+  _updateAlwaysUse24HourFormat(data['alwaysUse24HourFormat']);
+}
+
 void _updateTextScaleFactor(double textScaleFactor) {
   window._textScaleFactor = textScaleFactor;
   _invoke(window.onTextScaleFactorChanged, window._onTextScaleFactorChangedZone);
+}
+
+void _updateAlwaysUse24HourFormat(bool alwaysUse24HourFormat) {
+  window._alwaysUse24HourFormat = alwaysUse24HourFormat;
 }
 
 void _updateSemanticsEnabled(bool enabled) {
