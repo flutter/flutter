@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
@@ -34,7 +33,7 @@ void main() {
         ),
       ),
     );
-    
+
     expect(semantics, hasSemantics(
       new TestSemantics.root(
         children: <TestSemantics>[

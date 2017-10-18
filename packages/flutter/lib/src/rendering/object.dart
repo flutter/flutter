@@ -2119,6 +2119,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // Nothing to do by default.
   }
 
+  // Use [_semanticsConfiguration] to access.
   SemanticsConfiguration _cachedSemanticsConfiguration;
 
   SemanticsConfiguration get _semanticsConfiguration {
@@ -2248,7 +2249,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// Updates the semantic information of the render object.
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
-    final _SemanticsFragment fragment = _getSemanticsFragment(_semanticsClippingRect, _semantics?.parent?.isPartOfNodeMerging ?? false);
+    final _SemanticsFragment fragment = _getSemanticsForParent(
+      parentClippingRect: _semanticsClippingRect,
+      mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
+    );
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment;
     final SemanticsNode node = interestingFragment.compileChildren().single;
@@ -2256,19 +2260,33 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(interestingFragment.config == null && node == _semantics);
   }
 
+  /// Clip that needs to be applied to any [SemanticsNode] owned by this
+  /// [RenderObject].
+  ///
+  /// Can be null if no clip is to be applied.
+  ///
+  /// Updated by [_getSemanticsForParent].
   Rect _semanticsClippingRect;
 
-  /// Returns the Semantics that this node would like to add to its parent.
-  _SemanticsFragment _getSemanticsFragment(Rect parentClippingRect, bool mergeIntoParent) {
+  /// Returns the semantics that this node would like to add to its parent.
+  _SemanticsFragment _getSemanticsForParent({
+    @required Rect parentClippingRect,
+    @required bool mergeIntoParent,
+  }) {
+    assert(mergeIntoParent != null);
+
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
 
-    final _SemanticsGeometry geometry = new _SemanticsGeometry(this, parentClippingRect);
+    final _SemanticsGeometry geometry = new _SemanticsGeometry(
+      owner: this,
+      parentClippingRect: parentClippingRect,
+    );
     _semanticsClippingRect = geometry.clipRect;
 
     // Shortcut if this fragment cannot be exposed to user.
     if (_semanticsConfiguration.isSemanticBoundary && !mergeIntoParent && geometry.isInvisible)
-      return new _ContainerSemanticsFragment(dropSemanticsOfPreviousSiblings);
+      return new _ContainerSemanticsFragment(dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
@@ -2276,7 +2294,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     visitChildrenForSemantics((RenderObject renderChild) {
-      final _SemanticsFragment fragment = renderChild._getSemanticsFragment(_semanticsClippingRect, childrenMergeIntoParent);
+      final _SemanticsFragment fragment = renderChild._getSemanticsForParent(
+        parentClippingRect: _semanticsClippingRect,
+        mergeIntoParent: childrenMergeIntoParent,
+      );
       if (fragment.dropsSemanticsOfPreviousSiblings) {
         fragments.clear();
         toBeMarkedExplicit.clear();
@@ -2314,11 +2335,22 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     if (parent is! RenderObject) {
       assert(!config.hasBeenAnnotated);
       assert(!mergeIntoParent);
-      result = new _RootSemanticsFragment(this, dropSemanticsOfPreviousSiblings);
+      result = new _RootSemanticsFragment(
+        owner: this,
+        dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
     } else if (producesForkingFragment) {
-      result = new _ContainerSemanticsFragment(dropSemanticsOfPreviousSiblings);
+      result = new _ContainerSemanticsFragment(
+        dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
     } else {
-      result = new _SwitchableSemanticsFragment(this, mergeIntoParent, geometry, dropSemanticsOfPreviousSiblings, config);
+      result = new _SwitchableSemanticsFragment(
+        config: config,
+        geometry: geometry,
+        mergeIntoParent: mergeIntoParent,
+        owner: this,
+        dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
+      );
       if (config.isSemanticBoundary) {
         final _SwitchableSemanticsFragment fragment = result;
         fragment.markAsExplicit();
@@ -2344,15 +2376,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Assemble the [SemanticsNode] for this [RenderObject].
   ///
-  /// If [isSemanticBoundary] is true, this method is called with the semantics
-  /// [node] created for this [RenderObject] and its semantics [children].
-  /// By default, the method will annotate [node] with the [semanticsAnnotator]
-  /// and add the [children] to it.
+  /// If [isSemanticBoundary] is true, this method is called with the `node`
+  /// created for this [RenderObject], the `config` to be applied to that node
+  /// and the `children` [SemanticNode]s that decedents of this RenderObject
+  /// have generated.
+  ///
+  /// By default, the method will annotate `node` with `config` and add the
+  /// `children` to it.
   ///
   /// Subclasses can override this method to add additional [SemanticsNode]s
-  /// to the tree. If a subclass adds additional nodes in this method, it also
-  /// needs to override [resetSemantics] to call [SemanticsNode.reset] on those
-  /// additional [SemanticsNode]s.
+  /// to the tree.
   void assembleSemanticsNode(
       SemanticsNode node,
       SemanticsConfiguration config,
@@ -2918,7 +2951,8 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
 ///  * [_ContainerSemanticsFragment]: a container class to transport the semantic
 ///    information of multiple [_InterestingSemanticsFragment] to a parent.
 abstract class _SemanticsFragment {
-  _SemanticsFragment(this.dropsSemanticsOfPreviousSiblings);
+  _SemanticsFragment({@required this.dropsSemanticsOfPreviousSiblings })
+      : assert (dropsSemanticsOfPreviousSiblings != null);
 
   /// Incorporate the fragments of children into this fragment.
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
@@ -2943,7 +2977,8 @@ abstract class _SemanticsFragment {
 /// obtained via [interestingFragments].
 class _ContainerSemanticsFragment extends _SemanticsFragment {
 
-  _ContainerSemanticsFragment(bool dropsSemanticsOfPreviousSiblings) : super(dropsSemanticsOfPreviousSiblings);
+  _ContainerSemanticsFragment({ @required bool dropsSemanticsOfPreviousSiblings })
+      : super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
@@ -2961,7 +2996,16 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 /// should be added to the parent's [SemanticsNode] and what [config] should be
 /// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
-  _InterestingSemanticsFragment(this.geometry, bool dropsSemanticsOfPreviousSiblings) : super(dropsSemanticsOfPreviousSiblings);
+  _InterestingSemanticsFragment({
+    this.geometry,
+    @required this.owner,
+    @required bool dropsSemanticsOfPreviousSiblings
+  }) : assert(owner != null),
+       super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+
+  /// The [RenderObject] that owns this fragment (and any new [SemanticNode]
+  /// introduced by it).
+  final RenderObject owner;
 
   /// The children to be added to the parent.
   Iterable<SemanticsNode> compileChildren();
@@ -3000,6 +3044,8 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   }
 
   Set<SemanticsTag> _tagsForChildren;
+
+  /// Tag all children produced by [compileChildren] with `tags`.
   void addTags(Iterable<SemanticsTag> tags) {
     if (tags == null || tags.isEmpty)
       return;
@@ -3014,21 +3060,22 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
 /// The root node is available as only element in the Iterable returned by
 /// [children].
 class _RootSemanticsFragment extends _InterestingSemanticsFragment {
-  _RootSemanticsFragment(this._owner, bool dropsSemanticsOfPreviousSiblings) : super(null, dropsSemanticsOfPreviousSiblings);
-
-  final RenderObject _owner;
+  _RootSemanticsFragment({
+    @required RenderObject owner,
+    @required bool dropsSemanticsOfPreviousSiblings,
+  }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
     assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
-    _owner._semantics ??= new SemanticsNode.root(
-      showOnScreen: _owner.showOnScreen,
-      owner: _owner.owner.semanticsOwner,
+    owner._semantics ??= new SemanticsNode.root(
+      showOnScreen: owner.showOnScreen,
+      owner: owner.owner.semanticsOwner,
     );
-    final SemanticsNode node = _owner._semantics;
+    final SemanticsNode node = owner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
     assert(!node.wasAffectedByClip);
-    node.rect = _owner.semanticBounds;
+    node.rect = owner.semanticBounds;
     assert(!node.isInvisible);
     yield node;
   }
@@ -3053,12 +3100,12 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// A [_SwitchableSemanticsFragment] that can be told to only add explicit
+/// A [_InterstingSemanticsFragment] that can be told to only add explicit
 /// [SemanticsNode]s to the parent.
 ///
 /// If [markAsExplicit] was not called before this fragment is added to
-/// another fragment via [addAll] it will merge [config] into the parent's
-/// [SemanticsNode] and add its [children] to it.
+/// another fragment it will merge [config] into the parent's [SemanticsNode]
+/// and add its [children] to it.
 ///
 /// If [markAsExplicit] was called before adding this fragment to another
 /// fragment it will create a new [SemanticsNode]. The newly created node will
@@ -3072,33 +3119,41 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 /// no longer wants to merge any semantic information into the parent's
 /// [SemanticsNode].
 class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
-  _SwitchableSemanticsFragment(this._owner, this._mergeIntoParent, _SemanticsGeometry geometry, bool dropsSemanticsOfPreviousSiblings, this._config) : super(geometry, dropsSemanticsOfPreviousSiblings);
+  _SwitchableSemanticsFragment({
+    @required bool mergeIntoParent,
+    @required SemanticsConfiguration config,
+    @required _SemanticsGeometry geometry,
+    @required RenderObject owner,
+    @required bool dropsSemanticsOfPreviousSiblings,
+  }) : _mergeIntoParent = mergeIntoParent,
+       _config = config,
+       assert(mergeIntoParent != null),
+       assert(config != null),
+       super(geometry: geometry, owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
-  final RenderObject _owner;
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
   final List<SemanticsNode> _children = <SemanticsNode>[];
 
-
   @override
   Iterable<SemanticsNode> compileChildren() sync* {
     if (!_isExplicit) {
-      _owner._semantics = null;
+      owner._semantics = null;
       yield* _children;
       return;
     }
     if (!_mergeIntoParent && geometry.rect.isEmpty)
       return;  // Drop the node, it's not going to be visible.
-    _owner._semantics ??= new SemanticsNode(showOnScreen: _owner.showOnScreen);
-    final SemanticsNode node = _owner._semantics
+    owner._semantics ??= new SemanticsNode(showOnScreen: owner.showOnScreen);
+    final SemanticsNode node = owner._semantics
       ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
 
     geometry.updateNode(node);
 
     if (_config.isSemanticBoundary) {
-      _owner.assembleSemanticsNode(node, _config, _children);
+      owner.assembleSemanticsNode(node, _config, _children);
     } else {
       node.updateWith(config: _config, childrenInInversePaintOrder: _children);
     }
@@ -3133,14 +3188,27 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
+/// Helper class that keeps track of the geometry of a [SemanticsNode].
+///
+/// It is used to annotate a [SemanticsNode] with the current information for
+/// [SemanticsNode.rect] and [SemanticsNode.transform].
 class _SemanticsGeometry {
-  _SemanticsGeometry(RenderObject owner, this._parentClippingRect) : assert(owner != null), _ancestorChain = <RenderObject>[owner];
+
+  /// `parentClippingRect` may be null if no clip is to be applied.
+  _SemanticsGeometry({
+    @required RenderObject owner,
+    @required Rect parentClippingRect
+  }) : assert(owner != null),
+       _ancestorChain = <RenderObject>[owner],
+       _parentClippingRect = parentClippingRect;
 
   final Rect _parentClippingRect;
   final List<RenderObject> _ancestorChain;
 
   RenderObject get _owner => _ancestorChain.first;
 
+  /// The current clip [Rect] that would be applied to the [SemanticsNode]
+  /// owned by [owner].
   Rect get clipRect {
     if (!_isClipRectValid) {
       __clipRect = _computeClipRect();
@@ -3176,6 +3244,9 @@ class _SemanticsGeometry {
     return MatrixUtils.inverseTransformRect(clipTransform, clip);
   }
 
+  /// The value for [SemanticsNode.rect].
+  ///
+  /// This is essentially [RenderObject.semanticsBound] with [clipRect] applied.
   Rect get rect {
     if (__rect == null)
       __rect = _computeRect();
@@ -3183,7 +3254,11 @@ class _SemanticsGeometry {
   }
   Rect __rect;
 
-  Rect _computeRect() => clipRect == null ? _owner.semanticBounds : clipRect.intersect(_owner.semanticBounds);
+  Rect _computeRect() {
+    if (clipRect == null)
+      return _owner.semanticBounds;
+    return clipRect.intersect(_owner.semanticBounds);
+  }
 
   Matrix4 _computeTransformation() {
     assert(_ancestorChain.length > 1);
@@ -3197,6 +3272,10 @@ class _SemanticsGeometry {
     return transform;
   }
 
+  /// Annotates `node` with the latest geometry information.
+  ///
+  /// It sets [SemanticsNode.rect], [SemanticsNode.transform], and
+  /// [SemanticsNode.wasAffectedByClip] to the current values.
   void updateNode(SemanticsNode node) {
     if (_ancestorChain.length > 1)
       node.transform = _computeTransformation();
@@ -3204,10 +3283,19 @@ class _SemanticsGeometry {
     node.wasAffectedByClip = rect != _owner.semanticBounds;
   }
 
+  /// Adds the geometric information of `ancestor` to this object.
+  ///
+  /// Those information are required to properly compute the value for
+  /// [SemanticsNode.transform].
+  ///
+  /// Ancestors have to be added in order from [owner] up until the next
+  /// [RenderObject] that owns a [SemanticsNode] is reached.
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
   }
 
+  /// Whether a [SemanticsNode] annotated with the geometric information tracked
+  /// by this object would be visible on screen.
   bool get isInvisible {
     return clipRect != null && clipRect.isEmpty || rect.isEmpty;
   }
