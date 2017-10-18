@@ -270,14 +270,17 @@ void main() {
     // rendering widths in tests.
     // TODO(#12357): Figure out why this is, and fix it (if needed) once Blink
     // text rendering is replaced.
+    // anyOf for heights is needed because libtxt and Blink calculate selection
+    // rectangles differently.
+    // TODO: remove this when Blink is replaced.
     expect(boxes[0].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[0].toRect().height, 13.0);
+    expect(boxes[0].toRect().height, anyOf(13.0, 26.0));
     expect(boxes[1].toRect().width, anyOf(27.0, 26.0));
     expect(boxes[1].toRect().height, 26.0);
     expect(boxes[2].toRect().width, anyOf(27.0, 26.0));
     expect(boxes[2].toRect().height, 26.0);
     expect(boxes[3].toRect().width, anyOf(14.0, 13.0));
-    expect(boxes[3].toRect().height, 13.0);
+    expect(boxes[3].toRect().height, anyOf(13.0, 26.0));
   });
 
   test('toStringDeep', () {
