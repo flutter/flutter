@@ -31,7 +31,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     private static final String TAG = "FlutterView";
 
     private Map<Integer, SemanticsObject> mObjects;
-    private FlutterView mOwner;
+    private final FlutterView mOwner;
     private boolean mAccessibilityEnabled = false;
     private SemanticsObject mFocusedObject;
     private SemanticsObject mHoveredObject;
