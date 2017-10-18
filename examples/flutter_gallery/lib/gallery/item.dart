@@ -286,6 +286,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
     ),
     new GalleryItem(
+      title: 'Navigation',
+      subtitle: 'Cupertino styled navigation patterns',
+      category: 'Cupertino Components',
+      routeName: CupertinoDialogDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
+    ),
+    new GalleryItem(
       title: 'Sliders',
       subtitle: 'Cupertino styled sliders',
       category: 'Cupertino Components',

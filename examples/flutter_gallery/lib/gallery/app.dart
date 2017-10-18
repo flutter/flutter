@@ -138,8 +138,8 @@ class GalleryAppState extends State<GalleryApp> {
       );
     }
 
-    final Map<String, WidgetBuilder> _kRoutes = new Map<String,
-      WidgetBuilder>.fromIterable(
+    final Map<String, WidgetBuilder> _kRoutes =
+        new Map<String, WidgetBuilder>.fromIterable(
       // For a different example of how to set up an application routing table
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html

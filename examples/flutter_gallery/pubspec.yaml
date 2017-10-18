@@ -6,6 +6,7 @@ dependencies:
   intl: 0.15.2
   string_scanner: 1.0.2
   url_launcher: 0.4.2+5
+  cupertino_icons: ^0.1.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
