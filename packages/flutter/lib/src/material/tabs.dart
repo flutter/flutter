@@ -34,23 +34,35 @@ const double _kMaxTabWidth = 264.0;
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.google.com/components/tabs.html>
 class Tab extends StatelessWidget {
-  /// Creates a material design [TabBar] tab. At least one of [text] and [icon]
-  /// must be non-null.
+  /// Creates a material design [TabBar] tab. At least one of [text], [icon],
+  /// and [child] must be non-null. The [text] and [child] arguments must not be
+  /// used at the same time.
   const Tab({
     Key key,
     this.text,
     this.icon,
-  }) : assert(text != null || icon != null),
+    this.child,
+  }) : assert(text != null || child != null || icon != null),
+       assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/31140
        super(key: key);
 
   /// The text to display as the tab's label.
+  ///
+  /// Must not be used in combination with [child].
   final String text;
+
+  /// The widget to be used as the tab's label.
+  ///
+  /// Usually a [Text] widget, possibly wrapped in a [Semantics] widget.
+  ///
+  /// Must not be used in combination with [text].
+  final Widget child;
 
   /// An icon to display as the tab's label.
   final Widget icon;
 
   Widget _buildLabelText() {
-    return new Text(text, softWrap: false, overflow: TextOverflow.fade);
+    return child ?? new Text(text, softWrap: false, overflow: TextOverflow.fade);
   }
 
   @override
