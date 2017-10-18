@@ -35,7 +35,7 @@ const double _kMaxTabWidth = 264.0;
 ///  * <https://material.google.com/components/tabs.html>
 class Tab extends StatelessWidget {
   /// Creates a material design [TabBar] tab. At least one of [text], [icon],
-  /// and [child] must be non-null. [text] and [child] cannot ne used at the
+  /// and [child] must be non-null. [text] and [child] cannot be used at the
   /// same time.
   const Tab({
     Key key,

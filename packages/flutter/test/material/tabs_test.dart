@@ -1219,7 +1219,7 @@ void main() {
     expect(controller.index, 1);
   });
 
-  testWidgets('can override tabs semantics', (WidgetTester tester) async {
+  testWidgets('can override semantics of tabs', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     final List<Tab> tabs = new List<Tab>.generate(2, (int index) {
