@@ -179,6 +179,73 @@ void main() {
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 
+  testWidgets('Navigator.of rootNavigator finds root Navigator', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: new Material(
+        child: new Column(
+          children: <Widget>[
+            const SizedBox(
+              height: 300.0,
+              child: const Text('Root page'),
+            ),
+            new SizedBox(
+              height: 300.0,
+              child: new Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  if (settings.isInitialRoute) {
+                    return new MaterialPageRoute<Null>(
+                      builder: (BuildContext context) {
+                        return new RaisedButton(
+                          child: const Text('Next'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              new MaterialPageRoute<Null>(
+                                builder: (BuildContext context) {
+                                  return new RaisedButton(
+                                    child: const Text('Inner page'),
+                                    onPressed: () {
+                                      Navigator.of(context, rootNavigator: true).push(
+                                        new MaterialPageRoute<Null>(
+                                          builder: (BuildContext context) {
+                                            return const Text('Dialog');
+                                          }
+                                        ),
+                                      );
+                                    },
+                                  );
+                                }
+                              ),
+                            );
+                          },
+                        );
+                      },
+                    );
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    await tester.tap(find.text('Next'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Both elements are on screen.
+    expect(tester.getTopLeft(find.text('Root page')).dy, 0.0);
+    expect(tester.getTopLeft(find.text('Inner page')).dy, greaterThan(300.0));
+
+    await tester.tap(find.text('Inner page'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+
+    // Dialog is pushed to the whole page and is at the top of the screen, not
+    // inside the inner page.
+    expect(tester.getTopLeft(find.text('Dialog')).dy, 0.0);
+  });
+
   testWidgets('Gestures between push and build are ignored', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
