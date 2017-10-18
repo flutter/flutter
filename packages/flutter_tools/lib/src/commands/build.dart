@@ -6,24 +6,23 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
-import '../build_info.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 import 'build_aot.dart';
 import 'build_apk.dart';
 import 'build_flx.dart';
 import 'build_ios.dart';
+import 'clean.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp: false}) {
     addSubcommand(new BuildApkCommand());
     addSubcommand(new BuildAotCommand());
-    addSubcommand(new BuildCleanCommand());
     addSubcommand(new BuildIOSCommand());
     addSubcommand(new BuildFlxCommand(verboseHelp: verboseHelp));
+    addSubcommand(new CleanCommand());  // here for backwards compatibility.
   }
 
   @override
@@ -58,33 +57,6 @@ abstract class BuildSubCommand extends FlutterCommand {
         printStatus(pubspecLock.readAsStringSync());
       else
         printError('File not found: ${pubspecLock.absolute.path}');
-    }
-  }
-}
-
-class BuildCleanCommand extends FlutterCommand {
-  BuildCleanCommand() {
-    requiresPubspecYaml();
-  }
-
-  @override
-  final String name = 'clean';
-
-  @override
-  final String description = 'Delete the build/ directory.';
-
-  @override
-  Future<Null> runCommand() async {
-    final Directory buildDir = fs.directory(getBuildDirectory());
-    printStatus("Deleting '${buildDir.path}${fs.path.separator}'.");
-
-    if (!buildDir.existsSync())
-      return;
-
-    try {
-      buildDir.deleteSync(recursive: true);
-    } catch (error) {
-      throwToolExit(error.toString());
     }
   }
 }

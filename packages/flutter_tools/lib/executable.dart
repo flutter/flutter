@@ -24,6 +24,7 @@ import 'src/cache.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/build.dart';
 import 'src/commands/channel.dart';
+import 'src/commands/clean.dart';
 import 'src/commands/config.dart';
 import 'src/commands/create.dart';
 import 'src/commands/daemon.dart';
@@ -68,6 +69,7 @@ Future<Null> main(List<String> args) async {
     new AnalyzeCommand(verboseHelp: verboseHelp),
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(),
+    new CleanCommand(),
     new ConfigCommand(verboseHelp: verboseHelp),
     new CreateCommand(),
     new DaemonCommand(hidden: !verboseHelp),
