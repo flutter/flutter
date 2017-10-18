@@ -374,6 +374,8 @@ class InputDecorator extends StatelessWidget {
   static const double _kBottomBorderHeight = 1.0;
   static const double _kDensePadding = 4.0;
   static const double _kNormalPadding = 8.0;
+  static const double _kDenseTopPadding = 8.0;
+  static const double _kNormalTopPadding = 16.0;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -451,7 +453,7 @@ class InputDecorator extends StatelessWidget {
     final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
     final double subTextHeight = subtextStyle.fontSize * textScaleFactor;
 
-    double topPadding = isCollapsed ? 0.0 : 2.0 * (isDense ?  _kDensePadding : _kNormalPadding);
+    double topPadding = isCollapsed ? 0.0 : (isDense ?  _kDenseTopPadding : _kNormalTopPadding);
 
     final List<Widget> stackChildren = <Widget>[];
 
@@ -461,7 +463,7 @@ class InputDecorator extends StatelessWidget {
       final TextStyle labelStyle = hasInlineLabel ? hintStyle : floatingLabelStyle;
       final double labelTextHeight = floatingLabelStyle.fontSize * textScaleFactor;
 
-      final double topPaddingIncrement = labelTextHeight + (isDense ? _kDensePadding : _kNormalPadding) - 4.0;
+      final double topPaddingIncrement = labelTextHeight + (isDense ? _kDensePadding : _kNormalPadding);
       stackChildren.add(
         new AnimatedPositionedDirectional(
           start: 0.0,
@@ -548,7 +550,7 @@ class InputDecorator extends StatelessWidget {
 
     if (errorText != null || helperText != null) {
       assert(!isCollapsed);
-      final double linePadding = _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding) - 4.0;
+      final double linePadding = _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding);
       columnChildren.add(
         new AnimatedContainer(
           padding: new EdgeInsets.only(top: linePadding),
