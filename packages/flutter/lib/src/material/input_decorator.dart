@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -54,6 +56,8 @@ class InputDecoration {
     this.prefixStyle,
     this.suffixText,
     this.suffixStyle,
+    this.counterText,
+    this.counterStyle,
   }) : isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
@@ -78,7 +82,9 @@ class InputDecoration {
        prefixText = null,
        prefixStyle = null,
        suffixText = null,
-       suffixStyle = null;
+       suffixStyle = null,
+       counterText = null,
+       counterStyle = null;
 
   /// An icon to show before the input field.
   ///
@@ -189,6 +195,17 @@ class InputDecoration {
   /// If null, defaults to the [hintStyle].
   final TextStyle suffixStyle;
 
+  /// Optional text to place below the line as a character count.
+  ///
+  /// Uses the [counterStyle]. Uses [helperStyle] if [counterStyle] isn't
+  /// specified. Suffix is not returned as part of the input.
+  final String counterText;
+
+  /// The style to use for the [counterText].
+  ///
+  /// If null, defaults to the [helperStyle].
+  final TextStyle counterStyle;
+
   /// Creates a copy of this input decoration but with the given fields replaced
   /// with the new values.
   ///
@@ -209,6 +226,8 @@ class InputDecoration {
     TextStyle prefixStyle,
     String suffixText,
     TextStyle suffixStyle,
+    String counterText,
+    TextStyle counterStyle,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -226,6 +245,8 @@ class InputDecoration {
       prefixStyle: prefixStyle ?? this.prefixStyle,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
+      counterText: counterText ?? this.counterText,
+      counterStyle: counterStyle ?? this.counterStyle,
     );
   }
 
@@ -251,7 +272,9 @@ class InputDecoration {
         && typedOther.prefixText == prefixText
         && typedOther.prefixStyle == prefixStyle
         && typedOther.suffixText == suffixText
-        && typedOther.suffixStyle == suffixStyle;
+        && typedOther.suffixStyle == suffixStyle
+        && typedOther.counterText == counterText
+        && typedOther.counterStyle == counterStyle;
   }
 
   @override
@@ -273,6 +296,8 @@ class InputDecoration {
       prefixStyle,
       suffixText,
       suffixStyle,
+      counterText,
+      counterStyle,
     );
   }
 
@@ -303,6 +328,10 @@ class InputDecoration {
       description.add('suffixText: $suffixText');
     if (suffixStyle != null)
       description.add('suffixStyle: $suffixStyle');
+    if (counterText != null)
+      description.add('counterText: $counterText');
+    if (counterStyle != null)
+      description.add('counterStyle: $counterStyle');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -398,7 +427,7 @@ class InputDecorator extends StatelessWidget {
     return themeData.hintColor;
   }
 
-  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild, double subTextHeight) {
+  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild) {
     if (decoration.hideDivider) {
       return new Container(
         padding: new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding),
@@ -434,6 +463,7 @@ class InputDecorator extends StatelessWidget {
 
     final String labelText = decoration.labelText;
     final String helperText = decoration.helperText;
+    final String counterText = decoration.counterText;
     final String hintText = decoration.hintText;
     final String errorText = decoration.errorText;
 
@@ -446,12 +476,14 @@ class InputDecorator extends StatelessWidget {
 
     final TextStyle baseStyle = this.baseStyle ?? themeData.textTheme.subhead;
     final TextStyle hintStyle = decoration.hintStyle ?? baseStyle.copyWith(color: themeData.hintColor);
+    final TextStyle helperStyle =
+      decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
     final TextStyle subtextStyle = errorText != null
       ? decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor)
-      : decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
+      : helperStyle;
+    final TextStyle counterStyle = decoration.counterStyle ?? helperStyle;
 
     final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
-    final double subTextHeight = subtextStyle.fontSize * textScaleFactor;
 
     double topPadding = isCollapsed ? 0.0 : (isDense ?  _kDenseTopPadding : _kNormalTopPadding);
 
@@ -545,15 +577,18 @@ class InputDecorator extends StatelessWidget {
       columnChildren.add(inputChild);
     } else {
       final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      columnChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild, subTextHeight));
+      columnChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
     }
 
-    if (errorText != null || helperText != null) {
-      assert(!isCollapsed);
-      final double linePadding = _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding);
-      columnChildren.add(
-        new AnimatedContainer(
-          padding: new EdgeInsets.only(top: linePadding),
+    if (errorText != null || helperText != null || counterText != null) {
+      assert(!isCollapsed);  // Collapsed fields can't have any of these set.
+      final EdgeInsets topPadding = new EdgeInsets.only(
+        top: _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding)
+      );
+
+      Widget buildSubText() {
+        return new AnimatedContainer(
+          padding: topPadding,
           duration: _kTransitionDuration,
           curve: _kTransitionCurve,
           child: new Text(
@@ -562,8 +597,39 @@ class InputDecorator extends StatelessWidget {
             textAlign: textAlign,
             overflow: TextOverflow.ellipsis,
           ),
-        ),
-      );
+        );
+      }
+
+      Widget buildCounter() {
+        return new AnimatedContainer(
+          padding: topPadding,
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          child: new Text(
+            counterText,
+            style: counterStyle,
+            textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      }
+
+      final bool needSubTextField = errorText != null || helperText != null;
+      final bool needCounterField = counterText != null;
+      if (needCounterField && needSubTextField) {
+        columnChildren.add(
+          new Row(
+            children: <Widget>[
+              new Expanded(child: buildSubText()),
+              buildCounter(),
+            ],
+          ),
+        );
+      } else if (needSubTextField) {
+        columnChildren.add(buildSubText());
+      } else if (needCounterField) {
+        columnChildren.add(buildCounter());
+      }
     }
 
     stackChildren.add(

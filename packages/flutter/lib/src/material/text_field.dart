@@ -85,6 +85,7 @@ class TextField extends StatefulWidget {
     this.obscureText: false,
     this.autocorrect: true,
     this.maxLines: 1,
+    this.maxCharacters,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
@@ -94,6 +95,7 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
+       assert(maxCharacters == null || maxCharacters > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
        super(key: key);
 
@@ -168,6 +170,17 @@ class TextField extends StatefulWidget {
   /// null, the value must be greater than zero.
   final int maxLines;
 
+  /// The maximum number of characters to allow in the text field.
+  ///
+  /// If set, this will display a character counter below the field, showing
+  /// how many characters have been entered, and how many are allowed, and
+  /// will prevent any characters above the limit from being entered. It does
+  /// this with a [TextInputFormatter], which is executed before any of the
+  /// supplied [inputFormatters].
+  ///
+  /// This value must be either null or greater than zero.
+  final int maxCharacters;
+
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
 
@@ -195,6 +208,7 @@ class TextField extends StatefulWidget {
     description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
     description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    description.add(new IntProperty('maxCharacters', maxCharacters, defaultValue: null));
   }
 }
 
@@ -206,6 +220,14 @@ class _TextFieldState extends State<TextField> {
 
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
+
+  bool get needsCounter => widget.maxCharacters != null
+    && widget.decoration != null
+    && widget.decoration.counterText == null;
+
+  InputDecoration get _effectiveDecoration => needsCounter
+    ?  widget.decoration.copyWith(counterText: '${_effectiveController.value.text.length} / ${widget.maxCharacters}')
+    : widget.decoration;
 
   @override
   void initState() {
@@ -238,12 +260,20 @@ class _TextFieldState extends State<TextField> {
       Feedback.forLongPress(context);
   }
 
+  void _handleOnChanged(String value) {
+    if (widget.onChanged != null)
+      widget.onChanged(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
+    final List<TextInputFormatter> formatters =
+      <TextInputFormatter>[new LimitedLengthTextInputFormatter(widget.maxCharacters)]
+        ..addAll(widget.inputFormatters ?? const Iterable<TextInputFormatter>.empty());
 
     Widget child = new RepaintBoundary(
       child: new EditableText(
@@ -262,10 +292,10 @@ class _TextFieldState extends State<TextField> {
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls,
-        onChanged: widget.onChanged,
+        onChanged: _handleOnChanged,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
-        inputFormatters: widget.inputFormatters,
+        inputFormatters: formatters,
       ),
     );
 
@@ -274,7 +304,7 @@ class _TextFieldState extends State<TextField> {
         animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
-            decoration: widget.decoration,
+            decoration: _effectiveDecoration,
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,

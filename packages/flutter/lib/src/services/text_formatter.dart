@@ -120,6 +120,29 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
       = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
 }
 
+/// A [TextInputFormatter] that prevents the insertion of more characters than allowed.
+///
+/// Since this formatter only prevents new characters from being added to the text,
+/// it preserves the existing [TextEditingValue.selection].
+class LimitedLengthTextInputFormatter extends TextInputFormatter {
+  /// Creates a formatter that prevents the insertion of more characters than an allowed limit.
+  ///
+  /// The [allowedMaxCharacters] must be null or greater than zero.  If it is null, then
+  /// no limit is enforced.
+  LimitedLengthTextInputFormatter(this.allowedMaxCharacters)
+    : assert(allowedMaxCharacters == null || allowedMaxCharacters > 0);
+
+  /// A [Pattern] to match and replace incoming [TextEditingValue]s.
+  final int allowedMaxCharacters;
+
+  @override
+  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
+    if (allowedMaxCharacters != null && newValue.text.length > allowedMaxCharacters)
+      return oldValue;
+    return newValue;
+  }
+}
+
 /// A [TextInputFormatter] that allows only the insertion of whitelisted
 /// characters patterns.
 ///
