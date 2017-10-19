@@ -465,9 +465,21 @@ class DevFS {
       // Incremental run with no changes is supposed to be fast (considering
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
-      for (DevFSContent content in dirtyEntries.values)
-        if (content is DevFSFileContent)
-          invalidatedFiles.add(content.file.uri.toString());
+      final Set<Uri> filesUris = new Set<Uri>();
+      for (Uri uri in dirtyEntries.keys) {
+        if (!uri.path.startsWith(assetBuildDirPrefix)) {
+          final DevFSContent content = dirtyEntries[uri];
+          if (content is DevFSFileContent) {
+            filesUris.add(uri);
+            invalidatedFiles.add(content.file.uri.toString());
+            numBytes -= content.size;
+          }
+        }
+      }
+      // No need to send source files because all compilation is done on the
+      // host and result of compilation is single kernel file.
+      for (Uri fileUri in filesUris)
+        dirtyEntries.remove(fileUri);
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
       final String compiledBinary = fullRestart
         ? await compile(
