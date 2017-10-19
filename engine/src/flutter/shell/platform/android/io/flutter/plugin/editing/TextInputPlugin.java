@@ -98,8 +98,11 @@ public class TextInputPlugin implements MethodCallHandler {
             // Note: both required. Some devices ignore TYPE_TEXT_FLAG_NO_SUGGESTIONS.
             textType |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
             textType |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
-        } else if (autocorrect) {
+        } else {
+          if (autocorrect)
             textType |= InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+          if (inputType.equals("TextInputType.text") || inputType.equals("TextInputType.multiline"))
+            textType |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
         }
         return textType;
     }

@@ -34,6 +34,8 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inputType) {
   if ([inputType isEqualToString:@"TextInputType.text"])
     return UITextAutocapitalizationTypeSentences;
+  if ([inputType isEqualToString:@"TextInputType.multiline"])
+    return UITextAutocapitalizationTypeSentences;
   return UITextAutocapitalizationTypeNone;
 }
 
