@@ -68,6 +68,9 @@ class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliz
   const _WidgetsLocalizationsDelegate();
 
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   Future<WidgetsLocalizations> load(Locale locale) => GlobalWidgetsLocalizations.load(locale);
 
   @override
