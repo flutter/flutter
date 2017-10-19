@@ -68,7 +68,6 @@ class _TimePickerFragmentContext {
     @required this.inactiveStyle,
     @required this.onTimeChange,
     @required this.onModeChange,
-    @required this.alwaysUse24HourFormat,
   }) : assert(headerTextTheme != null),
        assert(textDirection != null),
        assert(selectedTime != null),
@@ -78,8 +77,7 @@ class _TimePickerFragmentContext {
        assert(inactiveColor != null),
        assert(inactiveStyle != null),
        assert(onTimeChange != null),
-       assert(onModeChange != null),
-       assert(alwaysUse24HourFormat != null);
+       assert(onModeChange != null);
 
   final TextTheme headerTextTheme;
   final TextDirection textDirection;
@@ -91,7 +89,6 @@ class _TimePickerFragmentContext {
   final TextStyle inactiveStyle;
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
-  final bool alwaysUse24HourFormat;
 }
 
 /// Contains the [widget] and layout properties of an atom of time information,
@@ -292,7 +289,7 @@ class _MinuteControl extends StatelessWidget {
 /// [timeOfDayFormat] passing [context] to each widget in the
 /// configuration.
 ///
-/// The arguments must not be null.
+/// The [timeOfDayFormat] and [context] arguments must not be null.
 _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _TimePickerFragmentContext context) {
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour() {
@@ -577,7 +574,6 @@ class _TimePickerHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
-    final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
 
     EdgeInsets padding;
@@ -632,7 +628,6 @@ class _TimePickerHeader extends StatelessWidget {
       inactiveStyle: baseHeaderStyle.copyWith(color: inactiveColor),
       onTimeChange: onChanged,
       onModeChange: _handleChangeMode,
-      alwaysUse24HourFormat: media.alwaysUse24HourFormat,
     );
 
     final _TimePickerHeaderFormat format = _buildHeaderFormat(timeOfDayFormat, fragmentContext);

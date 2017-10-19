@@ -81,8 +81,6 @@ class MediaQueryData {
 
   /// Whether to use 24-hour format when formatting time.
   ///
-  /// ## Advice for widget implementors
-  ///
   /// The behavior of this flag is different across platforms:
   ///
   /// - On Android this flag is reported directly from the user settings called
@@ -90,7 +88,8 @@ class MediaQueryData {
   ///   whether it is the system-wide locale, or the custom locale set by the
   ///   application.
   /// - On iOS this flag is set to `true` when the user setting called "24-Hour
-  ///   Time" is set or the system-wide locale's default.
+  ///   Time" is set or the system-wide locale's default uses 24-hour
+  ///   formatting.
   final bool alwaysUse24HourFormat;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
