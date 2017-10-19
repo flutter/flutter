@@ -643,12 +643,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   void sendEvent(SemanticsEvent event) {
     if (!attached)
       return;
-    final Map<String, dynamic> annotatedEvent = <String, dynamic>{
-      'nodeId': id,
-      'type': event.type,
-      'data': event.toMap(),
-    };
-    SystemChannels.accessibility.send(annotatedEvent);
+    SystemChannels.accessibility.send(event.toMap(nodeId: id));
   }
 
   @override
