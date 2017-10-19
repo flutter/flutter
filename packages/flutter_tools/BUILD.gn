@@ -11,8 +11,8 @@ dart_package("flutter_tools") {
   disable_analysis = true
 
   deps = [
-    "//dart/pkg/analyzer",
-    "//dart/third_party/pkg/linter",
+    "//third_party/dart/pkg/analyzer",
+    "//third_party/dart/third_party/pkg/linter",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/collection",
