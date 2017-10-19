@@ -53,7 +53,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///
 /// The [leading] widget will automatically be a back chevron icon button (or a
 /// close button in case of a fullscreen dialog) to pop the current route if none
-/// is provided.
+/// is provided and [automaticallyImplyLeading] is true (true by default).
 ///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
@@ -73,11 +73,11 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
     Key key,
     this.leading,
     this.automaticallyImplyLeading: true,
-    @required this.middle,
+    this.middle,
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
-  }) : assert(middle != null, 'There must be a middle widget, usually a title.'),
+  }) : assert(automaticallyImplyLeading != null),
        super(key: key);
 
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -86,8 +86,10 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
 
   /// Controls whether we should try to imply the leading widget if null.
   ///
-  /// If true and [leading] is null, automatically try to deduce what the leading
-  /// widget should be. If leading widget is not null, this parameter has no effect.
+  /// If true and [leading] is null, automatically try to deduce what the [leading]
+  /// widget should be. If [leading] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
   final bool automaticallyImplyLeading;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
@@ -153,6 +155,13 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
 /// For advanced uses, an optional [middle] widget can be supplied to show a
 /// different widget in the middle of the navigation bar when the sliver is collapsed.
 ///
+/// Like [CupertinoNavigationBar], it also supports a [leading] and [trailing]
+/// widget on the static section on top that remains while scrolling.
+///
+/// The [leading] widget will automatically be a back chevron icon button (or a
+/// close button in case of a fullscreen dialog) to pop the current route if none
+/// is provided and [automaticallyImplyLeading] is true (true by default).
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -171,6 +180,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
+       assert(automaticallyImplyLeading != null),
        super(key: key);
 
   /// The navigation bar's title.
@@ -197,8 +207,10 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
 
   /// Controls whether we should try to imply the leading widget if null.
   ///
-  /// If true and [leading] is null, automatically try to deduce what the leading
-  /// widget should be. If leading widget is not null, this parameter has no effect.
+  /// If true and [leading] is null, automatically try to deduce what the [leading]
+  /// widget should be. If [leading] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
   final bool automaticallyImplyLeading;
 
   /// A widget to place in the middle of the static navigation bar instead of
@@ -286,7 +298,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
     Key key,
     this.leading,
     this.automaticallyImplyLeading,
-    @required this.middle,
+    this.middle,
     this.trailing,
     this.actionsForegroundColor,
     this.middleVisible,
