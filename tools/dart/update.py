@@ -28,7 +28,7 @@ WINDOWS_64_SDK = 'dartsdk-windows-x64-release.zip'
 # Path constants. (All of these should be absolute paths.)
 THIS_DIR = os.path.abspath(os.path.dirname(__file__))
 FLUTTER_DIR = os.path.abspath(os.path.join(THIS_DIR, '..', '..'))
-DART_SDKS_DIR = os.path.join(FLUTTER_DIR, 'dart/tools/sdks')
+DART_SDKS_DIR = os.path.join(FLUTTER_DIR, 'third_party/dart/tools/sdks')
 PATCH_FILE = os.path.join(FLUTTER_DIR, 'tools', 'dart', 'patch_sdk.diff')
 
 def IsStampFileUpToDate(stamp_file, sdk_url):
