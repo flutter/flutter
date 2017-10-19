@@ -12,7 +12,7 @@ flutter_app("flutter_gallery") {
   disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "../../packages/flutter",
     "//third_party/dart-pkg/pub/url_launcher",
   ]
 
