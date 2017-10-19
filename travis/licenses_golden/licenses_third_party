@@ -1,4 +1,4 @@
-Signature: c01c1c2e7dfa166b953d3514ffca6ac3
+Signature: 9ba54648728ca2142ba5624d02a05621
 
 UNUSED LICENSES:
 
@@ -4057,6 +4057,7 @@ FILE: ../../../third_party/dart/runtime/observatory/web/main.dart
 FILE: ../../../third_party/dart/runtime/platform/address_sanitizer.h
 FILE: ../../../third_party/dart/runtime/platform/math.h
 FILE: ../../../third_party/dart/runtime/platform/memory_sanitizer.h
+FILE: ../../../third_party/dart/runtime/platform/safe_stack.h
 FILE: ../../../third_party/dart/runtime/tools/verbose_gc_to_bmu.dart
 FILE: ../../../third_party/dart/runtime/vm/ast_transformer.cc
 FILE: ../../../third_party/dart/runtime/vm/ast_transformer.h
