@@ -401,7 +401,6 @@ void main() {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
-        expect(style.package, null);
         expect(style.fontSize, isNotNull);
         expect(style.fontWeight, isNotNull);
         expect(style.fontStyle, null);

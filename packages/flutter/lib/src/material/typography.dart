@@ -134,6 +134,11 @@ class TextTheme {
   /// Creates a new [TextTheme] where each text style from this object has been
   /// merged with the matching text style from the `other` object.
   ///
+  /// The merging is done by calling [TextStyle.merge] on each respective pair
+  /// of text styles from this and the [other] text themes and is subject to
+  /// the value of [TextStyle.inherit] flag. For more details, see the
+  /// documentation on [TextStyle.merge] and [TextStyle.inherit].
+  ///
   /// This is particularly useful if one [TextTheme] defines one set of
   /// properties and another defines a different set, e.g. having colors defined
   /// in one text theme and font sizes in another.

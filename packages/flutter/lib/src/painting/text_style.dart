@@ -403,13 +403,25 @@ class TextStyle extends Diagnosticable {
     );
   }
 
-  /// Returns a new text style that matches this text style but with some values
-  /// replaced by the non-null parameters of the given text style. If the given
-  /// text style is null, simply returns this text style.
+  /// Returns a new text style that is a combination of this style and the given
+  /// [other] style, following the following rules.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to true,
+  /// its null properties are replaced with the non-null properties of this text
+  /// style. It is said that the [other] style inherits properties of this
+  /// style. Another way to think of it is that the "missing" properties of the
+  /// [other] style are filled by the properties of this style.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to false,
+  /// simply returns the given [other] style unchanged. It is said that the
+  /// [other] style does not inherit properties of this style.
+  ///
+  /// If the given text style is null, simply returns this text style.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
-    assert(other.inherit);
+    if (!other.inherit)
+      return other;
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
