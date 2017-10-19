@@ -29,7 +29,7 @@ class _TimePickerLauncher extends StatelessWidget {
                 onPressed: () async {
                   onChanged(await showTimePicker(
                     context: context,
-                    initialTime: const TimeOfDay(hour: 7, minute: 0)
+                    initialTime: const TimeOfDay(hour: 7, minute: 0),
                   ));
                 }
               );
@@ -50,8 +50,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
-  final Element timePickerElement = tester.element(find.byElementPredicate((Element element) => element.widget.runtimeType.toString() == '_TimePickerDialog'));
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(timePickerElement);
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TimePickerDialog)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -204,5 +203,55 @@ void main() {
       await finishPicker(tester);
       expect(feedback.hapticCount, 3);
     });
+  });
+
+  const List<String> labels12To11 = const <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+
+  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const MediaQuery(
+        data: const MediaQueryData(alwaysUse24HourFormat: false),
+        child: const TimePickerDialog(initialTime: const TimeOfDay(hour: 7, minute: 0)),
+      ),
+    ));
+
+    final CustomPaint dialPaint = tester.widget(find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      matching: find.byType(CustomPaint),
+    ));
+    final dynamic dialPainter = dialPaint.painter;
+    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    expect(dialPainter.primaryInnerLabels, null);
+
+    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    expect(dialPainter.secondaryInnerLabels, null);
+  });
+
+  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const MediaQuery(
+        data: const MediaQueryData(alwaysUse24HourFormat: true),
+        child: const TimePickerDialog(initialTime: const TimeOfDay(hour: 7, minute: 0)),
+      ),
+    ));
+
+    final CustomPaint dialPaint = tester.widget(find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      matching: find.byType(CustomPaint),
+    ));
+    final dynamic dialPainter = dialPaint.painter;
+    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
+    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+
+    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
+    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
   });
 }

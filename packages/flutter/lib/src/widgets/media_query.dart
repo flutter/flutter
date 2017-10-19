@@ -40,7 +40,8 @@ class MediaQueryData {
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero
+    this.padding: EdgeInsets.zero,
+    this.alwaysUse24HourFormat: false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -53,7 +54,8 @@ class MediaQueryData {
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      alwaysUse24HourFormat = false;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
@@ -76,6 +78,20 @@ class MediaQueryData {
 
   /// The padding around the edges of the media (e.g., the screen).
   final EdgeInsets padding;
+
+  /// Whether to use 24-hour format when formatting time.
+  ///
+  /// ## Advice for widget implementors
+  ///
+  /// The behavior of this flag is different across platforms:
+  ///
+  /// - On Android this flag is reported directly from the user settings called
+  ///   "Use 24-hour format". It applies to any locale used by the application,
+  ///   whether it is the system-wide locale, or the custom locale set by the
+  ///   application.
+  /// - On iOS this flag is set to `true` when the user setting called "24-Hour
+  ///   Time" is set or the system-wide locale's default.
+  final bool alwaysUse24HourFormat;
 
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {

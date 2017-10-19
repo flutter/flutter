@@ -120,14 +120,20 @@ abstract class MaterialLocalizations {
 
   /// Formats [TimeOfDay.hour] in the given time of day according to the value
   /// of [timeOfDayFormat].
-  String formatHour(TimeOfDay timeOfDay);
+  ///
+  /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
+  /// rather than the default for the current locale.
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
   String formatMinute(TimeOfDay timeOfDay);
 
   /// Formats [timeOfDay] according to the value of [timeOfDayFormat].
-  String formatTimeOfDay(TimeOfDay timeOfDay);
+  ///
+  /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
+  /// rather than the default for the current locale.
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -274,9 +280,20 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   @override
-  String formatHour(TimeOfDay timeOfDay) {
-    assert(hourFormat(of: timeOfDayFormat) == HourFormat.h);
-    return formatDecimal(timeOfDay.hour);
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+    if (alwaysUse24HourFormat)
+      return _formatTwoDigitZeroPad(timeOfDay.hour);
+    else
+      return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+  }
+
+  /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
+  /// range. Not designed to format values outside this range.
+  String _formatTwoDigitZeroPad(int number) {
+    if (number < 10)
+      return '0$number';
+    else
+      return '$number';
   }
 
   @override
@@ -335,7 +352,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
     assert(timeOfDayFormat == TimeOfDayFormat.h_colon_mm_space_a);
     // Not using intl.DateFormat for two reasons:
     //
@@ -345,7 +362,8 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
+    return '$hour:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
   }
 
   @override

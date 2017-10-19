@@ -141,8 +141,8 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay) {
-    switch (hourFormat(of: timeOfDayFormat)) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+    switch (hourFormat(of: timeOfDayFormat, alwaysUse24HourFormat: alwaysUse24HourFormat)) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
@@ -188,7 +188,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -199,16 +199,16 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     //   no matter what date the day falls on.
     switch (timeOfDayFormat) {
       case TimeOfDayFormat.h_colon_mm_space_a:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_colon_mm:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
+        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.HH_dot_mm:
-        return '${formatHour(timeOfDay)}.${formatMinute(timeOfDay)}';
+        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}.${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
+        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)}';
       case TimeOfDayFormat.frenchCanadian:
-        return '${formatHour(timeOfDay)} h ${formatMinute(timeOfDay)}';
+        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)} h ${formatMinute(timeOfDay)}';
     }
 
     return null;
