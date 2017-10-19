@@ -7,7 +7,7 @@ Demo app for the material design widgets and other features provided by Flutter.
 You can follow these instructions to build the gallery app
 and install it onto your device.
 
-### Prereqs
+### Prerequisites
 
 If you are new to Flutter, please first follow
 the [Flutter Setup](https://flutter.io/setup/) guide.
