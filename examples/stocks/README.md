@@ -22,8 +22,9 @@ The `flutter run --release` command both builds and installs the Flutter app.
 
 ## Interationalization
 
-This app has be internationalized. It's an example of how one can do
-so with the [Dart intlpackage](https://pub.dartlang.org/packages/intl).
+This app has been internationalized (just enough to show how it's
+done). It's an example of how one can do so with the
+[Dart intlpackage](https://pub.dartlang.org/packages/intl).
 
 The [Flutter Internationalization Tutorial](https://flutter.io/tutorials/internationalization/)
 covers Flutter app internationalization in general.
