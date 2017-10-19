@@ -100,7 +100,7 @@ Future<GradleProject> _readGradleProject() async {
     if (flutterPluginVersion == FlutterPluginVersion.managed) {
       // Handle known exceptions. This will exit if handled.
       handleKnownGradleExceptions(e);
-      
+
       // Print a general Gradle error and exit.
       printError('* Error running Gradle:\n$e\n');
       throwToolExit('Please review your Gradle project setup in the android/ folder.');
@@ -355,14 +355,14 @@ class GradleProject {
 
     // Extract build types and product flavors.
     final Set<String> variants = new Set<String>();
-    properties.split('\n').forEach((String s) {
+    for (String s in properties.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();
         if (!variant.endsWith('test'))
           variants.add(variant);
       }
-    });
+    }
     final Set<String> buildTypes = new Set<String>();
     final Set<String> productFlavors = new Set<String>();
     for (final String variant1 in variants) {

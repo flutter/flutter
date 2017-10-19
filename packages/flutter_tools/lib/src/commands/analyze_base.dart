@@ -132,22 +132,22 @@ class PackageDependencyTracker {
     final File dotPackages = fs.file(dotPackagesPath);
     if (dotPackages.existsSync()) {
       // this directory has opinions about what we should be using
-      dotPackages
+      final Iterable<String> lines = dotPackages
         .readAsStringSync()
         .split('\n')
-        .where((String line) => !line.startsWith(new RegExp(r'^ *#')))
-        .forEach((String line) {
-          final int colon = line.indexOf(':');
-          if (colon > 0) {
-            final String packageName = line.substring(0, colon);
-            final String packagePath = fs.path.fromUri(line.substring(colon+1));
-            // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
-            // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
-            // since they would produce spurious conflicts.
-            if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
-              add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
-          }
-      });
+        .where((String line) => !line.startsWith(new RegExp(r'^ *#')));
+      for (String line in lines) {
+        final int colon = line.indexOf(':');
+        if (colon > 0) {
+          final String packageName = line.substring(0, colon);
+          final String packagePath = fs.path.fromUri(line.substring(colon+1));
+          // Ensure that we only add `analyzer` and dependent packages defined in the vended SDK (and referred to with a local
+          // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
+          // since they would produce spurious conflicts.
+          if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
+            add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
+        }
+      }
     }
   }
 

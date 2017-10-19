@@ -146,13 +146,13 @@ void generate(String commit) {
   initialize();
 
   final List<SampleInfo> samples = <SampleInfo>[];
-  sampleDirectory.listSync().forEach((FileSystemEntity entity) {
+  for (FileSystemEntity entity in sampleDirectory.listSync()) {
     if (entity is File && entity.path.endsWith('.dart')) {
       final SampleInfo sample = new SampleInfo(entity, commit);
       if (sample.initialize()) // skip files that lack the Sample Catalog comment
         samples.add(sample);
     }
-  });
+  }
 
   // Causes the generated imports to appear in alphabetical order.
   // Avoid complaints from flutter lint.

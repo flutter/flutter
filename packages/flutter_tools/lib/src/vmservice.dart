@@ -636,7 +636,8 @@ class VM extends ServiceObjectOwner {
   void _removeDeadIsolates(List<Isolate> newIsolates) {
     // Build a set of new isolates.
     final Set<String> newIsolateSet = new Set<String>();
-    newIsolates.forEach((Isolate iso) => newIsolateSet.add(iso.id));
+    for (Isolate iso in newIsolates)
+      newIsolateSet.add(iso.id);
 
     // Remove any old isolates which no longer exist.
     final List<String> toRemove = <String>[];

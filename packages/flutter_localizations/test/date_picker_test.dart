@@ -64,12 +64,12 @@ void main() {
 
         expect(find.text(expectedMonthYearHeader), findsOneWidget);
 
-        expectedDaysOfWeek.forEach((String dayOfWeek) {
+        for (String dayOfWeek in expectedDaysOfWeek) {
           expect(find.text(dayOfWeek), findsWidgets);
-        });
+        }
 
         Offset previousCellOffset;
-        expectedDaysOfMonth.forEach((String dayOfMonth) {
+        for (String dayOfMonth in expectedDaysOfMonth) {
           final Finder dayCell = find.descendant(of: find.byType(GridView), matching: find.text(dayOfMonth));
           expect(dayCell, findsOneWidget);
 
@@ -84,7 +84,7 @@ void main() {
             }
           }
           previousCellOffset = offset;
-        });
+        }
       });
     }
   });
