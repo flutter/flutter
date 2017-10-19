@@ -75,10 +75,10 @@ linter:
     - always_require_non_null_named_parameters
     - always_specify_types
     - annotate_overrides
-    # - avoid_annotating_with_dynamic # not yet tested
+    # - avoid_annotating_with_dynamic # conflicts with always_specify_types
     - avoid_as
-    # - avoid_catches_without_on_clauses # not yet tested
-    # - avoid_catching_errors # not yet tested
+    # - avoid_catches_without_on_clauses # we do this commonly
+    # - avoid_catching_errors # we do this commonly
     # - avoid_classes_with_only_static_members # not yet tested
     - avoid_function_literals_in_foreach_calls
     - avoid_init_to_null
