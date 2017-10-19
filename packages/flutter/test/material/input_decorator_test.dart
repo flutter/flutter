@@ -7,88 +7,171 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  Widget buildInputDecorator({InputDecoration decoration = const InputDecoration(), Widget child = const Text('Test')}) {
+    return new MaterialApp(
+      home: new Material(
+        child: new DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: new Center(
+            child: new InputDecorator(
+              decoration: decoration,
+              child: child,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Finder findInputDecoratorChildContainer() {
+    return find.byWidgetPredicate(
+            (Widget w) {
+          return w is AnimatedContainer && (w as dynamic).decoration != null;
+        });
+  }
+
+  double getBoxDecorationThickness(WidgetTester tester) {
+    final AnimatedContainer container = tester.widget(findInputDecoratorChildContainer());
+    final BoxDecoration decoration = container.decoration;
+    final Border border = decoration.border;
+    return border.bottom.width;
+  }
+
+  double getDividerY(WidgetTester tester) {
+    final Finder animatedContainerFinder = find.byWidgetPredicate(
+            (Widget w) {
+          return w is AnimatedContainer && (w as dynamic).decoration != null;
+        });
+    return tester.getRect(animatedContainerFinder).bottom;
+  }
+
+  double getDividerWidth(WidgetTester tester) {
+    final Finder animatedContainerFinder = find.byWidgetPredicate(
+            (Widget w) {
+          return w is AnimatedContainer && (w as dynamic).decoration != null;
+        });
+    return tester.getRect(animatedContainerFinder).size.width;
+  }
+
   testWidgets('InputDecorator always expands horizontally', (WidgetTester tester) async {
     final Key key = new UniqueKey();
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new Center(
-          child: new InputDecorator(
-            decoration: const InputDecoration(),
-            child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
-          ),
-        ),
+    await tester.pumpWidget(
+      buildInputDecorator(
+        child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
       ),
-    ));
+    );
 
     expect(tester.element(find.byKey(key)).size, equals(const Size(800.0, 60.0)));
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new Center(
-          child: new InputDecorator(
-            decoration: const InputDecoration(
-              icon: const Icon(Icons.add_shopping_cart),
-            ),
-            child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
-          ),
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          icon: const Icon(Icons.add_shopping_cart),
         ),
+        child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
       ),
-    ));
+    );
 
     expect(tester.element(find.byKey(key)).size, equals(const Size(752.0, 60.0)));
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new Center(
-          child: new InputDecorator(
-            decoration: const InputDecoration.collapsed(
-              hintText: 'Hint text',
-            ),
-            child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
-          ),
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration.collapsed(
+          hintText: 'Hint text',
         ),
+        child: new Container(key: key, width: 50.0, height: 60.0, color: Colors.blue),
       ),
-    ));
+    );
 
     expect(tester.element(find.byKey(key)).size, equals(const Size(800.0, 60.0)));
   });
 
-  testWidgets('InputDecorator draws the underline in the right place.', (WidgetTester tester) async {
-    final TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new DefaultTextStyle(
-          style: style,
-          child: const Center(
-            child: const InputDecorator(
-              decoration: const InputDecoration(
-                hintText: 'Hint', labelText: 'Label', helperText: 'Helper'),
-              child: const Text('Test'),
-            ),
-          ),
+  testWidgets('InputDecorator draws the underline correctly in the right place.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
         ),
       ),
-    ));
+    );
 
-    expect(tester.renderObject(finder), paints
+    expect(getBoxDecorationThickness(tester), equals(1.0));
+    expect(getDividerY(tester), equals(316.5));
+    expect(getDividerWidth(tester), equals(800.0));
+  });
+
+  testWidgets('InputDecorator draws the underline correctly in the right place for dense layout.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
+          isDense: true,
+        ),
+      ),
+    );
+
+    expect(getBoxDecorationThickness(tester), equals(1.0));
+    expect(getDividerY(tester), equals(312.5));
+    expect(getDividerWidth(tester), equals(800.0));
+  });
+
+  testWidgets('InputDecorator does not draw the underline when hideDivider is true.', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
+          hideDivider: true,
+        ),
+      ),
+    );
+
+    expect(findInputDecoratorChildContainer(), findsNothing);
+  });
+
+  testWidgets('InputDecorator uses proper padding for dense mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
+          isDense: true,
+        ),
+      ),
+    );
+
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
+    expect(
+      tester.getRect(find.text('Label')).size,
+      anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Label')).left, equals(0.0));
+    expect(tester.getRect(find.text('Label')).top, equals(278.5));
+    expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
+    expect(tester.getRect(find.text('Hint')).left, equals(0.0));
+    expect(tester.getRect(find.text('Hint')).top, equals(294.5));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).left, equals(0.0));
+    expect(tester.getRect(find.text('Helper')).top, equals(317.5));
   });
 
   testWidgets('InputDecorator uses proper padding', (WidgetTester tester) async {
-    final TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new DefaultTextStyle(
-          style: style,
-          child: const Center(
-            child: const InputDecorator(
-              decoration: const InputDecoration(hintText: 'Hint', labelText: 'Label', helperText: 'Helper'),
-              child: const Text('Test'),
-            ),
-          ),
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
         ),
       ),
-    ));
+    );
 
     // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
@@ -103,21 +186,21 @@ void main() {
     expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(325.5));
+  });
 
-    await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new DefaultTextStyle(
-          style: style,
-          child: const Center(
-            child: const InputDecorator(
-              decoration: const InputDecoration(hintText: 'Hint', labelText: 'Label', errorText: 'Error'),
-              child: const Text('Test'),
-            ),
-          ),
+  testWidgets('InputDecorator uses proper padding when error is set', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          hintText: 'Hint',
+          labelText: 'Label',
+          helperText: 'Helper',
+          errorText: 'Error',
         ),
       ),
-    ));
+    );
 
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
       tester.getRect(find.text('Label')).size,
       anyOf(<Size>[const Size(60.0, 12.0), const Size(61.0, 12.0)]),
@@ -133,11 +216,10 @@ void main() {
   });
 
   testWidgets('InputDecorator animates properly', (WidgetTester tester) async {
-    final TextStyle style = const TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(new MaterialApp(
-      home: new Material(
-        child: new DefaultTextStyle(
-          style: style,
+      home: const Material(
+        child: const DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
           child: const Center(
             child: const TextField(
               decoration: const InputDecoration(
