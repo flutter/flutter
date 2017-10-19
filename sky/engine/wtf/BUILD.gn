@@ -254,7 +254,7 @@ executable("wtf_unittests") {
 
   deps = [
     ":wtf",
-    "//dart/runtime:libdart_jit",
+    "//third_party/dart/runtime:libdart_jit",
 
     # Does not use $flutter_root/testing because it needs and provides its own main
     # function in RunAllTests.cpp.

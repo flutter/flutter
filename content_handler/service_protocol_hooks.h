@@ -5,8 +5,8 @@
 #ifndef FLUTTER_CONTENT_HANDLER_SERVICE_PROTOCOL_HOOKS_H_
 #define FLUTTER_CONTENT_HANDLER_SERVICE_PROTOCOL_HOOKS_H_
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "lib/fxl/synchronization/waitable_event.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace flutter_runner {
 

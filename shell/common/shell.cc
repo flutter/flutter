@@ -9,7 +9,6 @@
 #include <sstream>
 #include <vector>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/icu_util.h"
@@ -22,6 +21,7 @@
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 #include "flutter/shell/common/switches.h"
 #include "lib/fxl/files/unique_fd.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkGraphics.h"
 
 namespace shell {

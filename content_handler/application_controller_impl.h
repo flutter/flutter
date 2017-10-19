@@ -9,7 +9,6 @@
 
 #include <fdio/namespace.h>
 
-#include "dart/runtime/include/dart_api.h"
 #include "lib/app/fidl/application_controller.fidl.h"
 #include "lib/app/fidl/application_runner.fidl.h"
 #include "lib/app/fidl/service_provider.fidl.h"
@@ -19,6 +18,7 @@
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "lib/svc/cpp/service_provider_bridge.h"
 #include "lib/ui/views/fidl/view_provider.fidl.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace flutter_runner {
 class App;

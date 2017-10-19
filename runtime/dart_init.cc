@@ -14,8 +14,6 @@
 #include <utility>
 #include <vector>
 
-#include "dart/runtime/bin/embedded_dart_io.h"
-#include "dart/runtime/include/dart_mirrors_api.h"
 #include "flutter/assets/unzipper_provider.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/settings.h"
@@ -42,6 +40,8 @@
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
 #include "lib/tonic/typed_data/uint8_list.h"
+#include "third_party/dart/runtime/bin/embedded_dart_io.h"
+#include "third_party/dart/runtime/include/dart_mirrors_api.h"
 
 using tonic::DartClassProvider;
 using tonic::LogIfError;
@@ -53,8 +53,9 @@ namespace observatory {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 // These two symbols are defined in |observatory_archive.cc| which is generated
-// by the |//dart/runtime/observatory:archive_observatory| rule. Both of these
-// symbols will be part of the data segment and therefore are read only.
+// by the |//third_party/dart/runtime/observatory:archive_observatory| rule.
+// Both of these symbols will be part of the data segment and therefore are read
+// only.
 extern unsigned int observatory_assets_archive_len;
 extern const uint8_t* observatory_assets_archive;
 

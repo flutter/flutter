@@ -10,7 +10,6 @@
 #include <utility>
 
 #include "dart-pkg/zircon/sdk_ext/handle.h"
-#include "dart/runtime/include/dart_api.h"
 #include "flutter/assets/zip_asset_store.h"
 #include "flutter/common/threads.h"
 #include "flutter/content_handler/accessibility_bridge.h"
@@ -28,6 +27,7 @@
 #include "lib/fxl/logging.h"
 #include "lib/fxl/time/time_delta.h"
 #include "lib/zip/create_unzipper.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/rapidjson/rapidjson/document.h"
 #include "third_party/rapidjson/rapidjson/stringbuffer.h"
 #include "third_party/rapidjson/rapidjson/writer.h"

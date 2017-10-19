@@ -1,4 +1,4 @@
-Signature: cee11298a626058031cb28def5209b01
+Signature: 35d3f6005ca741ef2a4dcc8260335281
 
 UNUSED LICENSES:
 
@@ -44,7 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../topaz/lib/tonic/LICENSE
+ORIGIN: ../../../lib/ftl/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.cc
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.h
@@ -54,8 +54,6 @@ FILE: ../../../topaz/lib/tonic/dart_microtask_queue.cc
 FILE: ../../../topaz/lib/tonic/dart_microtask_queue.h
 FILE: ../../../topaz/lib/tonic/dart_sticky_error.cc
 FILE: ../../../topaz/lib/tonic/dart_sticky_error.h
-FILE: ../../../topaz/lib/tonic/debugger/dart_debugger.cc
-FILE: ../../../topaz/lib/tonic/debugger/dart_debugger.h
 FILE: ../../../topaz/lib/tonic/file_loader/file_loader.cc
 FILE: ../../../topaz/lib/tonic/file_loader/file_loader.h
 FILE: ../../../topaz/lib/tonic/logging/dart_error.cc
@@ -102,7 +100,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../topaz/lib/tonic/LICENSE
+ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../lib/ftl/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../topaz/lib/tonic/dart_args.h
 FILE: ../../../topaz/lib/tonic/dart_binding_macros.h

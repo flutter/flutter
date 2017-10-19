@@ -8,9 +8,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "dart/runtime/bin/embedded_dart_io.h"
-#include "dart/runtime/include/dart_api.h"
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "lib/fxl/build_config.h"
 #include "lib/fxl/logging.h"
@@ -22,6 +19,9 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
+#include "third_party/dart/runtime/bin/embedded_dart_io.h"
+#include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 #if defined(OS_ANDROID)
 #include <android/log.h>

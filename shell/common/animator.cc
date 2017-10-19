@@ -4,10 +4,10 @@
 
 #include "flutter/shell/common/animator.h"
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/trace_event.h"
 #include "lib/fxl/time/stopwatch.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 

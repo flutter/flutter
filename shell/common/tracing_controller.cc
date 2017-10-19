@@ -6,12 +6,12 @@
 
 #include <string>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_init.h"
 #include "flutter/shell/common/shell.h"
 #include "lib/fxl/logging.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 

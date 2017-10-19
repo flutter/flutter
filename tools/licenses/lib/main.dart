@@ -1891,6 +1891,8 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryAndroidPlatformDirectory(this, entry);
     if (entry.name == 'boringssl')
       return new RepositoryBoringSSLDirectory(this, entry);
+    if (entry.name == 'dart')
+      return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'expat')
       return new RepositoryExpatDirectory(this, entry);
     if (entry.name == 'freetype-android')
@@ -2241,8 +2243,6 @@ class RepositoryRoot extends RepositoryDirectory {
       throw '//base is no longer part of this client: remove it';
     if (entry.name == 'third_party')
       return new RepositoryRootThirdPartyDirectory(this, entry);
-    if (entry.name == 'dart')
-      return new RepositoryDartDirectory(this, entry);
     if (entry.name == 'flutter')
       return new RepositoryFlutterDirectory(this, entry);
     if (entry.name == 'garnet')

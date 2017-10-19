@@ -4,19 +4,19 @@
 
 import("$flutter_root/lib/ui/dart_ui.gni")
 
-import("//dart/runtime/bin/io_sources.gni")
-import("//dart/runtime/lib/async_sources.gni")
-import("//dart/runtime/lib/collection_sources.gni")
-import("//dart/runtime/lib/convert_sources.gni")
-import("//dart/runtime/lib/core_sources.gni")
-import("//dart/runtime/lib/developer_sources.gni")
-import("//dart/runtime/lib/internal_sources.gni")
-import("//dart/runtime/lib/isolate_sources.gni")
-import("//dart/runtime/lib/math_sources.gni")
-import("//dart/runtime/lib/mirrors_sources.gni")
-import("//dart/runtime/lib/typed_data_sources.gni")
+import("//third_party/dart/runtime/bin/io_sources.gni")
+import("//third_party/dart/runtime/lib/async_sources.gni")
+import("//third_party/dart/runtime/lib/collection_sources.gni")
+import("//third_party/dart/runtime/lib/convert_sources.gni")
+import("//third_party/dart/runtime/lib/core_sources.gni")
+import("//third_party/dart/runtime/lib/developer_sources.gni")
+import("//third_party/dart/runtime/lib/internal_sources.gni")
+import("//third_party/dart/runtime/lib/isolate_sources.gni")
+import("//third_party/dart/runtime/lib/math_sources.gni")
+import("//third_party/dart/runtime/lib/mirrors_sources.gni")
+import("//third_party/dart/runtime/lib/typed_data_sources.gni")
 
-import("//dart/utils/generate_patch_sdk.gni")
+import("//third_party/dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
   import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
@@ -86,12 +86,12 @@ action("generate_snapshot_bin") {
 
   deps = [
     ":generate_dart_ui",
-    "//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
+    "//third_party/dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
   ]
   depfile = "$target_gen_dir/core_snapshot.d"
 
   inputs = [
-             "//dart/runtime/tools/create_snapshot_bin.py",
+             "//third_party/dart/runtime/tools/create_snapshot_bin.py",
              snapshot_dart,
            ] + dart_ui_files
   if (is_fuchsia) {
@@ -114,9 +114,9 @@ action("generate_snapshot_bin") {
   rebased_dart_ui_path = rebase_path(dart_ui_path)
 
   gen_snapshot_dir =
-      get_label_info("//dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
+      get_label_info("//third_party/dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
                      "root_out_dir")
-  script = "//dart/runtime/tools/create_snapshot_bin.py"
+  script = "//third_party/dart/runtime/tools/create_snapshot_bin.py"
 
   args = [
     "--executable",
@@ -184,7 +184,7 @@ template("bin_to_assembly") {
 
   action(target_name) {
     deps = invoker.deps
-    script = "//dart/runtime/tools/bin_to_assembly.py"
+    script = "//third_party/dart/runtime/tools/bin_to_assembly.py"
     args = [
       "--input",
       rebase_path(invoker.input),
@@ -293,7 +293,7 @@ template("concatenate_patch") {
     libsources = invoker.libsources
     inputs = []
     output = invoker.output
-    script = "//dart/runtime/tools/concatenate_patches.py"
+    script = "//third_party/dart/runtime/tools/concatenate_patches.py"
     args = [
       "--output",
       rebase_path(output, root_build_dir),
@@ -322,7 +322,7 @@ template("generate_vm_patched_sdk") {
   # libraries.
   generate_patched_sdk(target_name) {
     mode = "flutter"
-    deps = concatenation_target_names + ["//dart/runtime/vm:kernel_platform_files"]
+    deps = concatenation_target_names + ["//third_party/dart/runtime/vm:kernel_platform_files"]
     input_patches_dir = "$target_gen_dir/patches"
     patched_sdk_dir = "flutter_patched_sdk"
     outputs = [
@@ -336,63 +336,63 @@ generate_vm_patched_sdk("flutter_patched_sdk") {
     [
       "async",
       async_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "collection",
       collection_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "convert",
       convert_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "core",
       core_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "developer",
       developer_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "internal",
       internal_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "io",
       io_runtime_sources,
-      "//dart/runtime/bin",
+      "//third_party/dart/runtime/bin",
     ],
     [
       "isolate",
       isolate_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "math",
       math_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "mirrors",
       mirrors_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
     [
       "typed_data",
       typed_data_runtime_sources,
-      "//dart/runtime/lib",
+      "//third_party/dart/runtime/lib",
     ],
   ]
 }
 
 action("compile_platform") {
-  script = "//dart/tools/compile_platform.py"
+  script = "//third_party/dart/tools/compile_platform.py"
 
   sources = [
     "$root_out_dir/flutter_patched_sdk/lib/libraries.json",

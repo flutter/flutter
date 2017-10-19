@@ -20,7 +20,7 @@ static_library("core") {
 
   if (flutter_runtime_mode != "release") {
     # Only include observatory assets in non-release modes.
-    deps += [ "//dart/runtime/observatory:embedded_observatory_archive" ]
+    deps += [ "//third_party/dart/runtime/observatory:embedded_observatory_archive" ]
   }
 
   configs += [

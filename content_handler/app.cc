@@ -7,7 +7,6 @@
 #include <thread>
 #include <utility>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/sky/engine/platform/fonts/fuchsia/FontCacheFuchsia.h"
@@ -15,6 +14,7 @@
 #include "lib/fxl/macros.h"
 #include "lib/fxl/tasks/task_runner.h"
 #include "lib/icu_data/cpp/icu_data.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace flutter_runner {
 namespace {
