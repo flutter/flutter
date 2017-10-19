@@ -1074,7 +1074,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
             information.writeln(
               'This is considered an error condition because it indicates that there is content '
               'that cannot be seen. If the content is legitimately bigger than the available '
-              'space, consider clipping it with a RectClip widget before putting it in the flex, '
+              'space, consider clipping it with a ClipRect widget before putting it in the flex, '
               'or using a scrollable container rather than a Flex, for example using ListView.'
             );
             information.writeln('The specific $runtimeType in question is:');
