@@ -168,11 +168,14 @@ import 'basic_types.dart';
 /// const TextStyle(fontFamily: 'Raleway', package: 'my_package')
 /// ```
 ///
-/// This is also how the package itself should create the style.
+/// If the package internally uses the font it defines, it should still specify
+/// the `package` argument when creating the text style as in the example above.
 ///
-/// A package can also provide font files in its `lib/` folder which will not
-/// automatically be included in the app. Instead the app can use these
-/// selectively when declaring a font. Suppose a package named `my_package` has:
+/// A package can also provide font files without declaring a font in its 
+/// `pubspec.yaml`. These files should then be in the `lib/` folder of the 
+/// package. The font files will not automatically be bundled in the app, instead 
+/// the app can use these selectively when declaring a font. Suppose a package 
+/// named `my_package` has:
 ///
 /// ```
 /// lib/fonts/Raleway-Medium.ttf
@@ -192,6 +195,13 @@ import 'basic_types.dart';
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
 ///
+/// In this case, since the app locally defines the font, the TextStyle is 
+/// created without the `package` argument:
+///
+///```dart
+/// const TextStyle(fontFamily: 'Raleway')
+/// ```
+///
 /// See also:
 ///
 ///  * [Text], the widget for showing text in a single style.
@@ -203,10 +213,13 @@ import 'basic_types.dart';
 @immutable
 class TextStyle extends Diagnosticable {
   /// Creates a text style.
+  ///
+  /// The `package` argument must be non-null if the font family is defined in a
+  /// package. It is combined with the `fontFamily` argument to set the
+  /// [fontFamily] property.
   const TextStyle({
     this.inherit: true,
     this.color,
-    String fontFamily,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -217,7 +230,8 @@ class TextStyle extends Diagnosticable {
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
-    this.package,
+    String fontFamily,
+    String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
        assert(inherit != null);
 
@@ -233,12 +247,12 @@ class TextStyle extends Diagnosticable {
   /// The color to use when painting the text.
   final Color color;
 
-  /// The name of the font to use when painting the text (e.g., Roboto).
+  /// The name of the font to use when painting the text (e.g., Roboto). If the
+  /// font is defined in a package, this will be prefixed with
+  /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
+  /// prefixing is done by the constructor when the `package` argument is
+  /// provided.
   final String fontFamily;
-
-  /// The name of the package from which the font is included. See the
-  /// documentation for the [TextStyle] class itself for details.
-  final String package;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
   ///
