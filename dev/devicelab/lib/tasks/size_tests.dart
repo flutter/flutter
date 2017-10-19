@@ -29,7 +29,7 @@ TaskFunction createBasicMaterialAppSizeTest() {
 
       await inDirectory(sampleDir, () async {
         await flutter('packages', options: <String>['get']);
-        await flutter('build', options: <String>['clean']);
+        await flutter('clean');
 
         if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
           await prepareProvisioningCertificates(sampleDir.path);
