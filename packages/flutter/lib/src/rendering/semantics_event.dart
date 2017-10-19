@@ -25,18 +25,21 @@ abstract class SemanticsEvent {
 
   /// Converts this event to a Map that can be encoded with
   /// [StandardMessageCodec].
-  Map<String, dynamic> toMap({int nodeId}) {
+  ///
+  /// [nodeId] is the unique identifier of the semantics node associated with
+  /// the event, or null if the event is not associated with a semantics node.
+  Map<String, dynamic> toMap({ int nodeId }) {
     final Map<String, dynamic> event = <String, dynamic>{
       'type': type,
       'data': getDataMap(),
     };
-    if (nodeId != null) {
+    if (nodeId != null)
       event['nodeId'] = nodeId;
-    }
+
     return event;
   }
 
-  // Returns the event's data object.
+  /// Returns the event's data object.
   Map<String, dynamic> getDataMap();
 
   @override
