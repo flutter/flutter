@@ -31,6 +31,6 @@ executable("synchronization_unittests") {
   deps = [
     ":synchronization",
     "$flutter_root/testing",
-    "//dart/runtime:libdart_jit",
+    "//third_party/dart/runtime:libdart_jit",
   ]
 }

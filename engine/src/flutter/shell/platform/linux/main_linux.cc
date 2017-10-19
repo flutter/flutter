@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "dart/runtime/bin/embedded_dart_io.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/shell/common/platform_view.h"
@@ -13,6 +12,7 @@
 #include "flutter/sky/engine/public/web/Sky.h"
 #include "lib/fxl/command_line.h"
 #include "lib/tonic/dart_microtask_queue.h"
+#include "third_party/dart/runtime/bin/embedded_dart_io.h"
 
 namespace {
 

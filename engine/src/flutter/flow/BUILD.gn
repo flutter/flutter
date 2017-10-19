@@ -99,7 +99,7 @@ executable("flow_unittests") {
 
   deps = [
     ":flow",
-    "//dart/runtime:libdart_jit",  # for tracing
+    "//third_party/dart/runtime:libdart_jit",  # for tracing
     "$flutter_root/testing",
     "//third_party/skia",
   ]

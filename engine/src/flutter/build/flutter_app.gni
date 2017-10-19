@@ -14,7 +14,7 @@ declare_args() {
   flutter_app_default_is_jit = true
 }
 
-gen_snapshot_label = "//dart/runtime/bin:gen_snapshot($host_toolchain)"
+gen_snapshot_label = "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)"
 gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
 gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
 
@@ -225,7 +225,7 @@ template("flutter_aot_app") {
                main_dart,
                "$flutter_root/runtime/dart_vm_entry_points.txt",
                "$flutter_root/runtime/dart_vm_entry_points_fuchsia.txt",
-               "//dart/runtime/bin/dart_io_entries.txt",
+               "//third_party/dart/runtime/bin/dart_io_entries.txt",
              ]
 
     outputs = [
@@ -264,7 +264,7 @@ template("flutter_aot_app") {
       "--entry-points-manifest",
       rebase_path("$flutter_root/runtime/dart_vm_entry_points_fuchsia.txt"),
       "--entry-points-manifest",
-      rebase_path("//dart/runtime/bin/dart_io_entries.txt"),
+      rebase_path("//third_party/dart/runtime/bin/dart_io_entries.txt"),
 
       "--main-dart",
       rebase_path(main_dart),

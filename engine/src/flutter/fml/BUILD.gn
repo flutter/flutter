@@ -24,7 +24,7 @@ source_set("fml") {
   ]
 
   deps = [
-    "//dart/runtime:dart_api",
+    "//third_party/dart/runtime:dart_api",
     "//garnet/public/lib/fxl",
 
     # These need to be in sync with the Fuchsia buildroot.
@@ -114,7 +114,7 @@ executable("fml_unittests") {
   ]
 
   deps = [
-    "//dart/runtime:libdart_jit",
+    "//third_party/dart/runtime:libdart_jit",
     "$flutter_root/fml",
     "$flutter_root/testing",
     "//garnet/public/lib/fxl",

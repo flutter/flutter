@@ -79,9 +79,9 @@ shared_library("flutter_framework_dylib") {
     "//third_party/skia",
   ]
   if (flutter_runtime_mode == "debug") {
-    deps += [ "//dart/runtime:libdart_jit" ]
+    deps += [ "//third_party/dart/runtime:libdart_jit" ]
   } else {
-    deps += [ "//dart/runtime:libdart_precompiled_runtime" ]
+    deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
   }
 
   public_configs = [

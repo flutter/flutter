@@ -59,101 +59,101 @@ dev_dependencies:
 
 dependency_overrides:
   args:
-    path: ../../dart/third_party/pkg/args
+    path: ../../third_party/dart/third_party/pkg/args
   async:
-    path: ../../dart/third_party/pkg/async
+    path: ../../third_party/dart/third_party/pkg/async
   charcode:
-    path: ../../dart/third_party/pkg/charcode
+    path: ../../third_party/dart/third_party/pkg/charcode
   collection:
-    path: ../../dart/third_party/pkg/collection
+    path: ../../third_party/dart/third_party/pkg/collection
   convert:
-    path: ../../dart/third_party/pkg/convert
+    path: ../../third_party/dart/third_party/pkg/convert
   crypto:
-    path: ../../dart/third_party/pkg/crypto
+    path: ../../third_party/dart/third_party/pkg/crypto
   front_end:
-    path: ../../dart/pkg/front_end/
+    path: ../../third_party/dart/pkg/front_end/
   kernel:
-    path: ../../dart/pkg/kernel/
+    path: ../../third_party/dart/pkg/kernel/
   logging:
-    path: ../../dart/third_party/pkg/logging
+    path: ../../third_party/dart/third_party/pkg/logging
   meta:
-    path: ../../dart/pkg/meta
+    path: ../../third_party/dart/pkg/meta
   quiver:
-    path: ../../dart/third_party/pkg/quiver
+    path: ../../third_party/dart/third_party/pkg/quiver
   package_config:
-    path: ../../dart/third_party/pkg_tested/package_config
+    path: ../../third_party/dart/third_party/pkg_tested/package_config
   path:
-    path: ../../dart/third_party/pkg/path
+    path: ../../third_party/dart/third_party/pkg/path
   source_span:
-    path: ../../dart/third_party/pkg/source_span
+    path: ../../third_party/dart/third_party/pkg/source_span
   typed_data:
-    path: ../../dart/third_party/pkg/typed_data
+    path: ../../third_party/dart/third_party/pkg/typed_data
   usage:
-    path: ../../dart/third_party/pkg/usage
+    path: ../../third_party/dart/third_party/pkg/usage
 
   analyzer:
-    path: ../../dart/pkg/analyzer
+    path: ../../third_party/dart/pkg/analyzer
   barback:
-    path: ../../dart/third_party/pkg/barback
+    path: ../../third_party/dart/third_party/pkg/barback
   boolean_selector:
-    path: ../../dart/third_party/pkg/boolean_selector
+    path: ../../third_party/dart/third_party/pkg/boolean_selector
   cli_util:
-    path: ../../dart/third_party/pkg/cli_util
+    path: ../../third_party/dart/third_party/pkg/cli_util
   csslib:
-    path: ../../dart/third_party/pkg/csslib
+    path: ../../third_party/dart/third_party/pkg/csslib
   glob:
-    path: ../../dart/third_party/pkg/glob
+    path: ../../third_party/dart/third_party/pkg/glob
   html:
-    path: ../../dart/third_party/pkg/html
+    path: ../../third_party/dart/third_party/pkg/html
   http:
-    path: ../../dart/third_party/pkg/http
+    path: ../../third_party/dart/third_party/pkg/http
   http_multi_server:
-    path: ../../dart/third_party/pkg/http_multi_server
+    path: ../../third_party/dart/third_party/pkg/http_multi_server
   http_parser:
-    path: ../../dart/third_party/pkg/http_parser
+    path: ../../third_party/dart/third_party/pkg/http_parser
   isolate:
-    path: ../../dart/third_party/pkg/isolate
+    path: ../../third_party/dart/third_party/pkg/isolate
   matcher:
-    path: ../../dart/third_party/pkg/matcher
+    path: ../../third_party/dart/third_party/pkg/matcher
   mime:
-    path: ../../dart/third_party/pkg/mime
+    path: ../../third_party/dart/third_party/pkg/mime
   mockito:
-    path: ../../dart/third_party/pkg/mockito
+    path: ../../third_party/dart/third_party/pkg/mockito
   package_resolver:
-    path: ../../dart/third_party/pkg_tested/package_resolver
+    path: ../../third_party/dart/third_party/pkg_tested/package_resolver
   plugin:
-    path: ../../dart/third_party/pkg/plugin
+    path: ../../third_party/dart/third_party/pkg/plugin
   pool:
-    path: ../../dart/third_party/pkg/pool
+    path: ../../third_party/dart/third_party/pkg/pool
   pub_semver:
-    path: ../../dart/third_party/pkg/pub_semver
+    path: ../../third_party/dart/third_party/pkg/pub_semver
   shelf:
-    path: ../../dart/third_party/pkg/shelf
+    path: ../../third_party/dart/third_party/pkg/shelf
   shelf_packages_handler:
-    path: ../../dart/third_party/pkg/shelf_packages_handler
+    path: ../../third_party/dart/third_party/pkg/shelf_packages_handler
   shelf_static:
-    path: ../../dart/third_party/pkg/shelf_static
+    path: ../../third_party/dart/third_party/pkg/shelf_static
   shelf_web_socket:
-    path: ../../dart/third_party/pkg/shelf_web_socket
+    path: ../../third_party/dart/third_party/pkg/shelf_web_socket
   source_map_stack_trace:
-    path: ../../dart/third_party/pkg/source_map_stack_trace
+    path: ../../third_party/dart/third_party/pkg/source_map_stack_trace
   source_maps:
-    path: ../../dart/third_party/pkg/source_maps
+    path: ../../third_party/dart/third_party/pkg/source_maps
   stack_trace:
-    path: ../../dart/third_party/pkg/stack_trace
+    path: ../../third_party/dart/third_party/pkg/stack_trace
   stream_channel:
-    path: ../../dart/third_party/pkg/stream_channel
+    path: ../../third_party/dart/third_party/pkg/stream_channel
   string_scanner:
-    path: ../../dart/third_party/pkg/string_scanner
+    path: ../../third_party/dart/third_party/pkg/string_scanner
   test:
-    path: ../../dart/third_party/pkg/test
+    path: ../../third_party/dart/third_party/pkg/test
   utf:
-    path: ../../dart/third_party/pkg/utf
+    path: ../../third_party/dart/third_party/pkg/utf
   watcher:
-    path: ../../dart/third_party/pkg/watcher
+    path: ../../third_party/dart/third_party/pkg/watcher
   web_socket_channel:
-    path: ../../dart/third_party/pkg/web_socket_channel
+    path: ../../third_party/dart/third_party/pkg/web_socket_channel
   when:
     path: ../../third_party/pkg/when
   yaml:
-    path: ../../dart/third_party/pkg/yaml
+    path: ../../third_party/dart/third_party/pkg/yaml

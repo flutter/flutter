@@ -6,7 +6,6 @@
 
 #include <utility>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/settings.h"
 #include "flutter/common/threads.h"
 #include "flutter/glue/trace_event.h"
@@ -27,6 +26,7 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/scopes/dart_api_scope.h"
 #include "lib/tonic/scopes/dart_isolate_scope.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 using tonic::LogIfError;
 using tonic::ToDart;

@@ -8,9 +8,9 @@
 #include <memory>
 #include <vector>
 
-#include "dart/runtime/include/dart_api.h"
 #include "lib/fxl/macros.h"
 #include "lib/tonic/logging/dart_error.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 namespace blink {
 class UIDartState;

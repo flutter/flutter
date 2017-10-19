@@ -4,7 +4,7 @@
 
 #include "flutter/fml/trace_event.h"
 
-#include "dart/runtime/include/dart_tools_api.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace fml {
 namespace tracing {

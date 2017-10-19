@@ -7,9 +7,9 @@
 
 #include <memory>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/shell/common/platform_view.h"
 #include "lib/fxl/synchronization/waitable_event.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 
 namespace shell {

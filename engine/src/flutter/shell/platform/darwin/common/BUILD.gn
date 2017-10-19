@@ -17,7 +17,7 @@ source_set("common") {
   set_sources_assignment_filter(sources_assignment_filter)
 
   deps = [
-    "//dart/runtime:dart_api",
+    "//third_party/dart/runtime:dart_api",
     "$flutter_root/common",
     "$flutter_root/flow",
     "$flutter_root/fml",

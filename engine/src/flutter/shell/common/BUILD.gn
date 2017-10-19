@@ -14,7 +14,7 @@
 #   List datadeps
 template("dart_embedder_resources") {
   action(target_name) {
-    script = "//dart/runtime/tools/create_resources.py"
+    script = "//third_party/dart/runtime/tools/create_resources.py"
     deps = []
     if (defined(invoker.deps)) {
       deps += invoker.deps
@@ -101,8 +101,8 @@ source_set("common") {
 
   deps = [
     ":generate_embedder_diagnostic_server_resources_cc",
-    "//dart/runtime:dart_api",
-    "//dart/runtime/platform:libdart_platform",
+    "//third_party/dart/runtime:dart_api",
+    "//third_party/dart/runtime/platform:libdart_platform",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",

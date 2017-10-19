@@ -16,7 +16,7 @@ group("flutter") {
     if (current_toolchain == host_toolchain) {
       public_deps += [
         "$flutter_root/frontend_server",
-        "//dart:create_sdk",
+        "//third_party/dart:create_sdk",
       ]
     }
   }

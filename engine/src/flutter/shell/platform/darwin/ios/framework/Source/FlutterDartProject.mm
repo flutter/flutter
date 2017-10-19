@@ -4,13 +4,13 @@
 
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartProject_Internal.h"
 
-#include "dart/runtime/include/dart_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/common/switches.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterDartSource.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 #include "lib/fxl/strings/string_view.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 
 static NSURL* URLForSwitch(const fxl::StringView name) {
   const auto& cmd = shell::Shell::Shared().GetCommandLine();

@@ -6,13 +6,13 @@
 
 #include <vector>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/runtime/start_up.h"
 #include "flutter/shell/common/shell.h"
 #include "lib/fxl/arraysize.h"
 #include "lib/fxl/command_line.h"
 #include "lib/fxl/macros.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 

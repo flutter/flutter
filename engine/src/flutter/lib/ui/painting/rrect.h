@@ -5,8 +5,8 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_RRECT_H_
 #define FLUTTER_LIB_UI_PAINTING_RRECT_H_
 
-#include "dart/runtime/include/dart_api.h"
 #include "lib/tonic/converter/dart_converter.h"
+#include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/skia/include/core/SkRRect.h"
 
 namespace blink {

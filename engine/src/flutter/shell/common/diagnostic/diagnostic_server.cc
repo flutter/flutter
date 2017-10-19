@@ -4,8 +4,6 @@
 
 #include "flutter/shell/common/diagnostic/diagnostic_server.h"
 
-#include "dart/runtime/include/dart_api.h"
-#include "dart/runtime/include/dart_native_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/runtime/embedder_resources.h"
@@ -17,6 +15,8 @@
 #include "lib/tonic/dart_binding_macros.h"
 #include "lib/tonic/dart_library_natives.h"
 #include "lib/tonic/logging/dart_invoke.h"
+#include "third_party/dart/runtime/include/dart_api.h"
+#include "third_party/dart/runtime/include/dart_native_api.h"
 #include "third_party/skia/include/core/SkStream.h"
 
 namespace flutter {

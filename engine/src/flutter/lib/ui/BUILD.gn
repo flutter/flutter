@@ -90,7 +90,7 @@ source_set("ui") {
   ]
 
   deps = [
-    "//dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime/bin:embedded_dart_io",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",

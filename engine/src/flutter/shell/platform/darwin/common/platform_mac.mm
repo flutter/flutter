@@ -6,7 +6,6 @@
 
 #include <Foundation/Foundation.h>
 
-#include "dart/runtime/include/dart_tools_api.h"
 #include "flutter/common/threads.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/start_up.h"
@@ -16,6 +15,7 @@
 #include "flutter/sky/engine/wtf/MakeUnique.h"
 #include "lib/fxl/command_line.h"
 #include "lib/fxl/strings/string_view.h"
+#include "third_party/dart/runtime/include/dart_tools_api.h"
 
 namespace shell {
 

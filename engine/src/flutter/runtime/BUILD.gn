@@ -2,11 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//dart/runtime/bin/vmservice/vmservice_sources.gni")
+import("//third_party/dart/runtime/bin/vmservice/vmservice_sources.gni")
 import("$flutter_root/common/config.gni")
 
 action("gen_embedded_resources_cc") {
-  script = "//dart/runtime/tools/create_resources.py"
+  script = "//third_party/dart/runtime/tools/create_resources.py"
   output_file = "$target_gen_dir/embedded_resources.cc"
   outputs = [
     output_file,
@@ -14,7 +14,7 @@ action("gen_embedded_resources_cc") {
 
   inputs = rebase_path(vmservice_sources,
                        "",
-                       "//dart/runtime/bin/vmservice")
+                       "//third_party/dart/runtime/bin/vmservice")
 
   args = [
            "--output",
@@ -26,7 +26,7 @@ action("gen_embedded_resources_cc") {
            "--table_name",
            "flutter_embedded_service_isolate",
            "--root_prefix",
-           rebase_path("//dart/runtime/bin/"),
+           rebase_path("//third_party/dart/runtime/bin/"),
          ] + rebase_path(inputs)
 }
 
@@ -92,8 +92,8 @@ source_set("runtime") {
   deps = [
     ":embedded_resources_cc",
     ":test_font",
-    "//dart/runtime:dart_api",
-    "//dart/runtime/bin:embedded_dart_io",
+    "//third_party/dart/runtime:dart_api",
+    "//third_party/dart/runtime/bin:embedded_dart_io",
     "$flutter_root/assets",
     "$flutter_root/common",
     "$flutter_root/flow",
