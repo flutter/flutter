@@ -196,7 +196,7 @@ void setSystemPagesAccessible(void* addr, size_t len) {
 void decommitSystemPages(void* addr, size_t len) {
   ASSERT(!(len & kSystemPageOffsetMask));
 #if OS(POSIX)
-  if (!madvise(addr, len, MADV_FREE)) {
+  if (madvise(addr, len, MADV_FREE)) {
     FXL_LOG(ERROR) << "Error '" << strerror(errno) << " (" << errno
                    << ")' on madvise(" << addr << "," << len << ",MADV_FREE);";
   }
