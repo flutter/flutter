@@ -23,40 +23,58 @@ import 'package:flutter/widgets.dart';
 ///
 /// See also:
 ///
-///  * [Icon]
+///  * [Icon], used to show these icons.
+///  * <https://github.com/flutter/cupertino_icons/blob/master/map.png>, a map of the
+///    icons in this icons font.
 class CupertinoIcons {
   CupertinoIcons._();
 
+  /// The icon font used for Cupertino icons.
   static const String iconFont = 'CupertinoIcons';
+  /// The dependent package providing the Cupertino icons font.
   static const String iconFontPackage = 'cupertino_icons';
 
   // Manually maintained list
 
+  /// A thin left chevron.
   static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A thin right chevron.
   static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// iOS style share icon with an arrow pointing up from a box.
   static const IconData share = const IconData(0xf4ca, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A book silhouette spread open.
   static const IconData book = const IconData(0xf3e7, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A letter 'i' in a circle.
   static const IconData info = const IconData(0xf44c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A curved up and left pointing arrow.
   static const IconData reply = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A chat bubble.
   static const IconData conversation_bubble = const IconData(0xf3fb, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A person's silhouette in a circle.
   static const IconData profile_circled = const IconData(0xf419, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A '+' sign in a circle.
   static const IconData plus_circled = const IconData(0xf48a, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A '-' sign in a circle.
   static const IconData minus_circled = const IconData(0xf463, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A right facing flag and pole outline.
   static const IconData flag = const IconData(0xf42c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A magnifier loop outline.
   static const IconData search = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A checkmark.
   static const IconData check_mark = const IconData(0xf41e, fontFamily: iconFont, fontPackage: iconFontPackage);
 
+  /// A checkmark in a circle.
   static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
