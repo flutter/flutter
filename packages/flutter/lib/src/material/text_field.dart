@@ -186,7 +186,7 @@ class TextField extends StatefulWidget {
   /// null, the value must be greater than zero.
   final int maxLines;
 
-  /// The maximum number of characters to allow in the text field.
+  /// The maximum number of characters (Unicode runes) to allow in the text field.
   ///
   /// If set, a character counter will be displayed below the
   /// field, showing how many characters have been entered and how many are
@@ -204,6 +204,10 @@ class TextField extends StatefulWidget {
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
   /// characters may be entered, but the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  ///
+  /// See also:
+  ///  * [LengthLimitingTextInputFormatter] for more information on how it
+  ///    counts characters.
   final int maxLength;
 
   /// If true, prevents the field from allowing more than [maxLength]
@@ -271,8 +275,8 @@ class _TextFieldState extends State<TextField> {
       return widget.decoration;
 
     final InputDecoration effectiveDecoration = widget?.decoration ?? const InputDecoration();
-    final String counterText = '${_effectiveController.value.text.length} / ${widget.maxLength}';
-    if (_effectiveController.value.text.length > widget.maxLength) {
+    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    if (_effectiveController.value.text.runes.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
       return effectiveDecoration.copyWith(
         errorText: effectiveDecoration.errorText ?? '',

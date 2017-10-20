@@ -125,6 +125,109 @@ void main() {
       ));
     });
 
+    test('test length limiting formatter with zero-length string', () {
+      testNewValue = const TextEditingValue(
+        text: '',
+        selection: const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      );
+
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(1)
+        .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting the empty string.
+      expect(actualValue, const TextEditingValue(
+        text: '',
+        selection: const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ));
+    });
+
+    test('test length limiting formatter with non-ASCII runes', () {
+      testNewValue = const TextEditingValue(
+        text: '\u{1f984}\u{1f984}\u{1f984}\u{1f984}', // Unicode U+1f984 (UNICORN FACE)
+        selection: const TextSelection(
+          baseOffset: 4,
+          extentOffset: 4,
+        ),
+      );
+
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(2)
+        .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting two runes.
+      expect(actualValue, const TextEditingValue(
+        text: '\u{1f984}\u{1f984}',
+        selection: const TextSelection(
+          baseOffset: 2,
+          extentOffset: 2,
+        ),
+      ));
+    });
+
+
+    test('test length limiting formatter with complex Unicode characters', () {
+      // TODO(gspencer): Test additional strings.  We can do this once the
+      // formatter supports Unicode grapheme clusters.
+      // The following should all be treated as single characters:
+      //  - \u{0058}\u{0346}\u{0361}\u{035E}\u{032A}\u{031C}\u{0333}\u{0326}\u{031D}\u{0332}
+      //  - \u{1F3F3}\u{FE0F}\u{200D}\u{1F308}
+      testNewValue = const TextEditingValue(
+        text: '\u{0000}\u{FEFF}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      );
+      TextEditingValue actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      expect(actualValue, const TextEditingValue(
+        text: '\u{0000}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ));
+
+      testNewValue = const TextEditingValue(
+        text: '\u{1F984}\u{0020}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      );
+      actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      expect(actualValue, const TextEditingValue(
+        text: '\u{1F984}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ));
+
+      testNewValue = const TextEditingValue(
+        text: '\u{0058}\u{0059}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      );
+      actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      expect(actualValue, const TextEditingValue(
+        text: '\u{0058}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ));
+    });
+
+
     test('test length limiting formatter when selection is off the end', () {
       final TextEditingValue actualValue =
       new LengthLimitingTextInputFormatter(2)

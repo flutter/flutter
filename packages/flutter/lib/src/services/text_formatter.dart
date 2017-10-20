@@ -122,22 +122,32 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
       = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
 }
 
-/// A [TextInputFormatter] that prevents the insertion of more characters than allowed.
+/// A [TextInputFormatter] that prevents the insertion of more characters (i.e.
+/// Unicode runes) than allowed.
 ///
-/// Since this formatter only prevents new characters from being added to the text,
-/// it preserves the existing [TextEditingValue.selection].
+/// Since this formatter only prevents new characters from being added to the
+/// text, it preserves the existing [TextEditingValue.selection].
 class LengthLimitingTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that prevents the insertion of more characters than a limit.
+  /// Creates a formatter that prevents the insertion of more characters than a
+  /// limit.
   ///
-  /// The [maxLength] must be null or greater than zero. If it is null, then no limit
-  /// is enforced.
+  /// The [maxLength] must be null or greater than zero. If it is null, then no
+  /// limit is enforced.
   LengthLimitingTextInputFormatter(this.maxLength)
     : assert(maxLength == null || maxLength > 0);
 
-  /// The limit on the number of characters this formatter will allow.
+  /// The limit on the number of characters (i.e. Unicode runes) this formatter
+  /// will allow.
   ///
   /// The value must be null or greater than zero. If it is null, then no limit
   /// is enforced.
+  ///
+  /// This formatter does not currently count Unicode grapheme clusters (i.e.
+  /// characters visible to the user), it counts Unicode runes, which leaves
+  /// out a number of useful possible characters (like many emoji and composed
+  /// characters), so this will be inaccurate in the presence of those
+  /// characters. If you expect to encounter these kinds of characters, be
+  /// generous in the maxLength used.
   final int maxLength;
 
   @override
@@ -145,13 +155,27 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue, // unused.
     TextEditingValue newValue,
   ) {
-    if (maxLength != null && newValue.text.length > maxLength) {
+    if (maxLength != null && newValue.text.runes.length > maxLength) {
       final TextSelection newSelection = newValue.selection.copyWith(
           baseOffset: math.min(newValue.selection.start, maxLength),
           extentOffset: math.min(newValue.selection.end, maxLength),
       );
+      // This does not count grapheme clusters (i.e. characters visible to the user),
+      // it counts Unicode runes, which leaves out a number of useful possible
+      // characters (like many emoji), so this will be inaccurate in the
+      // presence of those characters. The Dart lang bug
+      // https://github.com/dart-lang/sdk/issues/28404 has been filed to
+      // address this in Dart.
+      // TODO(gspencer): convert this to count actual characters when Dart
+      // supports that.
+      final RuneIterator iterator = new RuneIterator(newValue.text);
+      if (iterator.moveNext())
+        for (int count = 0; count < maxLength; ++count)
+          if (!iterator.moveNext())
+            break;
+      final String truncated = newValue.text.substring(0, iterator.rawIndex);
       return new TextEditingValue(
-        text: newValue.text.substring(0, maxLength),
+        text: truncated,
         selection: newSelection,
         composing: TextRange.empty,
       );

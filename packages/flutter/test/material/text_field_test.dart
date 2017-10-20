@@ -1604,8 +1604,16 @@ void main() {
 
     expect(textController.text, '0123456789101112');
     expect(find.text('16 / 10'), findsOneWidget);
-    final Text counterTextWidget = tester.widget(find.text('16 / 10'));
+    Text counterTextWidget = tester.widget(find.text('16 / 10'));
     expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10 / 10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10 / 10'));
+    expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
