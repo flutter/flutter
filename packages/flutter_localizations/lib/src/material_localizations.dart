@@ -7,7 +7,8 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
+// TODO(yjbanov): remove internal import when https://github.com/dart-lang/intl/issues/145 is fixed.
+
 
 import 'l10n/localizations.dart';
 import 'widgets_localizations.dart';
