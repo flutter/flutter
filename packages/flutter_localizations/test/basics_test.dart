@@ -56,7 +56,7 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
   Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
 
   @override
-  isSupported(Locale locale) => true;
+  bool isSupported(Locale locale) => true;
 
   @override
   bool shouldReload(_DummyLocalizationsDelegate old) => true;
