@@ -9,6 +9,12 @@ source_set("common") {
   sources = [
     "buffer_conversions.h",
     "buffer_conversions.mm",
+    "FlutterChannels.h",
+    "FlutterChannels.mm",
+    "FlutterCodecs.h",
+    "FlutterCodecs.mm",
+    "FlutterStandardCodec.mm",
+    "FlutterStandardCodec_internal.h",
     "platform_mac.h",
     "platform_mac.mm",
     "process_info_mac.cc",
