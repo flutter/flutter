@@ -84,4 +84,6 @@ class CupertinoIcons {
   static const IconData home = const IconData(0xf447, fontFamily: iconFont);
 
   static const IconData shopping_cart = const IconData(0xf3f7, fontFamily: iconFont);
+
+  static const IconData ellipsis = const IconData(0xf46a, fontFamily: iconFont);
 }

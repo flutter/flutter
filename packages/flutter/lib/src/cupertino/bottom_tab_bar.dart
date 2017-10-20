@@ -44,7 +44,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor: _kDefaultTabBarBackgroundColor,
     this.activeColor: CupertinoColors.activeBlue,
     this.inactiveColor: CupertinoColors.inactiveGray,
-    this.iconSize: 28.0,
+    this.iconSize: 30.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),

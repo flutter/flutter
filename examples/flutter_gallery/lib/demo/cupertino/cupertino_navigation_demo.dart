@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
@@ -13,44 +14,67 @@ class CupertinoNavigationDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark);
-    return new CupertinoTabScaffold(
-      tabBar: new CupertinoTabBar(
-        items: const <BottomNavigationBarItem>[
-          const BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.home),
-            title: const Text('Tab 1'),
-          ),
-          const BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.shopping_cart),
-            title: const Text('Tab 2'),
-          ),
-          const BottomNavigationBarItem(
-            icon: const Icon(CupertinoIcons.profile_circled),
-            title: const Text('Tab 3'),
-          ),
-        ],
-      ),
-      tabBuilder: (BuildContext context, int index) {
-        return new DefaultTextStyle(
-          style: const TextStyle(
-            fontFamily: 'SF Pro Text',
-            fontSize: 17.0,
-            color: CupertinoColors.black,
-          ),
-          child: new CupertinoTabView(
-            builder: (BuildContext context) {
-              switch (index) {
-                case 0:
-                  return new CupertinoDemoTab1();
-                  break;
-                case 2:
-                  return new CupertinoDemoTab3();
-                  break;
-                default:
+    return new WillPopScope(
+      // Prevent swipe popping of this page. Use explicit exit buttons only.
+      onWillPop: () => new Future<bool>.value(true),
+      child: new CupertinoTabScaffold(
+        tabBar: new CupertinoTabBar(
+          items: const <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.home),
+              title: const Text('Tab 1'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.conversation_bubble),
+              title: const Text('Tab 2'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const Icon(CupertinoIcons.profile_circled),
+              title: const Text('Tab 3'),
+            ),
+          ],
+        ),
+        tabBuilder: (BuildContext context, int index) {
+          return new DefaultTextStyle(
+            style: const TextStyle(
+              fontFamily: '.SF UI Text',
+              fontSize: 17.0,
+              color: CupertinoColors.black,
+            ),
+            child: new CupertinoTabView(
+              builder: (BuildContext context) {
+                switch (index) {
+                  case 0:
+                    return new CupertinoDemoTab1();
+                    break;
+                  case 1:
+                    return new CupertinoDemoTab2();
+                    break;
+                  case 2:
+                    return new CupertinoDemoTab3();
+                    break;
+                  default:
+                }
               }
-            }
-          ),
-        );
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class ExitButton extends StatelessWidget {
+  const ExitButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return new CupertinoButton(
+      padding: EdgeInsets.zero,
+      child: const Text('Exit'),
+      onPressed: () {
+        // The demo is on the root navigator.
+        Navigator.of(context, rootNavigator: true).pop();
       },
     );
   }
@@ -64,6 +88,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
             largeTitle: const Text('Home'),
+            trailing: const ExitButton(),
           ),
           new SliverList(
             delegate: new SliverChildBuilderDelegate(
@@ -211,7 +236,10 @@ class Tab1ItemPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
-      navigationBar: new CupertinoNavigationBar(middle: new Text(colorName)),
+      navigationBar: new CupertinoNavigationBar(
+        middle: new Text(colorName),
+        trailing: const ExitButton(),
+      ),
       child: new Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 80.0),
         child: new Row(children: <Widget>[
@@ -232,10 +260,43 @@ class Tab1ItemPage extends StatelessWidget {
                 colorName,
                 style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
               ),
-              const Padding(padding: const EdgeInsets.only(top: 8.0)),
+              const Padding(padding: const EdgeInsets.only(top: 6.0)),
               new Text(
                 'Item number $index',
-                style: const TextStyle(color: const Color(0xff8e8e93)),
+                style: const TextStyle(
+                  color: const Color(0xff8e8e93),
+                  fontSize: 16.0,
+                  fontWeight: FontWeight.w100,
+                ),
+              ),
+              const Padding(padding: const EdgeInsets.only(top: 20.0)),
+              new Row(
+                children: <Widget>[
+                  new CupertinoButton(
+                    color: CupertinoColors.activeBlue,
+                    minSize: 30.0,
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    borderRadius: new BorderRadius.circular(32.0),
+                    child: const Text(
+                      'GET',
+                      style: const TextStyle(
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.28,
+                      ),
+                    ),
+                    onPressed: () {},
+                  ),
+                  // new Expanded(child: new Container()),
+                  new CupertinoButton(
+                    color: CupertinoColors.activeBlue,
+                    minSize: 30.0,
+                    padding: EdgeInsets.zero,
+                    borderRadius: new BorderRadius.circular(32.0),
+                    child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
+                    onPressed: () {},
+                  ),
+                ],
               )
             ],
           ),
@@ -243,6 +304,214 @@ class Tab1ItemPage extends StatelessWidget {
       ),
     );
   }
+}
+
+class CupertinoDemoTab2 extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new CupertinoPageScaffold(
+      navigationBar: const CupertinoNavigationBar(
+        middle: const Text('Support Chat'),
+        trailing: const ExitButton(),
+      ),
+      child: new ListView(
+        children: <Widget>[
+          const Padding(padding: const EdgeInsets.only(top: 60.0)),
+          new Tab2Header(),
+        ],
+      ),
+    );
+  }
+}
+
+class Tab2Header extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: new ClipRRect(
+        borderRadius: const BorderRadius.all(const Radius.circular(16.0)),
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            new Container(
+              decoration: const BoxDecoration(
+                color: const Color(0xFFE5E5E5),
+              ),
+              child: new Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                child: new Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    const Text(
+                      'PULL REQUEST',
+                      style: const TextStyle(
+                        color: const Color(0xFF646464),
+                        letterSpacing: -0.8,
+                        fontSize: 14.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Text(
+                      'Show More',
+                      style: const TextStyle(
+                        color: const Color(0xFF646464),
+                        letterSpacing: -0.6,
+                        fontSize: 12.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            new Container(
+              decoration: const BoxDecoration(
+                color: const Color(0xFFF3F3F3),
+              ),
+              child: new Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                child: new Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    const Text(
+                      'Add Neural Reading Functions via Implant Interface #204',
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.6,
+                      ),
+                    ),
+                    const Padding(padding: const EdgeInsets.only(top: 16.0)),
+                    const Text(
+                      'REVIEWERS',
+                      style: const TextStyle(
+                        color: const Color(0xFF646464),
+                        fontSize: 12.0,
+                        letterSpacing: -0.6,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const Padding(padding: const EdgeInsets.only(top: 8.0)),
+                    new Row(
+                      children: <Widget>[
+                        new Container(
+                          width: 44.0,
+                          height: 44.0,
+                          decoration: new BoxDecoration(
+                            image: new DecorationImage(
+                              image: const AssetImage('assets/reviewer1.jpeg')
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const Padding(padding: const EdgeInsets.only(left: 2.0)),
+                        new Image(
+                          image: const AssetImage('assets/check-2.png'),
+                          width: 30.0,
+                        ),
+                        const Padding(padding: const EdgeInsets.only(left: 8.0)),
+                        new Container(
+                          width: 44.0,
+                          height: 44.0,
+                          decoration: new BoxDecoration(
+                            image: new DecorationImage(
+                              image: const AssetImage('assets/reviewer4.jpeg')
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const Padding(padding: const EdgeInsets.only(left: 2.0)),
+                        new Image(
+                          image: const AssetImage('assets/comments-2.png'),
+                          width: 30.0,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+enum Tab2ConversationBubbleColor {
+  blue,
+  gray,
+}
+
+class Tab2ConversationBubble extends StatelessWidget {
+  Tab2ConversationBubble({this.text, this.color});
+
+  final String text;
+  final Tab2ConversationBubbleColor color;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      decoration: new BoxDecoration(
+        borderRadius: const BorderRadius.all(const Radius.circular(18.0)),
+        color: color == Tab2ConversationBubbleColor.blue
+            ? CupertinoColors.activeBlue
+            : CupertinoColors.inactiveGray,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+      child: new Text(
+        text,
+        style: new TextStyle(
+          color: color == Tab2ConversationBubbleColor.blue
+              ? CupertinoColors.white
+              : CupertinoColors.black,
+          letterSpacing: -0.4,
+          fontWeight: FontWeight.w300,
+        ),
+      ),
+    );
+  }
+}
+
+class Tab2ConversationAvatar extends StatelessWidget {
+  Tab2ConversationAvatar({this.text, this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      decoration: new BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: new LinearGradient(
+          begin: FractionalOffset.topCenter,
+          end: FractionalOffset.bottomCenter,
+          colors: <Color>[const Color(0xFFFD5015), const Color(0xFFC72008)],
+        ),
+      ),
+      margin: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+      padding: const EdgeInsets.all(12.0),
+      child: new Text(
+        'LA',
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 13.0,
+          fontWeight: FontWeight.w500,
+        ),
+      )
+    );
+  }
+}
+
+List<Widget> buildTab2Conversation() {
+
+}
+
+class Tab2Conversation extends StatelessWidget {
+
 }
 
 class CupertinoDemoTab3 extends StatefulWidget {
@@ -258,6 +527,7 @@ class CupertinoDemoTab3State extends State<CupertinoDemoTab3> {
     return new CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         middle: const Text('Account'),
+        trailing: const ExitButton(),
       ),
       child: new DecoratedBox(
         decoration: const BoxDecoration(color: const Color(0xffefeff4)),
