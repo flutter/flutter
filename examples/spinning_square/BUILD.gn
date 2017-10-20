@@ -10,6 +10,6 @@ flutter_app("spinning_square") {
   disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "//third_party/dart-pkg/git/flutter/packages/flutter",
   ]
 }
