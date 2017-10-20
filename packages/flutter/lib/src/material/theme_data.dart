@@ -137,9 +137,9 @@ class ThemeData {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     platform ??= defaultTargetPlatform;
     final Typography typography = new Typography(platform: platform);
-    textTheme ??= (isDark ? typography.white : typography.black).apply(decoration: TextDecoration.none);
-    primaryTextTheme ??= (primaryIsDark ? typography.white : typography.black).apply(decoration: TextDecoration.none);
-    accentTextTheme ??= (accentIsDark ? typography.white : typography.black).apply(decoration: TextDecoration.none);
+    textTheme ??= isDark ? typography.white : typography.black;
+    primaryTextTheme ??= primaryIsDark ? typography.white : typography.black;
+    accentTextTheme ??= accentIsDark ? typography.white : typography.black;
     if (fontFamily != null) {
       textTheme = textTheme.apply(fontFamily: fontFamily);
       primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);

@@ -232,13 +232,11 @@ class TextStyle extends Diagnosticable {
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
-    String debugLabel,
+    this.debugLabel,
     String fontFamily,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
-       debugLabel = debugLabel == null ? _kDefaultDebugLabel : debugLabel,
-       assert(inherit != null),
-       assert(debugLabel == null || debugLabel.length <= 100);
+       assert(inherit != null);
 
 
   /// Whether null values are replaced with their value in an ancestor text
@@ -309,6 +307,13 @@ class TextStyle extends Diagnosticable {
 
   /// A human-readable description of this text style.
   ///
+  /// This property is maintained only in debug builds.
+  ///
+  /// When merging ([merge]), copying ([copyWith]), modifying using [apply], or
+  /// interpolating ([lerp]), the label of the resulting style is marked with
+  /// the debug labels of the original styles. This helps figuring out where a
+  /// particular text style came from.
+  ///
   /// This property is not considered when comparing text styles using `==` or
   /// [compareTo], and it does not affect [hashCode].
   final String debugLabel;
@@ -332,8 +337,8 @@ class TextStyle extends Diagnosticable {
   }) {
     String newDebugLabel;
     assert(() {
-      if (this.debugLabel != _kDefaultDebugLabel)
-        newDebugLabel = _capDebugLabelLength(debugLabel ?? 'copy of ${this.debugLabel}');
+      if (this.debugLabel != null)
+        newDebugLabel = debugLabel ?? 'copy of ${this.debugLabel}';
       return true;
     }());
     return new TextStyle(
@@ -352,14 +357,6 @@ class TextStyle extends Diagnosticable {
       decorationStyle: decorationStyle ?? this.decorationStyle,
       debugLabel: newDebugLabel,
     );
-  }
-
-  static String _capDebugLabelLength(String label) {
-    const int maxLabelLength = 100;
-    if (label.length > maxLabelLength) {
-      return '${label.substring(0, maxLabelLength - 3)}...';
-    }
-    return label;
   }
 
   /// Creates a copy of this text style replacing or altering the specified
@@ -416,8 +413,8 @@ class TextStyle extends Diagnosticable {
 
     String modifiedDebugLabel;
     assert(() {
-      if (debugLabel != _kDefaultDebugLabel)
-        modifiedDebugLabel = _capDebugLabelLength('modified $debugLabel');
+      if (debugLabel != null)
+        modifiedDebugLabel = 'modified $debugLabel';
       return true;
     }());
 
@@ -440,19 +437,19 @@ class TextStyle extends Diagnosticable {
   }
 
   /// Returns a new text style that is a combination of this style and the given
-  /// [other] style, following the following rules.
+  /// [other] style.
   ///
   /// If the given [other] text style has its [TextStyle.inherit] set to true,
   /// its null properties are replaced with the non-null properties of this text
-  /// style. It is said that the [other] style inherits properties of this
-  /// style. Another way to think of it is that the "missing" properties of the
-  /// [other] style are filled by the properties of this style.
+  /// style. The [other] style _inherits_ the properties of this style. Another
+  /// way to think of it is that the "missing" properties of the [other] style
+  /// are _filled_ by the properties of this style.
   ///
   /// If the given [other] text style has its [TextStyle.inherit] set to false,
-  /// simply returns the given [other] style unchanged. It is said that the
-  /// [other] style does not inherit properties of this style.
+  /// returns the given [other] style unchanged. The [other] style does not
+  /// inherit properties of this style.
   ///
-  /// If the given text style is null, simply returns this text style.
+  /// If the given text style is null, returns this text style.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
@@ -461,7 +458,8 @@ class TextStyle extends Diagnosticable {
 
     String mergedDebugLabel;
     assert(() {
-      mergedDebugLabel = _capDebugLabelLength('${other.debugLabel} < $debugLabel');
+      if (other.debugLabel != null || debugLabel != null)
+        mergedDebugLabel = '${other.debugLabel ?? _kDefaultDebugLabel} < ${debugLabel ?? _kDefaultDebugLabel}';
       return true;
     }());
 
@@ -490,7 +488,7 @@ class TextStyle extends Diagnosticable {
 
     String lerpDebugLabel;
     assert(() {
-      lerpDebugLabel = _capDebugLabelLength('lerp(${begin.debugLabel}, ${end.debugLabel})');
+      lerpDebugLabel = 'lerp(${begin.debugLabel ?? _kDefaultDebugLabel}, ${end.debugLabel ?? _kDefaultDebugLabel})';
       return true;
     }());
 
@@ -635,8 +633,8 @@ class TextStyle extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
     super.debugFillProperties(properties);
-    if (debugLabel != _kDefaultDebugLabel)
-      properties.add(new StringProperty('${prefix}debugLabel', debugLabel, defaultValue: null));
+    if (debugLabel != null)
+      properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));

@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/foundation/diagnostics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -397,7 +399,7 @@ void main() {
     }
 
     for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme)) {
+      for (TextStyle style in extractStyles(textTheme).map((TextStyle style) => new _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -411,6 +413,7 @@ void main() {
         expect(style.decoration, TextDecoration.none);
         expect(style.decorationColor, null);
         expect(style.decorationStyle, null);
+        expect(style.debugLabel, null);
       }
     }
   });
@@ -433,5 +436,75 @@ class _TestState extends State<Test> {
         color: Theme.of(context).primaryColor,
       ),
     );
+  }
+}
+
+/// This class exists only to make sure that we test all the properties of the
+/// [TextStyle] class. If a property is added/removed/renamed, the analyzer will
+/// complain that this class has incorrect overrides.
+class _TextStyleProxy implements TextStyle {
+  _TextStyleProxy(this._delegate);
+
+  final TextStyle _delegate;
+
+  // Do make sure that all the properties correctly forward to the _delegate.
+  @override Color get color => _delegate.color;
+  @override String get debugLabel => _delegate.debugLabel;
+  @override TextDecoration get decoration => _delegate.decoration;
+  @override Color get decorationColor => _delegate.decorationColor;
+  @override TextDecorationStyle get decorationStyle => _delegate.decorationStyle;
+  @override String get fontFamily => _delegate.fontFamily;
+  @override double get fontSize => _delegate.fontSize;
+  @override FontStyle get fontStyle => _delegate.fontStyle;
+  @override FontWeight get fontWeight => _delegate.fontWeight;
+  @override double get height => _delegate.height;
+  @override bool get inherit => _delegate.inherit;
+  @override double get letterSpacing => _delegate.letterSpacing;
+  @override TextBaseline get textBaseline => _delegate.textBaseline;
+  @override double get wordSpacing => _delegate.wordSpacing;
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({String name, DiagnosticsTreeStyle style}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  String toStringShort() {
+    throw new UnimplementedError();
+  }
+
+  @override
+  TextStyle apply({Color color, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String fontFamily, double fontSizeFactor: 1.0, double fontSizeDelta: 0.0, int fontWeightDelta: 0, double letterSpacingFactor: 1.0, double letterSpacingDelta: 0.0, double wordSpacingFactor: 1.0, double wordSpacingDelta: 0.0, double heightFactor: 1.0, double heightDelta: 0.0}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  RenderComparison compareTo(TextStyle other) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  TextStyle copyWith({Color color, String fontFamily, double fontSize, FontWeight fontWeight, FontStyle fontStyle, double letterSpacing, double wordSpacing, TextBaseline textBaseline, double height, TextDecoration decoration, Color decorationColor, TextDecorationStyle decorationStyle, String debugLabel}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, {String prefix: ''}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  ui.ParagraphStyle getParagraphStyle({TextAlign textAlign, TextDirection textDirection, double textScaleFactor: 1.0, String ellipsis, int maxLines}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  ui.TextStyle getTextStyle({double textScaleFactor: 1.0}) {
+    throw new UnimplementedError();
+  }
+
+  @override
+  TextStyle merge(TextStyle other) {
+    throw new UnimplementedError();
   }
 }
