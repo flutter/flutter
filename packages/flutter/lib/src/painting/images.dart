@@ -117,6 +117,16 @@ class DecorationImage {
   /// in the top right.
   final bool matchTextDirection;
 
+  /// Creates a [DecorationImagePainter] for this [DecorationImage].
+  ///
+  /// The `onChanged` argument must not be null. It will be called whenever the
+  /// image needs to be repainted, e.g. because it is loading incrementally or
+  /// because it is animated.
+  DecorationImagePainter createPainter(VoidCallback onChanged) {
+    assert(onChanged != null);
+    return new DecorationImagePainter._(this, onChanged);
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
@@ -154,6 +164,106 @@ class DecorationImage {
     if (matchTextDirection)
       properties.add('match text direction');
     return '$runtimeType(${properties.join(", ")})';
+  }
+}
+
+/// The painter for a [DecorationImage].
+///
+/// To obtain a painter, call [DecorationImage.createPainter].
+///
+/// To paint, call [paint]. The `onChanged` callback passed to
+/// [DecorationImage.createPainter] will be called if the image needs to paint
+/// again (e.g. because it is animated or because it had not yet loaded the
+/// first time the [paint] method was called).
+///
+/// This object should be disposed using the [dispose] method when it is no
+/// longer needed.
+class DecorationImagePainter {
+  DecorationImagePainter._(this._details, this._onChanged);
+
+  final DecorationImage _details;
+  final VoidCallback _onChanged;
+
+  ImageStream _imageStream;
+  ImageInfo _image;
+
+  void paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
+    if (_details == null)
+      return;
+
+    assert(canvas != null);
+    assert(rect != null);
+    assert(configuration != null);
+
+    bool flipHorizontally = false;
+    if (_details.matchTextDirection) {
+      assert(() {
+        // We check this first so that the assert will fire immediately, not just
+        // when the image is ready.
+        if (configuration.textDirection == null) {
+          throw new FlutterError(
+            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
+            'When DecorationImagePainter.paint() was called, there was no text direction provided '
+            'in the ImageConfiguration object to match.\n'
+            'The DecorationImage was:\n'
+            '  $_details\n'
+            'The ImageConfiguration was:\n'
+            '  $configuration'
+          );
+        }
+        return true;
+      }());
+      if (configuration.textDirection == TextDirection.rtl)
+        flipHorizontally = true;
+    }
+
+    final ImageStream newImageStream = _details.image.resolve(configuration);
+    if (newImageStream.key != _imageStream?.key) {
+      _imageStream?.removeListener(_imageListener);
+      _imageStream = newImageStream;
+      _imageStream.addListener(_imageListener);
+    }
+    if (_image == null)
+      return;
+
+    if (clipPath != null) {
+      canvas.save();
+      canvas.clipPath(clipPath);
+    }
+
+    paintImage(
+      canvas: canvas,
+      rect: rect,
+      image: _image.image,
+      colorFilter: _details.colorFilter,
+      fit: _details.fit,
+      alignment: _details.alignment.resolve(configuration.textDirection),
+      centerSlice: _details.centerSlice,
+      repeat: _details.repeat,
+      flipHorizontally: flipHorizontally,
+    );
+
+    if (clipPath != null)
+      canvas.restore();
+  }
+
+  void _imageListener(ImageInfo value, bool synchronousCall) {
+    if (_image == value)
+      return;
+    _image = value;
+    assert(_onChanged != null);
+    if (!synchronousCall)
+      _onChanged();
+  }
+
+  /// Releases the resources used by this painter.
+  ///
+  /// This should be called whenever the painter is no longer needed.
+  ///
+  /// After this method has been called, the object is no longer usable.
+  @mustCallSuper
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
   }
 }
 
