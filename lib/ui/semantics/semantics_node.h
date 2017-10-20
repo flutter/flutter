@@ -38,6 +38,7 @@ enum class SemanticsFlags : int32_t {
   kHasCheckedState = 1 << 0,
   kIsChecked = 1 << 1,
   kIsSelected = 1 << 2,
+  kIsButton = 1 << 3,
 };
 
 struct SemanticsNode {

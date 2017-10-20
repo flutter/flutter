@@ -56,6 +56,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     private static final int SEMANTICS_FLAG_HAS_CHECKED_STATE = 1 << 0;
     private static final int SEMANTICS_FLAG_IS_CHECKED = 1 << 1;
     private static final int SEMANTICS_FLAG_IS_SELECTED = 1 << 2;
+    private static final int SEMANTICS_FLAG_IS_BUTTON = 1 << 3;
 
     AccessibilityBridge(FlutterView owner) {
         assert owner != null;
@@ -158,6 +159,10 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         result.setChecked((object.flags & SEMANTICS_FLAG_IS_CHECKED) != 0);
         result.setSelected((object.flags & SEMANTICS_FLAG_IS_SELECTED) != 0);
         result.setText(object.label);
+
+        if ((object.flags & SEMANTICS_FLAG_IS_BUTTON) != 0) {
+          result.setClassName("android.widget.Button");
+        }
 
         // Accessibility Focus
         if (mFocusedObject != null && mFocusedObject.id == virtualViewId) {
