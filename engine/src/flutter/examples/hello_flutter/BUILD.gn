@@ -10,7 +10,7 @@ flutter_jit_app("hello_flutter") {
   disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "//third_party/dart-pkg/git/flutter/packages/flutter",
   ]
 }
 
@@ -20,6 +20,6 @@ flutter_aot_app("hello_flutter_aot") {
   disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "//third_party/dart-pkg/git/flutter/packages/flutter",
   ]
 }

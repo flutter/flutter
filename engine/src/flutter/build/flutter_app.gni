@@ -18,7 +18,7 @@ gen_snapshot_label = "//third_party/dart/runtime/bin:gen_snapshot($host_toolchai
 gen_snapshot_dir = get_label_info(gen_snapshot_label, "root_out_dir")
 gen_snapshot = "$gen_snapshot_dir/gen_snapshot"
 
-flutter_base = "//lib/flutter"
+flutter_base = "//third_party/dart-pkg/git/flutter"
 flutter_tools_label =
     "$flutter_base/packages/flutter_tools:fuchsia_builder($host_toolchain)"
 flutter_tools_out_dir = get_label_info(flutter_tools_label, "root_out_dir")

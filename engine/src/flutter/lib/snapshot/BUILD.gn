@@ -19,9 +19,9 @@ import("//third_party/dart/runtime/lib/typed_data_sources.gni")
 import("//third_party/dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
-  import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
   import("//topaz/public/dart-pkg/fuchsia/sdk_ext.gni")
   import("//topaz/public/dart-pkg/zircon/sdk_ext.gni")
+  import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
 }
 
 bindings_output_dir = "$root_gen_dir/sky/bindings"
@@ -37,9 +37,9 @@ copy("generate_dart_ui") {
 if (is_fuchsia) {
   action("generate_package_map") {
     dart_deps = [
+      "//third_party/dart-pkg/git/flutter/packages/flutter:flutter",
       "//topaz/public/lib/app/dart:dart",
       "//topaz/public/lib/fidl/dart",
-      "//lib/flutter/packages/flutter:flutter",
     ]
 
     dot_packages_file = "$target_gen_dir/snapshot.packages"
