@@ -164,9 +164,6 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 - (UIAccessibilityTraits)accessibilityTraits {
   UIAccessibilityTraits traits = UIAccessibilityTraitNone;
-  if (_node.HasAction(blink::SemanticsAction::kTap)) {
-    traits |= UIAccessibilityTraitButton;
-  }
   if (_node.HasAction(blink::SemanticsAction::kIncrease) ||
       _node.HasAction(blink::SemanticsAction::kDecrease)) {
     traits |= UIAccessibilityTraitAdjustable;
@@ -174,6 +171,9 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   if (_node.HasFlag(blink::SemanticsFlags::kIsSelected) ||
       _node.HasFlag(blink::SemanticsFlags::kIsChecked)) {
     traits |= UIAccessibilityTraitSelected;
+  }
+  if (_node.HasFlag(blink::SemanticsFlags::kIsButton)) {
+    traits |= UIAccessibilityTraitButton;
   }
   return traits;
 }

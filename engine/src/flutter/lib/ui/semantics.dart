@@ -123,6 +123,7 @@ class SemanticsFlags {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
+  static const int _kIsButton = 1 << 3;
 
   const SemanticsFlags._(this.index);
 
@@ -152,6 +153,13 @@ class SemanticsFlags {
   ///
   /// For example, the active tab in a tab bar has [isSelected] set to true.
   static const SemanticsFlags isSelected = const SemanticsFlags._(_kIsSelectedIndex);
+
+  /// Whether the semantic node represents a button.
+  ///
+  /// Platforms has special handling for buttons, for example Android's TalkBack
+  /// and iOS's VoiceOver provides an additional hint when the focused object is
+  /// a button.
+  static const SemanticsFlags isButton = const SemanticsFlags._(_kIsButton);
 
   /// The possible semantics flags.
   ///
