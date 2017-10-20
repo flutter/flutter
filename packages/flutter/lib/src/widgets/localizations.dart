@@ -42,13 +42,12 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   final Map<Type, dynamic> output = <Type, dynamic>{};
   List<_Pending> pendingList;
 
-  // Only load the first delegate for each delgate type that supports
+  // Only load the first delegate for each delegate type that supports
   // locale.languageCode.
-  //
   final Set<Type> types = new Set<Type>();
   final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
   for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
-    if (delegate.isSupported(locale) && !types.contains(delegate.type)) {
+    if (!types.contains(delegate.type) && delegate.isSupported(locale)) {
       types.add(delegate.type);
       delegates.add(delegate);
     }
@@ -99,11 +98,11 @@ abstract class LocalizationsDelegate<T> {
   /// const constructors so that they can be used in const expressions.
   const LocalizationsDelegate();
 
-  /// Return true if the instance of 'T' loaded by this delegate's [load]
+  /// Whether resources for the given locale can be loaded by this delegate.
+  ///
+  /// Return true if the instance of `T` loaded by this delegate's [load]
   /// method supports the given `locale`'s language.
-  bool isSupported(Locale locale) => true;
-  // TODO(hansmuller): remove the default implementation after existing
-  // apps have had a chance to update.
+  bool isSupported(Locale locale);
 
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have finished loading.
@@ -172,7 +171,7 @@ abstract class WidgetsLocalizations {
 class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   const _WidgetsLocalizationsDelegate();
 
-  // This is convenient simplification. It would be more correct test if locale's
+  // This is convenient simplification. It would be more correct test if the locale's
   // text-direction is LTR.
   @override
   bool isSupported(Locale locale) => true;
