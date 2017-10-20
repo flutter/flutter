@@ -24,6 +24,29 @@ void main() {
       'TestSemanticsEvent(number: 10, text: hello)',
     );
   });
+  test('SemanticsEvent.toMap', () {
+    expect(
+      new TestSemanticsEvent(text: 'hi', number: 11).toMap(),
+      <String, dynamic> {
+        'type': 'TestEvent',
+        'data': <String, dynamic> {
+          'text': 'hi',
+          'number': 11
+        }
+      }
+    );
+    expect(
+      new TestSemanticsEvent(text: 'hi', number: 11).toMap(nodeId: 123),
+      <String, dynamic> {
+        'type': 'TestEvent',
+        'nodeId': 123,
+        'data': <String, dynamic> {
+          'text': 'hi',
+          'number': 11
+        }
+      }
+    );
+  });
 }
 
 class TestSemanticsEvent extends SemanticsEvent {
@@ -33,7 +56,7 @@ class TestSemanticsEvent extends SemanticsEvent {
   final int number;
 
   @override
-  Map<String, dynamic> toMap() {
+  Map<String, dynamic> getDataMap() {
     final Map<String, dynamic> result = <String, dynamic>{};
     if (text != null)
       result['text'] = text;
