@@ -3176,6 +3176,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool selected,
     bool button,
     String label,
+    String value,
+    String hint,
     TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
@@ -3184,6 +3186,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _selected = selected,
        _button = button,
        _label = label,
+       _value = value,
+       _hint = hint,
        _textDirection = textDirection,
        super(child);
 
@@ -3254,9 +3258,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   String get label => _label;
   String _label;
   set label(String value) {
-    if (label == value)
+    if (_label == value)
       return;
-    final bool hadValue = label != null;
+    final bool hadValue = _label != null;
     _label = value;
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
@@ -3269,6 +3273,26 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       return;
     final bool hadValue = button != null;
     _button = value;
+
+  /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
+  String get value => _value;
+  String _value;
+  set value(String value) {
+    if (_value == value)
+      return;
+    final bool hadValue = _value != null;
+    _value = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  String get hint => _hint;
+  String _hint;
+  set hint(String value) {
+    if (_hint == value)
+      return;
+    final bool hadValue = _hint != null;
+    _hint = value;
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
@@ -3296,6 +3320,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (label != null)
       config.label = label;
+    if (value != null)
+      config.value = value;
+    if (hint != null)
+      config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
     if (button != null)

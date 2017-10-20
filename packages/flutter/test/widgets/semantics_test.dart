@@ -220,4 +220,33 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
   });
+
+  testWidgets('Semantics label and hint', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          label: 'label',
+          hint: 'hint',
+          value: 'value',
+          child: new Container(),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            label: 'label',
+            hint: 'hint',
+            value: 'value',
+            textDirection: TextDirection.ltr,
+          )
+        ]
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+  });
 }

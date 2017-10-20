@@ -4453,6 +4453,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.selected,
     this.button,
     this.label,
+    this.value,
+    this.hint,
     this.textDirection,
   }) : assert(container != null),
        super(key: key, child: child);
@@ -4504,7 +4506,20 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// or an explicit [textDirection] should be provided.
   final String label;
 
-  /// The reading direction of the [label].
+  /// Provides a textual description of value of the widget.
+  ///
+  /// If a value is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  final String value;
+
+  /// Provides a brief textual description of the result of an action performed
+  /// on the widget.
+  ///
+  /// If a hint is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  final String hint;
+
+  /// The reading direction of the [label], [value], and [hint].
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
@@ -4520,8 +4535,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       explicitChildNodes: explicitChildNodes,
       checked: checked,
       selected: selected,
-      label: label,
       button: button,
+      label: label,
+      value: value,
+      hint: hint,
       textDirection: _getTextDirection(context),
     );
   }
@@ -4534,6 +4551,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..checked = checked
       ..selected = selected
       ..label = label
+      ..value = value
+      ..hint = hint
       ..textDirection = _getTextDirection(context);
   }
 
@@ -4544,6 +4563,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new StringProperty('value', value));
+    description.add(new StringProperty('hint', hint));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
