@@ -7,14 +7,17 @@ import 'package:flutter/services.dart';
 import 'package:{{pluginProjectName}}/{{pluginProjectName}}.dart';
 {{/withPluginHook}}
 
-void main() {
+{{^withDriverTest}}
+void main() => runApp(new MyApp());
+{{/withDriverTest}}
 {{#withDriverTest}}
+void main() {
   // Enable integration testing with the Flutter Driver extension.
   // See https://flutter.io/testing/ for more info.
   enableFlutterDriverExtension();
-{{/withDriverTest}}
   runApp(new MyApp());
 }
+{{/withDriverTest}}
 
 {{^withPluginHook}}
 class MyApp extends StatelessWidget {
