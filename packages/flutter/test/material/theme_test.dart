@@ -413,9 +413,11 @@ void main() {
         expect(style.decoration, TextDecoration.none);
         expect(style.decorationColor, null);
         expect(style.decorationStyle, null);
-        expect(style.debugLabel, null);
+        expect(style.debugLabel, isNotNull);
       }
     }
+
+    expect(theme.textTheme.display4.debugLabel, 'blackMountainView display4 < englishLike display4');
   });
 }
 
