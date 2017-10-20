@@ -229,7 +229,7 @@ class LocalEngineArtifacts extends Artifacts {
   String getArtifactPath(Artifact artifact, [TargetPlatform platform, BuildMode mode]) {
     switch (artifact) {
       case Artifact.dartIoEntriesTxt:
-        return fs.path.join(_engineSrcPath, 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
+        return fs.path.join(_engineSrcPath, 'third_party', 'dart', 'runtime', 'bin', _artifactToFileName(artifact));
       case Artifact.dartVmEntryPointsTxt:
         return fs.path.join(_engineSrcPath, 'flutter', 'runtime', _artifactToFileName(artifact));
       case Artifact.snapshotDart:
