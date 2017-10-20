@@ -4437,6 +4437,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.explicitChildNodes: false,
     this.checked,
     this.selected,
+    this.button,
     this.label,
     this.textDirection,
   }) : assert(container != null),
@@ -4477,6 +4478,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// all other tabs are unselected.
   final bool selected;
 
+  /// If non-null, indicates that this subtree represents a button.
+  final bool button;
+
   /// Provides a textual description of the widget.
   ///
   /// If a label is provided, there must either by an ambient [Directionality]
@@ -4500,6 +4504,7 @@ class Semantics extends SingleChildRenderObjectWidget {
       checked: checked,
       selected: selected,
       label: label,
+      button: button,
       textDirection: _getTextDirection(context),
     );
   }
