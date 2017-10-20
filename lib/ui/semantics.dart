@@ -123,7 +123,7 @@ class SemanticsFlags {
   static const int _kHasCheckedStateIndex = 1 << 0;
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
-  static const int _kIsButton = 1 << 3;
+  static const int _kIsButtonIndex = 1 << 3;
 
   const SemanticsFlags._(this.index);
 
@@ -159,7 +159,7 @@ class SemanticsFlags {
   /// Platforms has special handling for buttons, for example Android's TalkBack
   /// and iOS's VoiceOver provides an additional hint when the focused object is
   /// a button.
-  static const SemanticsFlags isButton = const SemanticsFlags._(_kIsButton);
+  static const SemanticsFlags isButton = const SemanticsFlags._(_kIsButtonIndex);
 
   /// The possible semantics flags.
   ///
@@ -168,6 +168,7 @@ class SemanticsFlags {
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
+    _kIsButtonIndex: isButton
   };
 
   @override
@@ -179,6 +180,8 @@ class SemanticsFlags {
         return 'SemanticsFlags.isChecked';
       case _kIsSelectedIndex:
         return 'SemanticsFlags.isSelected';
+      case _kIsButtonIndex:
+        return 'SemanticsFlags.isButton';
     }
     return null;
   }
