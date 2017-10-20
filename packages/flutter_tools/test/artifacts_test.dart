@@ -79,7 +79,7 @@ void main() {
     testUsingContext('getArtifactPath', () {
       expect(
           artifacts.getArtifactPath(Artifact.dartIoEntriesTxt, TargetPlatform.android_arm, BuildMode.debug),
-          fs.path.join(tempDir.path, 'dart', 'runtime', 'bin', 'dart_io_entries.txt')
+          fs.path.join(tempDir.path, 'third_party', 'dart', 'runtime', 'bin', 'dart_io_entries.txt')
       );
       expect(
           artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, BuildMode.release),
