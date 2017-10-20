@@ -10,7 +10,7 @@ dart_package("flutter_test") {
   disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "../flutter",
     "//third_party/dart-pkg/pub/quiver",
     "//third_party/dart-pkg/pub/test",
   ]
