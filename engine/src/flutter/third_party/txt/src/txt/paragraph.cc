@@ -132,12 +132,12 @@ void FindWords(const std::vector<uint16_t>& text,
       word_start = i;
       in_word = true;
     } else if (in_word && is_space) {
-      words->emplace_back(word_start - start, i - start);
+      words->emplace_back(word_start, i);
       in_word = false;
     }
   }
   if (in_word)
-    words->emplace_back(word_start - start, end - start);
+    words->emplace_back(word_start, end);
 }
 
 }  // namespace
@@ -318,6 +318,7 @@ void Paragraph::Layout(double width, bool force) {
 
     std::vector<GlyphPosition> glyph_single_line_position_x;
     double run_x_offset = GetLineXOffset(line_number);
+    double justify_x_offset = 0;
     std::vector<PaintRecord> paint_records;
 
     for (const StyledRuns::Run& run : line_runs) {
@@ -393,7 +394,6 @@ void Paragraph::Layout(double width, bool force) {
         blob_start += blob_len;
       }
 
-      double justify_x_offset = 0;
       size_t code_unit_index = 0;
       double word_start_position = std::numeric_limits<double>::quiet_NaN();
 
@@ -413,7 +413,7 @@ void Paragraph::Layout(double width, bool force) {
           blob_buffer.pos[pos_index + 1] = layout.getY(glyph_index);
 
           if (word_index < words.size() &&
-              code_unit_index == words[word_index].start) {
+              words[word_index].start == line_run_start + code_unit_index) {
             word_start_position = run_x_offset + glyph_x_offset;
           }
 
@@ -448,7 +448,7 @@ void Paragraph::Layout(double width, bool force) {
           }
 
           if (word_index < words.size() &&
-              code_unit_index == words[word_index].end) {
+              words[word_index].end == line_run_start + code_unit_index) {
             if (justify_line)
               justify_x_offset += word_gap_width;
             word_index++;
