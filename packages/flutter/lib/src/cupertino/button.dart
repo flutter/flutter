@@ -190,6 +190,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color backgroundColor = widget.color;
 
     return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: enabled ? _handleTapDown : null,
       onTapUp: enabled ? _handleTapUp : null,
       onTapCancel: enabled ? _handleTapCancel : null,
