@@ -70,16 +70,16 @@ class CupertinoIcons {
   static const IconData flag = const IconData(0xf42c, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A magnifier loop outline.
-  static const IconData search = const IconData(0xf4c6, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData search = const IconData(0xf4a5, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A checkmark.
-  static const IconData check_mark = const IconData(0xf41e, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData check_mark = const IconData(0xf3fd, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A checkmark in a circle.
-  static const IconData check_mark_circled = const IconData(0xf41f, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData check_mark_circled = const IconData(0xf3fe, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A thicker left chevron used in iOS for the nav bar back button.
-  static const IconData back = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   static const IconData home = const IconData(0xf447, fontFamily: iconFont);
 

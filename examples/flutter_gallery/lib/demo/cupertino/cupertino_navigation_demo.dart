@@ -53,7 +53,7 @@ class CupertinoNavigationDemo extends StatelessWidget {
                     break;
                   default:
                 }
-              }
+              },
             ),
           );
         },
@@ -85,7 +85,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
       child: new CustomScrollView(
         slivers: <Widget>[
           const CupertinoSliverNavigationBar(
-            largeTitle: const Text('Home'),
+            largeTitle: const Text('Colors'),
             trailing: const ExitButton(),
           ),
           new SliverList(
@@ -154,7 +154,7 @@ class Tab1RowItemState extends State<Tab1RowItem> {
         ));
       },
       child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+        padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
         child: new Row(
           children: <Widget>[
             new Container(
@@ -177,7 +177,8 @@ class Tab1RowItemState extends State<Tab1RowItem> {
                       'Buy this cool color',
                       style: const TextStyle(
                         color: const Color(0xFF8E8E93),
-                        fontSize: 14.0,
+                        fontSize: 13.0,
+                        fontWeight: FontWeight.w300,
                       ),
                     ),
                   ],
@@ -210,14 +211,10 @@ class Tab1RowItemState extends State<Tab1RowItem> {
       return new Column(
         children: <Widget>[
           row,
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 92.0),
-            child: new Container(
-              height: 1.0,
-              color: const Color(0xFFD9D9D9),
-            )
-          )
-
+          new Container(
+            height: 1.0,
+            color: const Color(0xFFD9D9D9),
+          ),
         ],
       );
     }
@@ -225,11 +222,12 @@ class Tab1RowItemState extends State<Tab1RowItem> {
 }
 
 class Tab1ItemPage extends StatelessWidget {
-  Tab1ItemPage({this.color, this.colorName, this.index});
+  Tab1ItemPage({this.color, this.colorName, this.index}) : random = new math.Random();
 
   final Color color;
   final String colorName;
   final int index;
+  final math.Random random;
 
   @override
   Widget build(BuildContext context) {
@@ -238,72 +236,123 @@ class Tab1ItemPage extends StatelessWidget {
         middle: new Text(colorName),
         trailing: const ExitButton(),
       ),
-      child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 80.0),
-        child: new Row(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            new Container(
-              height: 128.0,
-              width: 128.0,
-              decoration: new BoxDecoration(
-                color: color,
-                borderRadius: new BorderRadius.circular(24.0),
-              ),
-            ),
-            const Padding(padding: const EdgeInsets.only(left: 18.0)),
-            new Expanded(
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  new Text(
-                    colorName,
-                    style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
+      child: new ListView(
+        children: <Widget>[
+          const Padding(padding: const EdgeInsets.only(top: 80.0)),
+          new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: new Row(
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
+                new Container(
+                  height: 128.0,
+                  width: 128.0,
+                  decoration: new BoxDecoration(
+                    color: color,
+                    borderRadius: new BorderRadius.circular(24.0),
                   ),
-                  const Padding(padding: const EdgeInsets.only(top: 6.0)),
-                  new Text(
-                    'Item number $index',
-                    style: const TextStyle(
-                      color: const Color(0xFF8E8E93),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w100,
-                    ),
-                  ),
-                  const Padding(padding: const EdgeInsets.only(top: 20.0)),
-                  new Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                ),
+                const Padding(padding: const EdgeInsets.only(left: 18.0)),
+                new Expanded(
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      new CupertinoButton(
-                        color: CupertinoColors.activeBlue,
-                        minSize: 30.0,
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        borderRadius: new BorderRadius.circular(32.0),
-                        child: const Text(
-                          'GET',
-                          style: const TextStyle(
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: -0.28,
-                          ),
-                        ),
-                        onPressed: () {},
+                      new Text(
+                        colorName,
+                        style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                       ),
-                      new CupertinoButton(
-                        color: CupertinoColors.activeBlue,
-                        minSize: 30.0,
-                        padding: EdgeInsets.zero,
-                        borderRadius: new BorderRadius.circular(32.0),
-                        child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
-                        onPressed: () {},
+                      const Padding(padding: const EdgeInsets.only(top: 6.0)),
+                      new Text(
+                        'Item number $index',
+                        style: const TextStyle(
+                          color: const Color(0xFF8E8E93),
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w100,
+                        ),
+                      ),
+                      const Padding(padding: const EdgeInsets.only(top: 20.0)),
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          new CupertinoButton(
+                            color: CupertinoColors.activeBlue,
+                            minSize: 30.0,
+                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                            borderRadius: new BorderRadius.circular(32.0),
+                            child: const Text(
+                              'GET',
+                              style: const TextStyle(
+                                fontSize: 14.0,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.28,
+                              ),
+                            ),
+                            onPressed: () {},
+                          ),
+                          new CupertinoButton(
+                            color: CupertinoColors.activeBlue,
+                            minSize: 30.0,
+                            padding: EdgeInsets.zero,
+                            borderRadius: new BorderRadius.circular(32.0),
+                            child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
+                            onPressed: () {},
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
+              ],
+            ),
+          ),
+          const Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 28.0, bottom: 8.0),
+            child: const Text(
+              'USERS ALSO LIKED',
+              style: const TextStyle(
+                color: const Color(0xFF646464),
+                letterSpacing: -0.60,
+                fontSize: 15.0,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ],
-        ),
+          ),
+          new SizedBox(
+            height: 200.0,
+            child: new ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: 10,
+              itemExtent: 160.0,
+              itemBuilder: (BuildContext context, int index) {
+                return new Padding(
+                  padding: const EdgeInsets.only(left: 16.0),
+                  child: new Container(
+                    decoration: new BoxDecoration(
+                      borderRadius: new BorderRadius.circular(8.0),
+                      color: new Color.fromARGB(
+                        255,
+                        (color.red + random.nextInt(100) - 50).clamp(0, 255),
+                        (color.green + random.nextInt(100) - 50).clamp(0, 255),
+                        (color.blue + random.nextInt(100) - 50).clamp(0, 255),
+                      ),
+                    ),
+                    child: new Center(
+                      child: new CupertinoButton(
+                        child: const Icon(
+                          CupertinoIcons.plus_circled,
+                          color: CupertinoColors.white,
+                          size: 36.0,
+                        ),
+                        onPressed: () {},
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -403,15 +452,10 @@ class Tab2Header extends StatelessWidget {
                           height: 44.0,
                           decoration: new BoxDecoration(
                             image: new DecorationImage(
-                              image: const AssetImage('assets/reviewer1.jpeg')
+                              image: const AssetImage('assets/person1.jpg'),
                             ),
                             shape: BoxShape.circle,
                           ),
-                        ),
-                        const Padding(padding: const EdgeInsets.only(left: 2.0)),
-                        new Image(
-                          image: const AssetImage('assets/check-2.png'),
-                          width: 30.0,
                         ),
                         const Padding(padding: const EdgeInsets.only(left: 8.0)),
                         new Container(
@@ -419,15 +463,21 @@ class Tab2Header extends StatelessWidget {
                           height: 44.0,
                           decoration: new BoxDecoration(
                             image: new DecorationImage(
-                              image: const AssetImage('assets/reviewer4.jpeg')
+                              image: const AssetImage('assets/person2.jpg'),
                             ),
                             shape: BoxShape.circle,
                           ),
                         ),
+                        const Padding(padding: const EdgeInsets.only(left: 8.0)),
+                        new Tab2ConversationAvatar(
+                          text: 'KL',
+                          color: const Color(0xFFFD5015),
+                        ),
                         const Padding(padding: const EdgeInsets.only(left: 2.0)),
-                        new Image(
-                          image: const AssetImage('assets/comments-2.png'),
-                          width: 30.0,
+                        const Icon(
+                          CupertinoIcons.check_mark_circled,
+                          color: const Color(0xFF646464),
+                          size: 20.0,
                         ),
                       ],
                     ),
@@ -515,7 +565,7 @@ class Tab2ConversationAvatar extends StatelessWidget {
           fontSize: 13.0,
           fontWeight: FontWeight.w500,
         ),
-      )
+      ),
     );
   }
 }
@@ -527,7 +577,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
         new Tab2ConversationBubble(
-          text: 'Hey guys, check this out',
+          text: "My Xanadu doesn't look right",
           color: Tab2ConversationBubbleColor.blue
         ),
       ],
@@ -538,11 +588,11 @@ List<Widget> buildTab2Conversation() {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget> [
         new Tab2ConversationAvatar(
-          text: 'LA',
+          text: 'KL',
           color: const Color(0xFFFD5015),
         ),
         new Tab2ConversationBubble(
-          text: 'Wow, that\'s pretty impressive.\nGood job!',
+          text: "We'll rush you a new one.\nIt's gonna be incredible",
           color: Tab2ConversationBubbleColor.gray,
         ),
       ],
@@ -552,7 +602,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
         new Tab2ConversationBubble(
-          text: 'Let\'s roll it out during I/O',
+          text: 'Awesome thanks!',
           color: Tab2ConversationBubbleColor.blue,
         ),
       ],
@@ -563,11 +613,11 @@ List<Widget> buildTab2Conversation() {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget> [
         new Tab2ConversationAvatar(
-          text: 'DA',
+          text: 'SJ',
           color: const Color(0xFF34CAD6),
         ),
         new Tab2ConversationBubble(
-          text: '+cc laywercat@',
+          text: "It's because you're holding\nit wrong",
           color: Tab2ConversationBubbleColor.gray,
         ),
       ],
@@ -577,8 +627,23 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
         new Tab2ConversationBubble(
-          text: 'Let me know if I should hold\noff for now',
+          text: 'Maybe, I just found it in a bar',
           color: Tab2ConversationBubbleColor.blue,
+        ),
+      ],
+    ),
+    new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: <Widget> [
+        new Tab2ConversationAvatar(
+          text: 'KL',
+          color: const Color(0xFFFD5015),
+        ),
+        new Tab2ConversationBubble(
+          text: "Actually there's one more thing",
+          color: Tab2ConversationBubbleColor.gray,
         ),
       ],
     ),
@@ -586,14 +651,7 @@ List<Widget> buildTab2Conversation() {
   ];
 }
 
-class CupertinoDemoTab3 extends StatefulWidget {
-  @override
-  State<StatefulWidget> createState() => new CupertinoDemoTab3State();
-}
-
-class CupertinoDemoTab3State extends State<CupertinoDemoTab3> {
-  bool signedIn = false;
-
+class CupertinoDemoTab3 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
@@ -611,21 +669,7 @@ class CupertinoDemoTab3State extends State<CupertinoDemoTab3> {
                 Navigator.of(context, rootNavigator: true).push(
                   new CupertinoPageRoute<bool>(
                     fullscreenDialog: true,
-                    builder: (BuildContext context) {
-                       return new CupertinoPageScaffold(
-                         navigationBar: new CupertinoNavigationBar(
-                           leading: new CupertinoButton(
-                             child: const Text('Cancel'),
-                             onPressed: () {
-                               Navigator.of(context).pop(false);
-                             },
-                           ),
-                         ),
-                         child: new Center(
-
-                         ),
-                       );
-                    },
+                    builder: (BuildContext context) => new Tab3Dialog(),
                   ),
                 );
               },
@@ -640,12 +684,49 @@ class CupertinoDemoTab3State extends State<CupertinoDemoTab3> {
                 height: 44.0,
                 child: new Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: new Row(children: <Widget>[ new Text(
-                    signedIn ? 'Sign out' : 'Sign in',
+                  child: new Row(children: <Widget>[ const Text(
+                    'Sign in',
                     style: const TextStyle(color: CupertinoColors.activeBlue),
                   ) ]),
                 ),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class Tab3Dialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new CupertinoPageScaffold(
+      navigationBar: new CupertinoNavigationBar(
+        leading: new CupertinoButton(
+          child: const Text('Cancel'),
+          padding: EdgeInsets.zero,
+          onPressed: () {
+            Navigator.of(context).pop(false);
+          },
+        ),
+      ),
+      child: new Center(
+        child: new Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            const Icon(
+              CupertinoIcons.profile_circled,
+              size: 160.0,
+              color: const Color(0xFF646464),
+            ),
+            const Padding(padding: const EdgeInsets.only(top: 18.0)),
+            new CupertinoButton(
+              color: CupertinoColors.activeBlue,
+              child: const Text('Sign in'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
             ),
           ],
         ),
