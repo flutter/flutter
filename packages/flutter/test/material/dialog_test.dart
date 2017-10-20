@@ -229,4 +229,49 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Dialog inherits Localizations', (WidgetTester tester) async {
+    Locale localeInDialog;
+    await tester.pumpWidget(
+      new MaterialApp(
+        locale: const Locale('en', 'US'),
+        home: new Builder(
+          builder: (BuildContext context) {
+            return new Material(
+              child: new Localizations.override(
+                context: context,
+                locale: const Locale('ru', 'RU'),
+                child: new Builder(
+                  builder: (BuildContext context) {
+                    return new Center(
+                      child: new RaisedButton(
+                        child: const Text('X'),
+                        onPressed: () {
+                          showDialog<Null>(
+                            context: context,
+                            child: new Builder(
+                              builder: (BuildContext context) {
+                                localeInDialog = Localizations.localeOf(context);
+                                return new Container();
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(localeInDialog, const Locale('ru', 'RU'));
+  });
 }
