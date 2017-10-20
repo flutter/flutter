@@ -29,6 +29,9 @@ class MockClipboard {
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
@@ -36,6 +39,9 @@ class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocali
 }
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
   @override
   Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
