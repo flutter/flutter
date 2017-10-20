@@ -142,4 +142,42 @@ void main() {
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
   });
+
+  test('TextStyle.debugLabel', () {
+    const TextStyle unknown = const TextStyle();
+    const TextStyle foo = const TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const TextStyle bar = const TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const TextStyle baz = const TextStyle(debugLabel: 'baz', fontSize: 3.0);
+
+    expect(unknown.debugLabel, 'unknown');
+    expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
+    expect(unknown.copyWith().debugLabel, 'unknown');
+    expect(unknown.apply().debugLabel, 'unknown');
+
+    expect(foo.debugLabel, 'foo');
+    expect(foo.toString(), 'TextStyle(debugLabel: "foo", inherit: true, size: 1.0)');
+    expect(foo.merge(bar).debugLabel, 'bar < foo');
+    expect(foo.merge(bar).merge(baz).debugLabel, 'baz < bar < foo');
+    expect(foo.copyWith().debugLabel, 'copy of foo');
+    expect(foo.apply().debugLabel, 'modified foo');
+    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo, bar)');
+    expect(TextStyle.lerp(foo.merge(bar), baz, 0.5).copyWith().debugLabel, 'copy of lerp(bar < foo, baz)');
+
+    expect(() => new TextStyle(debugLabel: 'a' * 300), throwsA(const isInstanceOf<AssertionError>()));
+
+    TextStyle cappedMerge = foo;
+    TextStyle cappedCopy = foo;
+    TextStyle cappedApply = foo;
+    TextStyle cappedLerp = foo;
+    for (int i = 0; i < 50; i++) {
+      cappedMerge = cappedMerge.merge(bar);
+      cappedCopy = cappedCopy.copyWith();
+      cappedApply = cappedApply.apply();
+      cappedLerp = TextStyle.lerp(cappedLerp, bar, 0.5);
+    }
+    expect(cappedMerge.debugLabel, hasLength(100));
+    expect(cappedCopy.debugLabel, hasLength(100));
+    expect(cappedApply.debugLabel, hasLength(100));
+    expect(cappedLerp.debugLabel, hasLength(100));
+  });
 }
