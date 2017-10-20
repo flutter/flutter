@@ -127,15 +127,17 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 /// Since this formatter only prevents new characters from being added to the text,
 /// it preserves the existing [TextEditingValue.selection].
 class LengthLimitingTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that prevents the insertion of more characters than an allowed
-  /// limit.
+  /// Creates a formatter that prevents the insertion of more characters than a limit.
   ///
-  /// The [maxLength] must be null or greater than zero.  If it is null, then no limit
+  /// The [maxLength] must be null or greater than zero. If it is null, then no limit
   /// is enforced.
   LengthLimitingTextInputFormatter(this.maxLength)
     : assert(maxLength == null || maxLength > 0);
 
-  /// A [Pattern] to match and replace incoming [TextEditingValue]s.
+  /// The limit on the number of characters this formatter will allow.
+  ///
+  /// The value must be null or greater than zero. If it is null, then no limit
+  /// is enforced.
   final int maxLength;
 
   @override

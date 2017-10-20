@@ -195,8 +195,8 @@ class InputDecoration {
 
   /// Optional text to place below the line as a character count.
   ///
-  /// Uses the [counterStyle]. Uses [helperStyle] if [counterStyle] isn't
-  /// specified. Suffix is not returned as part of the input.
+  /// Rendered using [counterStyle]. Uses [helperStyle] if [counterStyle] is
+  /// null.
   final String counterText;
 
   /// The style to use for the [counterText].
@@ -579,7 +579,7 @@ class InputDecorator extends StatelessWidget {
     }
 
     if (errorText != null || helperText != null || counterText != null) {
-      assert(!isCollapsed);  // Collapsed fields can't have any of these set.
+      assert(!isCollapsed, "Collapsed fields can't have errorText, helperText, or counterText set.");
       final EdgeInsets topPadding = new EdgeInsets.only(
         top: _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding)
       );

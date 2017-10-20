@@ -1588,9 +1588,11 @@ void main() {
 
   testWidgets("maxLength shows warning when maxLengthEnforced is false.", (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
+    final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
 
     await tester.pumpWidget(boilerplate(
       child: new TextField(
+        decoration: new InputDecoration(errorStyle: testStyle),
         controller: textController,
         maxLength: 10,
         maxLengthEnforced: false,
@@ -1602,6 +1604,8 @@ void main() {
 
     expect(textController.text, '0123456789101112');
     expect(find.text('16 / 10'), findsOneWidget);
+    final Text counterTextWidget = tester.widget(find.text('16 / 10'));
+    expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
   });
 
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {

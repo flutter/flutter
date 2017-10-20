@@ -73,15 +73,16 @@ class TextField extends StatefulWidget {
   ///
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
-  /// [maxLength] is set, it will display a character counter below the field,
-  /// showing how many characters have been entered, how many are allowed,
-  /// and will prevent any characters above the limit from being entered. It
-  /// does this with a [LengthLimitingTextInputFormatter], which is executed
-  /// after any of the supplied [inputFormatters]. The [maxLength] value must
-  /// be either null or greater than zero.
+  /// [maxLength] is set, a character counter will be displayed below the
+  /// field, showing how many characters have been entered and how many are
+  /// allowed. After [maxLength] characters have been input, additional input
+  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
+  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
+  /// evaluated after the supplied [inputFormatters], if any. The [maxLength]
+  /// value must be either null or greater than zero.
   ///
   /// If [maxLengthEnforced] is set to false, then more than [maxLength]
-  /// characters may be entered, but the error counter and divider will
+  /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
@@ -187,13 +188,14 @@ class TextField extends StatefulWidget {
 
   /// The maximum number of characters to allow in the text field.
   ///
-  /// If set, this will display a character counter below the field, showing
-  /// how many characters have been entered, and how many are allowed, and
-  /// will prevent any characters above the limit from being entered. It does
-  /// this with a [LengthLimitingTextInputFormatter], which is executed after
-  /// any of the supplied [inputFormatters].
+  /// If set, a character counter will be displayed below the
+  /// field, showing how many characters have been entered and how many are
+  /// allowed. After [maxLength] characters have been input, additional input
+  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
+  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
+  /// evaluated after the supplied [inputFormatters], if any.
   ///
-  /// This value must be either null or greater than zero.  If set to null
+  /// This value must be either null or greater than zero. If set to null
   /// (the default), there is no limit to the number of characters allowed.
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
@@ -204,7 +206,8 @@ class TextField extends StatefulWidget {
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   final int maxLength;
 
-  /// If true, prevents the field from allowing more than maxLength characters.
+  /// If true, prevents the field from allowing more than [maxLength]
+  /// characters.
   ///
   /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
   /// enforce the limit, or merely provide a character counter and warning when
@@ -239,6 +242,14 @@ class TextField extends StatefulWidget {
     description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
     description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
     description.add(new IntProperty('maxLength', maxLength, defaultValue: null));
+    description.add(
+      new FlagProperty(
+        'maxLengthEnforced',
+        value: maxLengthEnforced,
+        ifTrue: 'enforced',
+        ifFalse: 'not enforced',
+      ),
+    );
   }
 }
 
@@ -255,20 +266,21 @@ class _TextFieldState extends State<TextField> {
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  InputDecoration get _effectiveDecoration {
+  InputDecoration _getEffectiveDecoration() {
     if (!needsCounter)
       return widget.decoration;
 
+    final InputDecoration effectiveDecoration = widget?.decoration ?? const InputDecoration();
     final String counterText = '${_effectiveController.value.text.length} / ${widget.maxLength}';
     if (_effectiveController.value.text.length > widget.maxLength) {
       final ThemeData themeData = Theme.of(context);
-      return widget.decoration.copyWith(
-        errorText: widget.decoration.errorText ?? '',
-        counterStyle: widget.decoration?.errorStyle
+      return effectiveDecoration.copyWith(
+        errorText: effectiveDecoration.errorText ?? '',
+        counterStyle: effectiveDecoration.errorStyle
           ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
         counterText: counterText);
     }
-    return widget.decoration.copyWith(counterText: counterText);
+    return effectiveDecoration.copyWith(counterText: counterText);
   }
 
   @override
@@ -341,7 +353,7 @@ class _TextFieldState extends State<TextField> {
         animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
-            decoration: _effectiveDecoration,
+            decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,
