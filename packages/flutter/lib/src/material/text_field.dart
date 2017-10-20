@@ -74,11 +74,15 @@ class TextField extends StatefulWidget {
   /// The [maxLength] property is set to null by default, which means the
   /// number of characters allowed in the text field is not restricted. If
   /// [maxLength] is set, it will display a character counter below the field,
-  /// showing how many characters have been entered, and how many are allowed,
+  /// showing how many characters have been entered, how many are allowed,
   /// and will prevent any characters above the limit from being entered. It
   /// does this with a [LengthLimitingTextInputFormatter], which is executed
   /// after any of the supplied [inputFormatters]. The [maxLength] value must
   /// be either null or greater than zero.
+  ///
+  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
+  /// characters may be entered, but the error counter and divider will
+  /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
   /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
   /// [autocorrect] arguments must not be null.
@@ -95,6 +99,7 @@ class TextField extends StatefulWidget {
     this.autocorrect: true,
     this.maxLines: 1,
     this.maxLength,
+    this.maxLengthEnforced: true,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
@@ -103,6 +108,7 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(maxLengthEnforced != null),
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
@@ -192,7 +198,18 @@ class TextField extends StatefulWidget {
   ///
   /// Whitespace characters (e.g. newline, space, tab) are included in the
   /// character count.
+  ///
+  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
+  /// characters may be entered, but the error counter and divider will
+  /// switch to the [decoration.errorStyle] when the limit is exceeded.
   final int maxLength;
+
+  /// If true, prevents the field from allowing more than maxLength characters.
+  ///
+  /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
+  /// enforce the limit, or merely provide a character counter and warning when
+  /// [maxLength] is exceeded.
+  final bool maxLengthEnforced;
 
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
@@ -238,9 +255,21 @@ class _TextFieldState extends State<TextField> {
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  InputDecoration get _effectiveDecoration => needsCounter
-    ?  widget.decoration.copyWith(counterText: '${_effectiveController.value.text.length} / ${widget.maxLength}')
-    : widget.decoration;
+  InputDecoration get _effectiveDecoration {
+    if (!needsCounter)
+      return widget.decoration;
+
+    final String counterText = '${_effectiveController.value.text.length} / ${widget.maxLength}';
+    if (_effectiveController.value.text.length > widget.maxLength) {
+      final ThemeData themeData = Theme.of(context);
+      return widget.decoration.copyWith(
+        errorText: widget.decoration.errorText ?? '',
+        counterStyle: widget.decoration?.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterText: counterText);
+    }
+    return widget.decoration.copyWith(counterText: counterText);
+  }
 
   @override
   void initState() {
@@ -280,7 +309,7 @@ class _TextFieldState extends State<TextField> {
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
     final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
-    if (widget.maxLength != null)
+    if (widget.maxLength != null && widget.maxLengthEnforced)
       formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
 
     Widget child = new RepaintBoundary(

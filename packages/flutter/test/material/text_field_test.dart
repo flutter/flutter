@@ -1571,6 +1571,39 @@ void main() {
     expect(textController.text, '#一#二#三#四#五');
   });
 
+  testWidgets("maxLength isn't enforced when maxLengthEnforced is false.", (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789101112');
+  });
+
+  testWidgets("maxLength shows warning when maxLengthEnforced is false.", (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16 / 10'), findsOneWidget);
+  });
+
   testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
       home: const Material(

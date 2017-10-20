@@ -203,8 +203,11 @@ void main() {
     );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(325.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(325.5));
   });
 
@@ -231,11 +234,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(298.5));
-    expect(tester.getRect(find.text('Error')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Error')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Error')).left, equals(0.0));
     expect(tester.getRect(find.text('Error')).top, equals(325.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(325.5));
   });
 
@@ -270,11 +279,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
@@ -291,11 +306,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
@@ -311,11 +332,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
@@ -332,11 +359,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(
       tester.getRect(find.text('P')).size,
@@ -362,11 +395,17 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
-    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
-    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(715.0, 716.0));
     expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(
       tester.getRect(find.text('P')).size,
