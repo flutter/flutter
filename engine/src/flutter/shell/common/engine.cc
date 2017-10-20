@@ -189,12 +189,14 @@ void Engine::Init() {
 const std::string Engine::main_entrypoint_ = "main";
 
 void Engine::RunBundle(const std::string& bundle_path,
-                       const std::string& entrypoint) {
+                       const std::string& entrypoint,
+                       bool reuse_runtime_controller) {
   TRACE_EVENT0("flutter", "Engine::RunBundle");
   ConfigureAssetBundle(bundle_path);
   std::vector<uint8_t> platform_kernel;
   GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel,
+                   reuse_runtime_controller);
 
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
@@ -214,14 +216,16 @@ void Engine::RunBundle(const std::string& bundle_path,
 
 void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
                                   const std::string& snapshot_override,
-                                  const std::string& entrypoint) {
+                                  const std::string& entrypoint,
+                                  bool reuse_runtime_controller) {
   TRACE_EVENT0("flutter", "Engine::RunBundleAndSnapshot");
   if (snapshot_override.empty()) {
     RunBundle(bundle_path, entrypoint);
     return;
   }
   ConfigureAssetBundle(bundle_path);
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path));
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), std::vector<uint8_t>(),
+                   reuse_runtime_controller);
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
   } else {
@@ -235,7 +239,8 @@ void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
 
 void Engine::RunBundleAndSource(const std::string& bundle_path,
                                 const std::string& main,
-                                const std::string& packages) {
+                                const std::string& packages,
+                                bool reuse_runtime_controller) {
   TRACE_EVENT0("flutter", "Engine::RunBundleAndSource");
   FXL_CHECK(!blink::IsRunningPrecompiledCode())
       << "Cannot run from source in a precompiled build.";
@@ -248,7 +253,8 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
     ConfigureAssetBundle(bundle_path);
     GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
   }
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel,
+                   reuse_runtime_controller);
 
   if (!platform_kernel.empty()) {
     std::vector<uint8_t> kernel;
@@ -477,17 +483,19 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 }
 
 void Engine::ConfigureRuntime(const std::string& script_uri,
-                              const std::vector<uint8_t>& platform_kernel) {
-  if (!runtime_) {
-    runtime_ = blink::RuntimeController::Create(this);
-    runtime_->CreateDartController(
-        std::move(script_uri), default_isolate_snapshot_data,
-        default_isolate_snapshot_instr, platform_kernel);
-    runtime_->SetViewportMetrics(viewport_metrics_);
-    runtime_->SetLocale(language_code_, country_code_);
-    runtime_->SetUserSettingsData(user_settings_data_);
-    runtime_->SetSemanticsEnabled(semantics_enabled_);
+                              const std::vector<uint8_t>& platform_kernel,
+                              bool reuse_runtime_controller) {
+  if (runtime_ && reuse_runtime_controller) {
+    return;
   }
+  runtime_ = blink::RuntimeController::Create(this);
+  runtime_->CreateDartController(
+      std::move(script_uri), default_isolate_snapshot_data,
+      default_isolate_snapshot_instr, platform_kernel);
+  runtime_->SetViewportMetrics(viewport_metrics_);
+  runtime_->SetLocale(language_code_, country_code_);
+  runtime_->SetUserSettingsData(user_settings_data_);
+  runtime_->SetSemanticsEnabled(semantics_enabled_);
 }
 
 void Engine::DidCreateMainIsolate(Dart_Isolate isolate) {

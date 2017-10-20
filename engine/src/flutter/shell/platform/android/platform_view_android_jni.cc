@@ -105,11 +105,13 @@ static void RunBundleAndSnapshot(JNIEnv* env,
                                  jlong platform_view,
                                  jstring bundlePath,
                                  jstring snapshotOverride,
-                                 jstring entrypoint) {
+                                 jstring entrypoint,
+                                 jboolean reuse_runtime_controller) {
   return PLATFORM_VIEW->RunBundleAndSnapshot(
       fml::jni::JavaStringToString(env, bundlePath),        //
       fml::jni::JavaStringToString(env, snapshotOverride),  //
-      fml::jni::JavaStringToString(env, entrypoint)         //
+      fml::jni::JavaStringToString(env, entrypoint),        //
+      reuse_runtime_controller                              //
   );
 }
 
@@ -260,7 +262,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       {
           .name = "nativeRunBundleAndSnapshot",
           .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
           .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSnapshot),
       },
       {
