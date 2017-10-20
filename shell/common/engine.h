@@ -36,20 +36,23 @@ class Engine : public blink::RuntimeDelegate {
   static void Init();
 
   void RunBundle(const std::string& bundle_path,
-                 const std::string& entrypoint = main_entrypoint_);
+                 const std::string& entrypoint = main_entrypoint_,
+                 bool reuse_runtime_controller = false);
 
   // Uses the given snapshot instead of looking inside the bundle for the
   // snapshot. If |snapshot_override| is empty, this function looks for the
   // snapshot in the bundle itself.
   void RunBundleAndSnapshot(const std::string& bundle_path,
                             const std::string& snapshot_override,
-                            const std::string& entrypoint = main_entrypoint_);
+                            const std::string& entrypoint = main_entrypoint_,
+                            bool reuse_runtime_controller = false);
 
   // Uses the given source code instead of looking inside the bundle for the
   // source code.
   void RunBundleAndSource(const std::string& bundle_path,
                           const std::string& main,
-                          const std::string& packages);
+                          const std::string& packages,
+                          bool reuse_runtime_controller = false);
 
   void BeginFrame(fxl::TimePoint frame_time);
   void NotifyIdle(int64_t deadline);
@@ -91,7 +94,8 @@ class Engine : public blink::RuntimeDelegate {
   void ConfigureAssetBundle(const std::string& path);
   void ConfigureRuntime(
       const std::string& script_uri,
-      const std::vector<uint8_t>& platform_kernel = std::vector<uint8_t>());
+      const std::vector<uint8_t>& platform_kernel = std::vector<uint8_t>(),
+      bool reuse_runtime_controller = false);
 
   bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
   bool HandleNavigationPlatformMessage(

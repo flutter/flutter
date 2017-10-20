@@ -40,7 +40,8 @@ class PlatformViewAndroid : public PlatformView {
 
   void RunBundleAndSnapshot(std::string bundle_path,
                             std::string snapshot_override,
-                            std::string entrypoint);
+                            std::string entrypoint,
+                            bool reuse_isolate);
 
   void RunBundleAndSource(std::string bundle_path,
                           std::string main,
