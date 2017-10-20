@@ -462,13 +462,14 @@ void Paragraph::Layout(double width, bool force) {
             }
           }
         }
+
+        SkPaint::FontMetrics metrics;
+        paint.getFontMetrics(&metrics);
+        paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
+                                   builder.make(), metrics, line_number,
+                                   layout.getAdvance());
       }
 
-      SkPaint::FontMetrics metrics;
-      paint.getFontMetrics(&metrics);
-      paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
-                                 builder.make(), metrics, line_number,
-                                 layout.getAdvance());
       run_x_offset += layout.getAdvance();
     }
 
