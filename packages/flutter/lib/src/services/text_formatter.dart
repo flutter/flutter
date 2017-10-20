@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math show min;
+
 import 'text_editing.dart';
 import 'text_input.dart';
 
@@ -124,21 +126,34 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
 ///
 /// Since this formatter only prevents new characters from being added to the text,
 /// it preserves the existing [TextEditingValue.selection].
-class LimitedLengthTextInputFormatter extends TextInputFormatter {
-  /// Creates a formatter that prevents the insertion of more characters than an allowed limit.
+class LengthLimitingTextInputFormatter extends TextInputFormatter {
+  /// Creates a formatter that prevents the insertion of more characters than an allowed
+  /// limit.
   ///
-  /// The [allowedMaxCharacters] must be null or greater than zero.  If it is null, then
-  /// no limit is enforced.
-  LimitedLengthTextInputFormatter(this.allowedMaxCharacters)
-    : assert(allowedMaxCharacters == null || allowedMaxCharacters > 0);
+  /// The [maxLength] must be null or greater than zero.  If it is null, then no limit
+  /// is enforced.
+  LengthLimitingTextInputFormatter(this.maxLength)
+    : assert(maxLength == null || maxLength > 0);
 
   /// A [Pattern] to match and replace incoming [TextEditingValue]s.
-  final int allowedMaxCharacters;
+  final int maxLength;
 
   @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    if (allowedMaxCharacters != null && newValue.text.length > allowedMaxCharacters)
-      return oldValue;
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue, // unused.
+    TextEditingValue newValue,
+  ) {
+    if (maxLength != null && newValue.text.length > maxLength) {
+      final TextSelection newSelection = newValue.selection.copyWith(
+          baseOffset: math.min(newValue.selection.start, maxLength),
+          extentOffset: math.min(newValue.selection.end, maxLength),
+      );
+      return new TextEditingValue(
+        text: newValue.text.substring(0, maxLength),
+        selection: newSelection,
+        composing: TextRange.empty,
+      );
+    }
     return newValue;
   }
 }

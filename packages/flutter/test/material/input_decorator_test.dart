@@ -87,13 +87,14 @@ void main() {
     expect(tester.element(find.byKey(key)).size, equals(const Size(800.0, 60.0)));
   });
 
-  testWidgets('InputDecorator draws the underline correctly in the right place.', (WidgetTester tester) async {
+  testWidgets('InputDecorator draws the divider correctly in the right place.', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
           hintText: 'Hint',
           labelText: 'Label',
           helperText: 'Helper',
+          counterText: 'Counter',
         ),
       ),
     );
@@ -103,13 +104,14 @@ void main() {
     expect(getDividerWidth(tester), equals(800.0));
   });
 
-  testWidgets('InputDecorator draws the underline correctly in the right place for dense layout.', (WidgetTester tester) async {
+  testWidgets('InputDecorator draws the divider correctly in the right place for dense layout.', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
           hintText: 'Hint',
           labelText: 'Label',
           helperText: 'Helper',
+          counterText: 'Counter',
           isDense: true,
         ),
       ),
@@ -127,6 +129,7 @@ void main() {
           hintText: 'Hint',
           labelText: 'Label',
           helperText: 'Helper',
+          counterText: 'Counter',
           hideDivider: true,
         ),
       ),
@@ -142,6 +145,7 @@ void main() {
           hintText: 'Hint',
           labelText: 'Label',
           helperText: 'Helper',
+          counterText: 'Counter',
           isDense: true,
         ),
       ),
@@ -157,9 +161,18 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(294.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(716.0, 12.0), const Size(715.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(317.5));
+    expect(
+      tester.getRect(find.text('Counter')).size,
+      anyOf(<Size>[const Size(84.0, 12.0), const Size(85.0, 12.0)]),
+    );
+    expect(tester.getRect(find.text('Counter')).left, anyOf(716.0, 715.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(317.5));
   });
 
   testWidgets('InputDecorator uses proper padding', (WidgetTester tester) async {
@@ -169,6 +182,7 @@ void main() {
           hintText: 'Hint',
           labelText: 'Label',
           helperText: 'Helper',
+          counterText: 'Counter',
         ),
       ),
     );
@@ -183,9 +197,15 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(298.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(
+      tester.getRect(find.text('Helper')).size,
+      anyOf(<Size>[const Size(715.0, 12.0), const Size(716.0, 12.0)]),
+    );
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(325.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(325.5));
   });
 
   testWidgets('InputDecorator uses proper padding when error is set', (WidgetTester tester) async {
@@ -196,6 +216,7 @@ void main() {
           labelText: 'Label',
           helperText: 'Helper',
           errorText: 'Error',
+          counterText: 'Counter',
         ),
       ),
     );
@@ -210,9 +231,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(298.5));
-    expect(tester.getRect(find.text('Error')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Error')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Error')).left, equals(0.0));
     expect(tester.getRect(find.text('Error')).top, equals(325.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(325.5));
   });
 
   testWidgets('InputDecorator animates properly', (WidgetTester tester) async {
@@ -228,6 +252,7 @@ void main() {
                 hintText: 'Hint',
                 labelText: 'Label',
                 helperText: 'Helper',
+                counterText: 'Counter',
               ),
             ),
           ),
@@ -245,9 +270,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
@@ -263,9 +291,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
@@ -280,9 +311,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(find.text('P'), findsNothing);
     expect(find.text('S'), findsNothing);
 
@@ -298,9 +332,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(
       tester.getRect(find.text('P')).size,
       anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),
@@ -325,9 +362,12 @@ void main() {
     expect(tester.getRect(find.text('Hint')).size, equals(const Size(800.0, 16.0)));
     expect(tester.getRect(find.text('Hint')).left, equals(0.0));
     expect(tester.getRect(find.text('Hint')).top, equals(295.5));
-    expect(tester.getRect(find.text('Helper')).size, equals(const Size(800.0, 12.0)));
+    expect(tester.getRect(find.text('Helper')).size, equals(const Size(716.0, 12.0)));
     expect(tester.getRect(find.text('Helper')).left, equals(0.0));
     expect(tester.getRect(find.text('Helper')).top, equals(328.5));
+    expect(tester.getRect(find.text('Counter')).size, equals(const Size(84.0, 12.0)));
+    expect(tester.getRect(find.text('Counter')).left, equals(716.0));
+    expect(tester.getRect(find.text('Counter')).top, equals(328.5));
     expect(
       tester.getRect(find.text('P')).size,
       anyOf(<Size>[const Size(17.0, 16.0), const Size(16.0, 16.0)]),

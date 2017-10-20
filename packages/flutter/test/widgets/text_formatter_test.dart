@@ -33,7 +33,7 @@ void main() {
   group('test provided formatters', () {
     setUp(() {
       // a1b(2c3
-      // d4)e5f6 
+      // d4)e5f6
       // where the parentheses are the selection range.
       testNewValue = const TextEditingValue(
         text: 'a1b2c3\nd4e5f6',
@@ -51,7 +51,7 @@ void main() {
 
       // Expecting
       // 1(23
-      // 4)56 
+      // 4)56
       expect(actualValue, const TextEditingValue(
         text: '123\n456',
         selection: const TextSelection(
@@ -67,7 +67,7 @@ void main() {
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
-      // a1b(2c3d4)e5f6 
+      // a1b(2c3d4)e5f6
       expect(actualValue, const TextEditingValue(
         text: 'a1b2c3d4e5f6',
         selection: const TextSelection(
@@ -99,7 +99,7 @@ void main() {
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
-      // 1(234)56 
+      // 1(234)56
       expect(actualValue, const TextEditingValue(
         text: '123456',
         selection: const TextSelection(
@@ -108,5 +108,38 @@ void main() {
         ),
       ));
     });
+
+    test('test length limiting formatter', () {
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(6)
+          .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // a1b(2c3)
+      expect(actualValue, const TextEditingValue(
+        text: 'a1b2c3',
+        selection: const TextSelection(
+          baseOffset: 3,
+          extentOffset: 6,
+        ),
+      ));
+    });
+
+    test('test length limiting formatter when selection is off the end', () {
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(2)
+          .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // a1()
+      expect(actualValue, const TextEditingValue(
+        text: 'a1',
+        selection: const TextSelection(
+          baseOffset: 2,
+          extentOffset: 2,
+        ),
+      ));
+    });
+
   });
 }

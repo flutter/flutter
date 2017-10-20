@@ -68,8 +68,17 @@ class TextField extends StatefulWidget {
   /// The [maxLines] property can be set to null to remove the restriction on
   /// the number of lines. By default, it is one, meaning this is a single-line
   /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
-  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard type
-  /// is used.
+  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard
+  /// type is used.
+  ///
+  /// The [maxLength] property is set to null by default, which means the
+  /// number of characters allowed in the text field is not restricted. If
+  /// [maxLength] is set, it will display a character counter below the field,
+  /// showing how many characters have been entered, and how many are allowed,
+  /// and will prevent any characters above the limit from being entered. It
+  /// does this with a [LengthLimitingTextInputFormatter], which is executed
+  /// after any of the supplied [inputFormatters]. The [maxLength] value must
+  /// be either null or greater than zero.
   ///
   /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
   /// [autocorrect] arguments must not be null.
@@ -85,7 +94,7 @@ class TextField extends StatefulWidget {
     this.obscureText: false,
     this.autocorrect: true,
     this.maxLines: 1,
-    this.maxCharacters,
+    this.maxLength,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
@@ -95,7 +104,7 @@ class TextField extends StatefulWidget {
        assert(obscureText != null),
        assert(autocorrect != null),
        assert(maxLines == null || maxLines > 0),
-       assert(maxCharacters == null || maxCharacters > 0),
+       assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
        super(key: key);
 
@@ -175,11 +184,15 @@ class TextField extends StatefulWidget {
   /// If set, this will display a character counter below the field, showing
   /// how many characters have been entered, and how many are allowed, and
   /// will prevent any characters above the limit from being entered. It does
-  /// this with a [TextInputFormatter], which is executed before any of the
-  /// supplied [inputFormatters].
+  /// this with a [LengthLimitingTextInputFormatter], which is executed after
+  /// any of the supplied [inputFormatters].
   ///
-  /// This value must be either null or greater than zero.
-  final int maxCharacters;
+  /// This value must be either null or greater than zero.  If set to null
+  /// (the default), there is no limit to the number of characters allowed.
+  ///
+  /// Whitespace characters (e.g. newline, space, tab) are included in the
+  /// character count.
+  final int maxLength;
 
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
@@ -208,7 +221,7 @@ class TextField extends StatefulWidget {
     description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
     description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
-    description.add(new IntProperty('maxCharacters', maxCharacters, defaultValue: null));
+    description.add(new IntProperty('maxLength', maxLength, defaultValue: null));
   }
 }
 
@@ -221,12 +234,12 @@ class _TextFieldState extends State<TextField> {
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
 
-  bool get needsCounter => widget.maxCharacters != null
+  bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
   InputDecoration get _effectiveDecoration => needsCounter
-    ?  widget.decoration.copyWith(counterText: '${_effectiveController.value.text.length} / ${widget.maxCharacters}')
+    ?  widget.decoration.copyWith(counterText: '${_effectiveController.value.text.length} / ${widget.maxLength}')
     : widget.decoration;
 
   @override
@@ -260,20 +273,15 @@ class _TextFieldState extends State<TextField> {
       Feedback.forLongPress(context);
   }
 
-  void _handleOnChanged(String value) {
-    if (widget.onChanged != null)
-      widget.onChanged(value);
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
-    final List<TextInputFormatter> formatters =
-      <TextInputFormatter>[new LimitedLengthTextInputFormatter(widget.maxCharacters)]
-        ..addAll(widget.inputFormatters ?? const Iterable<TextInputFormatter>.empty());
+    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    if (widget.maxLength != null)
+      formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
 
     Widget child = new RepaintBoundary(
       child: new EditableText(
@@ -292,7 +300,7 @@ class _TextFieldState extends State<TextField> {
         selectionControls: themeData.platform == TargetPlatform.iOS
             ? cupertinoTextSelectionControls
             : materialTextSelectionControls,
-        onChanged: _handleOnChanged,
+        onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
         onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
         inputFormatters: formatters,
