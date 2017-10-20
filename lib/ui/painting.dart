@@ -250,25 +250,133 @@ class Color {
 ///
 /// [![Open Skia fiddle to view image.](https://flutter.github.io/assets-for-api-docs/dart-ui/blend_mode.png)](https://fiddle.skia.org/c/864acd0659c7a866ea7296a3184b8bdd)
 ///
-/// See [Paint.blendMode].
+/// The "src" (source) image is the shape or image being drawn, the "dst"
+/// (destination) image is the current contents of the canvas onto which the
+/// source is being drawn.
+///
+/// When using [saveLayer] and [restore], the blend mode of the [Paint] given to
+/// the [saveLayer] will be applied when [restore] is called. Each call to
+/// [saveLayer] introduces a new layer onto which shapes and images are painted;
+/// when [restore] is called, that layer is then _composited_ onto the parent
+/// layer, with the "src" being the most-recently-drawn shapes and images, and
+/// the "dst" being the parent layer. (For the first [saveLayer] call, the
+/// parent layer is the canvas itself.)
+///
+/// See also:
+///
+///  * [Paint.blendMode], which uses [BlendMode] to define the compositing
+///    strategy.
 enum BlendMode {
   // This list comes from Skia's SkXfermode.h and the values (order) should be
   // kept in sync.
   // See: https://skia.org/user/api/skpaint#SkXfermode
 
+  /// Drop both the source and destination images, leaving nothing.
+  ///
+  /// This corresponds to the "clear" Porter-Duff operator.
   clear,
+
+  /// Drop the destination image, only paint the source image.
+  ///
+  /// Conceptually, the destination is first cleared, then the source image is
+  /// painted.
+  ///
+  /// This corresponds to the "Copy" Porter-Duff operator.
   src,
+
+  /// Drop the source image, only paint the destination image.
+  ///
+  /// Conceptually, the source image is discarded, leaving the destination
+  /// untouched.
+  ///
+  /// This corresponds to the "Destination" Porter-Duff operator.
   dst,
+
+  /// Composite the source image over the destination image.
+  ///
+  /// This is the default value. It represents the most intuitive case, where
+  /// shapes are painted on top of what is below, with transparent areas showing
+  /// the destination layer.
+  ///
+  /// This corresponds to the "Source over Destination" Porter-Duff operator,
+  /// also known as the Painter's Algorithm.
   srcOver,
+
+  /// Composite the source image under the destination image.
+  ///
+  /// This is the opposite of [srcOver].
+  ///
+  /// This corresponds to the "Destination over Source" Porter-Duff operator.
   dstOver,
+
+  /// Show the source image, but only where the two images overlap. The
+  /// destination image is not rendered, it is treated merely as a mask.
+  ///
+  /// To show the destination image instead, consider [dstIn].
+  ///
+  /// To reverse the semantic of the mask (only showing the source where the
+  /// destination is absent, rather than where it is present), consider
+  /// [srcOut].
+  ///
+  /// This corresponds to the "Source in Destination" Porter-Duff operator.
   srcIn,
+
+  /// Show the destination image, but only where the two images overlap. The
+  /// source image is not rendered, it is treated merely as a mask.
+  ///
+  /// To show the source image instead, consider [srcIn].
+  ///
+  /// To reverse the semantic of the mask (only showing the source where the
+  /// destination is present, rather than where it is absent), consider [srcIn].
+  ///
+  /// This corresponds to the "Destination in Source" Porter-Duff operator.
   dstIn,
+
+  /// Show the source image, but only where the two images do not overlap. The
+  /// destination image is not rendered, it is treated merely as a mask.
+  ///
+  /// To show the destination image instead, consider [dstOut].
+  ///
+  /// To reverse the semantic of the mask (only showing the source where the
+  /// destination is present, rather than where it is absent), consider [srcIn].
+  ///
+  /// This corresponds to the "Source out Destination" Porter-Duff operator.
   srcOut,
+
+  /// Show the destination image, but only where the two images do not overlap. The
+  /// source image is not rendered, it is treated merely as a mask.
+  ///
+  /// To show the source image instead, consider [srcOut].
+  ///
+  /// To reverse the semantic of the mask (only showing the destination where the
+  /// source is present, rather than where it is absent), consider [dstIn].
+  ///
+  /// This corresponds to the "Destination out Source" Porter-Duff operator.
   dstOut,
+
+  /// Composite the source image over the destination image, but only where it
+  /// overlaps the destination.
+  ///
+  /// This corresponds to the "Source atop Destination" Porter-Duff operator.
   srcATop,
+
+  /// Composite the destination image over the source image, but only where it
+  /// overlaps the source.
+  ///
+  /// This corresponds to the "Destination atop Source" Porter-Duff operator.
   dstATop,
+
+  /// Composite the source and destination images, leaving transparency where
+  /// they would overlap.
+  ///
+  /// This corresponds to the "Source xor Destination" Porter-Duff operator.
   xor,
+
+  /// Composite the source and destination images by summing their components.
+  ///
+  /// This corresponds to the "Source plus Destination" Porter-Duff operator.
   plus,
+
   modulate,
 
   // Following blend modes are defined in the CSS Compositing standard.
@@ -489,6 +597,12 @@ class Paint {
   /// layer is being composited.
   ///
   /// Defaults to [BlendMode.srcOver].
+  ///
+  /// See also:
+  ///
+  ///  * [Canvas.saveLayer], which uses its [Paint]'s [blendMode] to composite
+  ///    the layer when [restore] is called.
+  ///  * [BlendMode], which discusses the user of [saveLayer] with [blendMode].
   BlendMode get blendMode {
     final int encoded = _data.getInt32(_kBlendModeOffset, _kFakeHostEndian);
     return BlendMode.values[encoded ^ _kBlendModeDefault];
@@ -843,10 +957,10 @@ class Path extends NativeFieldWrapperClass2 {
   /// is less than 1, it is an ellipse.
   void relativeConicTo(double x1, double y1, double x2, double y2, double w) native "Path_relativeConicTo";
 
-  /// If the [forceMoveTo] argument is false, adds a straight line
+  /// If the `forceMoveTo` argument is false, adds a straight line
   /// segment and an arc segment.
   ///
-  /// If the [forceMoveTo] argument is true, starts a new subpath
+  /// If the `forceMoveTo` argument is true, starts a new subpath
   /// consisting of an arc segment.
   ///
   /// In either case, the arc segment consists of the arc that follows
@@ -857,7 +971,7 @@ class Path extends NativeFieldWrapperClass2 {
   /// that intersects the center of the rectangle and with positive
   /// angles going clockwise around the oval.
   ///
-  /// The line segment added if [forceMoveTo] is false starts at the
+  /// The line segment added if `forceMoveTo` is false starts at the
   /// current point and ends at the start of the arc.
   void arcTo(Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
     assert(_rectIsValid(rect));
@@ -866,16 +980,16 @@ class Path extends NativeFieldWrapperClass2 {
   void _arcTo(double left, double top, double right, double bottom,
               double startAngle, double sweepAngle, bool forceMoveTo) native "Path_arcTo";
 
-  /// Appends up to four conic curves weighted to describe an oval of [radius]
-  /// and rotated by [rotation].
+  /// Appends up to four conic curves weighted to describe an oval of `radius`
+  /// and rotated by `rotation`.
   ///
   /// The first curve begins from the last point in the path and the last ends
-  /// at [arcEnd]. The curves follow a path in a direction determined by
-  /// [clockwise] and [largeArc] in such a way that the sweep angle
+  /// at `arcEnd`. The curves follow a path in a direction determined by
+  /// `clockwise` and `largeArc` in such a way that the sweep angle
   /// is always less than 360 degrees.
   ///
   /// A simple line is appended if either either radii are zero or the last
-  /// point in the path is [arcEnd]. The radii are scaled to fit the last path
+  /// point in the path is `arcEnd`. The radii are scaled to fit the last path
   /// point if both are greater than zero but too small to describe an arc.
   ///
   void arcToPoint(Offset arcEnd, {
@@ -894,18 +1008,18 @@ class Path extends NativeFieldWrapperClass2 {
                    bool clockwise) native "Path_arcToPoint";
 
 
-  /// Appends up to four conic curves weighted to describe an oval of [radius]
-  /// and rotated by [rotation].
+  /// Appends up to four conic curves weighted to describe an oval of `radius`
+  /// and rotated by `rotation`.
   ///
   /// The last path point is described by (px, py).
   ///
   /// The first curve begins from the last point in the path and the last ends
-  /// at [arcEndDelta].dx + px and [arcEndDelta].dy + py. The curves follow a
-  /// path in a direction determined by [clockwise] and [largeArc]
+  /// at `arcEndDelta.dx + px` and `arcEndDelta.dy + py`. The curves follow a
+  /// path in a direction determined by `clockwise` and `largeArc`
   /// in such a way that the sweep angle is always less than 360 degrees.
   ///
   /// A simple line is appended if either either radii are zero, or, both
-  /// [arcEndDelta].dx and [arcEndDelta].dy are zero. The radii are scaled to
+  /// `arcEndDelta.dx` and `arcEndDelta.dy` are zero. The radii are scaled to
   /// fit the last path point if both are greater than zero but too small to
   /// describe an arc.
   void relativeArcToPoint(Offset arcEndDelta, {
@@ -1632,6 +1746,8 @@ class Canvas extends NativeFieldWrapperClass2 {
   ///
   ///  * [save], which saves the current state, but does not create a new layer
   ///    for subsequent commands.
+  ///  * [BlendMode], which discusses the use of [Paint.blendMode] with
+  ///    [saveLayer].
   void saveLayer(Rect bounds, Paint paint) {
     assert(_rectIsValid(bounds));
     assert(paint != null);
