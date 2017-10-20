@@ -57,8 +57,26 @@ abstract class BoxBorder extends ShapeBorder {
   /// const constructors so that they can be used in const expressions.
   const BoxBorder();
 
+  /// The top side of this border.
+  ///
+  /// This getter is available on both [Border] and [BorderDirectional]. If
+  /// [isUniform] is true, then this is the same style as all the other sides.
+  BorderSide get top;
+
+  /// The bottom side of this border.
+  BorderSide get bottom;
+
+  /// Whether all four sides of the border are identical. Uniform borders are
+  /// typically more efficient to paint.
+  ///
+  /// A uniform border by definition has no text direction dependency and
+  /// therefore could be expressed as a [Border], even if it is currently a
+  /// [BorderDirectional]. A uniform border can also be expressed as a
+  /// [RoundedRectangleBorder].
+  bool get isUniform;
+
   // We override this to tighten the return value, so that callers can assume
-  // that we'll return a BoxBorder.
+  // that we'll return a [BoxBorder].
   @override
   BoxBorder add(ShapeBorder other, { bool reversed: false }) => null;
 
@@ -315,13 +333,13 @@ class Border extends BoxBorder {
     );
   }
 
-  /// The top side of this border.
+  @override
   final BorderSide top;
 
   /// The right side of this border.
   final BorderSide right;
 
-  /// The bottom side of this border.
+  @override
   final BorderSide bottom;
 
   /// The left side of this border.
@@ -332,8 +350,7 @@ class Border extends BoxBorder {
     return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
-  /// Whether all four sides of the border are identical. Uniform borders are
-  /// typically more efficient to paint.
+  @override
   bool get isUniform {
     final Color topColor = top.color;
     if (right.color != topColor ||
@@ -572,7 +589,7 @@ class BorderDirectional extends BoxBorder {
     );
   }
 
-  /// The top side of this border.
+  @override
   final BorderSide top;
 
   /// The start side of this border.
@@ -595,7 +612,7 @@ class BorderDirectional extends BoxBorder {
   ///  * [TextDirection], which is used to describe the reading direction.
   final BorderSide end;
 
-  /// The bottom side of this border.
+  @override
   final BorderSide bottom;
 
   @override
@@ -603,8 +620,7 @@ class BorderDirectional extends BoxBorder {
     return new EdgeInsetsDirectional.fromSTEB(start.width, top.width, end.width, bottom.width);
   }
 
-  /// Whether all four sides of the border are identical. Uniform borders are
-  /// typically more efficient to paint.
+  @override
   bool get isUniform {
     final Color topColor = top.color;
     if (start.color != topColor ||
