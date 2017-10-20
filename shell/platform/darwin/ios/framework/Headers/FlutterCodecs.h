@@ -99,7 +99,7 @@ FLUTTER_EXPORT
 
  On the Dart side, these values are represented as follows:
 
- - `nil` or `NSNull`: `null`
+ - `nil` or `NSNull`: null
  - `NSNumber`: `bool`, `int`, or `double`, depending on the contained value.
  - `FlutterStandardBigInteger`: `int`
  - `NSString`: `String`

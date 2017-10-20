@@ -470,7 +470,7 @@ class Window {
   /// arbitrary data.
   ///
   /// Message handlers must call the function given in the `callback` parameter.
-  /// If the handler does not need to respond, the handler should pass `null` to
+  /// If the handler does not need to respond, the handler should pass null to
   /// the callback.
   ///
   /// The framework invokes this callback in the same zone in which the
