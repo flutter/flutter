@@ -101,11 +101,15 @@ abstract class MaterialLocalizations {
   ///
   /// This text theme is incomplete. For example, it lacks text color
   /// information. This theme must be merged with another text theme that
-  /// provides the missing values. The text styles provided by this theme have
-  /// their [TextStyle.inherit] property set to true.
+  /// provides the missing values.
   ///
   /// Typically a complete theme is obtained via [Theme.of], which can be
   /// localized using the [Localizations] widget.
+  ///
+  /// The text styles provided by this theme are expected to have their
+  /// [TextStyle.inherit] property set to false, so that the [ThemeData]
+  /// obtained from [Theme.of] no longer inherits text style properties and
+  /// contains a complete set of properties needed to style a [Text] widget.
   ///
   /// See also: https://material.io/guidelines/style/typography.html
   TextTheme get localTextGeometry;

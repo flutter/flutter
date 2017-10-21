@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+const String _kDefaultDebugLabel = 'unknown';
+
 /// An immutable style in which paint text.
 ///
 /// ## Sample code
@@ -230,6 +232,7 @@ class TextStyle extends Diagnosticable {
     this.decoration,
     this.decorationColor,
     this.decorationStyle,
+    this.debugLabel,
     String fontFamily,
     String package,
   }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
@@ -302,6 +305,19 @@ class TextStyle extends Diagnosticable {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
+  /// A human-readable description of this text style.
+  ///
+  /// This property is maintained only in debug builds.
+  ///
+  /// When merging ([merge]), copying ([copyWith]), modifying using [apply], or
+  /// interpolating ([lerp]), the label of the resulting style is marked with
+  /// the debug labels of the original styles. This helps figuring out where a
+  /// particular text style came from.
+  ///
+  /// This property is not considered when comparing text styles using `==` or
+  /// [compareTo], and it does not affect [hashCode].
+  final String debugLabel;
+
   /// Creates a copy of this text style but with the given fields replaced with
   /// the new values.
   TextStyle copyWith({
@@ -317,7 +333,14 @@ class TextStyle extends Diagnosticable {
     TextDecoration decoration,
     Color decorationColor,
     TextDecorationStyle decorationStyle,
+    String debugLabel,
   }) {
+    String newDebugLabel;
+    assert(() {
+      if (this.debugLabel != null)
+        newDebugLabel = debugLabel ?? 'copy of ${this.debugLabel}';
+      return true;
+    }());
     return new TextStyle(
       inherit: inherit,
       color: color ?? this.color,
@@ -332,11 +355,18 @@ class TextStyle extends Diagnosticable {
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
       decorationStyle: decorationStyle ?? this.decorationStyle,
+      debugLabel: newDebugLabel,
     );
   }
 
-  /// Creates a copy of this text style but with the numeric fields multiplied
-  /// by the given factors and then incremented by the given deltas.
+  /// Creates a copy of this text style replacing or altering the specified
+  /// properties.
+  ///
+  /// The non-numeric properties [color], [fontFamily], [decoration],
+  /// [decorationColor] and [decorationStyle] are replaced with the new values.
+  ///
+  /// The numeric properties are multiplied by the given factors and then
+  /// incremented by the given deltas.
   ///
   /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would
   /// return a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
@@ -346,14 +376,15 @@ class TextStyle extends Diagnosticable {
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
   ///
-  /// The arguments must not be null.
+  /// The numeric arguments must not be null.
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
-  ///
-  /// The non-numeric fields can be controlled using the corresponding arguments.
   TextStyle apply({
     Color color,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
     String fontFamily,
     double fontSizeFactor: 1.0,
     double fontSizeDelta: 0.0,
@@ -379,6 +410,14 @@ class TextStyle extends Diagnosticable {
     assert(heightFactor != null);
     assert(heightDelta != null);
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
+
+    String modifiedDebugLabel;
+    assert(() {
+      if (debugLabel != null)
+        modifiedDebugLabel = 'modified $debugLabel';
+      return true;
+    }());
+
     return new TextStyle(
       inherit: inherit,
       color: color ?? this.color,
@@ -390,19 +429,40 @@ class TextStyle extends Diagnosticable {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
-      decoration: decoration,
-      decorationColor: decorationColor,
-      decorationStyle: decorationStyle,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      debugLabel: modifiedDebugLabel,
     );
   }
 
-  /// Returns a new text style that matches this text style but with some values
-  /// replaced by the non-null parameters of the given text style. If the given
-  /// text style is null, simply returns this text style.
+  /// Returns a new text style that is a combination of this style and the given
+  /// [other] style.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to true,
+  /// its null properties are replaced with the non-null properties of this text
+  /// style. The [other] style _inherits_ the properties of this style. Another
+  /// way to think of it is that the "missing" properties of the [other] style
+  /// are _filled_ by the properties of this style.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to false,
+  /// returns the given [other] style unchanged. The [other] style does not
+  /// inherit properties of this style.
+  ///
+  /// If the given text style is null, returns this text style.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
-    assert(other.inherit);
+    if (!other.inherit)
+      return other;
+
+    String mergedDebugLabel;
+    assert(() {
+      if (other.debugLabel != null || debugLabel != null)
+        mergedDebugLabel = '${other.debugLabel ?? _kDefaultDebugLabel} < ${debugLabel ?? _kDefaultDebugLabel}';
+      return true;
+    }());
+
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
@@ -415,7 +475,8 @@ class TextStyle extends Diagnosticable {
       height: other.height,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
-      decorationStyle: other.decorationStyle
+      decorationStyle: other.decorationStyle,
+      debugLabel: mergedDebugLabel,
     );
   }
 
@@ -424,6 +485,13 @@ class TextStyle extends Diagnosticable {
   /// This will not work well if the styles don't set the same fields.
   static TextStyle lerp(TextStyle begin, TextStyle end, double t) {
     assert(begin.inherit == end.inherit);
+
+    String lerpDebugLabel;
+    assert(() {
+      lerpDebugLabel = 'lerp(${begin.debugLabel ?? _kDefaultDebugLabel}, ${end.debugLabel ?? _kDefaultDebugLabel})';
+      return true;
+    }());
+
     return new TextStyle(
       inherit: end.inherit,
       color: Color.lerp(begin.color, end.color, t),
@@ -437,7 +505,8 @@ class TextStyle extends Diagnosticable {
       height: ui.lerpDouble(begin.height ?? end.height, end.height ?? begin.height, t),
       decoration: t < 0.5 ? begin.decoration : end.decoration,
       decorationColor: Color.lerp(begin.decorationColor, end.decorationColor, t),
-      decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle
+      decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle,
+      debugLabel: lerpDebugLabel,
     );
   }
 
@@ -564,6 +633,8 @@ class TextStyle extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
     super.debugFillProperties(properties);
+    if (debugLabel != null)
+      properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
     styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
     styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));

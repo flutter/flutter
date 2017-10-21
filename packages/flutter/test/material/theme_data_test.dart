@@ -24,7 +24,8 @@ void main() {
     for (TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = new ThemeData(platform: platform);
       final Typography typography = new Typography(platform: platform);
-      expect(theme.textTheme, typography.black, reason: 'Not using default typography for $platform');
+      expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
+          reason: 'Not using default typography for $platform');
     }
   });
 
