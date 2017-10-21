@@ -961,7 +961,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.fit: BoxFit.contain,
     this.alignment: Alignment.center,
-    Widget child
+    Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -974,16 +974,30 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   @override
-  RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
+  RenderFittedBox createRenderObject(BuildContext context) {
+    return new RenderFittedBox(
+      fit: fit,
+      alignment: alignment,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFittedBox renderObject) {
     renderObject
       ..fit = fit
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxFit>('fit', fit));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 

@@ -112,4 +112,230 @@ void main() {
 
     expect(insidePoint, equals(outsidePoint));
   });
+
+  testWidgets('FittedBox with no child', (WidgetTester tester) async {
+    final Key key = new UniqueKey();
+    await tester.pumpWidget(
+      new Center(
+        child: new FittedBox(
+          key: key,
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.firstRenderObject(find.byKey(key));
+    expect(box.size.width, 0.0);
+    expect(box.size.height, 0.0);
+  });
+
+  testWidgets('Child can be aligned multiple ways in a row', (WidgetTester tester) async {
+    final Key outside = new UniqueKey();
+    final Key inside = new UniqueKey();
+
+    { // align RTL
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new FittedBox(
+                key: outside,
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.bottomEnd,
+                child: new Container(
+                  key: inside,
+                  width: 10.0,
+                  height: 10.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+      expect(outsideBox.size.width, 100.0);
+      expect(outsideBox.size.height, 100.0);
+
+      final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+      expect(insideBox.size.width, 10.0);
+      expect(insideBox.size.height, 10.0);
+
+      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(0.0, 90.0));
+      final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
+      final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(10.0, 100.0));
+
+      expect(insideTopLeft, equals(outsideTopLeft));
+      expect(insideBottomRight, equals(outsideBottomRight));
+    }
+
+    { // change direction
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new FittedBox(
+                key: outside,
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.bottomEnd,
+                child: new Container(
+                  key: inside,
+                  width: 10.0,
+                  height: 10.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+      expect(outsideBox.size.width, 100.0);
+      expect(outsideBox.size.height, 100.0);
+
+      final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+      expect(insideBox.size.width, 10.0);
+      expect(insideBox.size.height, 10.0);
+
+      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(90.0, 90.0));
+      final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
+      final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(100.0, 100.0));
+
+      expect(insideTopLeft, equals(outsideTopLeft));
+      expect(insideBottomRight, equals(outsideBottomRight));
+    }
+
+    { // change alignment
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new FittedBox(
+                key: outside,
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.center,
+                child: new Container(
+                  key: inside,
+                  width: 10.0,
+                  height: 10.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+      expect(outsideBox.size.width, 100.0);
+      expect(outsideBox.size.height, 100.0);
+
+      final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+      expect(insideBox.size.width, 10.0);
+      expect(insideBox.size.height, 10.0);
+
+      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(45.0, 45.0));
+      final Offset insideBottomRight = insideBox.localToGlobal(const Offset(10.0, 10.0));
+      final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(55.0, 55.0));
+
+      expect(insideTopLeft, equals(outsideTopLeft));
+      expect(insideBottomRight, equals(outsideBottomRight));
+    }
+
+    { // change size
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new FittedBox(
+                key: outside,
+                fit: BoxFit.scaleDown,
+                alignment: AlignmentDirectional.center,
+                child: new Container(
+                  key: inside,
+                  width: 30.0,
+                  height: 10.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+      expect(outsideBox.size.width, 100.0);
+      expect(outsideBox.size.height, 100.0);
+
+      final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+      expect(insideBox.size.width, 30.0);
+      expect(insideBox.size.height, 10.0);
+
+      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(35.0, 45.0));
+      final Offset insideBottomRight = insideBox.localToGlobal(const Offset(30.0, 10.0));
+      final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(65.0, 55.0));
+
+      expect(insideTopLeft, equals(outsideTopLeft));
+      expect(insideBottomRight, equals(outsideBottomRight));
+    }
+
+    { // change fit
+
+      await tester.pumpWidget(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Center(
+            child: new Container(
+              width: 100.0,
+              height: 100.0,
+              child: new FittedBox(
+                key: outside,
+                fit: BoxFit.fill,
+                alignment: AlignmentDirectional.center,
+                child: new Container(
+                  key: inside,
+                  width: 30.0,
+                  height: 10.0,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
+      expect(outsideBox.size.width, 100.0);
+      expect(outsideBox.size.height, 100.0);
+
+      final RenderBox insideBox = tester.firstRenderObject(find.byKey(inside));
+      expect(insideBox.size.width, 30.0);
+      expect(insideBox.size.height, 10.0);
+
+      final Offset insideTopLeft = insideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset outsideTopLeft = outsideBox.localToGlobal(const Offset(0.0, 0.0));
+      final Offset insideBottomRight = insideBox.localToGlobal(const Offset(30.0, 10.0));
+      final Offset outsideBottomRight = outsideBox.localToGlobal(const Offset(100.0, 100.0));
+
+      expect(insideTopLeft, equals(outsideTopLeft));
+      expect(insideBottomRight, equals(outsideBottomRight));
+    }
+  });
 }
