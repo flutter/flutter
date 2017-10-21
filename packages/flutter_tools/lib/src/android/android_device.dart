@@ -772,7 +772,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {
       if (line.startsWith(device.id)) {
-        final List<String> splitLine = line.split("tcp:");
+        final List<String> splitLine = line.split('tcp:');
 
         // Sanity check splitLine.
         if (splitLine.length != 3)

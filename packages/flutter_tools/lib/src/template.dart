@@ -10,7 +10,7 @@ import 'globals.dart';
 
 const String _kTemplateExtension = '.tmpl';
 const String _kCopyTemplateExtension = '.copy.tmpl';
-final Pattern _kTemplateLanguageVariant = new RegExp(r"(\w+)-(\w+)\.tmpl.*");
+final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All other

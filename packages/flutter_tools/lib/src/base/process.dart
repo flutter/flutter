@@ -298,7 +298,7 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
   if (workingDirectory == null)
     printTrace(argsText);
   else
-    printTrace("[$workingDirectory${fs.path.separator}] $argsText");
+    printTrace('[$workingDirectory${fs.path.separator}] $argsText');
 }
 
 String _runWithLoggingSync(List<String> cmd, {

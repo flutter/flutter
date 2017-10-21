@@ -16,8 +16,8 @@ void main() {
     final RenderPositionedBox positioner = new RenderPositionedBox(child: sizer);
     layout(positioner, constraints: new BoxConstraints.loose(const Size(200.0, 200.0)));
 
-    expect(positioner.size.width, equals(200.0), reason: "positioner width");
-    expect(positioner.size.height, equals(200.0), reason: "positioner height");
+    expect(positioner.size.width, equals(200.0), reason: 'positioner width');
+    expect(positioner.size.height, equals(200.0), reason: 'positioner height');
   });
 
   test('RenderPositionedBox shrink wraps', () {
@@ -28,21 +28,21 @@ void main() {
     final RenderPositionedBox positioner = new RenderPositionedBox(child: sizer, widthFactor: 1.0);
     layout(positioner, constraints: new BoxConstraints.loose(const Size(200.0, 200.0)));
 
-    expect(positioner.size.width, equals(100.0), reason: "positioner width");
-    expect(positioner.size.height, equals(200.0), reason: "positioner height");
+    expect(positioner.size.width, equals(100.0), reason: 'positioner width');
+    expect(positioner.size.height, equals(200.0), reason: 'positioner height');
 
     positioner.widthFactor = null;
     positioner.heightFactor = 1.0;
     pumpFrame();
 
-    expect(positioner.size.width, equals(200.0), reason: "positioner width");
-    expect(positioner.size.height, equals(100.0), reason: "positioner height");
+    expect(positioner.size.width, equals(200.0), reason: 'positioner width');
+    expect(positioner.size.height, equals(100.0), reason: 'positioner height');
 
     positioner.widthFactor = 1.0;
     pumpFrame();
 
-    expect(positioner.size.width, equals(100.0), reason: "positioner width");
-    expect(positioner.size.height, equals(100.0), reason: "positioner height");
+    expect(positioner.size.width, equals(100.0), reason: 'positioner width');
+    expect(positioner.size.height, equals(100.0), reason: 'positioner height');
   });
 
   test('RenderPositionedBox width and height factors', () {

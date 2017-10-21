@@ -197,28 +197,28 @@ abstract class Domain {
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! String)
-      throw "$name is not a String";
+      throw '$name is not a String';
     return val;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! bool)
-      throw "$name is not a bool";
+      throw '$name is not a bool';
     return val;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! int)
-      throw "$name is not an int";
+      throw '$name is not an int';
     return val;
   }
 

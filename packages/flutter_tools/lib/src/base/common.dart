@@ -40,5 +40,5 @@ class ToolExit implements Exception {
   final int exitCode;
 
   @override
-  String toString() => "Exception: $message";
+  String toString() => 'Exception: $message';
 }

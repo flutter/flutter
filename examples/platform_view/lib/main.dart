@@ -35,7 +35,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   static const MethodChannel _methodChannel =
-      const MethodChannel("samples.flutter.io/platform_view");
+      const MethodChannel('samples.flutter.io/platform_view');
 
   int _counter = 0;
 
@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<Null> _launchPlatformCount() async {
     final int platformCounter =
-        await _methodChannel.invokeMethod("switchView", _counter);
+        await _methodChannel.invokeMethod('switchView', _counter);
     setState(() {
       _counter = platformCounter;
     });

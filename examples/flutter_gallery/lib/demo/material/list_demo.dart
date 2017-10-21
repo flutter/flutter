@@ -172,10 +172,10 @@ class _ListDemoState extends State<ListDemo> {
   Widget buildListTile(BuildContext context, String item) {
     Widget secondary;
     if (_itemType == _MaterialListType.twoLine) {
-      secondary = const Text("Additional item information.");
+      secondary = const Text('Additional item information.');
     } else if (_itemType == _MaterialListType.threeLine) {
       secondary = const Text(
-        "Even more additional list item information appears on line three.",
+        'Even more additional list item information appears on line three.',
       );
     }
     return new MergeSemantics(
@@ -192,7 +192,7 @@ class _ListDemoState extends State<ListDemo> {
 
   @override
   Widget build(BuildContext context) {
-    final String layoutText = _dense ? " \u2013 Dense" : "";
+    final String layoutText = _dense ? ' \u2013 Dense' : '';
     String itemTypeText;
     switch (_itemType) {
       case _MaterialListType.oneLine:

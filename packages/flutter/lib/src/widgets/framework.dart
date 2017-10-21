@@ -3833,7 +3833,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
       throw new FlutterError(
         'Incorrect use of ParentDataWidget.\n' +
         widget.debugDescribeInvalidAncestorChain(
-          description: "$this",
+          description: '$this',
           ownershipChain: parent.debugGetCreatorChain(10),
           foundValidAncestor: ancestor != null,
           badAncestors: badAncestors

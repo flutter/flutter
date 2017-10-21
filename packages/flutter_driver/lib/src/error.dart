@@ -96,7 +96,7 @@ class LogRecord {
   ///
   /// It is meant to be read by humans. There's no guarantee that this value is
   /// stable enough to be parsed by machines.
-  String get levelDescription => level.toString().split(".").last;
+  String get levelDescription => level.toString().split('.').last;
 
   @override
   String toString() => '[${levelDescription.padRight(5)}] $loggerName: $message';

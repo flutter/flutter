@@ -13,11 +13,11 @@ enum DialogDemoAction {
   agree,
 }
 
-const String _alertWithoutTitleText = "Discard draft?";
+const String _alertWithoutTitleText = 'Discard draft?';
 
 const String _alertWithTitleText =
-  "Let Google help apps determine location. This means sending anyonmous location "
-  "data to Google, even when no apps are running.";
+  'Let Google help apps determine location. This means sending anyonmous location '
+  'data to Google, even when no apps are running.';
 
 class DialogDemoItem extends StatelessWidget {
   const DialogDemoItem({ Key key, this.icon, this.color, this.text, this.onPressed }) : super(key: key);

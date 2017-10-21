@@ -46,21 +46,21 @@ class Calculator {
     try {
       final List<dynamic> result = decoder.convert(_data);
       final int n = result.length;
-      onResultListener("Decoded $n results");
+      onResultListener('Decoded $n results');
     } catch (e, stack) {
-      print("Invalid JSON file: $e");
+      print('Invalid JSON file: $e');
       print(stack);
     }
   }
 
   static String _replicateJson(String data, int count) {
-    final StringBuffer buffer = new StringBuffer()..write("[");
+    final StringBuffer buffer = new StringBuffer()..write('[');
     for (int i = 0; i < count; i++) {
       buffer.write(data);
       if (i < count - 1)
         buffer.write(',');
     }
-    buffer.write("]");
+    buffer.write(']');
     return buffer.toString();
   }
 }

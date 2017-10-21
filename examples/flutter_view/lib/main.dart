@@ -26,9 +26,9 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  static const String _channel = "increment";
-  static const String _pong = "pong";
-  static const String _emptyMessage = "";
+  static const String _channel = 'increment';
+  static const String _pong = 'pong';
+  static const String _emptyMessage = '';
   static const BasicMessageChannel<String> platform =
       const BasicMessageChannel<String>(_channel, const StringCodec());
 

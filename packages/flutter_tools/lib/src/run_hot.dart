@@ -433,7 +433,7 @@ class HotRunner extends ResidentRunner {
         timer.stop();
         status.cancel();
         if (result.isOk)
-          printStatus("${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.");
+          printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
         if (result.hint != null)
           printStatus(result.hint);
         return result;
@@ -530,7 +530,7 @@ class HotRunner extends ResidentRunner {
         reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
       }
     } catch (error, st) {
-      printError("Hot reload failed: $error\n$st");
+      printError('Hot reload failed: $error\n$st');
       final int errorCode = error['code'];
       final String errorMessage = error['message'];
       if (errorCode == Isolate.kIsolateReloadBarred) {
@@ -587,8 +587,8 @@ class HotRunner extends ResidentRunner {
         await view.uiIsolate.flutterReassemble();
       } on TimeoutException {
         reassembleTimedOut = true;
-        printTrace("Reassembling ${view.uiIsolate.name} took too long.");
-        printStatus("Hot reloading ${view.uiIsolate.name} took too long; the reload may have failed.");
+        printTrace('Reassembling ${view.uiIsolate.name} took too long.');
+        printStatus('Hot reloading ${view.uiIsolate.name} took too long; the reload may have failed.');
         continue;
       } catch (error) {
         reassembleAndScheduleErrors = true;

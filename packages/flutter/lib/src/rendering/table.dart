@@ -1167,7 +1167,7 @@ class RenderTable extends RenderBox {
     description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
     description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: "unknown"));
+    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
   }
 
   @override

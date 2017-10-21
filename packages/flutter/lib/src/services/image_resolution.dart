@@ -246,7 +246,7 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[lower];
   }
 
-  static final RegExp _extractRatioRegExp = new RegExp(r"/?(\d+(\.\d*)?)x/");
+  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x/');
 
   double _parseScale(String key) {
     final Match match = _extractRatioRegExp.firstMatch(key);

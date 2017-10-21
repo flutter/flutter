@@ -24,7 +24,7 @@ final List<List<String>> _kNameLines = _kDialogText
   .toList();
 
 final TextStyle _kDaveStyle = new TextStyle(color: Colors.indigo.shade400, height: 1.8);
-final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: "monospace");
+final TextStyle _kHalStyle = new TextStyle(color: Colors.red.shade400, fontFamily: 'monospace');
 final TextStyle _kBold = const TextStyle(fontWeight: FontWeight.bold);
 final TextStyle _kUnderline = const TextStyle(
   decoration: TextDecoration.underline,
@@ -33,7 +33,7 @@ final TextStyle _kUnderline = const TextStyle(
 );
 
 Widget toStyledText(String name, String text) {
-  final TextStyle lineStyle = (name == "Dave") ? _kDaveStyle : _kHalStyle;
+  final TextStyle lineStyle = (name == 'Dave') ? _kDaveStyle : _kHalStyle;
   return new RichText(
     key: new Key(text),
     text: new TextSpan(
@@ -55,7 +55,7 @@ Widget toStyledText(String name, String text) {
   );
 }
 
-Widget toPlainText(String name, String text) => new Text(name + ":" + text);
+Widget toPlainText(String name, String text) => new Text(name + ':' + text);
 
 class SpeakerSeparator extends StatelessWidget {
   @override

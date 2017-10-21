@@ -498,10 +498,10 @@ class DevFS {
         try {
           await _httpWriter.write(dirtyEntries);
         } on SocketException catch (socketException, stackTrace) {
-          printTrace("DevFS sync failed. Lost connection to device: $socketException");
+          printTrace('DevFS sync failed. Lost connection to device: $socketException');
           throw new DevFSException('Lost connection to device.', socketException, stackTrace);
         } catch (exception, stackTrace) {
-          printError("Could not update files on device: $exception");
+          printError('Could not update files on device: $exception');
           throw new DevFSException('Sync failed', exception, stackTrace);
         }
       } else {

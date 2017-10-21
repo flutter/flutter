@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../lib/card_collection.dart' as card_collection;
 
 void main() {
-  testWidgets("Card Collection smoke test", (WidgetTester tester) async {
+  testWidgets('Card Collection smoke test', (WidgetTester tester) async {
     card_collection.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame

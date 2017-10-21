@@ -170,7 +170,7 @@ class HSVColor {
   int get hashCode => hashValues(alpha, hue, saturation, value);
 
   @override
-  String toString() => "HSVColor($alpha, $hue, $saturation, $value)";
+  String toString() => 'HSVColor($alpha, $hue, $saturation, $value)';
 }
 
 /// A color that has a small table of related colors called a "swatch".

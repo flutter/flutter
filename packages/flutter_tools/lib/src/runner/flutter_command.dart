@@ -265,18 +265,18 @@ abstract class FlutterCommand extends Command<Null> {
   Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
       printError("Unable to locate a development device; please run 'flutter doctor' "
-          "for information about installing additional components.");
+          'for information about installing additional components.');
       return null;
     }
 
     List<Device> devices = await deviceManager.getDevices().toList();
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      printStatus("No devices found with name or id "
+      printStatus('No devices found with name or id '
           "matching '${deviceManager.specifiedDeviceId}'");
       return null;
     } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      printStatus("No devices found");
+      printStatus('No devices found');
       return null;
     } else if (devices.isEmpty) {
       printNoConnectedDevices();
@@ -290,10 +290,10 @@ abstract class FlutterCommand extends Command<Null> {
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
-        printStatus("Found ${devices.length} devices with name or id matching "
+        printStatus('Found ${devices.length} devices with name or id matching '
             "'${deviceManager.specifiedDeviceId}':");
       } else {
-        printStatus("More than one device connected; please specify a device with "
+        printStatus('More than one device connected; please specify a device with '
             "the '-d <deviceId>' flag, or use '-d all' to act on all devices.");
         devices = await deviceManager.getAllConnectedDevices().toList();
       }
@@ -313,7 +313,7 @@ abstract class FlutterCommand extends Command<Null> {
     if (deviceList == null)
       return null;
     if (deviceList.length > 1) {
-      printStatus("More than one device connected; please specify a device with "
+      printStatus('More than one device connected; please specify a device with '
         "the '-d <deviceId>' flag.");
       deviceList = await deviceManager.getAllConnectedDevices().toList();
       printStatus('');

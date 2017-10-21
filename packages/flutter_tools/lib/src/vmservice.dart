@@ -321,7 +321,7 @@ abstract class ServiceObject {
       return null;
 
     if (!_isServiceMap(map))
-      throw new VMServiceObjectLoadError("Expected a service map", map);
+      throw new VMServiceObjectLoadError('Expected a service map', map);
 
     final String type = _stripRef(map['type']);
 
@@ -435,7 +435,7 @@ abstract class ServiceObject {
     final String mapType = _stripRef(map['type']);
 
     if ((_type != null) && (_type != mapType)) {
-      throw new VMServiceObjectLoadError("ServiceObject types must not change",
+      throw new VMServiceObjectLoadError('ServiceObject types must not change',
                                          map);
     }
     _type = mapType;
@@ -443,7 +443,7 @@ abstract class ServiceObject {
 
     _canCache = map['fixedId'] == true;
     if ((_id != null) && (_id != map['id']) && _canCache) {
-      throw new VMServiceObjectLoadError("ServiceObject id changed", map);
+      throw new VMServiceObjectLoadError('ServiceObject id changed', map);
     }
     _id = map['id'];
 
@@ -1061,7 +1061,7 @@ class Isolate extends ServiceObjectOwner {
       if (ownerType == 'Library' || ownerType == '@Library')
         break;
       final String ownerName = owner['name'];
-      name = "$ownerName.$name";
+      name = '$ownerName.$name';
       owner = owner['owner'];
     }
 

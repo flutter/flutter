@@ -578,7 +578,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       RenderBox child = firstChild;
       while (true) {
         final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
-        children.add(child.toDiagnosticsNode(name: "child with index ${childParentData.index}"));
+        children.add(child.toDiagnosticsNode(name: 'child with index ${childParentData.index}'));
         if (child == lastChild)
           break;
         child = childParentData.nextSibling;
@@ -588,7 +588,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       final List<int> indices = _keepAliveBucket.keys.toList()..sort();
       for (int index in indices) {
         children.add(_keepAliveBucket[index].toDiagnosticsNode(
-          name: "child with index $index (kept alive offstage)",
+          name: 'child with index $index (kept alive offstage)',
           style: DiagnosticsTreeStyle.offstage,
         ));
       }

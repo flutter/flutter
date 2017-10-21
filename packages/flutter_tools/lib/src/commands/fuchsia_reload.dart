@@ -256,9 +256,9 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
     // The Observatory requires somewhat non-standard URIs that the Uri class
     // can't build for us, so instead we build them by hand.
-    final String isolateIdQuery = "?isolateId=isolates%2F$number";
-    final String isolateAddr = "$vmServiceAddr/#/inspect$isolateIdQuery";
-    final String debuggerAddr = "$vmServiceAddr/#/debugger$isolateIdQuery";
+    final String isolateIdQuery = '?isolateId=isolates%2F$number';
+    final String isolateAddr = '$vmServiceAddr/#/inspect$isolateIdQuery';
+    final String debuggerAddr = '$vmServiceAddr/#/debugger$isolateIdQuery';
 
     final String newUsed = getSizeAsMB(isolate.newSpace.used);
     final String newCap = getSizeAsMB(isolate.newSpace.capacity);
@@ -452,7 +452,7 @@ class _PortForwarder {
     final ProcessResult result = await processManager.run(command);
     printTrace(command.join(' '));
     if (result.exitCode != 0) {
-      printTrace("Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
+      printTrace('Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
   }
 
@@ -487,7 +487,7 @@ class FuchsiaDeviceCommandRunner {
     printTrace(args.join(' '));
     final ProcessResult result = await processManager.run(args);
     if (result.exitCode != 0) {
-      printStatus("Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
+      printStatus('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
     printTrace(result.stdout);
