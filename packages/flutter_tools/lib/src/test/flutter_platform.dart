@@ -408,8 +408,8 @@ class _FlutterPlatform extends PlatformPlugin {
 
   String _getWebSocketUrl(HttpServer server) {
     return host.type == InternetAddressType.IP_V4
-        ? "ws://${host.address}:${server.port}"
-        : "ws://[${host.address}]:${server.port}";
+        ? 'ws://${host.address}:${server.port}'
+        : 'ws://[${host.address}]:${server.port}';
   }
 
   String _generateTestMain({

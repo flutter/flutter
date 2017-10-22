@@ -71,7 +71,7 @@ void main() {
     box = tester.renderObject(find.byType(ExpansionPanelList));
     expect(box.size.height - oldHeight, greaterThanOrEqualTo(100.0)); // 100 + some margin
   });
-  testWidgets("Multiple Panel List test", (WidgetTester tester) async {
+  testWidgets('Multiple Panel List test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new ListView(

@@ -42,34 +42,35 @@ const String outputHeader = '''
 final Map<String, Map<String, String>> localeToResources = <String, Map<String, String>>{};
 
 /// Maps locales to resource attributes.
-/// 
+///
 /// See also https://github.com/googlei18n/app-resource-bundle/wiki/ApplicationResourceBundleSpecification#resource-attributes
 final Map<String, Map<String, dynamic>> localeToResourceAttributes = <String, Map<String, dynamic>>{};
 
-// Return s as a Dart-parseable raw string in double quotes. Expand double quotes:
-// foo => r"foo"
-// foo "bar" => r"foo " '"' r"bar" '"'
+// Return s as a Dart-parseable raw string in single or double quotes. Expand double quotes:
+// foo => r'foo'
+// foo "bar" => r'foo "bar"'
+// foo 'bar' => r'foo ' "'" r'bar' "'"
 String generateString(String s) {
-  if (!s.contains('"'))
-    return 'r"$s"';
+  if (!s.contains("'"))
+    return "r'$s'";
 
   final StringBuffer output = new StringBuffer();
   bool started = false; // Have we started writing a raw string.
   for (int i = 0; i < s.length; i++) {
-    if (s[i] == '"') {
+    if (s[i] == "'") {
       if (started)
-        output.write('"');
-      output.write(' \'"\' ');
+        output.write("'");
+      output.write(' "\'" ');
       started = false;
     } else if (!started) {
-      output.write('r"${s[i]}');
+      output.write("r'${s[i]}");
       started = true;
     } else {
       output.write(s[i]);
     }
   }
   if (started)
-    output.write('"');
+    output.write("'");
   return output.toString();
 }
 
@@ -84,12 +85,12 @@ String generateLocalizationsMap() {
 const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
 
   for (String locale in localeToResources.keys.toList()..sort()) {
-    output.writeln('  "$locale": const <String, String>{');
+    output.writeln("  '$locale': const <String, String>{");
 
     final Map<String, String> resources = localeToResources[locale];
     for (String name in resources.keys) {
       final String value = generateString(resources[name]);
-      output.writeln('    "$name": $value,');
+      output.writeln("    '$name': $value,");
     }
     output.writeln('  },');
   }

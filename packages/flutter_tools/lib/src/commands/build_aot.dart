@@ -239,10 +239,10 @@ Future<String> _buildAotSnapshot(
   ];
 
   if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-    printTrace("Extra front-end options: $extraFrontEndOptions");
+    printTrace('Extra front-end options: $extraFrontEndOptions');
 
   if ((extraGenSnapshotOptions != null) && extraGenSnapshotOptions.isNotEmpty) {
-    printTrace("Extra gen-snapshot options: $extraGenSnapshotOptions");
+    printTrace('Extra gen-snapshot options: $extraGenSnapshotOptions');
     genSnapshotCmd.addAll(extraGenSnapshotOptions);
   }
 

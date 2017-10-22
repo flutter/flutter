@@ -245,9 +245,9 @@ class StockHomeState extends State<StockHome> {
       stock.lastSale += 1.0;
     });
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text("Purchased ${stock.symbol} for ${stock.lastSale}"),
+      content: new Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: new SnackBarAction(
-        label: "BUY MORE",
+        label: 'BUY MORE',
         onPressed: () {
           _buyStock(stock);
         },
@@ -278,7 +278,7 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  static const List<String> portfolioSymbols = const <String>["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
+  static const List<String> portfolioSymbols = const <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
   Widget buildSearchBar() {
     return new AppBar(

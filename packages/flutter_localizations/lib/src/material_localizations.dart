@@ -348,7 +348,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_nameToValue["scriptCategory"]);
+  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_nameToValue['scriptCategory']);
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.

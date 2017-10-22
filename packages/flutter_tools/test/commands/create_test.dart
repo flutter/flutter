@@ -261,7 +261,7 @@ void main() {
       Cache.flutterRoot = '../..';
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
-      final File existingFile = fs.file("${projectDir.path.toString()}/bad");
+      final File existingFile = fs.file('${projectDir.path.toString()}/bad');
       if (!existingFile.existsSync())
         existingFile.createSync(recursive: true);
       expect(

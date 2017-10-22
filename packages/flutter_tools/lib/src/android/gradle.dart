@@ -43,7 +43,7 @@ FlutterPluginVersion get flutterPluginVersion {
   final File plugin = fs.file('android/buildSrc/src/main/groovy/FlutterPlugin.groovy');
   if (plugin.existsSync()) {
     final String packageLine = plugin.readAsLinesSync().skip(4).first;
-    if (packageLine == "package io.flutter.gradle") {
+    if (packageLine == 'package io.flutter.gradle') {
       return FlutterPluginVersion.v2;
     }
     return FlutterPluginVersion.v1;
@@ -51,7 +51,7 @@ FlutterPluginVersion get flutterPluginVersion {
   final File appGradle = fs.file('android/app/build.gradle');
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
-      if (line.contains(new RegExp(r"apply from: .*/flutter.gradle"))) {
+      if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
         return FlutterPluginVersion.managed;
       }
     }

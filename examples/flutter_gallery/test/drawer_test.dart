@@ -51,21 +51,21 @@ void main() {
     expect(app.theme.platform, equals(TargetPlatform.iOS));
 
     // Verify the font scale.
-    final Size origTextSize = tester.getSize(find.text("Small"));
+    final Size origTextSize = tester.getSize(find.text('Small'));
     expect(origTextSize, equals(const Size(176.0, 14.0)));
 
     // Switch font scale.
     await tester.tap(find.text('Small'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    final Size textSize = tester.getSize(find.text("Small"));
+    final Size textSize = tester.getSize(find.text('Small'));
     expect(textSize, equals(const Size(176.0, 11.0)));
 
     // Set font scale back to default.
     await tester.tap(find.text('System Default'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
-    final Size newTextSize = tester.getSize(find.text("Small"));
+    final Size newTextSize = tester.getSize(find.text('Small'));
     expect(newTextSize, equals(origTextSize));
 
     // Scroll to the bottom of the menu.

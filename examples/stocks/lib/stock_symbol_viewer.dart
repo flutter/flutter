@@ -16,10 +16,10 @@ class _StockSymbolView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(stock != null);
-    final String lastSale = "\$${stock.lastSale.toStringAsFixed(2)}";
-    String changeInPrice = "${stock.percentChange.toStringAsFixed(2)}%";
+    final String lastSale = '\$${stock.lastSale.toStringAsFixed(2)}';
+    String changeInPrice = '${stock.percentChange.toStringAsFixed(2)}%';
     if (stock.percentChange > 0)
-      changeInPrice = "+" + changeInPrice;
+      changeInPrice = '+' + changeInPrice;
 
     final TextStyle headings = Theme.of(context).textTheme.body2;
     return new Container(

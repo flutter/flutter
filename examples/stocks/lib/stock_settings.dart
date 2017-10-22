@@ -68,8 +68,8 @@ class StockSettingsState extends State<StockSettings> {
         showDialog<bool>(
           context: context,
           child: new AlertDialog(
-            title: const Text("Change mode?"),
-            content: const Text("Optimistic mode means everything is awesome. Are you sure you can handle that?"),
+            title: const Text('Change mode?'),
+            content: const Text('Optimistic mode means everything is awesome. Are you sure you can handle that?'),
             actions: <Widget>[
               new FlatButton(
                 child: const Text('NO THANKS'),

@@ -29,7 +29,7 @@ class CardCollectionState extends State<CardCollection> {
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
-  static const String _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
+  static const String _sunshineURL = 'http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg';
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
@@ -103,23 +103,23 @@ class CardCollectionState extends State<CardCollection> {
         child: new ListView(
           children: <Widget>[
             const DrawerHeader(child: const Center(child: const Text('Options'))),
-            buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
-            buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
-            buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
-            buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
+            buildDrawerCheckbox('Make card labels editable', _editable, _toggleEditable),
+            buildDrawerCheckbox('Fixed size cards', _fixedSizeCards, _toggleFixedSizeCards),
+            buildDrawerCheckbox('Let the sun shine', _sunshine, _toggleSunshine),
+            buildDrawerCheckbox('Vary font sizes', _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
             const Divider(),
-            buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Deep Purple', Colors.deepPurple, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Green', Colors.green, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Amber', Colors.amber, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Teal', Colors.teal, _primaryColor, _selectColor),
             const Divider(),
-            buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
-            buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
-            buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
+            buildDrawerDirectionRadioItem('Dismiss horizontally', DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
+            buildDrawerDirectionRadioItem('Dismiss left', DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
+            buildDrawerDirectionRadioItem('Dismiss right', DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
             const Divider(),
-            buildFontRadioItem("Left-align text", TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
-            buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
-            buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
+            buildFontRadioItem('Left-align text', TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
+            buildFontRadioItem('Center-align text', TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
+            buildFontRadioItem('Right-align text', TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             const Divider(),
             new ListTile(
               leading: const Icon(Icons.dvr),
@@ -282,16 +282,16 @@ class CardCollectionState extends State<CardCollection> {
     String backgroundMessage;
     switch (_dismissDirection) {
       case DismissDirection.horizontal:
-        backgroundMessage = "Swipe in either direction";
+        backgroundMessage = 'Swipe in either direction';
         break;
       case DismissDirection.endToStart:
-        backgroundMessage = "Swipe left to dismiss";
+        backgroundMessage = 'Swipe left to dismiss';
         break;
       case DismissDirection.startToEnd:
-        backgroundMessage = "Swipe right to dismiss";
+        backgroundMessage = 'Swipe right to dismiss';
         break;
       default:
-        backgroundMessage = "Unsupported dismissDirection";
+        backgroundMessage = 'Unsupported dismissDirection';
     }
 
     // TODO(abarth): This icon is wrong in RTL.

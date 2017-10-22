@@ -367,7 +367,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
       FocusScopeNode child = _firstChild;
       int count = 1;
       while (true) {
-        children.add(child.toDiagnosticsNode(name: "child $count"));
+        children.add(child.toDiagnosticsNode(name: 'child $count'));
         if (child == _lastChild)
           break;
         child = child._nextSibling;

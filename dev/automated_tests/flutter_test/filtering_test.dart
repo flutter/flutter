@@ -9,6 +9,6 @@ void main() {
     expect(2 + 2, 4);
   });
   test('excluded', () {
-    throw "this test should have been filtered out";
+    throw 'this test should have been filtered out';
   });
 }

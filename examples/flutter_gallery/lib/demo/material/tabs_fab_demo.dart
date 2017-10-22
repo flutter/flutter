@@ -6,9 +6,9 @@ import 'package:flutter/material.dart';
 
 const String _explanatoryText =
   "When the Scaffold's floating action button changes, the new button fades and "
-  "turns into view. In this demo, changing tabs can cause the app to be rebuilt "
-  "with a FloatingActionButton that the Scaffold distinguishes from the others "
-  "by its key.";
+  'turns into view. In this demo, changing tabs can cause the app to be rebuilt '
+  'with a FloatingActionButton that the Scaffold distinguishes from the others '
+  'by its key.';
 
 class _Page {
   _Page({ this.label, this.colors, this.icon });

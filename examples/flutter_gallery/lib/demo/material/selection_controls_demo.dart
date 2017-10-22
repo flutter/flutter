@@ -7,21 +7,21 @@ import 'package:flutter/material.dart';
 import '../../gallery/demo.dart';
 
 const String _checkboxText =
-  "Checkboxes allow the user to select multiple options from a set.";
+  'Checkboxes allow the user to select multiple options from a set.';
 
 const String _checkboxCode = 'selectioncontrols_checkbox';
 
 const String _radioText =
-  "Radio buttons allow the user to select one option from a set. Use radio "
-  "buttons for exclusive selection if you think that the user needs to see "
-  "all available options side-by-side.";
+  'Radio buttons allow the user to select one option from a set. Use radio '
+  'buttons for exclusive selection if you think that the user needs to see '
+  'all available options side-by-side.';
 
 const String _radioCode = 'selectioncontrols_radio';
 
 const String _switchText =
-  "On/off switches toggle the state of a single settings option. The option "
-  "that the switch controls, as well as the state it’s in, should be made "
-  "clear from the corresponding inline label.";
+  'On/off switches toggle the state of a single settings option. The option '
+  'that the switch controls, as well as the state it’s in, should be made '
+  'clear from the corresponding inline label.';
 
 const String _switchCode = 'selectioncontrols_switch';
 
@@ -37,19 +37,19 @@ class _SelectionControlsDemoState extends State<SelectionControlsDemo> {
   Widget build(BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       new ComponentDemoTabData(
-        tabName: "CHECKBOX",
+        tabName: 'CHECKBOX',
         description: _checkboxText,
         demoWidget: buildCheckbox(),
         exampleCodeTag: _checkboxCode
       ),
       new ComponentDemoTabData(
-        tabName: "RADIO",
+        tabName: 'RADIO',
         description: _radioText,
         demoWidget: buildRadio(),
         exampleCodeTag: _radioCode
       ),
       new ComponentDemoTabData(
-        tabName: "SWITCH",
+        tabName: 'SWITCH',
         description: _switchText,
         demoWidget: buildSwitch(),
         exampleCodeTag: _switchCode

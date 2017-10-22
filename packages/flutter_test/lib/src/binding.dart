@@ -142,7 +142,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     createHttpClient = () {
       return new http.MockClient((http.BaseRequest request) {
         return new Future<http.Response>.value(
-          new http.Response("Mocked: Unavailable.", 404, request: request)
+          new http.Response('Mocked: Unavailable.', 404, request: request)
         );
       });
     };
