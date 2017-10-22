@@ -307,7 +307,6 @@ class PageScrollPhysics extends ScrollPhysics {
 // control the scroll positions, everything should be fine.
 final PageController _defaultPageController = new PageController();
 const PageScrollPhysics _kPagePhysics = const PageScrollPhysics();
-const ScrollPhysics _kNonSnappingPhysics = const ScrollPhysics();
 
 /// A scrollable list that works page by page.
 ///
@@ -470,12 +469,9 @@ class _PageViewState extends State<PageView> {
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
-    ScrollPhysics physics = widget.physics;
-    if (physics == null) {
-      physics = widget.pageSnapping ? _kPagePhysics : _kNonSnappingPhysics;
-    } else if (widget.pageSnapping) {
-      physics = _kPagePhysics.applyTo(physics);
-    }
+    final ScrollPhysics physics = widget.pageSnapping
+        ? _kPagePhysics.applyTo(widget.physics)
+        : widget.physics;
 
     return new NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
@@ -516,6 +512,6 @@ class _PageViewState extends State<PageView> {
     description.add(new FlagProperty('reverse', value: widget.reverse, ifTrue: 'reversed'));
     description.add(new DiagnosticsProperty<PageController>('controller', widget.controller, showName: false));
     description.add(new DiagnosticsProperty<ScrollPhysics>('physics', widget.physics, showName: false));
-    description.add(new FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'noSnapping'));
+    description.add(new FlagProperty('pageSnapping', value: widget.pageSnapping, ifFalse: 'snapping disabled'));
   }
 }

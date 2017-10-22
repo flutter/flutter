@@ -368,11 +368,10 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
-  testWidgets('Page snapping disable and reenable',
-      (WidgetTester tester) async {
+  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
     final List<int> log = <int>[];
 
-    Widget build({bool pageSnapping}) {
+    Widget build({ bool pageSnapping }) {
       return new Directionality(
         textDirection: TextDirection.ltr,
         child: new PageView(
@@ -419,7 +418,7 @@ void main() {
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
     expect(find.text('Arizona'), findsOneWidget);
-    expect(find.text('California'), findsNothing);
+    expect(find.text('Arkansas'), findsNothing);
 
     // Now re-enable snapping, confirm that we've settled on a page.
     await tester.pumpWidget(build(pageSnapping: true));
@@ -429,7 +428,7 @@ void main() {
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
-    expect(find.text('California'), findsNothing);
+    expect(find.text('Arkansas'), findsNothing);
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
