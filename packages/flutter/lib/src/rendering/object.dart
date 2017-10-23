@@ -2318,12 +2318,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           continue;
         if (!config.isCompatibleWith(fragment.config))
           toBeMarkedExplicit.add(fragment);
-        for (_InterestingSemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
-          if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
-            toBeMarkedExplicit.add(fragment);
-            toBeMarkedExplicit.add(siblingFragment);
-          }
-        }
+//        for (_InterestingSemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
+//          if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
+//            toBeMarkedExplicit.add(fragment);
+//            toBeMarkedExplicit.add(siblingFragment);
+//          }
+//        }
       }
     });
 
