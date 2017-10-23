@@ -198,7 +198,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], isSelected: false, label: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], isSelected: false, label: "", isButton: false, textDirection: null)\n',
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
@@ -208,6 +208,7 @@ void main() {
       ..addAction(SemanticsAction.showOnScreen, () { })
       ..isChecked = false
       ..isSelected = true
+      ..isButton = true
       ..label = 'Use all the properties'
       ..textDirection = TextDirection.rtl;
     final SemanticsNode allProperties = new SemanticsNode()
@@ -217,11 +218,11 @@ void main() {
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], unchecked, selected, label: "Use all the properties", textDirection: rtl)\n',
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], unchecked, selected, label: "Use all the properties", button, textDirection: rtl)\n',
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = new SemanticsNode()

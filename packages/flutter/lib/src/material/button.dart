@@ -330,7 +330,7 @@ class _MaterialButtonState extends State<MaterialButton> {
           child: new Center(
             widthFactor: 1.0,
             heightFactor: 1.0,
-            child: widget.child
+            child: new Semantics(button: true, child: widget.child),
           )
         )
       )

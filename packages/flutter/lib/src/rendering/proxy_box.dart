@@ -3175,6 +3175,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes,
     bool checked,
     bool selected,
+    bool button,
     String label,
     TextDirection textDirection,
   }) : assert(container != null),
@@ -3182,6 +3183,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _explicitChildNodes = explicitChildNodes,
        _checked = checked,
        _selected = selected,
+       _button = button,
        _label = label,
        _textDirection = textDirection,
        super(child);
@@ -3260,6 +3262,17 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  bool get button => _button;
+  bool _button;
+  set button(bool value) {
+    if (button == value)
+      return;
+    final bool hadValue = button != null;
+    _button = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
   /// This must not be null if [label] is not null.
@@ -3286,6 +3299,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.label = label;
     if (textDirection != null)
       config.textDirection = textDirection;
+    if (button != null)
+      config.isButton = button;
   }
 }
 

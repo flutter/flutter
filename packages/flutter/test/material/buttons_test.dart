@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -31,14 +33,49 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 1,
             actions: SemanticsAction.tap.index,
             label: 'ABC',
             rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
-            transform: new Matrix4.translationValues(356.0, 282.0, 0.0)
+            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            flags: SemanticsFlags.isButton.index,
+          )
+        ],
+      ),
+      ignoreId: true,
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('Does RaisedButton contribute semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Material(
+          child: new Center(
+            child: new RaisedButton(
+              onPressed: () { },
+              child: const Text('ABC')
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            actions: SemanticsAction.tap.index,
+            label: 'ABC',
+            rect: new Rect.fromLTRB(0.0, 0.0, 88.0, 36.0),
+            transform: new Matrix4.translationValues(356.0, 282.0, 0.0),
+            flags: SemanticsFlags.isButton.index,
           )
         ]
-      )
+      ),
+      ignoreId: true,
     ));
 
     semantics.dispose();

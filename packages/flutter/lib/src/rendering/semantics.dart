@@ -680,6 +680,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
+    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
   }
 
@@ -1043,6 +1044,11 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);
+  }
+
+  /// Whether the owning [RenderObject] is a button (true) or not (false).
+  set isButton(bool value) {
+    _setFlag(SemanticsFlags.isButton, value);
   }
 
   // TAGS
