@@ -461,7 +461,7 @@ Future<T> showDialog<T>({
   bool barrierDismissible: true,
   @required Widget child,
 }) {
-  return Navigator.push(context, new _DialogRoute<T>(
+  return Navigator.of(context, rootNavigator: true).push(new _DialogRoute<T>(
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
