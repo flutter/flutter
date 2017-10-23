@@ -1184,7 +1184,8 @@ class SemanticsConfiguration {
       otherString: other._label,
       otherTextDirection: other.textDirection,
     );
-    _value ??= other._value;
+    if (_value == '' || _value == null)
+      _value = other._value;
     _hint = _concatStrings(
       thisString: _hint,
       thisTextDirection: textDirection,

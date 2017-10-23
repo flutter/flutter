@@ -3298,7 +3298,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
-  /// This must not be null if [label] is not null.
+  /// This must not be null if [label], [hint], or [value] is not null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {

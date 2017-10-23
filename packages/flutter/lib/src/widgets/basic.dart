@@ -4525,7 +4525,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   final TextDirection textDirection;
 
   TextDirection _getTextDirection(BuildContext context) {
-    return textDirection ?? (label != null ? Directionality.of(context) : null);
+    return textDirection ?? (label != null || value != null || hint != null ? Directionality.of(context) : null);
   }
 
   @override

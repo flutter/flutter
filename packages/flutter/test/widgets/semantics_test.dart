@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -240,6 +241,126 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             label: 'label',
+            hint: 'hint',
+            value: 'value',
+            textDirection: TextDirection.ltr,
+          )
+        ]
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+  });
+
+  testWidgets('Semantics hints can merge', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          container: true,
+          child: new Column(
+            children: <Widget>[
+              const Semantics(
+                hint: 'hint one',
+              ),
+              const Semantics(
+                hint: 'hint two',
+              )
+
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            hint: 'hint one\nhint two',
+            textDirection: TextDirection.ltr,
+          )
+        ]
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+  });
+
+  testWidgets('Semantics values do not merge', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          container: true,
+          child: new Column(
+            children: <Widget>[
+              new Semantics(
+                value: 'value one',
+                child: new Container(
+                  height: 10.0,
+                  width: 10.0,
+                )
+              ),
+              new Semantics(
+                value: 'value two',
+                child: new Container(
+                  height: 10.0,
+                  width: 10.0,
+                )
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          children: <TestSemantics>[
+            new TestSemantics(
+              value: 'value one',
+              textDirection: TextDirection.ltr,
+            ),
+            new TestSemantics(
+              value: 'value two',
+              textDirection: TextDirection.ltr,
+            ),
+          ]
+        )
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
+  });
+
+  testWidgets('Semantics calue and hint can merge', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          container: true,
+          child: new Column(
+            children: <Widget>[
+              const Semantics(
+                hint: 'hint',
+              ),
+              const Semantics(
+                value: 'value',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
             hint: 'hint',
             value: 'value',
             textDirection: TextDirection.ltr,
