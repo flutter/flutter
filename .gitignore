@@ -22,7 +22,6 @@ Thumbs.db
 
 # directories pulled in via deps or hooks
 /buildtools/
-/dart/
 /flutter/
 /garnet/
 /ios_tools/
@@ -32,6 +31,7 @@ Thumbs.db
 /third_party/benchmark/
 /third_party/boringssl/
 /third_party/colorama/
+/third_party/dart/
 /third_party/freetype2/
 /third_party/gtest/
 /third_party/gyp/
