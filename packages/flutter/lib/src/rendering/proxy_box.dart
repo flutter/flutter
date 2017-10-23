@@ -3226,7 +3226,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
-  /// If non-null, sets the [SemanticsNode.isButton] semantic the given value.
+  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
   bool get button => _button;
   bool _button;
   set button(bool value) {

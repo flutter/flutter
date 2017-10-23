@@ -4479,6 +4479,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   final bool selected;
 
   /// If non-null, indicates that this subtree represents a button.
+  ///
+  /// TalkBack/VoiceOver provides users with the hint "button" when a button
+  /// is focused.
   final bool button;
 
   /// Provides a textual description of the widget.
