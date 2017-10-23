@@ -14,7 +14,7 @@ import os
 import sys
 
 DART_SCRIPT_DIR = os.path.dirname(sys.argv[0])
-DART_ROOT = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../dart'))
+DART_ROOT = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../third_party/dart'))
 FLUTTER_ROOT = os.path.realpath(os.path.join(DART_SCRIPT_DIR, '../../flutter'))
 
 class VarImpl(object):
