@@ -3362,6 +3362,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return chain.join(' \u2190 ');
   }
 
+  /// Returns the parent chain from this element back to the root of the tree.
+  ///
+  /// Useful for debug display of a tree of Elements with only nodes in the path
+  /// from the root to this Element expanded.
+  List<Element> debugGetDiagnosticChain() {
+    final List<Element> chain = <Element>[this];
+    Element node = _parent;
+    while (node != null) {
+      chain.add(node);
+      node = node._parent;
+    }
+    return chain;
+  }
+
   /// A short, textual description of this element.
   @override String toStringShort() {
     return widget != null ? '${widget.toStringShort()}' : '[$runtimeType]';
