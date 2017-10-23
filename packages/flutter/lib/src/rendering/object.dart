@@ -859,6 +859,7 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
+    clipRectCount = 0;
     Timeline.startSync('Semantics');
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
@@ -875,6 +876,7 @@ class PipelineOwner {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
       Timeline.finishSync();
+      print('Clip rect: $clipRectCount');
     }
   }
 }
@@ -2318,12 +2320,12 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           continue;
         if (!config.isCompatibleWith(fragment.config))
           toBeMarkedExplicit.add(fragment);
-//        for (_InterestingSemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
-//          if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
-//            toBeMarkedExplicit.add(fragment);
-//            toBeMarkedExplicit.add(siblingFragment);
-//          }
-//        }
+        for (_InterestingSemanticsFragment siblingFragment in fragments.sublist(0, fragments.length - 1)) {
+          if (!fragment.config.isCompatibleWith(siblingFragment.config)) {
+            toBeMarkedExplicit.add(fragment);
+            toBeMarkedExplicit.add(siblingFragment);
+          }
+        }
       }
     });
 
@@ -3221,6 +3223,7 @@ class _SemanticsGeometry {
   bool _isClipRectValid = false;
 
   Rect _computeClipRect() {
+    clipRectCount++;
     if (_owner.parent is! RenderObject)
       return null;
     final RenderObject parent = _owner.parent;
@@ -3301,3 +3304,5 @@ class _SemanticsGeometry {
     return clipRect != null && clipRect.isEmpty || rect.isEmpty;
   }
 }
+
+int clipRectCount = 0;
