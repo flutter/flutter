@@ -1736,8 +1736,7 @@ class _InactiveElements {
     final List<Element> elements = _elements.toList()..sort(Element._sort);
     _elements.clear();
     try {
-      for (Element element in elements.reversed)
-        _unmount(element);
+      elements.reversed.forEach(_unmount);
     } finally {
       assert(_elements.isEmpty);
       _locked = false;

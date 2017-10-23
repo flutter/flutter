@@ -119,7 +119,7 @@ linter:
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_locals
-    # - prefer_foreach # not yet tested
+    - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested

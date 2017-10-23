@@ -2758,9 +2758,7 @@ abstract class ContainerRenderObjectMixin<ChildType extends RenderObject, Parent
 
   /// Add all the children to the end of this render object's child list.
   void addAll(List<ChildType> children) {
-    if (children != null)
-      for (ChildType child in children)
-        add(child);
+    children?.forEach(add);
   }
 
   void _removeFromChildList(ChildType child) {
@@ -2945,7 +2943,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
 
 /// Describes the semantics information a [RenderObject] wants to add to its
 /// parent.
-/// 
+///
 /// It has two notable subclasses:
 ///  * [_InterestingSemanticsFragment] describing actual semantic information to
 ///    be added to the parent.

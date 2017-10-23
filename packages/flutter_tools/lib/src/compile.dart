@@ -131,8 +131,7 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile $inputKey');
-    for (String invalidatedFile in invalidatedFiles)
-      _server.stdin.writeln(invalidatedFile);
+    invalidatedFiles.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
 
     return stdoutHandler.outputFilename.future;
