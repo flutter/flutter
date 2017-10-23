@@ -33,6 +33,8 @@ class SemanticsUpdateBuilder
                   double right,
                   double bottom,
                   std::string label,
+                  std::string hint,
+                  std::string value,
                   int textDirection,
                   const tonic::Float64List& transform,
                   const tonic::Int32List& children);

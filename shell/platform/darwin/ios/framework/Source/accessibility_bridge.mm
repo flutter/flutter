@@ -162,6 +162,18 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   return @(_node.label.data());
 }
 
+- (NSString*)accessibilityHint {
+  if (_node.hint.empty())
+    return nil;
+  return @(_node.hint.data());
+}
+
+- (NSString*)accessibilityValue {
+  if (_node.value.empty())
+    return nil;
+  return @(_node.value.data());
+}
+
 - (UIAccessibilityTraits)accessibilityTraits {
   UIAccessibilityTraits traits = UIAccessibilityTraitNone;
   if (_node.HasAction(blink::SemanticsAction::kIncrease) ||
