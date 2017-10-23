@@ -26,9 +26,9 @@ import '../lib/src/usage.dart';
 
 // Note: this was largely inspired by lib/src/commands/test.dart.
 
-const String _kOptionPackages = "packages";
-const String _kOptionShell = "shell";
-const String _kOptionTestDirectory = "test-directory";
+const String _kOptionPackages = 'packages';
+const String _kOptionShell = 'shell';
+const String _kOptionTestDirectory = 'test-directory';
 const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionShell,

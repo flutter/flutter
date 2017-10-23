@@ -44,11 +44,11 @@ Future<int> runTests(
   }
 
   for (String name in names) {
-    testArgs..add("--name")..add(name);
+    testArgs..add('--name')..add(name);
   }
 
   for (String plainName in plainNames) {
-    testArgs..add("--plain-name")..add(plainName);
+    testArgs..add('--plain-name')..add(plainName);
   }
 
   testArgs.add('--');

@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/painting.dart';
+import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   test('ShapeDecoration constructor', () {
@@ -48,4 +53,70 @@ void main() {
     expect(Decoration.lerp(a, b, 0.9).hitTest(size, const Offset(20.0, 50.0)), isTrue);
     expect(b.hitTest(size, const Offset(20.0, 50.0)), isTrue);
   });
+
+  test('ShapeDecoration.image RTL test', () {
+    final List<int> log = <int>[];
+    final ShapeDecoration decoration = new ShapeDecoration(
+      shape: const CircleBorder(),
+      image: new DecorationImage(
+        image: new TestImageProvider(),
+        alignment: AlignmentDirectional.bottomEnd,
+      ),
+    );
+    final BoxPainter painter = decoration.createBoxPainter(() { log.add(0); });
+    expect((Canvas canvas) => painter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(100.0, 100.0))), paintsAssertion);
+    expect(
+      (Canvas canvas) {
+        return painter.paint(
+          canvas,
+          const Offset(20.0, -40.0),
+          const ImageConfiguration(
+            size: const Size(1000.0, 1000.0),
+            textDirection: TextDirection.rtl,
+          ),
+        );
+      },
+      paints
+        ..drawImageRect(source: new Rect.fromLTRB(0.0, 0.0, 100.0, 200.0), destination: new Rect.fromLTRB(20.0, 1000.0 - 40.0 - 200.0, 20.0 + 100.0, 1000.0 - 40.0))
+    );
+    expect(
+      (Canvas canvas) {
+        return painter.paint(
+          canvas,
+          Offset.zero,
+          const ImageConfiguration(
+            size: const Size(100.0, 200.0),
+            textDirection: TextDirection.ltr,
+          ),
+        );
+      },
+      isNot(paints..image()) // we always use drawImageRect
+    );
+    expect(log, isEmpty);
+  });
+}
+
+class TestImageProvider extends ImageProvider<TestImageProvider> {
+  @override
+  Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
+    return new SynchronousFuture<TestImageProvider>(this);
+  }
+
+  @override
+  ImageStreamCompleter load(TestImageProvider key) {
+    return new OneFrameImageStreamCompleter(
+      new SynchronousFuture<ImageInfo>(new ImageInfo(image: new TestImage(), scale: 1.0)),
+    );
+  }
+}
+
+class TestImage extends ui.Image {
+  @override
+  int get width => 100;
+
+  @override
+  int get height => 200;
+
+  @override
+  void dispose() { }
 }

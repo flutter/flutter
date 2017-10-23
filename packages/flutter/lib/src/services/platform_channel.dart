@@ -150,7 +150,7 @@ class MethodChannel {
       codec.encodeMethodCall(new MethodCall(method, arguments)),
     );
     if (result == null)
-      throw new MissingPluginException("No implementation found for method $method on channel $name");
+      throw new MissingPluginException('No implementation found for method $method on channel $name');
     return codec.decodeEnvelope(result);
   }
 

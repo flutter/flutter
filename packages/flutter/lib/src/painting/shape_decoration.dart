@@ -268,9 +268,9 @@ class ShapeDecoration extends Decoration {
 
 /// An object that paints a [ShapeDecoration] into a canvas.
 class _ShapeDecorationPainter extends BoxPainter {
-  _ShapeDecorationPainter(this._decoration, VoidCallback onChange)
+  _ShapeDecorationPainter(this._decoration, VoidCallback onChanged)
     : assert(_decoration != null),
-      super(onChange);
+      super(onChanged);
 
   final ShapeDecoration _decoration;
 
@@ -318,6 +318,7 @@ class _ShapeDecorationPainter extends BoxPainter {
       _outerPath = _decoration.shape.getOuterPath(rect);
     if (_decoration.image != null)
       _innerPath = _decoration.shape.getInnerPath(rect);
+    _lastRect = rect;
   }
 
   void _paintShadows(Canvas canvas) {
@@ -332,48 +333,17 @@ class _ShapeDecorationPainter extends BoxPainter {
       canvas.drawPath(_outerPath, _interiorPaint);
   }
 
-  ImageStream _imageStream;
-  ImageInfo _image;
-
-  void _imageListener(ImageInfo value, bool synchronousCall) {
-    if (_image == value)
-      return;
-    _image = value;
-    assert(onChanged != null);
-    if (!synchronousCall)
-      onChanged();
-  }
-
+  DecorationImagePainter _imagePainter;
   void _paintImage(Canvas canvas, ImageConfiguration configuration) {
-    final DecorationImage details = _decoration.image;
-    if (details == null)
+    if (_decoration.image == null)
       return;
-    final ImageStream newImageStream = details.image.resolve(configuration);
-    if (newImageStream.key != _imageStream?.key) {
-      _imageStream?.removeListener(_imageListener);
-      _imageStream = newImageStream;
-      _imageStream.addListener(_imageListener);
-    }
-    if (_image == null)
-      return;
-    canvas.save();
-    canvas.clipPath(_innerPath);
-    paintImage(
-      canvas: canvas,
-      rect: _lastRect,
-      image: _image.image,
-      colorFilter: details.colorFilter,
-      fit: details.fit,
-      alignment: details.alignment,
-      centerSlice: details.centerSlice,
-      repeat: details.repeat,
-    );
-    canvas.restore();
+    _imagePainter ??= _decoration.image.createPainter(onChanged);
+    _imagePainter.paint(canvas, _lastRect, _innerPath, configuration);
   }
 
   @override
   void dispose() {
-    _imageStream?.removeListener(_imageListener);
+    _imagePainter?.dispose();
     super.dispose();
   }
 

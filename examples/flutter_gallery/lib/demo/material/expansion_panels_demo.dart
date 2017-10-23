@@ -225,7 +225,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         name: 'Location',
         value: _Location.Bahamas,
         hint: 'Select location',
-        valueToString: (_Location location) => location.toString().split(".")[1],
+        valueToString: (_Location location) => location.toString().split('.')[1],
         builder: (DemoItem<_Location> item) {
           void close() {
             setState(() {

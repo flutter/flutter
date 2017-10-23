@@ -36,6 +36,9 @@ class SyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizati
   final List<bool> shouldReloadValues = <bool>[];
 
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadSync(locale, prefix);
 
   @override
@@ -53,6 +56,9 @@ class AsyncTestLocalizationsDelegate extends LocalizationsDelegate<TestLocalizat
 
   final String prefix; // Changing this value triggers a rebuild
   final List<bool> shouldReloadValues = <bool>[];
+
+  @override
+  bool isSupported(Locale locale) => true;
 
   @override
   Future<TestLocalizations> load(Locale locale) => TestLocalizations.loadAsync(locale, prefix);
@@ -93,12 +99,18 @@ class SyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizati
   Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadSync(locale);
 
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   bool shouldReload(SyncMoreLocalizationsDelegate old) => false;
 }
 
 class AsyncMoreLocalizationsDelegate extends LocalizationsDelegate<MoreLocalizations> {
   @override
   Future<MoreLocalizations> load(Locale locale) => MoreLocalizations.loadAsync(locale);
+
+  @override
+  bool isSupported(Locale locale) => true;
 
   @override
   bool shouldReload(AsyncMoreLocalizationsDelegate old) => false;
@@ -111,6 +123,9 @@ class OnlyRTLDefaultWidgetsLocalizations extends DefaultWidgetsLocalizations {
 
 class OnlyRTLDefaultWidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
   const OnlyRTLDefaultWidgetsLocalizationsDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
 
   @override
   Future<WidgetsLocalizations> load(Locale locale) {

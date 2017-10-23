@@ -148,7 +148,7 @@ abstract class Decoration extends Diagnosticable {
 abstract class BoxPainter {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  BoxPainter([this._onChanged]);
+  BoxPainter([this.onChanged]);
 
   /// Paints the [Decoration] for which this object was created on the
   /// given canvas using the given configuration.
@@ -180,13 +180,12 @@ abstract class BoxPainter {
   ///
   /// Resources might not start to load until after [paint] has been called,
   /// because they might depend on the configuration.
-  VoidCallback get onChanged => _onChanged;
-  VoidCallback _onChanged;
+  final VoidCallback onChanged;
 
-  /// Discard any resources being held by the object. This also guarantees that
-  /// the [onChanged] callback will not be called again.
+  /// Discard any resources being held by the object.
+  ///
+  /// The [onChanged] callback will not be invoked after this method has been
+  /// called.
   @mustCallSuper
-  void dispose() {
-    _onChanged = null;
-  }
+  void dispose() { }
 }

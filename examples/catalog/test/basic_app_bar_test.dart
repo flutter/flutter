@@ -20,7 +20,7 @@ Finder findChoiceCard(IconData icon) {
 }
 
 void main() {
-  testWidgets("basic_app_bar sample smoke test", (WidgetTester tester) async {
+  testWidgets('basic_app_bar sample smoke test', (WidgetTester tester) async {
     basic_app_bar_sample.main();
     await tester.pump();
 

@@ -29,6 +29,9 @@ class MockClipboard {
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
@@ -36,6 +39,9 @@ class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocali
 }
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
   @override
   Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
@@ -789,13 +795,7 @@ void main() {
   });
 
   testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.localize(
-      new ThemeData(
-        hintColor: Colors.blue[500],
-      ),
-      MaterialTextGeometry.forScriptCategory(MaterialTextGeometry.englishLikeCategory),
-    );
-
+    final ThemeData themeData = new ThemeData(hintColor: Colors.blue[500]);
     await tester.pumpWidget(
       overlay(
         child: new Theme(
@@ -810,7 +810,7 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, themeData.textTheme.caption.fontSize);
+    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {

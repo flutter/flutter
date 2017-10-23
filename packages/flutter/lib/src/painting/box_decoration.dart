@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -305,9 +304,9 @@ class BoxDecoration extends Decoration {
 
 /// An object that paints a [BoxDecoration] into a canvas.
 class _BoxDecorationPainter extends BoxPainter {
-  _BoxDecorationPainter(this._decoration, VoidCallback onChange)
+  _BoxDecorationPainter(this._decoration, VoidCallback onChanged)
     : assert(_decoration != null),
-      super(onChange);
+      super(onChanged);
 
   final BoxDecoration _decoration;
 
@@ -367,74 +366,27 @@ class _BoxDecorationPainter extends BoxPainter {
       _paintBox(canvas, rect, _getBackgroundPaint(rect), textDirection);
   }
 
-  ImageStream _imageStream;
-  ImageInfo _image;
-
+  DecorationImagePainter _imagePainter;
   void _paintBackgroundImage(Canvas canvas, Rect rect, ImageConfiguration configuration) {
-    // TODO(ianh): factor this out into a DecorationImage.paint method.
-    final DecorationImage backgroundImage = _decoration.image;
-    if (backgroundImage == null)
+    if (_decoration.image == null)
       return;
-
-    bool flipHorizontally = false;
-    if (backgroundImage.matchTextDirection) {
-      // We check this first so that the assert will fire immediately, not just when the
-      // image is ready.
-      assert(configuration.textDirection != null, 'matchTextDirection can only be used when a TextDirection is available.');
-      if (configuration.textDirection == TextDirection.rtl)
-        flipHorizontally = true;
-    }
-
-    final ImageStream newImageStream = backgroundImage.image.resolve(configuration);
-    if (newImageStream.key != _imageStream?.key) {
-      _imageStream?.removeListener(_imageListener);
-      _imageStream = newImageStream;
-      _imageStream.addListener(_imageListener);
-    }
-    final ui.Image image = _image?.image;
-    if (image == null)
-      return;
-
+    _imagePainter ??= _decoration.image.createPainter(onChanged);
     Path clipPath;
-    if (_decoration.shape == BoxShape.circle)
-      clipPath = new Path()..addOval(rect);
-    else if (_decoration.borderRadius != null)
-      clipPath = new Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
-    if (clipPath != null) {
-      canvas.save();
-      canvas.clipPath(clipPath);
+    switch (_decoration.shape) {
+      case BoxShape.circle:
+        clipPath = new Path()..addOval(rect);
+        break;
+      case BoxShape.rectangle:
+        if (_decoration.borderRadius != null)
+          clipPath = new Path()..addRRect(_decoration.borderRadius.resolve(configuration.textDirection).toRRect(rect));
+        break;
     }
-
-    paintImage(
-      canvas: canvas,
-      rect: rect,
-      image: image,
-      colorFilter: backgroundImage.colorFilter,
-      fit: backgroundImage.fit,
-      alignment: backgroundImage.alignment.resolve(configuration.textDirection),
-      centerSlice: backgroundImage.centerSlice,
-      repeat: backgroundImage.repeat,
-      flipHorizontally: flipHorizontally,
-    );
-
-    if (clipPath != null)
-      canvas.restore();
-  }
-
-  void _imageListener(ImageInfo value, bool synchronousCall) {
-    if (_image == value)
-      return;
-    _image = value;
-    assert(onChanged != null);
-    if (!synchronousCall)
-      onChanged();
+    _imagePainter.paint(canvas, rect, clipPath, configuration);
   }
 
   @override
   void dispose() {
-    _imageStream?.removeListener(_imageListener);
-    _imageStream = null;
-    _image = null;
+    _imagePainter?.dispose();
     super.dispose();
   }
 

@@ -175,7 +175,7 @@ Future<int> _handleToolError(
     writelnStderr();
     writelnStderr(
         "Run 'flutter -h' (or 'flutter <command> -h') for available "
-            "flutter commands and options."
+            'flutter commands and options.'
     );
     // Argument error exit code.
     return _exit(64);

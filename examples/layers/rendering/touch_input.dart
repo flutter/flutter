@@ -104,7 +104,7 @@ void main() {
   final RenderParagraph paragraph = new RenderParagraph(
     const TextSpan(
       style: const TextStyle(color: Colors.black87),
-      text: "Touch me!",
+      text: 'Touch me!',
     ),
     textDirection: TextDirection.ltr,
   );

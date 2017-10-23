@@ -277,12 +277,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object obj = ""]) {
+  void writeln([Object obj = '']) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
     bool addSeparator = false;
     for (dynamic object in objects) {
       if (addSeparator) {

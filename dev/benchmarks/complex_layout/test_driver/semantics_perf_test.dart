@@ -31,7 +31,7 @@ void main() {
         expect(await driver.setSemantics(true), isTrue);
       });
 
-      final Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == "Semantics");
+      final Iterable<TimelineEvent> semanticsEvents = timeline.events.where((TimelineEvent event) => event.name == 'Semantics');
       if (semanticsEvents.length != 1)
         fail('Expected exactly one semantics event, got ${semanticsEvents.length}');
       final Duration semanticsTreeCreation = semanticsEvents.first.duration;

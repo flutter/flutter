@@ -462,11 +462,13 @@ class ThemeData {
   /// Caches localized themes to speed up the [localize] method.
   static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache = new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
 
-  /// Returns a new theme built by merging [baseTheme] into the text geometry
-  /// provided by the [localTextGeometry].
+  /// Returns a new theme built by merging the text geometry provided by the
+  /// [localTextGeometry] theme with the [baseTheme].
   ///
-  /// The [TextStyle.inherit] field in the text styles provided by
-  /// [localTextGeometry] must be set to true.
+  /// For those text styles in the [baseTheme] whose [TextStyle.inherit] is set
+  /// to true, the returned theme's text styles inherit the geometric properties
+  /// of [localTextGeometry]. The resulting text styles' [TextStyle.inherit] is
+  /// set to those provided by [localTextGeometry].
   static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
     // WARNING: this method memoizes the result in a cache based on the
     // previously seen baseTheme and localTextGeometry. Memoization is safe

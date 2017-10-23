@@ -8,18 +8,29 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FooMaterialLocalizations extends GlobalMaterialLocalizations {
-  FooMaterialLocalizations(Locale locale) : super(locale);
+  FooMaterialLocalizations(Locale locale, this.backButtonTooltip) : super(locale);
 
   @override
-  String get backButtonTooltip => 'foo';
+  final String backButtonTooltip;
 }
 
 class FooMaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const FooMaterialLocalizationsDelegate();
+  const FooMaterialLocalizationsDelegate({
+    this.supportedLanguage: 'en',
+    this.backButtonTooltip: 'foo'
+  });
+
+  final String supportedLanguage;
+  final String backButtonTooltip;
+
+  @override
+  bool isSupported(Locale locale) {
+    return supportedLanguage == 'allLanguages' ? true : locale.languageCode == supportedLanguage;
+  }
 
   @override
   Future<FooMaterialLocalizations> load(Locale locale) {
-    return new SynchronousFuture<FooMaterialLocalizations>(new FooMaterialLocalizations(locale));
+    return new SynchronousFuture<FooMaterialLocalizations>(new FooMaterialLocalizations(locale, backButtonTooltip));
   }
 
   @override
@@ -143,7 +154,42 @@ void main() {
     expect(find.text('Back'), findsOneWidget);
   });
 
-  testWidgets('MaterialApp overrides MaterialLocalizations', (WidgetTester tester) async {
+  testWidgets('MaterialApp adds MaterialLocalizations for additional languages', (WidgetTester tester) async {
+    final Key textKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      buildFrame(
+        delegates: <FooMaterialLocalizationsDelegate>[
+          const FooMaterialLocalizationsDelegate(supportedLanguage: 'fr', backButtonTooltip: 'FR'),
+          const FooMaterialLocalizationsDelegate(supportedLanguage: 'de', backButtonTooltip: 'DE'),
+        ],
+        supportedLocales: const <Locale>[
+          const Locale('en', ''),
+          const Locale('fr', ''),
+          const Locale('de', ''),
+        ],
+        buildContent: (BuildContext context) {
+          // Should always be 'foo', no matter what the locale is
+          return new Text(
+            MaterialLocalizations.of(context).backButtonTooltip,
+            key: textKey,
+          );
+        }
+      )
+    );
+
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Back');
+
+    await tester.binding.setLocale('fr', 'CA');
+    await tester.pump();
+    expect(find.text('FR'), findsOneWidget);
+
+    await tester.binding.setLocale('de', 'DE');
+    await tester.pump();
+    expect(find.text('DE'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp overrides MaterialLocalizations for all locales', (WidgetTester tester) async {
     final Key textKey = new UniqueKey();
 
     await tester.pumpWidget(
@@ -151,7 +197,7 @@ void main() {
         // Accept whatever locale we're given
         localeResolutionCallback: (Locale locale, Iterable<Locale> supportedLocales) => locale,
         delegates: <FooMaterialLocalizationsDelegate>[
-          const FooMaterialLocalizationsDelegate(),
+          const FooMaterialLocalizationsDelegate(supportedLanguage: 'allLanguages'),
         ],
         buildContent: (BuildContext context) {
           // Should always be 'foo', no matter what the locale is
@@ -169,6 +215,38 @@ void main() {
     await tester.pump();
     expect(find.text('foo'), findsOneWidget);
 
+    await tester.binding.setLocale('de', 'DE');
+    await tester.pump();
+    expect(find.text('foo'), findsOneWidget);
+  });
+
+  testWidgets('MaterialApp overrides MaterialLocalizations for default locale', (WidgetTester tester) async {
+    final Key textKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      buildFrame(
+        delegates: <FooMaterialLocalizationsDelegate>[
+          const FooMaterialLocalizationsDelegate(supportedLanguage: 'en'),
+        ],
+        // supportedLocales not specified, so all locales resolve to 'en'
+        buildContent: (BuildContext context) {
+          return new Text(
+            MaterialLocalizations.of(context).backButtonTooltip,
+            key: textKey,
+          );
+        }
+      )
+    );
+
+    // Unsupported locale '_' (the widget tester's default) resolves to 'en'.
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'foo');
+
+    // Unsupported locale 'zh' resolves to 'en'.
+    await tester.binding.setLocale('zh', 'CN');
+    await tester.pump();
+    expect(find.text('foo'), findsOneWidget);
+
+    // Unsupported locale 'de' resolves to 'en'.
     await tester.binding.setLocale('de', 'DE');
     await tester.pump();
     expect(find.text('foo'), findsOneWidget);

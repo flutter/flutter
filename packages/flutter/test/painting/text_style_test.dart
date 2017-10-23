@@ -142,4 +142,25 @@ void main() {
     expect(s7.fontFamily, 'packages/p/test');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
   });
+
+  test('TextStyle.debugLabel', () {
+    const TextStyle unknown = const TextStyle();
+    const TextStyle foo = const TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const TextStyle bar = const TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const TextStyle baz = const TextStyle(debugLabel: 'baz', fontSize: 3.0);
+
+    expect(unknown.debugLabel, null);
+    expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
+    expect(unknown.copyWith().debugLabel, null);
+    expect(unknown.apply().debugLabel, null);
+
+    expect(foo.debugLabel, 'foo');
+    expect(foo.toString(), 'TextStyle(debugLabel: foo, inherit: true, size: 1.0)');
+    expect(foo.merge(bar).debugLabel, 'bar < foo');
+    expect(foo.merge(bar).merge(baz).debugLabel, 'baz < bar < foo');
+    expect(foo.copyWith().debugLabel, 'copy of foo');
+    expect(foo.apply().debugLabel, 'modified foo');
+    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo, bar)');
+    expect(TextStyle.lerp(foo.merge(bar), baz, 0.5).copyWith().debugLabel, 'copy of lerp(bar < foo, baz)');
+  });
 }

@@ -209,7 +209,7 @@ void main() {
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
-      ..label = "Use all the properties"
+      ..label = 'Use all the properties'
       ..textDirection = TextDirection.rtl;
     final SemanticsNode allProperties = new SemanticsNode()
       ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)

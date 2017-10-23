@@ -287,6 +287,24 @@ abstract class PaintPattern {
 
   /// Indicates that an image is expected next.
   ///
+  /// The next call to [Canvas.drawImage] is examined, and its arguments
+  /// compared to those passed to _this_ method.
+  ///
+  /// If no call to [Canvas.drawImage] was made, then this results in
+  /// failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawImage] call are ignored.
+  ///
+  /// The [Paint]-related arguments (`color`, `strokeWidth`, `hasMaskFilter`,
+  /// `style`) are compared against the state of the [Paint] object after the
+  /// painting has completed, not at the time of the call. If the same [Paint]
+  /// object is reused multiple times, then this may not match the actual
+  /// arguments as they were seen by the method.
+  void image({ ui.Image image, double x, double y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+
+  /// Indicates that an image subsection is expected next.
+  ///
   /// The next call to [Canvas.drawImageRect] is examined, and its arguments
   /// compared to those passed to _this_ method.
   ///
@@ -610,6 +628,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void paragraph({ ui.Paragraph paragraph, Offset offset }) {
     _predicates.add(new _FunctionPaintPredicate(#drawParagraph, <dynamic>[paragraph, offset]));
+  }
+
+  @override
+  void image({ ui.Image image, double x, double y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _DrawImagePaintPredicate(image: image, x: x, y: y, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -976,6 +999,50 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   _ArcPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+}
+
+class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
+  _DrawImagePaintPredicate({ this.image, this.x, this.y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawImage, 'an image', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+  );
+
+  final ui.Image image;
+  final double x;
+  final double y;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final ui.Image imageArgument = arguments[0];
+    if (image != null && imageArgument != image)
+      throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
+    final Offset pointArgument = arguments[0];
+    if (x != null && y != null) {
+      final Offset point = new Offset(x, y);
+      if (point != pointArgument)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+    } else {
+      if (x != null && pointArgument.dx != x)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+      if (y != null && pointArgument.dy != y)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (image != null)
+      description.add('image $image');
+    if (x != null && y != null) {
+      description.add('point ${new Offset(x, y)}');
+    } else {
+      if (x != null)
+        description.add('x-coordinate ${x.toStringAsFixed(1)}');
+      if (y != null)
+        description.add('y-coordinate ${y.toStringAsFixed(1)}');
+    }
+  }
 }
 
 class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {

@@ -27,6 +27,9 @@ class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
 
   @override
+  bool isSupported(Locale locale) => locale.languageCode == 'es' || locale.languageCode == 'en';
+
+  @override
   bool shouldReload(_StocksLocalizationsDelegate old) => false;
 }
 
