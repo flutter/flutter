@@ -52,6 +52,8 @@ struct SemanticsNode {
   int32_t flags = 0;
   int32_t actions = 0;
   std::string label;
+  std::string hint;
+  std::string value;
   int32_t textDirection = 0;  // 0=unknown, 1=rtl, 2=ltr
 
   SkRect rect = SkRect::MakeEmpty();
