@@ -336,7 +336,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
   });
 
-  testWidgets('Semantics calue and hint can merge', (WidgetTester tester) async {
+  testWidgets('Semantics value and hint can merge', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
