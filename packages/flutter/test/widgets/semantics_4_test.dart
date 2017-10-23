@@ -53,22 +53,22 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 3,
+            id: 1,
             label: 'L1',
             rect: TestSemantics.fullScreen,
           ),
           new TestSemantics.rootChild(
-            id: 4,
+            id: 2,
             label: 'L2',
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               new TestSemantics(
-                id: 1,
+                id: 3,
                 flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
                 rect: TestSemantics.fullScreen,
               ),
               new TestSemantics(
-                id: 2,
+                id: 4,
                 flags: SemanticsFlags.hasCheckedState.index,
                 rect: TestSemantics.fullScreen,
               ),
@@ -113,12 +113,12 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 3,
+            id: 1,
             label: 'L1',
             rect: TestSemantics.fullScreen,
           ),
           new TestSemantics.rootChild(
-            id: 4,
+            id: 2,
             label: 'L2',
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             rect: TestSemantics.fullScreen,
@@ -158,7 +158,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 4,
+            id: 2,
             label: 'L2',
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             rect: TestSemantics.fullScreen,

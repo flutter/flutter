@@ -3086,7 +3086,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
 
     _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
-      ..wasAffectedByClip = node.wasAffectedByClip
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
     _annotatedNode = _innerNode;

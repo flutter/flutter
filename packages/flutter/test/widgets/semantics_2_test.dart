@@ -53,17 +53,17 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 3,
+          id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
-              id: 1,
+              id: 2,
               label: 'child1',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlags.isSelected.index,
             ),
             new TestSemantics(
-              id: 2,
+              id: 3,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlags.isSelected.index,
@@ -107,7 +107,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 3,
+          id: 1,
           label: 'child1',
           rect: TestSemantics.fullScreen,
           flags: SemanticsFlags.isSelected.index,
@@ -149,7 +149,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 3,
+          id: 1,
           rect: TestSemantics.fullScreen,
           children: <TestSemantics>[
             new TestSemantics(
@@ -159,7 +159,7 @@ void main() {
               flags: SemanticsFlags.isSelected.index,
             ),
             new TestSemantics(
-              id: 2,
+              id: 3,
               label: 'child2',
               rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 10.0),
               flags: SemanticsFlags.isSelected.index,

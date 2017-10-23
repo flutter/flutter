@@ -253,12 +253,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] was affected by a clip from an ancestors.
+  /// The clip rect from an ancestor that was applied to this node.
   ///
-  /// If this is true it means that an ancestor imposed a clip on this
-  /// [SemanticsNode]. However, it does not mean that the clip had any effect
-  /// on the [rect] whatsoever.
-  bool wasAffectedByClip = false;
+  /// Expressed in the coordinate system of the node. May be null if no clip has
+  /// been applied.
+  Rect parentClipRect;
 
   /// Whether the node is invisible.
   ///
@@ -672,7 +671,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
-    properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
     if (_hasFlag(SemanticsFlags.hasCheckedState))
@@ -1107,7 +1105,7 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
-    _actionsAsBits != other._actionsAsBits;
+    _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
 
     textDirection ??= other.textDirection;

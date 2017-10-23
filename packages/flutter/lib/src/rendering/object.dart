@@ -859,7 +859,6 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
-    clipRectCount = 0;
     Timeline.startSync('Semantics');
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
@@ -876,7 +875,6 @@ class PipelineOwner {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
       Timeline.finishSync();
-      print('Clip rect: $clipRectCount');
     }
   }
 }
@@ -2253,43 +2251,23 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void _updateSemantics() {
     assert(_semanticsConfiguration.isSemanticBoundary || parent is! RenderObject);
     final _SemanticsFragment fragment = _getSemanticsForParent(
-      parentClippingRect: _semanticsClippingRect,
       mergeIntoParent: _semantics?.parent?.isPartOfNodeMerging ?? false,
     );
     assert(fragment is _InterestingSemanticsFragment);
     final _InterestingSemanticsFragment interestingFragment = fragment;
-    final SemanticsNode node = interestingFragment.compileChildren().single;
+    final SemanticsNode node = interestingFragment.compileChildren(_semantics?.parentClipRect).single;
     // Fragment only wants to add this node's SemanticsNode to the parent.
     assert(interestingFragment.config == null && node == _semantics);
   }
 
-  /// Clip that needs to be applied to any [SemanticsNode] owned by this
-  /// [RenderObject].
-  ///
-  /// Can be null if no clip is to be applied.
-  ///
-  /// Updated by [_getSemanticsForParent].
-  Rect _semanticsClippingRect;
-
   /// Returns the semantics that this node would like to add to its parent.
   _SemanticsFragment _getSemanticsForParent({
-    @required Rect parentClippingRect,
     @required bool mergeIntoParent,
   }) {
     assert(mergeIntoParent != null);
 
     final SemanticsConfiguration config = _semanticsConfiguration;
     bool dropSemanticsOfPreviousSiblings = config.isBlockingSemanticsOfPreviouslyPaintedNodes;
-
-    final _SemanticsGeometry geometry = new _SemanticsGeometry(
-      owner: this,
-      parentClippingRect: parentClippingRect,
-    );
-    _semanticsClippingRect = geometry.clipRect;
-
-    // Shortcut if this fragment cannot be exposed to user.
-    if (_semanticsConfiguration.isSemanticBoundary && !mergeIntoParent && geometry.isInvisible)
-      return new _ContainerSemanticsFragment(dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings);
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
@@ -2298,7 +2276,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     visitChildrenForSemantics((RenderObject renderChild) {
       final _SemanticsFragment fragment = renderChild._getSemanticsForParent(
-        parentClippingRect: _semanticsClippingRect,
         mergeIntoParent: childrenMergeIntoParent,
       );
       if (fragment.dropsSemanticsOfPreviousSiblings) {
@@ -2310,7 +2287,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // Figure out which child fragments are to be made explicit.
       for (_InterestingSemanticsFragment fragment in fragment.interestingFragments) {
         fragments.add(fragment);
-        fragment.geometry.addAncestor(this);
+        fragment.addAncestor(this);
         fragment.addTags(config.tagsForChildren);
         if (config.explicitChildNodes || parent is! RenderObject) {
           fragment.markAsExplicit();
@@ -2349,7 +2326,6 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     } else {
       result = new _SwitchableSemanticsFragment(
         config: config,
-        geometry: geometry,
         mergeIntoParent: mergeIntoParent,
         owner: this,
         dropsSemanticsOfPreviousSiblings: dropSemanticsOfPreviousSiblings,
@@ -3000,18 +2976,20 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 /// merged into the parent's [SemanticsNode].
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
-    this.geometry,
-    @required this.owner,
+    @required RenderObject owner,
     @required bool dropsSemanticsOfPreviousSiblings
   }) : assert(owner != null),
+       _ancestorChain = <RenderObject>[owner],
        super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   /// The [RenderObject] that owns this fragment (and any new [SemanticNode]
   /// introduced by it).
-  final RenderObject owner;
+  RenderObject get owner => _ancestorChain.first;
+
+  final List<RenderObject> _ancestorChain;
 
   /// The children to be added to the parent.
-  Iterable<SemanticsNode> compileChildren();
+  Iterable<SemanticsNode> compileChildren(Rect parentClipRect);
 
   /// The [SemanticsConfiguration] the child wants to merge into the parent's
   /// [SemanticsNode] or null if it doesn't want to merge anything.
@@ -3035,8 +3013,6 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments);
 
-  final _SemanticsGeometry geometry;
-
   /// Whether this fragment wants to add any semantic information to the parent
   /// [SemanticsNode].
   bool get hasConfigForParent => config != null;
@@ -3055,6 +3031,10 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     _tagsForChildren ??= new Set<SemanticsTag>();
     _tagsForChildren.addAll(tags);
   }
+
+  void addAncestor(RenderObject ancestor) {
+    _ancestorChain.add(ancestor);
+  }
 }
 
 /// A [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
@@ -3069,22 +3049,36 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compileChildren() sync* {
+  Iterable<SemanticsNode> compileChildren(Rect parentClipRect) sync* {
     assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
+    assert(parentClipRect == null);
+    assert(_ancestorChain.length == 1);
+
     owner._semantics ??= new SemanticsNode.root(
       showOnScreen: owner.showOnScreen,
       owner: owner.owner.semanticsOwner,
     );
     final SemanticsNode node = owner._semantics;
     assert(MatrixUtils.matrixEquals(node.transform, new Matrix4.identity()));
-    assert(!node.wasAffectedByClip);
+    assert(node.parentClipRect == null);
+
     node.rect = owner.semanticBounds;
+
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    for (_InterestingSemanticsFragment fragment in _children) {
+      assert(fragment.config == null);
+      children.addAll(fragment.compileChildren(parentClipRect));
+    }
+    node.updateWith(config: null, childrenInInversePaintOrder: children);
+
     assert(!node.isInvisible);
     yield node;
   }
 
   @override
   SemanticsConfiguration get config => null;
+
+  final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
   void markAsExplicit() {
@@ -3093,13 +3087,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
 
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
-    final SemanticsNode root = compileChildren().first;
-    final List<SemanticsNode> children = <SemanticsNode>[];
-    for (_InterestingSemanticsFragment fragment in fragments) {
-      assert(fragment.config == null);
-      children.addAll(fragment.compileChildren());
-    }
-    root.updateWith(config: null, childrenInInversePaintOrder: children);
+    _children.addAll(fragments);
   }
 }
 
@@ -3125,40 +3113,59 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   _SwitchableSemanticsFragment({
     @required bool mergeIntoParent,
     @required SemanticsConfiguration config,
-    @required _SemanticsGeometry geometry,
     @required RenderObject owner,
     @required bool dropsSemanticsOfPreviousSiblings,
   }) : _mergeIntoParent = mergeIntoParent,
        _config = config,
        assert(mergeIntoParent != null),
        assert(config != null),
-       super(geometry: geometry, owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
+       super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   final bool _mergeIntoParent;
   SemanticsConfiguration _config;
   bool _isConfigWritable = false;
-  final List<SemanticsNode> _children = <SemanticsNode>[];
+  final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren() sync* {
+  Iterable<SemanticsNode> compileChildren(Rect parentClipRect) sync* {
     if (!_isExplicit) {
       owner._semantics = null;
-      yield* _children;
+      for (_InterestingSemanticsFragment fragment in _children) {
+        assert(_ancestorChain.first == fragment._ancestorChain.last);
+        fragment._ancestorChain.addAll(_ancestorChain.sublist(1));
+        yield* fragment.compileChildren(parentClipRect);
+      }
       return;
     }
-    if (!_mergeIntoParent && geometry.rect.isEmpty)
+
+    final _SemanticsGeometry geometry = _needsGeometryUpdate
+        ? new _SemanticsGeometry(parentClipRect: parentClipRect, ancestors: _ancestorChain)
+        : null;
+
+    if (!_mergeIntoParent && (geometry?.isInvisible == true))
       return;  // Drop the node, it's not going to be visible.
+
     owner._semantics ??= new SemanticsNode(showOnScreen: owner.showOnScreen);
     final SemanticsNode node = owner._semantics
       ..isMergedIntoParent = _mergeIntoParent
       ..tags = _tagsForChildren;
 
-    geometry.updateNode(node);
+    if (geometry != null) {
+      assert(_needsGeometryUpdate);
+      node
+        ..rect = geometry.rect
+        ..transform = geometry.transform
+        ..parentClipRect = geometry.clipRect;
+    }
+
+    final List<SemanticsNode> children = <SemanticsNode>[];
+    for (_InterestingSemanticsFragment fragment in _children)
+      children.addAll(fragment.compileChildren(node.parentClipRect));
 
     if (_config.isSemanticBoundary) {
-      owner.assembleSemanticsNode(node, _config, _children);
+      owner.assembleSemanticsNode(node, _config, children);
     } else {
-      node.updateWith(config: _config, childrenInInversePaintOrder: _children);
+      node.updateWith(config: _config, childrenInInversePaintOrder: children);
     }
 
     yield node;
@@ -3172,7 +3179,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   @override
   void addAll(Iterable<_InterestingSemanticsFragment> fragments) {
     for (_InterestingSemanticsFragment fragment in fragments) {
-      _children.addAll(fragment.compileChildren());
+      _children.add(fragment);
       if (fragment.config == null)
         continue;
       if (!_isConfigWritable) {
@@ -3189,6 +3196,8 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   void markAsExplicit() {
     _isExplicit = true;
   }
+
+  bool get _needsGeometryUpdate => _ancestorChain.length > 1;
 }
 
 /// Helper class that keeps track of the geometry of a [SemanticsNode].
@@ -3199,110 +3208,56 @@ class _SemanticsGeometry {
 
   /// `parentClippingRect` may be null if no clip is to be applied.
   _SemanticsGeometry({
-    @required RenderObject owner,
-    @required Rect parentClippingRect
-  }) : assert(owner != null),
-       _ancestorChain = <RenderObject>[owner],
-       _parentClippingRect = parentClippingRect;
-
-  final Rect _parentClippingRect;
-  final List<RenderObject> _ancestorChain;
-
-  RenderObject get _owner => _ancestorChain.first;
-
-  /// The current clip [Rect] that would be applied to the [SemanticsNode]
-  /// owned by [owner].
-  Rect get clipRect {
-    if (!_isClipRectValid) {
-      __clipRect = _computeClipRect();
-      _isClipRectValid = true;
-    }
-    return __clipRect;
+    @required Rect parentClipRect,
+    @required List<RenderObject> ancestors,
+  }) {
+    _computeValues(parentClipRect, ancestors);
   }
-  Rect __clipRect;
-  bool _isClipRectValid = false;
 
-  Rect _computeClipRect() {
-    clipRectCount++;
-    if (_owner.parent is! RenderObject)
-      return null;
-    final RenderObject parent = _owner.parent;
+  Rect _clipRect;
+  Matrix4 _transform;
+  Rect _rect;
 
-    // Clip rect in parent's coordinate system.
-    Rect clip = parent.describeApproximatePaintClip(_owner);
-    if (clip == null) {
-      if (_parentClippingRect == null)
-        return null;
-      clip = _parentClippingRect;
-    } else if (_parentClippingRect != null) {
-      clip = _parentClippingRect.intersect(clip);
+  Matrix4 get transform => _transform;
+  Rect get clipRect => _clipRect;
+  Rect get rect => _rect;
+
+  void _computeValues(Rect parentClipRect, List<RenderObject> ancestors) {
+    assert(ancestors.length > 1);
+
+    _transform = new Matrix4.identity();
+    _clipRect = parentClipRect;
+    for (int index = ancestors.length-1; index > 0; index -= 1) {
+      final RenderObject parent = ancestors[index];
+      final RenderObject child = ancestors[index-1];
+      _clipRect = _intersectClipRect(parent.describeApproximatePaintClip(child));
+      if (_clipRect != null) {
+        if (_clipRect.isEmpty) {
+          _clipRect = Rect.zero;
+        } else {
+          final Matrix4 clipTransform = new Matrix4.identity();
+          parent.applyPaintTransform(child, clipTransform);
+          _clipRect = MatrixUtils.inverseTransformRect(clipTransform, _clipRect);
+        }
+      }
+      parent.applyPaintTransform(child, _transform);
     }
 
-    assert(clip != null);
-    if (clip.isEmpty)
-      return Rect.zero;
-
-    // Translate clip into owner's coordinate system.
-    final Matrix4 clipTransform = new Matrix4.identity();
-    parent.applyPaintTransform(_owner, clipTransform);
-    return MatrixUtils.inverseTransformRect(clipTransform, clip);
+    final RenderObject owner = ancestors.first;
+    _rect = _clipRect == null ? owner.semanticBounds : _clipRect.intersect(owner.semanticBounds);
   }
 
-  /// The value for [SemanticsNode.rect].
-  ///
-  /// This is essentially [RenderObject.semanticsBound] with [clipRect] applied.
-  Rect get rect {
-    if (__rect == null)
-      __rect = _computeRect();
-    return __rect;
-  }
-  Rect __rect;
-
-  Rect _computeRect() {
-    if (clipRect == null)
-      return _owner.semanticBounds;
-    return clipRect.intersect(_owner.semanticBounds);
-  }
-
-  Matrix4 _computeTransformation() {
-    assert(_ancestorChain.length > 1);
-    final Matrix4 transform = new Matrix4.identity();
-    for (int index = _ancestorChain.length-1; index > 0; index -= 1) {
-      final RenderObject parent = _ancestorChain[index];
-      final RenderObject child = _ancestorChain[index - 1];
-      parent.applyPaintTransform(child, transform);
-
-    }
-    return transform;
-  }
-
-  /// Annotates `node` with the latest geometry information.
-  ///
-  /// It sets [SemanticsNode.rect], [SemanticsNode.transform], and
-  /// [SemanticsNode.wasAffectedByClip] to the current values.
-  void updateNode(SemanticsNode node) {
-    if (_ancestorChain.length > 1)
-      node.transform = _computeTransformation();
-    node.rect = rect;
-    node.wasAffectedByClip = rect != _owner.semanticBounds;
-  }
-
-  /// Adds the geometric information of `ancestor` to this object.
-  ///
-  /// Those information are required to properly compute the value for
-  /// [SemanticsNode.transform].
-  ///
-  /// Ancestors have to be added in order from [owner] up until the next
-  /// [RenderObject] that owns a [SemanticsNode] is reached.
-  void addAncestor(RenderObject ancestor) {
-    _ancestorChain.add(ancestor);
+  Rect _intersectClipRect(Rect other) {
+    if (_clipRect == null)
+      return other;
+    if (other == null)
+      return _clipRect;
+    return _clipRect.intersect(other);
   }
 
   /// Whether a [SemanticsNode] annotated with the geometric information tracked
   /// by this object would be visible on screen.
   bool get isInvisible {
-    return clipRect != null && clipRect.isEmpty || rect.isEmpty;
+    return _rect.isEmpty;
   }
 }
-
-int clipRectCount = 0;
