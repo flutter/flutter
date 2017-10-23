@@ -148,7 +148,7 @@ void main() {
       ));
     });
 
-    test('test length limiting formatter with non-ASCII runes', () {
+    test('test length limiting formatter with non-BMP Unicode scalar values', () {
       testNewValue = const TextEditingValue(
         text: '\u{1f984}\u{1f984}\u{1f984}\u{1f984}', // Unicode U+1f984 (UNICORN FACE)
         selection: const TextSelection(
@@ -175,25 +175,23 @@ void main() {
     test('test length limiting formatter with complex Unicode characters', () {
       // TODO(gspencer): Test additional strings.  We can do this once the
       // formatter supports Unicode grapheme clusters.
-      // The following should all be treated as single characters:
-      //  - \u{0058}\u{0346}\u{0361}\u{035E}\u{032A}\u{031C}\u{0333}\u{0326}\u{031D}\u{0332}
-      //  - \u{1F3F3}\u{FE0F}\u{200D}\u{1F308}
-      testNewValue = const TextEditingValue(
-        text: '\u{0000}\u{FEFF}',
-        selection: const TextSelection(
-          baseOffset: 1,
-          extentOffset: 1,
-        ),
-      );
-      TextEditingValue actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
-      expect(actualValue, const TextEditingValue(
-        text: '\u{0000}',
-        selection: const TextSelection(
-          baseOffset: 1,
-          extentOffset: 1,
-        ),
-      ));
+      //
+      // A formatter with max length 1 should accept:
+      //  - The '\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}' sequence (flag followed by
+      //    a variation selector, a zero-width joiner, and a rainbow to make a rainbow
+      //    flag).
+      //  - The sequence '\u{0058}\u{0346}\u{0361}\u{035E}\u{032A}\u{031C}\u{0333}\u{0326}\u{031D}\u{0332}'
+      //    (Latin X with many composed characters).
+      //
+      // A formatter should not count as a character:
+      //   * The '\u{0000}\u{FEFF}' sequence. (NULL followed by zero-width no-break space).
+      //
+      // A formatter with max length 1 should truncate this to one character:
+      //   * The '\u{1F3F3}\u{FE0F}\u{1F308}' sequence (flag with ignored variation
+      //     selector followed by rainbow, should truncate to just flag).
 
+      // The U+1F984 U+0020 sequence: Unicorn face followed by a space should
+      // yield only the unicorn face.
       testNewValue = const TextEditingValue(
         text: '\u{1F984}\u{0020}',
         selection: const TextSelection(
@@ -201,7 +199,7 @@ void main() {
           extentOffset: 1,
         ),
       );
-      actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      TextEditingValue actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
       expect(actualValue, const TextEditingValue(
         text: '\u{1F984}',
         selection: const TextSelection(
@@ -210,6 +208,8 @@ void main() {
         ),
       ));
 
+      // The U+0058 U+0059 sequence: Latin X followed by Latin Y, should yield
+      // Latin X.
       testNewValue = const TextEditingValue(
         text: '\u{0058}\u{0059}',
         selection: const TextSelection(

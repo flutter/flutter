@@ -474,12 +474,11 @@ class InputDecorator extends StatelessWidget {
 
     final TextStyle baseStyle = this.baseStyle ?? themeData.textTheme.subhead;
     final TextStyle hintStyle = decoration.hintStyle ?? baseStyle.copyWith(color: themeData.hintColor);
-    final TextStyle helperStyle =
-      decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
+    final TextStyle helperStyle = decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
+    final TextStyle counterStyle = decoration.counterStyle ?? helperStyle;
     final TextStyle subtextStyle = errorText != null
       ? decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor)
       : helperStyle;
-    final TextStyle counterStyle = decoration.counterStyle ?? helperStyle;
 
     final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
 

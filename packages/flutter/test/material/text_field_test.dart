@@ -1586,7 +1586,7 @@ void main() {
     expect(textController.text, '0123456789101112');
   });
 
-  testWidgets("maxLength shows warning when maxLengthEnforced is false.", (WidgetTester tester) async {
+  testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
     final TextEditingController textController = new TextEditingController();
     final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
 

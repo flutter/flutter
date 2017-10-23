@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math show min;
+import 'dart:math' as math;
 
 import 'text_editing.dart';
 import 'text_input.dart';
@@ -122,11 +122,14 @@ class BlacklistingTextInputFormatter extends TextInputFormatter {
       = new BlacklistingTextInputFormatter(new RegExp(r'\n'));
 }
 
-/// A [TextInputFormatter] that prevents the insertion of more characters (i.e.
-/// Unicode runes) than allowed.
+/// A [TextInputFormatter] that prevents the insertion of more characters
+/// (currently defined as Unicode scalar values) than allowed.
 ///
 /// Since this formatter only prevents new characters from being added to the
 /// text, it preserves the existing [TextEditingValue.selection].
+///
+///  * [maxLength], which discusses the precise meaning of "number of
+///    characters" and how it may differ from the intuitive meaning.
 class LengthLimitingTextInputFormatter extends TextInputFormatter {
   /// Creates a formatter that prevents the insertion of more characters than a
   /// limit.
@@ -136,18 +139,31 @@ class LengthLimitingTextInputFormatter extends TextInputFormatter {
   LengthLimitingTextInputFormatter(this.maxLength)
     : assert(maxLength == null || maxLength > 0);
 
-  /// The limit on the number of characters (i.e. Unicode runes) this formatter
+  /// The limit on the number of characters (i.e. Unicode scalar values) this formatter
   /// will allow.
   ///
   /// The value must be null or greater than zero. If it is null, then no limit
   /// is enforced.
   ///
   /// This formatter does not currently count Unicode grapheme clusters (i.e.
-  /// characters visible to the user), it counts Unicode runes, which leaves
+  /// characters visible to the user), it counts Unicode scalar values, which leaves
   /// out a number of useful possible characters (like many emoji and composed
   /// characters), so this will be inaccurate in the presence of those
   /// characters. If you expect to encounter these kinds of characters, be
   /// generous in the maxLength used.
+  ///
+  /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
+  /// which is the letter "o" followed by a composed diaeresis "¨", or it can
+  /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
+  /// SMALL LETTER O WITH DIAERESIS".  In the first case, the text field will
+  /// count two characters, and the second case will be counted as one
+  /// character, even though the user can see no difference in the input.
+  ///
+  /// Similarly, some emoji are represented by multiple scalar values. The
+  /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽", should be
+  /// counted as a single character, but because it is a combination of two
+  /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
+  /// characters.
   final int maxLength;
 
   @override
