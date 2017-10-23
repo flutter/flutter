@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
@@ -33,11 +31,6 @@ class CardCollectionState extends State<CardCollection> {
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
-  static const List<double> _cardHeights = const <double>[
-    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-  ];
 
   MaterialColor _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
@@ -48,22 +41,15 @@ class CardCollectionState extends State<CardCollection> {
   bool _sunshine = false;
   bool _varyFontSizes = false;
 
-  void _updateCardSizes() {
-    if (_fixedSizeCards)
-      return;
-    _cardModels = new List<CardModel>.generate(
-      _cardModels.length,
-      (int i) {
-        _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
-        return _cardModels[i];
-      }
-    );
-  }
-
   void _initVariableSizedCardModels() {
+    final List<double> cardHeights = <double>[
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+    ];
     _cardModels = new List<CardModel>.generate(
-      _cardHeights.length,
-      (int i) => new CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i])
+      cardHeights.length,
+      (int i) => new CardModel(i, cardHeights[i])
     );
   }
 
@@ -140,7 +126,6 @@ class CardCollectionState extends State<CardCollection> {
   void _toggleEditable() {
     setState(() {
       _editable = !_editable;
-      _updateCardSizes();
     });
   }
 
