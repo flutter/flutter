@@ -326,7 +326,7 @@ Future<int> main() async {
       final _MockedIncrementalKernelGenerator generator =
         new _MockedIncrementalKernelGenerator();
       when(generator.computeDelta()).thenReturn(new Future<DeltaProgram>.value(
-        new DeltaProgram(null /* program stub */)
+        new DeltaProgram("", null /* program stub */)
       ));
       final _MockedBinaryPrinterFactory printerFactory =
         new _MockedBinaryPrinterFactory();
