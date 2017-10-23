@@ -220,7 +220,7 @@ void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
                                   bool reuse_runtime_controller) {
   TRACE_EVENT0("flutter", "Engine::RunBundleAndSnapshot");
   if (snapshot_override.empty()) {
-    RunBundle(bundle_path, entrypoint);
+    RunBundle(bundle_path, entrypoint, reuse_runtime_controller);
     return;
   }
   ConfigureAssetBundle(bundle_path);
