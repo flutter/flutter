@@ -134,7 +134,6 @@ class TextPainter {
       return;
     _textScaleFactor = value;
     _paragraph = null;
-    _layoutTemplate = null;
     _needsLayout = true;
   }
 
