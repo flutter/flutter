@@ -35,7 +35,7 @@ const List<Demo> demos = const <Demo>[
   // Demos
   const Demo('Shrine', profiled: true),
   const Demo('Contact profile', profiled: true),
-  // const Demo('Animation', profiled: true),
+  const Demo('Animation', profiled: true),
 
   // Material Components
   const Demo('Bottom navigation', profiled: true),
