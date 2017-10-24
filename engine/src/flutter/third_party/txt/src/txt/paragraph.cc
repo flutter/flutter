@@ -380,6 +380,17 @@ void Paragraph::Layout(double width, bool force) {
       layout.doLayout(text_ptr, 0, text_count, text_count, bidiFlags, font,
                       minikin_paint, minikin_font_collection);
 
+      if (layout.nGlyphs() == 0) {
+        // This run is empty, so insert a placeholder paint record that captures
+        // the current font metrics.
+        SkPaint::FontMetrics metrics;
+        paint.getFontMetrics(&metrics);
+        paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
+                                   builder.make(), metrics, line_number,
+                                   layout.getAdvance());
+        continue;
+      }
+
       // Break the layout into blobs that share the same SkPaint parameters.
       std::vector<Range> glyph_blobs;
       for (size_t blob_start = 0; blob_start < layout.nGlyphs();) {
