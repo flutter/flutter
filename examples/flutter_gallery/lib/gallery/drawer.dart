@@ -171,7 +171,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show an Android phone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      title: const Text('Android'),
+      title: const Text('Mountain View'),
       value: TargetPlatform.android,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
@@ -181,7 +181,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget cupertinoItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show the iPhone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      title: const Text('iOS'),
+      title: const Text('Cupertino'),
       value: TargetPlatform.iOS,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
@@ -240,7 +240,7 @@ class GalleryDrawer extends StatelessWidget {
                   style: aboutTextStyle,
                   text: 'Flutter is an early-stage, open-source project to help '
                         'developers build high-performance, high-fidelity, mobile '
-                        'apps for iOS and Android from a single codebase. This '
+                        'apps for multiple platforms from a single codebase. This '
                         "gallery is a preview of Flutter's many widgets, behaviors, "
                         'animations, layouts, and more. Learn more about Flutter at '
                 ),
