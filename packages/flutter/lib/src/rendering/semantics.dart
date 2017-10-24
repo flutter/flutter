@@ -253,12 +253,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] was affected by a clip from an ancestors.
+  /// The clip rect from an ancestor that was applied to this node.
   ///
-  /// If this is true it means that an ancestor imposed a clip on this
-  /// [SemanticsNode]. However, it does not mean that the clip had any effect
-  /// on the [rect] whatsoever.
-  bool wasAffectedByClip = false;
+  /// Expressed in the coordinate system of the node. May be null if no clip has
+  /// been applied.
+  Rect parentClipRect;
 
   /// Whether the node is invisible.
   ///
@@ -488,13 +487,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     return _label != config.label ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
-        _actionsAsBitMap(_actions) != _actionsAsBitMap(config._actions) ||
+        _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
   // TAGS, LABELS, ACTIONS
 
   Map<SemanticsAction, VoidCallback> _actions = _kEmptyConfig._actions;
+
+  int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
   /// The [SemanticsTag]s this node is tagged with.
   ///
@@ -519,10 +520,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
-  int _actionsAsBitMap(Map<SemanticsAction, VoidCallback> actions) {
-    return actions.keys.fold(0, (int prev, SemanticsAction action) => prev |= action.index);
-  }
-
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
@@ -539,6 +536,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _flags = config._flags;
     _textDirection = config.textDirection;
     _actions = new Map<SemanticsAction, VoidCallback>.from(config._actions);
+    _actionsAsBits = config._actionsAsBits;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
   }
@@ -551,7 +549,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
     int flags = _flags;
-    int actions = _actionsAsBitMap(_actions);
+    int actions = _actionsAsBits;
     String label = _label;
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
@@ -560,7 +558,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
-        actions |= _actionsAsBitMap(node._actions);
+        actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
@@ -673,7 +671,6 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
-    properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
     if (_hasFlag(SemanticsFlags.hasCheckedState))
@@ -871,7 +868,7 @@ class SemanticsOwner extends ChangeNotifier {
           return handler;
       }
     }
-    return node._canPerformAction(action) ? node._actions[action] : null;
+    return node._actions[action];
   }
 
   /// Asks the [SemanticsNode] at the given position to perform the given action.
@@ -985,11 +982,14 @@ class SemanticsConfiguration {
   /// * [addAction] to add an action.
   final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
+  int _actionsAsBits = 0;
+
   /// Adds an `action` to the semantics tree.
   ///
   /// Whenever the user performs `action` the provided `handler` is called.
   void addAction(SemanticsAction action, VoidCallback handler) {
     _actions[action] = handler;
+    _actionsAsBits |= action.index;
     _hasBeenAnnotated = true;
   }
 
@@ -1083,7 +1083,7 @@ class SemanticsConfiguration {
   bool isCompatibleWith(SemanticsConfiguration other) {
     if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
       return true;
-    if (_actions.keys.toSet().intersection(other._actions.keys.toSet()).isNotEmpty)
+    if (_actionsAsBits & other._actionsAsBits != 0)
       return false;
     if ((_flags & other._flags) != 0)
       return false;
@@ -1105,6 +1105,7 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
+    _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
 
     textDirection ??= other.textDirection;
@@ -1138,6 +1139,7 @@ class SemanticsConfiguration {
       .._textDirection = _textDirection
       .._label = _label
       .._flags = _flags
+      .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
 }

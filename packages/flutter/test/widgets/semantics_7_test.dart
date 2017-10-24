@@ -55,7 +55,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 3,
+            id: 1,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,
@@ -111,7 +111,7 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 3,
+            id: 1,
             flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
             label: label,
             rect: TestSemantics.fullScreen,

@@ -40,12 +40,12 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 2,
+            id: 1,
             label: 'I am text!\nMoar text!!1',
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               new TestSemantics(
-                id: 1,
+                id: 2,
                 label: 'Button',
                 textDirection: TextDirection.ltr,
                 actions: SemanticsAction.tap.index,

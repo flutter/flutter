@@ -95,7 +95,7 @@ void main() {
     expect(semantics, hasSemantics(new TestSemantics.root(
       children: <TestSemantics>[
         new TestSemantics.rootChild(
-          id: 7,
+          id: 1,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
@@ -103,7 +103,7 @@ void main() {
           label: 'aaa\nAAA',
         ),
         new TestSemantics.rootChild(
-          id: 8,
+          id: 4,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
@@ -111,7 +111,7 @@ void main() {
           label: 'bbb\nBBB',
         ),
         new TestSemantics.rootChild(
-          id: 9,
+          id: 7,
           rect: new Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: new Matrix4.translationValues(0.0, 112.0, 0.0),
           flags: SemanticsFlags.hasCheckedState.index,

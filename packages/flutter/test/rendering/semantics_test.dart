@@ -198,7 +198,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), wasAffectedByClip: false, actions: [], isSelected: false, label: "", isButton: false, textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isSelected: false, label: "", isButton: false, textDirection: null)\n',
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
@@ -214,11 +214,10 @@ void main() {
     final SemanticsNode allProperties = new SemanticsNode()
       ..rect = new Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = new Matrix4.translation(new Vector3(10.0, 10.0, 0.0))
-      ..wasAffectedByClip = true
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), clipped, actions: [longPress, scrollUp, showOnScreen], unchecked, selected, label: "Use all the properties", button, textDirection: rtl)\n',
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, label: "Use all the properties", button, textDirection: rtl)\n',
     );
     expect(
       allProperties.getSemanticsData().toString(),
