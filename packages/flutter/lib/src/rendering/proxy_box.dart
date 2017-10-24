@@ -3254,7 +3254,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  bool get button => _button;
+  bool _button;
+  set button(bool value) {
+    if (button == value)
+      return;
+    final bool hadValue = button != null;
+    _button = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label;
   set label(String value) {
@@ -3265,16 +3278,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
-  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
-  bool get button => _button;
-  bool _button;
-  set button(bool value) {
-    if (button == value)
-      return;
-    final bool hadValue = button != null;
-    _button = value;
-
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get value => _value;
   String _value;
   set value(String value) {
@@ -3286,6 +3292,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint;
   set hint(String value) {
