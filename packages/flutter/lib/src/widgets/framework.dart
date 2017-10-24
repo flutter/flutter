@@ -2257,7 +2257,7 @@ class BuildOwner {
         assert(_dirtyElements[index]._inDirtyList);
         assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
         try {
-          _dirtyElements[index].rebuild();
+          _dirtyElements[index]._rebuild();
         } catch (e, stack) {
           _debugReportException(
             'while rebuilding dirty elements', e, stack,
@@ -2674,6 +2674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
+    assert(owner._debugCurrentBuildTarget == this);
     if (newWidget == null) {
       if (child != null)
         deactivateChild(child);
@@ -2688,7 +2689,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
-        child.update(newWidget);
+        child._update(newWidget);
         assert(child.widget == newWidget);
         assert(() {
           child.owner._debugElementWasRebuilt(child);
@@ -2753,6 +2754,52 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         && _active
         && Widget.canUpdate(widget, newWidget));
     _widget = newWidget;
+  }
+
+  // Wrap [mount] in build phase.
+  void _mount(Element parent, dynamic newSlot) {
+    _buildScope(parent?.owner, () { mount(parent, newSlot); });
+  }
+
+  void _prepareRebuild() {
+    _prepareDependenciesRebuild();
+  }
+
+  void _finishRebuild() {
+    _finishDependenciesRebuild();
+  }
+
+  // Wrap [update] in build phase.
+  void _update(Widget newWidget) {
+    _buildScope(owner, () { update(newWidget); }, before: _prepareRebuild, after: _finishRebuild);
+  }
+
+  // Wrap [rebuild] in build phase.
+  void _rebuild() {
+    assert(_debugLifecycleState != _ElementLifecycle.initial);
+    if (!_active || !_dirty)
+      return;
+    _buildScope(owner, rebuild, before: _prepareRebuild, after: _finishRebuild);
+  }
+
+  void _buildScope(BuildOwner buildOwner, VoidCallback callback, {VoidCallback before = _nop, VoidCallback after = _nop}) {
+    Element debugPreviousBuildTarget;
+    try {
+      assert(() {
+        debugPreviousBuildTarget = buildOwner._debugCurrentBuildTarget;
+        buildOwner._debugCurrentBuildTarget = this;
+        return true;
+      }());
+      before();
+      callback();
+    } finally {
+      after();
+      assert(() {
+        assert(buildOwner._debugCurrentBuildTarget == this);
+        buildOwner._debugCurrentBuildTarget = debugPreviousBuildTarget;
+        return true;
+      }());
+    }
   }
 
   /// Change the slot that the given child occupies in its parent.
@@ -2882,6 +2929,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @protected
   Element inflateWidget(Widget newWidget, dynamic newSlot) {
     assert(newWidget != null);
+    assert(owner._debugCurrentBuildTarget == this);
     final Key key = newWidget.key;
     if (key is GlobalKey) {
       final Element newChild = _retakeInactiveElement(key, newWidget);
@@ -2896,7 +2944,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     final Element newChild = newWidget.createElement();
     assert(() { _debugCheckForCycles(newChild); return true; }());
-    newChild.mount(this, newSlot);
+    newChild._mount(this, newSlot);
     assert(newChild._debugLifecycleState == _ElementLifecycle.active);
     return newChild;
   }
@@ -3000,7 +3048,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
-      didChangeDependencies();
+      markDependenciesChanged();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -3187,7 +3235,40 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Map<Type, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
+  Set<InheritedElement> _obsolescentDependencies;
   bool _hadUnsatisfiedDependencies = false;
+
+  void _prepareDependenciesRebuild() {
+    assert(_obsolescentDependencies == null || _obsolescentDependencies.isEmpty);
+    final Set<InheritedElement> tmp = _obsolescentDependencies;
+    _obsolescentDependencies = _dependencies;
+    _dependencies = tmp;
+    _hadUnsatisfiedDependencies = false;
+    _checkDependenciesChanged();
+  }
+
+  void _finishDependenciesRebuild() {
+    if (_obsolescentDependencies != null && _obsolescentDependencies.isNotEmpty) {
+      for (InheritedElement dependency in _obsolescentDependencies) {
+        dependency.removeDependent(this);
+      }
+      _obsolescentDependencies.clear();
+    }
+  }
+
+  void _addDependency(InheritedElement ancestor) {
+    assert(ancestor is InheritedElement);
+    _dependencies ??= new HashSet<InheritedElement>();
+    final bool newDependency = _dependencies.add(ancestor);
+    final bool oldDependency = _obsolescentDependencies?.remove(ancestor) ?? false;
+    if (newDependency && !oldDependency) {
+      ancestor.addDependent(this);
+    }
+  }
+
+  bool _containsDependency(InheritedElement dependency) {
+    return _dependencies?.contains(dependency) ?? false;
+  }
 
   bool _debugCheckStateIsActiveForAncestorLoopkup() {
     assert(() {
@@ -3210,10 +3291,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_debugCheckStateIsActiveForAncestorLoopkup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
-      assert(ancestor is InheritedElement);
-      _dependencies ??= new HashSet<InheritedElement>();
-      _dependencies.add(ancestor);
-      ancestor.addDependent(this);
+      _addDependency(ancestor);
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -3288,19 +3366,37 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       ancestor = ancestor._parent;
   }
 
-  /// Called when a dependency of this element changes.
+  bool _dependenciesChanged = false;
+
+  void markDependenciesChanged() {
+    assert(_active); // Otherwise this dependency should be unlinked in deactivate.
+    _dependenciesChanged = true;
+    markNeedsBuild();
+  }
+
+  void _checkDependenciesChanged() {
+    if (_dependenciesChanged) {
+      didChangeDependencies();
+      _dependenciesChanged = false;
+    }
+  }
+
+  /// Called when dependencies of this element changed.
   ///
   /// The [inheritFromWidgetOfExactType] registers this element as depending on
   /// inherited information of the given type. When the information of that type
   /// changes at this location in the tree (e.g., because the [InheritedElement]
   /// updated to a new [InheritedWidget] and
   /// [InheritedWidget.updateShouldNotify] returned true), the framework calls
-  /// this function to notify this element of the change.
+  /// this function to notify this element of the change. If multiple
+  /// dependencies changed, this function is only fired once. This function will
+  /// not be called if this element is unmounted later in this frame.
+  @protected
   @mustCallSuper
   void didChangeDependencies() {
-    assert(_active); // otherwise markNeedsBuild is a no-op
+    assert(_active && _debugLifecycleState == _ElementLifecycle.active);
     assert(_debugCheckOwnerBuildTargetExists('didChangeDependencies'));
-    markNeedsBuild();
+    assert(owner._debugCurrentBuildTarget == this);
   }
 
   bool _debugCheckOwnerBuildTargetExists(String methodName) {
@@ -3448,8 +3544,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
   void rebuild() {
-    assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_active || !_dirty)
+    assert(_active && _debugLifecycleState == _ElementLifecycle.active);
+    if (!_dirty)
       return;
     assert(() {
       if (debugPrintRebuildDirtyWidgets) {
@@ -3462,20 +3558,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
-    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(owner._debugStateLocked);
-    Element debugPreviousBuildTarget;
-    assert(() {
-      debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
-      owner._debugCurrentBuildTarget = this;
-      return true;
-    }());
     performRebuild();
-    assert(() {
-      assert(owner._debugCurrentBuildTarget == this);
-      owner._debugCurrentBuildTarget = debugPreviousBuildTarget;
-      return true;
-    }());
     assert(!_dirty);
   }
 
@@ -3975,7 +4059,6 @@ abstract class InheritedElement extends ProxyElement {
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
   void dispatchDidChangeDependencies() {
-    assert(_debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies'));
     for (Element dependent in dependents) {
       assert(() {
         // check that it really is our descendant
@@ -3984,9 +4067,9 @@ abstract class InheritedElement extends ProxyElement {
           ancestor = ancestor._parent;
         return ancestor == this;
       }());
-      // check that it really deepends on us
-      assert(dependent._dependencies.contains(this));
-      dependent.didChangeDependencies();
+      // check that it really depends on us
+      assert(dependent._containsDependency(this));
+      dependent.markDependenciesChanged();
     }
   }
 }
@@ -4266,6 +4349,7 @@ abstract class RenderObjectElement extends Element {
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> forgottenChildren }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
+    assert(owner._debugCurrentBuildTarget == this);
 
     Element replaceWithNullIfForgotten(Element child) {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
@@ -4722,3 +4806,5 @@ void _debugReportException(String context, dynamic exception, StackTrace stack, 
     informationCollector: informationCollector,
   ));
 }
+
+void _nop() {}
