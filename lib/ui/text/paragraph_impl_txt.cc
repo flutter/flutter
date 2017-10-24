@@ -83,10 +83,10 @@ Dart_Handle ParagraphImplTxt::getPositionForOffset(double dx, double dy) {
 }
 
 Dart_Handle ParagraphImplTxt::getWordBoundary(unsigned offset) {
-  SkIPoint point = m_paragraph->GetWordBoundary(offset);
+  txt::Paragraph::Range point = m_paragraph->GetWordBoundary(offset);
   Dart_Handle result = Dart_NewList(2);
-  Dart_ListSetAt(result, 0, ToDart(point.x()));
-  Dart_ListSetAt(result, 1, ToDart(point.y()));
+  Dart_ListSetAt(result, 0, ToDart(point.start));
+  Dart_ListSetAt(result, 1, ToDart(point.end));
   return result;
 }
 

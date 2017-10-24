@@ -20,7 +20,6 @@
 #include <algorithm>
 #include <limits>
 #include <numeric>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -41,11 +40,6 @@
 
 namespace txt {
 namespace {
-
-struct Range {
-  Range(size_t s, size_t e) : start(s), end(e) {}
-  size_t start, end;
-};
 
 const sk_sp<SkTypeface>& GetTypefaceForGlyph(const minikin::Layout& layout,
                                              size_t index) {
@@ -123,7 +117,7 @@ void GetPaint(const TextStyle& style, SkPaint* paint) {
 void FindWords(const std::vector<uint16_t>& text,
                size_t start,
                size_t end,
-               std::vector<Range>* words) {
+               std::vector<Paragraph::Range>* words) {
   bool in_word = false;
   size_t word_start;
   for (size_t i = start; i < end; ++i) {
@@ -274,7 +268,7 @@ void Paragraph::Layout(double width, bool force) {
 
   records_.clear();
   line_heights_.clear();
-  glyph_position_x_.clear();
+  glyph_lines_.clear();
 
   minikin::Layout layout;
   SkTextBlobBuilder builder;
@@ -316,7 +310,7 @@ void Paragraph::Layout(double width, bool force) {
       run_index++;
     }
 
-    std::vector<GlyphPosition> glyph_single_line_position_x;
+    std::vector<GlyphPosition> glyph_positions;
     double run_x_offset = GetLineXOffset(line_number);
     double justify_x_offset = 0;
     std::vector<PaintRecord> paint_records;
@@ -436,14 +430,14 @@ void Paragraph::Layout(double width, bool force) {
           }
           float subglyph_advance =
               glyph_advance / subglyph_code_unit_counts.size();
-          glyph_single_line_position_x.emplace_back(
-              run_x_offset + glyph_x_offset, subglyph_advance,
-              subglyph_code_unit_counts[0]);
+          glyph_positions.emplace_back(run_x_offset + glyph_x_offset,
+                                       subglyph_advance,
+                                       subglyph_code_unit_counts[0]);
 
           // Compute positions for the additional characters in the ligature.
           for (size_t i = 1; i < subglyph_code_unit_counts.size(); ++i) {
-            glyph_single_line_position_x.emplace_back(
-                glyph_single_line_position_x.back().start + subglyph_advance,
+            glyph_positions.emplace_back(
+                glyph_positions.back().start + subglyph_advance,
                 subglyph_advance, subglyph_code_unit_counts[i]);
           }
 
@@ -455,8 +449,7 @@ void Paragraph::Layout(double width, bool force) {
 
             if (!isnan(word_start_position)) {
               double word_width =
-                  glyph_single_line_position_x.back().glyph_end() -
-                  word_start_position;
+                  glyph_positions.back().glyph_end() - word_start_position;
               max_word_width = std::max(word_width, max_word_width);
               word_start_position = std::numeric_limits<double>::quiet_NaN();
             }
@@ -498,8 +491,8 @@ void Paragraph::Layout(double width, bool force) {
     }
 
     line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
-                            roundf(max_line_spacing + max_descent));
-    y_offset += roundf(max_line_spacing + prev_max_descent);
+                            round(max_line_spacing + max_descent));
+    y_offset += round(max_line_spacing + prev_max_descent);
     prev_max_descent = max_descent;
 
     for (PaintRecord& paint_record : paint_records) {
@@ -511,8 +504,8 @@ void Paragraph::Layout(double width, bool force) {
     size_t next_line_start = (line_number < line_ranges_.size() - 1)
                                  ? line_ranges_[line_number + 1].start
                                  : text_.size();
-    glyph_position_x_.emplace_back(std::move(glyph_single_line_position_x),
-                                   next_line_start - line_range.start);
+    glyph_lines_.emplace_back(std::move(glyph_positions),
+                              next_line_start - line_range.start);
   }
 
   max_intrinsic_width_ = 0;
@@ -767,34 +760,34 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
 
   size_t pos = 0;
   size_t line;
-  for (line = 0; line < glyph_position_x_.size(); ++line) {
-    if (start < pos + glyph_position_x_[line].total_code_units)
+  for (line = 0; line < glyph_lines_.size(); ++line) {
+    if (start < pos + glyph_lines_[line].total_code_units)
       break;
-    pos += glyph_position_x_[line].total_code_units;
+    pos += glyph_lines_[line].total_code_units;
   }
-  if (line == glyph_position_x_.size())
+  if (line == glyph_lines_.size())
     return rects;
 
-  if (end <= pos + glyph_position_x_[line].total_code_units) {
+  if (end <= pos + glyph_lines_[line].total_code_units) {
     rects.push_back(GetRectForLineRange(line, start - pos, end - pos));
     return rects;
   }
 
-  rects.push_back(GetRectForLineRange(
-      line, start - pos, glyph_position_x_[line].total_code_units));
+  rects.push_back(GetRectForLineRange(line, start - pos,
+                                      glyph_lines_[line].total_code_units));
 
   while (true) {
-    pos += glyph_position_x_[line].total_code_units;
+    pos += glyph_lines_[line].total_code_units;
     line++;
-    if (line == glyph_position_x_.size())
+    if (line == glyph_lines_.size())
       break;
 
-    if (end <= pos + glyph_position_x_[line].total_code_units) {
+    if (end <= pos + glyph_lines_[line].total_code_units) {
       rects.push_back(GetRectForLineRange(line, 0, end - pos));
       break;
     } else {
-      rects.push_back(GetRectForLineRange(
-          line, 0, glyph_position_x_[line].total_code_units));
+      rects.push_back(
+          GetRectForLineRange(line, 0, glyph_lines_[line].total_code_units));
     }
   }
 
@@ -804,8 +797,8 @@ std::vector<SkRect> Paragraph::GetRectsForRange(size_t start,
 SkRect Paragraph::GetRectForLineRange(size_t line,
                                       size_t start,
                                       size_t end) const {
-  FXL_DCHECK(line < glyph_position_x_.size());
-  const GlyphLine& glyph_line = glyph_position_x_[line];
+  FXL_DCHECK(line < glyph_lines_.size());
+  const GlyphLine& glyph_line = glyph_lines_[line];
   if (glyph_line.positions.empty())
     return SkRect::MakeEmpty();
 
@@ -830,11 +823,11 @@ Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
   for (y_index = 0; y_index < line_heights_.size() - 1; ++y_index) {
     if (dy < line_heights_[y_index])
       break;
-    offset += glyph_position_x_[y_index].total_code_units;
+    offset += glyph_lines_[y_index].total_code_units;
   }
 
   const std::vector<GlyphPosition>& line_glyph_position =
-      glyph_position_x_[y_index].positions;
+      glyph_lines_[y_index].positions;
   size_t x_index;
   for (x_index = 0; x_index < line_glyph_position.size(); ++x_index) {
     double glyph_end = (x_index < line_glyph_position.size() - 1)
@@ -855,11 +848,11 @@ Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
   return PositionWithAffinity(offset, x_index > 0 ? UPSTREAM : DOWNSTREAM);
 }
 
-SkIPoint Paragraph::GetWordBoundary(size_t offset) const {
+Paragraph::Range Paragraph::GetWordBoundary(size_t offset) const {
   // TODO(garyq): Consider punctuation as separate words.
   if (text_.size() == 0)
-    return SkIPoint::Make(0, 0);
-  return SkIPoint::Make(
+    return Range(0, 0);
+  return Range(
       minikin::getPrevWordBreakForCache(text_.data(), offset + 1, text_.size()),
       minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
 }

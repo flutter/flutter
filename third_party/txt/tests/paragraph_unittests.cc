@@ -1075,35 +1075,35 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   SkRect rect = GetCoordinatesForGlyphPosition(*paragraph, 0);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(0), SkIPoint::Make(0, 5));
-  EXPECT_EQ(paragraph->GetWordBoundary(1), SkIPoint::Make(0, 5));
-  EXPECT_EQ(paragraph->GetWordBoundary(2), SkIPoint::Make(0, 5));
-  EXPECT_EQ(paragraph->GetWordBoundary(3), SkIPoint::Make(0, 5));
-  EXPECT_EQ(paragraph->GetWordBoundary(4), SkIPoint::Make(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(0), txt::Paragraph::Range(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(1), txt::Paragraph::Range(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(2), txt::Paragraph::Range(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(3), txt::Paragraph::Range(0, 5));
+  EXPECT_EQ(paragraph->GetWordBoundary(4), txt::Paragraph::Range(0, 5));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 5);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(5), SkIPoint::Make(5, 6));
+  EXPECT_EQ(paragraph->GetWordBoundary(5), txt::Paragraph::Range(5, 6));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 6);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(6), SkIPoint::Make(6, 7));
+  EXPECT_EQ(paragraph->GetWordBoundary(6), txt::Paragraph::Range(6, 7));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 7);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(7), SkIPoint::Make(7, 12));
-  EXPECT_EQ(paragraph->GetWordBoundary(8), SkIPoint::Make(7, 12));
-  EXPECT_EQ(paragraph->GetWordBoundary(9), SkIPoint::Make(7, 12));
-  EXPECT_EQ(paragraph->GetWordBoundary(10), SkIPoint::Make(7, 12));
-  EXPECT_EQ(paragraph->GetWordBoundary(11), SkIPoint::Make(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(7), txt::Paragraph::Range(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(8), txt::Paragraph::Range(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(9), txt::Paragraph::Range(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(10), txt::Paragraph::Range(7, 12));
+  EXPECT_EQ(paragraph->GetWordBoundary(11), txt::Paragraph::Range(7, 12));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 12);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(12), SkIPoint::Make(12, 13));
+  EXPECT_EQ(paragraph->GetWordBoundary(12), txt::Paragraph::Range(12, 13));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 13);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(13), SkIPoint::Make(13, 18));
+  EXPECT_EQ(paragraph->GetWordBoundary(13), txt::Paragraph::Range(13, 18));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 18);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
@@ -1119,7 +1119,7 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   rect = GetCoordinatesForGlyphPosition(*paragraph, 30);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
-  EXPECT_EQ(paragraph->GetWordBoundary(30), SkIPoint::Make(30, 31));
+  EXPECT_EQ(paragraph->GetWordBoundary(30), txt::Paragraph::Range(30, 31));
   rect = GetCoordinatesForGlyphPosition(*paragraph, 31);
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
@@ -1127,7 +1127,7 @@ TEST_F(ParagraphTest, GetWordBoundaryParagraph) {
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
   EXPECT_EQ(paragraph->GetWordBoundary(icu_text.length() - 1),
-            SkIPoint::Make(icu_text.length() - 5, icu_text.length()));
+            txt::Paragraph::Range(icu_text.length() - 5, icu_text.length()));
   rect = GetCoordinatesForGlyphPosition(*paragraph, icu_text.length());
   GetCanvas()->drawLine(rect.fLeft, rect.fTop, rect.fLeft, rect.fBottom, paint);
 
