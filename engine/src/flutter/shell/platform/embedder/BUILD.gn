@@ -12,20 +12,18 @@ source_set("embedder") {
   ]
 
   deps = [
-    "//third_party/dart/runtime:libdart_jit",
-    "//third_party/dart/runtime/bin:embedded_dart_io",
     "$flutter_root/common",
     "$flutter_root/fml",
     "$flutter_root/shell/common",
     "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/bin:embedded_dart_io",
     "//third_party/skia",
     "//topaz/lib/tonic",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }
 
 shared_library("flutter_engine") {
@@ -33,7 +31,122 @@ shared_library("flutter_engine") {
     ":embedder",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
+}
+
+if (is_mac) {
+  _flutter_embedder_framework_dir = "$root_out_dir/FlutterEmbedder.framework"
+
+  copy("copy_dylib") {
+    visibility = [ ":*" ]
+    sources = [
+      "$root_out_dir/libflutter_engine.dylib",
+    ]
+    outputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/FlutterEmbedder",
+    ]
+    deps = [
+      ":flutter_engine",
+    ]
+  }
+
+  copy("copy_headers") {
+    visibility = [ ":*" ]
+    sources = [
+      "embedder.h",
+    ]
+    outputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/Headers/FlutterEmbedder.h",
+    ]
+  }
+
+  copy("copy_icu") {
+    visibility = [ ":*" ]
+    sources = [
+      "//third_party/icu/common/icudtl.dat",
+    ]
+    outputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/Resources/icudtl.dat",
+    ]
+  }
+
+  copy("copy_info_plist") {
+    visibility = [ ":*" ]
+    sources = [
+      "EmbedderInfo.plist",
+    ]
+    outputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist",
+    ]
+  }
+
+  copy("copy_module_map") {
+    visibility = [ ":*" ]
+    sources = [
+      "embedder.modulemap",
+    ]
+    outputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/Modules/module.modulemap",
+    ]
+  }
+
+  action("install_dylib") {
+    visibility = [ ":*" ]
+    stamp_file = "$root_build_dir/flutter_embedder_install_name_stamp"
+    script = "$flutter_root/sky/tools/change_install_name.py"
+
+    inputs = [
+      "$_flutter_embedder_framework_dir/Versions/A/FlutterEmbedder",
+    ]
+
+    outputs = [
+      stamp_file,
+    ]
+
+    args = [
+      "--dylib",
+      "FlutterEmbedder.framework/Versions/A/FlutterEmbedder",
+      "--install_name",
+      "@rpath/FlutterEmbedder.framework/Versions/A/FlutterEmbedder",
+      "--stamp",
+      rebase_path(stamp_file),
+    ]
+
+    deps = [
+      ":copy_dylib",
+    ]
+  }
+
+  action("generate_symlinks") {
+    script = "//build/config/mac/package_framework.py"
+    outputs = [
+      "$root_build_dir/FlutterEmbedder.stamp",
+    ]
+    args = [
+      "--framework",
+      "FlutterEmbedder.framework",
+      "--version",
+      "A",
+      "--contents",
+      "FlutterEmbedder",
+      "Resources",
+      "Headers",
+      "Modules",
+      "--stamp",
+      "FlutterEmbedder.stamp",
+    ]
+    deps = [
+      ":copy_headers",
+      ":copy_icu",
+      ":copy_info_plist",
+      ":copy_module_map",
+      ":install_dylib",
+    ]
+  }
+
+  group("flutter_embedder_framework") {
+    deps = [
+      ":generate_symlinks",
+    ]
+  }
 }
