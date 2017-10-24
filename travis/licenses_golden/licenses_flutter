@@ -1254,6 +1254,8 @@ FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_mac.xib
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Flutter.podspec
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/module.modulemap
+FILE: ../../../flutter/shell/platform/embedder/EmbedderInfo.plist
+FILE: ../../../flutter/shell/platform/embedder/embedder.modulemap
 FILE: ../../../flutter/sky/engine/core/editing/CompositionUnderlineRangeFilter.cpp
 FILE: ../../../flutter/sky/engine/core/editing/CompositionUnderlineRangeFilter.h
 FILE: ../../../flutter/sky/engine/core/editing/PositionWithAffinity.cpp

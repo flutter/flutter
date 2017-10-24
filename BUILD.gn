@@ -33,8 +33,10 @@ group("flutter") {
   # If on the host, compile all unittests targets.
   if (current_toolchain == host_toolchain) {
     if (is_mac) {
-      public_deps +=
-          [ "$flutter_root/shell/platform/darwin:flutter_channels_unittests" ]
+      public_deps += [
+        "$flutter_root/shell/platform/darwin:flutter_channels_unittests",
+        "$flutter_root/shell/platform/embedder:flutter_embedder_framework",
+      ]
     }
     if (!is_win) {
       public_deps += [ "$flutter_root/shell/platform/embedder:flutter_engine" ]
@@ -64,7 +66,9 @@ if (is_fuchsia) {
 
     package_name = "flutter"
 
-    deps = [ ":flutter" ]
+    deps = [
+      ":flutter",
+    ]
 
     binaries = [
       {
