@@ -798,8 +798,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       Route<dynamic> route;
       if (initialRouteName != Navigator.defaultRouteName)
         route = _routeNamed(initialRouteName, allowNull: true);
-      if (route == null)
-        route = _routeNamed(Navigator.defaultRouteName);
+      route ??= _routeNamed(Navigator.defaultRouteName);
       push(route);
     }
     for (Route<dynamic> route in _history)

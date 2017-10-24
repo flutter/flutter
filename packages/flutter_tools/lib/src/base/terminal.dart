@@ -85,8 +85,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get onCharInput {
-    if (_broadcastStdInString == null)
-      _broadcastStdInString = io.stdin.transform(ASCII.decoder).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin.transform(ASCII.decoder).asBroadcastStream();
     return _broadcastStdInString;
   }
 
