@@ -59,7 +59,7 @@ vars = {
   'dart_intl_tag': '0.15.1',
   'dart_isolate_tag': '1.1.0',
   'dart_json_rpc_2_tag': '2.0.4',
-  'dart_linter_tag': '0.1.35',
+  'dart_linter_rev': 'ae88f710dce03bc92e20f78645cbdf069b39d529',
   'dart_logging_tag': '0.11.3+1',
   'dart_markdown_tag': '0.11.4',
   'dart_matcher_tag': '0.12.1+4',
@@ -118,7 +118,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '13e6d0abb8c1caeeb03735429e493359d7864b87',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'fcb277b9b2f78b5b59cda0a0b15edfc5f5578807',
 
    # Fuchsia compatibility
    #
@@ -249,7 +249,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/dart-lang/logging' + '@' + Var('dart_logging_tag'),
 
   'src/third_party/dart/third_party/pkg/linter':
-   Var('chromium_git') + '/external/github.com/dart-lang/linter' + '@' + Var('dart_linter_tag'),
+   Var('chromium_git') + '/external/github.com/dart-lang/linter' + '@' + Var('dart_linter_rev'),
 
   'src/third_party/dart/third_party/pkg/markdown':
    Var('chromium_git') + '/external/github.com/dart-lang/markdown' + '@' + Var('dart_markdown_tag'),
