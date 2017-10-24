@@ -124,7 +124,7 @@ class BottomNavigationBar extends StatefulWidget {
 // This represents a single tile in the bottom navigation bar. It is intended
 // to go into a flex container.
 class _BottomNavigationTile extends StatelessWidget {
-  _BottomNavigationTile(
+  const _BottomNavigationTile(
     this.type,
     this.item,
     this.animation,

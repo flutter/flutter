@@ -433,7 +433,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The [indicatorWeight] parameter defaults to 2, and must not be null.
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
-  TabBar({
+  const TabBar({
     Key key,
     @required this.tabs,
     this.controller,
@@ -812,7 +812,7 @@ class TabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
   /// The length of [children] must be the same as the [controller]'s length.
-  TabBarView({
+  const TabBarView({
     Key key,
     @required this.children,
     this.controller,

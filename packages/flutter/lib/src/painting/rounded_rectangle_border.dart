@@ -139,7 +139,7 @@ class RoundedRectangleBorder extends ShapeBorder {
 }
 
 class _RoundedRectangleToCircleBorder extends ShapeBorder {
-  _RoundedRectangleToCircleBorder({
+  const _RoundedRectangleToCircleBorder({
     this.side: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
     @required this.circleness,

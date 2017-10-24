@@ -172,7 +172,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 /// An widget laying out multiple tabs with only one active tab being built
 /// at a time and on stage. Off stage tabs' animations are stopped.
 class _TabView extends StatefulWidget {
-  _TabView({
+  const _TabView({
     @required this.currentTabIndex,
     @required this.tabNumber,
     @required this.tabBuilder,

@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class Leaf extends StatefulWidget {
-  Leaf({ Key key, this.child }) : super(key: key);
+  const Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
   _LeafState createState() => new _LeafState();
@@ -222,8 +222,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: <Widget>[
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
                 ]),
               ),
             ),
@@ -298,8 +298,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: <Widget>[
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
                 ]),
               ),
             ),
@@ -307,8 +307,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: <Widget>[
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
                 ]),
               ),
             ),
@@ -316,8 +316,8 @@ void main() {
               child: new Container(
                 height: 400.0,
                 child: new Stack(children: <Widget>[
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                  new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                  const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
                 ]),
               ),
             ),
@@ -350,7 +350,7 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: <Widget>[
-                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
               ]),
             ),
           ),
@@ -358,8 +358,8 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: <Widget>[
-                new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
               ]),
             ),
           ),
@@ -367,9 +367,9 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: <Widget>[
-                new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
               ]),
             ),
           ),
@@ -409,8 +409,8 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: <Widget>[
-                new Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(1), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(2), child: const Placeholder()),
               ]),
             ),
           ),
@@ -425,10 +425,10 @@ void main() {
             child: new Container(
               height: 400.0,
               child: new Stack(children: <Widget>[
-                new Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
-                new Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(3), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(4), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(5), child: const Placeholder()),
+                const Leaf(key: const GlobalObjectKey<_LeafState>(0), child: const Placeholder()),
               ]),
             ),
           ),
