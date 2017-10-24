@@ -1013,7 +1013,7 @@ class MessageProperty extends DiagnosticsProperty<Null> {
   ///
   /// The [name], `message`, and [level] arguments must not be null.
   MessageProperty(String name, String message, {
-    DiagnosticLevel level : DiagnosticLevel.info,
+    DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(name != null),
        assert(message != null),
        assert(level != null),
@@ -1032,11 +1032,12 @@ class StringProperty extends DiagnosticsProperty<String> {
   /// The [showName], [quoted], and [level] arguments must not be null.
   StringProperty(String name, String value, {
     String description,
+    String tooltip,
     bool showName: true,
     Object defaultValue: kNoDefaultValue,
     this.quoted: true,
     String ifEmpty,
-    DiagnosticLevel level : DiagnosticLevel. info,
+    DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(quoted != null),
        assert(level != null),
@@ -1045,12 +1046,13 @@ class StringProperty extends DiagnosticsProperty<String> {
     value,
     description: description,
     defaultValue: defaultValue,
+    tooltip: tooltip,
     showName: showName,
     ifEmpty: ifEmpty,
     level: level,
   );
 
-  /// Whether the description is enclosed in double quotes.
+  /// Whether the value is enclosed in double quotes.
   final bool quoted;
 
   @override
@@ -1144,7 +1146,7 @@ class DoubleProperty extends _NumProperty<double> {
     String unit,
     String tooltip,
     Object defaultValue: kNoDefaultValue,
-    bool showName : true,
+    bool showName: true,
     DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
