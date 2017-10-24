@@ -35,6 +35,8 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.value: '',
+    this.hint: '',
     this.textDirection,
     this.rect,
     this.transform,
@@ -42,6 +44,8 @@ class TestSemantics {
     Iterable<SemanticsTag> tags,
   }) : assert(flags != null),
        assert(label != null),
+       assert(value != null),
+       assert(hint != null),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
@@ -51,6 +55,8 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.value: '',
+    this.hint: '',
     this.textDirection,
     this.transform,
     this.children: const <TestSemantics>[],
@@ -58,6 +64,8 @@ class TestSemantics {
   }) : id = 0,
        assert(flags != null),
        assert(label != null),
+       assert(value != null),
+       assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -76,6 +84,8 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.hint: '',
+    this.value: '',
     this.textDirection,
     this.rect,
     Matrix4 transform,
@@ -83,6 +93,8 @@ class TestSemantics {
     Iterable<SemanticsTag> tags,
   }) : assert(flags != null),
        assert(label != null),
+       assert(value != null),
+       assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -101,6 +113,13 @@ class TestSemantics {
 
   /// A textual description of this node.
   final String label;
+
+  /// A textual description for the value of this node.
+  final String value;
+
+  /// A brief textual description of the result of the action that can be
+  /// performed on this node.
+  final String hint;
 
   /// The reading direction of the [label].
   ///
@@ -169,10 +188,14 @@ class TestSemantics {
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
     if (label != nodeData.label)
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
+    if (value != nodeData.value)
+      return fail('expected node id $id to have value "$value" but found value "${nodeData.value}".');
+    if (hint != nodeData.hint)
+      return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if (nodeData.label != '' && nodeData.textDirection == null)
-      return fail('expected node id $id, which has a label, to have a textDirection, but it did not.');
+    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '') && nodeData.textDirection == null)
+      return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     if (!ignoreTransform && transform != nodeData.transform)

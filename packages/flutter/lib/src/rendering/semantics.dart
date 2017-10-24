@@ -76,6 +76,8 @@ class SemanticsData extends Diagnosticable {
     @required this.flags,
     @required this.actions,
     @required this.label,
+    @required this.value,
+    @required this.hint,
     @required this.textDirection,
     @required this.rect,
     this.tags,
@@ -97,7 +99,17 @@ class SemanticsData extends Diagnosticable {
   /// The text's reading direction is given by [textDirection].
   final String label;
 
-  /// The reading direction for the text in [label].
+  /// A textual description for the current value of the node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  final String value;
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  final String hint;
+
+  /// The reading direction for the text in [label], [value], and [hint].
   final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
@@ -485,6 +497,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _label != config.label ||
+        _hint != config.hint ||
+        _value != config.value ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
         _actionsAsBits != config._actionsAsBits ||
@@ -516,7 +530,19 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get label => _label;
   String _label = _kEmptyConfig.label;
 
-  /// The reading direction for [label].
+  /// A textual description for the current value of the node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get value => _value;
+  String _value = _kEmptyConfig.value;
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint = _kEmptyConfig.hint;
+
+  /// The reading direction for [label], [value], and [hint].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
@@ -533,6 +559,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
 
     _label = config.label;
+    _value = config.value;
+    _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _actions = new Map<SemanticsAction, VoidCallback>.from(config._actions);
@@ -551,6 +579,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     int flags = _flags;
     int actions = _actionsAsBits;
     String label = _label;
+    String hint = _hint;
+    String value = _value;
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
 
@@ -560,27 +590,24 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         flags |= node._flags;
         actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
+        if (value == '' || value == null)
+          value = node._value;
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
         }
-        if (node._label.isNotEmpty) {
-          String nestedLabel = node._label;
-          if (textDirection != node._textDirection && node._textDirection != null) {
-            switch (node._textDirection) {
-              case TextDirection.rtl:
-                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
-                break;
-              case TextDirection.ltr:
-                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
-                break;
-            }
-          }
-          if (label.isEmpty)
-            label = nestedLabel;
-          else
-            label = '$label\n$nestedLabel';
-        }
+        label = _concatStrings(
+          thisString: label,
+          thisTextDirection: textDirection,
+          otherString: node._label,
+          otherTextDirection: node._textDirection,
+        );
+        hint = _concatStrings(
+          thisString: hint,
+          thisTextDirection: textDirection,
+          otherString: node._hint,
+          otherTextDirection: node._textDirection,
+        );
         return true;
       });
     }
@@ -589,6 +616,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       flags: flags,
       actions: actions,
       label: label,
+      value: value,
+      hint: hint,
       textDirection: textDirection,
       rect: rect,
       transform: transform,
@@ -621,6 +650,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       actions: data.actions,
       rect: data.rect,
       label: data.label,
+      value: data.value,
+      hint: data.hint,
       textDirection: data.textDirection,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
@@ -676,8 +707,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     if (_hasFlag(SemanticsFlags.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
-    properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
+    properties.add(new StringProperty('label', _label, defaultValue: ''));
+    properties.add(new StringProperty('value', _value, defaultValue: ''));
+    properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
   }
 
@@ -1015,6 +1048,11 @@ class SemanticsConfiguration {
 
   /// A textual description of the owning [RenderObject].
   ///
+  /// On iOS this is used for the `accessibilityLabel` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [value] and [hint] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
   /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
@@ -1023,7 +1061,37 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The reading direction for the text in [label].
+  /// A textual description for the current value of the owning [RenderObject].
+  ///
+  /// On iOS this is used for the `accessibilityValue` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [label] and [hint] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get value => _value;
+  String _value = '';
+  set value(String value) {
+    _value = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// On iOS this is used for the `accessibilityHint` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [label] and [value] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint = '';
+  set hint(String hint) {
+    _hint = hint;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The reading direction for the text in [label], [value], and [hint].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection textDirection) {
@@ -1087,6 +1155,8 @@ class SemanticsConfiguration {
       return false;
     if ((_flags & other._flags) != 0)
       return false;
+    if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
+      return false;
     return true;
   }
 
@@ -1109,23 +1179,20 @@ class SemanticsConfiguration {
     _flags |= other._flags;
 
     textDirection ??= other.textDirection;
-    if (other.label.isNotEmpty) {
-      String nestedLabel = other.label;
-      if (textDirection != other.textDirection && other.textDirection != null) {
-        switch (other.textDirection) {
-          case TextDirection.rtl:
-            nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
-            break;
-          case TextDirection.ltr:
-            nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
-            break;
-        }
-      }
-      if (label.isEmpty)
-        label = nestedLabel;
-      else
-        label = '$label\n$nestedLabel';
-    }
+    _label = _concatStrings(
+      thisString: _label,
+      thisTextDirection: textDirection,
+      otherString: other._label,
+      otherTextDirection: other.textDirection,
+    );
+    if (_value == '' || _value == null)
+      _value = other._value;
+    _hint = _concatStrings(
+      thisString: _hint,
+      thisTextDirection: textDirection,
+      otherString: other._hint,
+      otherTextDirection: other.textDirection,
+    );
 
     _hasBeenAnnotated = _hasBeenAnnotated || other._hasBeenAnnotated;
   }
@@ -1138,8 +1205,34 @@ class SemanticsConfiguration {
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._textDirection = _textDirection
       .._label = _label
+      .._value = _value
+      .._hint = _hint
       .._flags = _flags
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
+}
+
+String _concatStrings({
+  @required String thisString,
+  @required String otherString,
+  @required TextDirection thisTextDirection,
+  @required TextDirection otherTextDirection
+}) {
+  if (otherString.isEmpty)
+    return thisString;
+  String nestedLabel = otherString;
+  if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
+    switch (otherTextDirection) {
+      case TextDirection.rtl:
+        nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+        break;
+      case TextDirection.ltr:
+        nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+        break;
+    }
+  }
+  if (thisString.isEmpty)
+    return nestedLabel;
+  return '$thisString\n$nestedLabel';
 }
