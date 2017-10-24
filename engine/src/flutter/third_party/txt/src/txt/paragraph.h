@@ -18,7 +18,7 @@
 #define LIB_TXT_SRC_PARAGRAPH_H_
 
 #include <set>
-#include <tuple>
+#include <utility>
 #include <vector>
 
 #include "font_collection.h"
@@ -61,6 +61,14 @@ class Paragraph {
     const Affinity affinity;
 
     PositionWithAffinity(size_t p, Affinity a) : position(p), affinity(a) {}
+  };
+
+  struct Range {
+    Range(size_t s, size_t e) : start(s), end(e) {}
+    size_t start, end;
+    bool operator==(const Range& other) const {
+      return start == other.start && end == other.end;
+    }
   };
 
   // Minikin Layout doLayout() and LineBreaker addStyleRun() has an
@@ -133,7 +141,7 @@ class Paragraph {
 
   // Finds the first and last glyphs that define a word containing the glyph at
   // index offset.
-  SkIPoint GetWordBoundary(size_t offset) const;
+  Range GetWordBoundary(size_t offset) const;
 
   // Returns the number of lines the paragraph takes up. If the text exceeds the
   // amount width and maxlines provides, Layout() truncates the extra text from
@@ -218,7 +226,7 @@ class Paragraph {
   };
 
   // Holds the laid out x positions of each glyph.
-  std::vector<GlyphLine> glyph_position_x_;
+  std::vector<GlyphLine> glyph_lines_;
 
   // The max width of the paragraph as provided in the most recent Layout()
   // call.
