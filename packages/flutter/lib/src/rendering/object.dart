@@ -3032,6 +3032,14 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
     _tagsForChildren.addAll(tags);
   }
 
+  /// Adds the geometric information of `ancestor` to this object.
+  ///
+  /// Those information are required to properly compute the value for
+  /// [SemanticsNode.transform], [SemanticsNode.clipRect], and
+  /// [SemanticsNode.rect].
+  ///
+  /// Ancestors have to be added in order from [owner] up until the next
+  /// [RenderObject] that owns a [SemanticsNode] is reached.
   void addAncestor(RenderObject ancestor) {
     _ancestorChain.add(ancestor);
   }
@@ -3206,7 +3214,12 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
 /// [SemanticsNode.rect] and [SemanticsNode.transform].
 class _SemanticsGeometry {
 
-  /// `parentClippingRect` may be null if no clip is to be applied.
+  /// The `parentClippingRect` may be null if no clip is to be applied.
+  ///
+  /// The `ancestors` list has to include all [RenderObject] in order that are
+  /// located between the [SemanticsNode] whose geometry is represented here
+  /// (first [RenderObject] in the list) and its closest ancestor [RenderObject]
+  /// that also owns its own [SemanticsNode] (last [RenderObject] in the list).
   _SemanticsGeometry({
     @required Rect parentClipRect,
     @required List<RenderObject> ancestors,
@@ -3218,8 +3231,13 @@ class _SemanticsGeometry {
   Matrix4 _transform;
   Rect _rect;
 
+  /// Value for [SemanticsNode.transform].
   Matrix4 get transform => _transform;
+
+  /// Value for [SemanticsNode.parentClipRect].
   Rect get clipRect => _clipRect;
+
+  /// Value for [SemanticsNode.rect].
   Rect get rect => _rect;
 
   void _computeValues(Rect parentClipRect, List<RenderObject> ancestors) {
