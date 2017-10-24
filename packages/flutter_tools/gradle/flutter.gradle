@@ -410,7 +410,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--depfile", "${intermediateDir}/snapshot_blob.bin.d"
                 }
             }
-            args "--working-dir", "${intermediateDir}/flx"
+            args "--working-dir", "${intermediateDir}/flutter_assets"
         }
     }
 }
@@ -433,17 +433,18 @@ class FlutterTask extends BaseFlutterTask {
 
     CopySpec getAssets() {
         return project.copySpec {
-            from "${intermediateDir}/app.flx"
-            from "${intermediateDir}/snapshot_blob.bin"
+            from "${intermediateDir}"
+            include "flutter_assets/**" // the working dir and its files
+            include "app.flx"
             if (buildMode != 'debug') {
-              if (preferSharedLibrary) {
-                from "${intermediateDir}/app.so"
-              } else {
-                from "${intermediateDir}/vm_snapshot_data"
-                from "${intermediateDir}/vm_snapshot_instr"
-                from "${intermediateDir}/isolate_snapshot_data"
-                from "${intermediateDir}/isolate_snapshot_instr"
-              }
+	       if (preferSharedLibrary) {
+                  include "${intermediateDir}/app.so"
+	       } else {
+                  include "vm_snapshot_data"
+                  include "vm_snapshot_instr"
+                  include "isolate_snapshot_data"
+                  include "isolate_snapshot_instr"
+	       }
             }
       }
     }

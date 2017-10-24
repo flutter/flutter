@@ -305,7 +305,8 @@ void main() {
     BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(UTF8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
-      return new ByteData(5); // 0x0000000000
+      final Uint8List encoded = UTF8.encoder.convert('service_extensions_test_file');
+      return encoded.buffer.asByteData();
     });
     bool data;
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return true; });
