@@ -3334,6 +3334,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.tap].
+  ///
+  /// This is the semantic equivalent of a user briefly tapping the screen with
+  /// the finger without moving it. For example, a button should implement this
+  /// action.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen while an element is focused.
   VoidCallback get onTap => _onTap;
   VoidCallback _onTap;
   set onTap(VoidCallback handler) {
@@ -3346,6 +3353,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.longPress].
+  ///
+  /// This is the semantic equivalent of a user pressing and holding the screen
+  /// with the finger for a few seconds without moving it.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen without lifting the finger after the
+  /// second tap.
   VoidCallback get onLongPress => _onLongPress;
   VoidCallback _onLongPress;
   set onLongPress(VoidCallback handler) {
@@ -3358,6 +3372,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.scrollLeft].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from right to left. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping left with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path.
   VoidCallback get onScrollLeft => _onScrollLeft;
   VoidCallback _onScrollLeft;
   set onScrollLeft(VoidCallback handler) {
@@ -3370,6 +3392,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.scrollRight].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from left to right. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping right with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path.
   VoidCallback get onScrollRight => _onScrollRight;
   VoidCallback _onScrollRight;
   set onScrollRight(VoidCallback handler) {
@@ -3382,6 +3412,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.scrollUp].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from bottom to top. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path.
   VoidCallback get onScrollUp => _onScrollUp;
   VoidCallback _onScrollUp;
   set onScrollUp(VoidCallback handler) {
@@ -3394,6 +3432,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.scrollDown].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from top to bottom. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path.
   VoidCallback get onScrollDown => _onScrollDown;
   VoidCallback _onScrollDown;
   set onScrollDown(VoidCallback handler) {
@@ -3406,6 +3452,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.increase].
+  ///
+  /// This is a request to increase the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume up button.
   VoidCallback get onIncrease => _onIncrease;
   VoidCallback _onIncrease;
   set onIncrease(VoidCallback handler) {
@@ -3418,6 +3471,13 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   }
 
   /// The handler for [SemanticsAction.decrease].
+  ///
+  /// This is a request to decrease the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume down button.
   VoidCallback get onDecrease => _onDecrease;
   VoidCallback _onDecrease;
   set onDecrease(VoidCallback handler) {

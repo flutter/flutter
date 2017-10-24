@@ -423,7 +423,7 @@ void main() {
     int semanticsUpdateCount = 0;
     tester.binding.pipelineOwner.ensureSemantics(
       listener: () {
-        semanticsUpdateCount++;
+        semanticsUpdateCount += 1;
       }
     );
 
