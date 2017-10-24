@@ -91,7 +91,7 @@ class MockHttpClientRequest implements io.HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse implements io.HttpClientResponse {
+class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientResponse {
   MockHttpClientResponse(this.statusCode);
 
   @override
