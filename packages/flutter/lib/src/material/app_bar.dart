@@ -321,8 +321,12 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _AppBarState extends State<AppBar> {
-  void _handleDrawerButton() {
-    Scaffold.of(context).openDrawer();
+  void _handleDrawerButtonLeft() {
+    Scaffold.of(context).openLeftDrawer();
+  }
+
+  void _handleDrawerButtonRight() {
+    Scaffold.of(context).openRightDrawer();
   }
 
   @override
@@ -332,7 +336,8 @@ class _AppBarState extends State<AppBar> {
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
 
-    final bool hasDrawer = scaffold?.hasDrawer ?? false;
+    final bool hasLeftDrawer = scaffold?.hasLeftDrawer ?? false;
+    final bool hasRightDrawer = scaffold?.hasRightDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
 
@@ -358,10 +363,10 @@ class _AppBarState extends State<AppBar> {
 
     Widget leading = widget.leading;
     if (leading == null && widget.automaticallyImplyLeading) {
-      if (hasDrawer) {
+      if (hasLeftDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
-          onPressed: _handleDrawerButton,
+          onPressed: _handleDrawerButtonLeft,
           tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
         );
       } else {
@@ -393,6 +398,12 @@ class _AppBarState extends State<AppBar> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions,
       );
+    } else if (hasRightDrawer) {
+      actions = new IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: _handleDrawerButtonRight,
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      );      
     }
 
     final Widget toolbar = new Padding(

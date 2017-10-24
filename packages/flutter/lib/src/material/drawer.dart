@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
+import 'scaffold.dart';
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
@@ -109,13 +110,13 @@ class Drawer extends StatelessWidget {
 ///
 ///  * [Drawer]
 ///  * [Scaffold.drawer]
-class DrawerController extends StatefulWidget {
+class LeftDrawerController extends StatefulWidget {
   /// Creates a controller for a [Drawer].
   ///
   /// Rarely used directly.
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
-  const DrawerController({
+  const LeftDrawerController({
     GlobalKey key,
     @required this.child,
   }) : assert(child != null),
@@ -127,13 +128,13 @@ class DrawerController extends StatefulWidget {
   final Widget child;
 
   @override
-  DrawerControllerState createState() => new DrawerControllerState();
+  LeftDrawerControllerState createState() => new LeftDrawerControllerState();
 }
 
 /// State for a [DrawerController].
 ///
 /// Typically used by a [Scaffold] to [open] and [close] the drawer.
-class DrawerControllerState extends State<DrawerController> with SingleTickerProviderStateMixin {
+class LeftDrawerControllerState extends State<LeftDrawerController> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -218,13 +219,17 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   void _move(DragUpdateDetails details) {
     final double delta = details.primaryDelta / _width;
-    switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        _controller.value -= delta;
-        break;
-      case TextDirection.ltr:
-        _controller.value += delta;
-        break;
+    if (Scaffold.of(context).isRightDrawerOpen() == true) {
+      _controller.value = 0.0;
+    } else {
+      switch (Directionality.of(context)) {
+        case TextDirection.rtl:
+          _controller.value -= delta;
+          break;
+        case TextDirection.ltr:
+          _controller.value += delta;
+          break;
+      }
     }
   }
 
@@ -259,6 +264,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   /// Starts an animation to close the drawer.
   void close() {
     _controller.fling(velocity: -1.0);
+  }
+
+  bool isOpen() {
+    if (_controller.value >= 1.0) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
@@ -302,6 +315,251 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 alignment: AlignmentDirectional.centerStart,
                 child: new Align(
                   alignment: AlignmentDirectional.centerEnd,
+                  widthFactor: _controller.value,
+                  child: new RepaintBoundary(
+                    child: new FocusScope(
+                      key: _drawerKey,
+                      node: _focusScopeNode,
+                      child: widget.child
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+  }
+  @override
+  Widget build(BuildContext context) {
+    return new ListTileTheme(
+      style: ListTileStyle.drawer,
+      child: _buildDrawer(context),
+    );
+  }
+}
+
+/// Provides interactive behavior for [Drawer] widgets.
+///
+/// Rarely used directly. Drawer controllers are typically created automatically
+/// by [Scaffold] widgets.
+///
+/// The draw controller provides the ability to open and close a drawer, either
+/// via an animation or via user interaction. When closed, the drawer collapses
+/// to a translucent gesture detector that can be used to listen for edge
+/// swipes.
+///
+/// See also:
+///
+///  * [Drawer]
+///  * [Scaffold.drawer]
+class RightDrawerController extends StatefulWidget {
+  /// Creates a controller for a [Drawer].
+  ///
+  /// Rarely used directly.
+  ///
+  /// The [child] argument must not be null and is typically a [Drawer].
+  const RightDrawerController({
+    GlobalKey key,
+    @required this.child,
+  }) : assert(child != null),
+       super(key: key);
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically a [Drawer].
+  final Widget child;
+
+  @override
+  RightDrawerControllerState createState() => new RightDrawerControllerState();
+}
+
+/// State for a [DrawerController].
+///
+/// Typically used by a [Scaffold] to [open] and [close] the drawer.
+class RightDrawerControllerState extends State<RightDrawerController> with SingleTickerProviderStateMixin {
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(duration: _kBaseSettleDuration, vsync: this)
+      ..addListener(_animationChanged)
+      ..addStatusListener(_animationStatusChanged);
+  }
+
+  @override
+  void dispose() {
+    _historyEntry?.remove();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _animationChanged() {
+    setState(() {
+      // The animation controller's state is our build state, and it changed already.
+    });
+  }
+
+  LocalHistoryEntry _historyEntry;
+  final FocusScopeNode _focusScopeNode = new FocusScopeNode();
+
+  void _ensureHistoryEntry() {
+    if (_historyEntry == null) {
+      final ModalRoute<dynamic> route = ModalRoute.of(context);
+      if (route != null) {
+        _historyEntry = new LocalHistoryEntry(onRemove: _handleHistoryEntryRemoved);
+        route.addLocalHistoryEntry(_historyEntry);
+        FocusScope.of(context).setFirstFocus(_focusScopeNode);
+      }
+    }
+  }
+
+  void _animationStatusChanged(AnimationStatus status) {
+    switch (status) {
+      case AnimationStatus.forward:
+        _ensureHistoryEntry();
+        break;
+      case AnimationStatus.reverse:
+        _historyEntry?.remove();
+        _historyEntry = null;
+        break;
+      case AnimationStatus.dismissed:
+        break;
+      case AnimationStatus.completed:
+        break;
+    }
+  }
+
+  void _handleHistoryEntryRemoved() {
+    _historyEntry = null;
+    close();
+  }
+
+  AnimationController _controller;
+
+  void _handleDragDown(DragDownDetails details) {
+    _controller.stop();
+    _ensureHistoryEntry();
+  }
+
+  void _handleDragCancel() {
+    if (_controller.isDismissed || _controller.isAnimating)
+      return;
+    if (_controller.value < 0.5) {
+      open();
+    } else if (_controller.value == 1.0) {
+      return;
+    } else {
+      close();
+    } 
+  }
+
+  final GlobalKey _drawerKey = new GlobalKey();
+
+  double get _width {
+    final RenderBox box = _drawerKey.currentContext?.findRenderObject();
+    if (box != null)
+      return box.size.width;
+    return _kWidth; // drawer not being shown currently
+  }
+
+  void _move(DragUpdateDetails details) {
+    final double delta = details.primaryDelta / _width;
+    if (Scaffold.of(context).isLeftDrawerOpen() == true) {
+      _controller.value = 0.0;
+    } else {
+      switch (Directionality.of(context)) {
+        case TextDirection.rtl:
+          _controller.value += delta;
+          break;
+        case TextDirection.ltr:
+          _controller.value -= delta;
+          break;
+      }
+    }
+  }
+
+  void _settle(DragEndDetails details) {
+    if (_controller.isDismissed)
+      return;
+    if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
+      final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.fling(velocity: visualVelocity);
+        break;
+      case TextDirection.ltr:
+        _controller.fling(velocity: -visualVelocity);
+        break;
+      }
+    } else if (details.velocity.pixelsPerSecond.dx > 0.0) {
+      close();
+    } else {
+      open();
+    }
+  }
+
+  /// Starts an animation to open the drawer.
+  ///
+  /// Typically called by [ScaffoldState.openDrawer].
+  void open() {
+    _controller.fling(velocity: 1.0);
+  }
+
+  /// Starts an animation to close the drawer.
+  void close() {
+    _controller.fling(velocity: -1.0);
+  }
+
+  bool isOpen() {
+    if (_controller.value >= 1.0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
+  final GlobalKey _gestureDetectorKey = new GlobalKey();
+
+  Widget _buildDrawer(BuildContext context) {
+    if (_controller.status == AnimationStatus.dismissed) {
+      return new Align(
+        alignment: AlignmentDirectional.centerEnd,
+        child: new GestureDetector(
+          key: _gestureDetectorKey,
+          onHorizontalDragUpdate: _move,
+          onHorizontalDragEnd: _settle,
+          behavior: HitTestBehavior.translucent,
+          excludeFromSemantics: true,
+          child: new Container(width: _kEdgeDragWidth)
+        ),
+      );
+    } else {
+      return new GestureDetector(
+        key: _gestureDetectorKey,
+        onHorizontalDragDown: _handleDragDown,
+        onHorizontalDragUpdate: _move,
+        onHorizontalDragEnd: _settle,
+        onHorizontalDragCancel: _handleDragCancel,
+        excludeFromSemantics: true,
+        child: new RepaintBoundary(
+          child: new Stack(
+            children: <Widget>[
+              new BlockSemantics(
+                child: new GestureDetector(
+                  // On Android, the back button is used to dismiss a modal.
+                  excludeFromSemantics: defaultTargetPlatform == TargetPlatform.android,
+                  onTap: close,
+                  child: new Container(
+                    color: _color.evaluate(_controller)
+                  ),
+                ),
+              ),
+              new Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: new Align(
+                  alignment: AlignmentDirectional.centerStart,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
