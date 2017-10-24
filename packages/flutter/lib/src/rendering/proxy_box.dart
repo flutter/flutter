@@ -3179,6 +3179,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     String value,
     String hint,
     TextDirection textDirection,
+    VoidCallback onTap,
+    VoidCallback onLongPress,
+    VoidCallback onScrollLeft,
+    VoidCallback onScrollRight,
+    VoidCallback onScrollUp,
+    VoidCallback onScrollDown,
+    VoidCallback onIncrease,
+    VoidCallback onDecrease,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3189,6 +3197,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _value = value,
        _hint = hint,
        _textDirection = textDirection,
+       _onTap = onTap,
+       _onLongPress = onLongPress,
+       _onScrollLeft = onScrollLeft,
+       _onScrollRight = onScrollRight,
+       _onScrollUp = onScrollUp,
+       _onScrollDown = onScrollDown,
+       _onIncrease = onIncrease,
+       _onDecrease = onDecrease,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3317,6 +3333,102 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// The handler for [SemanticsAction.tap].
+  VoidCallback get onTap => _onTap;
+  VoidCallback _onTap;
+  set onTap(VoidCallback handler) {
+    if (_onTap == handler)
+      return;
+    final bool hadValue = _onTap != null;
+    _onTap = handler;
+    if ((handler != null) == hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.longPress].
+  VoidCallback get onLongPress => _onLongPress;
+  VoidCallback _onLongPress;
+  set onLongPress(VoidCallback handler) {
+    if (_onLongPress == handler)
+      return;
+    final bool hadValue = _onLongPress != null;
+    _onLongPress = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  VoidCallback get onScrollLeft => _onScrollLeft;
+  VoidCallback _onScrollLeft;
+  set onScrollLeft(VoidCallback handler) {
+    if (_onScrollLeft == handler)
+      return;
+    final bool hadValue = _onScrollLeft != null;
+    _onScrollLeft = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollRight].
+  VoidCallback get onScrollRight => _onScrollRight;
+  VoidCallback _onScrollRight;
+  set onScrollRight(VoidCallback handler) {
+    if (_onScrollRight == handler)
+      return;
+    final bool hadValue = _onScrollRight != null;
+    _onScrollRight = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollUp].
+  VoidCallback get onScrollUp => _onScrollUp;
+  VoidCallback _onScrollUp;
+  set onScrollUp(VoidCallback handler) {
+    if (_onScrollUp == handler)
+      return;
+    final bool hadValue = _onScrollUp != null;
+    _onScrollUp = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollDown].
+  VoidCallback get onScrollDown => _onScrollDown;
+  VoidCallback _onScrollDown;
+  set onScrollDown(VoidCallback handler) {
+    if (_onScrollDown == handler)
+      return;
+    final bool hadValue = _onScrollDown != null;
+    _onScrollDown = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.increase].
+  VoidCallback get onIncrease => _onIncrease;
+  VoidCallback _onIncrease;
+  set onIncrease(VoidCallback handler) {
+    if (_onIncrease == handler)
+      return;
+    final bool hadValue = _onIncrease != null;
+    _onIncrease = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.decrease].
+  VoidCallback get onDecrease => _onDecrease;
+  VoidCallback _onDecrease;
+  set onDecrease(VoidCallback handler) {
+    if (_onDecrease == handler)
+      return;
+    final bool hadValue = _onDecrease != null;
+    _onDecrease = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     config.isSemanticBoundary = container;
@@ -3326,6 +3438,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isChecked = checked;
     if (selected != null)
       config.isSelected = selected;
+    if (button != null)
+      config.isButton = button;
     if (label != null)
       config.label = label;
     if (value != null)
@@ -3334,8 +3448,65 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
-    if (button != null)
-      config.isButton = button;
+    // Registering _perform* as action handlers instead of the user provided
+    // ones to ensure that changing a user provided handler from a non-null to
+    // another non-null value doesn't require a semantics update.
+    if (onTap != null)
+      config.addAction(SemanticsAction.tap, _performTap);
+    if (onLongPress != null)
+      config.addAction(SemanticsAction.longPress, _performLongPress);
+    if (onScrollLeft != null)
+      config.addAction(SemanticsAction.scrollLeft, _performScrollLeft);
+    if (onScrollRight != null)
+      config.addAction(SemanticsAction.scrollRight, _performScrollRight);
+    if (onScrollUp != null)
+      config.addAction(SemanticsAction.scrollUp, _performScrollUp);
+    if (onScrollDown != null)
+      config.addAction(SemanticsAction.scrollDown, _performScrollDown);
+    if (onIncrease != null)
+      config.addAction(SemanticsAction.increase, _performIncrease);
+    if (onDecrease != null)
+      config.addAction(SemanticsAction.decrease, _performDecrease);
+  }
+
+  void _performTap() {
+    if (onTap != null)
+      onTap();
+  }
+
+  void _performLongPress() {
+    if (onLongPress != null)
+      onLongPress();
+  }
+
+  void _performScrollLeft() {
+    if (onScrollLeft != null)
+      onScrollLeft();
+  }
+
+  void _performScrollRight() {
+    if (onScrollRight != null)
+      onScrollRight();
+  }
+
+  void _performScrollUp() {
+    if (onScrollUp != null)
+      onScrollUp();
+  }
+
+  void _performScrollDown() {
+    if (onScrollDown != null)
+      onScrollDown();
+  }
+
+  void _performIncrease() {
+    if (onIncrease != null)
+      onIncrease();
+  }
+
+  void _performDecrease() {
+    if (onDecrease != null)
+      onDecrease();
   }
 }
 

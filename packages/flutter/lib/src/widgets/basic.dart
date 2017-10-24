@@ -4456,6 +4456,14 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.value,
     this.hint,
     this.textDirection,
+    this.onTap,
+    this.onLongPress,
+    this.onScrollLeft,
+    this.onScrollRight,
+    this.onScrollUp,
+    this.onScrollDown,
+    this.onIncrease,
+    this.onDecrease,
   }) : assert(container != null),
        super(key: key, child: child);
 
@@ -4540,6 +4548,30 @@ class Semantics extends SingleChildRenderObjectWidget {
     return textDirection ?? (label != null || value != null || hint != null ? Directionality.of(context) : null);
   }
 
+  /// The handler for [SemanticsAction.tap].
+  final VoidCallback onTap;
+
+  /// The handler for [SemanticsAction.longPress].
+  final VoidCallback onLongPress;
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  final VoidCallback onScrollLeft;
+
+  /// The handler for [SemanticsAction.scrollRight].
+  final VoidCallback onScrollRight;
+
+  /// The handler for [SemanticsAction.scrollUp].
+  final VoidCallback onScrollUp;
+
+  /// The handler for [SemanticsAction.scrollDown].
+  final VoidCallback onScrollDown;
+
+  /// The handler for [SemanticsAction.increase].
+  final VoidCallback onIncrease;
+
+  /// The handler for [SemanticsAction.decrease].
+  final VoidCallback onDecrease;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
@@ -4552,6 +4584,14 @@ class Semantics extends SingleChildRenderObjectWidget {
       value: value,
       hint: hint,
       textDirection: _getTextDirection(context),
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onScrollLeft: onScrollLeft,
+      onScrollRight: onScrollRight,
+      onScrollUp: onScrollUp,
+      onScrollDown: onScrollDown,
+      onIncrease: onIncrease,
+      onDecrease: onDecrease,
     );
   }
 
@@ -4565,7 +4605,15 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..label = label
       ..value = value
       ..hint = hint
-      ..textDirection = _getTextDirection(context);
+      ..textDirection = _getTextDirection(context)
+      ..onTap = onTap
+      ..onLongPress = onLongPress
+      ..onScrollLeft = onScrollLeft
+      ..onScrollRight = onScrollRight
+      ..onScrollUp = onScrollUp
+      ..onScrollDown = onScrollDown
+      ..onIncrease = onIncrease
+      ..onDecrease = onDecrease;
   }
 
   @override
