@@ -540,4 +540,9 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
         || backgroundColor != oldDelegate.backgroundColor
         || actionsForegroundColor != oldDelegate.actionsForegroundColor;
   }
+
+  @override
+  String toString() {
+    return '${describeIdentity(this)}(title: $title)';
+  }
 }

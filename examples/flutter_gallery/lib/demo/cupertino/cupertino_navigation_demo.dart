@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 class CupertinoNavigationDemo extends StatelessWidget {
   static const String routeName = '/cupertino/navigation';
@@ -69,7 +70,10 @@ class ExitButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return new CupertinoButton(
       padding: EdgeInsets.zero,
-      child: const Text('Exit'),
+      child: const Tooltip(
+        message: 'Back',
+        child: const Text('Exit'),
+      ),
       onPressed: () {
         // The demo is on the root navigator.
         Navigator.of(context, rootNavigator: true).pop();
@@ -450,8 +454,8 @@ class Tab2Header extends StatelessWidget {
                         new Container(
                           width: 44.0,
                           height: 44.0,
-                          decoration: new BoxDecoration(
-                            image: new DecorationImage(
+                          decoration: const BoxDecoration(
+                            image: const DecorationImage(
                               image: const AssetImage('assets/person1.jpg'),
                             ),
                             shape: BoxShape.circle,
@@ -461,8 +465,8 @@ class Tab2Header extends StatelessWidget {
                         new Container(
                           width: 44.0,
                           height: 44.0,
-                          decoration: new BoxDecoration(
-                            image: new DecorationImage(
+                          decoration: const BoxDecoration(
+                            image: const DecorationImage(
                               image: const AssetImage('assets/person2.jpg'),
                             ),
                             shape: BoxShape.circle,
