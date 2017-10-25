@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
+import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
@@ -362,7 +363,7 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!package_names.isValidPackageName(projectName))
+  if (!linter_utils.isValidPackageName(projectName))
     return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
 
   if (_packageDependencies.contains(projectName)) {

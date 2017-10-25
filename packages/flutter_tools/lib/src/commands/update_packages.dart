@@ -123,6 +123,21 @@ class UpdatePackagesCommand extends FlutterCommand {
         temporaryDirectory.deleteSync(recursive: true);
       }
 
+      // The transitive dependency tree for the fake package does not contain
+      // dependencies between Flutter SDK packages and pub packages. We add them
+      // here.
+      for (PubspecYaml pubspec in pubspecs) {
+        final String package = pubspec.name;
+        final String version = pubspec.version;
+        for (PubspecDependency dependency in pubspec.dependencies) {
+          if (dependency.kind == DependencyKind.normal) {
+            tree._versions[package] = version;
+            tree._dependencyTree[package] ??= new Set<String>();
+            tree._dependencyTree[package].add(dependency.name);
+          }
+        }
+      }
+
       // Now that we have collected all the data, we can apply our dependency
       // versions to each pubspec.yaml that we collected. This mutates the
       // pubspec.yaml files.
@@ -155,10 +170,13 @@ class UpdatePackagesCommand extends FlutterCommand {
   }
 }
 
-/// The various sections of a pubspec.yaml file. We care about the
-/// "dependencies", "dev_dependencies", and "dependency_overrides" sections, the
-/// others are all bucketed into "other".
-enum Section { dependencies, devDependencies, dependencyOverrides, other }
+/// The various sections of a pubspec.yaml file.
+///
+/// We care about the "dependencies", "dev_dependencies", and
+/// "dependency_overrides" sections, as well as the "name" and "version" fields
+/// in the pubspec header bucketed into [header]. The others are all bucketed
+/// into [other].
+enum Section { header, dependencies, devDependencies, dependencyOverrides, other }
 
 /// The various kinds of dependencies we know and care about.
 enum DependencyKind {
@@ -192,12 +210,18 @@ class PubspecYaml {
   /// pubspec.yaml and parse it into a line-by-line form.
   factory PubspecYaml(Directory directory) {
     final File file = _pubspecFor(directory);
-    return new PubspecYaml._(file, _parse(file.path, file.readAsLinesSync()));
+    return _parse(file, file.readAsLinesSync());
   }
 
-  PubspecYaml._(this.file, this.inputData);
+  PubspecYaml._(this.file, this.name, this.version, this.inputData);
 
   final File file; // The actual pubspec.yaml file.
+
+  /// The package name.
+  final String name;
+
+  /// The package version.
+  final String version;
 
   final List<PubspecLine> inputData; // Each line of the pubspec.yaml file, parsed(ish).
 
@@ -206,7 +230,10 @@ class PubspecYaml {
   /// objects). We don't just use a YAML parser because we care about comments
   /// and also because we can just define the style of pubspec.yaml files we care
   /// about (since they're all under our control).
-  static List<PubspecLine> _parse(String filename, List<String> lines) {
+  static PubspecYaml _parse(File file, List<String> lines) {
+    final String filename = file.path;
+    String packageName;
+    String packageVersion;
     final List<PubspecLine> result = <PubspecLine>[]; // The output buffer.
     Section section = Section.other; // Which section we're currently reading from.
     bool seenMain = false; // Whether we've seen the "dependencies:" section.
@@ -228,7 +255,12 @@ class PubspecYaml {
         final PubspecHeader header = PubspecHeader.parse(line); // See if it's a header.
         if (header != null) { // It is!
           section = header.section; // The parser determined what kind of section it is.
-          if (section == Section.dependencies) {
+          if (section == Section.header) {
+            if (header.name == 'name')
+              packageName = header.value;
+            else if (header.name == 'version')
+              packageVersion = header.value;
+          } else if (section == Section.dependencies) {
             // If we're entering the "dependencies" section, we want to make sure that
             // it's the first section (of those we care about) that we've seen so far.
             if (seenMain)
@@ -316,7 +348,7 @@ class PubspecYaml {
         lastDependency = null;
       }
     }
-    return result;
+    return new PubspecYaml._(file, packageName, packageVersion, result);
   }
 
   /// This returns all the explicit dependencies that this pubspec.yaml lists.
@@ -474,8 +506,34 @@ class PubspecLine {
 
 /// A header, e.g. "dependencies:".
 class PubspecHeader extends PubspecLine {
-  PubspecHeader(String line, this.section) : super(line);
+  PubspecHeader(String line, this.section, { this.name, this.value }) : super(line);
+
+  /// The section of the pubspec where the parse [line] appears.
   final Section section;
+
+  /// The name in the pubspec line providing a name/value pair, such as "name"
+  /// and "version".
+  ///
+  /// Example:
+  ///
+  /// The value of this field extracted from the following line is "version".
+  ///
+  /// ```
+  /// version: 0.16.5
+  /// ```
+  final String name;
+
+  /// The value in the pubspec line providing a name/value pair, such as "name"
+  /// and "version".
+  ///
+  /// Example:
+  ///
+  /// The value of this field extracted from the following line is "0.16.5".
+  ///
+  /// ```
+  /// version: 0.16.5
+  /// ```
+  final String value;
 
   static PubspecHeader parse(String line) {
     // We recognize any line that:
@@ -487,9 +545,11 @@ class PubspecHeader extends PubspecLine {
     if (line.startsWith(' '))
       return null;
     final String strippedLine = _stripComments(line);
-    if (!strippedLine.endsWith(':') || strippedLine.length <= 1)
+    if (!strippedLine.contains(':') || strippedLine.length <= 1)
       return null;
-    final String sectionName = strippedLine.substring(0, strippedLine.length - 1);
+    final List<String> parts = strippedLine.split(':');
+    final String sectionName = parts.first;
+    final String value = parts.last.trim();
     switch (sectionName) {
       case 'dependencies':
         return new PubspecHeader(line, Section.dependencies);
@@ -497,6 +557,9 @@ class PubspecHeader extends PubspecLine {
         return new PubspecHeader(line, Section.devDependencies);
       case 'dependency_overrides':
         return new PubspecHeader(line, Section.dependencyOverrides);
+      case 'name':
+      case 'version':
+        return new PubspecHeader(line, Section.header, name: sectionName, value: value);
       default:
         return new PubspecHeader(line, Section.other);
     }
@@ -590,6 +653,25 @@ class PubspecDependency extends PubspecLine {
   static const String _kSdkPrefix = '    sdk: ';
   static const String _kGitPrefix = '    git:';
 
+  /// Whether the dependency points to a package in the Flutter SDK.
+  ///
+  /// There are two ways one can point to a Flutter package:
+  ///
+  /// - Using a "sdk: flutter" dependency.
+  /// - Using a "path" dependency that points somewhere in the Flutter
+  ///   repository other than the "bin" directory.
+  bool get pointsToSdk {
+    if (_kind == DependencyKind.sdk)
+      return true;
+
+    if (_kind == DependencyKind.path &&
+        !fs.path.isWithin(fs.path.join(Cache.flutterRoot, 'bin'), _lockTarget) &&
+        fs.path.isWithin(Cache.flutterRoot, _lockTarget))
+      return true;
+
+    return false;
+  }
+
   /// If parse decided we were a two-line dependency, this is called to parse the second line.
   /// We throw if we couldn't parse this line.
   /// We return true if we parsed it and stored the line in lockLine.
@@ -677,7 +759,7 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   result.writeln('dependencies:');
   overrides.writeln('dependency_overrides:');
   for (PubspecDependency dependency in dependencies)
-    if (dependency.kind != DependencyKind.sdk)
+    if (!dependency.pointsToSdk)
       dependency.describeForFakePubspec(result, overrides);
   result.write(overrides.toString());
   return result.toString();
