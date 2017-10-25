@@ -199,9 +199,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   void _clearTrackers() {
-    final List<_TapTracker> localTrackers = new List<_TapTracker>.from(_trackers.values);
-    for (_TapTracker tracker in localTrackers)
-      _reject(tracker);
+    _trackers.values.toList().forEach(_reject);
     assert(_trackers.isEmpty);
   }
 

@@ -478,8 +478,7 @@ class DevFS {
       }
       // No need to send source files because all compilation is done on the
       // host and result of compilation is single kernel file.
-      for (Uri fileUri in filesUris)
-        dirtyEntries.remove(fileUri);
+      filesUris.forEach(dirtyEntries.remove);
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
       final String compiledBinary = fullRestart
         ? await compile(

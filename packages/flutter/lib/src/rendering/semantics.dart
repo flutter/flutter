@@ -438,10 +438,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void redepthChildren() {
-    if (_children != null) {
-      for (SemanticsNode child in _children)
-        redepthChild(child);
-    }
+    _children?.forEach(redepthChild);
   }
 
   @override

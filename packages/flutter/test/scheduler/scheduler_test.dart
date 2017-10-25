@@ -28,8 +28,7 @@ void main() {
       scheduler.scheduleTask(() { executedTasks.add(x); }, Priority.idle + x);
     }
 
-    for (int x in input)
-      scheduleAddingTask(x);
+    input.forEach(scheduleAddingTask);
 
     strategy.allowedPriority = 100;
     for (int i = 0; i < 3; i += 1)

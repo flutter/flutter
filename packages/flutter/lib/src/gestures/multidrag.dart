@@ -293,8 +293,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 
   @override
   void dispose() {
-    for (int pointer in _pointers.keys.toList())
-      _removeState(pointer);
+    _pointers.keys.toList().forEach(_removeState);
     assert(_pointers.isEmpty);
     _pointers = null;
     super.dispose();
