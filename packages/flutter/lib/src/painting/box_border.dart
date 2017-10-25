@@ -34,14 +34,6 @@ enum BoxShape {
   ///
   ///  * [CircleBorder], the equivalent [ShapeBorder].
   circle,
-
-  /// A pill-shaped region (a box with semicircles on both ends)
-  /// centered in the middle of the box into which the [Border] or
-  /// [BoxDecoration] is painted.  The diameters of the ends of the pill are
-  /// equal to the shortest dimension of the box. A box that is taller than it
-  /// is wide will have a rounded top and bottom, and a box that is wider
-  /// than it is tall will have rounded left and right ends.
-  pill,
 }
 
 /// Base class for box borders that can paint as rectangle, circles, or rounded
@@ -160,21 +152,6 @@ abstract class BoxBorder extends ShapeBorder {
       'However, only Border and BorderDirectional classes are supported by this method. '
       'For a more general interpolation method, consider using ShapeBorder.lerp instead.'
     );
-  }
-
-  /// Calculates the [BorderRadius] necessary to draw a pill that fits into the
-  /// supplied rectangle.
-  ///
-  /// The [shape] parameter can only be [BoxShape.pill].
-  static BorderRadius pillRadiusForRect(BoxShape shape, Rect rect) {
-    switch (shape) {
-      case BoxShape.pill:
-        return new BorderRadius.all(new Radius.circular(rect.shortestSide / 2.0));
-        break;
-      default:
-        assert(false, "Pill radius can only be calculated for pills.");
-        return null;
-    }
   }
 
   @override
@@ -472,16 +449,12 @@ class Border extends BoxBorder {
   ///
   /// Uniform borders are more efficient to paint than more complex borders.
   ///
-  /// You can provide a [BoxShape] to draw the border on. If the `shape` is
+  /// You can provide a [BoxShape] to draw the border on. If the `shape` in
   /// [BoxShape.circle], there is the requirement that the border [isUniform].
   ///
   /// If you specify a rectangular box shape ([BoxShape.rectangle]), then you
   /// may specify a [BorderRadius]. If a `borderRadius` is specified, there is
   /// the requirement that the border [isUniform].
-  ///
-  /// If you specify a pill-shaped border using [BoxShape.pill] or
-  /// [BoxShape.verticalPill], then you may not specify a [BorderRadius], since
-  /// it is computed from the size of the decoration.
   ///
   /// The [getInnerPath] and [getOuterPath] methods do not know about the
   /// `shape` and `borderRadius` arguments.
@@ -514,9 +487,6 @@ class Border extends BoxBorder {
               }
               BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
               break;
-          case BoxShape.pill:
-            assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-            BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, BoxBorder.pillRadiusForRect(shape, rect));
             break;
           }
           return;
@@ -822,10 +792,6 @@ class BorderDirectional extends BoxBorder {
                 return;
               }
               BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
-              break;
-            case BoxShape.pill:
-              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-              BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, BoxBorder.pillRadiusForRect(shape, rect));
               break;
           }
           return;

@@ -1378,9 +1378,6 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
       case BoxShape.circle:
         final Rect rect = Offset.zero & size;
         return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
-      case BoxShape.pill:
-        final Rect rect = Offset.zero & size;
-        return BoxBorder.pillRadiusForRect(_shape, rect).toRRect(rect);
     }
     assert(false, 'Box shape $_shape not handled.');
     return null;

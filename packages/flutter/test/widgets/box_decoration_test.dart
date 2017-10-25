@@ -154,17 +154,6 @@ void main() {
               shape: BoxShape.circle,
             ),
           ),
-          new Container(
-            width: 150.0,
-            height: 100.0,
-            decoration: new BoxDecoration(
-              border: new Border.all(
-                width: 10.0,
-                color: const Color(0xFFFFFFFF),
-              ),
-              shape: BoxShape.pill,
-            ),
-          ),
         ],
       ),
     );
@@ -191,16 +180,11 @@ void main() {
         ),
       )
       ..circle(x: 400.0, y: 350.0, radius: 45.0)
-      ..drrect(
-        outer: new RRect.fromLTRBR(
-          325.0, 400.0, 475.0, 500.0, const Radius.circular(50.0)),
-        inner: new RRect.fromLTRBR(
-          335.0, 410.0, 465.0, 490.0, const Radius.circular(40.0))
-      )
     );
   });
 
   testWidgets('Can hit test on BoxDecoration', (WidgetTester tester) async {
+
     List<int> itemsTapped;
 
     final Key key = const Key('Container with BoxDecoration');
@@ -233,9 +217,11 @@ void main() {
 
     await tester.tapAt(const Offset(449.0, 324.0));
     expect(itemsTapped, <int>[1,1,1]);
+
   });
 
   testWidgets('Can hit test on BoxDecoration circle', (WidgetTester tester) async {
+
     List<int> itemsTapped;
 
     final Key key = const Key('Container with BoxDecoration');
@@ -271,46 +257,7 @@ void main() {
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1,1]);
+
   });
 
-  testWidgets('Can hit test on BoxDecoration pill', (WidgetTester tester) async {
-    List<int> itemsTapped;
-
-    final Key key = const Key('Container with BoxDecoration');
-    Widget buildFrame(Border border) {
-      itemsTapped = <int>[];
-      return new Center(
-        child: new GestureDetector(
-          behavior: HitTestBehavior.deferToChild,
-          child: new Container(
-            key: key,
-            width: 100.0,
-            height: 50.0,
-            decoration: new BoxDecoration(border: border, shape: BoxShape.pill),
-          ),
-          onTap: () {
-            itemsTapped.add(1);
-          },
-        )
-      );
-    }
-
-    await tester.pumpWidget(buildFrame(new Border.all()));
-    expect(itemsTapped, isEmpty);
-
-    await tester.tapAt(const Offset(0.0, 0.0));
-    expect(itemsTapped, isEmpty);
-
-    await tester.tapAt(const Offset(400.0, 250.0));
-    expect(itemsTapped, isEmpty);
-
-    await tester.tapAt(const Offset(351.0, 300.0));
-    expect(itemsTapped, <int>[1]);
-
-    await tester.tapAt(const Offset(400.0, 300.0));
-    expect(itemsTapped, <int>[1, 1]);
-
-    await tester.tap(find.byKey(key));
-    expect(itemsTapped, <int>[1, 1, 1]);
-  });
 }
