@@ -19,6 +19,7 @@ import("//third_party/dart/runtime/lib/typed_data_sources.gni")
 import("//third_party/dart/utils/generate_patch_sdk.gni")
 
 if (is_fuchsia) {
+  import("//build/dart/toolchain.gni")
   import("//topaz/public/dart-pkg/fuchsia/sdk_ext.gni")
   import("//topaz/public/dart-pkg/zircon/sdk_ext.gni")
   import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
@@ -46,7 +47,11 @@ if (is_fuchsia) {
     outputs = [
       dot_packages_file
     ]
-    deps = dart_deps
+    deps = []
+    foreach(dep, dart_deps) {
+      deps += [ "$dep($dart_toolchain)" ]
+    }
+
     depfile = "$dot_packages_file.d"
 
     script = "//build/dart/gen_dot_packages.py"
@@ -58,7 +63,7 @@ if (is_fuchsia) {
       "--root-build-dir",
       rebase_path(root_build_dir),
       "--root-gen-dir",
-      rebase_path(root_gen_dir),
+      rebase_path(dart_root_gen_dir),
       "--package-name",
       "snapshot_root",
       "--depfile",
