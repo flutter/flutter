@@ -7,9 +7,9 @@
 
 #import <UIKit/UIKit.h>
 
-#include "flutter/shell/platform/darwin/common/FlutterBinaryMessenger.h"
-#include "flutter/shell/platform/darwin/common/FlutterChannels.h"
-#include "flutter/shell/platform/darwin/common/FlutterCodecs.h"
+#include "FlutterBinaryMessenger.h"
+#include "FlutterChannels.h"
+#include "FlutterCodecs.h"
 
 NS_ASSUME_NONNULL_BEGIN
 @protocol FlutterPluginRegistrar;

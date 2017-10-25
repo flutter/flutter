@@ -12,7 +12,7 @@
 
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/lib/ui/semantics/semantics_node.h"
-#include "flutter/shell/platform/darwin/common/FlutterChannels.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterView.h"
 #include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkMatrix44.h"
