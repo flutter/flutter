@@ -163,7 +163,8 @@ void RuntimeHolder::Init(
     first_app = false;
     blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                        default_isolate_snapshot_data,
-                       default_isolate_snapshot_instr);
+                       default_isolate_snapshot_instr,
+                       /* bundle_path = */ "");
 
     // This has to happen after the Dart runtime is initialized.
     SetThreadName(blink::Threads::UI(), "ui");
