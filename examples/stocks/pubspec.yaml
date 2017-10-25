@@ -8,6 +8,7 @@ dependencies:
   intl_translation: 0.15.0
   http: 0.11.3+14
   isolate: 1.1.0
+  material_icons_font: ^0.1.1
 
 dev_dependencies:
   flutter_test:
@@ -44,6 +45,3 @@ dev_dependencies:
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+4 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
-
-flutter:
-  uses-material-design: true

@@ -4,6 +4,7 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  material_icons_font: ^0.1.1
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
@@ -38,6 +39,3 @@ dependencies:
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+4 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
-
-flutter:
-  uses-material-design: true
