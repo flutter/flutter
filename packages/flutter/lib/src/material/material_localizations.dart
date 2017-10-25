@@ -114,6 +114,11 @@ abstract class MaterialLocalizations {
   /// See also: https://material.io/guidelines/style/typography.html
   TextTheme get localTextGeometry;
 
+  /// Formats a [number] using local decimal number format.
+  ///
+  /// Inserts locale-appropriate thousands separator, if necessary.
+  String formatDecimal(int number);
+
   /// Formats [TimeOfDay.hour] in the given time of day according to the value
   /// of [timeOfDayFormat].
   String formatHour(TimeOfDay timeOfDay);
@@ -314,7 +319,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return null;
   }
 
-  /// Formats an integer, inserting thousands separators as needed.
+  @override
   String formatDecimal(int number) {
     if (number > -1000 && number < 1000)
       return number.toString();

@@ -184,9 +184,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   int get firstDayOfWeekIndex => (_fullYearFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
-  /// Formats a [number] using local decimal number format.
-  ///
-  /// Inserts locale-appropriate thousands separator, if necessary.
+  @override
   String formatDecimal(int number) {
     return _decimalFormat.format(number);
   }
