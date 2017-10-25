@@ -176,8 +176,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
-  // ignore: prefer_const_constructors_in_immutables , https://github.com/dart-lang/linter/issues/814
-  factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._;
+  factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel);
 
   /// Creates a global key without a label.
   ///
@@ -327,9 +326,6 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// The label does not affect the key's identity.
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   LabeledGlobalKey(this._debugLabel) : super.constructor();
-
-  // Used for forwarding the constructor from GlobalKey.
-  LabeledGlobalKey._({ String debugLabel }) : this(debugLabel);
 
   final String _debugLabel;
 
