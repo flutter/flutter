@@ -16,7 +16,7 @@ source_set("common") {
     "FlutterCodecs.mm",
     "FlutterMacros.h",
     "FlutterStandardCodec.mm",
-    "FlutterStandardCodec_internal.h",
+    "FlutterStandardCodec_Internal.h",
     "platform_mac.h",
     "platform_mac.mm",
     "process_info_mac.cc",
