@@ -1,0 +1,55 @@
+# Copyright 2016 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+template("test_fixtures") {
+  testonly = true
+
+  assert(defined(invoker.fixtures), "Test fixtures must be specified.")
+
+  fixtures_name_target_name = target_name + "_gen_fixtures_name"
+  fixtures_source_set_target_name = target_name + "_gen_fixtures_source_set"
+  fixtures_copy_target_name = target_name + "_copy_fixtures"
+
+  fixtures_location = "$target_gen_dir/fixtures"
+  fixtures_location_file = "$target_gen_dir/test_fixtures_location.cc"
+
+  action(fixtures_name_target_name) {
+    script = "$flutter_root/testing/build/gen_fixtures_location_symbol.py"
+
+    outputs = [
+      fixtures_location_file,
+    ]
+
+    args = [
+      "--fixtures_location_file",
+      rebase_path(fixtures_location_file),
+      "--fixtures_location",
+      rebase_path(fixtures_location),
+    ]
+  }
+
+  source_set(fixtures_source_set_target_name) {
+    sources = [
+      fixtures_location_file,
+    ]
+
+    deps = [
+      ":$fixtures_name_target_name",
+    ]
+  }
+
+  copy(fixtures_copy_target_name) {
+    sources = invoker.fixtures
+    outputs = [
+      "$fixtures_location/{{source_file_part}}",
+    ]
+  }
+
+  group(target_name) {
+    deps = [
+      ":$fixtures_copy_target_name",
+      ":$fixtures_source_set_target_name",
+    ]
+  }
+}
