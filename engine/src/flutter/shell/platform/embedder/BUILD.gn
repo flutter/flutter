@@ -26,6 +26,21 @@ source_set("embedder") {
   public_configs = [ "$flutter_root:config" ]
 }
 
+executable("embedder_unittests") {
+  testonly = true
+
+  include_dirs = [ "." ]
+
+  sources = [
+    "tests/embedder_unittests.cc",
+  ]
+
+  deps = [
+    ":embedder",
+    "$flutter_root/testing",
+  ]
+}
+
 shared_library("flutter_engine") {
   deps = [
     ":embedder",
@@ -73,7 +88,7 @@ if (is_mac) {
   copy("copy_info_plist") {
     visibility = [ ":*" ]
     sources = [
-      "EmbedderInfo.plist",
+      "assets/EmbedderInfo.plist",
     ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Resources/Info.plist",
@@ -83,7 +98,7 @@ if (is_mac) {
   copy("copy_module_map") {
     visibility = [ ":*" ]
     sources = [
-      "embedder.modulemap",
+      "assets/embedder.modulemap",
     ]
     outputs = [
       "$_flutter_embedder_framework_dir/Versions/A/Modules/module.modulemap",

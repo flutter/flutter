@@ -39,7 +39,10 @@ group("flutter") {
       ]
     }
     if (!is_win) {
-      public_deps += [ "$flutter_root/shell/platform/embedder:flutter_engine" ]
+      public_deps += [
+        "$flutter_root/shell/platform/embedder:embedder_unittests",
+        "$flutter_root/shell/platform/embedder:flutter_engine",
+      ]
     }
     public_deps += [
       "$flutter_root/flow:flow_unittests",
