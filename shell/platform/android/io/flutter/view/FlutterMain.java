@@ -188,7 +188,9 @@ public class FlutterMain {
                 shellArgs.add("--log-tag=" + sSettings.getLogTag());
             }
 
-            nativeInit(applicationContext, shellArgs.toArray(new String[0]));
+            String appBundlePath = findAppBundlePath(applicationContext);
+            nativeInit(applicationContext, shellArgs.toArray(new String[0]),
+                appBundlePath);
 
             sInitialized = true;
         } catch (Exception e) {
@@ -197,7 +199,7 @@ public class FlutterMain {
         }
     }
 
-    private static native void nativeInit(Context context, String[] args);
+    private static native void nativeInit(Context context, String[] args, String bundlePath);
     private static native void nativeRecordStartTimestamp(long initTimeMillis);
 
     /**

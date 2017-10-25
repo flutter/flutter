@@ -96,7 +96,8 @@ Shell::~Shell() {}
 
 void Shell::InitStandalone(fxl::CommandLine command_line,
                            std::string icu_data_path,
-                           std::string application_library_path) {
+                           std::string application_library_path,
+                           std::string bundle_path) {
   TRACE_EVENT0("flutter", "Shell::InitStandalone");
 
   fml::icu::InitializeICU(icu_data_path);
@@ -191,10 +192,11 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
 
   blink::Settings::Set(settings);
 
-  Init(std::move(command_line));
+  Init(std::move(command_line), bundle_path);
 }
 
-void Shell::Init(fxl::CommandLine command_line) {
+void Shell::Init(fxl::CommandLine command_line,
+                 const std::string& bundle_path) {
 #if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   bool trace_skia = command_line.HasOption(FlagForSwitch(Switch::TraceSkia));
   InitSkiaEventTracer(trace_skia);
@@ -202,7 +204,8 @@ void Shell::Init(fxl::CommandLine command_line) {
 
   FXL_DCHECK(!g_shell);
   g_shell = new Shell(std::move(command_line));
-  blink::Threads::UI()->PostTask(Engine::Init);
+  blink::Threads::UI()->PostTask(
+      [bundle_path]() { Engine::Init(bundle_path); });
 }
 
 Shell& Shell::Shared() {

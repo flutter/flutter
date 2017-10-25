@@ -35,7 +35,6 @@ class DartController {
   void CreateIsolateFor(const std::string& script_uri,
                         const uint8_t* isolate_snapshot_data,
                         const uint8_t* isolate_snapshot_instr,
-                        const std::vector<uint8_t>& platform_kernel,
                         std::unique_ptr<UIDartState> ui_dart_state);
 
   UIDartState* dart_state() const { return ui_dart_state_; }
@@ -52,11 +51,6 @@ class DartController {
   // during isolate shutdown, instead it is deleted when the controller
   // object is deleted.
   UIDartState* ui_dart_state_;
-
-  // Kernel binary image of platform core libraries. This is copied and
-  // maintained for dart script lifespan, so that kernel loading mechanism can
-  // incrementally build the dart objects from it.
-  uint8_t* platform_kernel_bytes;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(DartController);
 };

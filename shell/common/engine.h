@@ -33,7 +33,7 @@ class Engine : public blink::RuntimeDelegate {
 
   fxl::WeakPtr<Engine> GetWeakPtr();
 
-  static void Init();
+  static void Init(const std::string& bundle_path);
 
   void RunBundle(const std::string& bundle_path,
                  const std::string& entrypoint = main_entrypoint_,
@@ -92,10 +92,8 @@ class Engine : public blink::RuntimeDelegate {
   void StartAnimatorIfPossible();
 
   void ConfigureAssetBundle(const std::string& path);
-  void ConfigureRuntime(
-      const std::string& script_uri,
-      const std::vector<uint8_t>& platform_kernel = std::vector<uint8_t>(),
-      bool reuse_runtime_controller = false);
+  void ConfigureRuntime(const std::string& script_uri,
+                        bool reuse_runtime_controller = false);
 
   bool HandleLifecyclePlatformMessage(blink::PlatformMessage* message);
   bool HandleNavigationPlatformMessage(

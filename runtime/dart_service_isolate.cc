@@ -84,7 +84,7 @@ void DartServiceIsolate::Shutdown(Dart_NativeArguments args) {
 bool DartServiceIsolate::Startup(std::string server_ip,
                                  intptr_t server_port,
                                  Dart_LibraryTagHandler embedder_tag_handler,
-                                 bool running_precompiled,
+                                 bool running_from_sources,
                                  bool disable_origin_check,
                                  char** error) {
   Dart_Isolate isolate = Dart_CurrentIsolate();
@@ -110,15 +110,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
 
   Dart_Handle result;
 
-  if (running_precompiled) {
-    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_sky");
-    Dart_Handle library = Dart_LookupLibrary(uri);
-    SHUTDOWN_ON_ERROR(library);
-    result = Dart_SetRootLibrary(library);
-    SHUTDOWN_ON_ERROR(result);
-    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
-    SHUTDOWN_ON_ERROR(result);
-  } else {
+  if (running_from_sources) {
     // Use our own library tag handler when loading service isolate sources.
     Dart_SetLibraryTagHandler(DartServiceIsolate::LibraryTagHandler);
     // Load main script.
@@ -131,6 +123,14 @@ bool DartServiceIsolate::Startup(std::string server_ip,
     SHUTDOWN_ON_ERROR(result);
     // Finalize loading.
     result = Dart_FinalizeLoading(false);
+    SHUTDOWN_ON_ERROR(result);
+  } else {
+    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_sky");
+    Dart_Handle library = Dart_LookupLibrary(uri);
+    SHUTDOWN_ON_ERROR(library);
+    result = Dart_SetRootLibrary(library);
+    SHUTDOWN_ON_ERROR(result);
+    result = Dart_SetNativeResolver(library, GetNativeFunction, GetSymbol);
     SHUTDOWN_ON_ERROR(result);
   }
 

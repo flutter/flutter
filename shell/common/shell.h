@@ -28,7 +28,8 @@ class Shell {
 
   static void InitStandalone(fxl::CommandLine command_line,
                              std::string icu_data_path = "",
-                             std::string application_library_path = "");
+                             std::string application_library_path = "",
+                             std::string bundle_path = "");
 
   static Shell& Shared();
 
@@ -71,7 +72,8 @@ class Shell {
                          std::string* isolate_name);
 
  private:
-  static void Init(fxl::CommandLine command_line);
+  static void Init(fxl::CommandLine command_line,
+                   const std::string& bundle_path);
 
   Shell(fxl::CommandLine command_line);
 

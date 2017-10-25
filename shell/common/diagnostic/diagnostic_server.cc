@@ -6,6 +6,7 @@
 
 #include "flutter/common/threads.h"
 #include "flutter/flow/compositor_context.h"
+#include "flutter/runtime/dart_init.h"
 #include "flutter/runtime/embedder_resources.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/picture_serializer.h"
@@ -72,16 +73,22 @@ void DiagnosticServer::Start(uint32_t port, bool ipv6) {
   EmbedderResources resources(
       &flutter::runtime::__sky_embedder_diagnostic_server_resources_[0]);
 
-  const char* source = nullptr;
-  int source_length =
-      resources.ResourceLookup(kDiagnosticServerScript, &source);
-  FXL_DCHECK(source_length != EmbedderResources::kNoSuchInstance);
+  Dart_Handle diagnostic_library;
+  if (blink::GetKernelPlatformBinary() != nullptr) {
+    diagnostic_library =
+        Dart_LookupLibrary(Dart_NewStringFromCString("dart:diagnostic_server"));
+  } else {
+    const char* source = nullptr;
+    int source_length =
+        resources.ResourceLookup(kDiagnosticServerScript, &source);
+    FXL_DCHECK(source_length != EmbedderResources::kNoSuchInstance);
 
-  Dart_Handle diagnostic_library = Dart_LoadLibrary(
-      Dart_NewStringFromCString("dart:diagnostic_server"), Dart_Null(),
-      Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(source),
-                             source_length),
-      0, 0);
+    diagnostic_library = Dart_LoadLibrary(
+        Dart_NewStringFromCString("dart:diagnostic_server"), Dart_Null(),
+        Dart_NewStringFromUTF8(reinterpret_cast<const uint8_t*>(source),
+                               source_length),
+        0, 0);
+  }
 
   FXL_CHECK(!LogIfError(diagnostic_library));
   FXL_CHECK(!LogIfError(Dart_SetNativeResolver(diagnostic_library,

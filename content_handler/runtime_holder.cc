@@ -266,10 +266,8 @@ void RuntimeHolder::CreateView(
     isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
         dlsym(dylib_handle_, "_kDartIsolateSnapshotInstructions"));
   }
-  std::vector<uint8_t> empty_platform_kernel;
   runtime_->CreateDartController(script_uri, isolate_snapshot_data,
-                                 isolate_snapshot_instr,
-                                 std::move(empty_platform_kernel));
+                                 isolate_snapshot_instr);
 
   runtime_->SetViewportMetrics(viewport_metrics_);
 
