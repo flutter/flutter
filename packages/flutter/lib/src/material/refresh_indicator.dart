@@ -86,7 +86,8 @@ class RefreshIndicator extends StatefulWidget {
     this.displacement: 40.0,
     @required this.onRefresh,
     this.color,
-    this.backgroundColor
+    this.backgroundColor,
+    this.acceptNotification: defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(onRefresh != null),
        super(key: key);
@@ -112,6 +113,13 @@ class RefreshIndicator extends StatefulWidget {
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
   final Color backgroundColor;
+  
+  /// A predicate that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether notification.depth == 0. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate acceptNotification;
 
   @override
   RefreshIndicatorState createState() => new RefreshIndicatorState();
@@ -174,7 +182,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth != 0)
+    if (!widget.acceptNotification(notification))
       return false;
     if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
         _mode == null && _start(notification.metrics.axisDirection)) {
