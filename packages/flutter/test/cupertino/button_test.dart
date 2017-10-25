@@ -2,9 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 const TextStyle testStyle = const TextStyle(
   fontFamily: 'Ahem',
@@ -163,6 +168,37 @@ void main() {
       matching: find.byType(Opacity),
     ));
     expect(opacity.opacity, pressedOpacity);
+  });
+
+  testWidgets('Material button is semantically a button', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(
+      boilerplate(
+          child: new Center(
+            child: new CupertinoButton(
+              onPressed: () { },
+              child: const Text('ABC')
+            ),
+          ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            actions: SemanticsAction.tap.index,
+            label: 'ABC',
+            flags: SemanticsFlags.isButton.index,
+          )
+        ],
+      ),
+      ignoreId: true,
+      ignoreRect: true,
+      ignoreTransform: true,
+    ));
+
+    semantics.dispose();
   });
 }
 
