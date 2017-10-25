@@ -91,9 +91,7 @@ class _FlutterPlatform extends PlatformPlugin {
     this.explicitObservatoryPort,
     this.explicitDiagnosticPort,
     this.host,
-  }) {
-    assert(shellPath != null);
-  }
+  }) : assert(shellPath != null);
 
   final String shellPath;
   final TestWatcher watcher;
