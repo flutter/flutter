@@ -995,11 +995,9 @@ class Isolate extends ServiceObjectOwner {
   }
 
   void _updateHeaps(Map<String, dynamic> map, bool mapIsRef) {
-    if (_newSpace == null)
-      _newSpace = new HeapSpace._empty(this);
+    _newSpace ??= new HeapSpace._empty(this);
     _newSpace._update(map['new'], mapIsRef);
-    if (_oldSpace == null)
-      _oldSpace = new HeapSpace._empty(this);
+    _oldSpace ??= new HeapSpace._empty(this);
     _oldSpace._update(map['old'], mapIsRef);
   }
 
