@@ -124,6 +124,14 @@ static ServiceIsolateHook g_service_isolate_hook = nullptr;
 static RegisterNativeServiceProtocolExtensionHook
     g_register_native_service_protocol_extensions_hook = nullptr;
 
+// Kernel representation of core dart libraries(loaded from platform.dill).
+// TODO(aam): This (and platform_data below) have to be released when engine
+// gets torn down. At that point we could also call Dart_Cleanup to complete
+// Dart VM cleanup.
+static void* kernel_platform = nullptr;
+// Bytes actually read from platform.dill that are referenced by kernel_platform
+static std::vector<uint8_t> platform_data;
+
 void IsolateShutdownCallback(void* callback_data) {
   if (tonic::DartStickyError::IsSet()) {
     tonic::DartApiScope api_scope;
@@ -194,10 +202,19 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
   return nullptr;
 #else   // FLUTTER_RUNTIME_MODE
   UIDartState* dart_state = new UIDartState(nullptr, nullptr);
+
+  bool is_running_from_kernel = GetKernelPlatformBinary() != nullptr;
+
   Dart_Isolate isolate =
-      Dart_CreateIsolate(script_uri, "main", g_default_isolate_snapshot_data,
-                         g_default_isolate_snapshot_instructions, nullptr,
-                         static_cast<tonic::DartState*>(dart_state), error);
+      is_running_from_kernel
+          ? Dart_CreateIsolateFromKernel(
+                script_uri, "main", kernel_platform, nullptr /* flags */,
+                static_cast<tonic::DartState*>(dart_state), error)
+          : Dart_CreateIsolate(
+                script_uri, "main", g_default_isolate_snapshot_data,
+                g_default_isolate_snapshot_instructions, nullptr,
+                static_cast<tonic::DartState*>(dart_state), error);
+
   FXL_CHECK(isolate) << error;
   dart_state->set_debug_name_prefix(script_uri);
   dart_state->SetIsolate(isolate);
@@ -216,7 +233,8 @@ Dart_Isolate ServiceIsolateCreateCallback(const char* script_uri,
       const bool disable_websocket_origin_check = false;
       const bool service_isolate_booted = DartServiceIsolate::Startup(
           ip, port, tonic::DartState::HandleLibraryTag,
-          IsRunningPrecompiledCode(), disable_websocket_origin_check, error);
+          !IsRunningPrecompiledCode() && !is_running_from_kernel,
+          disable_websocket_origin_check, error);
       FXL_CHECK(service_isolate_booted) << error;
     }
 
@@ -252,7 +270,6 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
   // Are we running from a Dart source file?
   const bool running_from_source = StringEndsWith(entry_uri, ".dart");
 
-  void* kernel_platform = nullptr;
   std::vector<uint8_t> kernel_data;
   std::vector<uint8_t> snapshot_data;
   std::string entry_path;
@@ -272,14 +289,6 @@ Dart_Isolate IsolateCreateCallback(const char* script_uri,
               GetUnzipperProviderForPath(std::move(bundle_path)));
       zip_asset_store->GetAsBuffer(kKernelAssetKey, &kernel_data);
       zip_asset_store->GetAsBuffer(kSnapshotAssetKey, &snapshot_data);
-
-      std::vector<uint8_t> platform_data;
-      zip_asset_store->GetAsBuffer(kPlatformKernelAssetKey, &platform_data);
-      if (!platform_data.empty()) {
-        kernel_platform = Dart_ReadKernelBinary(
-            platform_data.data(), platform_data.size(), ReleaseFetchedBytes);
-        FXL_DCHECK(kernel_platform != NULL);
-      }
     }
   }
 
@@ -454,10 +463,15 @@ static void EmbedderInformationCallback(Dart_EmbedderInformation* info) {
   info->name = "Flutter";
 }
 
+void* GetKernelPlatformBinary() {
+  return kernel_platform;
+}
+
 void InitDartVM(const uint8_t* vm_snapshot_data,
                 const uint8_t* vm_snapshot_instructions,
                 const uint8_t* default_isolate_snapshot_data,
-                const uint8_t* default_isolate_snapshot_instructions) {
+                const uint8_t* default_isolate_snapshot_instructions,
+                const std::string& bundle_path) {
   TRACE_EVENT0("flutter", __func__);
 
   g_default_isolate_snapshot_data = default_isolate_snapshot_data;
@@ -533,6 +547,17 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
 #if defined(OS_FUCHSIA)
   PushBackAll(&args, kDartFuchsiaTraceArgs, arraysize(kDartFuchsiaTraceArgs));
 #endif
+
+  if (!bundle_path.empty()) {
+    auto zip_asset_store = fxl::MakeRefCounted<ZipAssetStore>(
+        GetUnzipperProviderForPath(std::move(bundle_path)));
+    zip_asset_store->GetAsBuffer(kPlatformKernelAssetKey, &platform_data);
+    if (!platform_data.empty()) {
+      kernel_platform = Dart_ReadKernelBinary(
+          platform_data.data(), platform_data.size(), ReleaseFetchedBytes);
+      FXL_DCHECK(kernel_platform != nullptr);
+    }
+  }
 
   for (size_t i = 0; i < settings.dart_flags.size(); i++)
     args.push_back(settings.dart_flags[i].c_str());

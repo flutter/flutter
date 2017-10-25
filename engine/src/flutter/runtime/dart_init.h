@@ -11,6 +11,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace blink {
 
@@ -41,7 +42,10 @@ struct EmbedderTracingCallbacks {
 void InitDartVM(const uint8_t* vm_snapshot_data,
                 const uint8_t* vm_snapshot_instructions,
                 const uint8_t* default_isolate_snapshot_data,
-                const uint8_t* default_isolate_snapshot_instructions);
+                const uint8_t* default_isolate_snapshot_instructions,
+                const std::string& bundle_path);
+
+void* GetKernelPlatformBinary();
 
 void SetEmbedderTracingCallbacks(
     std::unique_ptr<EmbedderTracingCallbacks> callbacks);

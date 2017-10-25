@@ -19,7 +19,8 @@ namespace shell {
 static void Init(JNIEnv* env,
                  jclass clazz,
                  jobject context,
-                 jobjectArray jargs) {
+                 jobjectArray jargs,
+                 jstring bundlePath) {
   // Prepare command line arguments and initialize the shell.
   std::vector<std::string> args;
   args.push_back("flutter_tester");
@@ -30,7 +31,9 @@ static void Init(JNIEnv* env,
   auto command_line = fxl::CommandLineFromIterators(args.begin(), args.end());
   std::string icu_data_path =
       command_line.GetOptionValueWithDefault("icu-data-file-path", "");
-  Shell::InitStandalone(std::move(command_line), std::move(icu_data_path));
+  Shell::InitStandalone(std::move(command_line), std::move(icu_data_path),
+                        /* application_library_path= */ "",
+                        fml::jni::JavaStringToString(env, bundlePath));
 }
 
 static void RecordStartTimestamp(JNIEnv* env,
@@ -45,7 +48,8 @@ bool RegisterFlutterMain(JNIEnv* env) {
   static const JNINativeMethod methods[] = {
       {
           .name = "nativeInit",
-          .signature = "(Landroid/content/Context;[Ljava/lang/String;)V",
+          .signature = "(Landroid/content/Context;[Ljava/lang/String;Ljava/"
+                       "lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&Init),
       },
       {

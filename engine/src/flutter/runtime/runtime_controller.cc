@@ -29,14 +29,12 @@ RuntimeController::~RuntimeController() {}
 void RuntimeController::CreateDartController(
     const std::string& script_uri,
     const uint8_t* isolate_snapshot_data,
-    const uint8_t* isolate_snapshot_instr,
-    const std::vector<uint8_t>& platform_kernel) {
+    const uint8_t* isolate_snapshot_instr) {
   FXL_DCHECK(!dart_controller_);
 
   dart_controller_.reset(new DartController());
   dart_controller_->CreateIsolateFor(
       script_uri, isolate_snapshot_data, isolate_snapshot_instr,
-      platform_kernel,
       std::make_unique<UIDartState>(this, std::make_unique<Window>(this)));
 
   UIDartState* dart_state = dart_controller_->dart_state();

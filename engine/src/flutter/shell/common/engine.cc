@@ -130,7 +130,7 @@ static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
 static const uint8_t* default_isolate_snapshot_data = nullptr;
 static const uint8_t* default_isolate_snapshot_instr = nullptr;
 
-void Engine::Init() {
+void Engine::Init(const std::string& bundle_path) {
   const uint8_t* vm_snapshot_data;
   const uint8_t* vm_snapshot_instr;
 #if !FLUTTER_AOT
@@ -183,7 +183,7 @@ void Engine::Init() {
 
   blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                      default_isolate_snapshot_data,
-                     default_isolate_snapshot_instr);
+                     default_isolate_snapshot_instr, bundle_path);
 }
 
 const std::string Engine::main_entrypoint_ = "main";
@@ -193,10 +193,7 @@ void Engine::RunBundle(const std::string& bundle_path,
                        bool reuse_runtime_controller) {
   TRACE_EVENT0("flutter", "Engine::RunBundle");
   ConfigureAssetBundle(bundle_path);
-  std::vector<uint8_t> platform_kernel;
-  GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel,
-                   reuse_runtime_controller);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
 
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
@@ -224,8 +221,7 @@ void Engine::RunBundleAndSnapshot(const std::string& bundle_path,
     return;
   }
   ConfigureAssetBundle(bundle_path);
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), std::vector<uint8_t>(),
-                   reuse_runtime_controller);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
   if (blink::IsRunningPrecompiledCode()) {
     runtime_->dart_controller()->RunFromPrecompiledSnapshot(entrypoint);
   } else {
@@ -248,15 +244,9 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
 
-  std::vector<uint8_t> platform_kernel;
-  if (!bundle_path.empty()) {
-    ConfigureAssetBundle(bundle_path);
-    GetAssetAsBuffer(blink::kPlatformKernelAssetKey, &platform_kernel);
-  }
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), platform_kernel,
-                   reuse_runtime_controller);
+  ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
 
-  if (!platform_kernel.empty()) {
+  if (blink::GetKernelPlatformBinary() != nullptr) {
     std::vector<uint8_t> kernel;
     if (!files::ReadFileToVector(main, &kernel)) {
       load_script_error_ = tonic::kUnknownErrorType;
@@ -483,15 +473,14 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
 }
 
 void Engine::ConfigureRuntime(const std::string& script_uri,
-                              const std::vector<uint8_t>& platform_kernel,
                               bool reuse_runtime_controller) {
   if (runtime_ && reuse_runtime_controller) {
     return;
   }
   runtime_ = blink::RuntimeController::Create(this);
-  runtime_->CreateDartController(
-      std::move(script_uri), default_isolate_snapshot_data,
-      default_isolate_snapshot_instr, platform_kernel);
+  runtime_->CreateDartController(std::move(script_uri),
+                                 default_isolate_snapshot_data,
+                                 default_isolate_snapshot_instr);
   runtime_->SetViewportMetrics(viewport_metrics_);
   runtime_->SetLocale(language_code_, country_code_);
   runtime_->SetUserSettingsData(user_settings_data_);
