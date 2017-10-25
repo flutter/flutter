@@ -337,7 +337,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       String additional = '';
       if (_currentTestDescription != '')
         additional = '\nThe test description was: $_currentTestDescription';
-      test_package.registerException('Test failed. See exception logs above.$additional', _EmptyStack.instance);
+      test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
       _pendingExceptionDetails = null;
     }
     _currentTestDescription = null;
@@ -1082,12 +1082,7 @@ class _LiveTestRenderView extends RenderView {
   }
 }
 
-class _EmptyStack implements StackTrace {
-  const _EmptyStack._();
-  static const _EmptyStack instance = const _EmptyStack._();
-  @override
-  String toString() => '';
-}
+final stack_trace.Chain _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)
