@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
 
 import 'colors.dart';
 import 'debug.dart';
@@ -28,8 +29,8 @@ const TextStyle _kLabelStyle = const TextStyle(
 /// Supplying a non-null [onDeleted] callback will cause the chip to include a
 /// button for deleting the chip.
 ///
-/// Requires one of its ancestors to be a [Material] widget.  [label] may not be
-/// null.
+/// Requires one of its ancestors to be a [Material] widget. The [label]
+/// and [border] arguments must not be null.
 ///
 /// ## Sample code
 ///
@@ -61,7 +62,9 @@ class Chip extends StatelessWidget {
     this.deleteButtonTooltipMessage,
     this.backgroundColor,
     this.deleteIconColor,
+    this.border: BorderSide.none,
   }) : assert(label != null),
+       assert(border != null),
        labelStyle = labelStyle ?? _kLabelStyle,
        super(key: key);
 
@@ -91,6 +94,11 @@ class Chip extends StatelessWidget {
   /// This color is used as the background of the container that will hold the
   /// widget's label.
   final Color backgroundColor;
+
+  /// The border to draw around the chip.
+  ///
+  /// Defaults to [BorderSide.none].
+  final BorderSide border;
 
   /// Color for delete icon, the default being black.
   ///
@@ -138,10 +146,10 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
-          // TODO(gspencer): Internationalize this text.
+          // TODO(#12378): Internationalize this text.
           message: deleteButtonTooltipMessage ?? 'Delete "$label"',
           child: new Container(
-            padding: const EdgeInsetsDirectional.only(start: 4.0, end: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: new Icon(
               Icons.cancel,
               size: 24.0,
@@ -154,21 +162,19 @@ class Chip extends StatelessWidget {
 
     return new Semantics(
       container: true,
-      child: new ConstrainedBox(
+      child: new Container(
         constraints: const BoxConstraints(minHeight: _kChipHeight),
-        child: new Container(
-          padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
-          decoration: new BoxDecoration(
-            color: backgroundColor ?? Colors.grey.shade300,
-            shape: BoxShape.pill,
-          ),
-          child: new Center(
-            widthFactor: 1.0,
-            heightFactor: 1.0,
-            child: new Row(
-              children: children,
-              mainAxisSize: MainAxisSize.min,
-            ),
+        padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
+        decoration: new ShapeDecoration(
+          color: backgroundColor ?? Colors.grey.shade300,
+          shape: new StadiumBorder(border),
+        ),
+        child: new Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: new Row(
+            children: children,
+            mainAxisSize: MainAxisSize.min,
           ),
         ),
       ),

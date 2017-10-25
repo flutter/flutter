@@ -322,12 +322,12 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Chip A')), const Size(235.0, 39.0));
-    expect(tester.getSize(find.text('Chip B')), const Size(235.0, 39.0));
-    expect(tester.getSize(find.byType(Chip).first).width, moreOrLessEquals(287.0, epsilon: 0.1));
-    expect(tester.getSize(find.byType(Chip).first).height, moreOrLessEquals(39.0, epsilon: 0.1));
-    expect(tester.getSize(find.byType(Chip).last).width, moreOrLessEquals(287.0, epsilon: 0.1));
-    expect(tester.getSize(find.byType(Chip).last).height, moreOrLessEquals(39.0, epsilon: 0.1));
+    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(39.0));
+    expect(tester.getSize(find.byType(Chip).last).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).last).height, equals(39.0));
 
     // Check that individual text scales are taken into account.
     await tester.pumpWidget(
@@ -353,11 +353,11 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.text('Chip A')), const Size(235.0, 39.0));
-    expect(tester.getSize(find.text('Chip B')), const Size(79.0, 13.0));
-    expect(tester.getSize(find.byType(Chip).first).width, moreOrLessEquals(287.0, epsilon: 0.1));
-    expect(tester.getSize(find.byType(Chip).first).height, moreOrLessEquals(39.0, epsilon: 0.1));
-    expect(tester.getSize(find.byType(Chip).last), const Size(131.0, 32.0));
+    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(78.0, 13.0), const Size(79.0, 13.0)));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(39.0));
+    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(130.0, 32.0), const Size(131.0, 32.0)));
   });
 
   testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
