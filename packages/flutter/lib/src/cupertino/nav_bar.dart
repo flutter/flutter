@@ -432,8 +432,9 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   }
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDelegate {
-  const _CupertinoLargeTitleNavigationBarSliverDelegate({
+class _CupertinoLargeTitleNavigationBarSliverDelegate
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin{
+  _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
     @required this.title,
     this.leading,
@@ -539,10 +540,5 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
         || trailing != oldDelegate.trailing
         || backgroundColor != oldDelegate.backgroundColor
         || actionsForegroundColor != oldDelegate.actionsForegroundColor;
-  }
-
-  @override
-  String toString() {
-    return '${describeIdentity(this)}(title: $title)';
   }
 }

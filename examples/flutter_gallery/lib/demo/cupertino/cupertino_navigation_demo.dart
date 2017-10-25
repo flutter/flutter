@@ -8,8 +8,39 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
+
+const List<Color> coolColors = const <Color>[
+  const Color.fromARGB(255, 255, 59, 48),
+  const Color.fromARGB(255, 255, 149, 0),
+  const Color.fromARGB(255, 255, 204, 0),
+  const Color.fromARGB(255, 76, 217, 100),
+  const Color.fromARGB(255, 90, 200, 250),
+  const Color.fromARGB(255, 0, 122, 255),
+  const Color.fromARGB(255, 88, 86, 214),
+  const Color.fromARGB(255, 255, 45, 85),
+];
+
+const List<String> coolColorNames = const <String>[
+  'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge',
+  'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
+  'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrabor', 'Nattier',
+  'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
+];
+
 class CupertinoNavigationDemo extends StatelessWidget {
+  CupertinoNavigationDemo()
+      : colorItems = new List<Color>.generate(50, (int index){
+          return coolColors[new math.Random().nextInt(coolColors.length)];
+        }) ,
+        colorNameItems = new List<String>.generate(50, (int index){
+          return coolColorNames[new math.Random().nextInt(coolColorNames.length)];
+        });
+
   static const String routeName = '/cupertino/navigation';
+
+  final List<Color> colorItems;
+  final List<String> colorNameItems;
 
   @override
   Widget build(BuildContext context) {
@@ -21,15 +52,15 @@ class CupertinoNavigationDemo extends StatelessWidget {
           items: const <BottomNavigationBarItem>[
             const BottomNavigationBarItem(
               icon: const Icon(CupertinoIcons.home),
-              title: const Text('Tab 1'),
+              title: const Text('Home'),
             ),
             const BottomNavigationBarItem(
               icon: const Icon(CupertinoIcons.conversation_bubble),
-              title: const Text('Tab 2'),
+              title: const Text('Support'),
             ),
             const BottomNavigationBarItem(
               icon: const Icon(CupertinoIcons.profile_circled),
-              title: const Text('Tab 3'),
+              title: const Text('Profile'),
             ),
           ],
         ),
@@ -44,7 +75,10 @@ class CupertinoNavigationDemo extends StatelessWidget {
               builder: (BuildContext context) {
                 switch (index) {
                   case 0:
-                    return new CupertinoDemoTab1();
+                    return new CupertinoDemoTab1(
+                      colorItems: colorItems,
+                      colorNameItems: colorNameItems
+                    );
                     break;
                   case 1:
                     return new CupertinoDemoTab2();
@@ -83,6 +117,11 @@ class ExitButton extends StatelessWidget {
 }
 
 class CupertinoDemoTab1 extends StatelessWidget {
+  CupertinoDemoTab1({this.colorItems, this.colorNameItems});
+
+  final List<Color> colorItems;
+  final List<String> colorNameItems;
+
   @override
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
@@ -95,7 +134,12 @@ class CupertinoDemoTab1 extends StatelessWidget {
           new SliverList(
             delegate: new SliverChildBuilderDelegate(
               (BuildContext context, int index) {
-                return new Tab1RowItem(index: index, lastItem: index == 49);
+                return new Tab1RowItem(
+                  index: index,
+                  lastItem: index == 49,
+                  color: colorItems[index],
+                  colorName: colorNameItems[index],
+                );
               },
               childCount: 50,
             ),
@@ -106,43 +150,13 @@ class CupertinoDemoTab1 extends StatelessWidget {
   }
 }
 
-class Tab1RowItem extends StatefulWidget {
-  Tab1RowItem({this.index, this.lastItem}) ;
+class Tab1RowItem extends StatelessWidget {
+  Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
 
   final int index;
   final bool lastItem;
-
-  @override
-  State<StatefulWidget> createState() => new Tab1RowItemState();
-}
-
-class Tab1RowItemState extends State<Tab1RowItem> {
-  static const List<Color> coolColors = const <Color>[
-    const Color.fromARGB(255, 255, 59, 48),
-    const Color.fromARGB(255, 255, 149, 0),
-    const Color.fromARGB(255, 255, 204, 0),
-    const Color.fromARGB(255, 76, 217, 100),
-    const Color.fromARGB(255, 90, 200, 250),
-    const Color.fromARGB(255, 0, 122, 255),
-    const Color.fromARGB(255, 88, 86, 214),
-    const Color.fromARGB(255, 255, 45, 85),
-  ];
-
-  static const List<String> coolColorNames = const <String>[
-    'Sarcoline', 'Coquelicot', 'Smaragdine', 'Mikado', 'Glaucous', 'Wenge',
-    'Fulvous', 'Xanadu', 'Falu', 'Eburnean', 'Amaranth', 'Australien',
-    'Banan', 'Falu', 'Gingerline', 'Incarnadine', 'Labrabor', 'Nattier',
-    'Pervenche', 'Sinoper', 'Verditer', 'Watchet', 'Zaffre',
-  ];
-
-  Tab1RowItemState() :
-      color = coolColors[new math.Random().nextInt(coolColors.length)],
-      colorName = coolColorNames[new math.Random().nextInt(coolColorNames.length)];
-
   final Color color;
   final String colorName;
-
-  bool added = false;
 
   @override
   Widget build(BuildContext context) {
@@ -153,7 +167,7 @@ class Tab1RowItemState extends State<Tab1RowItem> {
           builder: (BuildContext context) => new Tab1ItemPage(
             color: color,
             colorName: colorName,
-            index: widget.index,
+            index: index,
           ),
         ));
       },
@@ -191,53 +205,68 @@ class Tab1RowItemState extends State<Tab1RowItem> {
             ),
             new CupertinoButton(
               padding: EdgeInsets.zero,
-              child: new Icon(
-                added ? CupertinoIcons.minus_circled : CupertinoIcons.plus_circled,
-                color: CupertinoColors.activeBlue
-              ),
-              onPressed: () {
-                setState(() { added = !added; });
-              },
+              child: const Icon(CupertinoIcons.plus_circled, color: CupertinoColors.activeBlue),
+              onPressed: () { },
             ),
             new CupertinoButton(
               padding: EdgeInsets.zero,
               child: const Icon(CupertinoIcons.share, color: CupertinoColors.activeBlue),
-              onPressed: () {},
+              onPressed: () { },
             ),
           ],
         ),
       ),
     );
 
-    if (widget.lastItem) {
+    if (lastItem) {
       return row;
-    } else {
-      return new Column(
-        children: <Widget>[
-          row,
-          new Container(
-            height: 1.0,
-            color: const Color(0xFFD9D9D9),
-          ),
-        ],
-      );
     }
+
+    return new Column(
+      children: <Widget>[
+        row,
+        new Container(
+          height: 1.0,
+          color: const Color(0xFFD9D9D9),
+        ),
+      ],
+    );
   }
 }
 
-class Tab1ItemPage extends StatelessWidget {
-  Tab1ItemPage({this.color, this.colorName, this.index}) : random = new math.Random();
+class Tab1ItemPage extends StatefulWidget {
+  Tab1ItemPage({this.color, this.colorName, this.index});
 
   final Color color;
   final String colorName;
   final int index;
-  final math.Random random;
+
+  @override
+  State<StatefulWidget> createState() => new Tab1ItemPageState();
+}
+
+class Tab1ItemPageState extends State<Tab1ItemPage> {
+  @override
+  void initState() {
+    super.initState();
+    relatedColors = new List<Color>.generate(10, (int index) {
+      final math.Random random = new math.Random();
+      return new Color.fromARGB(
+        255,
+      (widget.color.red + random.nextInt(100) - 50).clamp(0, 255),
+        (widget.color.green + random.nextInt(100) - 50).clamp(0, 255),
+        (widget.color.blue + random.nextInt(100) - 50).clamp(0, 255),
+      );
+    });
+  }
+
+  List<Color> relatedColors;
 
   @override
   Widget build(BuildContext context) {
     return new CupertinoPageScaffold(
       navigationBar: new CupertinoNavigationBar(
-        middle: new Text(colorName),
+        middle: new Text(widget.colorName),
         trailing: const ExitButton(),
       ),
       child: new ListView(
@@ -252,7 +281,7 @@ class Tab1ItemPage extends StatelessWidget {
                   height: 128.0,
                   width: 128.0,
                   decoration: new BoxDecoration(
-                    color: color,
+                    color: widget.color,
                     borderRadius: new BorderRadius.circular(24.0),
                   ),
                 ),
@@ -263,12 +292,12 @@ class Tab1ItemPage extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       new Text(
-                        colorName,
+                        widget.colorName,
                         style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                       ),
                       const Padding(padding: const EdgeInsets.only(top: 6.0)),
                       new Text(
-                        'Item number $index',
+                        'Item number ${widget.index}',
                         style: const TextStyle(
                           color: const Color(0xFF8E8E93),
                           fontSize: 16.0,
@@ -292,7 +321,7 @@ class Tab1ItemPage extends StatelessWidget {
                                 letterSpacing: -0.28,
                               ),
                             ),
-                            onPressed: () {},
+                            onPressed: () { },
                           ),
                           new CupertinoButton(
                             color: CupertinoColors.activeBlue,
@@ -300,7 +329,7 @@ class Tab1ItemPage extends StatelessWidget {
                             padding: EdgeInsets.zero,
                             borderRadius: new BorderRadius.circular(32.0),
                             child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
-                            onPressed: () {},
+                            onPressed: () { },
                           ),
                         ],
                       ),
@@ -334,12 +363,7 @@ class Tab1ItemPage extends StatelessWidget {
                   child: new Container(
                     decoration: new BoxDecoration(
                       borderRadius: new BorderRadius.circular(8.0),
-                      color: new Color.fromARGB(
-                        255,
-                        (color.red + random.nextInt(100) - 50).clamp(0, 255),
-                        (color.green + random.nextInt(100) - 50).clamp(0, 255),
-                        (color.blue + random.nextInt(100) - 50).clamp(0, 255),
-                      ),
+                      color: relatedColors[index],
                     ),
                     child: new Center(
                       child: new CupertinoButton(
@@ -348,7 +372,7 @@ class Tab1ItemPage extends StatelessWidget {
                           color: CupertinoColors.white,
                           size: 36.0,
                         ),
-                        onPressed: () {},
+                        onPressed: () { },
                       ),
                     ),
                   ),
@@ -456,7 +480,10 @@ class Tab2Header extends StatelessWidget {
                           height: 44.0,
                           decoration: const BoxDecoration(
                             image: const DecorationImage(
-                              image: const AssetImage('assets/person1.jpg'),
+                              image: const AssetImage(
+                                'cupertino_navigation/person1.jpg',
+                                package: _kGalleryAssetsPackage
+                              ),
                             ),
                             shape: BoxShape.circle,
                           ),
@@ -467,15 +494,13 @@ class Tab2Header extends StatelessWidget {
                           height: 44.0,
                           decoration: const BoxDecoration(
                             image: const DecorationImage(
-                              image: const AssetImage('assets/person2.jpg'),
+                              image: const AssetImage(
+                                'cupertino_navigation/person2.jpg',
+                                package: _kGalleryAssetsPackage
+                              ),
                             ),
                             shape: BoxShape.circle,
                           ),
-                        ),
-                        const Padding(padding: const EdgeInsets.only(left: 8.0)),
-                        new Tab2ConversationAvatar(
-                          text: 'KL',
-                          color: const Color(0xFFFD5015),
                         ),
                         const Padding(padding: const EdgeInsets.only(left: 2.0)),
                         const Icon(
@@ -621,7 +646,7 @@ List<Widget> buildTab2Conversation() {
           color: const Color(0xFF34CAD6),
         ),
         new Tab2ConversationBubble(
-          text: "It's because you're holding\nit wrong",
+          text: "We'll send you our\nnewest Labrabor too!",
           color: Tab2ConversationBubbleColor.gray,
         ),
       ],
@@ -631,7 +656,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
         new Tab2ConversationBubble(
-          text: 'Maybe, I just found it in a bar',
+          text: 'Yay',
           color: Tab2ConversationBubbleColor.blue,
         ),
       ],
@@ -646,8 +671,18 @@ List<Widget> buildTab2Conversation() {
           color: const Color(0xFFFD5015),
         ),
         new Tab2ConversationBubble(
-          text: "Actually there's one more thing",
+          text: "Actually there's one more thing...",
           color: Tab2ConversationBubbleColor.gray,
+        ),
+      ],
+    ),
+    new Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget> [
+        new Tab2ConversationBubble(
+          text: "What's that?",
+          color: Tab2ConversationBubbleColor.blue,
         ),
       ],
     ),
