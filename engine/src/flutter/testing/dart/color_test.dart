@@ -77,4 +77,20 @@ void main() {
       const Color(0xFFFFFFFF),
     );
   });
+
+  test('compute gray luminance', () {
+    // Each color component is at 20%.
+    final Color lightGray = const Color(0xFF333333);
+    // Relative luminance's formula is just the linearized color value for gray.
+    // ((0.2 + 0.055) / 1.055) ^ 2.4.
+    expect(lightGray.computeLuminance(), equals(0.033104766570885055));
+  });
+
+  test('compute color luminance', () {
+    final Color brightRed = const Color(0xFFFF3B30);
+    // 0.2126 * ((1.0 + 0.055) / 1.055) ^ 2.4 +
+    // 0.7152 * ((0.23137254902 +0.055) / 1.055) ^ 2.4 +
+    // 0.0722 * ((0.18823529411 + 0.055) / 1.055) ^ 2.4
+    expect(brightRed.computeLuminance(), equals(0.24601329637099723));
+  });
 }
