@@ -497,24 +497,13 @@ class ThemeData {
     );
   }
 
-  // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-  static double _linearizeColorComponent(double component) {
-    if (component <= 0.03928)
-      return component / 12.92;
-    return math.pow((component + 0.055) / 1.055, 2.4);
-  }
-
   /// Determines whether the given [Color] is [Brightness.light] or
   /// [Brightness.dark].
   ///
   /// This compares the luminosity of the given color to a threshold value that
   /// matches the material design specification.
   static Brightness estimateBrightnessForColor(Color color) {
-    // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-    final double R = _linearizeColorComponent(color.red / 0xFF);
-    final double G = _linearizeColorComponent(color.green / 0xFF);
-    final double B = _linearizeColorComponent(color.blue / 0xFF);
-    final double L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
+    final double relativeLuminance = color.computeLuminance();
 
     // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
     // The spec says to use kThreshold=0.0525, but Material Design appears to bias
@@ -523,7 +512,7 @@ class ThemeData {
     // Design spec shows for its color palette on
     // <https://material.io/guidelines/style/color.html#color-color-palette>.
     const double kThreshold = 0.15;
-    if ((L + 0.05) * (L + 0.05) > kThreshold )
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold )
       return Brightness.light;
     return Brightness.dark;
   }
