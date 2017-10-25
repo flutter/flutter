@@ -325,8 +325,8 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openLeftDrawer();
   }
 
-  void _handleDrawerButtonRight() {
-    Scaffold.of(context).openRightDrawer();
+  void _handleDrawerButtonEndSide() {
+    Scaffold.of(context).openEndSideDrawer();
   }
 
   @override
@@ -336,8 +336,8 @@ class _AppBarState extends State<AppBar> {
     final ScaffoldState scaffold = Scaffold.of(context, nullOk: true);
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
 
-    final bool hasLeftDrawer = scaffold?.hasLeftDrawer ?? false;
-    final bool hasRightDrawer = scaffold?.hasRightDrawer ?? false;
+    final bool hasDrawer = scaffold?.hasDrawer ?? false;
+    final bool hasEndSideDrawer = scaffold?.hasEndSideDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
 
@@ -363,7 +363,7 @@ class _AppBarState extends State<AppBar> {
 
     Widget leading = widget.leading;
     if (leading == null && widget.automaticallyImplyLeading) {
-      if (hasLeftDrawer) {
+      if (hasDrawer) {
         leading = new IconButton(
           icon: const Icon(Icons.menu),
           onPressed: _handleDrawerButtonLeft,
@@ -398,10 +398,10 @@ class _AppBarState extends State<AppBar> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions,
       );
-    } else if (hasRightDrawer) {
+    } else if (hasEndSideDrawer) {
       actions = new IconButton(
         icon: const Icon(Icons.menu),
-        onPressed: _handleDrawerButtonRight,
+        onPressed: _handleDrawerButtonEndSide,
         tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
       );      
     }
