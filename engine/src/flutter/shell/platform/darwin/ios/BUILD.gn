@@ -17,25 +17,17 @@ shared_library("flutter_framework_dylib") {
   sources = [
     "framework/Headers/Flutter.h",
     "framework/Headers/FlutterAppDelegate.h",
-    "framework/Headers/FlutterBinaryMessenger.h",
-    "framework/Headers/FlutterChannels.h",
-    "framework/Headers/FlutterCodecs.h",
     "framework/Headers/FlutterDartProject.h",
-    "framework/Headers/FlutterMacros.h",
     "framework/Headers/FlutterPlugin.h",
     "framework/Headers/FlutterViewController.h",
     "framework/Headers/FlutterNavigationController.h",
     "framework/Source/FlutterAppDelegate.mm",
-    "framework/Source/FlutterChannels.mm",
-    "framework/Source/FlutterCodecs.mm",
     "framework/Source/FlutterDartProject.mm",
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartSource.h",
     "framework/Source/FlutterDartSource.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
-    "framework/Source/FlutterStandardCodec.mm",
-    "framework/Source/FlutterStandardCodec_Internal.h",
     "framework/Source/FlutterTextInputDelegate.h",
     "framework/Source/FlutterTextInputPlugin.h",
     "framework/Source/FlutterTextInputPlugin.mm",
@@ -164,17 +156,17 @@ copy("framework_headers") {
   sources = [
     "framework/Headers/Flutter.h",
     "framework/Headers/FlutterAppDelegate.h",
-    "framework/Headers/FlutterBinaryMessenger.h",
-    "framework/Headers/FlutterChannels.h",
-    "framework/Headers/FlutterCodecs.h",
     "framework/Headers/FlutterDartProject.h",
-    "framework/Headers/FlutterMacros.h",
     "framework/Headers/FlutterPlugin.h",
     "framework/Headers/FlutterViewController.h",
     "framework/Headers/FlutterNavigationController.h",
   ]
   outputs = [
     "$_flutter_framework_dir/Headers/{{source_file_part}}",
+  ]
+
+  deps = [
+    "$flutter_root/shell/platform/darwin/common",
   ]
 }
 
