@@ -53,12 +53,10 @@ dev_dependencies:
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
-  dart_style: 1.0.8 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.2 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  intl_translation: 0.16.0 # TRANSITIVE DEPENDENCY
   io: 0.3.0 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
@@ -82,7 +80,6 @@ dev_dependencies:
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
-  vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+4 # TRANSITIVE DEPENDENCY
 
 dartdoc:

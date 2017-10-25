@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -16,12 +18,35 @@ import '../runner/flutter_command.dart';
 
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({ this.hidden: false }) {
-    argParser.addFlag(
-      'force-upgrade',
-      help: 'Attempt to update all the dependencies to their latest versions.\n'
-            'This will actually modify the pubspec.yaml files in your checkout.',
-      defaultsTo: false,
-    );
+    argParser
+      ..addFlag(
+        'force-upgrade',
+        help: 'Attempt to update all the dependencies to their latest versions.\n'
+              'This will actually modify the pubspec.yaml files in your checkout.',
+        defaultsTo: false,
+      )
+      ..addFlag(
+        'paths',
+        help: 'Finds paths in the dependency chain leading from package specified '
+              'in --from to package specified in --to.',
+        defaultsTo: false,
+      )
+      ..addOption(
+        'from',
+        help: 'Used with flag --dependency-path. Specifies the package to begin '
+              'searching dependency path from.',
+      )
+      ..addOption(
+        'to',
+        help: 'Used with flag --dependency-path. Specifies the package that the '
+              'sought after dependency path leads to.',
+      )
+      ..addFlag(
+        'transitive-closure',
+        help: 'Prints the dependency graph that is the transitive closure of '
+              'packages the Flutter SDK depends on.',
+        defaultsTo: false,
+      );
   }
 
   @override
@@ -51,7 +76,9 @@ class UpdatePackagesCommand extends FlutterCommand {
     final List<Directory> packages = runner.getRepoPackages();
 
     final bool upgrade = argResults['force-upgrade'];
-    if (upgrade) {
+    final bool isPrintPaths = argResults['paths'];
+    final bool isPrintTransitiveClosure = argResults['transitive-closure'];
+    if (upgrade || isPrintPaths || isPrintTransitiveClosure) {
       printStatus('Upgrading packages...');
       // This feature attempts to collect all the packages used across all the
       // pubspec.yamls in the repo (including via transitive dependencies), and
@@ -138,6 +165,18 @@ class UpdatePackagesCommand extends FlutterCommand {
         }
       }
 
+      if (isPrintTransitiveClosure) {
+        tree._dependencyTree.forEach((String from, Set<String> to) {
+          print('$from -> $to');
+        });
+        return;
+      }
+
+      if (isPrintPaths) {
+        showDependencyPaths(from: argResults['from'], to: argResults['to'], tree: tree);
+        return;
+      }
+
       // Now that we have collected all the data, we can apply our dependency
       // versions to each pubspec.yaml that we collected. This mutates the
       // pubspec.yaml files.
@@ -168,6 +207,63 @@ class UpdatePackagesCommand extends FlutterCommand {
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
   }
+
+  void showDependencyPaths({
+    @required String from,
+    @required String to,
+    @required PubDependencyTree tree,
+  }) {
+    if (!tree.contains(from))
+      throw new ToolExit('Package $from not found in the dependency tree.');
+    if (!tree.contains(to))
+      throw new ToolExit('Package $to not found in the dependency tree.');
+
+    final Queue<_DependencyLink> traversalQueue = new Queue<_DependencyLink>();
+    final Set<String> visited = new Set<String>();
+    final List<_DependencyLink> paths = <_DependencyLink>[];
+
+    traversalQueue.addFirst(new _DependencyLink(from: null, to: from));
+    while(traversalQueue.isNotEmpty) {
+      final _DependencyLink link = traversalQueue.removeLast();
+      if (link.to == to)
+        paths.add(link);
+      if (link.from != null)
+        visited.add(link.from.to);
+      for (String dependency in tree._dependencyTree[link.to]) {
+        if (!visited.contains(dependency)) {
+          traversalQueue.addFirst(new _DependencyLink(from: link, to: dependency));
+        }
+      }
+    }
+
+    for (_DependencyLink path in paths) {
+      final StringBuffer buf = new StringBuffer();
+      while (path != null) {
+        buf.write('${path.to}');
+        path = path.from;
+        if (path != null)
+          buf.write(' <- ');
+      }
+      print(buf);
+    }
+
+    if (paths.isEmpty) {
+      printStatus('No paths found from $from to $to');
+    }
+  }
+}
+
+class _DependencyLink {
+  _DependencyLink({
+    @required this.from,
+    @required this.to,
+  });
+
+  final _DependencyLink from;
+  final String to;
+
+  @override
+  String toString() => '${from?.to} -> $to';
 }
 
 /// The various sections of a pubspec.yaml file.
@@ -371,7 +467,7 @@ class PubspecYaml {
   void apply(PubDependencyTree versions, Set<String> specialDependencies) {
     assert(versions != null);
     final List<String> output = <String>[]; // the string data to output to the file, line by line
-    final Set<String> done = new Set<String>(); // packages we've already dealt with
+    final Set<String> directDependencies = new Set<String>(); // packages this pubspec directly depends on (i.e. not transitive)
     Section section = Section.other; // the section we're currently handling
     int lastPossiblePlace; // the line number where we're going to insert the transitive dependencies
     // Walk the pre-parsed input file, outputting it unmodified except for
@@ -402,7 +498,7 @@ class PubspecYaml {
             // the dependency if it wasn't one of our autogenerated transitive
             // dependency lines.
             if (!data.isTransitive) {
-              assert(!done.contains(data.name));
+              assert(!directDependencies.contains(data.name));
               if (data.kind == DependencyKind.normal) {
                 // This is a regular dependency, so we need to update the
                 // version number.
@@ -422,7 +518,7 @@ class PubspecYaml {
               }
               // Remember that we've dealt with this dependency so we don't
               // mention it again when doing the transitive dependencies.
-              done.add(data.name);
+              directDependencies.add(data.name);
             }
             // Since we're in one of the places where we can list dependencies,
             // remember this as the current last known valid place to insert our
@@ -453,10 +549,9 @@ class PubspecYaml {
     final Set<String> transitiveDependencies = new Set<String>(); // which dependencies we need to handle
     // Merge the list of dependencies we've seen in this file and the dependencies we know this
     // file mentions that are already pinned (and which didn't get special processing above).
-    done.addAll(specialDependencies);
-    // Now, for each of those dependencies, find all the transitive dependencies.
-    for (String package in done.toList())
-      transitiveDependencies.addAll(versions.getTransitiveDependenciesFor(package, seen: new Set<String>.from(done)));
+    final Set<String> done = new Set<String>.from(directDependencies)..addAll(specialDependencies);
+    for (String package in directDependencies.toList())
+      transitiveDependencies.addAll(versions.getTransitiveDependenciesFor(package, seen: done));
     // Sort that list lexically so that we don't get noisy diffs when upgrading.
     final List<String> transitiveDependenciesAsList = transitiveDependencies.toList()..sort();
     // Add a blank line to keep the output clean. It doesn't matter if this adds
