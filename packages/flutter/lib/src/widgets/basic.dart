@@ -961,7 +961,7 @@ class FittedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.fit: BoxFit.contain,
     this.alignment: Alignment.center,
-    Widget child
+    Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -974,16 +974,30 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  final Alignment alignment;
+  final AlignmentGeometry alignment;
 
   @override
-  RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
+  RenderFittedBox createRenderObject(BuildContext context) {
+    return new RenderFittedBox(
+      fit: fit,
+      alignment: alignment,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFittedBox renderObject) {
     renderObject
       ..fit = fit
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxFit>('fit', fit));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 
@@ -4437,7 +4451,10 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.explicitChildNodes: false,
     this.checked,
     this.selected,
+    this.button,
     this.label,
+    this.value,
+    this.hint,
     this.textDirection,
   }) : assert(container != null),
        super(key: key, child: child);
@@ -4477,19 +4494,50 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// all other tabs are unselected.
   final bool selected;
 
+  /// If non-null, indicates that this subtree represents a button.
+  ///
+  /// TalkBack/VoiceOver provides users with the hint "button" when a button
+  /// is focused.
+  final bool button;
+
   /// Provides a textual description of the widget.
   ///
   /// If a label is provided, there must either by an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.label] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
   final String label;
 
-  /// The reading direction of the [label].
+  /// Provides a textual description of the value of the widget.
+  ///
+  /// If a value is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.value] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String value;
+
+  /// Provides a brief textual description of the result of an action performed
+  /// on the widget.
+  ///
+  /// If a hint is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String hint;
+
+  /// The reading direction of the [label], [value], and [hint].
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
 
   TextDirection _getTextDirection(BuildContext context) {
-    return textDirection ?? (label != null ? Directionality.of(context) : null);
+    return textDirection ?? (label != null || value != null || hint != null ? Directionality.of(context) : null);
   }
 
   @override
@@ -4499,7 +4547,10 @@ class Semantics extends SingleChildRenderObjectWidget {
       explicitChildNodes: explicitChildNodes,
       checked: checked,
       selected: selected,
+      button: button,
       label: label,
+      value: value,
+      hint: hint,
       textDirection: _getTextDirection(context),
     );
   }
@@ -4512,6 +4563,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..checked = checked
       ..selected = selected
       ..label = label
+      ..value = value
+      ..hint = hint
       ..textDirection = _getTextDirection(context);
   }
 
@@ -4522,6 +4575,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new StringProperty('value', value));
+    description.add(new StringProperty('hint', hint));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

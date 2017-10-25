@@ -173,10 +173,10 @@ const String _kDefaultDebugLabel = 'unknown';
 /// If the package internally uses the font it defines, it should still specify
 /// the `package` argument when creating the text style as in the example above.
 ///
-/// A package can also provide font files without declaring a font in its 
-/// `pubspec.yaml`. These files should then be in the `lib/` folder of the 
-/// package. The font files will not automatically be bundled in the app, instead 
-/// the app can use these selectively when declaring a font. Suppose a package 
+/// A package can also provide font files without declaring a font in its
+/// `pubspec.yaml`. These files should then be in the `lib/` folder of the
+/// package. The font files will not automatically be bundled in the app, instead
+/// the app can use these selectively when declaring a font. Suppose a package
 /// named `my_package` has:
 ///
 /// ```
@@ -197,7 +197,7 @@ const String _kDefaultDebugLabel = 'unknown';
 ///
 /// The `lib/` is implied, so it should not be included in the asset path.
 ///
-/// In this case, since the app locally defines the font, the TextStyle is 
+/// In this case, since the app locally defines the font, the TextStyle is
 /// created without the `package` argument:
 ///
 ///```dart
@@ -709,8 +709,7 @@ class TextStyle extends Diagnosticable {
 
     final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
     properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
-    for (DiagnosticsNode style in styles)
-      properties.add(style);
+    styles.forEach(properties.add);
 
     if (!styleSpecified)
       properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));

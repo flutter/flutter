@@ -105,7 +105,7 @@ linter:
     - prefer_adjacent_string_concatenation
     # - prefer_asserts_in_initializer_lists # not yet tested
     - prefer_collection_literals
-    # - prefer_conditional_assignment # not yet tested
+    - prefer_conditional_assignment
     - prefer_const_constructors
     # - prefer_const_constructors_in_immutables # not yet tested
     # - prefer_constructors_over_static_methods # not yet tested
@@ -113,7 +113,7 @@ linter:
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
     - prefer_final_locals
-    # - prefer_foreach # not yet tested
+    - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_initializing_formals
     # - prefer_interpolation_to_compose_strings # not yet tested

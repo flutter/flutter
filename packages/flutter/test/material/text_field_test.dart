@@ -1520,4 +1520,121 @@ void main() {
       controller.selection = const TextSelection.collapsed(offset: 10);
     }, throwsFlutterError);
   });
+
+  testWidgets('maxLength limits input.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789');
+  });
+
+  testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        decoration: null,
+        maxLength: 10,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789');
+  });
+
+  testWidgets('maxLength still works with other formatters.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        inputFormatters: <TextInputFormatter> [
+          new BlacklistingTextInputFormatter(
+            new RegExp(r'[a-z]'),
+            replacementString: '#',
+          ),
+        ],
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), 'a一b二c三\nd四e五f六');
+    // The default single line formatter replaces \n with empty string.
+    expect(textController.text, '#一#二#三#四#五');
+  });
+
+  testWidgets("maxLength isn't enforced when maxLengthEnforced is false.", (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789101112');
+  });
+
+  testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+    final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        decoration: new InputDecoration(errorStyle: testStyle),
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16 / 10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16 / 10'));
+    expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10 / 10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10 / 10'));
+    expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
+  testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(
+        child: const DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: const Center(
+            child: const TextField(
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('0 / 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 / 10'), findsOneWidget);
+  });
 }

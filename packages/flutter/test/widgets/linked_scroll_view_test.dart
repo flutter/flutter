@@ -26,13 +26,11 @@ class LinkedScrollController extends ScrollController {
 
   void setParent(ScrollController newParent) {
     if (_parent != null) {
-      for (ScrollPosition position in positions)
-        _parent.detach(position);
+      positions.forEach(_parent.detach);
     }
     _parent = newParent;
     if (_parent != null) {
-      for (ScrollPosition position in positions)
-        _parent.attach(position);
+      positions.forEach(_parent.attach);
     }
   }
 
@@ -54,8 +52,7 @@ class LinkedScrollController extends ScrollController {
   @override
   void dispose() {
     if (_parent != null) {
-      for (ScrollPosition position in positions)
-        _parent.detach(position);
+      positions.forEach(_parent.detach);
     }
     super.dispose();
   }

@@ -76,6 +76,8 @@ class SemanticsData extends Diagnosticable {
     @required this.flags,
     @required this.actions,
     @required this.label,
+    @required this.value,
+    @required this.hint,
     @required this.textDirection,
     @required this.rect,
     this.tags,
@@ -97,7 +99,17 @@ class SemanticsData extends Diagnosticable {
   /// The text's reading direction is given by [textDirection].
   final String label;
 
-  /// The reading direction for the text in [label].
+  /// A textual description for the current value of the node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  final String value;
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  final String hint;
+
+  /// The reading direction for the text in [label], [value], and [hint].
   final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
@@ -253,12 +265,11 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }
   }
 
-  /// Whether [rect] was affected by a clip from an ancestors.
+  /// The clip rect from an ancestor that was applied to this node.
   ///
-  /// If this is true it means that an ancestor imposed a clip on this
-  /// [SemanticsNode]. However, it does not mean that the clip had any effect
-  /// on the [rect] whatsoever.
-  bool wasAffectedByClip = false;
+  /// Expressed in the coordinate system of the node. May be null if no clip has
+  /// been applied.
+  Rect parentClipRect;
 
   /// Whether the node is invisible.
   ///
@@ -427,10 +438,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   @override
   void redepthChildren() {
-    if (_children != null) {
-      for (SemanticsNode child in _children)
-        redepthChild(child);
-    }
+    _children?.forEach(redepthChild);
   }
 
   @override
@@ -486,15 +494,19 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _label != config.label ||
+        _hint != config.hint ||
+        _value != config.value ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
-        _actionsAsBitMap(_actions) != _actionsAsBitMap(config._actions) ||
+        _actionsAsBits != config._actionsAsBits ||
         _mergeAllDescendantsIntoThisNode != config.isMergingSemanticsOfDescendants;
   }
 
   // TAGS, LABELS, ACTIONS
 
   Map<SemanticsAction, VoidCallback> _actions = _kEmptyConfig._actions;
+
+  int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
   /// The [SemanticsTag]s this node is tagged with.
   ///
@@ -515,13 +527,21 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   String get label => _label;
   String _label = _kEmptyConfig.label;
 
-  /// The reading direction for [label].
+  /// A textual description for the current value of the node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get value => _value;
+  String _value = _kEmptyConfig.value;
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint = _kEmptyConfig.hint;
+
+  /// The reading direction for [label], [value], and [hint].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
-
-  int _actionsAsBitMap(Map<SemanticsAction, VoidCallback> actions) {
-    return actions.keys.fold(0, (int prev, SemanticsAction action) => prev |= action.index);
-  }
 
   bool _canPerformAction(SemanticsAction action) => _actions.containsKey(action);
 
@@ -536,9 +556,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
 
     _label = config.label;
+    _value = config.value;
+    _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
     _actions = new Map<SemanticsAction, VoidCallback>.from(config._actions);
+    _actionsAsBits = config._actionsAsBits;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
   }
@@ -551,8 +574,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned data matches the data on this node.
   SemanticsData getSemanticsData() {
     int flags = _flags;
-    int actions = _actionsAsBitMap(_actions);
+    int actions = _actionsAsBits;
     String label = _label;
+    String hint = _hint;
+    String value = _value;
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
 
@@ -560,29 +585,26 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _visitDescendants((SemanticsNode node) {
         assert(node.isMergedIntoParent);
         flags |= node._flags;
-        actions |= _actionsAsBitMap(node._actions);
+        actions |= node._actionsAsBits;
         textDirection ??= node._textDirection;
+        if (value == '' || value == null)
+          value = node._value;
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
         }
-        if (node._label.isNotEmpty) {
-          String nestedLabel = node._label;
-          if (textDirection != node._textDirection && node._textDirection != null) {
-            switch (node._textDirection) {
-              case TextDirection.rtl:
-                nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
-                break;
-              case TextDirection.ltr:
-                nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
-                break;
-            }
-          }
-          if (label.isEmpty)
-            label = nestedLabel;
-          else
-            label = '$label\n$nestedLabel';
-        }
+        label = _concatStrings(
+          thisString: label,
+          thisTextDirection: textDirection,
+          otherString: node._label,
+          otherTextDirection: node._textDirection,
+        );
+        hint = _concatStrings(
+          thisString: hint,
+          thisTextDirection: textDirection,
+          otherString: node._hint,
+          otherTextDirection: node._textDirection,
+        );
         return true;
       });
     }
@@ -591,6 +613,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       flags: flags,
       actions: actions,
       label: label,
+      value: value,
+      hint: hint,
       textDirection: textDirection,
       rect: rect,
       transform: transform,
@@ -623,6 +647,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       actions: data.actions,
       rect: data.rect,
       label: data.label,
+      value: data.value,
+      hint: data.hint,
       textDirection: data.textDirection,
       transform: data.transform?.storage ?? _kIdentityTransform,
       children: children,
@@ -673,13 +699,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
       properties.add(new DiagnosticsProperty<Rect>('rect', rect, description: description, showName: false));
     }
-    properties.add(new FlagProperty('wasAffectedByClip', value: wasAffectedByClip, ifTrue: 'clipped'));
     final List<String> actions = _actions.keys.map((SemanticsAction action) => describeEnum(action)).toList()..sort();
     properties.add(new IterableProperty<String>('actions', actions, ifEmpty: null));
     if (_hasFlag(SemanticsFlags.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
+    properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
+    properties.add(new StringProperty('value', _value, defaultValue: ''));
+    properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
   }
 
@@ -870,7 +898,7 @@ class SemanticsOwner extends ChangeNotifier {
           return handler;
       }
     }
-    return node._canPerformAction(action) ? node._actions[action] : null;
+    return node._actions[action];
   }
 
   /// Asks the [SemanticsNode] at the given position to perform the given action.
@@ -984,11 +1012,14 @@ class SemanticsConfiguration {
   /// * [addAction] to add an action.
   final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
+  int _actionsAsBits = 0;
+
   /// Adds an `action` to the semantics tree.
   ///
   /// Whenever the user performs `action` the provided `handler` is called.
   void addAction(SemanticsAction action, VoidCallback handler) {
     _actions[action] = handler;
+    _actionsAsBits |= action.index;
     _hasBeenAnnotated = true;
   }
 
@@ -1014,6 +1045,11 @@ class SemanticsConfiguration {
 
   /// A textual description of the owning [RenderObject].
   ///
+  /// On iOS this is used for the `accessibilityLabel` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [value] and [hint] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
   /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
@@ -1022,7 +1058,37 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
-  /// The reading direction for the text in [label].
+  /// A textual description for the current value of the owning [RenderObject].
+  ///
+  /// On iOS this is used for the `accessibilityValue` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [label] and [hint] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get value => _value;
+  String _value = '';
+  set value(String value) {
+    _value = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// A brief description of the result of performing an action on this node.
+  ///
+  /// On iOS this is used for the `accessibilityHint` property defined in the
+  /// `UIAccessibility` Protocol. On Android it is concatenated together with
+  /// [label] and [value] in the following order: [value], [label], [hint].
+  /// The concatenated value is then used as the `Text` description.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint = '';
+  set hint(String hint) {
+    _hint = hint;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The reading direction for the text in [label], [value], and [hint].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection textDirection) {
@@ -1043,6 +1109,11 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);
+  }
+
+  /// Whether the owning [RenderObject] is a button (true) or not (false).
+  set isButton(bool value) {
+    _setFlag(SemanticsFlags.isButton, value);
   }
 
   // TAGS
@@ -1077,9 +1148,11 @@ class SemanticsConfiguration {
   bool isCompatibleWith(SemanticsConfiguration other) {
     if (other == null || !other.hasBeenAnnotated || !hasBeenAnnotated)
       return true;
-    if (_actions.keys.toSet().intersection(other._actions.keys.toSet()).isNotEmpty)
+    if (_actionsAsBits & other._actionsAsBits != 0)
       return false;
     if ((_flags & other._flags) != 0)
+      return false;
+    if (_value != null && _value.isNotEmpty && other._value != null && other._value.isNotEmpty)
       return false;
     return true;
   }
@@ -1099,26 +1172,24 @@ class SemanticsConfiguration {
       return;
 
     _actions.addAll(other._actions);
+    _actionsAsBits |= other._actionsAsBits;
     _flags |= other._flags;
 
     textDirection ??= other.textDirection;
-    if (other.label.isNotEmpty) {
-      String nestedLabel = other.label;
-      if (textDirection != other.textDirection && other.textDirection != null) {
-        switch (other.textDirection) {
-          case TextDirection.rtl:
-            nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
-            break;
-          case TextDirection.ltr:
-            nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
-            break;
-        }
-      }
-      if (label.isEmpty)
-        label = nestedLabel;
-      else
-        label = '$label\n$nestedLabel';
-    }
+    _label = _concatStrings(
+      thisString: _label,
+      thisTextDirection: textDirection,
+      otherString: other._label,
+      otherTextDirection: other.textDirection,
+    );
+    if (_value == '' || _value == null)
+      _value = other._value;
+    _hint = _concatStrings(
+      thisString: _hint,
+      thisTextDirection: textDirection,
+      otherString: other._hint,
+      otherTextDirection: other.textDirection,
+    );
 
     _hasBeenAnnotated = _hasBeenAnnotated || other._hasBeenAnnotated;
   }
@@ -1131,7 +1202,34 @@ class SemanticsConfiguration {
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._textDirection = _textDirection
       .._label = _label
+      .._value = _value
+      .._hint = _hint
       .._flags = _flags
+      .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
+}
+
+String _concatStrings({
+  @required String thisString,
+  @required String otherString,
+  @required TextDirection thisTextDirection,
+  @required TextDirection otherTextDirection
+}) {
+  if (otherString.isEmpty)
+    return thisString;
+  String nestedLabel = otherString;
+  if (thisTextDirection != otherTextDirection && otherTextDirection != null) {
+    switch (otherTextDirection) {
+      case TextDirection.rtl:
+        nestedLabel = '${Unicode.RLE}$nestedLabel${Unicode.PDF}';
+        break;
+      case TextDirection.ltr:
+        nestedLabel = '${Unicode.LRE}$nestedLabel${Unicode.PDF}';
+        break;
+    }
+  }
+  if (thisString.isEmpty)
+    return nestedLabel;
+  return '$thisString\n$nestedLabel';
 }

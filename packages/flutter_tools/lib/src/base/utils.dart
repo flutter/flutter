@@ -142,10 +142,8 @@ class ItemListNotifier<T> {
 
     _items = updatedSet;
 
-    for (T item in addedItems)
-      _addedController.add(item);
-    for (T item in removedItems)
-      _removedController.add(item);
+    addedItems.forEach(_addedController.add);
+    removedItems.forEach(_removedController.add);
   }
 
   /// Close the streams.

@@ -384,10 +384,7 @@ class RenderTable extends RenderBox {
     _configuration = configuration;
     _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
-    if (children != null) {
-      for (List<RenderBox> row in children)
-        addRow(row);
-    }
+    children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
@@ -628,8 +625,7 @@ class RenderTable extends RenderBox {
       y += 1;
     }
     // drop all the lost children
-    for (RenderBox oldChild in lostChildren)
-      dropChild(oldChild);
+    lostChildren.forEach(dropChild);
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
@@ -652,8 +648,7 @@ class RenderTable extends RenderBox {
     _children.clear();
     _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
-    for (List<RenderBox> row in cells)
-      addRow(row);
+    cells.forEach(addRow);
     assert(_children.length == rows * columns);
   }
 

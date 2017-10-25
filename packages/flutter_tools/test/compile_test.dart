@@ -45,7 +45,7 @@ void main() {
       final String output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
-      verifyNever(mockFrontendServerStdIn.writeln(any));
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
     }, overrides: <Type, Generator>{
@@ -64,7 +64,7 @@ void main() {
       final String output = await compile(sdkRoot: '/path/to/sdkroot',
         mainPath: '/path/to/main.dart'
       );
-      verifyNever(mockFrontendServerStdIn.writeln(any));
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals(null));
     }, overrides: <Type, Generator>{
@@ -110,7 +110,7 @@ void main() {
       final String output = await generator.recompile(
         '/path/to/main.dart', null /* invalidatedFiles */
       );
-      verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
+      expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
       expect(logger.traceText, equals('compile debug message: line1\ncompile debug message: line2\n'));
       expect(output, equals('/path/to/main.dart.dill'));
@@ -125,12 +125,13 @@ void main() {
       when(mockFrontendServer.stdout).thenReturn(streamController.stream);
       streamController.add(UTF8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
-      verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
+      expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.traceText, equals(
         'compile debug message: line0\ncompile debug message: line1\n'
         'compile debug message: line1\ncompile debug message: line2\n'
@@ -148,7 +149,7 @@ void main() {
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'
       ));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
-      verify(mockFrontendServerStdIn.writeln('compile /path/to/main.dart'));
+      expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
 
       await _recompile(streamController, generator, mockFrontendServerStdIn,
         'result abc\nline1\nline2\nabc /path/to/main.dart.dill\n');
@@ -156,6 +157,7 @@ void main() {
         'result abc\nline2\nline3\nabc /path/to/main.dart.dill\n');
 
       verifyNoMoreInteractions(mockFrontendServerStdIn);
+      expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
       expect(logger.traceText, equals(
         'compile debug message: line0\ncompile debug message: line1\n'
         'compile debug message: line1\ncompile debug message: line2\n'
@@ -177,15 +179,33 @@ Future<Null> _recompile(StreamController<List<int>> streamController,
   });
   final String output = await generator.recompile(null /* mainPath */, <String>['/path/to/main.dart']);
   expect(output, equals('/path/to/main.dart.dill'));
-  final String recompileCommand = verify(
-    mockFrontendServerStdIn.writeln(captureThat(startsWith('recompile ')))
-  ).captured[0];
-  final String token1 = recompileCommand.split(' ')[1];
-  verify(mockFrontendServerStdIn.writeln('/path/to/main.dart'));
-  verify(mockFrontendServerStdIn.writeln(token1));
+  final String commands = mockFrontendServerStdIn.getAndClear();
+  final RegExp re = new RegExp(r'^recompile (.*)\n/path/to/main.dart\n(.*)\n$');
+  expect(commands, matches(re));
+  final Match match = re.firstMatch(commands);
+  expect(match[1] == match[2], isTrue);
+  mockFrontendServerStdIn._stdInWrites.clear();
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 class MockStream extends Mock implements Stream<List<int>> {}
-class MockStdIn extends Mock implements IOSink {}
+class MockStdIn extends Mock implements IOSink {
+  final StringBuffer _stdInWrites = new StringBuffer();
+
+  String getAndClear() {
+    final String result = _stdInWrites.toString();
+    _stdInWrites.clear();
+    return result;
+  }
+
+  @override
+  void write([Object o = '']) {
+    _stdInWrites.write(o);
+  }
+
+  @override
+  void writeln([Object o = '']) {
+    _stdInWrites.writeln(o);
+  }
+}

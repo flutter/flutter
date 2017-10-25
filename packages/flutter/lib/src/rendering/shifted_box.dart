@@ -229,7 +229,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   /// The [alignment] argument must not be null.
   RenderAligningShiftedBox({
     AlignmentGeometry alignment: Alignment.center,
-    TextDirection textDirection,
+    @required TextDirection textDirection,
     RenderBox child,
   }) : assert(alignment != null),
        _alignment = alignment,
@@ -265,7 +265,7 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
   AlignmentGeometry _alignment;
   /// Sets the alignment to a new value, and triggers a layout update.
   ///
-  /// The new alignment must not be null or have any null properties.
+  /// The new alignment must not be null.
   set alignment(AlignmentGeometry value) {
     assert(value != null);
     if (_alignment == value)

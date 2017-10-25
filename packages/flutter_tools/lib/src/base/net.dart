@@ -55,8 +55,7 @@ Future<List<int>> _attempt(Uri url) async {
   printTrace('Received response from server, collecting bytes...');
   try {
     final BytesBuilder responseBody = new BytesBuilder(copy: false);
-    await for (List<int> chunk in response)
-      responseBody.add(chunk);
+    await response.forEach(responseBody.add);
     return responseBody.takeBytes();
   } on IOException catch (error) {
     printTrace('Download error: $error');

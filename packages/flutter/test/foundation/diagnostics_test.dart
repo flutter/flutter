@@ -36,8 +36,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
     if (style != null)
       properties.defaultDiagnosticsTreeStyle = style;
 
-    for (DiagnosticsNode property in this.properties)
-      properties.add(property);
+    this.properties.forEach(properties.add);
   }
 }
 

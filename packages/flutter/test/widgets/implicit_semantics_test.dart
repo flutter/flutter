@@ -229,20 +229,20 @@ void main() {
         new TestSemantics.root(
           children: <TestSemantics>[
             new TestSemantics.rootChild(
-              id: 8,
+              id: 5,
               children: <TestSemantics>[
                 new TestSemantics(
-                  id: 5,
+                  id: 6,
                   flags: SemanticsFlags.isSelected.index,
                   label: 'node 1',
                 ),
                 new TestSemantics(
-                  id: 6,
+                  id: 7,
                   flags: SemanticsFlags.isSelected.index,
                   label: 'node 2',
                 ),
                 new TestSemantics(
-                  id: 7,
+                  id: 8,
                   flags: SemanticsFlags.isSelected.index,
                   label: 'node 3',
                 ),

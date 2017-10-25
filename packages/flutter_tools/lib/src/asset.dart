@@ -194,9 +194,7 @@ class AssetBundle {
 
   void dump() {
     printTrace('Dumping AssetBundle:');
-    for (String archivePath in entries.keys.toList()..sort()) {
-      printTrace(archivePath);
-    }
+    (entries.keys.toList()..sort()).forEach(printTrace);
   }
 }
 

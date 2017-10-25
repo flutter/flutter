@@ -7,7 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
-import 'package:intl/date_symbol_data_local.dart' as intl_local_date_data;
+import 'package:intl/date_symbols.dart' as intl;
+// TODO(yjbanov): remove internal import when https://github.com/dart-lang/intl/issues/145 is fixed.
+// ignore: implementation_imports
+import 'package:intl/src/date_format_internal.dart' as date_format_internal;
+import 'l10n/date_localizations.dart' as date_localizations;
 
 import 'l10n/localizations.dart';
 import 'widgets_localizations.dart';
@@ -412,10 +416,14 @@ bool _dateIntlDataInitialized = false;
 /// data. Subsequent invocations have no effect.
 void _loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
-    // The returned Future is intentionally dropped on the floor. The
-    // function only returns it to be compatible with the async counterparts.
-    // The Future has no value otherwise.
-    intl_local_date_data.initializeDateFormatting();
+    date_format_internal.initializeDatePatterns(() => date_localizations.datePatterns);
+    date_format_internal.initializeDateSymbols(() {
+      final Map<String, intl.DateSymbols> symbols = <String, intl.DateSymbols>{};
+      date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+        symbols[locale] = new intl.DateSymbols.deserializeFromMap(data);
+      });
+      return symbols;
+    });
     _dateIntlDataInitialized = true;
   }
 }

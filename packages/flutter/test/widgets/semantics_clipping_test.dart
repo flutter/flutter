@@ -60,12 +60,6 @@ void main() {
       ignoreTransform: true,
     ));
 
-    final SemanticsNode node1 = tester.renderObject(find.byWidget(const Text('1'))).debugSemantics;
-    final SemanticsNode node2 = tester.renderObject(find.byWidget(const Text('2'))).debugSemantics;
-
-    expect(node1.wasAffectedByClip, false);
-    expect(node2.wasAffectedByClip, true);
-
     semantics.dispose();
   });
 

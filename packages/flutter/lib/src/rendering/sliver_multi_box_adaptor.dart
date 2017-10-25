@@ -219,8 +219,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void removeAll() {
     super.removeAll();
-    for (RenderBox child in _keepAliveBucket.values)
-      dropChild(child);
+    _keepAliveBucket.values.forEach(dropChild);
     _keepAliveBucket.clear();
   }
 
@@ -274,15 +273,13 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
   @override
   void redepthChildren() {
     super.redepthChildren();
-    for (RenderBox child in _keepAliveBucket.values)
-      redepthChild(child);
+    _keepAliveBucket.values.forEach(redepthChild);
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
     super.visitChildren(visitor);
-    for (RenderBox child in _keepAliveBucket.values)
-      visitor(child);
+    _keepAliveBucket.values.forEach(visitor);
   }
 
   @override

@@ -368,6 +368,69 @@ void main() {
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
   });
 
+  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+
+    Widget build({ bool pageSnapping }) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          pageSnapping: pageSnapping,
+          onPageChanged: log.add,
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(pageSnapping: true));
+    expect(log, isEmpty);
+
+    // Drag more than halfway to the next page, to confirm the default behavior.
+    TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    // The page view is 800.0 wide, so this move is just beyond halfway.
+    await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    expect(log, equals(const <int>[1]));
+    log.clear();
+
+    // Release the gesture, confirm that the page settles on the next.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+
+    // Disable page snapping, and try moving halfway. Confirm it doesn't snap.
+    await tester.pumpWidget(build(pageSnapping: false));
+    gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    // Move just beyond halfway, again.
+    await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    // Page notifications still get sent.
+    expect(log, equals(const <int>[2]));
+    log.clear();
+
+    // Release the gesture, confirm that both pages are visible.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsOneWidget);
+    expect(find.text('Arkansas'), findsNothing);
+
+    // Now re-enable snapping, confirm that we've settled on a page.
+    await tester.pumpWidget(build(pageSnapping: true));
+    await tester.pumpAndSettle();
+
+    expect(log, isEmpty);
+
+    expect(find.text('Alaska'), findsNothing);
+    expect(find.text('Arizona'), findsOneWidget);
+    expect(find.text('Arkansas'), findsNothing);
+  });
+
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
     final PageController controller = new PageController(viewportFraction: 1/8);
 

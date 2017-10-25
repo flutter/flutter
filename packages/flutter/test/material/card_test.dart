@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/rendering.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -38,15 +40,16 @@ void main() {
       new TestSemantics.root(
         children: <TestSemantics>[
           new TestSemantics.rootChild(
-            id: 2,
+            id: 1,
             label: 'I am text!\nMoar text!!1',
             textDirection: TextDirection.ltr,
             children: <TestSemantics>[
               new TestSemantics(
-                id: 1,
+                id: 2,
                 label: 'Button',
                 textDirection: TextDirection.ltr,
                 actions: SemanticsAction.tap.index,
+                flags: SemanticsFlags.isButton.index,
               ),
             ],
           ),

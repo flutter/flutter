@@ -1764,14 +1764,29 @@ class RenderFittedBox extends RenderProxyBox {
   ///
   /// The [fit] and [alignment] arguments must not be null.
   RenderFittedBox({
-    RenderBox child,
     BoxFit fit: BoxFit.contain,
-    Alignment alignment: Alignment.center
+    AlignmentGeometry alignment: Alignment.center,
+    TextDirection textDirection,
+    RenderBox child,
   }) : assert(fit != null),
        assert(alignment != null),
        _fit = fit,
        _alignment = alignment,
+       _textDirection = textDirection,
        super(child);
+
+  Alignment _resolvedAlignment;
+
+  void _resolve() {
+    if (_resolvedAlignment != null)
+      return;
+    _resolvedAlignment = alignment.resolve(textDirection);
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    markNeedsPaint();
+  }
 
   /// How to inscribe the child into the space allocated during layout.
   BoxFit get fit => _fit;
@@ -1790,16 +1805,35 @@ class RenderFittedBox extends RenderProxyBox {
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  Alignment get alignment => _alignment;
-  Alignment _alignment;
-  set alignment(Alignment value) {
-    assert(value != null && value.x != null && value.y != null);
+  ///
+  /// If this is set to a [AlignmentDirectional] object, then
+  /// [textDirection] must not be null.
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
+    assert(value != null);
     if (_alignment == value)
       return;
     _alignment = value;
     _clearPaintData();
-    markNeedsPaint();
+    _markNeedResolution();
   }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _clearPaintData();
+    _markNeedResolution();
+  }
+
+  // TODO(ianh): The intrinsic dimensions of this box are wrong.
 
   @override
   void performLayout() {
@@ -1828,12 +1862,13 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow = false;
       _transform = new Matrix4.identity();
     } else {
+      _resolve();
       final Size childSize = child.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
-      final Rect sourceRect = _alignment.inscribe(sizes.source, Offset.zero & childSize);
-      final Rect destinationRect = _alignment.inscribe(sizes.destination, Offset.zero & size);
+      final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
+      final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
@@ -1894,6 +1929,7 @@ class RenderFittedBox extends RenderProxyBox {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxFit>('fit', fit));
     description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -3050,7 +3086,6 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
 
     _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
-      ..wasAffectedByClip = node.wasAffectedByClip
       ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
     _annotatedNode = _innerNode;
@@ -3139,14 +3174,20 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool explicitChildNodes,
     bool checked,
     bool selected,
+    bool button,
     String label,
+    String value,
+    String hint,
     TextDirection textDirection,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
        _checked = checked,
        _selected = selected,
+       _button = button,
        _label = label,
+       _value = value,
+       _hint = hint,
        _textDirection = textDirection,
        super(child);
 
@@ -3213,20 +3254,59 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  bool get button => _button;
+  bool _button;
+  set button(bool value) {
+    if (button == value)
+      return;
+    final bool hadValue = button != null;
+    _button = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
   String get label => _label;
   String _label;
   set label(String value) {
-    if (label == value)
+    if (_label == value)
       return;
-    final bool hadValue = label != null;
+    final bool hadValue = _label != null;
     _label = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get value => _value;
+  String _value;
+  set value(String value) {
+    if (_value == value)
+      return;
+    final bool hadValue = _value != null;
+    _value = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  ///
+  /// The text's reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint;
+  set hint(String value) {
+    if (_hint == value)
+      return;
+    final bool hadValue = _hint != null;
+    _hint = value;
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
-  /// This must not be null if [label] is not null.
+  /// This must not be null if [label], [hint], or [value] is not null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -3248,8 +3328,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.isSelected = selected;
     if (label != null)
       config.label = label;
+    if (value != null)
+      config.value = value;
+    if (hint != null)
+      config.hint = hint;
     if (textDirection != null)
       config.textDirection = textDirection;
+    if (button != null)
+      config.isButton = button;
   }
 }
 
