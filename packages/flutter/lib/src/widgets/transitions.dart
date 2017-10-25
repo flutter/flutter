@@ -443,6 +443,45 @@ class DecoratedBoxTransition extends AnimatedWidget {
   }
 }
 
+/// Animated version of an [Align] that animates its [Align.alignment] property.
+class AlignTransition extends AnimatedWidget {
+  /// Creates an animated [Align] whose [AlignmentGeometry] animation updates
+  /// the widget.
+  ///
+  /// See also:
+  ///
+  /// * [new Align].
+  const AlignTransition({
+    Key key,
+    @required Animation<AlignmentGeometry> alignment,
+    @required this.child,
+    this.widthFactor,
+    this.heightFactor,
+  }) : super(key: key, listenable: alignment);
+
+  /// The animation that controls the child's alignment.
+  Animation<AlignmentGeometry> get alignment => listenable;
+
+  /// If non-null, the child's width factor, see [Align.widthFactor].
+  final double widthFactor;
+
+  /// If non-null, the child's height factor, see [Align.heightFactor].
+  final double heightFactor;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Align(
+      alignment: alignment.value,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      child: child,
+    );
+  }
+}
+
 /// A builder that builds a widget given a child.
 ///
 /// The child should typically be part of the returned widget tree.

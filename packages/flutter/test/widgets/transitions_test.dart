@@ -146,4 +146,49 @@ void main() {
       expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
     });
   });
+
+  testWidgets('AlignTransition animates', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(vsync: const TestVSync());
+    final Animation<Alignment> alignmentTween = new AlignmentTween(
+      begin: const Alignment(-1.0, 0.0),
+      end: const Alignment(1.0, 1.0),
+    ).animate(controller);
+    final Widget widget = new AlignTransition(
+      alignment: alignmentTween,
+      child: const Text('Ready', textDirection: TextDirection.ltr),
+    );
+
+    await tester.pumpWidget(widget);
+
+    final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
+
+    Alignment actualAlignment = actualPositionedBox.alignment;
+    expect(actualAlignment, const Alignment(-1.0, 0.0));
+
+    controller.value = 0.5;
+    await tester.pump();
+    actualAlignment = actualPositionedBox.alignment;
+    expect(actualAlignment, const Alignment(0.0, 0.5));
+  });
+
+  testWidgets('AlignTransition keeps width and height factors', (WidgetTester tester) async {
+    final AnimationController controller = new AnimationController(vsync: const TestVSync());
+    final Animation<Alignment> alignmentTween = new AlignmentTween(
+      begin: const Alignment(-1.0, 0.0),
+      end: const Alignment(1.0, 1.0),
+    ).animate(controller);
+    final Widget widget = new AlignTransition(
+      alignment: alignmentTween,
+      child: const Text('Ready', textDirection: TextDirection.ltr),
+      widthFactor: 0.3,
+      heightFactor: 0.4,
+    );
+
+    await tester.pumpWidget(widget);
+
+    final Align actualAlign = tester.widget(find.byType(Align));
+
+    expect(actualAlign.widthFactor, 0.3);
+    expect(actualAlign.heightFactor, 0.4);
+  });
 }
