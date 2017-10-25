@@ -1082,7 +1082,7 @@ class _LiveTestRenderView extends RenderView {
   }
 }
 
-final stack_trace.Chain _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
+final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)
