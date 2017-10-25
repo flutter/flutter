@@ -81,9 +81,12 @@ class CupertinoIcons {
   /// A thicker left chevron used in iOS for the nav bar back button.
   static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData home = const IconData(0xf447, fontFamily: iconFont);
+  /// Outline of a simple front-facing house.
+  static const IconData home = const IconData(0xf447, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData shopping_cart = const IconData(0xf3f7, fontFamily: iconFont);
+  /// A right facing shopping cart outline.
+  static const IconData shopping_cart = const IconData(0xf3f7, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  static const IconData ellipsis = const IconData(0xf46a, fontFamily: iconFont);
+  /// 3 solid dots.
+  static const IconData ellipsis = const IconData(0xf46a, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
