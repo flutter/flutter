@@ -129,6 +129,13 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
   _node = *node;
 }
 
+/**
+ * Whether calling `setSemanticsNode:` with `node` would cause a layout change.
+ */
+- (BOOL)willCauseLayoutChange:(const blink::SemanticsNode*)node {
+  return _node.rect != node->rect || _node.transform != node->transform;
+}
+
 - (std::vector<SemanticsObject*>*)children {
   return &_children;
 }
@@ -363,9 +370,11 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
   // Children are received in paint order (inverse hit testing order). We need to bring them into
   // traversal order (top left to bottom right, with hit testing order as tie breaker).
   NSMutableSet<SemanticsObject*>* childOrdersToUpdate = [[[NSMutableSet alloc] init] autorelease];
+  BOOL layoutChanged = NO;
 
   for (const blink::SemanticsNode& node : nodes) {
     SemanticsObject* object = GetOrCreateObject(node.id);
+    layoutChanged = layoutChanged || [object willCauseLayoutChange:&node];
     [object setSemanticsNode:&node];
     const size_t childrenCount = node.children.size();
     auto& children = *[object children];
@@ -403,8 +412,12 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
     VisitObjectsRecursivelyAndRemove(root, doomed_uids);
   [objects_ removeObjectsForKeys:doomed_uids];
 
-  // TODO(goderbauer): figure out which node to focus next.
-  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+  layoutChanged = layoutChanged || [doomed_uids count] > 0;
+
+  if (layoutChanged) {
+    // TODO(goderbauer): figure out which node to focus next.
+    UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, nil);
+  }
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
