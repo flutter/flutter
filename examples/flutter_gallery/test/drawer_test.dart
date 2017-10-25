@@ -44,7 +44,7 @@ void main() {
     expect(app.theme.platform, equals(TargetPlatform.android));
 
     // Change platform
-    await tester.tap(find.text('Cupertino'));
+    await tester.tap(find.text('iOS'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1)); // end animation
     app = find.byType(MaterialApp).evaluate().first.widget;

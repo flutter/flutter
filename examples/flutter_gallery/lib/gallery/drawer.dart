@@ -171,7 +171,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show an Android phone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      title: const Text('Mountain View'),
+      title: new Text(defaultTargetPlatform == TargetPlatform.iOS ? 'Mountain View' : 'Android'),
       value: TargetPlatform.android,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
@@ -181,7 +181,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget cupertinoItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show the iPhone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      title: const Text('Cupertino'),
+      title: new Text(defaultTargetPlatform == TargetPlatform.iOS ? 'Cupertino' : 'iOS'),
       value: TargetPlatform.iOS,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
@@ -238,11 +238,12 @@ class GalleryDrawer extends StatelessWidget {
               children: <TextSpan>[
                 new TextSpan(
                   style: aboutTextStyle,
-                  text: 'Flutter is an early-stage, open-source project to help '
-                        'developers build high-performance, high-fidelity, mobile '
-                        'apps for multiple platforms from a single codebase. This '
-                        "gallery is a preview of Flutter's many widgets, behaviors, "
-                        'animations, layouts, and more. Learn more about Flutter at '
+                  text: 'Flutter is an early-stage, open-source project to help developers'
+                        'build high-performance, high-fidelity, mobile apps for '
+                        '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
+                        'from a single codebase. This gallery is a preview of '
+                        "Flutter's many widgets, behaviors, animations, layouts, "
+                        'and more. Learn more about Flutter at '
                 ),
                 new LinkTextSpan(
                   style: linkStyle,
