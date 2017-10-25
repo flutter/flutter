@@ -617,7 +617,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 // The parent hierarchy can change and lead to the slice being
 // rebuilt. Using a global key solves the issue.
 class _MergeableMaterialSliceKey extends GlobalKey {
-  _MergeableMaterialSliceKey(this.value) : super.constructor();
+  const _MergeableMaterialSliceKey(this.value) : super.constructor();
 
   final LocalKey value;
 

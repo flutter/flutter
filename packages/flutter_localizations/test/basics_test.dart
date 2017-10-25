@@ -11,11 +11,11 @@ void main() {
     await tester.pumpWidget(new MaterialApp( // Creates the outer Localizations widget.
       home: new ListView(
         children: <Widget>[
-          new LocalizationTracker(key: const ValueKey<String>('outer')),
+          const LocalizationTracker(key: const ValueKey<String>('outer')),
           new Localizations(
             locale: const Locale('zh', 'CN'),
             delegates: GlobalMaterialLocalizations.delegates,
-            child: new LocalizationTracker(key: const ValueKey<String>('inner')),
+            child: const LocalizationTracker(key: const ValueKey<String>('inner')),
           ),
         ],
       ),
@@ -65,7 +65,7 @@ class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizatio
 class DummyLocalizations {}
 
 class LocalizationTracker extends StatefulWidget {
-  LocalizationTracker({Key key}) : super(key: key);
+  const LocalizationTracker({Key key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => new LocalizationTrackerState();

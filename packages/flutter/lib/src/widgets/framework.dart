@@ -110,6 +110,7 @@ class _TypeLiteral<T> { Type get type => T; }
 /// A key that is only equal to itself.
 class UniqueKey extends LocalKey {
   /// Creates a key that is equal only to itself.
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
   UniqueKey();
 
   @override
@@ -175,7 +176,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The label is purely for debugging and not used for comparing the identity
   /// of the key.
-  factory GlobalKey({ String debugLabel }) = LabeledGlobalKey<T>._;
+  factory GlobalKey({ String debugLabel }) => new LabeledGlobalKey<T>(debugLabel);
 
   /// Creates a global key without a label.
   ///
@@ -323,10 +324,8 @@ class LabeledGlobalKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   /// Creates a global key with a debugging label.
   ///
   /// The label does not affect the key's identity.
+  // ignore: prefer_const_constructors_in_immutables , never use const for this class
   LabeledGlobalKey(this._debugLabel) : super.constructor();
-
-  // Used for forwarding the constructor from GlobalKey.
-  LabeledGlobalKey._({ String debugLabel }) : _debugLabel = debugLabel, super.constructor();
 
   final String _debugLabel;
 

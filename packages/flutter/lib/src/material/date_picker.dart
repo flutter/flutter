@@ -158,7 +158,7 @@ class _DatePickerHeader extends StatelessWidget {
 }
 
 class _DateHeaderButton extends StatelessWidget {
-  _DateHeaderButton({
+  const _DateHeaderButton({
     Key key,
     this.onTap,
     this.color,

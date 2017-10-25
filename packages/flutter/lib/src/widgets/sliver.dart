@@ -902,7 +902,7 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
-  KeepAlive({
+  const KeepAlive({
     Key key,
     @required this.keepAlive,
     @required Widget child,
