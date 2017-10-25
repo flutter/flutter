@@ -262,22 +262,6 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   }
 }
 
-// DELETE
-double _linearizeColorComponent(double component) {
-    if (component <= 0.03928)
-      return component / 12.92;
-    return math.pow((component + 0.055) / 1.055, 2.4);
-  }
-
-double _luminance(Color color) {
-  // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-  final double R = _linearizeColorComponent(color.red / 0xFF);
-  final double G = _linearizeColorComponent(color.green / 0xFF);
-  final double B = _linearizeColorComponent(color.blue / 0xFF);
-  return 0.2126 * R + 0.7152 * G + 0.0722 * B;
-}
-// DELETE
-
 /// Returns `child` wrapped with background and a bottom border if background color
 /// is opaque. Otherwise, also blur with [BackdropFilter].
 Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
@@ -295,7 +279,7 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
     child: child,
   );
 
-  final bool darkBackground = _luminance(backgroundColor) < 0.179;
+  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
   SystemChrome.setSystemUIOverlayStyle(
       darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
 
