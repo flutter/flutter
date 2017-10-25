@@ -215,9 +215,12 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   /// with an action that is no longer possible.
   ///
   /// The `label` is a string that describes this node. The `value` property
-  /// describes the current value of the node as a string. The `hint` string
-  /// describes what result an action performed on this node has. The reading
-  /// direction of all these strings is given by `textDirection`.
+  /// describes the current value of the node as a string. The `increasedValue`
+  /// string will become the `value` string after a [SemanticsAction.increase]
+  /// action is performed. The `decreasedValue` string will become the `value`
+  /// string after a [SemanticsAction.decrease] action is performed. The `hint`
+  /// string describes what result an action performed on this node has. The
+  /// reading direction of all these strings is given by `textDirection`.
   ///
   /// The `rect` is the region occupied by this node in its own coordinate
   /// system.
@@ -232,6 +235,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String label,
     String hint,
     String value,
+    String increasedValue,
+    String decreasedValue,
     TextDirection textDirection,
     Float64List transform,
     Int32List children
@@ -248,6 +253,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
                 label,
                 hint,
                 value,
+                increasedValue,
+                decreasedValue,
                 textDirection != null ? textDirection.index + 1 : 0,
                 transform,
                 children);
@@ -263,6 +270,8 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     String label,
     String hint,
     String value,
+    String increasedValue,
+    String decreasedValue,
     int textDirection,
     Float64List transform,
     Int32List children

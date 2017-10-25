@@ -245,12 +245,14 @@ bool GeometryComparator(SemanticsObject* a, SemanticsObject* b) {
 
 - (void)accessibilityIncrement {
   if (_node.HasAction(blink::SemanticsAction::kIncrease)) {
+    _node.value = _node.increasedValue;
     _bridge->DispatchSemanticsAction(_uid, blink::SemanticsAction::kIncrease);
   }
 }
 
 - (void)accessibilityDecrement {
   if (_node.HasAction(blink::SemanticsAction::kDecrease)) {
+    _node.value = _node.decreasedValue;
     _bridge->DispatchSemanticsAction(_uid, blink::SemanticsAction::kDecrease);
   }
 }
