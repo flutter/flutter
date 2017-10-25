@@ -7,7 +7,7 @@
 
 #import <Foundation/Foundation.h>
 
-#include "flutter/shell/platform/darwin/common/FlutterMacros.h"
+#include "FlutterMacros.h"
 
 FLUTTER_EXPORT
 @interface FlutterDartProject : NSObject

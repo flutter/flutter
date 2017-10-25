@@ -28,13 +28,13 @@ source_set("flutter_channels") {
   sources = [
     "common/buffer_conversions.h",
     "common/buffer_conversions.mm",
-    "common/FlutterBinaryMessenger.h",
-    "common/FlutterChannels.h",
-    "common/FlutterCodecs.h",
-    "common/FlutterChannels.mm",
-    "common/FlutterCodecs.mm",
-    "common/FlutterStandardCodec.mm",
-    "common/FlutterStandardCodec_Internal.h",
+    "ios/framework/Headers/FlutterBinaryMessenger.h",
+    "ios/framework/Headers/FlutterChannels.h",
+    "ios/framework/Headers/FlutterCodecs.h",
+    "ios/framework/Source/FlutterChannels.mm",
+    "ios/framework/Source/FlutterCodecs.mm",
+    "ios/framework/Source/FlutterStandardCodec.mm",
+    "ios/framework/Source/FlutterStandardCodec_Internal.h",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
 
@@ -61,8 +61,8 @@ executable("flutter_channels_unittests") {
 
   set_sources_assignment_filter([])
   sources = [
-    "common/flutter_codecs_unittest.mm",
-    "common/flutter_standard_codec_unittest.mm",
+    "ios/framework/Source/flutter_codecs_unittest.mm",
+    "ios/framework/Source/flutter_standard_codec_unittest.mm",
   ]
   set_sources_assignment_filter(sources_assignment_filter)
 

@@ -5,7 +5,7 @@
 #ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
 #define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERTEXTINPUTPLUGIN_H_
 
-#include "flutter/shell/platform/darwin/common/FlutterChannels.h"
+#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputDelegate.h"
 
 @interface FlutterTextInputPlugin : NSObject
