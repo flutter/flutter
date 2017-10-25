@@ -7,13 +7,13 @@ source_set("testing") {
 
   sources = [
     "$flutter_root/testing/run_all_unittests.cc",
+    "$flutter_root/testing/testing.cc",
+    "$flutter_root/testing/testing.h",
   ]
 
   public_deps = [
     "//third_party/gtest",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 }
