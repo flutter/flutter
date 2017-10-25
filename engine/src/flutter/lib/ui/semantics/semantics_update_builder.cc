@@ -44,6 +44,8 @@ void SemanticsUpdateBuilder::updateNode(int id,
                                         std::string label,
                                         std::string hint,
                                         std::string value,
+                                        std::string increasedValue,
+                                        std::string decreasedValue,
                                         int textDirection,
                                         const tonic::Float64List& transform,
                                         const tonic::Int32List& children) {
@@ -55,6 +57,8 @@ void SemanticsUpdateBuilder::updateNode(int id,
   node.label = label;
   node.hint = hint;
   node.value = value;
+  node.increasedValue = increasedValue;
+  node.decreasedValue = decreasedValue;
   node.textDirection = textDirection;
   node.transform.setColMajord(transform.data());
   node.children = std::vector<int32_t>(

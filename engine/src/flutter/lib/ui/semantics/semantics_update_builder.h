@@ -35,6 +35,8 @@ class SemanticsUpdateBuilder
                   std::string label,
                   std::string hint,
                   std::string value,
+                  std::string increasedValue,
+                  std::string decreasedValue,
                   int textDirection,
                   const tonic::Float64List& transform,
                   const tonic::Int32List& children);
