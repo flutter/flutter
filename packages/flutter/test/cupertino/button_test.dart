@@ -170,7 +170,7 @@ void main() {
     expect(opacity.opacity, pressedOpacity);
   });
 
-  testWidgets('Material button is semantically a button', (WidgetTester tester) async {
+  testWidgets('Cupertino button is semantically a button', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await tester.pumpWidget(
       boilerplate(
