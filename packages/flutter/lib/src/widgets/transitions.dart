@@ -443,7 +443,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   }
 }
 
-/// Animated version of an [Align] that animates it's [Align.alignment] property.
+/// Animated version of an [Align] that animates its [Align.alignment] property.
 class AlignTransition extends AnimatedWidget {
   /// Creates an animated [Align] whose [AlignmentGeometry] animation updates
   /// the widget.
@@ -462,10 +462,10 @@ class AlignTransition extends AnimatedWidget {
   /// The animation that controls the child's alignment.
   Animation<AlignmentGeometry> get alignment => listenable;
 
-  /// If non-null the child's width factor, see [Align.widthFactor].
+  /// If non-null, the child's width factor, see [Align.widthFactor].
   final double widthFactor;
 
-  /// If non-null the child's height factor, see [Align.heightFactor].
+  /// If non-null, the child's height factor, see [Align.heightFactor].
   final double heightFactor;
 
   /// The widget below this widget in the tree.
