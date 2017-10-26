@@ -181,7 +181,7 @@ Otherwise, icons in Material widgets may fail to appear correctly.
       }
     }
 
-    if (flutterManifest.usesMaterialDesign) {
+    if (flutterManifest.usesMaterialDesign && !packageMap.map.containsKey('material_icons_font')) {
       printError(_materialIconsFontUpgradeInstructions);
     }
 

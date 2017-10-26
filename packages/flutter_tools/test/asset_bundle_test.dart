@@ -112,6 +112,25 @@ flutter:
       await bundle.build(manifestPath: 'pubspec.yaml');
       expect(testLogger.errorText, contains('material_icons_font:'));
     }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
+
+    testUsingContext('do not warn if project has both uses-material-design and material_icons_font for compatibility', () async {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: test
+dependencies:
+  material_icons_font: ^0.1.1
+
+flutter:
+  uses-material-design: true''');
+      fs.file('.packages')
+        ..createSync()
+        ..writeAsStringSync('material_icons_font:file:///~/.pub-cache/hosted/pub.dartlang.org/material_icons_font-0.1.1/lib/');
+
+      final AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(testLogger.errorText.isEmpty, true);
+    }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
   });
 
 }
