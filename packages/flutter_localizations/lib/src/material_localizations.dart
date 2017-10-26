@@ -8,9 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
-// TODO(yjbanov): remove internal import when https://github.com/dart-lang/intl/issues/145 is fixed.
-// ignore: implementation_imports
-import 'package:intl/src/date_format_internal.dart' as date_format_internal;
+import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
 import 'l10n/date_localizations.dart' as date_localizations;
 
 import 'l10n/localizations.dart';
@@ -184,9 +182,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   int get firstDayOfWeekIndex => (_fullYearFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
-  /// Formats a [number] using local decimal number format.
-  ///
-  /// Inserts locale-appropriate thousands separator, if necessary.
+  @override
   String formatDecimal(int number) {
     return _decimalFormat.format(number);
   }
@@ -416,13 +412,14 @@ bool _dateIntlDataInitialized = false;
 /// data. Subsequent invocations have no effect.
 void _loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
-    date_format_internal.initializeDatePatterns(() => date_localizations.datePatterns);
-    date_format_internal.initializeDateSymbols(() {
-      final Map<String, intl.DateSymbols> symbols = <String, intl.DateSymbols>{};
-      date_localizations.dateSymbols.forEach((String locale, dynamic data) {
-        symbols[locale] = new intl.DateSymbols.deserializeFromMap(data);
-      });
-      return symbols;
+    date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+      assert(date_localizations.datePatterns.containsKey(locale));
+      final intl.DateSymbols symbols = new intl.DateSymbols.deserializeFromMap(data);
+      date_symbol_data_custom.initializeDateFormattingCustom(
+        locale: locale,
+        symbols: symbols,
+        patterns: date_localizations.datePatterns[locale],
+      );
     });
     _dateIntlDataInitialized = true;
   }

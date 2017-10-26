@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:intl/intl.dart' as intl;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +20,7 @@ void main() {
   });
 
   group(DayPicker, () {
+    final intl.NumberFormat arabicNumbers = new intl.NumberFormat('0', 'ar');
     final Map<Locale, Map<String, dynamic>> testLocales = <Locale, Map<String, dynamic>>{
       // Tests the default.
       const Locale('en', 'US'): <String, dynamic>{
@@ -34,14 +37,11 @@ void main() {
         'expectedMonthYearHeader': 'сентябрь 2017 г.',
       },
       // Tests RTL.
-      // TODO: change to Arabic numerals when these are fixed:
-      // TODO: https://github.com/dart-lang/intl/issues/143
-      // TODO: https://github.com/flutter/flutter/issues/12289
       const Locale('ar', 'AR'): <String, dynamic>{
         'textDirection': TextDirection.rtl,
         'expectedDaysOfWeek': <String>['ح', 'ن', 'ث', 'ر', 'خ', 'ج', 'س'],
-        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${i + 1}'),
-        'expectedMonthYearHeader': 'سبتمبر 2017',
+        'expectedDaysOfMonth': new List<String>.generate(30, (int i) => '${arabicNumbers.format(i + 1)}'),
+        'expectedMonthYearHeader': 'سبتمبر ٢٠١٧',
       },
     };
 

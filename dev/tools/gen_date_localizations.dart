@@ -43,7 +43,7 @@ Future<Null> main(List<String> rawArgs) async {
     );
   }
 
-  final File dotPackagesFile = new File(path.join('packages', 'flutter', '.packages'));
+  final File dotPackagesFile = new File(path.join('packages', 'flutter_localizations', '.packages'));
   final bool dotPackagesExists = dotPackagesFile.existsSync();
 
   if (!dotPackagesExists) {
