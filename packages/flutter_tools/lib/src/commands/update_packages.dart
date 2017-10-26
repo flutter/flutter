@@ -16,6 +16,10 @@ import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
+const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
+  'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
+};
+
 class UpdatePackagesCommand extends FlutterCommand {
   UpdatePackagesCommand({ this.hidden: false }) {
     argParser
@@ -814,7 +818,7 @@ class PubspecDependency extends PubspecLine {
         assert(kind != DependencyKind.unknown);
         break;
       case DependencyKind.normal:
-        dependencies.writeln('  $name: any');
+        dependencies.writeln('  $name: ${_kManuallyPinnedDependencies[name] ?? 'any'}');
         break;
       case DependencyKind.path:
         if (_lockIsOverride) {

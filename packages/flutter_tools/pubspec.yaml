@@ -18,7 +18,7 @@ dependencies:
   intl: 0.15.2
   json_rpc_2: 2.0.4
   json_schema: 1.0.6
-  linter: 0.1.37
+  linter: 0.1.35
   meta: 1.1.1
   mustache: 0.2.5+1
   package_config: 1.0.3
@@ -62,7 +62,7 @@ dev_dependencies:
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
-  mime: 0.9.3 # TRANSITIVE DEPENDENCY
+  mime: 0.9.4 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.4.2 # TRANSITIVE DEPENDENCY
