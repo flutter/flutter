@@ -122,6 +122,11 @@ void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
   // Screenshot.
   Dart_RegisterRootServiceRequestCallback(kScreenshotExtensionName, &Screenshot,
                                           nullptr);
+
+  // SkPicture Screenshot.
+  Dart_RegisterRootServiceRequestCallback(kScreenshotSkpExtensionName,
+                                          &ScreenshotSkp, nullptr);
+
   // The following set of service protocol extensions require debug build
   if (running_precompiled_code) {
     return;
@@ -314,6 +319,67 @@ void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
   canvas->clear(SK_ColorBLACK);
   layer_tree->Raster(frame);
   canvas->flush();
+}
+
+const char* PlatformViewServiceProtocol::kScreenshotSkpExtensionName =
+    "_flutter.screenshotSkp";
+
+bool PlatformViewServiceProtocol::ScreenshotSkp(const char* method,
+                                                const char** param_keys,
+                                                const char** param_values,
+                                                intptr_t num_params,
+                                                void* user_data,
+                                                const char** json_object) {
+  fxl::AutoResetWaitableEvent latch;
+  sk_sp<SkPicture> picture;
+  blink::Threads::Gpu()->PostTask([&latch, &picture]() {
+    picture = ScreenshotSkpGpuTask();
+    latch.Signal();
+  });
+
+  latch.Wait();
+
+  SkDynamicMemoryWStream stream;
+  PngPixelSerializer serializer;
+  picture->serialize(&stream, &serializer);
+  sk_sp<SkData> skp_data(stream.detachAsData());
+
+  size_t b64_size =
+      SkBase64::Encode(skp_data->data(), skp_data->size(), nullptr);
+  SkAutoTMalloc<char> b64_data(b64_size);
+  SkBase64::Encode(skp_data->data(), skp_data->size(), b64_data.get());
+
+  std::stringstream response;
+  response << "{\"type\":\"ScreenshotSkp\","
+           << "\"skp\":\"" << std::string{b64_data.get(), b64_size} << "\"}";
+  *json_object = strdup(response.str().c_str());
+  return true;
+}
+
+sk_sp<SkPicture> PlatformViewServiceProtocol::ScreenshotSkpGpuTask() {
+  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers;
+  Shell::Shared().GetRasterizers(&rasterizers);
+  if (rasterizers.size() != 1)
+    return nullptr;
+
+  Rasterizer* rasterizer = rasterizers[0].get();
+  if (rasterizer == nullptr)
+    return nullptr;
+
+  flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();
+  if (layer_tree == nullptr)
+    return nullptr;
+
+  SkPictureRecorder recorder;
+  recorder.beginRecording(SkRect::MakeWH(layer_tree->frame_size().width(),
+                                         layer_tree->frame_size().height()));
+
+  flow::CompositorContext compositor_context(nullptr);
+  flow::CompositorContext::ScopedFrame frame = compositor_context.AcquireFrame(
+      nullptr, recorder.getRecordingCanvas(), false);
+  layer_tree->Raster(frame);
+
+  return recorder.finishRecordingAsPicture();
 }
 
 const char* PlatformViewServiceProtocol::kFlushUIThreadTasksExtensionName =
