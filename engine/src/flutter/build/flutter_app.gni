@@ -33,7 +33,6 @@ template("flutter_jit_app") {
   dart_package(dart_package_name) {
     forward_variables_from(invoker,
                            [
-                             "analysis_options",
                              "deps",
                              "disable_analysis",
                              "source_dir",
@@ -191,7 +190,6 @@ template("flutter_aot_app") {
   dart_package(dart_package_name) {
     forward_variables_from(invoker,
                            [
-                             "analysis_options",
                              "deps",
                              "disable_analysis",
                              "source_dir",
@@ -381,13 +379,8 @@ template("flutter_aot_app") {
 #   manifest (optional)
 #     Path to the manifest file
 #
-#   analysis_options (optional)
-#     By default, a script to run the analyzer on the contents of the package is
-#     generated in the output directory. This parameter contains the path to an
-#     analysis options file for this target.
-#
 #   disable_analysis (optional)
-#     Prevents the analysis script from being generated.
+#     Prevents analysis from being run on this target.
 template("flutter_app") {
   if (flutter_app_default_is_jit) {
     flutter_jit_app(target_name) {
@@ -398,7 +391,6 @@ template("flutter_app") {
                                "output_name",
                                "deps",
                                "manifest",
-                               "analysis_options",
                                "disable_analysis",
                                "source_dir",
                              ])
@@ -412,7 +404,6 @@ template("flutter_app") {
                                "output_name",
                                "deps",
                                "manifest",
-                               "analysis_options",
                                "disable_analysis",
                                "source_dir",
                              ])
