@@ -221,6 +221,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
+    if (_controller.isDismissed) {
+      final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
+      final bool canPop = parentRoute?.canPop ?? false;
+      if(canPop) {
+        Navigator.of(context).pop();
+        return;
+      }
+    }
     double delta = details.primaryDelta / _width;
     if(widget.type == DrawerAlignment.END) {
       delta *= -1;
