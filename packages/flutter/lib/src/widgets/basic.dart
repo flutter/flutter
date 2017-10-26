@@ -4576,7 +4576,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping left with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path.
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
   final VoidCallback onScrollLeft;
 
   /// The handler for [SemanticsAction.scrollRight].
@@ -4587,7 +4589,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.
+  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
   final VoidCallback onScrollRight;
 
   /// The handler for [SemanticsAction.scrollUp].
@@ -4598,7 +4602,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping up with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path.
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
   final VoidCallback onScrollUp;
 
   /// The handler for [SemanticsAction.scrollDown].
@@ -4609,7 +4615,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
   final VoidCallback onScrollDown;
 
   /// The handler for [SemanticsAction.increase].

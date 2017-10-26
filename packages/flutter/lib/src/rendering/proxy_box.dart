@@ -3379,7 +3379,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping left with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path.
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
   VoidCallback get onScrollLeft => _onScrollLeft;
   VoidCallback _onScrollLeft;
   set onScrollLeft(VoidCallback handler) {
@@ -3399,7 +3401,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping right with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
   VoidCallback get onScrollRight => _onScrollRight;
   VoidCallback _onScrollRight;
   set onScrollRight(VoidCallback handler) {
@@ -3419,7 +3423,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping up with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path.
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
   VoidCallback get onScrollUp => _onScrollUp;
   VoidCallback _onScrollUp;
   set onScrollUp(VoidCallback handler) {
@@ -3439,7 +3445,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with three
   /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
   VoidCallback get onScrollDown => _onScrollDown;
   VoidCallback _onScrollDown;
   set onScrollDown(VoidCallback handler) {
