@@ -244,6 +244,9 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
   if (packages_path.empty())
     packages_path = FindPackagesPath(main);
 
+  if (!bundle_path.empty())
+    ConfigureAssetBundle(bundle_path);
+
   ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
 
   if (blink::GetKernelPlatformBinary() != nullptr) {
