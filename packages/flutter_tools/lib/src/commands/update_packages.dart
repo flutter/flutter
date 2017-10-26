@@ -16,8 +16,16 @@ import '../dart/pub.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
+/// Map from package name to package version, used to artificially pin a pub
+/// package version in cases when upgrading to the latest breaks Flutter.
+///
+/// Example:
+///
+/// ```
+///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
+/// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
-  'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
+  // Add pinned packages here.
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
