@@ -96,6 +96,22 @@ void main()  {
         expectedAssetManifest,
       );
     }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
+
+    testUsingContext('warning when uses-material-design is used', () async {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync('''
+name: test
+flutter:
+  uses-material-design: true''');
+      fs.file('.packages')
+        ..createSync()
+        ..writeAsStringSync('');
+
+      final AssetBundle bundle = new AssetBundle();
+      await bundle.build(manifestPath: 'pubspec.yaml');
+      expect(testLogger.errorText, contains('material_icons_font:'));
+    }, overrides: <Type, Generator>{FileSystem: () => new MemoryFileSystem(),});
   });
 
 }
