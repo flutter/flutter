@@ -296,6 +296,11 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  void _resetDirtyAssets() {
+    for (FlutterDevice device in flutterDevices)
+      device.devFS.assetPathsToEvict.clear();
+  }
+
   Future<Null> _cleanupDevFS() async {
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS != null) {
@@ -348,6 +353,7 @@ class HotRunner extends ResidentRunner {
     // TODO(aam): Add generator reset logic once we switch to using incremental
     // compiler for full application recompilation on restart.
     final bool updatedDevFS = await _updateDevFS(fullRestart: true);
+    _resetDirtyAssets();
     if (!updatedDevFS)
       return new OperationResult(1, 'DevFS synchronization failed');
     // Check if the isolate is paused and resume it.
