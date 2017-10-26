@@ -4454,6 +4454,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.button,
     this.label,
     this.value,
+    this.increasedValue,
+    this.decreasedValue,
     this.hint,
     this.textDirection,
     this.onTap,
@@ -4528,6 +4530,30 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///    in TalkBack and VoiceOver.
   final String value;
 
+  /// The value that [value] will become after a [SemanticsAction.increase]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onIncrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// has to be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.increasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String increasedValue;
+
+  /// The value that [value] will become after a [SemanticsAction.decrease]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onDecrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// has to be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String decreasedValue;
+
   /// Provides a brief textual description of the result of an action performed
   /// on the widget.
   ///
@@ -4539,7 +4565,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///    in TalkBack and VoiceOver.
   final String hint;
 
-  /// The reading direction of the [label], [value], and [hint].
+  /// The reading direction of the [label], [value], [hint], [increasedValue],
+  /// and [decreasedValue].
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
@@ -4625,6 +4652,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// This is a request to increase the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
+  /// If a [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  ///
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
@@ -4634,6 +4664,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// This is a request to decrease the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -4650,6 +4683,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       button: button,
       label: label,
       value: value,
+      increasedValue: increasedValue,
+      decreasedValue: decreasedValue,
       hint: hint,
       textDirection: _getTextDirection(context),
       onTap: onTap,
@@ -4672,6 +4707,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..selected = selected
       ..label = label
       ..value = value
+      ..increasedValue = increasedValue
+      ..decreasedValue = decreasedValue
       ..hint = hint
       ..textDirection = _getTextDirection(context)
       ..onTap = onTap
