@@ -48,6 +48,15 @@ class PlatformViewServiceProtocol {
                          const char** json_object);
   static void ScreenshotGpuTask(SkBitmap* bitmap);
 
+  static const char* kScreenshotSkpExtensionName;
+  static bool ScreenshotSkp(const char* method,
+                            const char** param_keys,
+                            const char** param_values,
+                            intptr_t num_params,
+                            void* user_data,
+                            const char** json_object);
+  static sk_sp<SkPicture> ScreenshotSkpGpuTask();
+
   // This API should not be invoked by production code.
   // It can potentially starve the service isolate if the main isolate pauses
   // at a breakpoint or is in an infinite loop.
