@@ -32,7 +32,7 @@ enum _ScaffoldSlot {
   bottomNavigationBar,
   floatingActionButton,
   drawer,
-  endSideDrawer,
+  endDrawer,
   statusBar,
 }
 
@@ -152,9 +152,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
     }
 
-    if (hasChild(_ScaffoldSlot.endSideDrawer)) {
-      layoutChild(_ScaffoldSlot.endSideDrawer, new BoxConstraints.tight(size));
-      positionChild(_ScaffoldSlot.endSideDrawer, Offset.zero);
+    if (hasChild(_ScaffoldSlot.endDrawer)) {
+      layoutChild(_ScaffoldSlot.endDrawer, new BoxConstraints.tight(size));
+      positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
   }
 
@@ -318,7 +318,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.persistentFooterButtons,
     this.drawer,
-    this.endSideDrawer,
+    this.endDrawer,
     this.bottomNavigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding: true,
@@ -382,7 +382,7 @@ class Scaffold extends StatefulWidget {
   /// [ScaffoldState.openDrawer] function.
   ///
   /// Typically a [Drawer].
-  final Widget endSideDrawer;
+  final Widget endDrawer;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -531,15 +531,15 @@ class Scaffold extends StatefulWidget {
     }
   }
 
-  static bool hasEndSideDrawer(BuildContext context, { bool registerForUpdates: true }) {
+  static bool hasEndDrawer(BuildContext context, { bool registerForUpdates: true }) {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
       final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
-      return scaffold?.hasEndSideDrawer ?? false;
+      return scaffold?.hasEndDrawer ?? false;
     } else {
       final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
-      return scaffold?.hasEndSideDrawer ?? false;
+      return scaffold?.hasEndDrawer ?? false;
     }
   }
 
@@ -556,11 +556,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // DRAWER API
 
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
-  final GlobalKey<DrawerControllerState> _endSideDrawerKey = new GlobalKey<DrawerControllerState>();
+  final GlobalKey<DrawerControllerState> _endDrawerKey = new GlobalKey<DrawerControllerState>();
 
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
-  bool get hasEndSideDrawer => widget.endSideDrawer != null;
+  bool get hasEndDrawer => widget.endDrawer != null;
 
   /// Opens the [Drawer] (if any).
   ///
@@ -574,28 +574,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// To close the drawer once it is open, use [Navigator.pop].
   ///
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
-  void opendrawer() {
+  void openDrawer() {
     _drawerKey.currentState?.open();
   }
 
-  void openEndSideDrawer() {
-    _endSideDrawerKey.currentState?.open();
-  }
-
-  bool isDrawerOpen() {
-    if (_drawerKey.currentState?.isOpen() == true) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  bool isEndSideDrawerOpen() {
-    if (_endSideDrawerKey.currentState?.isOpen() == true) {
-      return true;
-    } else {
-      return false;
-    }
+  void openEndDrawer() {
+    _endDrawerKey.currentState?.open();
   }
 
   // SNACKBAR API
@@ -995,7 +979,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _drawerKey,
-          type: DrawerType.START,
+          type: DrawerAlignment.START,
           child: widget.drawer,
         ),
         _ScaffoldSlot.drawer,
@@ -1007,16 +991,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       );
     }
 
-    if (widget.endSideDrawer != null) {
-      assert(hasEndSideDrawer);
+    if (widget.endDrawer != null) {
+      assert(hasEndDrawer);
       _addIfNonNull(
         children,
         new DrawerController(
-          key: _endSideDrawerKey,
-          type: DrawerType.END,
-          child: widget.endSideDrawer,
+          key: _endDrawerKey,
+          type: DrawerAlignment.END,
+          child: widget.endDrawer,
         ),
-        _ScaffoldSlot.endSideDrawer,
+        _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
         removeLeftPadding: textDirection == TextDirection.rtl,
         removeTopPadding: false,
@@ -1038,7 +1022,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     return new _ScaffoldScope(
       hasDrawer: hasDrawer,
-      hasEndSideDrawer: hasEndSideDrawer,
+      hasEndDrawer: hasEndDrawer,
       child: new PrimaryScrollController(
         controller: _primaryScrollController,
         child: new Material(
@@ -1156,16 +1140,16 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
     @required this.hasDrawer,
-    @required this.hasEndSideDrawer,
+    @required this.hasEndDrawer,
     @required Widget child,
-  }) : assert(hasDrawer != null || hasEndSideDrawer != null),
+  }) : assert(hasDrawer != null || hasEndDrawer != null),
        super(child: child);
 
   final bool hasDrawer;
-  final bool hasEndSideDrawer;
+  final bool hasEndDrawer;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
-    return ((hasDrawer != oldWidget.hasDrawer) || (hasEndSideDrawer != oldWidget.hasEndSideDrawer));
+    return ((hasDrawer != oldWidget.hasDrawer) || (hasEndDrawer != oldWidget.hasEndDrawer));
   }
 }

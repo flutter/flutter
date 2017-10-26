@@ -8,9 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
-import 'scaffold.dart';
 
-enum DrawerType { START, END }
+enum DrawerAlignment { START, END }
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
@@ -129,7 +128,7 @@ class DrawerController extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget child;
-  final DrawerType type;
+  final DrawerAlignment type;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -203,25 +202,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _handleDragCancel() {
-    if (widget.type == DrawerType.START) {
-      if (_controller.isDismissed || _controller.isAnimating)
-        return;
-      if (_controller.value < 0.5) {
-        close();
-      } else {
-        open();
-      }      
+    if (_controller.isDismissed || _controller.isAnimating)
+      return;
+    if (_controller.value < 0.5) {
+      close();
     } else {
-      if (_controller.isDismissed || _controller.isAnimating)
-        return;
-      if (_controller.value < 0.5) {
-        open();
-      } else if (_controller.value == 1.0) {
-        return;
-      } else {
-        close();
-      } 
-    }
+      open();
+    }      
   }
 
   final GlobalKey _drawerKey = new GlobalKey();
@@ -234,73 +221,40 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
-    final double delta = details.primaryDelta / _width;
-    if (widget.type == DrawerType.START) {
-      if (Scaffold.of(context).isEndSideDrawerOpen() == true) {
-        _controller.value = 0.0;
-      } else {
-        switch (Directionality.of(context)) {
-          case TextDirection.rtl:
-            _controller.value -= delta;
-            break;
-          case TextDirection.ltr:
-            _controller.value += delta;
-            break;
-        }
-      }
-    } else {
-      if (Scaffold.of(context).isDrawerOpen() == true) {
-        _controller.value = 0.0;
-      } else {
-        switch (Directionality.of(context)) {
-          case TextDirection.rtl:
-            _controller.value += delta;
-            break;
-          case TextDirection.ltr:
-            _controller.value -= delta;
-            break;
-        }
-      }      
+    double delta = details.primaryDelta / _width;
+    if(widget.type == DrawerAlignment.END) {
+      delta *= -1;
+    }
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.value -= delta;
+        break;
+      case TextDirection.ltr:
+        _controller.value += delta;
+        break;
     }
   }
 
   void _settle(DragEndDetails details) {
-    if (widget.type == DrawerType.START) {
-      if (_controller.isDismissed)
-        return;
-      if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-        final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-        switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _controller.fling(velocity: -visualVelocity);
-          break;
-        case TextDirection.ltr:
-          _controller.fling(velocity: visualVelocity);
-          break;
-        }
-      } else if (_controller.value < 0.5) {
-        close();
-      } else {
-        open();
+    if (_controller.isDismissed)
+      return;
+    if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
+      double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      if(widget.type == DrawerAlignment.END) {
+        visualVelocity *= -1;
       }
+      switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        _controller.fling(velocity: -visualVelocity);
+        break;
+      case TextDirection.ltr:
+        _controller.fling(velocity: visualVelocity);
+        break;
+      }
+    } else if (_controller.value < 0.5) {
+      close();
     } else {
-      if (_controller.isDismissed)
-        return;
-      if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-        final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-        switch (Directionality.of(context)) {
-        case TextDirection.rtl:
-          _controller.fling(velocity: visualVelocity);
-          break;
-        case TextDirection.ltr:
-          _controller.fling(velocity: -visualVelocity);
-          break;
-        }
-      } else if (details.velocity.pixelsPerSecond.dx > 0.0) {
-        close();
-      } else {
-        open();
-      }      
+      open();
     }
   }
 
@@ -316,21 +270,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _controller.fling(velocity: -1.0);
   }
 
-  bool isOpen() {
-    if (_controller.value >= 1.0) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: (widget.type == DrawerType.START) ? 
+        alignment: (widget.type == DrawerAlignment.START) ? 
           AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
         child: new GestureDetector(
           key: _gestureDetectorKey,
@@ -363,10 +309,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: (widget.type == DrawerType.START) ? 
+                alignment: (widget.type == DrawerAlignment.START) ? 
                   AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
                 child: new Align(
-                  alignment: (widget.type == DrawerType.START) ? 
+                  alignment: (widget.type == DrawerAlignment.START) ? 
                     AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
