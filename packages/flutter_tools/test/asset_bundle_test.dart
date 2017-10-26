@@ -125,7 +125,7 @@ flutter:
   uses-material-design: true''');
       fs.file('.packages')
         ..createSync()
-        ..writeAsStringSync('material_icons_font:file:///~/.pub-cache/hosted/pub.dartlang.org/material_icons_font-0.1.1/lib/');
+        ..writeAsStringSync('material_icons_font:.');
 
       final AssetBundle bundle = new AssetBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
