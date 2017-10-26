@@ -10,8 +10,10 @@ import 'package:flutter/widgets.dart';
 ///
 /// Icons are identified by their name as listed below.
 ///
+/// The icon assets are not automatically bundled with the `cupertino` package.
+///
 /// To use this class, make sure you add a dependency on `cupertino_icons` in your
-/// project's `pubspec.yaml` file. This ensures that the CupertinoIcons font is
+/// own project's `pubspec.yaml` file. This ensures that the CupertinoIcons font is
 /// included in your application. This font is used to display the icons. For example:
 ///
 /// ```yaml
@@ -20,6 +22,8 @@ import 'package:flutter/widgets.dart';
 /// dependencies:
 ///   cupertino_icons: ^0.1.0
 /// ```
+///
+/// Otherwise, icons from this class may fail to appear correctly.
 ///
 /// See also:
 ///

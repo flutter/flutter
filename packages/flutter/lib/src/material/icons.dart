@@ -10,6 +10,8 @@ import 'package:flutter/widgets.dart';
 ///
 /// Icons are identified by their name as listed below.
 ///
+/// The icon assets are not automatically bundled with the `material` package.
+///
 /// To use this class, make sure you add a dependency to the
 /// `material_icons_font` package in your project's `pubspec.yaml` file in the
 /// `dependencies` section. This ensures that the MaterialIcons font is included
@@ -20,6 +22,8 @@ import 'package:flutter/widgets.dart';
 /// dependencies:
 ///   material_icons_font: ^0.1.1
 /// ```
+///
+/// Otherwise, icons from this class may fail to appear correctly.
 ///
 /// See also:
 ///
