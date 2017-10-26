@@ -370,4 +370,147 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreRect: true, ignoreId: true));
   });
+
+  testWidgets('Semantics widget supports all actions', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<SemanticsAction> performedActions = <SemanticsAction>[];
+
+    await tester.pumpWidget(
+      new Semantics(
+        container: true,
+        onTap: () => performedActions.add(SemanticsAction.tap),
+        onLongPress: () => performedActions.add(SemanticsAction.longPress),
+        onScrollLeft: () => performedActions.add(SemanticsAction.scrollLeft),
+        onScrollRight: () => performedActions.add(SemanticsAction.scrollRight),
+        onScrollUp: () => performedActions.add(SemanticsAction.scrollUp),
+        onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
+        onIncrease: () => performedActions.add(SemanticsAction.increase),
+        onDecrease: () => performedActions.add(SemanticsAction.decrease),
+      )
+    );
+
+    final Set<SemanticsAction> allActions = SemanticsAction.values.values.toSet()
+      ..remove(SemanticsAction.showOnScreen); // showOnScreen is non user-exposed.
+
+    final int expectedId = 32;
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: expectedId,
+          rect: TestSemantics.fullScreen,
+          actions: allActions.fold(0, (int previous, SemanticsAction action) => previous | action.index)
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics));
+
+    // Do the actions work?
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+    int expectedLength = 1;
+    for (SemanticsAction action in allActions) {
+      semanticsOwner.performAction(expectedId, action);
+      expect(performedActions.length, expectedLength);
+      expect(performedActions.last, action);
+      expectedLength += 1;
+    }
+
+    semantics.dispose();
+  });
+
+  testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    int semanticsUpdateCount = 0;
+    tester.binding.pipelineOwner.ensureSemantics(
+      listener: () {
+        semanticsUpdateCount += 1;
+      }
+    );
+
+    final List<String> performedActions = <String>[];
+
+    await tester.pumpWidget(
+      new Semantics(
+        container: true,
+        onTap: () => performedActions.add('first'),
+      ),
+    );
+
+    final int expectedId = 35;
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: expectedId,
+          rect: TestSemantics.fullScreen,
+          actions: SemanticsAction.tap.index,
+        ),
+      ],
+    );
+
+    final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
+
+    expect(semantics, hasSemantics(expectedSemantics));
+    semanticsOwner.performAction(expectedId, SemanticsAction.tap);
+    expect(semanticsUpdateCount, 1);
+    expect(performedActions, <String>['first']);
+
+    semanticsUpdateCount = 0;
+    performedActions.clear();
+
+    // Updating existing handler should not trigger semantics update
+    await tester.pumpWidget(
+      new Semantics(
+        container: true,
+        onTap: () => performedActions.add('second'),
+      ),
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics));
+    semanticsOwner.performAction(expectedId, SemanticsAction.tap);
+    expect(semanticsUpdateCount, 0);
+    expect(performedActions, <String>['second']);
+
+    semanticsUpdateCount = 0;
+    performedActions.clear();
+
+    // Adding a handler works
+    await tester.pumpWidget(
+      new Semantics(
+        container: true,
+        onTap: () => performedActions.add('second'),
+        onLongPress: () => performedActions.add('longPress'),
+      ),
+    );
+
+    final TestSemantics expectedSemanticsWithLongPress = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: expectedId,
+          rect: TestSemantics.fullScreen,
+          actions: SemanticsAction.tap.index | SemanticsAction.longPress.index,
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemanticsWithLongPress));
+    semanticsOwner.performAction(expectedId, SemanticsAction.longPress);
+    expect(semanticsUpdateCount, 1);
+    expect(performedActions, <String>['longPress']);
+
+    semanticsUpdateCount = 0;
+    performedActions.clear();
+
+    // Removing a handler works
+    await tester.pumpWidget(
+      new Semantics(
+        container: true,
+        onTap: () => performedActions.add('second'),
+      ),
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics));
+    expect(semanticsUpdateCount, 1);
+
+    semantics.dispose();
+  });
 }
