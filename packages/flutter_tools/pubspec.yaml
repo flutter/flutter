@@ -8,14 +8,14 @@ environment:
 
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
-  archive: 1.0.31
+  archive: 1.0.32
   args: 0.13.7
   cli_util: 0.1.2+1
   coverage: 0.9.3
   crypto: 2.0.2+1
   file: 2.3.4
   http: 0.11.3+14
-  intl: 0.15.1
+  intl: 0.15.2
   json_rpc_2: 2.0.4
   json_schema: 1.0.6
   linter: 0.1.35
@@ -26,7 +26,7 @@ dependencies:
   plugin: 0.2.0+2
   process: 2.0.5
   quiver: 0.25.0
-  stack_trace: 1.8.2
+  stack_trace: 1.8.3
   stream_channel: 1.6.2
   usage: 3.3.0
   vm_service_client: 0.2.3
@@ -37,7 +37,7 @@ dependencies:
   # We depend on very specific internal implementation details of the
   # 'test' package, which change between versions, so when upgrading
   # this, make sure the tests are still running correctly.
-  test: 0.12.24+8
+  test: 0.12.26
 
   # Version from the vended Dart SDK as defined in `dependency_overrides`.
   analyzer: any
@@ -53,17 +53,16 @@ dev_dependencies:
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   csslib: 0.14.1 # TRANSITIVE DEPENDENCY
-  dart_style: 1.0.8 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   html: 0.13.2 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  intl_translation: 0.15.0 # TRANSITIVE DEPENDENCY
+  io: 0.3.0 # TRANSITIVE DEPENDENCY
   isolate: 1.1.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   logging: 0.11.3+1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
-  mime: 0.9.3 # TRANSITIVE DEPENDENCY
+  mime: 0.9.4 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.4.2 # TRANSITIVE DEPENDENCY
@@ -72,7 +71,7 @@ dev_dependencies:
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
   shelf: 0.7.0 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
-  shelf_static: 0.2.5 # TRANSITIVE DEPENDENCY
+  shelf_static: 0.2.6 # TRANSITIVE DEPENDENCY
   shelf_web_socket: 0.2.2 # TRANSITIVE DEPENDENCY
   source_map_stack_trace: 1.1.4 # TRANSITIVE DEPENDENCY
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
@@ -81,7 +80,6 @@ dev_dependencies:
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
   utf: 0.9.0+3 # TRANSITIVE DEPENDENCY
-  vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   watcher: 0.9.7+4 # TRANSITIVE DEPENDENCY
 
 dartdoc:
