@@ -176,6 +176,10 @@ class SemanticsData extends Diagnosticable {
     }
     properties.add(new IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new StringProperty('value', value, defaultValue: ''));
+    properties.add(new StringProperty('increasedValue', increasedValue, defaultValue: ''));
+    properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
+    properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 

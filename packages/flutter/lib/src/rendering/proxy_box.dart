@@ -3537,7 +3537,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
     );
     assert(
-      onDecrease == null || (value == null) == (increasedValue == null),
+      onDecrease == null || (value == null) == (decreasedValue == null),
       'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
     );
 
