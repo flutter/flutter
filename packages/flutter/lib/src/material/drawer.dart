@@ -281,11 +281,28 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  AlignmentDirectional get drawerStartAlignment {
+    switch(widget.type) {
+      case DrawerAlignment.START: return AlignmentDirectional.centerStart;
+        break;
+      case DrawerAlignment.END: return AlignmentDirectional.centerEnd;
+        break;
+    }
+  }
+
+  AlignmentDirectional get drawerEndAlignment {
+    switch(widget.type) {
+      case DrawerAlignment.START: return AlignmentDirectional.centerEnd;
+        break;
+      case DrawerAlignment.END: return AlignmentDirectional.centerStart;
+        break;
+    }
+  }
+
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: (widget.type == DrawerAlignment.START) ? 
-          AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
+        alignment: drawerStartAlignment,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -317,11 +334,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: (widget.type == DrawerAlignment.START) ? 
-                  AlignmentDirectional.centerStart : AlignmentDirectional.centerEnd,
+                alignment: drawerStartAlignment,
                 child: new Align(
-                  alignment: (widget.type == DrawerAlignment.START) ? 
-                    AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
+                  alignment: drawerEndAlignment,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
