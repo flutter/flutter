@@ -263,8 +263,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-      if(widget.type == DrawerAlignment.end) {
-        visualVelocity *= -1;
+      switch (widget.type) {
+        case DrawerAlignment.end:
+          visualVelocity = -visualVelocity;
+          break;
       }
       switch (Directionality.of(context)) {
       case TextDirection.rtl:
