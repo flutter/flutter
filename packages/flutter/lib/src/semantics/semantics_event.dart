@@ -121,3 +121,31 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
     return map;
   }
 }
+
+/// An event for a semantic announcement.
+///
+/// This should be used for announcement that are not seamlessly announced by
+/// the system as a result of a UI state change.
+///
+/// For example a camera application can use this method to make accessibility
+/// announcements regarding objects in the viewfinder.
+class AnnounceSemanticsEvent extends SemanticsEvent {
+
+  AnnounceSemanticsEvent(this.message, this.textDirection) : super('announce');
+
+  /// The message to announce.
+  final String message;
+
+  /// Text direction for [message].
+  final TextDirection textDirection;
+
+  @override
+  Map<String, dynamic> getDataMap() {
+    final Map<String, dynamic> map = <String, dynamic>{
+      'message': message,
+      'textDirection': textDirection.index,
+    };
+
+    return map;
+  }
+}

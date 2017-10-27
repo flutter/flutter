@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:ui' show TextDirection;
 
+import 'package:flutter/rendering.dart' show AnnounceSemanticsEvent;
+
 import 'system_channels.dart';
 
 /// Allows access to the platform's accessibility services.
@@ -22,13 +24,7 @@ class SemanticsService {
   /// For example a camera application can use this method to make accessibility
   /// announcements regarding objects in the viewfinder.
   static Future<Null> announce(String message, TextDirection textDirection) async {
-    final Map<String, dynamic> event = <String, dynamic>{
-      'type': 'announce',
-      'data': <String, dynamic> {
-        'message': message,
-        'textDirection': textDirection.index,
-      },
-    };
-    await SystemChannels.accessibility.send(event);
+    final AnnounceSemanticsEvent event = new AnnounceSemanticsEvent(message, textDirection);
+    await SystemChannels.accessibility.send(event.toMap());
   }
 }
