@@ -65,7 +65,7 @@ void main() {
         child: new GlowingOverscrollIndicator(
           axisDirection: AxisDirection.down,
           color: const Color(0x0DFFFFFF),
-          notificationPredicate: (notification) => notification.depth == 1,
+          notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
           child: new SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: new Container(
