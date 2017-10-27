@@ -15,7 +15,6 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/trace_event.h"
 #include "flutter/runtime/dart_init.h"
-#include "flutter/shell/common/diagnostic/diagnostic_server.h"
 #include "flutter/shell/common/engine.h"
 #include "flutter/shell/common/platform_view_service_protocol.h"
 #include "flutter/shell/common/skia_event_tracer_impl.h"
@@ -57,14 +56,6 @@ bool GetSwitchValue(const fxl::CommandLine& command_line,
   return false;
 }
 
-void ServiceIsolateHook(bool running_precompiled) {
-  if (!running_precompiled) {
-    const blink::Settings& settings = blink::Settings::Get();
-    if (settings.enable_diagnostic)
-      DiagnosticServer::Start(settings.diagnostic_port, settings.ipv6);
-  }
-}
-
 }  // namespace
 
 Shell::Shell(fxl::CommandLine command_line)
@@ -87,7 +78,6 @@ Shell::Shell(fxl::CommandLine command_line)
   blink::Threads::Gpu()->PostTask([this]() { InitGpuThread(); });
   blink::Threads::UI()->PostTask([this]() { InitUIThread(); });
 
-  blink::SetServiceIsolateHook(ServiceIsolateHook);
   blink::SetRegisterNativeServiceProtocolExtensionHook(
       PlatformViewServiceProtocol::RegisterHook);
 }
@@ -124,18 +114,6 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
   // Checked mode overrides.
   settings.dart_non_checked_mode =
       command_line.HasOption(FlagForSwitch(Switch::DartNonCheckedMode));
-
-  settings.enable_diagnostic =
-      !command_line.HasOption(FlagForSwitch(Switch::DisableDiagnostic));
-
-  if (command_line.HasOption(FlagForSwitch(Switch::DeviceDiagnosticPort))) {
-    if (!GetSwitchValue(command_line, Switch::DeviceDiagnosticPort,
-                        &settings.diagnostic_port)) {
-      FXL_LOG(INFO)
-          << "Diagnostic port specified was malformed. Will default to "
-          << settings.diagnostic_port;
-    }
-  }
 
   settings.ipv6 = command_line.HasOption(FlagForSwitch(Switch::IPv6));
 
