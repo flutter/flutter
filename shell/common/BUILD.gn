@@ -55,22 +55,10 @@ template("dart_embedder_resources") {
   }
 }
 
-dart_embedder_resources("generate_embedder_diagnostic_server_resources_cc") {
-  inputs = [
-    "$flutter_root/shell/common/diagnostic/diagnostic_server.dart",
-  ]
-  root_prefix = "$flutter_root/shell/common/diagnostic/"
-  output = "$target_gen_dir/embedder_diagnostic_server_resources.cc"
-  table_name = "sky_embedder_diagnostic_server"
-}
-
 source_set("common") {
   sources = [
-    "$target_gen_dir/embedder_diagnostic_server_resources.cc",
     "animator.cc",
     "animator.h",
-    "diagnostic/diagnostic_server.cc",
-    "diagnostic/diagnostic_server.h",
     "engine.cc",
     "engine.h",
     "null_rasterizer.cc",
@@ -100,7 +88,6 @@ source_set("common") {
   ]
 
   deps = [
-    ":generate_embedder_diagnostic_server_resources_cc",
     "//third_party/dart/runtime:dart_api",
     "//third_party/dart/runtime/platform:libdart_platform",
     "$flutter_root/assets",

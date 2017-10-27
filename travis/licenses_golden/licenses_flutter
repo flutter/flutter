@@ -1395,9 +1395,6 @@ FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
 FILE: ../../../flutter/runtime/test_font_selector.cc
 FILE: ../../../flutter/runtime/test_font_selector.h
-FILE: ../../../flutter/shell/common/diagnostic/diagnostic_server.cc
-FILE: ../../../flutter/shell/common/diagnostic/diagnostic_server.dart
-FILE: ../../../flutter/shell/common/diagnostic/diagnostic_server.h
 FILE: ../../../flutter/shell/common/null_rasterizer.cc
 FILE: ../../../flutter/shell/common/null_rasterizer.h
 FILE: ../../../flutter/shell/common/platform_view_service_protocol.cc
