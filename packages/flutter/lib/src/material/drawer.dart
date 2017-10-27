@@ -9,7 +9,20 @@ import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
 
-enum DrawerAlignment { START, END }
+/// The alginment of a [Drawer] which is used to identify positioning
+/// of the [Drawer]
+///
+enum DrawerAlignment {
+  /// Denotes that the [Drawer] is at the start side of the [Scaffold]
+  /// i.e. left side when Directionality is LTR
+  /// and right side when Directionality is RTL
+  start,
+
+  /// Denotes that the [Drawer] is at the end side of the [Scaffold]
+  /// i.e. right side when Directionality is LTR
+  /// and left side when Directionality is RTL
+  end,
+}
 
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
@@ -208,7 +221,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       close();
     } else {
       open();
-    }      
+    }
   }
 
   final GlobalKey _drawerKey = new GlobalKey();
@@ -224,14 +237,16 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_controller.isDismissed) {
       final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
       final bool canPop = parentRoute?.canPop ?? false;
-      if(canPop) {
+      if (canPop) {
         Navigator.of(context).pop();
         return;
       }
     }
     double delta = details.primaryDelta / _width;
-    if(widget.type == DrawerAlignment.END) {
-      delta *= -1;
+    switch (widget.type) {
+      case DrawerAlignment.end:
+        delta = -delta;
+        break;
     }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
@@ -248,7 +263,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-      if(widget.type == DrawerAlignment.END) {
+      if(widget.type == DrawerAlignment.end) {
         visualVelocity *= -1;
       }
       switch (Directionality.of(context)) {
@@ -281,28 +296,28 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
-  AlignmentDirectional get drawerStartAlignment {
-    switch(widget.type) {
-      case DrawerAlignment.START: return AlignmentDirectional.centerStart;
-        break;
-      case DrawerAlignment.END: return AlignmentDirectional.centerEnd;
-        break;
+  AlignmentDirectional get _drawerStartAlignment {
+    switch (widget.type) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerStart;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerEnd;
     }
   }
 
-  AlignmentDirectional get drawerEndAlignment {
-    switch(widget.type) {
-      case DrawerAlignment.START: return AlignmentDirectional.centerEnd;
-        break;
-      case DrawerAlignment.END: return AlignmentDirectional.centerStart;
-        break;
+  AlignmentDirectional get _drawerEndAlignment {
+    switch (widget.type) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerEnd;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerStart;
     }
   }
 
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: drawerStartAlignment,
+        alignment: _drawerStartAlignment,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -334,9 +349,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: drawerStartAlignment,
+                alignment: _drawerStartAlignment,
                 child: new Align(
-                  alignment: drawerEndAlignment,
+                  alignment: _drawerEndAlignment,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(

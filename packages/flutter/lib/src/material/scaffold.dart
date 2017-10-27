@@ -367,8 +367,9 @@ class Scaffold extends StatefulWidget {
   final List<Widget> persistentFooterButtons;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
-  /// devices. Swipes in from left-to-right
-  ///
+  /// devices. Swipes in from either left-to-right (LTR languages) or
+  /// right-to-left (RTL languages)
+  /// 
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
   ///
@@ -376,7 +377,8 @@ class Scaffold extends StatefulWidget {
   final Widget drawer;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
-  /// devices. Swipes in from right-to-left
+  /// devices. Swipes in from right-to-left (LTR languages) or
+  /// left-to-right (RTL languages)
   ///
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
@@ -578,6 +580,18 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _drawerKey.currentState?.open();
   }
 
+  /// Opens the end side [Drawer] (if any).
+  ///
+  /// If the scaffold has a non-null [Scaffold.endDrawer], this function will cause
+  /// the end side drawer to begin its entrance animation.
+  ///
+  /// Normally this is not needed since the [Scaffold] automatically shows an
+  /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
+  /// drawer.
+  ///
+  /// To close the end side drawer once it is open, use [Navigator.pop].
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openEndDrawer() {
     _endDrawerKey.currentState?.open();
   }
@@ -979,7 +993,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _drawerKey,
-          type: DrawerAlignment.START,
+          type: DrawerAlignment.start,
           child: widget.drawer,
         ),
         _ScaffoldSlot.drawer,
@@ -997,14 +1011,14 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _endDrawerKey,
-          type: DrawerAlignment.END,
+          type: DrawerAlignment.end,
           child: widget.endDrawer,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
-        removeLeftPadding: textDirection == TextDirection.rtl,
+        removeLeftPadding: textDirection == TextDirection.ltr,
         removeTopPadding: false,
-        removeRightPadding: textDirection == TextDirection.ltr,
+        removeRightPadding: textDirection == TextDirection.rtl,
         removeBottomPadding: false,
       );
     }
