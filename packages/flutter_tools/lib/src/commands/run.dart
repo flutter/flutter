@@ -44,11 +44,6 @@ abstract class RunCommandBase extends FlutterCommand {
               'Specifying port 0 will find a random free port.\n'
               'Defaults to the first available port after $kDefaultObservatoryPort.'
     );
-    argParser.addOption('diagnostic-port',
-        help: 'Listen to the given port for a diagnostic connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultDiagnosticPort.'
-    );
   }
 
   int get observatoryPort {
@@ -57,17 +52,6 @@ abstract class RunCommandBase extends FlutterCommand {
         return int.parse(argResults['observatory-port']);
       } catch (error) {
         throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-    return null;
-  }
-
-  int get diagnosticPort {
-    if (argResults['diagnostic-port'] != null) {
-      try {
-        return int.parse(argResults['diagnostic-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--diagnostic-port`: $error');
       }
     }
     return null;
@@ -244,7 +228,6 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: argResults['enable-software-rendering'],
         traceSkia: argResults['trace-skia'],
         observatoryPort: observatoryPort,
-        diagnosticPort: diagnosticPort,
       );
     }
   }

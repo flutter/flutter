@@ -268,7 +268,6 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       command.getBuildInfo(),
       startPaused: true,
       observatoryPort: command.observatoryPort,
-      diagnosticPort: command.diagnosticPort,
     ),
     platformArgs: platformArgs,
     usesTerminalUi: false,
