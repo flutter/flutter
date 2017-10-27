@@ -132,7 +132,7 @@ class MaterialApp extends StatefulWidget {
   /// This value is passed unmodified to [WidgetsApp.title].
   final String title;
 
-  /// If non-null this function is called to produce the app's
+  /// If non-null this callback is called to produce the app's
   /// title string, otherwise [title] is used.
   ///
   /// The [onGenerateTitle] `context` parameter includes the [WidgetsApp]'s
@@ -140,6 +140,9 @@ class MaterialApp extends StatefulWidget {
   /// localized title.
   ///
   /// This callback function must not return null.
+  ///
+  /// The [onGenerateTitle] callback is called each time the [MaterialApp]
+  /// rebuilds.
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;

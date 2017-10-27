@@ -84,6 +84,9 @@ abstract class WidgetsBindingObserver {
   /// box, and false otherwise. The [WidgetsApp] widget uses this
   /// mechanism to notify the [Navigator] widget that it should pop
   /// its current route if possible.
+  ///
+  /// This method exposes the `popRoute` notification from
+  /// [SystemChannels.navigation].
   Future<bool> didPopRoute() => new Future<bool>.value(false);
 
   /// Called when the host tells the app to push a new route onto the
@@ -92,10 +95,15 @@ abstract class WidgetsBindingObserver {
   /// Observers are expected to return true if they were able to
   /// handle the notification. Observers are notified in registration
   /// order until one returns true.
+  ///
+  /// This method exposes the `pushRoute` notification from
+  /// [SystemChannels.navigation].
   Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
+  ///
+  /// This method exposes notifications from [Window.onMetricsChanged].
   ///
   /// ## Sample code
   ///
@@ -154,6 +162,8 @@ abstract class WidgetsBindingObserver {
   /// preferences, and it should affect all of the text sizes in the
   /// application.
   ///
+  /// This method exposes notifications from [Window.onTextScaleFactorChanged].
+  ///
   /// ## Sample code
   ///
   /// ```dart
@@ -200,6 +210,8 @@ abstract class WidgetsBindingObserver {
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
+  ///
+  /// This method exposes notifications from [Window.onLocaleChanged].
   void didChangeLocale(Locale locale) { }
 
   /// Called when the system puts the app in the background or returns
@@ -207,9 +219,14 @@ abstract class WidgetsBindingObserver {
   ///
   /// An example of implementing this method is provided in the class-level
   /// documentation for the [WidgetsBindingObserver] class.
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when the system is running low on memory.
+  ///
+  /// This method exposes the `memoryPressure` notification from
+  /// [SystemChannels.system].
   void didHaveMemoryPressure() { }
 }
 
@@ -359,6 +376,9 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// Notify all the observers that the locale has changed (using
   /// [WidgetsBindingObserver.didChangeLocale]), giving them the
   /// `locale` argument.
+  ///
+  /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
+  /// notification is received.
   void dispatchLocaleChanged(Locale locale) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeLocale(locale);
@@ -367,14 +387,17 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// Called when the system pops the current route.
   ///
   /// This first notifies the binding observers (using
-  /// [WidgetsBindingObserver.didPopRoute]), in registration order,
-  /// until one returns true, meaning that it was able to handle the
-  /// request (e.g. by closing a dialog box). If none return true,
-  /// then the application is shut down.
+  /// [WidgetsBindingObserver.didPopRoute]), in registration order, until one
+  /// returns true, meaning that it was able to handle the request (e.g. by
+  /// closing a dialog box). If none return true, then the application is shut
+  /// down by calling [SystemNavigator.pop].
   ///
   /// [WidgetsApp] uses this in conjunction with a [Navigator] to
   /// cause the back button to close dialog boxes, return from modal
   /// pages, and so forth.
+  ///
+  /// This method exposes the `popRoute` notification from
+  /// [SystemChannels.navigation].
   Future<Null> handlePopRoute() async {
     for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
@@ -385,6 +408,14 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
 
   /// Called when the host tells the app to push a new route onto the
   /// navigator.
+  ///
+  /// This notifies the binding observers (using
+  /// [WidgetsBindingObserver.didPushRoute]), in registration order, until one
+  /// returns true, meaning that it was able to handle the request (e.g. by
+  /// opening a dialog box). If none return true, then nothing happens.
+  ///
+  /// This method exposes the `pushRoute` notification from
+  /// [SystemChannels.navigation].
   Future<Null> handlePushRoute(String route) async {
     for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
@@ -406,6 +437,8 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
@@ -429,11 +462,25 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     return null;
   }
 
+  /// Called when the operating system notifies the application of a memory
+  /// pressure situation.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didHaveMemoryPressure].
+  ///
+  /// This method exposes the `memoryPressure` notification from
+  /// [SystemChannels.system].
+  void handleMemoryPressure() {
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didHaveMemoryPressure();
+  }
+
   Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
     final String type = message['type'];
-    if (type == 'memoryPressure') {
-      for (WidgetsBindingObserver observer in _observers)
-        observer.didHaveMemoryPressure();
+    switch (type) {
+      case 'memoryPressure':
+        handleMemoryPressure();
+        break;
     }
     return null;
   }
