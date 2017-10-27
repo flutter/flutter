@@ -208,7 +208,8 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  return _runCommand(pub, args, workingDirectory: workingDirectory);
+  return _runCommand(pub, args, workingDirectory: workingDirectory,
+      environment: <String, String>{'DART_VM_OPTIONS': '--assert-initializer'});
 }
 
 class EvalResult {
