@@ -116,7 +116,7 @@ class VulkanProcTable : public fxl::RefCountedThreadSafe<VulkanProcTable> {
 #endif  // OS_ANDROID
 #if OS_FUCHSIA
   DEFINE_PROC(CreateMagmaSurfaceKHR);
-  DEFINE_PROC(ExportDeviceMemoryMAGMA);
+  DEFINE_PROC(GetMemoryFuchsiaHandleKHR);
   DEFINE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR);
   DEFINE_PROC(ImportSemaphoreFuchsiaHandleKHR);
 #endif  // OS_FUCHSIA

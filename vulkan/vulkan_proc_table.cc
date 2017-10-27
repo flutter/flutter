@@ -92,9 +92,7 @@ bool VulkanProcTable::SetupInstanceProcAddresses(
 #if OS_FUCHSIA
   [this, &handle]() -> bool {
     ACQUIRE_PROC(CreateMagmaSurfaceKHR, handle);
-    ACQUIRE_PROC(ExportDeviceMemoryMAGMA, handle);
     ACQUIRE_PROC(GetPhysicalDeviceMagmaPresentationSupportKHR, handle);
-    ACQUIRE_PROC(ImportSemaphoreFuchsiaHandleKHR, handle);
     return true;
   }();
 #endif  // OS_FUCHSIA
@@ -146,7 +144,7 @@ bool VulkanProcTable::SetupDeviceProcAddresses(
   ACQUIRE_PROC(ResetFences, handle);
   ACQUIRE_PROC(WaitForFences, handle);
 #if OS_FUCHSIA
-  ACQUIRE_PROC(ExportDeviceMemoryMAGMA, handle);
+  ACQUIRE_PROC(GetMemoryFuchsiaHandleKHR, handle);
   ACQUIRE_PROC(ImportSemaphoreFuchsiaHandleKHR, handle);
 #endif  // OS_FUCHSIA
   device_ = {handle, nullptr};

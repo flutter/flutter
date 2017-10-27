@@ -225,11 +225,16 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
   {
     // Acquire the VMO for the device memory.
     uint32_t vmo_handle = 0;
-    if (VK_CALL_LOG_ERROR(vk_.ExportDeviceMemoryMAGMA(
-            backend_context_->fDevice, vk_memory_, &vmo_handle)) !=
+
+    VkMemoryGetFuchsiaHandleInfoKHR get_handle_info = {
+        VK_STRUCTURE_TYPE_MEMORY_GET_FUCHSIA_HANDLE_INFO_KHR, nullptr,
+        vk_memory_, VK_EXTERNAL_MEMORY_HANDLE_TYPE_FUCHSIA_VMO_BIT_KHR};
+    if (VK_CALL_LOG_ERROR(vk_.GetMemoryFuchsiaHandleKHR(
+            backend_context_->fDevice, &get_handle_info, &vmo_handle)) !=
         VK_SUCCESS) {
       return false;
     }
+
     exported_vmo.reset(static_cast<zx_handle_t>(vmo_handle));
   }
 
