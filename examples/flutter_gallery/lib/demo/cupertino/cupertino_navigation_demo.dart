@@ -117,7 +117,7 @@ class ExitButton extends StatelessWidget {
 }
 
 class CupertinoDemoTab1 extends StatelessWidget {
-  CupertinoDemoTab1({this.colorItems, this.colorNameItems});
+  const CupertinoDemoTab1({this.colorItems, this.colorNameItems});
 
   final List<Color> colorItems;
   final List<String> colorNameItems;
@@ -151,7 +151,7 @@ class CupertinoDemoTab1 extends StatelessWidget {
 }
 
 class Tab1RowItem extends StatelessWidget {
-  Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
+  const Tab1RowItem({this.index, this.lastItem, this.color, this.colorName});
 
   final int index;
   final bool lastItem;
@@ -235,7 +235,7 @@ class Tab1RowItem extends StatelessWidget {
 }
 
 class Tab1ItemPage extends StatefulWidget {
-  Tab1ItemPage({this.color, this.colorName, this.index});
+  const Tab1ItemPage({this.color, this.colorName, this.index});
 
   final Color color;
   final String colorName;
@@ -527,7 +527,7 @@ enum Tab2ConversationBubbleColor {
 }
 
 class Tab2ConversationBubble extends StatelessWidget {
-  Tab2ConversationBubble({this.text, this.color});
+  const Tab2ConversationBubble({this.text, this.color});
 
   final String text;
   final Tab2ConversationBubbleColor color;
@@ -561,7 +561,7 @@ class Tab2ConversationBubble extends StatelessWidget {
 }
 
 class Tab2ConversationAvatar extends StatelessWidget {
-  Tab2ConversationAvatar({this.text, this.color});
+  const Tab2ConversationAvatar({this.text, this.color});
 
   final String text;
   final Color color;
@@ -605,7 +605,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: "My Xanadu doesn't look right",
           color: Tab2ConversationBubbleColor.blue
         ),
@@ -616,11 +616,11 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget> [
-        new Tab2ConversationAvatar(
+        const Tab2ConversationAvatar(
           text: 'KL',
           color: const Color(0xFFFD5015),
         ),
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: "We'll rush you a new one.\nIt's gonna be incredible",
           color: Tab2ConversationBubbleColor.gray,
         ),
@@ -630,7 +630,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: 'Awesome thanks!',
           color: Tab2ConversationBubbleColor.blue,
         ),
@@ -641,11 +641,11 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget> [
-        new Tab2ConversationAvatar(
+        const Tab2ConversationAvatar(
           text: 'SJ',
           color: const Color(0xFF34CAD6),
         ),
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: "We'll send you our\nnewest Labrabor too!",
           color: Tab2ConversationBubbleColor.gray,
         ),
@@ -655,7 +655,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: 'Yay',
           color: Tab2ConversationBubbleColor.blue,
         ),
@@ -666,11 +666,11 @@ List<Widget> buildTab2Conversation() {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: <Widget> [
-        new Tab2ConversationAvatar(
+        const Tab2ConversationAvatar(
           text: 'KL',
           color: const Color(0xFFFD5015),
         ),
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: "Actually there's one more thing...",
           color: Tab2ConversationBubbleColor.gray,
         ),
@@ -680,7 +680,7 @@ List<Widget> buildTab2Conversation() {
       mainAxisAlignment: MainAxisAlignment.end,
       mainAxisSize: MainAxisSize.min,
       children: <Widget> [
-        new Tab2ConversationBubble(
+        const Tab2ConversationBubble(
           text: "What's that?",
           color: Tab2ConversationBubbleColor.blue,
         ),
