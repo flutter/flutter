@@ -37,21 +37,21 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// widget must contain a widget that generates a [ScrollNotification], such
   /// as a [ListView] or a [GridView].
   ///
-  /// The [showLeading], [showTrailing], [axisDirection], [color] and
-  /// [acceptNotification] arguments must not be null.
+  /// The [showLeading], [showTrailing], [axisDirection], [color], and
+  /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
     Key key,
     this.showLeading: true,
     this.showTrailing: true,
     @required this.axisDirection,
     @required this.color,
-    this.acceptNotification: defaultScrollNotificationPredicate,
+    this.notificationPredicate: defaultScrollNotificationPredicate,
     this.child,
   }) : assert(showLeading != null),
        assert(showTrailing != null),
        assert(axisDirection != null),
        assert(color != null),
-       assert(acceptNotification != null),
+       assert(notificationPredicate != null),
        super(key: key);
 
   /// Whether to show the overscroll glow on the side with negative scroll
@@ -87,12 +87,12 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// The color of the glow. The alpha channel is ignored.
   final Color color;
   
-  /// A predicate that specifies whether a [ScrollNotification] should be
+  /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
   ///
-  /// By default, checks whether notification.depth == 0. Set it to something
+  /// By default, checks whether `notification.depth == 0`. Set it to something
   /// else for more complicated layouts.
-  final ScrollNotificationPredicate acceptNotification;
+  final ScrollNotificationPredicate notificationPredicate;
 
   /// The subtree to place inside the overscroll indicator. This should include
   /// a source of [ScrollNotification] notifications, typically a [Scrollable]
@@ -153,7 +153,7 @@ class _GlowingOverscrollIndicatorState extends State<GlowingOverscrollIndicator>
   final Map<bool, bool> _accepted = <bool, bool>{false: true, true: true};
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (!widget.acceptNotification(notification))
+    if (!widget.notificationPredicate(notification))
       return false;
     if (notification is OverscrollNotification) {
       _GlowController controller;

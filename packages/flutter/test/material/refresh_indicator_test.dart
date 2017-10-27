@@ -52,7 +52,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new RefreshIndicator(
-          acceptNotification: (notification) => notification.depth == 1,
+          notificationPredicate: (notification) => notification.depth == 1,
           onRefresh: refresh,
           child: new SingleChildScrollView(
             scrollDirection: Axis.horizontal,
