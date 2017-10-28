@@ -100,13 +100,26 @@ FlutterResult FlutterEngineRun(size_t version,
     return ptr(user_data);
   };
 
+  std::string icu_data_path;
+  if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
+    icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
+  }
+
+  fxl::CommandLine command_line;
+  if (SAFE_ACCESS(args, command_line_argc, 0) != 0 &&
+      SAFE_ACCESS(args, command_line_argv, nullptr) != nullptr) {
+    command_line = fxl::CommandLineFromArgcArgv(
+        SAFE_ACCESS(args, command_line_argc, 0),
+        SAFE_ACCESS(args, command_line_argv, nullptr));
+  }
+
   static std::once_flag once_shell_initialization;
   std::call_once(once_shell_initialization, [&]() {
     fxl::CommandLine null_command_line;
     shell::Shell::InitStandalone(
-        fxl::CommandLine{},
-        "",  // icu data path default lookup.
-        ""   // application library not supported in JIT mode.
+        std::move(command_line),
+        icu_data_path,  // icu data path default lookup.
+        ""              // application library not supported in JIT mode.
     );
   });
 
