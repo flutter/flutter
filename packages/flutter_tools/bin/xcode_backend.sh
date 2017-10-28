@@ -36,6 +36,19 @@ BuildApp() {
     target_path="${FLUTTER_TARGET}"
   fi
 
+  # Archive builds (ACTION=install) should always run in release mode.
+  if [[ "$ACTION" == "install" && "$FLUTTER_BUILD_MODE" != "release" ]]; then
+    EchoError "========================================================================"
+    EchoError "ERROR: Flutter archive builds must be run in Release mode."
+    EchoError ""
+    EchoError "To correct, run:"
+    EchoError "flutter build ios --release"
+    EchoError ""
+    EchoError "then re-run Archive from Xcode."
+    EchoError "========================================================================"
+    exit -1
+  fi
+
   local build_mode="release"
   if [[ -n "$FLUTTER_BUILD_MODE" ]]; then
     build_mode="${FLUTTER_BUILD_MODE}"
