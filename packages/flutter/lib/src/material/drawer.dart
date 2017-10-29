@@ -133,15 +133,19 @@ class DrawerController extends StatefulWidget {
   const DrawerController({
     GlobalKey key,
     @required this.child,
-    @required this.type,
-  }) : assert(child != null || type != null),
+    @required this.alignment,
+  }) : assert(child != null || alignment != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Drawer].
   final Widget child;
-  final DrawerAlignment type;
+
+  /// The alginment of a [Drawer] which is used to identify positioning
+  /// of the [Drawer] i.e. either start-side or end-side
+  ///
+  final DrawerAlignment alignment;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -234,16 +238,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
-    if (_controller.isDismissed) {
-      final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
-      final bool canPop = parentRoute?.canPop ?? false;
-      if (canPop) {
-        Navigator.of(context).pop();
-        return;
-      }
-    }
     double delta = details.primaryDelta / _width;
-    switch (widget.type) {
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        break;
       case DrawerAlignment.end:
         delta = -delta;
         break;
@@ -263,7 +261,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
       double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
-      switch (widget.type) {
+      switch (widget.alignment) {
+        case DrawerAlignment.start:
+          break;
         case DrawerAlignment.end:
           visualVelocity = -visualVelocity;
           break;
@@ -299,7 +299,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   AlignmentDirectional get _drawerStartAlignment {
-    switch (widget.type) {
+    switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
       case DrawerAlignment.end:
@@ -308,7 +308,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   AlignmentDirectional get _drawerEndAlignment {
-    switch (widget.type) {
+    switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
       case DrawerAlignment.end:

@@ -367,8 +367,8 @@ class Scaffold extends StatefulWidget {
   final List<Widget> persistentFooterButtons;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
-  /// devices. Swipes in from either left-to-right (LTR languages) or
-  /// right-to-left (RTL languages)
+  /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
+  /// right-to-left ([TextDirection.rtl])
   /// 
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
@@ -377,8 +377,8 @@ class Scaffold extends StatefulWidget {
   final Widget drawer;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
-  /// devices. Swipes in from right-to-left (LTR languages) or
-  /// left-to-right (RTL languages)
+  /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
+  /// left-to-right ([TextDirection.rtl])
   ///
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
@@ -533,18 +533,6 @@ class Scaffold extends StatefulWidget {
     }
   }
 
-  static bool hasEndDrawer(BuildContext context, { bool registerForUpdates: true }) {
-    assert(registerForUpdates != null);
-    assert(context != null);
-    if (registerForUpdates) {
-      final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
-      return scaffold?.hasEndDrawer ?? false;
-    } else {
-      final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
-      return scaffold?.hasEndDrawer ?? false;
-    }
-  }
-
   @override
   ScaffoldState createState() => new ScaffoldState();
 }
@@ -562,6 +550,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
+  /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
 
   /// Opens the [Drawer] (if any).
@@ -993,7 +982,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _drawerKey,
-          type: DrawerAlignment.start,
+          alignment: DrawerAlignment.start,
           child: widget.drawer,
         ),
         _ScaffoldSlot.drawer,
@@ -1011,7 +1000,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _endDrawerKey,
-          type: DrawerAlignment.end,
+          alignment: DrawerAlignment.end,
           child: widget.endDrawer,
         ),
         _ScaffoldSlot.endDrawer,
