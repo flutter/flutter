@@ -23,7 +23,6 @@
 library rendering;
 
 export 'package:flutter/foundation.dart' show
-  AbstractNode,
   VoidCallback,
   ValueChanged,
   ValueGetter,
