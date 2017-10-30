@@ -485,8 +485,8 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   ScrollPosition _position;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     if (_position != null)
       _position.isScrollingNotifier.removeListener(_isScrollingListener);
     _position = Scrollable.of(context)?.position;

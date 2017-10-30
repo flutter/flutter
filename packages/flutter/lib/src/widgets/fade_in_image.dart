@@ -375,9 +375,9 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   }
 
   @override
-  void didChangeDependencies() {
+  void didDependenciesChanged() {
     _resolveImage();
-    super.didChangeDependencies();
+    super.didDependenciesChanged();
   }
 
   @override

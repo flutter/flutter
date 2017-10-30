@@ -195,8 +195,8 @@ class ImageConfiguration {
 ///   ImageInfo _imageInfo;
 ///
 ///   @override
-///   void didChangeDependencies() {
-///     super.didChangeDependencies();
+///   void didDependenciesChanged() {
+///     super.didDependenciesChanged();
 ///     // We call _getImage here because createLocalImageConfiguration() needs to
 ///     // be called again if the dependencies changed, in case the changes relate
 ///     // to the DefaultAssetBundle, MediaQuery, etc, which that method uses.

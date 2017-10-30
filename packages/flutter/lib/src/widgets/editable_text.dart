@@ -324,8 +324,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     if (!_didAutoFocus && widget.autofocus) {
       FocusScope.of(context).autofocus(widget.focusNode);
       _didAutoFocus = true;

@@ -109,7 +109,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
   String _exampleCode;
 
   @override
-  void didChangeDependencies() {
+  void didDependenciesChanged() {
     getExampleCode(widget.exampleCodeTag, DefaultAssetBundle.of(context)).then<Null>((String code) {
       if (mounted) {
         setState(() {
@@ -117,7 +117,7 @@ class FullScreenCodeDialogState extends State<FullScreenCodeDialog> {
         });
       }
     });
-    super.didChangeDependencies();
+    super.didDependenciesChanged();
   }
 
   @override

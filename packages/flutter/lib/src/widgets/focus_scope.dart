@@ -86,8 +86,8 @@ class _FocusScopeState extends State<FocusScope> {
   bool _didAutofocus = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     if (!_didAutofocus && widget.autofocus) {
       FocusScope.of(context).setFirstFocus(widget.node);
       _didAutofocus = true;

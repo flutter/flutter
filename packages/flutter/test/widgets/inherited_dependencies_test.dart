@@ -49,9 +49,9 @@ class ConditionalTextElement extends StatefulElement {
   ConditionalText get widget => super.widget;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    widget.logger('Element.didChangeDependencies');
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
+    widget.logger('Element.didDependenciesChanged');
   }
 }
 
@@ -68,9 +68,9 @@ class ConditionalTextState extends State<ConditionalText> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    widget.logger('State.didChangeDependencies');
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
+    widget.logger('State.didDependenciesChanged');
   }
 }
 
@@ -98,16 +98,16 @@ Widget buildHierarchicalInheritedWidgetTree({bool condition, String text, Widget
 }
 
 void main() {
-  testWidgets('State.didChangeDependencies is called before first build', (WidgetTester tester) async {
+  testWidgets('State.didDependenciesChanged is called before first build', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didChangeDependencies'])));
-    expect(log, <String>['State.didChangeDependencies', 'build']);
+    await tester.pumpWidget(new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didDependenciesChanged'])));
+    expect(log, <String>['State.didDependenciesChanged', 'build']);
   });
 
-  testWidgets('State.didChangeDependencies is not called for elements about to unmount', (WidgetTester tester) async {
+  testWidgets('State.didDependenciesChanged is not called for elements about to unmount', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didChangeDependencies']));
+    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didDependenciesChanged']));
 
     await tester.pumpWidget(buildHierarchicalInheritedWidgetTree(
         condition: true,
@@ -124,9 +124,9 @@ void main() {
     expect(log, <String>[]);
   });
 
-  testWidgets('State.didChangeDependencies is called only once if multiple dependencies changed', (WidgetTester tester) async {
+  testWidgets('State.didDependenciesChanged is called only once if multiple dependencies changed', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didChangeDependencies']));
+    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['Element.didDependenciesChanged']));
 
     await tester.pumpWidget(buildHierarchicalInheritedWidgetTree(
         condition: true,
@@ -140,19 +140,19 @@ void main() {
         text: 'Bar',
         child: widget,
     ));
-    expect(log, <String>['State.didChangeDependencies', 'build']);
+    expect(log, <String>['State.didDependenciesChanged', 'build']);
   });
 
-  testWidgets('Element.didChangeDependencies is not called in first build', (WidgetTester tester) async {
+  testWidgets('Element.didDependenciesChanged is not called in first build', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    await tester.pumpWidget(new ConditionalText(logger: newLogger(log, excludes: <String>['State.didChangeDependencies'])));
+    await tester.pumpWidget(new ConditionalText(logger: newLogger(log, excludes: <String>['State.didDependenciesChanged'])));
     expect(log, <String>['build']);
   });
 
-  testWidgets('Element.didChangeDependencies is not called for elements about to unmount', (WidgetTester tester) async {
+  testWidgets('Element.didDependenciesChanged is not called for elements about to unmount', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['State.didChangeDependencies']));
+    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['State.didDependenciesChanged']));
 
     await tester.pumpWidget(buildHierarchicalInheritedWidgetTree(
       condition: true,
@@ -169,9 +169,9 @@ void main() {
     expect(log, <String>[]);
   });
 
-  testWidgets('Element.didChangeDependencies is called only once if multiple dependencies changed', (WidgetTester tester) async {
+  testWidgets('Element.didDependenciesChanged is called only once if multiple dependencies changed', (WidgetTester tester) async {
     final List<String> log = <String>[];
-    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['State.didChangeDependencies']));
+    final Widget widget = new ConditionalText(logger: newLogger(log, excludes: <String>['State.didDependenciesChanged']));
 
     await tester.pumpWidget(buildHierarchicalInheritedWidgetTree(
       condition: true,
@@ -185,10 +185,10 @@ void main() {
       text: 'Bar',
       child: widget,
     ));
-    expect(log, <String>['Element.didChangeDependencies', 'build']);
+    expect(log, <String>['Element.didDependenciesChanged', 'build']);
   });
 
-  testWidgets('didChangeDependencies is not called due to outdated dependency change', (WidgetTester tester) async {
+  testWidgets('didDependenciesChanged is not called due to outdated dependency change', (WidgetTester tester) async {
     final List<String> log = <String>[];
     final Widget widget = new ConditionalText(logger: newLogger(log));
 
@@ -213,7 +213,7 @@ void main() {
     expect(log, <String>[]);
   });
 
-  testWidgets('InheritedElement.dispatchDidChangeDependencies is allowed to call outside build phase', (WidgetTester tester) async {
+  testWidgets('InheritedElement.dispatchDidDependenciesChanged is allowed to call outside build phase', (WidgetTester tester) async {
     InheritedElement inheritedElement;
     bool rebuild;
 
@@ -231,7 +231,7 @@ void main() {
     ));
 
     rebuild = false;
-    inheritedElement.dispatchDidChangeDependencies();
+    inheritedElement.dispatchDidDependenciesChanged();
     await tester.pump();
     expect(rebuild, true);
   });

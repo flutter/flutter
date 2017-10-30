@@ -120,10 +120,10 @@ abstract class SingleTickerProviderStateMixin extends State<dynamic> implements 
   }
 
   @override
-  void didChangeDependencies() {
+  void didDependenciesChanged() {
     if (_ticker != null)
       _ticker.muted = !TickerMode.of(context);
-    super.didChangeDependencies();
+    super.didDependenciesChanged();
   }
 
   @override
@@ -200,13 +200,13 @@ abstract class TickerProviderStateMixin extends State<dynamic> implements Ticker
   }
 
   @override
-  void didChangeDependencies() {
+  void didDependenciesChanged() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
       for (Ticker ticker in _tickers)
         ticker.muted = muted;
     }
-    super.didChangeDependencies();
+    super.didDependenciesChanged();
   }
 
   @override

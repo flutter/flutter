@@ -27,8 +27,8 @@ void main() {
     expect(innerTracker.captionFontSize, 13.0);
   });
 
-  testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didChangeDependencies', (WidgetTester tester) async {
-    // PageView calls ScrollPosition.dispose() during didChangeDependencies.
+  testWidgets('Localizations is compatible with ChangeNotifier.dispose() called during didDependenciesChanged', (WidgetTester tester) async {
+    // PageView calls ScrollPosition.dispose() during didDependenciesChanged.
     await tester.pumpWidget(
       new MaterialApp(
         supportedLocales: const <Locale>[
@@ -50,7 +50,7 @@ void main() {
 }
 
 /// A localizations delegate that does not contain any useful data, and is only
-/// used to trigger didChangeDependencies upon locale change.
+/// used to trigger didDependenciesChanged upon locale change.
 class _DummyLocalizationsDelegate extends LocalizationsDelegate<DummyLocalizations> {
   @override
   Future<DummyLocalizations> load(Locale locale) async => new DummyLocalizations();
