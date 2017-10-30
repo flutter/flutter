@@ -446,6 +446,9 @@ class _AssetDirectoryCache {
     final String assetName = fs.path.basename(assetPath);
     final String directory = fs.path.dirname(assetPath);
 
+    if (!fs.directory(directory).existsSync())
+      return const <String>[];
+
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
       for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
