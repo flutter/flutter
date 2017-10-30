@@ -31,7 +31,7 @@ void PlatformViewIOS::Attach() {
 
 void PlatformViewIOS::Attach(fxl::Closure firstFrameCallback) {
   CreateEngine();
-  PostAddToShellTask();
+
   if (firstFrameCallback) {
     firstFrameCallback_ = firstFrameCallback;
     rasterizer_->AddNextFrameCallback([weakSelf = GetWeakPtr()] {
