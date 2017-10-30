@@ -17,6 +17,7 @@ import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
 import '../lib/src/base/terminal.dart';
 import '../lib/src/cache.dart';
+import '../lib/src/disabled_usage.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
 import '../lib/src/usage.dart';
@@ -54,7 +55,7 @@ Future<Null> main(List<String> args) async {
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Usage, () => new Usage());
+    context.putIfAbsent(Usage, () => new DisabledUsage());
     return run(args);
   });
 }
