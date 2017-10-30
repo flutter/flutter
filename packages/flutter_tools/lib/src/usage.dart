@@ -95,15 +95,15 @@ class Usage {
   }
 
   void sendTiming(
-    String category, 
-    String variableName, 
+    String category,
+    String variableName,
     Duration duration, {
     String label,
     }) {
     if (!suppressAnalytics) {
       _analytics.sendTiming(
-        variableName, 
-        duration.inMilliseconds, 
+        variableName,
+        duration.inMilliseconds,
         category: category,
         label: label,
       );
