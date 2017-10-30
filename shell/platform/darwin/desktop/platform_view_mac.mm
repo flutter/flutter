@@ -29,7 +29,6 @@ PlatformViewMac::~PlatformViewMac() = default;
 
 void PlatformViewMac::Attach() {
   CreateEngine();
-  PostAddToShellTask();
 }
 
 void PlatformViewMac::SetupAndLoadDart() {

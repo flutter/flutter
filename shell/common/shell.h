@@ -5,22 +5,24 @@
 #ifndef SHELL_COMMON_SHELL_H_
 #define SHELL_COMMON_SHELL_H_
 
+#include <unordered_set>
+
 #include "flutter/fml/thread.h"
 #include "flutter/shell/common/tracing_controller.h"
 #include "lib/fxl/command_line.h"
+#include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/ref_ptr.h"
 #include "lib/fxl/memory/weak_ptr.h"
+#include "lib/fxl/synchronization/mutex.h"
+#include "lib/fxl/synchronization/thread_annotations.h"
 #include "lib/fxl/synchronization/thread_checker.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 #include "lib/fxl/tasks/task_runner.h"
 
-#include <mutex>
-
 namespace shell {
 
 class PlatformView;
-class Rasterizer;
 
 class Shell {
  public:
@@ -35,31 +37,12 @@ class Shell {
 
   const fxl::CommandLine& GetCommandLine() const;
 
-  TracingController& tracing_controller();
+  void AddPlatformView(PlatformView* platform_view);
 
-  // Maintain a list of rasterizers.
-  // These APIs must only be accessed on the GPU thread.
-  void AddRasterizer(const fxl::WeakPtr<Rasterizer>& rasterizer);
-  void PurgeRasterizers();
-  void GetRasterizers(std::vector<fxl::WeakPtr<Rasterizer>>* rasterizer);
+  void RemovePlatformView(PlatformView* platform_view);
 
-  // List of PlatformViews.
-
-  // These APIs can be called from any thread.
-  void AddPlatformView(const std::shared_ptr<PlatformView>& platform_view);
-  void PurgePlatformViews();
-  void GetPlatformViews(
-      std::vector<std::weak_ptr<PlatformView>>* platform_views);
-
-  struct PlatformViewInfo {
-    uintptr_t view_id;
-    int64_t isolate_id;
-    std::string isolate_name;
-  };
-
-  // These APIs can be called from any thread.
-  // Return the list of platform view ids at the time of this call.
-  void GetPlatformViewIds(std::vector<PlatformViewInfo>* platform_view_ids);
+  void IteratePlatformViews(
+      std::function<bool /* continue */ (PlatformView*)> iterator) const;
 
   // Attempt to run a script inside a flutter view indicated by |view_id|.
   // Will set |view_existed| to true if the view was found and false otherwise.
@@ -72,12 +55,24 @@ class Shell {
                          std::string* isolate_name);
 
  private:
+  fxl::CommandLine command_line_;
+  std::unique_ptr<fml::Thread> gpu_thread_;
+  std::unique_ptr<fml::Thread> ui_thread_;
+  std::unique_ptr<fml::Thread> io_thread_;
+  std::unique_ptr<fxl::ThreadChecker> gpu_thread_checker_;
+  std::unique_ptr<fxl::ThreadChecker> ui_thread_checker_;
+  TracingController tracing_controller_;
+  mutable fxl::Mutex platform_views_mutex_;
+  std::unordered_set<PlatformView*> platform_views_
+      FXL_GUARDED_BY(platform_views_mutex_);
+
   static void Init(fxl::CommandLine command_line,
                    const std::string& bundle_path);
 
   Shell(fxl::CommandLine command_line);
 
   void InitGpuThread();
+
   void InitUIThread();
 
   void RunInPlatformViewUIThread(uintptr_t view_id,
@@ -88,22 +83,6 @@ class Shell {
                                  int64_t* dart_isolate_id,
                                  std::string* isolate_name,
                                  fxl::AutoResetWaitableEvent* latch);
-
-  fxl::CommandLine command_line_;
-
-  std::unique_ptr<fml::Thread> gpu_thread_;
-  std::unique_ptr<fml::Thread> ui_thread_;
-  std::unique_ptr<fml::Thread> io_thread_;
-
-  std::unique_ptr<fxl::ThreadChecker> gpu_thread_checker_;
-  std::unique_ptr<fxl::ThreadChecker> ui_thread_checker_;
-
-  TracingController tracing_controller_;
-
-  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers_;
-  std::vector<std::weak_ptr<PlatformView>> platform_views_;
-
-  std::mutex platform_views_mutex_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Shell);
 };

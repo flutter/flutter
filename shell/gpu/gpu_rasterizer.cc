@@ -17,16 +17,9 @@
 namespace shell {
 
 GPURasterizer::GPURasterizer(std::unique_ptr<flow::ProcessInfo> info)
-    : compositor_context_(std::move(info)), weak_factory_(this) {
-  auto weak_ptr = weak_factory_.GetWeakPtr();
-  blink::Threads::Gpu()->PostTask(
-      [weak_ptr]() { Shell::Shared().AddRasterizer(weak_ptr); });
-}
+    : compositor_context_(std::move(info)), weak_factory_(this) {}
 
-GPURasterizer::~GPURasterizer() {
-  weak_factory_.InvalidateWeakPtrs();
-  Shell::Shared().PurgeRasterizers();
-}
+GPURasterizer::~GPURasterizer() = default;
 
 fxl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();

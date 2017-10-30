@@ -74,7 +74,6 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   explicit PlatformView(std::unique_ptr<Rasterizer> rasterizer);
 
   void CreateEngine();
-  void PostAddToShellTask();
 
   void SetupResourceContextOnIOThreadPerform(
       fxl::AutoResetWaitableEvent* event);

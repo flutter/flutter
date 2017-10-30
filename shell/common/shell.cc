@@ -28,14 +28,6 @@ namespace {
 
 static Shell* g_shell = nullptr;
 
-bool IsInvalid(const fxl::WeakPtr<Rasterizer>& rasterizer) {
-  return !rasterizer;
-}
-
-bool IsViewInvalid(const std::weak_ptr<PlatformView>& platform_view) {
-  return platform_view.expired();
-}
-
 template <typename T>
 bool GetSwitchValue(const fxl::CommandLine& command_line,
                     Switch sw,
@@ -195,10 +187,6 @@ const fxl::CommandLine& Shell::GetCommandLine() const {
   return command_line_;
 }
 
-TracingController& Shell::tracing_controller() {
-  return tracing_controller_;
-}
-
 void Shell::InitGpuThread() {
   gpu_thread_checker_.reset(new fxl::ThreadChecker());
 }
@@ -207,61 +195,32 @@ void Shell::InitUIThread() {
   ui_thread_checker_.reset(new fxl::ThreadChecker());
 }
 
-void Shell::AddRasterizer(const fxl::WeakPtr<Rasterizer>& rasterizer) {
-  FXL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCreationThreadCurrent());
-  rasterizers_.push_back(rasterizer);
-}
-
-void Shell::PurgeRasterizers() {
-  FXL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCreationThreadCurrent());
-  rasterizers_.erase(
-      std::remove_if(rasterizers_.begin(), rasterizers_.end(), IsInvalid),
-      rasterizers_.end());
-}
-
-void Shell::GetRasterizers(std::vector<fxl::WeakPtr<Rasterizer>>* rasterizers) {
-  FXL_DCHECK(gpu_thread_checker_ &&
-             gpu_thread_checker_->IsCreationThreadCurrent());
-  *rasterizers = rasterizers_;
-}
-
-void Shell::AddPlatformView(
-    const std::shared_ptr<PlatformView>& platform_view) {
-  std::lock_guard<std::mutex> lk(platform_views_mutex_);
-  if (platform_view) {
-    platform_views_.push_back(platform_view);
+void Shell::AddPlatformView(PlatformView* platform_view) {
+  if (platform_view == nullptr) {
+    return;
   }
+  fxl::MutexLocker lock(&platform_views_mutex_);
+  platform_views_.insert(platform_view);
 }
 
-void Shell::PurgePlatformViews() {
-  std::lock_guard<std::mutex> lk(platform_views_mutex_);
-  platform_views_.erase(std::remove_if(platform_views_.begin(),
-                                       platform_views_.end(), IsViewInvalid),
-                        platform_views_.end());
+void Shell::RemovePlatformView(PlatformView* platform_view) {
+  if (platform_view == nullptr) {
+    return;
+  }
+  fxl::MutexLocker lock(&platform_views_mutex_);
+  platform_views_.erase(platform_view);
 }
 
-void Shell::GetPlatformViews(
-    std::vector<std::weak_ptr<PlatformView>>* platform_views) {
-  std::lock_guard<std::mutex> lk(platform_views_mutex_);
-  *platform_views = platform_views_;
-}
-
-void Shell::GetPlatformViewIds(
-    std::vector<PlatformViewInfo>* platform_view_ids) {
-  std::lock_guard<std::mutex> lk(platform_views_mutex_);
-  for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
-    std::shared_ptr<PlatformView> view = it->lock();
-    if (!view) {
-      // Skip dead views.
-      continue;
+void Shell::IteratePlatformViews(
+    std::function<bool(PlatformView*)> iterator) const {
+  if (iterator == nullptr) {
+    return;
+  }
+  fxl::MutexLocker lock(&platform_views_mutex_);
+  for (PlatformView* view : platform_views_) {
+    if (!iterator(view)) {
+      return;
     }
-    PlatformViewInfo info;
-    info.view_id = reinterpret_cast<uintptr_t>(view.get());
-    info.isolate_id = view->engine().GetUIIsolateMainPort();
-    info.isolate_name = view->engine().GetUIIsolateName();
-    platform_view_ids->push_back(info);
   }
 }
 
@@ -302,18 +261,28 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
 
   *view_existed = false;
 
-  for (auto it = platform_views_.begin(); it != platform_views_.end(); it++) {
-    std::shared_ptr<PlatformView> view = it->lock();
-    if (!view)
-      continue;
-    if (reinterpret_cast<uintptr_t>(view.get()) == view_id) {
-      *view_existed = true;
-      view->RunFromSource(assets_directory, main, packages);
-      *dart_isolate_id = view->engine().GetUIIsolateMainPort();
-      *isolate_name = view->engine().GetUIIsolateName();
-      break;
-    }
-  }
+  IteratePlatformViews(
+      [
+        view_id,                                         // argument
+        assets_directory = std::move(assets_directory),  // argument
+        main = std::move(main),                          // argument
+        packages = std::move(packages),                  // argument
+        &view_existed,                                   // out
+        &dart_isolate_id,                                // out
+        &isolate_name                                    // out
+      ](PlatformView * view)
+          ->bool {
+            if (reinterpret_cast<uintptr_t>(view) != view_id) {
+              // Keep looking.
+              return true;
+            }
+            *view_existed = true;
+            view->RunFromSource(assets_directory, main, packages);
+            *dart_isolate_id = view->engine().GetUIIsolateMainPort();
+            *isolate_name = view->engine().GetUIIsolateName();
+            // We found the requested view. Stop iterating over platform views.
+            return false;
+          });
 
   latch->Signal();
 }

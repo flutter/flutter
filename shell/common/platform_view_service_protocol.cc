@@ -210,29 +210,21 @@ bool PlatformViewServiceProtocol::ListViews(const char* method,
                                             intptr_t num_params,
                                             void* user_data,
                                             const char** json_object) {
-  // Ask the Shell for the list of platform views.
-  Shell& shell = Shell::Shared();
-  std::vector<Shell::PlatformViewInfo> platform_views;
-  shell.GetPlatformViewIds(&platform_views);
-
   std::stringstream response;
-
   response << "{\"type\":\"FlutterViewList\",\"views\":[";
   bool prefix_comma = false;
-  for (auto it = platform_views.begin(); it != platform_views.end(); it++) {
-    uintptr_t view_id = it->view_id;
-    int64_t isolate_id = it->isolate_id;
-    const std::string& isolate_name = it->isolate_name;
-    if (!view_id) {
-      continue;
-    }
-    if (prefix_comma) {
-      response << ',';
-    } else {
-      prefix_comma = true;
-    }
-    AppendFlutterView(&response, view_id, isolate_id, isolate_name);
-  }
+  Shell::Shared().IteratePlatformViews(
+      [&response, &prefix_comma](PlatformView* view) -> bool {
+        if (prefix_comma) {
+          response << ',';
+        } else {
+          prefix_comma = true;
+        }
+        AppendFlutterView(&response, reinterpret_cast<uintptr_t>(view),
+                          view->engine().GetUIIsolateMainPort(),
+                          view->engine().GetUIIsolateName());
+        return true;
+      });
   response << "]}";
   // Copy the response.
   *json_object = strdup(response.str().c_str());
@@ -256,6 +248,18 @@ static sk_sp<SkData> EncodeBitmapAsPNG(const SkBitmap& bitmap) {
   sk_sp<SkData> data(serializer.encodeToData(pixmap));
 
   return data;
+}
+
+static fxl::WeakPtr<Rasterizer> GetRandomRasterizer() {
+  fxl::WeakPtr<Rasterizer> rasterizer;
+  Shell::Shared().IteratePlatformViews(
+      [&rasterizer](PlatformView* view) -> bool {
+        rasterizer = view->rasterizer().GetWeakRasterizerPtr();
+        // We just grab the first rasterizer so there is no need to iterate
+        // further.
+        return false;
+      });
+  return rasterizer;
 }
 
 bool PlatformViewServiceProtocol::Screenshot(const char* method,
@@ -291,13 +295,9 @@ bool PlatformViewServiceProtocol::Screenshot(const char* method,
 }
 
 void PlatformViewServiceProtocol::ScreenshotGpuTask(SkBitmap* bitmap) {
-  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers;
-  Shell::Shared().GetRasterizers(&rasterizers);
-  if (rasterizers.size() != 1)
-    return;
+  auto rasterizer = GetRandomRasterizer();
 
-  Rasterizer* rasterizer = rasterizers[0].get();
-  if (rasterizer == nullptr)
+  if (!rasterizer)
     return;
 
   flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();
@@ -357,13 +357,9 @@ bool PlatformViewServiceProtocol::ScreenshotSkp(const char* method,
 }
 
 sk_sp<SkPicture> PlatformViewServiceProtocol::ScreenshotSkpGpuTask() {
-  std::vector<fxl::WeakPtr<Rasterizer>> rasterizers;
-  Shell::Shared().GetRasterizers(&rasterizers);
-  if (rasterizers.size() != 1)
-    return nullptr;
+  auto rasterizer = GetRandomRasterizer();
 
-  Rasterizer* rasterizer = rasterizers[0].get();
-  if (rasterizer == nullptr)
+  if (!rasterizer)
     return nullptr;
 
   flow::LayerTree* layer_tree = rasterizer->GetLastLayerTree();

@@ -14,7 +14,6 @@ PlatformViewTest::PlatformViewTest()
 
 void PlatformViewTest::Attach() {
   CreateEngine();
-  PostAddToShellTask();
 }
 
 PlatformViewTest::~PlatformViewTest() = default;
