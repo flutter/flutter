@@ -34,6 +34,7 @@ class ConfigCommand extends FlutterCommand {
   @override
   final String description =
     'Configure Flutter settings.\n\n'
+    'To remove a setting, configure it to an empty string.\n\n'
     'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve\n'
     'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
 
