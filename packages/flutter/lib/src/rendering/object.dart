@@ -14,7 +14,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
-import 'node.dart';
 import 'semantics.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;

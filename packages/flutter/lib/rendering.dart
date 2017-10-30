@@ -23,6 +23,7 @@
 library rendering;
 
 export 'package:flutter/foundation.dart' show
+  AbstractNode,
   VoidCallback,
   ValueChanged,
   ValueGetter,
@@ -42,7 +43,6 @@ export 'src/rendering/flow.dart';
 export 'src/rendering/image.dart';
 export 'src/rendering/layer.dart';
 export 'src/rendering/list_body.dart';
-export 'src/rendering/node.dart';
 export 'src/rendering/object.dart';
 export 'src/rendering/paragraph.dart';
 export 'src/rendering/performance_overlay.dart';
