@@ -139,8 +139,6 @@ void PlatformViewAndroid::Attach() {
   SetupResourceContextOnIOThread();
 
   UpdateThreadPriorities();
-
-  PostAddToShellTask();
 }
 
 void PlatformViewAndroid::Detach() {

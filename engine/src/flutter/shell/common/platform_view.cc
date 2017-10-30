@@ -17,10 +17,12 @@
 namespace shell {
 
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
-    : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {}
+    : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {
+  Shell::Shared().AddPlatformView(this);
+}
 
 PlatformView::~PlatformView() {
-  blink::Threads::UI()->PostTask([] { Shell::Shared().PurgePlatformViews(); });
+  Shell::Shared().RemovePlatformView(this);
 
   Rasterizer* rasterizer = rasterizer_.release();
   blink::Threads::Gpu()->PostTask([rasterizer]() { delete rasterizer; });
@@ -38,13 +40,6 @@ void PlatformView::SetRasterizer(std::unique_ptr<Rasterizer> rasterizer) {
 
 void PlatformView::CreateEngine() {
   engine_.reset(new Engine(this));
-}
-
-// Add this to the shell's list of PlatformVIews.
-// Subclasses should call this after the object is fully constructed.
-void PlatformView::PostAddToShellTask() {
-  blink::Threads::UI()->PostTask(
-      [self = shared_from_this()] { Shell::Shared().AddPlatformView(self); });
 }
 
 void PlatformView::DispatchPlatformMessage(

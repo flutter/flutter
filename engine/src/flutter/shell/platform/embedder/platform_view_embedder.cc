@@ -37,7 +37,6 @@ bool PlatformViewEmbedder::SurfaceSupportsSRGB() const {
 
 void PlatformViewEmbedder::Attach() {
   CreateEngine();
-  PostAddToShellTask();
   NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(this));
 }
 
