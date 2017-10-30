@@ -38,20 +38,6 @@ class ProtocolDiscovery {
     );
   }
 
-  factory ProtocolDiscovery.diagnosticService(
-    DeviceLogReader logReader, {
-    DevicePortForwarder portForwarder,
-    int hostPort,
-  }) {
-    const String kDiagnosticService = 'Diagnostic server';
-    return new ProtocolDiscovery._(
-      logReader, kDiagnosticService,
-      portForwarder: portForwarder,
-      hostPort: hostPort,
-      defaultHostPort: kDefaultDiagnosticPort,
-    );
-  }
-
   final DeviceLogReader logReader;
   final String serviceName;
   final DevicePortForwarder portForwarder;

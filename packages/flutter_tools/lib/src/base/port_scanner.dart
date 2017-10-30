@@ -30,11 +30,11 @@ abstract class PortScanner {
   /// If [defaultPort] is available, this will return it. Otherwise, it will
   /// search for an avaiable port close to [defaultPort]. If it cannot find one,
   /// it will return any available port.
-  Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
+  Future<int> findPreferredPort(int defaultPort) async {
     int iterationCount = 0;
 
     while (iterationCount < _kMaxSearchIterations) {
-      final int port = defaultPort + iterationCount * searchStep;
+      final int port = defaultPort + iterationCount;
       if (await isPortAvailable(port))
         return port;
       iterationCount++;

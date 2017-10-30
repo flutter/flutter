@@ -351,8 +351,6 @@ class IOSSimulator extends Device {
 
       final int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add('--observatory-port=$observatoryPort');
-      final int diagnosticPort = await debuggingOptions.findBestDiagnosticPort();
-      args.add('--diagnostic-port=$diagnosticPort');
     }
 
     ProtocolDiscovery observatoryDiscovery;
