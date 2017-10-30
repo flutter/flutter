@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/testing/testing.gni")
+
 source_set("embedder") {
   sources = [
     "embedder.cc",
@@ -26,6 +28,10 @@ source_set("embedder") {
   public_configs = [ "$flutter_root:config" ]
 }
 
+test_fixtures("fixtures") {
+  fixtures = [ "fixtures/simple_main.dart" ]
+}
+
 executable("embedder_unittests") {
   testonly = true
 
@@ -37,6 +43,7 @@ executable("embedder_unittests") {
 
   deps = [
     ":embedder",
+    ":fixtures",
     "$flutter_root/testing",
   ]
 }
