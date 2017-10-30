@@ -87,7 +87,7 @@ class MediaQueryData {
   ///   "Use 24-hour format". It applies to any locale used by the application,
   ///   whether it is the system-wide locale, or the custom locale set by the
   ///   application.
-  /// - On iOS this flag is set to `true` when the user setting called "24-Hour
+  /// - On iOS this flag is set to true when the user setting called "24-Hour
   ///   Time" is set or the system-wide locale's default uses 24-hour
   ///   formatting.
   final bool alwaysUse24HourFormat;

@@ -133,9 +133,8 @@ abstract class MaterialLocalizations {
   ///
   /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
   /// rather than the default for the current locale. This value is usually
-  /// passed from [MediaQueryData.alwaysUse24HourFormat], and it has platform-
-  /// specific behavior. For more details, see the documentation for
-  /// [MediaQueryData.alwaysUse24HourFormat].
+  /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
+  /// specific behavior.
   String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
@@ -286,17 +285,19 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
     if (alwaysUse24HourFormat)
       return _formatTwoDigitZeroPad(timeOfDay.hour);
-    else
-      return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+
+    return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
   }
 
   /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
   /// range. Not designed to format values outside this range.
   String _formatTwoDigitZeroPad(int number) {
+    assert(0 <= number && number < 100);
+
     if (number < 10)
       return '0$number';
-    else
-      return '$number';
+
+    return '$number';
   }
 
   @override

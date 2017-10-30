@@ -68,6 +68,7 @@ class _TimePickerFragmentContext {
     @required this.inactiveStyle,
     @required this.onTimeChange,
     @required this.onModeChange,
+    @required this.alwaysUse24HourFormat,
   }) : assert(headerTextTheme != null),
        assert(textDirection != null),
        assert(selectedTime != null),
@@ -77,7 +78,8 @@ class _TimePickerFragmentContext {
        assert(inactiveColor != null),
        assert(inactiveStyle != null),
        assert(onTimeChange != null),
-       assert(onModeChange != null);
+       assert(onModeChange != null),
+       assert(alwaysUse24HourFormat != null);
 
   final TextTheme headerTextTheme;
   final TextDirection textDirection;
@@ -89,6 +91,7 @@ class _TimePickerFragmentContext {
   final TextStyle inactiveStyle;
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
+  final bool alwaysUse24HourFormat;
 }
 
 /// Contains the [widget] and layout properties of an atom of time information,
@@ -239,7 +242,7 @@ class _HourControl extends StatelessWidget {
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
       child: new Text(localizations.formatHour(
         fragmentContext.selectedTime,
-        alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+        alwaysUse24HourFormat: fragmentContext.alwaysUse24HourFormat,
       ), style: hourStyle),
     );
   }
@@ -329,7 +332,7 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   }
 
   // Convenience function for creating a time header format with up to two pieces.
-  _TimePickerHeaderFormat format(int centrepieceIndex, _TimePickerHeaderPiece piece1,
+  _TimePickerHeaderFormat format(_TimePickerHeaderPiece piece1,
       [ _TimePickerHeaderPiece piece2 ]) {
     final List<_TimePickerHeaderPiece> pieces = <_TimePickerHeaderPiece>[];
     switch (context.textDirection) {
@@ -342,9 +345,15 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
         if (piece2 != null)
           pieces.add(piece2);
         pieces.add(piece1);
-        centrepieceIndex = pieces.length - centrepieceIndex - 1;
         break;
     }
+    int centrepieceIndex;
+    for (int i = 0; i < pieces.length; i += 1) {
+      if (pieces[i].pivotIndex >= 0) {
+        centrepieceIndex = i;
+      }
+    }
+    assert(centrepieceIndex != null);
     return new _TimePickerHeaderFormat(centrepieceIndex, pieces);
   }
 
@@ -363,27 +372,28 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
   switch (timeOfDayFormat) {
     case TimeOfDayFormat.h_colon_mm_space_a:
       return format(
-        0,
         piece(
           pivotIndex: 1,
           fragment1: hour(),
           fragment2: string(_TimePickerHeaderId.colon, ':'),
           fragment3: minute(),
         ),
-        piece(
-          bottomMargin: _kVerticalGap,
-          fragment1: dayPeriod(),
-        ),
+        context.alwaysUse24HourFormat
+          ? null
+          : piece(
+            bottomMargin: _kVerticalGap,
+            fragment1: dayPeriod(),
+          ),
       );
     case TimeOfDayFormat.H_colon_mm:
-      return format(0, piece(
+      return format(piece(
         pivotIndex: 1,
         fragment1: hour(),
         fragment2: string(_TimePickerHeaderId.colon, ':'),
         fragment3: minute(),
       ));
     case TimeOfDayFormat.HH_dot_mm:
-      return format(0, piece(
+      return format(piece(
         pivotIndex: 1,
         fragment1: hour(),
         fragment2: string(_TimePickerHeaderId.dot, '.'),
@@ -391,11 +401,12 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
       ));
     case TimeOfDayFormat.a_space_h_colon_mm:
       return format(
-        1,
-        piece(
-          bottomMargin: _kVerticalGap,
-          fragment1: dayPeriod(),
-        ),
+        context.alwaysUse24HourFormat
+            ? null
+            : piece(
+                bottomMargin: _kVerticalGap,
+                fragment1: dayPeriod(),
+              ),
         piece(
           pivotIndex: 1,
           fragment1: hour(),
@@ -404,14 +415,14 @@ _TimePickerHeaderFormat _buildHeaderFormat(TimeOfDayFormat timeOfDayFormat, _Tim
         ),
       );
     case TimeOfDayFormat.frenchCanadian:
-      return format(0, piece(
+      return format(piece(
         pivotIndex: 1,
         fragment1: hour(),
         fragment2: string(_TimePickerHeaderId.hString, 'h'),
         fragment3: minute(),
       ));
     case TimeOfDayFormat.HH_colon_mm:
-      return format(0, piece(
+      return format(piece(
         pivotIndex: 1,
         fragment1: hour(),
         fragment2: string(_TimePickerHeaderId.colon, ':'),
@@ -573,8 +584,10 @@ class _TimePickerHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugCheckHasMediaQuery(context);
     final ThemeData themeData = Theme.of(context);
     final TimeOfDayFormat timeOfDayFormat = MaterialLocalizations.of(context).timeOfDayFormat;
+    final MediaQueryData media = MediaQuery.of(context);
 
     EdgeInsets padding;
     double height;
@@ -628,6 +641,7 @@ class _TimePickerHeader extends StatelessWidget {
       inactiveStyle: baseHeaderStyle.copyWith(color: inactiveColor),
       onTimeChange: onChanged,
       onModeChange: _handleChangeMode,
+      alwaysUse24HourFormat: media.alwaysUse24HourFormat,
     );
 
     final _TimePickerHeaderFormat format = _buildHeaderFormat(timeOfDayFormat, fragmentContext);
@@ -703,7 +717,7 @@ const List<TimeOfDay> _pmHours = const <TimeOfDay>[
   const TimeOfDay(hour: 23, minute: 0),
 ];
 
-List<TextPainter> _init24HourInnerRing(TextTheme textTheme, MaterialLocalizations localizations, bool alwaysUse24HourFormat) {
+List<TextPainter> _build24HourInnerRing(TextTheme textTheme, MaterialLocalizations localizations, bool alwaysUse24HourFormat) {
   return _initPainters(textTheme, _amHours
       .map((TimeOfDay timeOfDay) {
         return localizations.formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
@@ -711,7 +725,7 @@ List<TextPainter> _init24HourInnerRing(TextTheme textTheme, MaterialLocalization
       .toList());
 }
 
-List<TextPainter> _init24HourOuterRing(TextTheme textTheme, MaterialLocalizations localizations, bool alwaysUse24HourFormat) {
+List<TextPainter> _build24HourOuterRing(TextTheme textTheme, MaterialLocalizations localizations, bool alwaysUse24HourFormat) {
   return _initPainters(textTheme, _pmHours
       .map((TimeOfDay timeOfDay) {
         return localizations.formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
@@ -998,6 +1012,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    debugCheckHasMediaQuery(context);
     final ThemeData themeData = Theme.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final MediaQueryData media = MediaQuery.of(context);
@@ -1020,10 +1035,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     switch (widget.mode) {
       case _TimePickerMode.hour:
         if (widget.is24h) {
-          primaryOuterLabels = _init24HourOuterRing(theme.textTheme, localizations, media.alwaysUse24HourFormat);
-          secondaryOuterLabels = _init24HourOuterRing(theme.accentTextTheme, localizations, media.alwaysUse24HourFormat);
-          primaryInnerLabels = _init24HourInnerRing(theme.textTheme, localizations, media.alwaysUse24HourFormat);
-          secondaryInnerLabels = _init24HourInnerRing(theme.accentTextTheme, localizations, media.alwaysUse24HourFormat);
+          primaryOuterLabels = _build24HourOuterRing(theme.textTheme, localizations, media.alwaysUse24HourFormat);
+          secondaryOuterLabels = _build24HourOuterRing(theme.accentTextTheme, localizations, media.alwaysUse24HourFormat);
+          primaryInnerLabels = _build24HourInnerRing(theme.textTheme, localizations, media.alwaysUse24HourFormat);
+          secondaryInnerLabels = _build24HourInnerRing(theme.accentTextTheme, localizations, media.alwaysUse24HourFormat);
         } else {
           primaryOuterLabels = _init12HourOuterRing(theme.textTheme, localizations, media.alwaysUse24HourFormat);
           secondaryOuterLabels = _init12HourOuterRing(theme.accentTextTheme, localizations, media.alwaysUse24HourFormat);
@@ -1131,6 +1146,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    debugCheckHasMediaQuery(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat;
     final MediaQueryData media = MediaQuery.of(context);
