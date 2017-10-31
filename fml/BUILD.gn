@@ -8,6 +8,9 @@ source_set("fml") {
     "icu_util.h",
     "mapping.cc",
     "mapping.h",
+    "memory/weak_ptr.h",
+    "memory/weak_ptr_internal.cc",
+    "memory/weak_ptr_internal.h",
     "message_loop.cc",
     "message_loop.h",
     "message_loop_impl.cc",
@@ -24,8 +27,8 @@ source_set("fml") {
   ]
 
   deps = [
-    "//third_party/dart/runtime:dart_api",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:dart_api",
 
     # These need to be in sync with the Fuchsia buildroot.
     "//third_party/icu",
@@ -33,9 +36,7 @@ source_set("fml") {
 
   configs += [ "//third_party/icu:icu_config" ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   libs = []
 
@@ -108,15 +109,16 @@ executable("fml_unittests") {
   testonly = true
 
   sources = [
+    "memory/weak_ptr_unittest.cc",
     "message_loop_unittests.cc",
     "thread_local_unittests.cc",
     "thread_unittests.cc",
   ]
 
   deps = [
-    "//third_party/dart/runtime:libdart_jit",
     "$flutter_root/fml",
     "$flutter_root/testing",
     "//garnet/public/lib/fxl",
+    "//third_party/dart/runtime:libdart_jit",
   ]
 }

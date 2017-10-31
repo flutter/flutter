@@ -250,8 +250,8 @@ static sk_sp<SkData> EncodeBitmapAsPNG(const SkBitmap& bitmap) {
   return data;
 }
 
-static fxl::WeakPtr<Rasterizer> GetRandomRasterizer() {
-  fxl::WeakPtr<Rasterizer> rasterizer;
+static fml::WeakPtr<Rasterizer> GetRandomRasterizer() {
+  fml::WeakPtr<Rasterizer> rasterizer;
   Shell::Shared().IteratePlatformViews(
       [&rasterizer](PlatformView* view) -> bool {
         rasterizer = view->rasterizer().GetWeakRasterizerPtr();

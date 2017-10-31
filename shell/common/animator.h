@@ -18,13 +18,13 @@ namespace shell {
 
 class Animator {
  public:
-  Animator(fxl::WeakPtr<Rasterizer> rasterizer,
+  Animator(fml::WeakPtr<Rasterizer> rasterizer,
            VsyncWaiter* waiter,
            Engine* engine);
 
   ~Animator();
 
-  void set_rasterizer(fxl::WeakPtr<Rasterizer> rasterizer) {
+  void set_rasterizer(fml::WeakPtr<Rasterizer> rasterizer) {
     rasterizer_ = rasterizer;
   }
 
@@ -46,7 +46,7 @@ class Animator {
 
   const char* FrameParity();
 
-  fxl::WeakPtr<Rasterizer> rasterizer_;
+  fml::WeakPtr<Rasterizer> rasterizer_;
   VsyncWaiter* waiter_;
   Engine* engine_;
 
@@ -59,7 +59,7 @@ class Animator {
   bool paused_;
   bool frame_scheduled_;
 
-  fxl::WeakPtrFactory<Animator> weak_factory_;
+  fml::WeakPtrFactory<Animator> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Animator);
 };

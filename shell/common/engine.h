@@ -31,7 +31,7 @@ class Engine : public blink::RuntimeDelegate {
 
   ~Engine() override;
 
-  fxl::WeakPtr<Engine> GetWeakPtr();
+  fml::WeakPtr<Engine> GetWeakPtr();
 
   static void Init(const std::string& bundle_path);
 
@@ -75,7 +75,7 @@ class Engine : public blink::RuntimeDelegate {
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
 
-  void set_rasterizer(fxl::WeakPtr<Rasterizer> rasterizer);
+  void set_rasterizer(fml::WeakPtr<Rasterizer> rasterizer);
 
  private:
   // RuntimeDelegate methods:
@@ -122,7 +122,7 @@ class Engine : public blink::RuntimeDelegate {
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
   bool have_surface_;
-  fxl::WeakPtrFactory<Engine> weak_factory_;
+  fml::WeakPtrFactory<Engine> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Engine);
 };

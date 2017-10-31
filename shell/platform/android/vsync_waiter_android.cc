@@ -26,8 +26,8 @@ VsyncWaiterAndroid::~VsyncWaiterAndroid() = default;
 void VsyncWaiterAndroid::AsyncWaitForVsync(Callback callback) {
   FXL_DCHECK(!callback_);
   callback_ = std::move(callback);
-  fxl::WeakPtr<VsyncWaiterAndroid>* weak =
-      new fxl::WeakPtr<VsyncWaiterAndroid>();
+  fml::WeakPtr<VsyncWaiterAndroid>* weak =
+      new fml::WeakPtr<VsyncWaiterAndroid>();
   *weak = weak_factory_.GetWeakPtr();
 
   blink::Threads::Platform()->PostTask([weak] {
@@ -70,8 +70,8 @@ static void OnNativeVsync(JNIEnv* env,
     TRACE_EVENT2("flutter", "VSYNC", "mode", "basic", "deadline", deadline);
   }
 #endif
-  fxl::WeakPtr<VsyncWaiterAndroid>* weak =
-      reinterpret_cast<fxl::WeakPtr<VsyncWaiterAndroid>*>(cookie);
+  fml::WeakPtr<VsyncWaiterAndroid>* weak =
+      reinterpret_cast<fml::WeakPtr<VsyncWaiterAndroid>*>(cookie);
   VsyncWaiterAndroid* waiter = weak->get();
   delete weak;
   if (waiter) {
