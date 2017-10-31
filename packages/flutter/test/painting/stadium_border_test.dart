@@ -37,7 +37,7 @@ void main() {
 
   test('StadiumBorder and CircleBorder', () {
     final StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
-    final CircleBorder circle = const CircleBorder(BorderSide.none);
+    final CircleBorder circle = const CircleBorder(side: BorderSide.none);
     final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
     final Matcher looksLikeS = isPathThat(
       includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],

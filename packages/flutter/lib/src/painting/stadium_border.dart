@@ -26,8 +26,7 @@ class StadiumBorder extends ShapeBorder {
   /// Create a stadium border.
   ///
   /// The [side] argument must not be null.
-  const StadiumBorder({this.side = BorderSide.none})
-      : assert(side != null);
+  const StadiumBorder({this.side = BorderSide.none}) : assert(side != null);
 
   /// The style of this border.
   final BorderSide side;
@@ -102,8 +101,8 @@ class StadiumBorder extends ShapeBorder {
       case BorderStyle.solid:
         final Radius radius = new Radius.circular(rect.shortestSide / 2.0);
         canvas.drawRRect(
-            new RRect.fromRectAndRadius(rect, radius).deflate(side.width / 2.0),
-            side.toPaint(),
+          new RRect.fromRectAndRadius(rect, radius).deflate(side.width / 2.0),
+          side.toPaint(),
         );
     }
   }
@@ -127,11 +126,11 @@ class StadiumBorder extends ShapeBorder {
 
 // Class to help with transitioning to/from a CircleBorder.
 class _StadiumToCircleBorder extends ShapeBorder {
-  _StadiumToCircleBorder({
+  const _StadiumToCircleBorder({
     this.side: BorderSide.none,
-    @required this.circleness,
+    this.circleness: 0.0,
   }) : assert(side != null),
-        assert(circleness != null);
+       assert(circleness != null);
 
   final BorderSide side;
 
@@ -274,13 +273,13 @@ class _StadiumToCircleBorder extends ShapeBorder {
 
 // Class to help with transitioning to/from a RoundedRectBorder.
 class _StadiumToRoundedRectangleBorder extends ShapeBorder {
-  _StadiumToRoundedRectangleBorder({
+  const _StadiumToRoundedRectangleBorder({
     this.side: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
-    @required this.rectness,
+    this.rectness: 0.0,
   }) : assert(side != null),
-        assert(borderRadius != null),
-        assert(rectness != null);
+       assert(borderRadius != null),
+       assert(rectness != null);
 
   final BorderSide side;
 
@@ -356,9 +355,9 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
 
   BorderRadius _adjustBorderRadius(Rect rect) {
     return BorderRadius.lerp(
-        borderRadius,
-        new BorderRadius.all(new Radius.circular(rect.shortestSide / 2.0)),
-        (1.0 - rectness)
+      borderRadius,
+      new BorderRadius.all(new Radius.circular(rect.shortestSide / 2.0)),
+      (1.0 - rectness)
     );
   }
 

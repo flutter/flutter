@@ -94,7 +94,7 @@ class ShapeDecoration extends Decoration {
       case BoxShape.circle:
         if (source.border != null) {
           assert(source.border.isUniform);
-          shape = new CircleBorder(source.border.top);
+          shape = new CircleBorder(side: source.border.top);
         } else {
           shape = const CircleBorder();
         }
