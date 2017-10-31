@@ -4519,6 +4519,11 @@ class LeafRenderObjectElement extends RenderObjectElement {
   void removeChildRenderObject(RenderObject child) {
     assert(false);
   }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return widget.debugDescribeChildren();
+  }
 }
 
 /// An [Element] that uses a [SingleChildRenderObjectWidget] as its configuration.

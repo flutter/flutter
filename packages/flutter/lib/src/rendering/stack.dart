@@ -332,14 +332,20 @@ class RenderStack extends RenderBox
     markNeedsLayout();
   }
 
-  /// How to align the non-positioned children in the stack.
+  /// How to align the non-positioned or partially-positioned children in the
+  /// stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then [textDirection]
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
+  ///
+  /// If this is set to an [AlignmentDirectional] object, then [textDirection]
   /// must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -504,20 +510,26 @@ class RenderStack extends RenderBox
 
         child.layout(childConstraints, parentUsesSize: true);
 
-        double x = 0.0;
-        if (childParentData.left != null)
+        double x;
+        if (childParentData.left != null) {
           x = childParentData.left;
-        else if (childParentData.right != null)
+        } else if (childParentData.right != null) {
           x = size.width - childParentData.right - child.size.width;
+        } else {
+          x = _resolvedAlignment.alongOffset(size - child.size).dx;
+        }
 
         if (x < 0.0 || x + child.size.width > size.width)
           _hasVisualOverflow = true;
 
-        double y = 0.0;
-        if (childParentData.top != null)
+        double y;
+        if (childParentData.top != null) {
           y = childParentData.top;
-        else if (childParentData.bottom != null)
+        } else if (childParentData.bottom != null) {
           y = size.height - childParentData.bottom - child.size.height;
+        } else {
+          y = _resolvedAlignment.alongOffset(size - child.size).dy;
+        }
 
         if (y < 0.0 || y + child.size.height > size.height)
           _hasVisualOverflow = true;

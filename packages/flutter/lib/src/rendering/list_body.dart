@@ -43,6 +43,10 @@ class RenderListBody extends RenderBox
       child.parentData = new ListBodyParentData();
   }
 
+  /// The direction in which the children are laid out.
+  ///
+  /// For example, if the [axisDirection] is [AxisDirection.down], each child
+  /// will be laid out below the next, vertically.
   AxisDirection get axisDirection => _axisDirection;
   AxisDirection _axisDirection;
   set axisDirection(AxisDirection value) {
@@ -53,6 +57,8 @@ class RenderListBody extends RenderBox
     markNeedsLayout();
   }
 
+  /// The axis (horizontal or vertical) corresponding to the current
+  /// [axisDirection].
   Axis get mainAxis => axisDirectionToAxis(axisDirection);
 
   @override

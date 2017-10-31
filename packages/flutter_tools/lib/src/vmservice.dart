@@ -738,6 +738,10 @@ class VM extends ServiceObjectOwner {
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
       return null;
+    } on rpc.RpcException catch (error) {
+      printError('Error ${error.code} received from application: ${error.message}');
+      printTrace('${error.data}');
+      return null;
     }
   }
 

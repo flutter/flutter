@@ -187,6 +187,20 @@ class DecorationImagePainter {
   ImageStream _imageStream;
   ImageInfo _image;
 
+  /// Draw the image onto the given canvas.
+  ///
+  /// The image is drawn at the position and size given by the `rect` argument.
+  ///
+  /// The image is clipped to the given `clipPath`, if any.
+  ///
+  /// The `configuration` object is used to resolve the image (e.g. to pick
+  /// resolution-specific assets), and to implement the
+  /// [DecorationImage.matchTextDirection] feature.
+  ///
+  /// If the image needs to be painted again, e.g. because it is animated or
+  /// because it had not yet been loaded the first time this method was called,
+  /// then the `onChanged` callback passed to [DecorationImage.createPainter]
+  /// will be called.
   void paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
     if (_details == null)
       return;
