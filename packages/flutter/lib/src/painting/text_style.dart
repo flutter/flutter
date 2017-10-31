@@ -681,8 +681,8 @@ class TextStyle extends Diagnosticable {
       defaultValue: null,
     ));
     styles.add(new EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, unit: 'x', defaultValue: null));
-    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, unit: 'x', defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
     styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
     styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
