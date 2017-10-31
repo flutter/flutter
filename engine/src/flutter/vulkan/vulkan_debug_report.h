@@ -14,8 +14,6 @@ namespace vulkan {
 
 class VulkanDebugReport {
  public:
-  static bool DebugExtensionSupported(const VulkanProcTable& vk);
-
   static std::string DebugExtensionName();
 
   VulkanDebugReport(const VulkanProcTable& vk,

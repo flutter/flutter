@@ -21,15 +21,25 @@ VulkanApplication::VulkanApplication(
     uint32_t api_version)
     : vk(p_vk), api_version_(api_version), valid_(false) {
   // Check if we want to enable debugging.
-
+  std::vector<VkExtensionProperties> supported_extensions =
+      GetSupportedInstanceExtensions(vk);
   bool enable_instance_debugging =
-      IsDebuggingEnabled() && VulkanDebugReport::DebugExtensionSupported(vk);
+      IsDebuggingEnabled() &&
+      ExtensionSupported(supported_extensions,
+                         VulkanDebugReport::DebugExtensionName());
 
   // Configure extensions.
 
   if (enable_instance_debugging) {
     enabled_extensions.emplace_back(VulkanDebugReport::DebugExtensionName());
   }
+#if OS_FUCHSIA
+  if (ExtensionSupported(supported_extensions,
+                         VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME)) {
+    enabled_extensions.emplace_back(
+        VK_KHR_EXTERNAL_MEMORY_CAPABILITIES_EXTENSION_NAME);
+  }
+#endif
 
   const char* extensions[enabled_extensions.size()];
 
@@ -164,6 +174,47 @@ VulkanApplication::AcquireFirstCompatibleLogicalDevice() const {
   }
   FXL_DLOG(INFO) << "Could not acquire compatible logical device.";
   return nullptr;
+}
+
+std::vector<VkExtensionProperties>
+VulkanApplication::GetSupportedInstanceExtensions(
+    const VulkanProcTable& vk) const {
+  if (!vk.EnumerateInstanceExtensionProperties) {
+    return std::vector<VkExtensionProperties>();
+  }
+
+  uint32_t count = 0;
+  if (VK_CALL_LOG_ERROR(vk.EnumerateInstanceExtensionProperties(
+          nullptr, &count, nullptr)) != VK_SUCCESS) {
+    return std::vector<VkExtensionProperties>();
+  }
+
+  if (count == 0) {
+    return std::vector<VkExtensionProperties>();
+  }
+
+  std::vector<VkExtensionProperties> properties;
+  properties.resize(count);
+  if (VK_CALL_LOG_ERROR(vk.EnumerateInstanceExtensionProperties(
+          nullptr, &count, properties.data())) != VK_SUCCESS) {
+    return std::vector<VkExtensionProperties>();
+  }
+
+  return properties;
+}
+
+bool VulkanApplication::ExtensionSupported(
+    const std::vector<VkExtensionProperties>& supported_instance_extensions,
+    std::string extension_name) {
+  uint32_t count = supported_instance_extensions.size();
+  for (size_t i = 0; i < count; i++) {
+    if (strncmp(supported_instance_extensions[i].extensionName,
+                extension_name.c_str(), extension_name.size()) == 0) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 }  // namespace vulkan

@@ -50,6 +50,11 @@ class VulkanApplication {
   bool valid_;
 
   std::vector<VkPhysicalDevice> GetPhysicalDevices() const;
+  std::vector<VkExtensionProperties> GetSupportedInstanceExtensions(
+      const VulkanProcTable& vk) const;
+  bool ExtensionSupported(
+      const std::vector<VkExtensionProperties>& supported_extensions,
+      std::string extension_name);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VulkanApplication);
 };
