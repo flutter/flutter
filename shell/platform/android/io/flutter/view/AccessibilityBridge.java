@@ -211,6 +211,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     // TODO(ianh): bidi support using textDirection
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_LEFT);
                 } else if ((object.actions & SEMANTICS_ACTION_INCREASE) != 0) {
+                    object.value = object.increasedValue;
+                    // Event causes Android to read out the updated value.
+                    sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_INCREASE);
                 } else {
                     return false;
@@ -224,6 +227,9 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     // TODO(ianh): bidi support using textDirection
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_SCROLL_RIGHT);
                 } else if ((object.actions & SEMANTICS_ACTION_DECREASE) != 0) {
+                    object.value = object.decreasedValue;
+                    // Event causes Android to read out the updated value.
+                    sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
                     mOwner.dispatchSemanticsAction(virtualViewId, SEMANTICS_ACTION_DECREASE);
                 } else {
                     return false;
@@ -237,6 +243,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
             }
             case AccessibilityNodeInfo.ACTION_ACCESSIBILITY_FOCUS: {
                 sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_ACCESSIBILITY_FOCUSED);
+
                 if (mFocusedObject == null) {
                     // When Android focuses a node, it doesn't invalidate the view.
                     // (It does when it sends ACTION_CLEAR_ACCESSIBILITY_FOCUS, so
@@ -244,6 +251,12 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
                     mOwner.invalidate();
                 }
                 mFocusedObject = object;
+
+                if ((object.actions & (SEMANTICS_ACTION_INCREASE | SEMANTICS_ACTION_DECREASE)) != 0) {
+                    // SeekBars only announce themselves after this event.
+                    sendAccessibilityEvent(virtualViewId, AccessibilityEvent.TYPE_VIEW_SELECTED);
+                }
+
                 return true;
             }
             // TODO(goderbauer): Use ACTION_SHOW_ON_SCREEN from Android Support Library after
@@ -435,6 +448,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         int actions;
         String label;
         String value;
+        String increasedValue;
+        String decreasedValue;
         String hint;
         TextDirection textDirection;
 
@@ -475,6 +490,12 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
 
             stringIndex = buffer.getInt();
             value = stringIndex == -1 ? null : strings[stringIndex];
+
+            stringIndex = buffer.getInt();
+            increasedValue = stringIndex == -1 ? null : strings[stringIndex];
+
+            stringIndex = buffer.getInt();
+            decreasedValue = stringIndex == -1 ? null : strings[stringIndex];
 
             stringIndex = buffer.getInt();
             hint = stringIndex == -1 ? null : strings[stringIndex];
