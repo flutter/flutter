@@ -9,22 +9,29 @@ import("//build/config/ios/ios_sdk.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
-shared_library("flutter_framework_dylib") {
+# The headers that will be copied to the Flutter.framework and be accessed
+# from outside the Flutter engine source root.
+_flutter_framework_headers = [
+  "framework/Headers/Flutter.h",
+  "framework/Headers/FlutterAppDelegate.h",
+  "framework/Headers/FlutterBinaryMessenger.h",
+  "framework/Headers/FlutterChannels.h",
+  "framework/Headers/FlutterCodecs.h",
+  "framework/Headers/FlutterDartProject.h",
+  "framework/Headers/FlutterMacros.h",
+  "framework/Headers/FlutterNavigationController.h",
+  "framework/Headers/FlutterPlugin.h",
+  "framework/Headers/FlutterViewController.h",
+]
+
+_flutter_framework_headers_copy_dir = "$_flutter_framework_dir/Headers"
+
+shared_library("create_flutter_framework_dylib") {
   visibility = [ ":*" ]
 
   output_name = "Flutter"
 
   sources = [
-    "framework/Headers/Flutter.h",
-    "framework/Headers/FlutterAppDelegate.h",
-    "framework/Headers/FlutterBinaryMessenger.h",
-    "framework/Headers/FlutterChannels.h",
-    "framework/Headers/FlutterCodecs.h",
-    "framework/Headers/FlutterDartProject.h",
-    "framework/Headers/FlutterMacros.h",
-    "framework/Headers/FlutterPlugin.h",
-    "framework/Headers/FlutterViewController.h",
-    "framework/Headers/FlutterNavigationController.h",
     "framework/Source/FlutterAppDelegate.mm",
     "framework/Source/FlutterChannels.mm",
     "framework/Source/FlutterCodecs.mm",
@@ -32,6 +39,7 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterDartSource.h",
     "framework/Source/FlutterDartSource.mm",
+    "framework/Source/FlutterNavigationController.mm",
     "framework/Source/FlutterPlatformPlugin.h",
     "framework/Source/FlutterPlatformPlugin.mm",
     "framework/Source/FlutterStandardCodec.mm",
@@ -42,7 +50,6 @@ shared_library("flutter_framework_dylib") {
     "framework/Source/FlutterView.h",
     "framework/Source/FlutterView.mm",
     "framework/Source/FlutterViewController.mm",
-    "framework/Source/FlutterNavigationController.mm",
     "framework/Source/accessibility_bridge.h",
     "framework/Source/accessibility_bridge.mm",
     "framework/Source/flutter_main_ios.h",
@@ -65,6 +72,8 @@ shared_library("flutter_framework_dylib") {
     "platform_view_ios.mm",
   ]
 
+  sources += _flutter_framework_headers
+
   deps = [
     "$flutter_root/flow",
     "$flutter_root/fml",
@@ -84,9 +93,7 @@ shared_library("flutter_framework_dylib") {
     deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
   }
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   defines = [ "FLUTTER_FRAMEWORK" ]
 
@@ -99,8 +106,9 @@ shared_library("flutter_framework_dylib") {
   ]
 }
 
-copy("framework_dylib") {
+copy("copy_framework_dylib") {
   visibility = [ ":*" ]
+
   sources = [
     "$root_out_dir/libFlutter.dylib",
   ]
@@ -109,11 +117,11 @@ copy("framework_dylib") {
   ]
 
   deps = [
-    ":flutter_framework_dylib",
+    ":create_flutter_framework_dylib",
   ]
 }
 
-action("framework_install_name") {
+action("copy_dylib_and_update_framework_install_name") {
   visibility = [ ":*" ]
   stamp_file = "$root_out_dir/flutter_install_name_stamp"
   script = "$flutter_root/sky/tools/change_install_name.py"
@@ -135,11 +143,11 @@ action("framework_install_name") {
   ]
 
   deps = [
-    ":framework_dylib",
+    ":copy_framework_dylib",
   ]
 }
 
-copy("framework_info_plist") {
+copy("copy_framework_info_plist") {
   visibility = [ ":*" ]
   sources = [
     "framework/Info.plist",
@@ -149,7 +157,7 @@ copy("framework_info_plist") {
   ]
 }
 
-copy("framework_module_map") {
+copy("copy_framework_module_map") {
   visibility = [ ":*" ]
   sources = [
     "framework/module.modulemap",
@@ -159,26 +167,23 @@ copy("framework_module_map") {
   ]
 }
 
-copy("framework_headers") {
+action("copy_framework_headers") {
+  script = "$flutter_root/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
-  sources = [
-    "framework/Headers/Flutter.h",
-    "framework/Headers/FlutterAppDelegate.h",
-    "framework/Headers/FlutterBinaryMessenger.h",
-    "framework/Headers/FlutterChannels.h",
-    "framework/Headers/FlutterCodecs.h",
-    "framework/Headers/FlutterDartProject.h",
-    "framework/Headers/FlutterMacros.h",
-    "framework/Headers/FlutterPlugin.h",
-    "framework/Headers/FlutterViewController.h",
-    "framework/Headers/FlutterNavigationController.h",
-  ]
-  outputs = [
-    "$_flutter_framework_dir/Headers/{{source_file_part}}",
-  ]
+  sources = _flutter_framework_headers
+  outputs = []
+  foreach(header, _flutter_framework_headers) {
+    header_basename = rebase_path(header, "framework/headers")
+    outputs += [ "$_flutter_framework_headers_copy_dir/$header_basename" ]
+  }
+  args = [
+           "--location",
+           rebase_path("$_flutter_framework_headers_copy_dir"),
+           "--headers",
+         ] + rebase_path(_flutter_framework_headers)
 }
 
-copy("framework_icu") {
+copy("copy_framework_icu") {
   visibility = [ ":*" ]
   set_sources_assignment_filter([])
   sources = [
@@ -190,7 +195,7 @@ copy("framework_icu") {
   ]
 }
 
-copy("framework_podspec") {
+copy("copy_framework_podspec") {
   visibility = [ ":*" ]
   sources = [
     "framework/Flutter.podspec",
@@ -200,14 +205,24 @@ copy("framework_podspec") {
   ]
 }
 
+shared_library("copy_and_verify_framework_headers") {
+  visibility = [ ":*" ]
+  include_dirs = [ "$_flutter_framework_headers_copy_dir" ]
+  sources = [
+    "framework/Source/FlutterUmbrellaImport.m",
+  ]
+  deps = [
+    ":copy_framework_headers",
+  ]
+}
+
 group("flutter_framework") {
-  public_deps = [
-    ":framework_dylib",
-    ":framework_headers",
-    ":framework_icu",
-    ":framework_info_plist",
-    ":framework_install_name",
-    ":framework_module_map",
-    ":framework_podspec",
+  deps = [
+    ":copy_and_verify_framework_headers",
+    ":copy_dylib_and_update_framework_install_name",
+    ":copy_framework_icu",
+    ":copy_framework_info_plist",
+    ":copy_framework_module_map",
+    ":copy_framework_podspec",
   ]
 }
