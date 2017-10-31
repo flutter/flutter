@@ -3287,7 +3287,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label;
   set label(String value) {
@@ -3300,7 +3300,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get value => _value;
   String _value;
   set value(String value) {
@@ -3314,7 +3314,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
   /// value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get increasedValue => _increasedValue;
   String _increasedValue;
   set increasedValue(String value) {
@@ -3328,7 +3328,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
   /// value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get decreasedValue => _decreasedValue;
   String _decreasedValue;
   set decreasedValue(String value) {
@@ -3341,7 +3341,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint;
   set hint(String value) {
@@ -3355,7 +3355,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
   /// This must not be null if [label], [hint], [value], [increasedValue], or
-  /// [decreasedValue] is not null.
+  /// [decreasedValue] are not null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {

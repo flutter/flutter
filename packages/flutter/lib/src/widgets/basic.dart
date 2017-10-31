@@ -4535,7 +4535,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// If a value is provided, [onIncrease] must also be set and there must
   /// either be an ambient [Directionality] or an explicit [textDirection]
-  /// has to be provided.
+  /// must be provided.
   ///
   /// See also:
   ///  * [SemanticsConfiguration.increasedValue] for a description of how this
@@ -4547,7 +4547,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// If a value is provided, [onDecrease] must also be set and there must
   /// either be an ambient [Directionality] or an explicit [textDirection]
-  /// has to be provided.
+  /// must be provided.
   ///
   /// See also:
   ///  * [SemanticsConfiguration.decreasedValue] for a description of how this

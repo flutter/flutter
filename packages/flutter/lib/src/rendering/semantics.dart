@@ -106,29 +106,29 @@ class SemanticsData extends Diagnosticable {
 
   /// A textual description of this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String label;
 
   /// A textual description for the current value of the node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String value;
 
   /// The value that [value] will become after performing a
   /// [SemanticsAction.increase] action.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String increasedValue;
 
   /// The value that [value] will become after performing a
   /// [SemanticsAction.decrease] action.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String decreasedValue;
 
   /// A brief description of the result of performing an action on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String hint;
 
   /// The reading direction for the text in [label], [value], [hint],
@@ -552,13 +552,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// A textual description of this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label = _kEmptyConfig.label;
 
   /// A textual description for the current value of the node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get value => _value;
   String _value = _kEmptyConfig.value;
 
@@ -568,7 +568,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// This property is only valid if the [SemanticsAction.decrease] action is
   /// available on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get decreasedValue => _decreasedValue;
   String _decreasedValue = _kEmptyConfig.decreasedValue;
 
@@ -578,13 +578,13 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// This property is only valid if the [SemanticsAction.increase] action is
   /// available on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get increasedValue => _increasedValue;
   String _increasedValue = _kEmptyConfig.increasedValue;
 
   /// A brief description of the result of performing an action on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
@@ -1124,7 +1124,7 @@ class SemanticsConfiguration {
   /// [value] and [hint] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
   set label(String label) {
@@ -1140,7 +1140,7 @@ class SemanticsConfiguration {
   /// [label] and [hint] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   ///
   /// See also:
   ///  * [decreasedValue], describes what [value] will be after performing
@@ -1161,7 +1161,7 @@ class SemanticsConfiguration {
   /// This must be set if a handler for [SemanticsAction.decrease] is provided
   /// and [value] is set.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get decreasedValue => _decreasedValue;
   String _decreasedValue = '';
   set decreasedValue(String decreasedValue) {
@@ -1176,7 +1176,7 @@ class SemanticsConfiguration {
   /// This must be set if a handler for [SemanticsAction.increase] is provided
   /// and [value] is set.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get increasedValue => _increasedValue;
   String _increasedValue = '';
   set increasedValue(String increasedValue) {
@@ -1192,7 +1192,7 @@ class SemanticsConfiguration {
   /// [label] and [value] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = '';
   set hint(String hint) {
