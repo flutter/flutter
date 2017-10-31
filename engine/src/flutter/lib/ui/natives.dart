@@ -5,7 +5,7 @@
 part of dart.ui;
 
 // Corelib 'print' implementation.
-void _print(arg) {
+void _print(dynamic arg) {
   _Logger._printString(arg.toString());
 }
 
@@ -43,13 +43,13 @@ Uri _getBaseURL() => Uri.parse(_baseURL);
 // Required for gen_snapshot to work correctly.
 int _isolateId;
 
-_getPrintClosure() => _print;
-_getScheduleMicrotaskClosure() => _scheduleMicrotask;
-_getGetBaseURLClosure() => _getBaseURL;
+Function _getPrintClosure() => _print;
+Function _getScheduleMicrotaskClosure() => _scheduleMicrotask;
+Function _getGetBaseURLClosure() => _getBaseURL;
 
 // Though the "main" symbol is not included in any of the libraries imported
 // above, the builtin library will be included manually during VM setup. This
 // symbol is only necessary for precompilation. It is marked as a stanalone
 // entry point into the VM. This prevents the precompiler from tree shaking
 // away "main"
-_getMainClosure() => main;
+Function _getMainClosure() => main;
