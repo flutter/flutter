@@ -95,7 +95,7 @@ abstract class MaterialLocalizations {
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat get timeOfDayFormat;
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false });
 
   /// Provides geometric text preferences for the current locale.
   ///
@@ -283,10 +283,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
-    if (alwaysUse24HourFormat)
-      return _formatTwoDigitZeroPad(timeOfDay.hour);
-
-    return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+    final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
+    switch (format) {
+      case TimeOfDayFormat.h_colon_mm_space_a:
+        return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+      case TimeOfDayFormat.HH_colon_mm:
+        return _formatTwoDigitZeroPad(timeOfDay.hour);
+      default:
+        throw new AssertionError('$runtimeType does not support $format.');
+    }
   }
 
   /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
@@ -357,7 +362,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
-    assert(timeOfDayFormat == TimeOfDayFormat.h_colon_mm_space_a);
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -366,8 +370,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
-    return '$hour:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+    final StringBuffer buffer = new StringBuffer();
+
+    // Add hour:minute.
+    buffer
+      ..write(formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat))
+      ..write(':')
+      ..write(formatMinute(timeOfDay));
+
+    if (alwaysUse24HourFormat) {
+      // There's no AM/PM indicator in 24-hour format.
+      return '$buffer';
+    }
+
+    // Add AM/PM indicator.
+    buffer
+      ..write(' ')
+      ..write(_formatDayPeriod(timeOfDay));
+    return '$buffer';
   }
 
   @override
@@ -456,7 +476,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  TimeOfDayFormat get timeOfDayFormat => TimeOfDayFormat.h_colon_mm_space_a;
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+    return alwaysUse24HourFormat
+      ? TimeOfDayFormat.HH_colon_mm
+      : TimeOfDayFormat.h_colon_mm_space_a;
+  }
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override

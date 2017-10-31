@@ -142,7 +142,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
-    switch (hourFormat(of: timeOfDayFormat, alwaysUse24HourFormat: alwaysUse24HourFormat)) {
+    switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
@@ -197,18 +197,20 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    switch (timeOfDayFormat) {
+    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
+    final String minute = formatMinute(timeOfDay);
+    switch (timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat)) {
       case TimeOfDayFormat.h_colon_mm_space_a:
-        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+        return '$hour:$minute ${_formatDayPeriod(timeOfDay)}';
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_colon_mm:
-        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)}';
+        return '$hour:$minute';
       case TimeOfDayFormat.HH_dot_mm:
-        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}.${formatMinute(timeOfDay)}';
+        return '$hour.$minute';
       case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)}:${formatMinute(timeOfDay)}';
+        return '${_formatDayPeriod(timeOfDay)} $hour:$minute';
       case TimeOfDayFormat.frenchCanadian:
-        return '${formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat)} h ${formatMinute(timeOfDay)}';
+        return '$hour h $minute';
     }
 
     return null;
@@ -328,7 +330,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
   ///    short time pattern used in locale en_US
   @override
-  TimeOfDayFormat get timeOfDayFormat {
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
     final String icuShortTimePattern = _nameToValue['timeOfDayFormat'];
 
     assert(() {
@@ -343,7 +345,12 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
       return true;
     }());
 
-    return _icuTimeOfDayToEnum[icuShortTimePattern];
+    final TimeOfDayFormat icuFormat = _icuTimeOfDayToEnum[icuShortTimePattern];
+
+    if (alwaysUse24HourFormat)
+      return _get24HourVersionOf(icuFormat);
+
+    return icuFormat;
   }
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
@@ -402,6 +409,23 @@ const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDa
   'a h:mm': TimeOfDayFormat.a_space_h_colon_mm,
   'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
 };
+
+/// Finds the [TimeOfDayFormat] to use instead of the `original` when the
+/// `original` uses 12-hour format and [MediaQueryData.alwaysUse24HourFormat]
+/// is true.
+TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
+  switch (original) {
+    case TimeOfDayFormat.HH_colon_mm:
+    case TimeOfDayFormat.HH_dot_mm:
+    case TimeOfDayFormat.frenchCanadian:
+    case TimeOfDayFormat.H_colon_mm:
+      return original;
+    case TimeOfDayFormat.h_colon_mm_space_a:
+    case TimeOfDayFormat.a_space_h_colon_mm:
+      return TimeOfDayFormat.HH_colon_mm;
+  }
+  return TimeOfDayFormat.HH_colon_mm;
+}
 
 /// Tracks if date i18n data has been loaded.
 bool _dateIntlDataInitialized = false;

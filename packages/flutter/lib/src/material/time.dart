@@ -185,14 +185,11 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-///
-/// If [alwaysUse24HourFormat] is true, returns [HourFormat.HH] for
-/// [TimeOfDayFormat]s that by default use [HourFormat.h].
-HourFormat hourFormat({ @required TimeOfDayFormat of, bool alwaysUse24HourFormat: false }) {
+HourFormat hourFormat({ @required TimeOfDayFormat of }) {
   switch (of) {
     case TimeOfDayFormat.h_colon_mm_space_a:
     case TimeOfDayFormat.a_space_h_colon_mm:
-      return alwaysUse24HourFormat ? HourFormat.HH : HourFormat.h;
+      return HourFormat.h;
     case TimeOfDayFormat.H_colon_mm:
       return HourFormat.H;
     case TimeOfDayFormat.HH_dot_mm:
