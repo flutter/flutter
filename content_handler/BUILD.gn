@@ -87,7 +87,7 @@ template("flutter_content_handler") {
 }
 
 flutter_content_handler("content_handler") {
-  output_name = "flutter_runner"
+  output_name = "flutter_jit_runner"
   extra_deps = [ "//third_party/dart/runtime:libdart_jit" ]
 }
 
