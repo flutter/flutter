@@ -48,7 +48,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(TimePickerDialog)));
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -130,14 +130,36 @@ void main() {
   const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
   const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
-  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: const MediaQuery(
-        data: const MediaQueryData(alwaysUse24HourFormat: false),
-        child: const TimePickerDialog(initialTime: const TimeOfDay(hour: 7, minute: 0)),
+  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
+    await tester.pumpWidget(
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new MediaQuery(
+          data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+                  showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
+                  return new Container();
+                });
+              },
+            ),
+          ),
+        ),
       ),
-    ));
+    );
+    // Pump once, because the dialog shows up asynchronously.
+    await tester.pump();
+  }
+
+  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false);
 
     final CustomPaint dialPaint = tester.widget(find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
@@ -154,13 +176,7 @@ void main() {
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      home: const MediaQuery(
-        data: const MediaQueryData(alwaysUse24HourFormat: true),
-        child: const TimePickerDialog(initialTime: const TimeOfDay(hour: 7, minute: 0)),
-      ),
-    ));
+    await mediaQueryBoilerplate(tester, true);
 
     final CustomPaint dialPaint = tester.widget(find.descendant(
       of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),

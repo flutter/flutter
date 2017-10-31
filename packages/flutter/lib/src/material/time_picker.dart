@@ -1081,11 +1081,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 /// selected [TimeOfDay] if the user taps the "OK" button, or null if the user
 /// taps the "CANCEL" button. The selected time is reported by calling
 /// [Navigator.pop].
-class TimePickerDialog extends StatefulWidget {
+class _TimePickerDialog extends StatefulWidget {
   /// Creates a material time picker.
   ///
   /// [initialTime] must not be null.
-  const TimePickerDialog({
+  const _TimePickerDialog({
     Key key,
     @required this.initialTime
   }) : assert(initialTime != null),
@@ -1098,7 +1098,7 @@ class TimePickerDialog extends StatefulWidget {
   _TimePickerDialogState createState() => new _TimePickerDialogState();
 }
 
-class _TimePickerDialogState extends State<TimePickerDialog> {
+class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   void initState() {
     super.initState();
@@ -1268,6 +1268,6 @@ Future<TimeOfDay> showTimePicker({
   assert(initialTime != null);
   return await showDialog<TimeOfDay>(
     context: context,
-    child: new TimePickerDialog(initialTime: initialTime),
+    child: new _TimePickerDialog(initialTime: initialTime),
   );
 }
