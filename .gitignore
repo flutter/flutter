@@ -2,12 +2,13 @@
 *.pyc
 *~
 .*.sw?
-.DS_Store
+.checkstyle
 .classpath
 .cproject
+.DS_Store
 .gdb_history
-.checkstyle
 .gdbinit
+.idea
 .landmines
 .packages
 .project
@@ -17,15 +18,12 @@ cscope.*
 Session.vim
 tags
 Thumbs.db
-/build/util/LASTCHANGE*
-.idea
 
 # directories pulled in via deps or hooks
 /buildtools/
 /flutter/
 /garnet/
 /ios_tools/
-/lib/
 /out/
 /third_party/android_tools/
 /third_party/benchmark/
