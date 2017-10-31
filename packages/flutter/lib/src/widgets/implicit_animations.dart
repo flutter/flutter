@@ -36,12 +36,22 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 /// This class specializes the interpolation of [Tween<BoxConstraints>] to use
 /// [Decoration.lerp].
 ///
-/// Typically this will only have useful results if the [begin] and [end]
-/// decorations have the same type; decorations of differing types generally do
-/// not have a useful animation defined, and will just jump to the [end]
-/// immediately.
+/// For [ShapeDecoration]s which know how to [ShapeDecoration.lerpTo] or
+/// [ShapeDecoration.lerpFrom] each other, this will produce a smooth
+/// interpolation between decorations.
 ///
-/// See [Tween] for a discussion on how to use interpolation objects.
+/// For other types of decorations (e.g. [BoxDecoration]), this
+/// will only have smooth results if the [begin] and [end] decorations have
+/// the same shape; decorations of differing shapes generally do not have a
+/// useful animation defined, and will just jump to the [end] immediately.
+///
+/// See also:
+///   * [Tween] for a discussion on how to use interpolation objects.
+///   * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder],
+///     [StadiumBorder] for examples of shape borders that can be smoothly
+///     interpolated.
+///   * [BoxBorder] for a border that can only be smoothly interpolated between other
+///     [BoxBorder]s.
 class DecorationTween extends Tween<Decoration> {
   /// Creates a decoration tween.
   ///
