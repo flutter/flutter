@@ -335,7 +335,7 @@ class CustomScrollView extends ScrollView {
   List<Widget> buildSlivers(BuildContext context) => slivers;
 }
 
-/// A [ScrollView] uses a single child layout model.
+/// A [ScrollView] that uses a single child layout model.
 ///
 /// See also:
 ///
@@ -402,7 +402,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// There are three options for constructing a [ListView]:
 ///
-///  1. The default constuctor takes an explict [List<Widget>] of children. This
+///  1. The default constructor takes an explicit [List<Widget>] of children. This
 ///     constructor is appropriate for list views with a small number of
 ///     children because constructing the [List] requires doing work for every
 ///     child that could possibly be displayed in the list view instead of just

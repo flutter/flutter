@@ -3796,7 +3796,7 @@ class StatefulElement extends ComponentElement {
   }
 }
 
-/// An [Element] that uses a [ProxyElement] as its configuration.
+/// An [Element] that uses a [ProxyWidget] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
   ProxyElement(ProxyWidget widget) : super(widget);
