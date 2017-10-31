@@ -14,16 +14,18 @@ fi
 
 echo "Analyzing dart:ui library..."
 RESULTS=`dartanalyzer                                                          \
-  --ignore-unrecognized-flags                                                  \
   --supermixin                                                                 \
+  --enable-assert-initializers                                                 \
+  --initializing-formal-access                                                 \
   --enable-strict-call-checks                                                  \
   --enable_type_checks                                                         \
   --strong                                                                     \
+  --no-implicit-dynamic                                                        \
   --package-warnings                                                           \
   --fatal-warnings                                                             \
-  --strong-hints                                                               \
   --fatal-hints                                                                \
   --lints                                                                      \
+  --fatal-lints                                                                \
   out/host_debug_unopt/gen/sky/bindings/dart_ui/ui.dart                        \
   2>&1                                                                         \
   | grep -v "Native functions can only be declared in the SDK and code that is loaded through native extensions" \

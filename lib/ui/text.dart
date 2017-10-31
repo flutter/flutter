@@ -154,17 +154,18 @@ class TextDecoration {
   /// Draw a line through each line of text
   static const TextDecoration lineThrough = const TextDecoration._(0x4);
 
+  @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
     if (other is! TextDecoration)
       return false;
     final TextDecoration typedOther = other;
     return _mask == typedOther._mask;
   }
 
+  @override
   int get hashCode => _mask.hashCode;
 
+  @override
   String toString() {
     if (_mask == 0)
       return 'TextDecoration.none';
@@ -652,7 +653,10 @@ enum TextDirection {
 }
 
 /// A rectangle enclosing a run of text.
+///
+/// This is similar to [Rect] but includes an inherent [TextDirection].
 class TextBox {
+  /// Creates an object that describes a box containing text.
   const TextBox.fromLTRBD(
     this.left,
     this.top,
@@ -670,12 +674,16 @@ class TextBox {
   ) : direction = TextDirection.values[directionIndex];
 
   /// The left edge of the text box, irrespective of direction.
+  ///
+  /// To get the leading edge (which may depend on the [direction]), consider [start].
   final double left;
 
   /// The top edge of the text box.
   final double top;
 
   /// The right edge of the text box, irrespective of direction.
+  ///
+  /// To get the trailing edge (which may depend on the [direction]), consider [end].
   final double right;
 
   /// The bottom edge of the text box.
@@ -687,16 +695,25 @@ class TextBox {
   /// Returns a rect of the same size as this box.
   Rect toRect() => new Rect.fromLTRB(left, top, right, bottom);
 
-  /// The left edge of the box for ltr text; the right edge of the box for rtl text.
+  /// The [left] edge of the box for left-to-right text; the [right] edge of the box for right-to-left text.
+  ///
+  /// See also:
+  ///
+  ///  * [direction], which specifies the text direction.
   double get start {
     return (direction == TextDirection.ltr) ? left : right;
   }
 
-  /// The right edge of the box for ltr text; the left edge of the box for rtl text.
+  /// The [right] edge of the box for left-to-right text; the [left] edge of the box for right-to-left text.
+  ///
+  /// See also:
+  ///
+  ///  * [direction], which specifies the text direction.
   double get end {
     return (direction == TextDirection.ltr) ? right : left;
   }
 
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -710,8 +727,10 @@ class TextBox {
         && typedOther.direction == direction;
   }
 
+  @override
   int get hashCode => hashValues(left, top, right, bottom, direction);
 
+  @override
   String toString() => 'TextBox.fromLTRBD(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)}, $direction)';
 }
 
@@ -738,15 +757,45 @@ enum TextAffinity {
 
 /// A visual position in a string of text.
 class TextPosition {
-  const TextPosition({ this.offset, this.affinity: TextAffinity.downstream });
+  /// Creates an object representing a particular position in a string.
+  ///
+  /// The arguments must not be null (so the [offset] argument is required).
+  const TextPosition({
+    this.offset,
+    this.affinity: TextAffinity.downstream,
+  }) : assert(offset != null),
+       assert(affinity != null);
 
-  /// The index of the character just prior to the position.
+  /// The index of the character that immediately follows the position.
+  ///
+  /// For example, given the string `'Hello'`, offset 0 represents the cursor
+  /// being before the `H`, while offset 5 represents the cursor being just
+  /// after the `o`.
   final int offset;
 
   /// If the offset has more than one visual location (e.g., occurs at a line
   /// break), which of the two locations is represented by this position.
+  ///
+  /// For example, if the text `'AB'` had a forced line break between the `A`
+  /// and the `B`, then the downstream affinity at offset 1 represents the
+  /// cursor being just after the `A` on the first line, while the upstream
+  /// affinity at offset 1 represents the cursor being just before the `B` on
+  /// the first line.
   final TextAffinity affinity;
 
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final TextPosition typedOther = other;
+    return typedOther.offset == offset
+        && typedOther.affinity == affinity;
+  }
+
+  @override
+  int get hashCode => hashValues(offset, affinity);
+
+  @override
   String toString() {
     return '$runtimeType(offset: $offset, affinity: $affinity)';
   }
@@ -785,6 +834,7 @@ class ParagraphConstraints {
   /// [Paragraph] with a [ParagraphBuilder].
   final double width;
 
+  @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
@@ -792,8 +842,10 @@ class ParagraphConstraints {
     return typedOther.width == width;
   }
 
+  @override
   int get hashCode => width.hashCode;
 
+  @override
   String toString() => '$runtimeType(width: $width)';
 }
 
