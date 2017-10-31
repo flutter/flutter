@@ -278,7 +278,7 @@ void main() {
       ),
     );
 
-    // TODO(#12357): Update this test when text metrics bug is fixed.
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
       tester.getSize(find.text('Chip A')),
       anyOf(const Size(79.0, 13.0), const Size(78.0, 13.0)),
@@ -322,6 +322,7 @@ void main() {
       ),
     );
 
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
     expect(tester.getSize(find.text('Chip B')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
     expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
@@ -353,6 +354,7 @@ void main() {
       ),
     );
 
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
     expect(tester.getSize(find.text('Chip B')), anyOf(const Size(78.0, 13.0), const Size(79.0, 13.0)));
     expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
@@ -386,7 +388,7 @@ void main() {
       ),
     );
 
-    // TODO(#12357): Update this test when text metrics bug is fixed.
+    // TODO(#12357): Update this test when the font metric bug is fixed to remove the anyOfs.
     expect(
       tester.getSize(find.byKey(keyA)),
       anyOf(const Size(79.0, 13.0), const Size(78.0, 13.0)),

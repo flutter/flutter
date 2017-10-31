@@ -167,7 +167,7 @@ class Chip extends StatelessWidget {
         padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
         decoration: new ShapeDecoration(
           color: backgroundColor ?? Colors.grey.shade300,
-          shape: new StadiumBorder(border),
+          shape: new StadiumBorder(side: border),
         ),
         child: new Center(
           widthFactor: 1.0,
