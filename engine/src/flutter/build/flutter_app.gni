@@ -166,7 +166,7 @@ template("flutter_jit_app") {
       "--depfile",
       rebase_path(bundle_depfile),
       "--interpreter",
-      "flutter_runner",
+      "flutter_jit_runner",
     ]
     if (defined(invoker.manifest)) {
       args += [

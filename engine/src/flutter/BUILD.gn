@@ -64,7 +64,6 @@ if (is_fuchsia) {
   import("//packages/package.gni")
 
   package("package") {
-    app = true
     testonly = true
 
     package_name = "flutter"
@@ -75,7 +74,7 @@ if (is_fuchsia) {
 
     binaries = [
       {
-        name = "flutter_runner"
+        name = "flutter_jit_runner"
       },
       {
         name = "flutter_aot_runner"
