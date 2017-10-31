@@ -21,7 +21,7 @@ GPURasterizer::GPURasterizer(std::unique_ptr<flow::ProcessInfo> info)
 
 GPURasterizer::~GPURasterizer() = default;
 
-fxl::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
+fml::WeakPtr<Rasterizer> GPURasterizer::GetWeakRasterizerPtr() {
   return weak_factory_.GetWeakPtr();
 }
 

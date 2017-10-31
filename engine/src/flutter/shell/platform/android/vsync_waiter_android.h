@@ -6,9 +6,9 @@
 #define SHELL_PLATFORM_ANDROID_VSYNC_WAITER_ANDROID_H_
 
 #include <jni.h>
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/vsync_waiter.h"
 #include "lib/fxl/macros.h"
-#include "lib/fxl/memory/weak_ptr.h"
 
 namespace shell {
 
@@ -26,9 +26,8 @@ class VsyncWaiterAndroid : public VsyncWaiter {
 
  private:
   Callback callback_;
-  fxl::WeakPtr<VsyncWaiterAndroid> self_;
-
-  fxl::WeakPtrFactory<VsyncWaiterAndroid> weak_factory_;
+  fml::WeakPtr<VsyncWaiterAndroid> self_;
+  fml::WeakPtrFactory<VsyncWaiterAndroid> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(VsyncWaiterAndroid);
 };

@@ -29,7 +29,7 @@ class GPURasterizer : public Rasterizer {
   void Teardown(
       fxl::AutoResetWaitableEvent* teardown_completion_event) override;
 
-  fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+  fml::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
 
   flow::LayerTree* GetLastLayerTree() override;
 
@@ -46,7 +46,7 @@ class GPURasterizer : public Rasterizer {
   // next time. NULL if there is no callback or the callback was set back to
   // NULL after being called.
   fxl::Closure nextFrameCallback_;
-  fxl::WeakPtrFactory<GPURasterizer> weak_factory_;
+  fml::WeakPtrFactory<GPURasterizer> weak_factory_;
 
   void DoDraw(std::unique_ptr<flow::LayerTree> layer_tree);
 

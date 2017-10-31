@@ -8,10 +8,10 @@
 #include <memory>
 
 #include "flutter/flow/layers/layer_tree.h"
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/surface.h"
 #include "flutter/synchronization/pipeline.h"
 #include "lib/fxl/functional/closure.h"
-#include "lib/fxl/memory/weak_ptr.h"
 #include "lib/fxl/synchronization/waitable_event.h"
 
 namespace shell {
@@ -29,7 +29,7 @@ class Rasterizer {
 
   virtual void Clear(SkColor color, const SkISize& size) = 0;
 
-  virtual fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
+  virtual fml::WeakPtr<Rasterizer> GetWeakRasterizerPtr() = 0;
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
 

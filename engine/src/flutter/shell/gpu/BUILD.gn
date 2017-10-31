@@ -27,14 +27,13 @@ source_set("gpu") {
     "$flutter_root/glue",
     "$flutter_root/shell/common",
     "$flutter_root/synchronization",
+    "//flutter/fml",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",
   ]
 
-  public_configs = [
-    "$flutter_root:config",
-  ]
+  public_configs = [ "$flutter_root:config" ]
 
   if (shell_enable_vulkan) {
     deps += [ "$flutter_root/vulkan" ]

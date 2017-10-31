@@ -44,7 +44,7 @@
   return YES;
 }
 
-void SnapshotRasterizer(fxl::WeakPtr<shell::Rasterizer> rasterizer,
+void SnapshotRasterizer(fml::WeakPtr<shell::Rasterizer> rasterizer,
                         CGContextRef context,
                         bool is_opaque) {
   if (!rasterizer) {
@@ -89,8 +89,8 @@ void SnapshotRasterizer(fxl::WeakPtr<shell::Rasterizer> rasterizer,
   SkCGDrawBitmap(context, bitmap, 0, 0);
 }
 
-static fxl::WeakPtr<shell::Rasterizer> GetRandomRasterizer() {
-  fxl::WeakPtr<shell::Rasterizer> rasterizer;
+static fml::WeakPtr<shell::Rasterizer> GetRandomRasterizer() {
+  fml::WeakPtr<shell::Rasterizer> rasterizer;
   shell::Shell::Shared().IteratePlatformViews([&rasterizer](shell::PlatformView* view) -> bool {
     rasterizer = view->rasterizer().GetWeakRasterizerPtr();
     // We just grab the first rasterizer so there is no need to iterate

@@ -7,13 +7,13 @@
 
 #include <memory>
 
+#include "flutter/fml/memory/weak_ptr.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/accessibility_bridge.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/platform_message_router.h"
 #include "flutter/shell/platform/darwin/ios/ios_surface.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
-#include "lib/fxl/memory/weak_ptr.h"
 
 @class CALayer;
 @class UIView;
@@ -39,7 +39,7 @@ class PlatformViewIOS : public PlatformView {
     return platform_message_router_;
   }
 
-  fxl::WeakPtr<PlatformViewIOS> GetWeakPtr();
+  fml::WeakPtr<PlatformViewIOS> GetWeakPtr();
 
   void UpdateSurfaceSize();
 
@@ -65,7 +65,7 @@ class PlatformViewIOS : public PlatformView {
   PlatformMessageRouter platform_message_router_;
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
   fxl::Closure firstFrameCallback_;
-  fxl::WeakPtrFactory<PlatformViewIOS> weak_factory_;
+  fml::WeakPtrFactory<PlatformViewIOS> weak_factory_;
   NSObject<FlutterBinaryMessenger>* binary_messenger_;
 
   void SetupAndLoadFromSource(const std::string& assets_directory,

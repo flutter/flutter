@@ -24,7 +24,7 @@ class NullRasterizer : public Rasterizer {
 
   void Clear(SkColor color, const SkISize& size) override;
 
-  fxl::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
+  fml::WeakPtr<Rasterizer> GetWeakRasterizerPtr() override;
 
   flow::LayerTree* GetLastLayerTree() override;
 
@@ -34,7 +34,7 @@ class NullRasterizer : public Rasterizer {
 
  private:
   std::unique_ptr<Surface> surface_;
-  fxl::WeakPtrFactory<NullRasterizer> weak_factory_;
+  fml::WeakPtrFactory<NullRasterizer> weak_factory_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
 };

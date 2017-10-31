@@ -68,7 +68,7 @@ void PlatformViewIOS::SetupAndLoadFromSource(const std::string& assets_directory
       });
 }
 
-fxl::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
+fml::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
 
