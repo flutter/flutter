@@ -6,7 +6,7 @@
 // the contents of the arb files. The map can be used to lookup a localized
 // string: `localizations[localeString][resourceId]`.
 //
-// The *.arb files are in packages/flutter/lib/src/material/i18n/.
+// The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
 // The arb (JSON) format files must contain a single map indexed by locale.
 // Each map value is itself a map with resource identifier keys and localized
@@ -31,10 +31,10 @@
 // ```
 //
 // If the data looks good, use the `-w` option to overwrite the
-// lib/src/l10n/localizations.dart file:
+// packages/flutter_localizations/lib/src/l10n/localizations.dart file:
 //
 // ```
-// dart dev/tools/gen_localizations.dart -w
+// dart dev/tools/gen_localizations.dart --overwrite
 // ```
 
 import 'dart:convert' show JSON;
@@ -151,7 +151,7 @@ void main(List<String> rawArgs) {
   }
   validateLocalizations(localeToResources, localeToResourceAttributes);
 
-  final String regenerate = 'dart dev/tools/gen_localizations.dart -w';
+  final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
   final StringBuffer buffer = new StringBuffer();
   buffer.writeln(outputHeader.replaceFirst('@(regenerate)', regenerate));
   buffer.writeln(generateLocalizationsMap());

@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart -w
+// dart dev/tools/gen_localizations.dart --overwrite
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
