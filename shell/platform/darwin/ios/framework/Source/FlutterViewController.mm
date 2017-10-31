@@ -77,6 +77,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   bool _platformSupportsTouchTypes;
   bool _platformSupportsTouchPressure;
   bool _platformSupportsTouchOrientationAndTilt;
+  bool _platformSupportsSafeAreaInsets;
   BOOL _initialized;
   BOOL _connected;
 }
@@ -125,6 +126,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   _platformSupportsTouchTypes = fml::IsPlatformVersionAtLeast(9);
   _platformSupportsTouchPressure = fml::IsPlatformVersionAtLeast(9);
   _platformSupportsTouchOrientationAndTilt = fml::IsPlatformVersionAtLeast(9, 1);
+  _platformSupportsSafeAreaInsets = fml::IsPlatformVersionAtLeast(11, 0);
 
   _orientationPreferences = UIInterfaceOrientationMaskAll;
   _statusBarStyle = UIStatusBarStyleDefault;
@@ -601,7 +603,20 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   _viewportMetrics.device_pixel_ratio = scale;
   _viewportMetrics.physical_width = viewSize.width * scale;
   _viewportMetrics.physical_height = viewSize.height * scale;
-  _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
+
+  // TODO(cbracken) once clang toolchain compiler-rt has been updated, replace with
+  // if (@available(iOS 11, *)) {
+  if (_platformSupportsSafeAreaInsets) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
+    _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
+    _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
+    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+#pragma clang diagnostic pop
+  } else {
+    _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
+  }
   [self updateViewportMetrics];
 
   // This must run after updateViewportMetrics so that the surface creation tasks are queued after
