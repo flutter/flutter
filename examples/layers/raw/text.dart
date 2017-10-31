@@ -22,9 +22,9 @@ ui.Picture paint(ui.Rect paintBounds) {
   canvas.drawRect(new ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
                   new ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0));
 
-  // The paint method of Pargraph draws the contents of the paragraph unto the
+  // The paint method of Paragraph draws the contents of the paragraph onto the
   // given canvas.
-  canvas.drawParagraph(paragraph, new ui.Offset(paragraph.width / -2.0, (paragraph.width / 2.0) - 125));
+  canvas.drawParagraph(paragraph, new ui.Offset(-paragraph.width / 2.0, (paragraph.width / 2.0) - 125.0));
 
   return recorder.endRecording();
 }
