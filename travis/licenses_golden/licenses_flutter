@@ -1172,6 +1172,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCodecs.
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterNavigationController.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterStandardCodec_Internal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterUmbrellaImport.m
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_codecs_unittest.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.mm
