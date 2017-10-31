@@ -7,12 +7,10 @@ import 'dart:ui' as ui;
 import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'debug.dart';
-import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
 export 'semantics_event.dart';
