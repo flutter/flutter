@@ -599,7 +599,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// `child`.
   ///
   /// See also [computeAbsolutePaintOffset], which computes the paint offset
-  /// from an explict layout offset and growth direction instead of using the
+  /// from an explicit layout offset and growth direction instead of using the
   /// values computed for the child during layout.
   @protected
   Offset paintOffsetOf(RenderSliver child);
