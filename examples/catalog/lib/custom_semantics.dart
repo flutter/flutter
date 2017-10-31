@@ -14,8 +14,7 @@ import 'package:flutter/material.dart';
 /// intuitive way of switching values compared to exposing the content of the
 /// drop down menu as a screen overlay from which the user can select.
 ///
-/// Users, that do not use a screen reader, will just see a regular dropdown
-/// menu.
+/// Users that do not use a screen reader will just see a regular dropdown menu.
 class AdjustableDropdownListTile extends StatelessWidget {
   const AdjustableDropdownListTile({
     this.label,
