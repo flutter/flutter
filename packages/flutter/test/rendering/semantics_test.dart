@@ -198,7 +198,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isSelected: false, isButton: false, label: "", value: "", hint: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isSelected: false, isButton: false, isTextField: false, label: "", value: "", hint: "", textDirection: null)\n',
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()

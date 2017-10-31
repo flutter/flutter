@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -290,11 +292,13 @@ class _IncludesNodeWith extends Matcher {
     this.label,
     this.textDirection,
     this.actions,
-}) : assert(label != null || actions != null);
+    this.flags,
+}) : assert(label != null || actions != null || flags != null);
 
   final String label;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
+  final List<SemanticsFlags> flags;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -324,6 +328,12 @@ class _IncludesNodeWith extends Matcher {
       if (expectedActions != actualActions)
         return false;
     }
+    if (flags != null) {
+      final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+      final int actualFlags = node.getSemanticsData().flags;
+      if (expectedFlags != actualFlags)
+        return false;
+    }
     return true;
   }
 
@@ -338,22 +348,16 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    String string = '';
-    if (label != null) {
-      string += 'label "$label"';
-      if (textDirection != null)
-        string += ' (${describeEnum(textDirection)})';
-      if (actions != null)
-        string += ' and ';
-    } else if (textDirection != null) {
-      string += 'direction ${describeEnum(textDirection)}';
-      if (actions != null)
-        string += ' and ';
-    }
-    if (actions != null) {
-      string += 'actions "${actions.join(', ')}"';
-    }
-    return string;
+    final List<String> strings = <String>[];
+    if (label != null)
+      strings.add('label "$label"');
+    if (textDirection != null)
+      strings.add(' (${describeEnum(textDirection)})');
+    if (actions != null)
+    strings.add('actions "${actions.join(', ')}"');
+    if (flags != null)
+    strings.add('flags "${flags.join(', ')}"');
+    return strings.join(', ');
   }
 }
 
@@ -361,10 +365,16 @@ class _IncludesNodeWith extends Matcher {
 /// `textDirection`, and `actions`.
 ///
 /// If null is provided for an argument, it will match against any value.
-Matcher includesNodeWith({ String label, TextDirection textDirection, List<SemanticsAction> actions }) {
+Matcher includesNodeWith({
+  String label,
+  TextDirection textDirection,
+  List<SemanticsAction> actions,
+  List<SemanticsFlags> flags,
+}) {
   return new _IncludesNodeWith(
     label: label,
     textDirection: textDirection,
     actions: actions,
+    flags: flags,
   );
 }

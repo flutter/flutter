@@ -7,6 +7,7 @@ import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -301,6 +302,12 @@ class RenderEditable extends RenderBox {
     if (attached)
       _offset.addListener(markNeedsPaint);
     markNeedsLayout();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isTextField = true;
   }
 
   @override
