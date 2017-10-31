@@ -924,6 +924,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    [setState] method, which indicates that some of their internal state
 ///    has changed in a way that might impact the user interface in this
 ///    subtree.
+///  * If a hot-reload occurs, such as initiated by the InteliJ IDEA, the 
+///    [State.reassemble] method is called (if overriden). This provides an 
+///    oppportunity to re-initialize any data that was created in the State 
+///    constructor or during [StatefulWidget.createState].
 ///  * During this time, a parent widget might rebuild and request that this
 ///    location in the tree update to display a new widget with the same
 ///    [runtimeType] and [Widget.key]. When this happens, the framework will
