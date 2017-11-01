@@ -4,13 +4,16 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlags,
+       TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+
+import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
 export 'semantics_event.dart';
@@ -1372,6 +1375,23 @@ class SemanticsConfiguration {
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
+}
+
+/// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
+/// are printed.
+enum DebugSemanticsDumpOrder {
+  /// Print nodes in inverse hit test order.
+  ///
+  /// In inverse hit test order, the last child of a [SemanticsNode] will be
+  /// asked first if it wants to respond to a user's interaction, followed by
+  /// the second last, etc. until a taker is found.
+  inverseHitTest,
+
+  /// Print nodes in traversal order.
+  ///
+  /// Traversal order defines how the user can move the accessibility focus from
+  /// one node to another.
+  traversal,
 }
 
 String _concatStrings({
