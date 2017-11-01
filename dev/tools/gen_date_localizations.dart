@@ -44,7 +44,7 @@ Future<Null> main(List<String> rawArgs) async {
   final bool dotPackagesExists = dotPackagesFile.existsSync();
 
   if (!dotPackagesExists) {
-    fatal(
+    exitWithError(
       'File not found: ${dotPackagesFile.path}. $_kCommandName must be run '
       'after a successful "flutter update-packages".'
     );
@@ -56,7 +56,7 @@ Future<Null> main(List<String> rawArgs) async {
     .firstWhere(
       (String line) => line.startsWith('intl:'),
       orElse: () {
-        fatal('intl dependency not found in ${dotPackagesFile.path}');
+        exitWithError('intl dependency not found in ${dotPackagesFile.path}');
       },
     )
     .split(':')
