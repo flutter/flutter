@@ -194,4 +194,43 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 122));
 
   });
+
+  testWidgets('Removing offscreen items does not crash', (WidgetTester tester) async {
+    IndexedWidgetBuilder childrenBuilder = (BuildContext context, int index) {
+      return new Container(
+        color: Colors.blue,
+        child: new Text(index.toString()),
+      );
+    };
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new CustomScrollView(
+        slivers: <Widget>[
+          new SliverFixedExtentList(
+            itemExtent: 100.0,
+            delegate: new SliverChildBuilderDelegate(
+              childrenBuilder,
+              childCount: 30,
+            ),
+          ),
+        ],
+      ),
+    ));
+
+    await tester.drag(find.text('5'), const Offset(0.0, -400.0));
+    await tester.pump();
+
+    childrenBuilder = (BuildContext context, int index) {
+      if (index > 3) {
+        return new Container(
+          color: Colors.blue,
+          child: new Text(index.toString()),
+        );
+      }
+      return null;
+    };
+
+    await tester.drag(find.text('5'), const Offset(0.0, 400.0));
+    await tester.pump();
+  });
 }

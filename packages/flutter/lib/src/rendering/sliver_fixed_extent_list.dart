@@ -148,6 +148,10 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     for (int index = indexOf(firstChild) - 1; index >= firstIndex; --index) {
       final RenderBox child = insertAndLayoutLeadingChild(childConstraints);
+      if (child == null) {
+        // Items before the previously first child are no longer present.
+        break;
+      }
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, index);
       assert(childParentData.index == index);
