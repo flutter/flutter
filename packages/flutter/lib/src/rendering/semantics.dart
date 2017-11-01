@@ -774,6 +774,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     if (_hasFlag(SemanticsFlags.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
+    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlags.isFocused), ifTrue: 'focused'));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
     properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlags.isTextField), ifTrue: 'textField'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
@@ -1223,6 +1224,11 @@ class SemanticsConfiguration {
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);
+  }
+
+  /// Whether the owning [RenderObject] currently holds the user's focus.
+  set isFocused(bool value) {
+    _setFlag(SemanticsFlags.isFocused, value);
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).

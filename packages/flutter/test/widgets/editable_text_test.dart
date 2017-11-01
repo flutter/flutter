@@ -256,7 +256,7 @@ void main() {
     ]);
   });
 
-  testWidgets('EditableText identifies as text field in semantics', (WidgetTester tester) async {
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -276,5 +276,12 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.idle();
+    await tester.pump();
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField, SemanticsFlags.isFocused]));
+
   });
 }
