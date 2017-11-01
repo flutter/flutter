@@ -636,7 +636,17 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
-  _viewportMetrics.physical_padding_bottom = 0;
+  // TODO(cbracken) once clang toolchain compiler-rt has been updated, replace with
+  // if (@available(iOS 11, *)) {
+  if (_platformSupportsSafeAreaInsets) {
+    CGFloat scale = [UIScreen mainScreen].scale;
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+#pragma clang diagnostic pop
+  } else {
+    _viewportMetrics.physical_padding_bottom = 0;
+  }
   [self updateViewportMetrics];
 }
 
