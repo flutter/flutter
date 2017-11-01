@@ -596,9 +596,18 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
 
+  /// Reconfigures the properties of this object to describe the configuration
+  /// provided in the `config` argument and the children listen in the
+  /// `childrenInInversePaintOrder` argument.
+  ///
+  /// The arguments may be null; this represents an empty configuration (all
+  /// values at their defaults, no children).
+  ///
+  /// No reference is kept to the [SemanticsConfiguration] object, but the child
+  /// list is used as-is and should therefore not be changed after this call.
   void updateWith({
     @required SemanticsConfiguration config,
-    @required  List<SemanticsNode> childrenInInversePaintOrder,
+    @required List<SemanticsNode> childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))

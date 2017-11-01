@@ -2239,9 +2239,10 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// Positioned children are those wrapped in a [Positioned] widget that has at
 /// least one non-null property. The stack sizes itself to contain all the
 /// non-positioned children, which are positioned according to [alignment]
-/// (which defaults to the top-left corner). The positioned children are then
-/// placed relative to the stack according to their top, right, bottom, and left
-/// properties.
+/// (which defaults to the top-left corner in left-to-right environments and the
+/// top-right corner in right-to-left environments). The positioned children are
+/// then placed relative to the stack according to their top, right, bottom, and
+/// left properties.
 ///
 /// The stack paints its children in order with the first child being at the
 /// bottom. If you want to change the order in which the children paint, you
@@ -2282,12 +2283,18 @@ class Stack extends MultiChildRenderObjectWidget {
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
-  /// How to align the non-positioned children in the stack.
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
+  ///
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -2398,6 +2405,12 @@ class IndexedStack extends Stack {
 /// [height] properties can be used to give the dimensions, with one
 /// corresponding position property (e.g. [top] and [height]).
 ///
+/// If all three values on a particular axis are null, then the
+/// [Stack.alignment] property is used to position the child.
+///
+/// If all six values are null, the child is a non-positioned child. The [Stack]
+/// uses only the non-positioned children to size itself.
+///
 /// See also:
 ///
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
@@ -2413,6 +2426,8 @@ class Positioned extends ParentDataWidget<Stack> {
   ///
   ///  * [Positioned.directional], which specifies the widget's horizontal
   ///    position using `start` and `end` rather than `left` and `right`.
+  ///  * [PositionedDirectional], which is similar to [Positioned.directional]
+  ///    but adapts to the ambient [Directionality].
   const Positioned({
     Key key,
     this.left,
@@ -2530,36 +2545,54 @@ class Positioned extends ParentDataWidget<Stack> {
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double left;
 
   /// The distance that the child's top edge is inset from the top of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double top;
 
   /// The distance that the child's right edge is inset from the right of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double right;
 
   /// The distance that the child's bottom edge is inset from the bottom of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double bottom;
 
   /// The child's width.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double width;
 
   /// The child's height.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double height;
 
   @override
@@ -3896,6 +3929,18 @@ class RichText extends LeafRenderObjectWidget {
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    description.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    description.add(new StringProperty('text', text.toPlainText()));
   }
 }
 
