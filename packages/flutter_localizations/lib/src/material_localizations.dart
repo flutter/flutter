@@ -441,7 +441,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'ps',  // Pashto
     'pt',  // Portugese
     'ru',  // Russian
-    'sd',  // Sindhi
     'ur',  // Urdu
     'zh',  // Simplified Chinese
   ];
