@@ -7,11 +7,11 @@ import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'semantics.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
