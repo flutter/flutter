@@ -91,7 +91,7 @@ action("generate_snapshot_bin") {
 
   deps = [
     ":generate_dart_ui",
-    "//third_party/dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
+    "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
   ]
   depfile = "$target_gen_dir/core_snapshot.d"
 
@@ -119,7 +119,7 @@ action("generate_snapshot_bin") {
   rebased_dart_ui_path = rebase_path(dart_ui_path)
 
   gen_snapshot_dir =
-      get_label_info("//third_party/dart/runtime/bin:gen_snapshot($dart_host_toolchain)",
+      get_label_info("//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)",
                      "root_out_dir")
   script = "//third_party/dart/runtime/tools/create_snapshot_bin.py"
 
