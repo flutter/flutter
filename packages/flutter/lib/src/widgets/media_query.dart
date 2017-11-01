@@ -55,7 +55,7 @@ class MediaQueryData {
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
       padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
-      alwaysUse24HourFormat = false;
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
