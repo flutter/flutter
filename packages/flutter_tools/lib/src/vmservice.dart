@@ -898,7 +898,7 @@ class HeapSpace extends ServiceObject {
   }
 }
 
-// A function, field or class along with its source location.
+/// A function, field or class along with its source location.
 class ProgramElement {
   ProgramElement(this.qualifiedName, this.uri, this.line, this.column);
 

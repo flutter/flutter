@@ -376,7 +376,7 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart');
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
-    return OperationResult.ok;
+    return OperationResult.kOk;
   }
 
   /// Returns [true] if the reload was successful.
@@ -415,7 +415,7 @@ class HotRunner extends ResidentRunner {
         timer.stop();
         status.cancel();
         printStatus('Restarted app in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return OperationResult.ok;
+        return OperationResult.kOk;
       } catch (error) {
         status.cancel();
         rethrow;
@@ -435,7 +435,7 @@ class HotRunner extends ResidentRunner {
         if (result.isOk)
           printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
         if (result.hint != null)
-          printStatus(result.hint);
+          printStatus('\n${result.hint}');
         return result;
       } catch (error) {
         status.cancel();
@@ -575,7 +575,7 @@ class HotRunner extends ResidentRunner {
     }
     if (reassembleViews.isEmpty) {
       printTrace('Skipping reassemble because all isolates are paused.');
-      return new OperationResult(OperationResult.ok.code, reloadMessage);
+      return new OperationResult(OperationResult.kOk.code, reloadMessage);
     }
     printTrace('Evicting dirty assets');
     await _evictDirtyAssets();
@@ -632,28 +632,25 @@ class HotRunner extends ResidentRunner {
         unusedElements.addAll(await unusedReport);
 
       if (unusedElements.isNotEmpty) {
+        // TODO(devoncarew): Should we only show this once during a restart session?
+        // So, show it once, and don't show it again until they've restarted?
         unusedElementMessage =
-          '\nThe following program elements were changed by the reload, '
-          'but did not run when the view was reassembled. If this code '
-          'only runs at start-up, you will need to restart ("R") for '
-          'the changes to have an effect.';
+          'Some methods were changed by the reload but did not run when the view was reassembled;\n'
+          'you may need to restart the app for the changes to have an effect:';
         for (ProgramElement unusedElement in unusedElements) {
           final String name = unusedElement.qualifiedName;
           final String path = _uriToRelativePath(unusedElement.uri);
           final int line = unusedElement.line;
-          String elementDescription;
-          if (line == null)
-            elementDescription = '$name ($path)';
-          else
-            elementDescription = '$name ($path:$line)';
-          unusedElementMessage += '\n - $elementDescription';
+          final String description = line == null ? '$name ($path)' : '$name ($path:$line)';
+          unusedElementMessage += '\n  $description';
         }
       }
     }
 
     return new OperationResult(
-      reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
-      reloadMessage, unusedElementMessage
+      reassembleAndScheduleErrors ? 1 : OperationResult.kOk.code,
+      reloadMessage,
+      hint: unusedElementMessage
     );
   }
 
