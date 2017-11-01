@@ -2,18 +2,66 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show JSON;
 import 'dart:io';
 
+/// Sanity checking of the @foo metadata in the English translations,
+/// material_en.arb.
+///
+/// - For each @foo resource, there must be a corresponding foo, except
+///   for plurals, for which there must be a fooOther.
+/// - Each @foo resource must have a Map value with a String valued
+///   description entry.
+///
+/// Returns an error message upon failure, null on success.
+String validateEnglishLocalizations(File file) {
+  final StringBuffer errorMessages = new StringBuffer();
+
+  if (!file.existsSync()) {
+    errorMessages.writeln('English localizations do not exist: $file');
+    return errorMessages.toString();
+  }
+
+  final Map<String, dynamic> bundle = JSON.decode(file.readAsStringSync());
+  for (String atResourceId in bundle.keys) {
+    if (!atResourceId.startsWith('@'))
+      continue;
+
+    final dynamic atResourceValue = bundle[atResourceId];
+    final Map<String, String> atResource = atResourceValue is Map ? atResourceValue : null;
+    if (atResource == null) {
+      errorMessages.writeln('A map value was not specified for $atResourceId');
+      continue;
+    }
+
+    final String description = atResource['description'];
+    if (description == null)
+      errorMessages.writeln('No description specified for $atResourceId');
+
+    final String plural = atResource['plural'];
+    final String resourceId = atResourceId.substring(1);
+    if (plural != null) {
+      final String resourceIdOther = '${resourceId}Other';
+      if (!bundle.containsKey(resourceIdOther))
+        errorMessages.writeln('Default plural resource $resourceIdOther undefined');
+    } else {
+      if (!bundle.containsKey(resourceId))
+        errorMessages.writeln('No matching $resourceId defined for $atResourceId');
+    }
+  }
+
+  return errorMessages.isEmpty ? null : errorMessages.toString();
+}
+
 /// Enforces the following invariants in our localizations:
-/// 
+///
 /// - Resource keys are valid, i.e. they appear in the canonical list.
 /// - Resource keys are complete for language-level locales, e.g. "es", "he".
-/// 
+///
 /// Uses "en" localizations as the canonical source of locale keys that other
 /// locales are compared against.
-/// 
-/// If validation fails, print an error message to STDERR and quit with exit
-/// code 1.
+///
+/// If validation fails, return an error message, otherwise return null.
 void validateLocalizations(
   Map<String, Map<String, String>> localeToResources,
   Map<String, Map<String, dynamic>> localeToAttributes,
@@ -33,7 +81,7 @@ void validateLocalizations(
     bool isPluralVariation(String key) {
       final RegExp pluralRegexp = new RegExp(r'(\w*)(Zero|One|Two|Few|Many)$');
       final Match pluralMatch = pluralRegexp.firstMatch(key);
-      
+
       if (pluralMatch == null)
         return false;
 
@@ -83,9 +131,7 @@ void validateLocalizations(
           ..writeln('  "notUsed": "Sindhi time format does not use a.m. indicator"')
           ..writeln('}');
     }
-
-    stderr.writeln('ERROR:');
-    stderr.writeln(errorMessages);
-    exit(1);
+    return errorMessages.toString();
   }
+  return null;
 }
