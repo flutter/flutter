@@ -46,6 +46,9 @@ void main() {
     expect(painter.text.text.length, 28);
     painter.layout();
 
+    // The skips here are because the old rendering code considers the bidi formatting characters
+    // to be part of the word sometimes and not others, which is fine, but we'd mildly prefer if
+    // we were consistently considering them part of words always.
     final TextRange hebrew1 = painter.getWordBoundary(const TextPosition(offset: 4, affinity: TextAffinity.downstream));
     expect(hebrew1, const TextRange(start: 0, end: 8), skip: skipExpectsWithKnownBugs);
     final TextRange english2 = painter.getWordBoundary(const TextPosition(offset: 14, affinity: TextAffinity.downstream));

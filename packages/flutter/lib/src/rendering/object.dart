@@ -2114,6 +2114,17 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner.requestVisualUpdate();
   }
 
+  /// Report the semantics of this node, for example for accessibility purposes.
+  ///
+  /// This method should be overridden by subclasses that have interesting
+  /// semantic information.
+  ///
+  /// The given [SemanticsConfiguration] object is mutable and should be
+  /// annotated in a manner that describes the current state. No reference
+  /// should be kept to that object; mutating it outside of the context of the
+  /// [describeSemanticsConfiguration] call (for example as a result of
+  /// asynchronous computation) will at best have no useful effect and at worse
+  /// will cause crashes as the data will be in an inconsistent state.
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
