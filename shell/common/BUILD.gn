@@ -61,6 +61,8 @@ source_set("common") {
     "animator.h",
     "engine.cc",
     "engine.h",
+    "null_platform_view.cc",
+    "null_platform_view.h",
     "null_rasterizer.cc",
     "null_rasterizer.h",
     "picture_serializer.cc",

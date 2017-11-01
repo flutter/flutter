@@ -10,6 +10,7 @@
 #include "FlutterChannels.h"
 #include "FlutterCodecs.h"
 #include "FlutterDartProject.h"
+#include "FlutterHeadlessDartRunner.h"
 #include "FlutterMacros.h"
 #include "FlutterNavigationController.h"
 #include "FlutterPlugin.h"
