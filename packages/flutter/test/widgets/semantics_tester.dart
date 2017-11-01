@@ -378,9 +378,9 @@ class _IncludesNodeWith extends Matcher {
     if (textDirection != null)
       strings.add(' (${describeEnum(textDirection)})');
     if (actions != null)
-    strings.add('actions "${actions.join(', ')}"');
+      strings.add('actions "${actions.join(', ')}"');
     if (flags != null)
-    strings.add('flags "${flags.join(', ')}"');
+      strings.add('flags "${flags.join(', ')}"');
     return strings.join(', ');
   }
 }
