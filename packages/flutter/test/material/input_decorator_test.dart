@@ -420,4 +420,20 @@ void main() {
     expect(tester.getRect(find.text('S')).left, anyOf(783.0, 784.0));
     expect(tester.getRect(find.text('S')).top, equals(295.5));
   });
+
+  testWidgets('InputDecorator animates properly', (WidgetTester tester) async {
+    final Widget child = const InputDecorator(
+      key: const Key('key'),
+      decoration: const InputDecoration(),
+      baseStyle: const TextStyle(),
+      textAlign: TextAlign.center,
+      isFocused: false,
+      isEmpty: false,
+      child: const Placeholder(),
+    );
+    expect(
+      child.toString(),
+      'InputDecorator-[<\'key\'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)',
+    );
+  });
 }
