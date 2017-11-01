@@ -7,8 +7,10 @@ import 'dart:io';
 import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
 
-void fatal(String message) {
-  stderr.writeln(message);
+void exitWithError(String errorMessage) {
+  if (errorMessage == null)
+    return;
+  stderr.writeln('Fatal Error: $errorMessage');
   exit(1);
 }
 
@@ -16,7 +18,7 @@ void checkCwdIsRepoRoot(String commandName) {
   final bool isRepoRoot = new Directory('.git').existsSync();
 
   if (!isRepoRoot) {
-    fatal(
+    exitWithError(
       '$commandName must be run from the root of the Flutter repository. The '
       'current working directory is: ${Directory.current.path}'
     );
@@ -32,7 +34,7 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'];
-  
+
   return new GeneratorOptions(writeToFile: writeToFile);
 }
 
