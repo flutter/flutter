@@ -29,7 +29,6 @@ class _ChipDemoState extends State<ChipDemo> {
       const Chip(
         avatar: const CircleAvatar(child: const Text('B')),
         label: const Text('Blueberry'),
-        border: const BorderSide(color: Colors.redAccent, width: 4.0),
       ),
     ];
 
