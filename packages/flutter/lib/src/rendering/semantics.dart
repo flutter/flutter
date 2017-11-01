@@ -1231,9 +1231,29 @@ class SemanticsConfiguration {
 
   // TAGS
 
+  /// The set of tags that this configuration wants to add to all child
+  /// [SemanticsNode]s.
+  ///
+  /// See also:
+  ///  * [addTagForChildren] to add a tag and for more information about their
+  ///    usage.
   Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
   Set<SemanticsTag> _tagsForChildren;
 
+  /// Specifies a [SemanticsTag] that this configuration wants to apply to all
+  /// child [SemanticsNode]s.
+  ///
+  /// The tag is added to all [SemanticsNode] that pass through the
+  /// [RenderObject] owning this configuration while looking to be attached to a
+  /// parent [SemanticsNode].
+  ///
+  /// Tags are used to communicate to a parent [SemanticsNode] that a child
+  /// [SemanticsNode] was passed through a particular [RenderObject]. The parent
+  /// can use this information to determine the shape of the semantics tree.
+  ///
+  /// See also:
+  ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
+  ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
     _tagsForChildren ??= new Set<SemanticsTag>();
     _tagsForChildren.add(tag);
