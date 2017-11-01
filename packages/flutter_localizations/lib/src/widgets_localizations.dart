@@ -36,7 +36,6 @@ class GlobalWidgetsLocalizations implements WidgetsLocalizations {
     'fa',  // Farsi
     'he',  // Hebrew
     'ps',  // Pashto
-    'sd',  // Sindhi
     'ur',  // Urdu
   ];
 
