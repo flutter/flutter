@@ -282,3 +282,14 @@ class UserScrollNotification extends ScrollNotification {
     description.add('direction: $direction');
   }
 }
+
+/// A predicate for [ScrollNotification], used to customize widgets that
+/// listen to notifications from their children.
+typedef bool ScrollNotificationPredicate(ScrollNotification notification);
+
+/// A [ScrollNotificationPredicate] that checks whether 
+/// `notification.depth == 0`, which means that the notification diid not bubble
+/// through any intervening scrolling widgets.
+bool defaultScrollNotificationPredicate(ScrollNotification notification) {
+  return notification.depth == 0;
+}
