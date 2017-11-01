@@ -40,6 +40,7 @@ export 'src/foundation/collections.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
 export 'src/foundation/licenses.dart';
+export 'src/foundation/node.dart';
 export 'src/foundation/observer_list.dart';
 export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';

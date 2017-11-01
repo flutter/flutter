@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'node.dart';
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
