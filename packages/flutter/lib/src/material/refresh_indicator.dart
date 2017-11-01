@@ -78,7 +78,8 @@ enum _RefreshIndicatorMode {
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
-  /// The [onRefresh] and [child] arguments must be non-null. The default
+  /// The [onRefresh], [child], and [notificationPredicate] arguments must be
+  /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   const RefreshIndicator({
     Key key,
@@ -86,9 +87,11 @@ class RefreshIndicator extends StatefulWidget {
     this.displacement: 40.0,
     @required this.onRefresh,
     this.color,
-    this.backgroundColor
+    this.backgroundColor,
+    this.notificationPredicate: defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(onRefresh != null),
+       assert(notificationPredicate != null),
        super(key: key);
 
   /// The refresh indicator will be stacked on top of this child. The indicator
@@ -112,6 +115,13 @@ class RefreshIndicator extends StatefulWidget {
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
   final Color backgroundColor;
+  
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate notificationPredicate;
 
   @override
   RefreshIndicatorState createState() => new RefreshIndicatorState();
@@ -174,7 +184,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth != 0)
+    if (!widget.notificationPredicate(notification))
       return false;
     if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
         _mode == null && _start(notification.metrics.axisDirection)) {

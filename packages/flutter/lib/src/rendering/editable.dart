@@ -369,6 +369,11 @@ class RenderEditable extends RenderBox {
   /// and the returned list is of length two. In this case, however, the two
   /// points might actually be co-located (e.g., because of a bidirectional
   /// selection that contains some text but whose ends meet in the middle).
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the equivalent but for
+  ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
     assert(constraints != null);
     _layoutText(constraints.maxWidth);
@@ -392,14 +397,30 @@ class RenderEditable extends RenderBox {
   }
 
   /// Returns the position in the text for the given global coordinate.
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the reverse operation, taking
+  ///    a [TextPosition] and returning a [Rect].
+  ///  * [TextPainter.getPositionForOffset], which is the equivalent method
+  ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
     _layoutText(constraints.maxWidth);
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
 
-  /// Returns the Rect in local coordinates for the caret at the given text
+  /// Returns the [Rect] in local coordinates for the caret at the given text
   /// position.
+  ///
+  /// See also:
+  ///
+  ///  * [getPositionForPoint], which is the reverse operation, taking
+  ///    an [Offset] in global coordinates and returning a [TextPosition].
+  ///  * [getEndpointsForSelection], which is the equivalent but for
+  ///    a selection rather than a particular text position.
+  ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
+  ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);

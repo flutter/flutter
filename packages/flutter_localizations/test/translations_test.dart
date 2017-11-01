@@ -20,7 +20,6 @@ void main() {
     'ps', // Pashto
     'pt', // Portugese
     'ru', // Russian
-    'sd', // Sindhi
     'ur', // Urdu
     'zh', // Chinese (simplified)
   ];

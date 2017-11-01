@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'node.dart';
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -76,7 +75,9 @@ class SemanticsData extends Diagnosticable {
     @required this.flags,
     @required this.actions,
     @required this.label,
+    @required this.increasedValue,
     @required this.value,
+    @required this.decreasedValue,
     @required this.hint,
     @required this.textDirection,
     @required this.rect,
@@ -85,7 +86,15 @@ class SemanticsData extends Diagnosticable {
   }) : assert(flags != null),
        assert(actions != null),
        assert(label != null),
+       assert(value != null),
+       assert(decreasedValue != null),
+       assert(increasedValue != null),
+       assert(hint != null),
        assert(label == '' || textDirection != null, 'A SemanticsData object with label "$label" had a null textDirection.'),
+       assert(value == '' || textDirection != null, 'A SemanticsData object with value "$value" had a null textDirection.'),
+       assert(hint == '' || textDirection != null, 'A SemanticsData object with hint "$hint" had a null textDirection.'),
+       assert(decreasedValue == '' || textDirection != null, 'A SemanticsData object with decreasedValue "$decreasedValue" had a null textDirection.'),
+       assert(increasedValue == '' || textDirection != null, 'A SemanticsData object with increasedValue "$increasedValue" had a null textDirection.'),
        assert(rect != null);
 
   /// A bit field of [SemanticsFlags] that apply to this node.
@@ -96,20 +105,33 @@ class SemanticsData extends Diagnosticable {
 
   /// A textual description of this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String label;
 
   /// A textual description for the current value of the node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String value;
+
+  /// The value that [value] will become after performing a
+  /// [SemanticsAction.increase] action.
+  ///
+  /// The reading direction is given by [textDirection].
+  final String increasedValue;
+
+  /// The value that [value] will become after performing a
+  /// [SemanticsAction.decrease] action.
+  ///
+  /// The reading direction is given by [textDirection].
+  final String decreasedValue;
 
   /// A brief description of the result of performing an action on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   final String hint;
 
-  /// The reading direction for the text in [label], [value], and [hint].
+  /// The reading direction for the text in [label], [value], [hint],
+  /// [increasedValue], and [decreasedValue].
   final TextDirection textDirection;
 
   /// The bounding box for this node in its coordinate system.
@@ -153,6 +175,10 @@ class SemanticsData extends Diagnosticable {
     }
     properties.add(new IterableProperty<String>('flags', flagSummary, ifEmpty: null));
     properties.add(new StringProperty('label', label, defaultValue: ''));
+    properties.add(new StringProperty('value', value, defaultValue: ''));
+    properties.add(new StringProperty('increasedValue', increasedValue, defaultValue: ''));
+    properties.add(new StringProperty('decreasedValue', decreasedValue, defaultValue: ''));
+    properties.add(new StringProperty('hint', hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 
@@ -495,7 +521,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   bool _isDifferentFromCurrentSemanticAnnotation(SemanticsConfiguration config) {
     return _label != config.label ||
         _hint != config.hint ||
+        _decreasedValue != config.decreasedValue ||
         _value != config.value ||
+        _increasedValue != config.increasedValue ||
         _flags != config._flags ||
         _textDirection != config.textDirection ||
         _actionsAsBits != config._actionsAsBits ||
@@ -523,23 +551,44 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// A textual description of this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label = _kEmptyConfig.label;
 
   /// A textual description for the current value of the node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get value => _value;
   String _value = _kEmptyConfig.value;
 
+  /// The value that [value] will have after a [SemanticsAction.decrease] action
+  /// has been performed.
+  ///
+  /// This property is only valid if the [SemanticsAction.decrease] action is
+  /// available on this node.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get decreasedValue => _decreasedValue;
+  String _decreasedValue = _kEmptyConfig.decreasedValue;
+
+  /// The value that [value] will have after a [SemanticsAction.increase] action
+  /// has been performed.
+  ///
+  /// This property is only valid if the [SemanticsAction.increase] action is
+  /// available on this node.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get increasedValue => _increasedValue;
+  String _increasedValue = _kEmptyConfig.increasedValue;
+
   /// A brief description of the result of performing an action on this node.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = _kEmptyConfig.hint;
 
-  /// The reading direction for [label], [value], and [hint].
+  /// The reading direction for [label], [value], [hint], [increasedValue], and
+  /// [decreasedValue].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection = _kEmptyConfig.textDirection;
 
@@ -556,7 +605,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
 
     _label = config.label;
+    _decreasedValue = config.decreasedValue;
     _value = config.value;
+    _increasedValue = config.increasedValue;
     _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
@@ -564,6 +615,15 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _actionsAsBits = config._actionsAsBits;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
+
+    assert(
+      !_canPerformAction(SemanticsAction.increase) || (_value == '') == (_increasedValue == ''),
+      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "increasedValue" or neither',
+    );
+    assert(
+      !_canPerformAction(SemanticsAction.decrease) || (_value == '') == (_decreasedValue == ''),
+      'A SemanticsNode with action "increase" needs to be annotated with either both "value" and "decreasedValue" or neither',
+    );
   }
 
 
@@ -578,6 +638,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     String label = _label;
     String hint = _hint;
     String value = _value;
+    String increasedValue = _increasedValue;
+    String decreasedValue = _decreasedValue;
     TextDirection textDirection = _textDirection;
     Set<SemanticsTag> mergedTags = tags == null ? null : new Set<SemanticsTag>.from(tags);
 
@@ -589,6 +651,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         textDirection ??= node._textDirection;
         if (value == '' || value == null)
           value = node._value;
+        if (increasedValue == '' || increasedValue == null)
+          increasedValue = node._increasedValue;
+        if (decreasedValue == '' || decreasedValue == null)
+          decreasedValue = node._decreasedValue;
         if (node.tags != null) {
           mergedTags ??= new Set<SemanticsTag>();
           mergedTags.addAll(node.tags);
@@ -614,6 +680,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       actions: actions,
       label: label,
       value: value,
+      increasedValue: increasedValue,
+      decreasedValue: decreasedValue,
       hint: hint,
       textDirection: textDirection,
       rect: rect,
@@ -648,6 +716,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       rect: data.rect,
       label: data.label,
       value: data.value,
+      decreasedValue: data.decreasedValue,
+      increasedValue: data.increasedValue,
       hint: data.hint,
       textDirection: data.textDirection,
       transform: data.transform?.storage ?? _kIdentityTransform,
@@ -708,6 +778,8 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlags.isTextField), ifTrue: 'textField'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
+    properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
+    properties.add(new StringProperty('decreasedValue', _decreasedValue, defaultValue: ''));
     properties.add(new StringProperty('hint', _hint, defaultValue: ''));
     properties.add(new EnumProperty<TextDirection>('textDirection', _textDirection, defaultValue: null));
   }
@@ -1019,6 +1091,7 @@ class SemanticsConfiguration {
   ///
   /// Whenever the user performs `action` the provided `handler` is called.
   void addAction(SemanticsAction action, VoidCallback handler) {
+    assert(handler != null);
     _actions[action] = handler;
     _actionsAsBits |= action.index;
     _hasBeenAnnotated = true;
@@ -1051,10 +1124,11 @@ class SemanticsConfiguration {
   /// [value] and [hint] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label = '';
   set label(String label) {
+    assert(label != null);
     _label = label;
     _hasBeenAnnotated = true;
   }
@@ -1066,11 +1140,48 @@ class SemanticsConfiguration {
   /// [label] and [hint] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
+  ///
+  /// See also:
+  ///  * [decreasedValue], describes what [value] will be after performing
+  ///    [SemanticsAction.decrease]
+  ///  * [increasedValue], describes what [value] will be after performing
+  ///    [SemanticsAction.increase]
   String get value => _value;
   String _value = '';
   set value(String value) {
+    assert(value != null);
     _value = value;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The value that [value] will have after performing a
+  /// [SemanticsAction.decrease] action.
+  ///
+  /// This must be set if a handler for [SemanticsAction.decrease] is provided
+  /// and [value] is set.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get decreasedValue => _decreasedValue;
+  String _decreasedValue = '';
+  set decreasedValue(String decreasedValue) {
+    assert(decreasedValue != null);
+    _decreasedValue = decreasedValue;
+    _hasBeenAnnotated = true;
+  }
+
+  /// The value that [value] will have after performing a
+  /// [SemanticsAction.increase] action.
+  ///
+  /// This must be set if a handler for [SemanticsAction.increase] is provided
+  /// and [value] is set.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get increasedValue => _increasedValue;
+  String _increasedValue = '';
+  set increasedValue(String increasedValue) {
+    assert(increasedValue != null);
+    _increasedValue = increasedValue;
     _hasBeenAnnotated = true;
   }
 
@@ -1081,15 +1192,17 @@ class SemanticsConfiguration {
   /// [label] and [value] in the following order: [value], [label], [hint].
   /// The concatenated value is then used as the `Text` description.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint = '';
   set hint(String hint) {
+    assert(hint != null);
     _hint = hint;
     _hasBeenAnnotated = true;
   }
 
-  /// The reading direction for the text in [label], [value], and [hint].
+  /// The reading direction for the text in [label], [value], [hint],
+  /// [increasedValue], and [decreasedValue].
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection textDirection) {
@@ -1124,9 +1237,29 @@ class SemanticsConfiguration {
 
   // TAGS
 
+  /// The set of tags that this configuration wants to add to all child
+  /// [SemanticsNode]s.
+  ///
+  /// See also:
+  ///  * [addTagForChildren] to add a tag and for more information about their
+  ///    usage.
   Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
   Set<SemanticsTag> _tagsForChildren;
 
+  /// Specifies a [SemanticsTag] that this configuration wants to apply to all
+  /// child [SemanticsNode]s.
+  ///
+  /// The tag is added to all [SemanticsNode] that pass through the
+  /// [RenderObject] owning this configuration while looking to be attached to a
+  /// parent [SemanticsNode].
+  ///
+  /// Tags are used to communicate to a parent [SemanticsNode] that a child
+  /// [SemanticsNode] was passed through a particular [RenderObject]. The parent
+  /// can use this information to determine the shape of the semantics tree.
+  ///
+  /// See also:
+  ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
+  ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
     _tagsForChildren ??= new Set<SemanticsTag>();
     _tagsForChildren.add(tag);
@@ -1188,8 +1321,12 @@ class SemanticsConfiguration {
       otherString: other._label,
       otherTextDirection: other.textDirection,
     );
+    if (_decreasedValue == '' || _decreasedValue == null)
+      _decreasedValue = other._decreasedValue;
     if (_value == '' || _value == null)
       _value = other._value;
+    if (_increasedValue == '' || _increasedValue == null)
+      _increasedValue = other._increasedValue;
     _hint = _concatStrings(
       thisString: _hint,
       thisTextDirection: textDirection,
@@ -1208,7 +1345,9 @@ class SemanticsConfiguration {
       .._hasBeenAnnotated = _hasBeenAnnotated
       .._textDirection = _textDirection
       .._label = _label
+      .._increasedValue = _increasedValue
       .._value = _value
+      .._decreasedValue = _decreasedValue
       .._hint = _hint
       .._flags = _flags
       .._actionsAsBits = _actionsAsBits

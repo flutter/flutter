@@ -496,6 +496,7 @@ void main() {
       '--non-interactive',
       '--enable-checked-mode',
       '--use-test-fonts',
+      // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
       testPath,
     ]);

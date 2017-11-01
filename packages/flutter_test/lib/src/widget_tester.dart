@@ -134,9 +134,10 @@ Future<Null> benchmarkWidgets(WidgetTesterCallback callback) {
 /// that have not yet resolved.
 void expect(dynamic actual, dynamic matcher, {
   String reason,
+  dynamic skip, // true or a String
 }) {
   TestAsyncUtils.guardSync();
-  test_package.expect(actual, matcher, reason: reason);
+  test_package.expect(actual, matcher, reason: reason, skip: skip);
 }
 
 /// Assert that `actual` matches `matcher`.
