@@ -131,14 +131,6 @@ void processBundle(File file, String locale) {
   }
 }
 
-void _exitOnValidationError(String errorMessages) {
-  if (errorMessages == null)
-    return;
-  stderr.writeln('ERROR:');
-  stderr.writeln(errorMessages);
-  exit(1);
-}
-
 void main(List<String> rawArgs) {
   checkCwdIsRepoRoot('gen_localizations');
   final GeneratorOptions options = parseArgs(rawArgs);
@@ -150,7 +142,7 @@ void main(List<String> rawArgs) {
   final Directory directory = new Directory(pathlib.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
 
-  _exitOnValidationError(
+  exitWithError(
     validateEnglishLocalizations(new File(pathlib.join(directory.path, 'material_en.arb')))
   );
 
@@ -161,7 +153,8 @@ void main(List<String> rawArgs) {
       processBundle(new File(path), locale);
     }
   }
-  _exitOnValidationError(
+
+  exitWithError(
     validateLocalizations(localeToResources, localeToResourceAttributes)
   );
 
