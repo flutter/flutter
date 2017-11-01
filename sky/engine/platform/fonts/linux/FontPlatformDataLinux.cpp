@@ -36,7 +36,7 @@
 
 namespace blink {
 
-static SkPaint::Hinting skiaHinting = SkPaint::kNormal_Hinting;
+static SkPaint::Hinting skiaHinting = SkPaint::kSlight_Hinting;
 static bool useSkiaAutoHint = true;
 static bool useSkiaBitmaps = true;
 static bool useSkiaAntiAlias = true;
