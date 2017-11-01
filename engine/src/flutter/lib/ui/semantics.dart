@@ -124,6 +124,8 @@ class SemanticsFlags {
   static const int _kIsCheckedIndex = 1 << 1;
   static const int _kIsSelectedIndex = 1 << 2;
   static const int _kIsButtonIndex = 1 << 3;
+  static const int _kIsTextFieldIndex = 1 << 4;
+  static const int _kIsFocusedIndex = 1 << 5;
 
   const SemanticsFlags._(this.index);
 
@@ -161,6 +163,17 @@ class SemanticsFlags {
   /// a button.
   static const SemanticsFlags isButton = const SemanticsFlags._(_kIsButtonIndex);
 
+  /// Whether the semantic node represents a text field.
+  ///
+  /// Text fields are announced as such and allow text input via accessibility
+  /// affordances.
+  static const SemanticsFlags isTextField = const SemanticsFlags._(_kIsTextFieldIndex);
+
+  /// Whether the semantic node currently holds the user's focus.
+  ///
+  /// The focused element is usually the current receiver of keyboard inputs.
+  static const SemanticsFlags isFocused = const SemanticsFlags._(_kIsFocusedIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -168,7 +181,9 @@ class SemanticsFlags {
     _kHasCheckedStateIndex: hasCheckedState,
     _kIsCheckedIndex: isChecked,
     _kIsSelectedIndex: isSelected,
-    _kIsButtonIndex: isButton
+    _kIsButtonIndex: isButton,
+    _kIsTextFieldIndex: isTextField,
+    _kIsFocusedIndex: isFocused,
   };
 
   @override
@@ -182,6 +197,10 @@ class SemanticsFlags {
         return 'SemanticsFlags.isSelected';
       case _kIsButtonIndex:
         return 'SemanticsFlags.isButton';
+      case _kIsTextFieldIndex:
+        return 'SemanticsFlags.isTextField';
+      case _kIsFocusedIndex:
+        return 'SemanticsFlags.isFocused';
     }
     return null;
   }

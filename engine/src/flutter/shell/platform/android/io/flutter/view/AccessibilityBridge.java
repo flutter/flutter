@@ -57,6 +57,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     private static final int SEMANTICS_FLAG_IS_CHECKED = 1 << 1;
     private static final int SEMANTICS_FLAG_IS_SELECTED = 1 << 2;
     private static final int SEMANTICS_FLAG_IS_BUTTON = 1 << 3;
+    private static final int SEMANTICS_FLAG_IS_TEXT_FIELD = 1 << 4;
+    private static final int SEMANTICS_FLAG_IS_FOCUSED = 1 << 5;
 
     AccessibilityBridge(FlutterView owner) {
         assert owner != null;
@@ -95,8 +97,13 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         result.setClassName("Flutter"); // TODO(goderbauer): Set proper class names
         result.setSource(mOwner, virtualViewId);
         result.setFocusable(object.isFocusable());
+        result.setFocused((object.flags & SEMANTICS_FLAG_IS_FOCUSED) != 0);
+
         if (mFocusedObject != null)
             result.setAccessibilityFocused(mFocusedObject.id == virtualViewId);
+
+        if ((object.flags & SEMANTICS_FLAG_IS_TEXT_FIELD) != 0)
+            result.setClassName("android.widget.EditText");
 
         if (object.parent != null) {
             assert object.id > 0;
