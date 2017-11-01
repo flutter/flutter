@@ -970,7 +970,12 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
   /// Adds the given text to the paragraph.
   ///
   /// The text will be styled according to the current stack of text styles.
-  void addText(String text) native "ParagraphBuilder_addText";
+  void addText(String text) {
+    String error = _addText(text);
+    if (error != null)
+      throw new ArgumentError(error);
+  }
+  String _addText(String text) native "ParagraphBuilder_addText";
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the
   /// added text and associated styling.

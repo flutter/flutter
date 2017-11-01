@@ -417,19 +417,34 @@ void ParagraphBuilder::pop() {
   }
 }
 
-void ParagraphBuilder::addText(const std::string& text) {
+Dart_Handle ParagraphBuilder::addText(const std::u16string& text) {
+  if (text.empty())
+    return Dart_Null();
+
+  // Use ICU to validate the UTF-16 input.  Calling u_strToUTF8 with a null
+  // output buffer will return U_BUFFER_OVERFLOW_ERROR if the input is well
+  // formed.
+  const UChar* text_ptr = reinterpret_cast<const UChar*>(text.data());
+  UErrorCode error_code = U_ZERO_ERROR;
+  u_strToUTF8(nullptr, 0, nullptr, text_ptr, text.size(), &error_code);
+  if (error_code != U_BUFFER_OVERFLOW_ERROR)
+    return tonic::ToDart("string is not well-formed UTF-16");
+
   if (!Settings::Get().using_blink) {
     m_paragraphBuilder->AddText(text);
   } else {
     // Blink Version.
     if (!m_currentRenderObject)
-      return;
-    RenderText* renderText = new RenderText(String::fromUTF8(text).impl());
+      return tonic::ToDart("paragraph has already been built");
+    RenderText* renderText =
+        new RenderText(String(text_ptr, text.size()).impl());
     RefPtr<RenderStyle> style = RenderStyle::create();
     style->inheritFrom(m_currentRenderObject->style());
     renderText->setStyle(style.release());
     m_currentRenderObject->addChild(renderText);
   }
+
+  return Dart_Null();
 }
 
 fxl::RefPtr<Paragraph> ParagraphBuilder::build() {

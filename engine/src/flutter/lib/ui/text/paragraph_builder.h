@@ -44,7 +44,7 @@ class ParagraphBuilder : public fxl::RefCountedThreadSafe<ParagraphBuilder>,
 
   void pop();
 
-  void addText(const std::string& text);
+  Dart_Handle addText(const std::u16string& text);
 
   fxl::RefPtr<Paragraph> build();
 
