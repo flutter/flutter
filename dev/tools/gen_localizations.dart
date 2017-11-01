@@ -131,7 +131,7 @@ void processBundle(File file, String locale) {
   }
 }
 
-void _exitOnValidationError(errorMessages) {
+void _exitOnValidationError(String errorMessages) {
   if (errorMessages == null)
     return;
   stderr.writeln('ERROR:');

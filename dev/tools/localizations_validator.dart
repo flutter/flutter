@@ -62,7 +62,7 @@ String validateEnglishLocalizations(File file) {
 /// locales are compared against.
 ///
 /// If validation fails, return an error message, otherwise return null.
-void validateLocalizations(
+String validateLocalizations(
   Map<String, Map<String, String>> localeToResources,
   Map<String, Map<String, dynamic>> localeToAttributes,
 ) {
