@@ -265,6 +265,7 @@ void Paragraph::Layout(double width, bool force) {
   paint.setAntiAlias(true);
   paint.setTextEncoding(SkPaint::kGlyphID_TextEncoding);
   paint.setSubpixelText(true);
+  paint.setHinting(SkPaint::kSlight_Hinting);
 
   records_.clear();
   line_heights_.clear();
