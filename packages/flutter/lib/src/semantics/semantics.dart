@@ -198,7 +198,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, textDirection, rect, tags, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, textDirection, rect, tags, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
