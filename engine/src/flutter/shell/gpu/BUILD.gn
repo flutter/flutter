@@ -24,10 +24,10 @@ source_set("gpu") {
   deps = [
     "$flutter_root/common",
     "$flutter_root/flow",
+    "$flutter_root/fml",
     "$flutter_root/glue",
     "$flutter_root/shell/common",
     "$flutter_root/synchronization",
-    "//flutter/fml",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
     "//third_party/skia:gpu",
