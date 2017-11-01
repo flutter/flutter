@@ -54,10 +54,8 @@ if (is_android) {
 
   # Defines the name the Android build gives to the current host CPU
   # architecture, which is different than the names GN uses.
-  if (host_cpu == "x64") {
+  if (host_cpu == "x64" || host_cpu == "x86") {
     android_host_arch = "x86_64"
-  } else if (host_cpu == "x86") {
-    android_host_arch = "x86"
   } else {
     assert(false, "Need Android toolchain support for your build CPU arch.")
   }
