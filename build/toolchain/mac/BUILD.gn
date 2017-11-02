@@ -257,7 +257,7 @@ mac_toolchain("clang_x64") {
 }
 
 # Toolchain used for Mac host (i386) targets.
-mac_toolchain("clang_i386") {
+mac_toolchain("clang_x86") {
   toolchain_cpu = "i386"
   toolchain_os = "mac"
   prefix = rebase_path(llvm_bin_path, root_build_dir)
