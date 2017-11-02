@@ -338,7 +338,7 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
  * text. */
 - (NSRange)rangeForCharacterAtIndex:(NSUInteger)index {
   if (index < self.text.length)
-    [self.text rangeOfComposedCharacterSequenceAtIndex:index];
+    return [self.text rangeOfComposedCharacterSequenceAtIndex:index];
   return NSMakeRange(index, 0);
 }
 
