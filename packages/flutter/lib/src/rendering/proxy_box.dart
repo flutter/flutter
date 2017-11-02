@@ -361,7 +361,7 @@ class RenderLimitedBox extends RenderProxyBox {
 
 /// Attempts to size the child to a specific aspect ratio.
 ///
-/// The render object first tries the largest width permited by the layout
+/// The render object first tries the largest width permitted by the layout
 /// constraints. The height of the render object is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -1372,12 +1372,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     assert(hasSize);
-    if (_shape == BoxShape.rectangle) {
-      return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
-    } else {
-      final Rect rect = Offset.zero & size;
-      return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    assert(_shape != null);
+    switch (_shape) {
+      case BoxShape.rectangle:
+        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+      case BoxShape.circle:
+        final Rect rect = Offset.zero & size;
+        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
+    return null;
   }
 
   @override

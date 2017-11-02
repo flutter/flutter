@@ -21,7 +21,7 @@ void main() {
     expect(() => new ShapeDecoration(color: colorR, shape: null), throwsAssertionError);
     expect(
       new ShapeDecoration.fromBoxDecoration(const BoxDecoration(shape: BoxShape.circle)),
-      const ShapeDecoration(shape: const CircleBorder(BorderSide.none)),
+      const ShapeDecoration(shape: const CircleBorder(side: BorderSide.none)),
     );
     expect(
       new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, borderRadius: new BorderRadiusDirectional.circular(100.0))),
@@ -29,7 +29,7 @@ void main() {
     );
     expect(
       new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.circle, border: new Border.all(color: colorG))),
-      new ShapeDecoration(shape: new CircleBorder(new BorderSide(color: colorG))),
+      new ShapeDecoration(shape: new CircleBorder(side: new BorderSide(color: colorG))),
     );
     expect(
       new ShapeDecoration.fromBoxDecoration(new BoxDecoration(shape: BoxShape.rectangle, border: new Border.all(color: colorR))),
