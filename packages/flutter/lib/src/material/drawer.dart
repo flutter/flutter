@@ -134,7 +134,8 @@ class DrawerController extends StatefulWidget {
     GlobalKey key,
     @required this.child,
     @required this.alignment,
-  }) : assert(child != null || alignment != null),
+  }) : assert(child != null), 
+       assert(alignment != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -298,7 +299,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
-  AlignmentDirectional get _drawerStartAlignment {
+  AlignmentDirectional get _drawerOuterAlignment {
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
@@ -307,7 +308,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     }
   }
 
-  AlignmentDirectional get _drawerEndAlignment {
+  AlignmentDirectional get _drawerInnerAlignment {
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
@@ -319,7 +320,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: _drawerStartAlignment,
+        alignment: _drawerOuterAlignment,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -351,9 +352,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: _drawerStartAlignment,
+                alignment: _drawerOuterAlignment,
                 child: new Align(
-                  alignment: _drawerEndAlignment,
+                  alignment: _drawerInnerAlignment,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
