@@ -328,6 +328,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// decedent nodes are merged into this node.
   ///
   /// See also:
+  ///
   ///  * [isMergedIntoParent]
   ///  * [mergeAllDescendantsIntoThisNode]
   bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
@@ -1092,6 +1093,7 @@ class SemanticsConfiguration {
   /// would like to contribute to the semantics tree.
   ///
   /// See also:
+  ///
   /// * [addAction] to add an action.
   final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
@@ -1111,6 +1113,7 @@ class SemanticsConfiguration {
   /// registered.
   ///
   /// See also:
+  ///
   ///  * [addAction] to add an action.
   VoidCallback getActionHandler(SemanticsAction action) => _actions[action];
 
@@ -1153,6 +1156,7 @@ class SemanticsConfiguration {
   /// The reading direction is given by [textDirection].
   ///
   /// See also:
+  /// 
   ///  * [decreasedValue], describes what [value] will be after performing
   ///    [SemanticsAction.decrease]
   ///  * [increasedValue], describes what [value] will be after performing
@@ -1256,6 +1260,7 @@ class SemanticsConfiguration {
   /// [SemanticsNode]s.
   ///
   /// See also:
+  ///
   ///  * [addTagForChildren] to add a tag and for more information about their
   ///    usage.
   Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
@@ -1273,6 +1278,7 @@ class SemanticsConfiguration {
   /// can use this information to determine the shape of the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
