@@ -33,6 +33,10 @@ class GPURasterizer : public Rasterizer {
 
   flow::LayerTree* GetLastLayerTree() override;
 
+  void DrawLastLayerTree() override;
+
+  flow::TextureRegistry& GetTextureRegistry() override;
+
   void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
   // Set a callback to be called once when the next frame is drawn.

@@ -57,7 +57,12 @@ CompositorContext::ScopedFrame::~ScopedFrame() {
   context_.EndFrame(*this, instrumentation_enabled_);
 }
 
+void CompositorContext::OnGrContextCreated() {
+  texture_registry_.OnGrContextCreated();
+}
+
 void CompositorContext::OnGrContextDestroyed() {
+  texture_registry_.OnGrContextDestroyed();
   raster_cache_.Clear();
 }
 

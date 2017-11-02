@@ -23,6 +23,7 @@ Animator::Animator(fml::WeakPtr<Rasterizer> rasterizer,
       pending_frame_semaphore_(1),
       frame_number_(1),
       paused_(false),
+      regenerate_layer_tree_(false),
       frame_scheduled_(false),
       weak_factory_(this) {}
 
@@ -58,6 +59,7 @@ void Animator::BeginFrame(fxl::TimePoint frame_start_time,
   TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
   frame_scheduled_ = false;
+  regenerate_layer_tree_ = false;
   pending_frame_semaphore_.Signal();
 
   if (!producer_continuation_) {
@@ -116,14 +118,29 @@ void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
   });
 }
 
-void Animator::RequestFrame() {
+bool Animator::CanReuseLastLayerTree() {
+  return !regenerate_layer_tree_;
+}
+
+void Animator::DrawLastLayerTree() {
+  pending_frame_semaphore_.Signal();
+  blink::Threads::Gpu()->PostTask([rasterizer = rasterizer_]() {
+    if (rasterizer.get())
+      rasterizer->DrawLastLayerTree();
+  });
+}
+
+void Animator::RequestFrame(bool regenerate_layer_tree) {
+  if (regenerate_layer_tree) {
+    regenerate_layer_tree_ = true;
+  }
   if (paused_) {
     return;
   }
 
   if (!pending_frame_semaphore_.TryWait()) {
-    // Multiple calls to Animator::RequestFrame will still result in a single
-    // request to the VsyncWaiter.
+    // Multiple calls to Animator::RequestDrawOnVSync will still result in a
+    // single request to the VsyncWaiter.
     return;
   }
 
@@ -149,8 +166,13 @@ void Animator::RequestFrame() {
 void Animator::AwaitVSync() {
   waiter_->AsyncWaitForVsync([self = weak_factory_.GetWeakPtr()](
       fxl::TimePoint frame_start_time, fxl::TimePoint frame_target_time) {
-    if (self)
-      self->BeginFrame(frame_start_time, frame_target_time);
+    if (self) {
+      if (self->CanReuseLastLayerTree()) {
+        self->DrawLastLayerTree();
+      } else {
+        self->BeginFrame(frame_start_time, frame_target_time);
+      }
+    }
   });
 
   engine_->NotifyIdle(dart_frame_deadline_);

@@ -17,6 +17,8 @@ shared_library("flutter_shell_native") {
     "android_context_gl.h",
     "android_environment_gl.cc",
     "android_environment_gl.h",
+    "android_external_texture_gl.h",
+    "android_external_texture_gl.cc",
     "android_native_window.cc",
     "android_native_window.h",
     "android_surface.cc",
@@ -46,6 +48,7 @@ shared_library("flutter_shell_native") {
     "$flutter_root/shell/gpu",
     "//garnet/public/lib/fxl",
     "//third_party/skia",
+    "//third_party/skia:gpu",
   ]
   if (flutter_runtime_mode == "debug") {
     deps += [ "//third_party/dart/runtime:libdart_jit" ]
@@ -114,6 +117,7 @@ java_library("flutter_shell_java") {
     "io/flutter/view/ResourceCleaner.java",
     "io/flutter/view/ResourceExtractor.java",
     "io/flutter/view/ResourcePaths.java",
+    "io/flutter/view/TextureRegistry.java",
     "io/flutter/view/VsyncWaiter.java",
   ]
 

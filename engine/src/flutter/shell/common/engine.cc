@@ -522,8 +522,8 @@ std::string Engine::DefaultRouteName() {
   return "/";
 }
 
-void Engine::ScheduleFrame() {
-  animator_->RequestFrame();
+void Engine::ScheduleFrame(bool regenerate_layer_tree) {
+  animator_->RequestFrame(regenerate_layer_tree);
 }
 
 void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {

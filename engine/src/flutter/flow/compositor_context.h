@@ -11,6 +11,7 @@
 #include "flutter/flow/instrumentation.h"
 #include "flutter/flow/process_info.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/flow/texture.h"
 #include "lib/fxl/macros.h"
 #include "third_party/skia/include/core/SkCanvas.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
@@ -55,9 +56,13 @@ class CompositorContext {
                            SkCanvas* canvas,
                            bool instrumentation_enabled = true);
 
+  void OnGrContextCreated();
+
   void OnGrContextDestroyed();
 
   RasterCache& raster_cache() { return raster_cache_; }
+
+  TextureRegistry& texture_registry() { return texture_registry_; }
 
   const Counter& frame_count() const { return frame_count_; }
 
@@ -69,6 +74,7 @@ class CompositorContext {
 
  private:
   RasterCache raster_cache_;
+  TextureRegistry texture_registry_;
   std::unique_ptr<ProcessInfo> process_info_;
   Counter frame_count_;
   Stopwatch frame_time_;

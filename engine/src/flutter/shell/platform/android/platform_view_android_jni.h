@@ -29,6 +29,12 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
 
 void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj);
 
+void SurfaceTextureAttachToGLContext(JNIEnv* env, jobject obj, jint textureId);
+
+void SurfaceTextureUpdateTexImage(JNIEnv* env, jobject obj);
+
+void SurfaceTextureDetachFromGLContext(JNIEnv* env, jobject obj);
+
 }  // namespace shell
 
 #endif  // FLUTTER_SHELL_PLATFORM_ANDROID_PLATFORM_VIEW_ANDROID_JNI_H_

@@ -33,6 +33,10 @@ class Rasterizer {
 
   virtual flow::LayerTree* GetLastLayerTree() = 0;
 
+  virtual void DrawLastLayerTree() = 0;
+
+  virtual flow::TextureRegistry& GetTextureRegistry() = 0;
+
   virtual void Draw(
       fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) = 0;
 

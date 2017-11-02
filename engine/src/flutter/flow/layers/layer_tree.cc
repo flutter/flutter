@@ -63,9 +63,11 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 #endif
 
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame) const {
-  Layer::PaintContext context = {*frame.canvas(), frame.context().frame_time(),
+  Layer::PaintContext context = {*frame.canvas(),
+                                 frame.context().frame_time(),
                                  frame.context().engine_time(),
                                  frame.context().memory_usage(),
+                                 frame.context().texture_registry(),
                                  checkerboard_offscreen_layers_};
   TRACE_EVENT0("flutter", "LayerTree::Paint");
 

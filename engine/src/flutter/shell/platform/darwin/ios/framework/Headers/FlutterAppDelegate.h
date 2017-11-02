@@ -34,6 +34,12 @@ FLUTTER_EXPORT
 // Defaults to window's rootViewController.
 - (NSObject<FlutterBinaryMessenger>*)binaryMessenger;
 
+// Can be overriden by subclasses to provide a custom FlutterTextureRegistry,
+// typically a FlutterViewController, for plugin interop.
+//
+// Defaults to window's rootViewController.
+- (NSObject<FlutterTextureRegistry>*)textures;
+
 @end
 
 #endif  // FLUTTER_FLUTTERDARTPROJECT_H_

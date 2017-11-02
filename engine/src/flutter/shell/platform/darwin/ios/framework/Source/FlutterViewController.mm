@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "flutter/common/threads.h"
+#include "flutter/flow/texture.h"
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
@@ -19,6 +20,7 @@
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterTextInputPlugin.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/flutter_touch_mapper.h"
+#include "flutter/shell/platform/darwin/ios/ios_external_texture_gl.h"
 #include "flutter/shell/platform/darwin/ios/platform_view_ios.h"
 #include "lib/fxl/functional/make_copyable.h"
 #include "lib/fxl/time/time_delta.h"
@@ -74,6 +76,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _systemChannel;
   fml::scoped_nsprotocol<FlutterBasicMessageChannel*> _settingsChannel;
   fml::scoped_nsprotocol<UIView*> _launchView;
+  int64_t _nextTextureId;
   bool _platformSupportsTouchTypes;
   bool _platformSupportsTouchPressure;
   bool _platformSupportsTouchOrientationAndTilt;
@@ -864,5 +867,21 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
               binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
   NSAssert(channel, @"The channel must not be null");
   _platformView->platform_message_router().SetMessageHandler(channel.UTF8String, handler);
+}
+
+#pragma mark - FlutterTextureRegistry
+
+- (int64_t)registerTexture:(NSObject<FlutterTexture>*)texture {
+  int64_t textureId = _nextTextureId++;
+  _platformView->RegisterExternalTexture(textureId, texture);
+  return textureId;
+}
+
+- (void)unregisterTexture:(int64_t)textureId {
+  _platformView->UnregisterTexture(textureId);
+}
+
+- (void)textureFrameAvailable:(int64_t)textureId {
+  _platformView->MarkTextureFrameAvailable(textureId);
 }
 @end

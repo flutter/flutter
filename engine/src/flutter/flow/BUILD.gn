@@ -40,6 +40,8 @@ source_set("flow") {
     "layers/picture_layer.h",
     "layers/shader_mask_layer.cc",
     "layers/shader_mask_layer.h",
+    "layers/texture_layer.cc",
+    "layers/texture_layer.h",
     "layers/transform_layer.cc",
     "layers/transform_layer.h",
     "matrix_decomposition.cc",
@@ -51,6 +53,8 @@ source_set("flow") {
     "raster_cache.h",
     "raster_cache_key.cc",
     "raster_cache_key.h",
+    "texture.cc",
+    "texture.h",
   ]
 
   public_deps = [
