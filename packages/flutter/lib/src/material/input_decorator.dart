@@ -472,15 +472,13 @@ class InputDecorator extends StatelessWidget {
 
     final Color activeColor = _getActiveColor(themeData);
 
-    final TextStyle baseStyle = this.baseStyle ?? themeData.textTheme.subhead;
+    final TextStyle baseStyle = themeData.textTheme.subhead.merge(this.baseStyle);
     final TextStyle hintStyle = decoration.hintStyle ?? baseStyle.copyWith(color: themeData.hintColor);
     final TextStyle helperStyle = decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
     final TextStyle counterStyle = decoration.counterStyle ?? helperStyle;
     final TextStyle subtextStyle = errorText != null
       ? decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor)
       : helperStyle;
-
-    final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
 
     double topPadding = isCollapsed ? 0.0 : (isDense ?  _kDenseTopPadding : _kNormalTopPadding);
 
@@ -645,6 +643,7 @@ class InputDecorator extends StatelessWidget {
     if (decoration.icon != null) {
       assert(!isCollapsed);
       final double iconSize = isDense ? 18.0 : 24.0;
+      final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
       final double iconTop = topPadding + (entryTextHeight - iconSize) / 2.0;
       return new Row(
         crossAxisAlignment: CrossAxisAlignment.start,
