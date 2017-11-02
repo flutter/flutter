@@ -638,6 +638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             style: widget.style,
             cursorColor: widget.cursorColor,
             showCursor: _showCursor,
+            hasFocus: _hasFocus,
             maxLines: widget.maxLines,
             selectionColor: widget.selectionColor,
             textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
@@ -663,6 +664,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
+    this.hasFocus,
     this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
@@ -681,6 +683,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final ValueNotifier<bool> showCursor;
+  final bool hasFocus;
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
@@ -699,6 +702,7 @@ class _Editable extends LeafRenderObjectWidget {
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
+      hasFocus: hasFocus,
       maxLines: maxLines,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
@@ -717,6 +721,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..text = _styledTextSpan
       ..cursorColor = cursorColor
       ..showCursor = showCursor
+      ..hasFocus = hasFocus
       ..maxLines = maxLines
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor
