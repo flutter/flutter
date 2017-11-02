@@ -473,11 +473,11 @@ class InputDecorator extends StatelessWidget {
     final Color activeColor = _getActiveColor(themeData);
 
     final TextStyle baseStyle = themeData.textTheme.subhead.merge(this.baseStyle);
-    final TextStyle hintStyle = decoration.hintStyle ?? baseStyle.copyWith(color: themeData.hintColor);
-    final TextStyle helperStyle = decoration.helperStyle ?? themeData.textTheme.caption.copyWith(color: themeData.hintColor);
-    final TextStyle counterStyle = decoration.counterStyle ?? helperStyle;
+    final TextStyle hintStyle = baseStyle.copyWith(color: themeData.hintColor).merge(decoration.hintStyle);
+    final TextStyle helperStyle = themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
+    final TextStyle counterStyle = helperStyle.merge(decoration.counterStyle);
     final TextStyle subtextStyle = errorText != null
-      ? decoration.errorStyle ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor)
+      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
       : helperStyle;
 
     double topPadding = isCollapsed ? 0.0 : (isDense ?  _kDenseTopPadding : _kNormalTopPadding);
@@ -486,7 +486,7 @@ class InputDecorator extends StatelessWidget {
 
     if (labelText != null) {
       assert(!isCollapsed);
-      final TextStyle floatingLabelStyle = decoration.labelStyle ?? themeData.textTheme.caption.copyWith(color: activeColor);
+      final TextStyle floatingLabelStyle = themeData.textTheme.caption.copyWith(color: activeColor).merge(decoration.labelStyle);
       final TextStyle labelStyle = hasInlineLabel ? hintStyle : floatingLabelStyle;
       final double labelTextHeight = floatingLabelStyle.fontSize * textScaleFactor;
 

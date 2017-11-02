@@ -817,6 +817,7 @@ void main() {
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
     final TextStyle style = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -865,6 +866,7 @@ void main() {
 
   testWidgets('TextField with specified hintStyle', (WidgetTester tester) async {
     final TextStyle hintStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -886,6 +888,7 @@ void main() {
 
   testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
     final TextStyle prefixStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -973,6 +976,7 @@ void main() {
   testWidgets('TextField prefix and suffix appear correctly with hint text',
           (WidgetTester tester) async {
     final TextStyle hintStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
