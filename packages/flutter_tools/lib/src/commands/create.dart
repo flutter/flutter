@@ -24,6 +24,7 @@ import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../version.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
@@ -298,6 +299,8 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'flutterRevision': FlutterVersion.instance.frameworkRevision,
+      'flutterChannel': FlutterVersion.instance.channel,
     };
   }
 

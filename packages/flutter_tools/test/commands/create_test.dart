@@ -12,15 +12,21 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/version.dart';
+import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
+const String frameworkRevision = '12345678';
+const String frameworkChannel = 'omega';
+
 void main() {
   group('create', () {
     Directory temp;
     Directory projectDir;
+    FlutterVersion mockFlutterVersion;
 
     setUpAll(() {
       Cache.disableLocking();
@@ -29,6 +35,7 @@ void main() {
     setUp(() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
       projectDir = temp.childDirectory('flutter_project');
+      mockFlutterVersion = new MockFlutterVersion();
     });
 
     tearDown(() {
@@ -171,6 +178,8 @@ void main() {
     // Verify content and formatting
     testUsingContext('content', () async {
       Cache.flutterRoot = '../..';
+      when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+      when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
 
       final CreateCommand command = new CreateCommand();
       final CommandRunner<Null> runner = createTestCommandRunner(command);
@@ -229,6 +238,15 @@ void main() {
       final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
       expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+
+      final String versionPath = fs.path.join('.version');
+      expectExists(versionPath);
+      final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+      expect(version, contains('revision: 12345678'));
+      expect(version, contains('channel: omega'));
+    },
+    overrides: <Type, Generator>{
+      FlutterVersion: () => mockFlutterVersion,
     });
 
     // Verify that we can regenerate over an existing project.
@@ -334,3 +352,5 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
   }
   expect(exec.exitCode, 0);
 }
+
+class MockFlutterVersion extends Mock implements FlutterVersion {}
