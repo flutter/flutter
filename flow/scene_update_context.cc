@@ -195,9 +195,12 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
   for (auto& task : paint_tasks_) {
     FXL_DCHECK(task.surface);
     SkCanvas* canvas = task.surface->GetSkiaSurface()->getCanvas();
-    Layer::PaintContext context = {*canvas, frame.context().frame_time(),
+    Layer::PaintContext context = {*canvas,
+                                   frame.context().frame_time(),
                                    frame.context().engine_time(),
-                                   frame.context().memory_usage(), false};
+                                   frame.context().memory_usage(),
+                                   frame.context().texture_registry(),
+                                   false};
     canvas->restoreToCount(1);
     canvas->save();
     canvas->clear(task.background_color);
