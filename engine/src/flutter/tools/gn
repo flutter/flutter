@@ -132,12 +132,22 @@ def to_gn_args(args):
       if 'target_cpu' in gn_args:
         gn_args['target_cpu'] = cpu_for_target_arch(gn_args['target_cpu'])
 
-    # Make sure the host toolchain has the same bit width as the target
-    # toolchain. This ensures that Dart's gen_snapshot generates the right
-    # code for the target.
+    # Modify host_toolchain into dart_host_toolchain so it matches word size of target_cpu
     target_is_32_bit = gn_args['target_cpu'] == 'arm' or gn_args['target_cpu'] == 'x86'
     if target_is_32_bit:
-      gn_args['host_cpu'] = 'x86';
+      if sys.platform.startswith('linux'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/linux:clang_x86"
+      elif sys.platform.startswith('darwin'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/mac:clang_i386"
+      elif sys.platform.startswith('win'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/win:x86"
+    else:
+      if sys.platform.startswith('linux'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/linux:clang_x64"
+      elif sys.platform.startswith('darwin'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/mac:clang_x64"
+      elif sys.platform.startswith('win'):
+        gn_args['dart_host_toolchain'] = "//build/toolchain/win:x64"
 
     gn_args['flutter_runtime_mode'] = args.runtime_mode
     gn_args['flutter_aot'] = aot
