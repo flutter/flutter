@@ -12,16 +12,6 @@ import 'feedback.dart';
 import 'icons.dart';
 import 'tooltip.dart';
 
-const double _kChipHeight = 32.0;
-
-const TextStyle _kLabelStyle = const TextStyle(
-  inherit: false,
-  fontSize: 13.0,
-  fontWeight: FontWeight.w400,
-  color: Colors.black87,
-  textBaseline: TextBaseline.alphabetic,
-);
-
 /// A material design chip.
 ///
 /// Chips represent complex entities in small blocks, such as a contact.
@@ -62,11 +52,21 @@ class Chip extends StatelessWidget {
     this.deleteButtonTooltipMessage,
     this.backgroundColor,
     this.deleteIconColor,
-    this.border: BorderSide.none,
+    this.border: const StadiumBorder(),
   }) : assert(label != null),
        assert(border != null),
-       labelStyle = labelStyle ?? _kLabelStyle,
+       labelStyle = labelStyle ?? _defaultLabelStyle,
        super(key: key);
+
+  static const TextStyle _defaultLabelStyle = const TextStyle(
+    inherit: false,
+    fontSize: 13.0,
+    fontWeight: FontWeight.w400,
+    color: Colors.black87,
+    textBaseline: TextBaseline.alphabetic,
+  );
+
+  static const double _chipHeight = 32.0;
 
   /// A widget to display prior to the chip's label.
   ///
@@ -97,8 +97,8 @@ class Chip extends StatelessWidget {
 
   /// The border to draw around the chip.
   ///
-  /// Defaults to [BorderSide.none].
-  final BorderSide border;
+  /// Defaults to a [StadiumBorder].
+  final ShapeBorder border;
 
   /// Color for delete icon, the default being black.
   ///
@@ -126,8 +126,8 @@ class Chip extends StatelessWidget {
       children.add(new ExcludeSemantics(
         child: new Container(
           margin: const EdgeInsetsDirectional.only(end: 8.0),
-          width: _kChipHeight,
-          height: _kChipHeight,
+          width: _chipHeight,
+          height: _chipHeight,
           child: avatar,
         ),
       ));
@@ -146,7 +146,8 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
-          // TODO(#12378): Internationalize this text.
+          // TODO(gspencer): Internationalize this text.
+          // https://github.com/flutter/flutter/issues/12378
           message: deleteButtonTooltipMessage ?? 'Delete "$label"',
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -163,11 +164,11 @@ class Chip extends StatelessWidget {
     return new Semantics(
       container: true,
       child: new Container(
-        constraints: const BoxConstraints(minHeight: _kChipHeight),
+        constraints: const BoxConstraints(minHeight: _chipHeight),
         padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
         decoration: new ShapeDecoration(
           color: backgroundColor ?? Colors.grey.shade300,
-          shape: new StadiumBorder(side: border),
+          shape: border,
         ),
         child: new Center(
           widthFactor: 1.0,

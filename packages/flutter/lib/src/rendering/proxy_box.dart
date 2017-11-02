@@ -1372,6 +1372,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     assert(hasSize);
+    assert(_shape != null);
     switch (_shape) {
       case BoxShape.rectangle:
         return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
@@ -1379,7 +1380,6 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
         final Rect rect = Offset.zero & size;
         return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
-    assert(false, 'Box shape $_shape not handled.');
     return null;
   }
 

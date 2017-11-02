@@ -487,7 +487,6 @@ class Border extends BoxBorder {
               }
               BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
               break;
-            break;
           }
           return;
       }
