@@ -77,7 +77,7 @@ abstract class LocalKey extends Key {
 ///
 /// See also the discussion at [Widget.key].
 class ValueKey<T> extends LocalKey {
-  /// Creates a key that delgates its [operator==] to the given value.
+  /// Creates a key that delegates its [operator==] to the given value.
   const ValueKey(this.value);
 
   /// The value to which this key delegates its [operator==]
@@ -302,7 +302,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
-  /// assoicated [State] object is not a subtype of `T`.
+  /// associated [State] object is not a subtype of `T`.
   T get currentState {
     final Element element = _currentElement;
     if (element is StatefulElement) {
@@ -930,7 +930,7 @@ typedef void StateSetter(VoidCallback fn);
 ///    update the [widget] property to refer to the new widget and then call the
 ///    [didUpdateWidget] method with the previous widget as an argument. [State]
 ///    objects should override [didUpdateWidget] to respond to changes in their
-///    associated wiget (e.g., to start implicit animations). The framework
+///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
 ///    calls to [setState] in [didUpdateWidget] are redundant.
 ///  * If the subtree containing the [State] object is removed from the tree
@@ -3796,7 +3796,7 @@ class StatefulElement extends ComponentElement {
   }
 }
 
-/// An [Element] that uses a [ProxyElement] as its configuration.
+/// An [Element] that uses a [ProxyWidget] as its configuration.
 abstract class ProxyElement extends ComponentElement {
   /// Initializes fields for subclasses.
   ProxyElement(ProxyWidget widget) : super(widget);
@@ -3819,7 +3819,7 @@ abstract class ProxyElement extends ComponentElement {
     rebuild();
   }
 
-  /// Notify other objects that the wiget associated with this element has changed.
+  /// Notify other objects that the widget associated with this element has changed.
   ///
   /// Called during [update] after changing the widget associated with this
   /// element but before rebuilding this element.
@@ -4518,6 +4518,11 @@ class LeafRenderObjectElement extends RenderObjectElement {
   @override
   void removeChildRenderObject(RenderObject child) {
     assert(false);
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    return widget.debugDescribeChildren();
   }
 }
 

@@ -513,4 +513,36 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Increased/decreased values are annotated', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Semantics(
+          container: true,
+          value: '10s',
+          increasedValue: '11s',
+          decreasedValue: '9s',
+          onIncrease: () => () {},
+          onDecrease: () => () {},
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          actions: SemanticsAction.increase.index | SemanticsAction.decrease.index,
+          textDirection: TextDirection.ltr,
+          value: '10s',
+          increasedValue: '11s',
+          decreasedValue: '9s',
+        ),
+      ],
+    ), ignoreTransform: true, ignoreRect: true, ignoreId: true));
+
+    semantics.dispose();
+  });
 }

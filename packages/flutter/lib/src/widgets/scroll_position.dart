@@ -557,7 +557,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If the argument is null, this method has no effect. This is convenient for
   /// cases where the new activity is obtained from another method, and that
   /// method might return null, since it means the caller does not have to
-  /// explictly null-check the argument.
+  /// explicitly null-check the argument.
   void beginActivity(ScrollActivity newActivity) {
     if (newActivity == null)
       return;

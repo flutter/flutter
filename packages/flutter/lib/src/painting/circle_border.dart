@@ -25,7 +25,7 @@ class CircleBorder extends ShapeBorder {
   /// Create a circle border.
   ///
   /// The [side] argument must not be null.
-  const CircleBorder([ this.side = BorderSide.none ]) : assert(side != null);
+  const CircleBorder({ this.side = BorderSide.none }) : assert(side != null);
 
   /// The style of this border.
   final BorderSide side;
@@ -36,19 +36,19 @@ class CircleBorder extends ShapeBorder {
   }
 
   @override
-  ShapeBorder scale(double t) => new CircleBorder(side.scale(t));
+  ShapeBorder scale(double t) => new CircleBorder(side: side.scale(t));
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is CircleBorder)
-      return new CircleBorder(BorderSide.lerp(a.side, side, t));
+      return new CircleBorder(side: BorderSide.lerp(a.side, side, t));
     return super.lerpFrom(a, t);
   }
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     if (b is CircleBorder)
-      return new CircleBorder(BorderSide.lerp(side, b.side, t));
+      return new CircleBorder(side: BorderSide.lerp(side, b.side, t));
     return super.lerpTo(b, t);
   }
 

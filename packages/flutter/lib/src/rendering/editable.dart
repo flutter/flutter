@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'semantics.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -105,6 +106,7 @@ class RenderEditable extends RenderBox {
     TextAlign textAlign: TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
+    bool hasFocus,
     int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
@@ -125,6 +127,7 @@ class RenderEditable extends RenderBox {
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
+       _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
@@ -227,6 +230,17 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether the editable is currently focused.
+  bool get hasFocus => _hasFocus;
+  bool _hasFocus;
+  set hasFocus(bool value) {
+    assert(value != null);
+    if (_hasFocus == value)
+      return;
+    _hasFocus = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will extend
@@ -304,6 +318,15 @@ class RenderEditable extends RenderBox {
   }
 
   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config
+      ..isFocused = hasFocus
+      ..isTextField = true;
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _offset.addListener(markNeedsPaint);
@@ -362,6 +385,11 @@ class RenderEditable extends RenderBox {
   /// and the returned list is of length two. In this case, however, the two
   /// points might actually be co-located (e.g., because of a bidirectional
   /// selection that contains some text but whose ends meet in the middle).
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the equivalent but for
+  ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
     assert(constraints != null);
     _layoutText(constraints.maxWidth);
@@ -385,14 +413,30 @@ class RenderEditable extends RenderBox {
   }
 
   /// Returns the position in the text for the given global coordinate.
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the reverse operation, taking
+  ///    a [TextPosition] and returning a [Rect].
+  ///  * [TextPainter.getPositionForOffset], which is the equivalent method
+  ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
     _layoutText(constraints.maxWidth);
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
 
-  /// Returns the Rect in local coordinates for the caret at the given text
+  /// Returns the [Rect] in local coordinates for the caret at the given text
   /// position.
+  ///
+  /// See also:
+  ///
+  ///  * [getPositionForPoint], which is the reverse operation, taking
+  ///    an [Offset] in global coordinates and returning a [TextPosition].
+  ///  * [getEndpointsForSelection], which is the equivalent but for
+  ///    a selection rather than a particular text position.
+  ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
+  ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);

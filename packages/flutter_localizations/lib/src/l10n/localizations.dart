@@ -4,7 +4,7 @@
 
 // This file has been automatically generated.  Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
+// dart dev/tools/gen_localizations.dart --overwrite
 
 /// Maps from [Locale.languageCode] to a map that contains the localized strings
 /// for that locale.
@@ -365,33 +365,6 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'pasteButtonLabel': r'ВСТАВИТЬ',
     'selectAllButtonLabel': r'ВЫБРАТЬ ВСЁ',
     'viewLicensesButtonLabel': r'ПРОСМОТРЕТЬ ЛИЦЕНЗИИ',
-  },
-  'sd': const <String, String>{
-    'scriptCategory': r'tall',
-    'timeOfDayFormat': r'HH:mm',
-    'openAppDrawerTooltip': r'اوپن جي مينڊيٽ مينيو',
-    'backButtonTooltip': r'پوئتي',
-    'closeButtonTooltip': r'بند ڪريو',
-    'nextMonthTooltip': r'ايندڙ مهيني',
-    'previousMonthTooltip': r'پويون مهينو',
-    'nextPageTooltip': r'اڳيون پيج',
-    'previousPageTooltip': r'پويون صفحو',
-    'showMenuTooltip': r'ڏيکاريو',
-    'aboutListTileTitle': r'$applicationName بابت',
-    'licensesPageTitle': r'لائسنس',
-    'pageRowsInfoTitle': r'$firstRow–$lastRow جي $rowCount',
-    'pageRowsInfoTitleApproximate': r'$firstRow–$lastRow کان $rowCount تقريبن',
-    'rowsPerPageTitle': r'رني پاسي وارو صفحو',
-    'selectedRowCountTitleOther': r'$selectedRowCount شيون چونڊيل',
-    'cancelButtonLabel': r'منسوخ ڪيو',
-    'closeButtonLabel': r'بند ڪريو',
-    'continueButtonLabel': r'جاري رکو',
-    'copyButtonLabel': r'ڪاپي',
-    'cutButtonLabel': r'پٽي',
-    'okButtonLabel': r'ٺيڪ آهي',
-    'pasteButtonLabel': r'پيسٽ ڪريو',
-    'selectAllButtonLabel': r'سڀ چونڊيو',
-    'viewLicensesButtonLabel': r'لائسنس ڏسو',
   },
   'ur': const <String, String>{
     'scriptCategory': r'tall',

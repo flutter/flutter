@@ -95,7 +95,7 @@ abstract class MaterialLocalizations {
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
   /// each supported layout.
-  TimeOfDayFormat get timeOfDayFormat;
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false });
 
   /// Provides geometric text preferences for the current locale.
   ///
@@ -114,16 +114,28 @@ abstract class MaterialLocalizations {
   /// See also: https://material.io/guidelines/style/typography.html
   TextTheme get localTextGeometry;
 
+  /// Formats [number] as a decimal, inserting locale-appropriate thousands
+  /// separators as necessary.
+  String formatDecimal(int number);
+
   /// Formats [TimeOfDay.hour] in the given time of day according to the value
   /// of [timeOfDayFormat].
-  String formatHour(TimeOfDay timeOfDay);
+  ///
+  /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
+  /// rather than the default for the current locale.
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
 
   /// Formats [TimeOfDay.minute] in the given time of day according to the value
   /// of [timeOfDayFormat].
   String formatMinute(TimeOfDay timeOfDay);
 
   /// Formats [timeOfDay] according to the value of [timeOfDayFormat].
-  String formatTimeOfDay(TimeOfDay timeOfDay);
+  ///
+  /// If [alwaysUse24HourFormat] is true, formats hour using [HourFormat.HH]
+  /// rather than the default for the current locale. This value is usually
+  /// passed from [MediaQueryData.alwaysUse24HourFormat], which has platform-
+  /// specific behavior.
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false });
 
   /// Full unabbreviated year format, e.g. 2017 rather than 17.
   String formatYear(DateTime date);
@@ -270,9 +282,27 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   ];
 
   @override
-  String formatHour(TimeOfDay timeOfDay) {
-    assert(hourFormat(of: timeOfDayFormat) == HourFormat.h);
-    return formatDecimal(timeOfDay.hour);
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+    final TimeOfDayFormat format = timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat);
+    switch (format) {
+      case TimeOfDayFormat.h_colon_mm_space_a:
+        return formatDecimal(timeOfDay.hourOfPeriod == 0 ? 12 : timeOfDay.hourOfPeriod);
+      case TimeOfDayFormat.HH_colon_mm:
+        return _formatTwoDigitZeroPad(timeOfDay.hour);
+      default:
+        throw new AssertionError('$runtimeType does not support $format.');
+    }
+  }
+
+  /// Formats [number] using two digits, assuming it's in the 0-99 inclusive
+  /// range. Not designed to format values outside this range.
+  String _formatTwoDigitZeroPad(int number) {
+    assert(0 <= number && number < 100);
+
+    if (number < 10)
+      return '0$number';
+
+    return '$number';
   }
 
   @override
@@ -314,7 +344,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     return null;
   }
 
-  /// Formats an integer, inserting thousands separators as needed.
+  @override
   String formatDecimal(int number) {
     if (number > -1000 && number < 1000)
       return number.toString();
@@ -331,8 +361,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay) {
-    assert(timeOfDayFormat == TimeOfDayFormat.h_colon_mm_space_a);
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -341,7 +370,24 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+    final StringBuffer buffer = new StringBuffer();
+
+    // Add hour:minute.
+    buffer
+      ..write(formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat))
+      ..write(':')
+      ..write(formatMinute(timeOfDay));
+
+    if (alwaysUse24HourFormat) {
+      // There's no AM/PM indicator in 24-hour format.
+      return '$buffer';
+    }
+
+    // Add AM/PM indicator.
+    buffer
+      ..write(' ')
+      ..write(_formatDayPeriod(timeOfDay));
+    return '$buffer';
   }
 
   @override
@@ -430,7 +476,11 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
-  TimeOfDayFormat get timeOfDayFormat => TimeOfDayFormat.h_colon_mm_space_a;
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
+    return alwaysUse24HourFormat
+      ? TimeOfDayFormat.HH_colon_mm
+      : TimeOfDayFormat.h_colon_mm_space_a;
+  }
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override

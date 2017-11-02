@@ -25,7 +25,7 @@ export 'package:flutter/rendering.dart' show
 ///
 /// It's uncommon to subclass [SliverChildDelegate]. Instead, consider using one
 /// of the existing subclasses that provide adaptors to builder callbacks or
-/// explict child lists.
+/// explicit child lists.
 ///
 /// See also:
 ///

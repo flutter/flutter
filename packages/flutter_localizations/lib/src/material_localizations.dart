@@ -8,9 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
-// TODO(yjbanov): remove internal import when https://github.com/dart-lang/intl/issues/145 is fixed.
-// ignore: implementation_imports
-import 'package:intl/src/date_format_internal.dart' as date_format_internal;
+import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
 import 'l10n/date_localizations.dart' as date_localizations;
 
 import 'l10n/localizations.dart';
@@ -143,8 +141,8 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String formatHour(TimeOfDay timeOfDay) {
-    switch (hourFormat(of: timeOfDayFormat)) {
+  String formatHour(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
+    switch (hourFormat(of: timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat))) {
       case HourFormat.HH:
         return _twoDigitZeroPaddedFormat.format(timeOfDay.hour);
       case HourFormat.H:
@@ -184,15 +182,13 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   int get firstDayOfWeekIndex => (_fullYearFormat.dateSymbols.FIRSTDAYOFWEEK + 1) % 7;
 
-  /// Formats a [number] using local decimal number format.
-  ///
-  /// Inserts locale-appropriate thousands separator, if necessary.
+  @override
   String formatDecimal(int number) {
     return _decimalFormat.format(number);
   }
 
   @override
-  String formatTimeOfDay(TimeOfDay timeOfDay) {
+  String formatTimeOfDay(TimeOfDay timeOfDay, { bool alwaysUse24HourFormat: false }) {
     // Not using intl.DateFormat for two reasons:
     //
     // - DateFormat supports more formats than our material time picker does,
@@ -201,18 +197,20 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     // - DateFormat operates on DateTime, which is sensitive to time eras and
     //   time zones, while here we want to format hour and minute within one day
     //   no matter what date the day falls on.
-    switch (timeOfDayFormat) {
+    final String hour = formatHour(timeOfDay, alwaysUse24HourFormat: alwaysUse24HourFormat);
+    final String minute = formatMinute(timeOfDay);
+    switch (timeOfDayFormat(alwaysUse24HourFormat: alwaysUse24HourFormat)) {
       case TimeOfDayFormat.h_colon_mm_space_a:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)} ${_formatDayPeriod(timeOfDay)}';
+        return '$hour:$minute ${_formatDayPeriod(timeOfDay)}';
       case TimeOfDayFormat.H_colon_mm:
       case TimeOfDayFormat.HH_colon_mm:
-        return '${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
+        return '$hour:$minute';
       case TimeOfDayFormat.HH_dot_mm:
-        return '${formatHour(timeOfDay)}.${formatMinute(timeOfDay)}';
+        return '$hour.$minute';
       case TimeOfDayFormat.a_space_h_colon_mm:
-        return '${_formatDayPeriod(timeOfDay)} ${formatHour(timeOfDay)}:${formatMinute(timeOfDay)}';
+        return '${_formatDayPeriod(timeOfDay)} $hour:$minute';
       case TimeOfDayFormat.frenchCanadian:
-        return '${formatHour(timeOfDay)} h ${formatMinute(timeOfDay)}';
+        return '$hour h $minute';
     }
 
     return null;
@@ -332,7 +330,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///  * http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US shows the
   ///    short time pattern used in locale en_US
   @override
-  TimeOfDayFormat get timeOfDayFormat {
+  TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
     final String icuShortTimePattern = _nameToValue['timeOfDayFormat'];
 
     assert(() {
@@ -347,7 +345,12 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
       return true;
     }());
 
-    return _icuTimeOfDayToEnum[icuShortTimePattern];
+    final TimeOfDayFormat icuFormat = _icuTimeOfDayToEnum[icuShortTimePattern];
+
+    if (alwaysUse24HourFormat)
+      return _get24HourVersionOf(icuFormat);
+
+    return icuFormat;
   }
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
@@ -407,6 +410,23 @@ const Map<String, TimeOfDayFormat> _icuTimeOfDayToEnum = const <String, TimeOfDa
   'ah:mm': TimeOfDayFormat.a_space_h_colon_mm,
 };
 
+/// Finds the [TimeOfDayFormat] to use instead of the `original` when the
+/// `original` uses 12-hour format and [MediaQueryData.alwaysUse24HourFormat]
+/// is true.
+TimeOfDayFormat _get24HourVersionOf(TimeOfDayFormat original) {
+  switch (original) {
+    case TimeOfDayFormat.HH_colon_mm:
+    case TimeOfDayFormat.HH_dot_mm:
+    case TimeOfDayFormat.frenchCanadian:
+    case TimeOfDayFormat.H_colon_mm:
+      return original;
+    case TimeOfDayFormat.h_colon_mm_space_a:
+    case TimeOfDayFormat.a_space_h_colon_mm:
+      return TimeOfDayFormat.HH_colon_mm;
+  }
+  return TimeOfDayFormat.HH_colon_mm;
+}
+
 /// Tracks if date i18n data has been loaded.
 bool _dateIntlDataInitialized = false;
 
@@ -416,13 +436,14 @@ bool _dateIntlDataInitialized = false;
 /// data. Subsequent invocations have no effect.
 void _loadDateIntlDataIfNotLoaded() {
   if (!_dateIntlDataInitialized) {
-    date_format_internal.initializeDatePatterns(() => date_localizations.datePatterns);
-    date_format_internal.initializeDateSymbols(() {
-      final Map<String, intl.DateSymbols> symbols = <String, intl.DateSymbols>{};
-      date_localizations.dateSymbols.forEach((String locale, dynamic data) {
-        symbols[locale] = new intl.DateSymbols.deserializeFromMap(data);
-      });
-      return symbols;
+    date_localizations.dateSymbols.forEach((String locale, dynamic data) {
+      assert(date_localizations.datePatterns.containsKey(locale));
+      final intl.DateSymbols symbols = new intl.DateSymbols.deserializeFromMap(data);
+      date_symbol_data_custom.initializeDateFormattingCustom(
+        locale: locale,
+        symbols: symbols,
+        patterns: date_localizations.datePatterns[locale],
+      );
     });
     _dateIntlDataInitialized = true;
   }
@@ -444,7 +465,6 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
     'ps',  // Pashto
     'pt',  // Portugese
     'ru',  // Russian
-    'sd',  // Sindhi
     'ur',  // Urdu
     'zh',  // Simplified Chinese
   ];

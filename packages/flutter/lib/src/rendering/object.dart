@@ -14,7 +14,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
-import 'node.dart';
 import 'semantics.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
@@ -2115,6 +2114,39 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner.requestVisualUpdate();
   }
 
+  /// Report the semantics of this node, for example for accessibility purposes.
+  ///
+  /// This method should be overridden by subclasses that have interesting
+  /// semantic information.
+  ///
+  /// The given [SemanticsConfiguration] object is mutable and should be
+  /// annotated in a manner that describes the current state. No reference
+  /// should be kept to that object; mutating it outside of the context of the
+  /// [describeSemanticsConfiguration] call (for example as a result of
+  /// asynchronous computation) will at best have no useful effect and at worse
+  /// will cause crashes as the data will be in an inconsistent state.
+  ///
+  /// ## Sample code
+  ///
+  /// The following snippet will describe the node as a button that responds to
+  /// tap actions.
+  ///
+  /// ```dart
+  /// abstract class SemanticButtonRenderObject extends RenderObject {
+  ///   @override
+  ///   void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  ///     super.describeSemanticsConfiguration(config);
+  ///     config
+  ///       ..addAction(SemanticsAction.tap, _handleTap)
+  ///       ..label = 'I am a button'
+  ///       ..isButton = true;
+  ///   }
+  ///
+  ///   void _handleTap() {
+  ///     // Do something.
+  ///   }
+  /// }
+  /// ```
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.

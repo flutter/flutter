@@ -217,8 +217,7 @@ class FlutterDevice {
     if (_loggingSubscription != null)
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
-      if (!line.contains('Observatory listening on http') &&
-          !line.contains('Diagnostic server listening on http'))
+      if (!line.contains('Observatory listening on http'))
         printStatus(line);
     });
   }

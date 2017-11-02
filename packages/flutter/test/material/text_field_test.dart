@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show SemanticsFlags;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class MockClipboard {
@@ -1636,5 +1638,26 @@ void main() {
     await tester.pump();
 
     expect(find.text('5 / 10'), findsOneWidget);
+  });
+
+  testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Material(
+          child: const DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            child: const Center(
+              child: const TextField(
+                maxLength: 10,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
   });
 }

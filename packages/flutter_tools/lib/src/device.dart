@@ -320,7 +320,6 @@ class DebuggingOptions {
     this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
-    this.diagnosticPort
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo) :
@@ -329,8 +328,7 @@ class DebuggingOptions {
     startPaused = false,
     enableSoftwareRendering = false,
     traceSkia = false,
-    observatoryPort = null,
-    diagnosticPort = null;
+    observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -340,7 +338,6 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;
-  final int diagnosticPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
 
@@ -351,35 +348,22 @@ class DebuggingOptions {
       return new Future<int>.value(observatoryPort);
     return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
-
-  bool get hasDiagnosticPort => diagnosticPort != null;
-
-  /// Return the user specified diagnostic port. If that isn't available,
-  /// return [kDefaultDiagnosticPort], or a port close to that one.
-  Future<int> findBestDiagnosticPort() {
-    if (hasDiagnosticPort)
-      return new Future<int>.value(diagnosticPort);
-    return portScanner.findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
-  }
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri, this.diagnosticUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null, diagnosticUri = null;
+  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.failed() : started = false, observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
   final bool started;
   final Uri observatoryUri;
-  final Uri diagnosticUri;
 
   @override
   String toString() {
     final StringBuffer buf = new StringBuffer('started=$started');
     if (observatoryUri != null)
       buf.write(', observatory=$observatoryUri');
-    if (diagnosticUri != null)
-      buf.write(', diagnostic=$diagnosticUri');
     return buf.toString();
   }
 }
@@ -427,8 +411,7 @@ abstract class DeviceLogReader {
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort, this.diagnosticPort);
+  DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
-  final int diagnosticPort;
 }

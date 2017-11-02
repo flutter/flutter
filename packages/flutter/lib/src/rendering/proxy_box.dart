@@ -361,7 +361,7 @@ class RenderLimitedBox extends RenderProxyBox {
 
 /// Attempts to size the child to a specific aspect ratio.
 ///
-/// The render object first tries the largest width permited by the layout
+/// The render object first tries the largest width permitted by the layout
 /// constraints. The height of the render object is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -1372,12 +1372,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     assert(hasSize);
-    if (_shape == BoxShape.rectangle) {
-      return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
-    } else {
-      final Rect rect = Offset.zero & size;
-      return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    assert(_shape != null);
+    switch (_shape) {
+      case BoxShape.rectangle:
+        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+      case BoxShape.circle:
+        final Rect rect = Offset.zero & size;
+        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
+    return null;
   }
 
   @override
@@ -3177,6 +3180,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     bool button,
     String label,
     String value,
+    String increasedValue,
+    String decreasedValue,
     String hint,
     TextDirection textDirection,
     VoidCallback onTap,
@@ -3195,6 +3200,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _button = button,
        _label = label,
        _value = value,
+       _increasedValue = increasedValue,
+       _decreasedValue = decreasedValue,
        _hint = hint,
        _textDirection = textDirection,
        _onTap = onTap,
@@ -3283,7 +3290,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label;
   set label(String value) {
@@ -3296,7 +3303,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get value => _value;
   String _value;
   set value(String value) {
@@ -3307,9 +3314,37 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
+  /// value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get increasedValue => _increasedValue;
+  String _increasedValue;
+  set increasedValue(String value) {
+    if (_increasedValue == value)
+      return;
+    final bool hadValue = _increasedValue != null;
+    _increasedValue = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
+  /// value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get decreasedValue => _decreasedValue;
+  String _decreasedValue;
+  set decreasedValue(String value) {
+    if (_decreasedValue == value)
+      return;
+    final bool hadValue = _decreasedValue != null;
+    _decreasedValue = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
   ///
-  /// The text's reading direction is given by [textDirection].
+  /// The reading direction is given by [textDirection].
   String get hint => _hint;
   String _hint;
   set hint(String value) {
@@ -3322,7 +3357,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
-  /// This must not be null if [label], [hint], or [value] is not null.
+  /// This must not be null if [label], [hint], [value], [increasedValue], or
+  /// [decreasedValue] are not null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -3499,6 +3535,15 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    assert(
+      onIncrease == null || (value == null) == (increasedValue == null),
+      'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
+    );
+    assert(
+      onDecrease == null || (value == null) == (decreasedValue == null),
+      'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
+    );
+
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
@@ -3512,6 +3557,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.label = label;
     if (value != null)
       config.value = value;
+    if (increasedValue != null)
+      config.increasedValue = increasedValue;
+    if (decreasedValue != null)
+      config.decreasedValue = decreasedValue;
     if (hint != null)
       config.hint = hint;
     if (textDirection != null)

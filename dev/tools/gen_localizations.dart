@@ -2,30 +2,47 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Given a directory that contains localized ".arb" (application resource
-// bundle) files, generates a Dart "localizations" Map definition that combines
+// This program generates a Dart "localizations" Map definition that combines
 // the contents of the arb files. The map can be used to lookup a localized
-// string: localizations[localeString][resourceId].
+// string: `localizations[localeString][resourceId]`.
 //
-// See *.arb and localizations.dart in packages/flutter/lib/src/material/i18n/.
+// The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
 // The arb (JSON) format files must contain a single map indexed by locale.
 // Each map value is itself a map with resource identifier keys and localized
 // resource string values.
 //
-// The arb filenames are assumed to end in "prefix_lc.arb" or "prefix_lc_cc.arb",
-// where prefix is the 2nd command line argument, lc is a language code and cc
-// is the country code. In most cases both codes are just two characters. A typical
-// filename would be "material_en.arb".
+// The arb filenames are expected to have the form "material_(\w+)\.arb", where
+// the group following "_" identifies the language code and the country code,
+// e.g. "material_en.arb" or "material_en_GB.arb". In most cases both codes are
+// just two characters.
 //
 // This app is typically run by hand when a module's .arb files have been
 // updated.
 //
-// Usage: dart gen_localizations.dart directory prefix
+// ## Usage
+//
+// Run this program from the root of the git repository.
+//
+// The following outputs the generated Dart code to the console as a dry run:
+//
+// ```
+// dart dev/tools/gen_localizations.dart
+// ```
+//
+// If the data looks good, use the `-w` option to overwrite the
+// packages/flutter_localizations/lib/src/l10n/localizations.dart file:
+//
+// ```
+// dart dev/tools/gen_localizations.dart --overwrite
+// ```
 
 import 'dart:convert' show JSON;
 import 'dart:io';
 
+import 'package:path/path.dart' as pathlib;
+
+import 'localizations_utils.dart';
 import 'localizations_validator.dart';
 
 const String outputHeader = '''
@@ -114,17 +131,20 @@ void processBundle(File file, String locale) {
   }
 }
 
-void main(List<String> args) {
-  if (args.length != 2)
-    stderr.writeln('Usage: dart gen_localizations.dart directory prefix');
+void main(List<String> rawArgs) {
+  checkCwdIsRepoRoot('gen_localizations');
+  final GeneratorOptions options = parseArgs(rawArgs);
 
   // filenames are assumed to end in "prefix_lc.arb" or "prefix_lc_cc.arb", where prefix
   // is the 2nd command line argument, lc is a language code and cc is the country
   // code. In most cases both codes are just two characters.
 
-  final Directory directory = new Directory(args[0]);
-  final String prefix = args[1];
-  final RegExp filenameRE = new RegExp('${prefix}_(\\w+)\\.arb\$');
+  final Directory directory = new Directory(pathlib.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
+  final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
+
+  exitWithError(
+    validateEnglishLocalizations(new File(pathlib.join(directory.path, 'material_en.arb')))
+  );
 
   for (FileSystemEntity entity in directory.listSync()) {
     final String path = entity.path;
@@ -133,9 +153,20 @@ void main(List<String> args) {
       processBundle(new File(path), locale);
     }
   }
-  validateLocalizations(localeToResources, localeToResourceAttributes);
 
-  final String regenerate = 'dart dev/tools/gen_localizations.dart ${directory.path} ${args[1]}';
-  print(outputHeader.replaceFirst('@(regenerate)', regenerate));
-  print(generateLocalizationsMap());
+  exitWithError(
+    validateLocalizations(localeToResources, localeToResourceAttributes)
+  );
+
+  final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
+  final StringBuffer buffer = new StringBuffer();
+  buffer.writeln(outputHeader.replaceFirst('@(regenerate)', regenerate));
+  buffer.writeln(generateLocalizationsMap());
+
+  if (options.writeToFile) {
+    final File localizationsFile = new File(pathlib.join(directory.path, 'localizations.dart'));
+    localizationsFile.writeAsStringSync('$buffer');
+  } else {
+    print(buffer);
+  }
 }

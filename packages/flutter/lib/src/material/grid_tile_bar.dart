@@ -12,7 +12,7 @@ import 'theme.dart';
 /// Typically used to add a one or two line header or footer on a [GridTile].
 ///
 /// For a one-line header, include a [title] widget. To add a second line, also
-/// include a [subtitle] wiget. Use [leading] or [trailing] to add an icon.
+/// include a [subtitle] widget. Use [leading] or [trailing] to add an icon.
 ///
 /// See also:
 ///

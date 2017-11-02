@@ -57,7 +57,38 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(painter, doesNotOverscroll);
   });
-
+  
+  testWidgets('Nested scrollable', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GlowingOverscrollIndicator(
+          axisDirection: AxisDirection.down,
+          color: const Color(0x0DFFFFFF),
+          notificationPredicate: (ScrollNotification notification) => notification.depth == 1,
+          child: new SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: new Container(
+                width: 600.0,
+                child: new CustomScrollView(
+                  slivers: <Widget>[
+                      const SliverToBoxAdapter(child: const SizedBox(height: 2000.0)),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    
+    final RenderObject outerPainter = tester.renderObject(find.byType(CustomPaint).first);
+    final RenderObject innerPainter = tester.renderObject(find.byType(CustomPaint).last);
+    
+    await slowDrag(tester, const Offset(200.0, 200.0), const Offset(0.0, 5.0));
+    expect(outerPainter, paints..circle());
+    expect(innerPainter, paints..circle());
+  });
+  
   testWidgets('Overscroll indicator changes side when you drag on the other side', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Directionality(

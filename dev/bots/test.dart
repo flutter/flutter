@@ -57,8 +57,6 @@ Future<Null> _verifyInternationalizations() async {
     dart,
     <String>[
       path.join('dev', 'tools', 'gen_localizations.dart'),
-      path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'),
-      'material'
     ],
     workingDirectory: flutterRoot,
   );

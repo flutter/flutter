@@ -29,7 +29,14 @@ class IconData {
   /// The font family from which the glyph for the [codePoint] will be selected.
   final String fontFamily;
 
-  // The name of the package from which the font family is included.
+  /// The name of the package from which the font family is included.
+  ///
+  /// The name is used by the [Icon] widget when configuring the [TextStyle] so
+  /// that the given [fontFamily] is obtained from the appropriate asset.
+  ///
+  /// See also:
+  ///
+  ///  * [TextStyle], which describes how to use fonts from other packages.
   final String fontPackage;
 
   @override

@@ -6,9 +6,11 @@
 /// package for the subset of locales supported by the flutter_localizations
 /// package.
 ///
-/// The extracted data is written into lib/src/l10n/date_localizations.dart.
+/// The extracted data is written into packages/flutter_localizations/lib/src/l10n/date_localizations.dart.
 ///
-/// Usage:
+/// ## Usage
+///
+/// Run this program from the root of the git repository.
 ///
 /// The following outputs the generated Dart code to the console as a dry run:
 ///
@@ -27,27 +29,22 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/args.dart' as args;
 import 'package:path/path.dart' as path;
+
+import 'localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
 Future<Null> main(List<String> rawArgs) async {
-  final bool writeToFile = (new args.ArgParser()..addFlag('overwrite', abbr: 'w', defaultsTo: false)).parse(rawArgs)['overwrite'];
-  final bool isRepoRoot = new Directory('.git').existsSync();
+  checkCwdIsRepoRoot(_kCommandName);
 
-  if (!isRepoRoot) {
-    _fatal(
-      '$_kCommandName must be run from the root of the Flutter repository. The '
-      'current working directory is: ${Directory.current.path}'
-    );
-  }
+  final bool writeToFile = parseArgs(rawArgs).writeToFile;
 
-  final File dotPackagesFile = new File(path.join('packages', 'flutter', '.packages'));
+  final File dotPackagesFile = new File(path.join('packages', 'flutter_localizations', '.packages'));
   final bool dotPackagesExists = dotPackagesFile.existsSync();
 
   if (!dotPackagesExists) {
-    _fatal(
+    exitWithError(
       'File not found: ${dotPackagesFile.path}. $_kCommandName must be run '
       'after a successful "flutter update-packages".'
     );
@@ -59,7 +56,7 @@ Future<Null> main(List<String> rawArgs) async {
     .firstWhere(
       (String line) => line.startsWith('intl:'),
       orElse: () {
-        _fatal('intl dependency not found in ${dotPackagesFile.path}');
+        exitWithError('intl dependency not found in ${dotPackagesFile.path}');
       },
     )
     .split(':')
@@ -138,11 +135,6 @@ String _jsonToMap(dynamic json) {
   }
 
   throw 'Unsupported JSON type ${json.runtimeType} of value $json.';
-}
-
-void _fatal(String message) {
-  stderr.writeln(message);
-  exit(1);
 }
 
 Iterable<String> _materialLocales() sync* {

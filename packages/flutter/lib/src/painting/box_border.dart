@@ -475,16 +475,19 @@ class Border extends BoxBorder {
         case BorderStyle.none:
           return;
         case BorderStyle.solid:
-          if (shape == BoxShape.circle) {
-            assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-            BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-            return;
+          switch (shape) {
+            case BoxShape.circle:
+              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+              BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
+              break;
+            case BoxShape.rectangle:
+              if (borderRadius != null) {
+                BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
+                return;
+              }
+              BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
+              break;
           }
-          if (borderRadius != null) {
-            BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
-            return;
-          }
-          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
           return;
       }
     }
@@ -777,16 +780,19 @@ class BorderDirectional extends BoxBorder {
         case BorderStyle.none:
           return;
         case BorderStyle.solid:
-          if (shape == BoxShape.circle) {
-            assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
-            BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
-            return;
+          switch (shape) {
+            case BoxShape.circle:
+              assert(borderRadius == null, 'A borderRadius can only be given for rectangular boxes.');
+              BoxBorder._paintUniformBorderWithCircle(canvas, rect, top);
+              break;
+            case BoxShape.rectangle:
+              if (borderRadius != null) {
+                BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
+                return;
+              }
+              BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
+              break;
           }
-          if (borderRadius != null) {
-            BoxBorder._paintUniformBorderWithRadius(canvas, rect, top, borderRadius);
-            return;
-          }
-          BoxBorder._paintUniformBorderWithRectangle(canvas, rect, top);
           return;
       }
     }

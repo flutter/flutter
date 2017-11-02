@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,6 +38,8 @@ class TestSemantics {
     this.actions: 0,
     this.label: '',
     this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
     this.rect,
@@ -45,6 +49,8 @@ class TestSemantics {
   }) : assert(flags != null),
        assert(label != null),
        assert(value != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
        assert(hint != null),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -56,6 +62,8 @@ class TestSemantics {
     this.actions: 0,
     this.label: '',
     this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
     this.hint: '',
     this.textDirection,
     this.transform,
@@ -64,6 +72,8 @@ class TestSemantics {
   }) : id = 0,
        assert(flags != null),
        assert(label != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
        assert(value != null),
        assert(hint != null),
        rect = TestSemantics.rootRect,
@@ -86,6 +96,8 @@ class TestSemantics {
     this.label: '',
     this.hint: '',
     this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
     this.textDirection,
     this.rect,
     Matrix4 transform,
@@ -94,6 +106,8 @@ class TestSemantics {
   }) : assert(flags != null),
        assert(label != null),
        assert(value != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
        assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
@@ -116,6 +130,14 @@ class TestSemantics {
 
   /// A textual description for the value of this node.
   final String value;
+
+  /// What [value] will become after [SemanticsAction.increase] has been
+  /// performed.
+  final String increasedValue;
+
+  /// What [value] will become after [SemanticsAction.decrease] has been
+  /// performed.
+  final String decreasedValue;
 
   /// A brief textual description of the result of the action that can be
   /// performed on this node.
@@ -190,11 +212,15 @@ class TestSemantics {
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
     if (value != nodeData.value)
       return fail('expected node id $id to have value "$value" but found value "${nodeData.value}".');
+    if (increasedValue != nodeData.increasedValue)
+      return fail('expected node id $id to have increasedValue "$increasedValue" but found value "${nodeData.increasedValue}".');
+    if (decreasedValue != nodeData.decreasedValue)
+      return fail('expected node id $id to have decreasedValue "$decreasedValue" but found value "${nodeData.decreasedValue}".');
     if (hint != nodeData.hint)
       return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '') && nodeData.textDirection == null)
+    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
       return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
@@ -290,11 +316,13 @@ class _IncludesNodeWith extends Matcher {
     this.label,
     this.textDirection,
     this.actions,
-}) : assert(label != null || actions != null);
+    this.flags,
+}) : assert(label != null || actions != null || flags != null);
 
   final String label;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
+  final List<SemanticsFlags> flags;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -324,6 +352,12 @@ class _IncludesNodeWith extends Matcher {
       if (expectedActions != actualActions)
         return false;
     }
+    if (flags != null) {
+      final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+      final int actualFlags = node.getSemanticsData().flags;
+      if (expectedFlags != actualFlags)
+        return false;
+    }
     return true;
   }
 
@@ -338,22 +372,16 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    String string = '';
-    if (label != null) {
-      string += 'label "$label"';
-      if (textDirection != null)
-        string += ' (${describeEnum(textDirection)})';
-      if (actions != null)
-        string += ' and ';
-    } else if (textDirection != null) {
-      string += 'direction ${describeEnum(textDirection)}';
-      if (actions != null)
-        string += ' and ';
-    }
-    if (actions != null) {
-      string += 'actions "${actions.join(', ')}"';
-    }
-    return string;
+    final List<String> strings = <String>[];
+    if (label != null)
+      strings.add('label "$label"');
+    if (textDirection != null)
+      strings.add(' (${describeEnum(textDirection)})');
+    if (actions != null)
+      strings.add('actions "${actions.join(', ')}"');
+    if (flags != null)
+      strings.add('flags "${flags.join(', ')}"');
+    return strings.join(', ');
   }
 }
 
@@ -361,10 +389,16 @@ class _IncludesNodeWith extends Matcher {
 /// `textDirection`, and `actions`.
 ///
 /// If null is provided for an argument, it will match against any value.
-Matcher includesNodeWith({ String label, TextDirection textDirection, List<SemanticsAction> actions }) {
+Matcher includesNodeWith({
+  String label,
+  TextDirection textDirection,
+  List<SemanticsAction> actions,
+  List<SemanticsFlags> flags,
+}) {
   return new _IncludesNodeWith(
     label: label,
     textDirection: textDirection,
     actions: actions,
+    flags: flags,
   );
 }

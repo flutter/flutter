@@ -1885,7 +1885,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
 /// A widget that attempts to size the child to a specific aspect ratio.
 ///
-/// The widget first tries the largest width permited by the layout
+/// The widget first tries the largest width permitted by the layout
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -2239,9 +2239,10 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// Positioned children are those wrapped in a [Positioned] widget that has at
 /// least one non-null property. The stack sizes itself to contain all the
 /// non-positioned children, which are positioned according to [alignment]
-/// (which defaults to the top-left corner). The positioned children are then
-/// placed relative to the stack according to their top, right, bottom, and left
-/// properties.
+/// (which defaults to the top-left corner in left-to-right environments and the
+/// top-right corner in right-to-left environments). The positioned children are
+/// then placed relative to the stack according to their top, right, bottom, and
+/// left properties.
 ///
 /// The stack paints its children in order with the first child being at the
 /// bottom. If you want to change the order in which the children paint, you
@@ -2282,12 +2283,18 @@ class Stack extends MultiChildRenderObjectWidget {
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
-  /// How to align the non-positioned children in the stack.
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
   /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
+  ///
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -2398,6 +2405,12 @@ class IndexedStack extends Stack {
 /// [height] properties can be used to give the dimensions, with one
 /// corresponding position property (e.g. [top] and [height]).
 ///
+/// If all three values on a particular axis are null, then the
+/// [Stack.alignment] property is used to position the child.
+///
+/// If all six values are null, the child is a non-positioned child. The [Stack]
+/// uses only the non-positioned children to size itself.
+///
 /// See also:
 ///
 ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
@@ -2413,6 +2426,8 @@ class Positioned extends ParentDataWidget<Stack> {
   ///
   ///  * [Positioned.directional], which specifies the widget's horizontal
   ///    position using `start` and `end` rather than `left` and `right`.
+  ///  * [PositionedDirectional], which is similar to [Positioned.directional]
+  ///    but adapts to the ambient [Directionality].
   const Positioned({
     Key key,
     this.left,
@@ -2530,36 +2545,54 @@ class Positioned extends ParentDataWidget<Stack> {
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double left;
 
   /// The distance that the child's top edge is inset from the top of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double top;
 
   /// The distance that the child's right edge is inset from the right of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double right;
 
   /// The distance that the child's bottom edge is inset from the bottom of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double bottom;
 
   /// The child's width.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double width;
 
   /// The child's height.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double height;
 
   @override
@@ -3897,6 +3930,18 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines;
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    description.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    description.add(new StringProperty('text', text.toPlainText()));
+  }
 }
 
 /// A widget that displays a [dart:ui.Image] directly.
@@ -4454,6 +4499,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     this.button,
     this.label,
     this.value,
+    this.increasedValue,
+    this.decreasedValue,
     this.hint,
     this.textDirection,
     this.onTap,
@@ -4528,6 +4575,30 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///    in TalkBack and VoiceOver.
   final String value;
 
+  /// The value that [value] will become after a [SemanticsAction.increase]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onIncrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.increasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String increasedValue;
+
+  /// The value that [value] will become after a [SemanticsAction.decrease]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onDecrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String decreasedValue;
+
   /// Provides a brief textual description of the result of an action performed
   /// on the widget.
   ///
@@ -4539,7 +4610,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///    in TalkBack and VoiceOver.
   final String hint;
 
-  /// The reading direction of the [label], [value], and [hint].
+  /// The reading direction of the [label], [value], [hint], [increasedValue],
+  /// and [decreasedValue].
   ///
   /// Defaults to the ambient [Directionality].
   final TextDirection textDirection;
@@ -4625,6 +4697,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// This is a request to increase the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
   ///
+  /// If a [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  ///
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
@@ -4634,6 +4709,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   ///
   /// This is a request to decrease the value represented by the widget. For
   /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
   ///
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
@@ -4650,6 +4728,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       button: button,
       label: label,
       value: value,
+      increasedValue: increasedValue,
+      decreasedValue: decreasedValue,
       hint: hint,
       textDirection: _getTextDirection(context),
       onTap: onTap,
@@ -4672,6 +4752,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..selected = selected
       ..label = label
       ..value = value
+      ..increasedValue = increasedValue
+      ..decreasedValue = decreasedValue
       ..hint = hint
       ..textDirection = _getTextDirection(context)
       ..onTap = onTap
