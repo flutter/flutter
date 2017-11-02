@@ -623,4 +623,39 @@ void main() {
     expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 530.0));
     expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 475.0, 750.0, 530.0));
   });
+
+  testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
+    const String bodyLabel = 'I am the body';
+    const String drawerLabel = 'I am the label on start side';
+    const String endDrawerLabel = 'I am the label on end side';
+
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+      body: const Text(bodyLabel),
+      drawer: const Drawer(child:const Text(drawerLabel)),
+      endDrawer: const Drawer(child:const Text(endDrawerLabel)),
+    )));
+
+    expect(semantics, includesNodeWith(label: bodyLabel));
+    expect(semantics, isNot(includesNodeWith(label: drawerLabel)));
+    expect(semantics, isNot(includesNodeWith(label: endDrawerLabel)));
+
+    final ScaffoldState state = tester.firstState(find.byType(Scaffold));
+    state.openDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
+    expect(semantics, includesNodeWith(label: drawerLabel));
+
+    state.openEndDrawer();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(semantics, isNot(includesNodeWith(label: bodyLabel)));
+    expect(semantics, includesNodeWith(label: endDrawerLabel));
+
+    semantics.dispose();
+  });
+
 }
