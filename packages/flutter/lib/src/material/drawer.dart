@@ -9,6 +9,21 @@ import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
 
+/// The alginment of a [Drawer] which is used to identify positioning
+/// of the [Drawer]
+///
+enum DrawerAlignment {
+  /// Denotes that the [Drawer] is at the start side of the [Scaffold]
+  /// i.e. left side when Directionality is LTR
+  /// and right side when Directionality is RTL
+  start,
+
+  /// Denotes that the [Drawer] is at the end side of the [Scaffold]
+  /// i.e. right side when Directionality is LTR
+  /// and left side when Directionality is RTL
+  end,
+}
+
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
 
@@ -118,13 +133,20 @@ class DrawerController extends StatefulWidget {
   const DrawerController({
     GlobalKey key,
     @required this.child,
-  }) : assert(child != null),
+    @required this.alignment,
+  }) : assert(child != null), 
+       assert(alignment != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Drawer].
   final Widget child;
+
+  /// The alginment of a [Drawer] which is used to identify positioning
+  /// of the [Drawer] i.e. either start-side or end-side
+  ///
+  final DrawerAlignment alignment;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -217,7 +239,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
-    final double delta = details.primaryDelta / _width;
+    double delta = details.primaryDelta / _width;
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        break;
+      case DrawerAlignment.end:
+        delta = -delta;
+        break;
+    }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
@@ -232,7 +261,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_controller.isDismissed)
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      switch (widget.alignment) {
+        case DrawerAlignment.start:
+          break;
+        case DrawerAlignment.end:
+          visualVelocity = -visualVelocity;
+          break;
+      }
       switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.fling(velocity: -visualVelocity);
@@ -240,8 +276,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case TextDirection.ltr:
         _controller.fling(velocity: visualVelocity);
         break;
-    }
-
+      }
     } else if (_controller.value < 0.5) {
       close();
     } else {
@@ -264,10 +299,28 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  AlignmentDirectional get _drawerOuterAlignment {
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerStart;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerEnd;
+    }
+  }
+
+  AlignmentDirectional get _drawerInnerAlignment {
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerEnd;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerStart;
+    }
+  }
+
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: AlignmentDirectional.centerStart,
+        alignment: _drawerOuterAlignment,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -299,9 +352,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: AlignmentDirectional.centerStart,
+                alignment: _drawerOuterAlignment,
                 child: new Align(
-                  alignment: AlignmentDirectional.centerEnd,
+                  alignment: _drawerInnerAlignment,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(
