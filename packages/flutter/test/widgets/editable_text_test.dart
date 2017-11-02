@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   final TextEditingController controller = new TextEditingController();
@@ -249,5 +254,34 @@ void main() {
         'composingExtent': -1,
       }),
     ]);
+  });
+
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
+
+    await tester.tap(find.byType(EditableText));
+    await tester.idle();
+    await tester.pump();
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField, SemanticsFlags.isFocused]));
+
   });
 }

@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'semantics.dart';
 import 'viewport_offset.dart';
 
 const double _kCaretGap = 1.0; // pixels
@@ -105,6 +106,7 @@ class RenderEditable extends RenderBox {
     TextAlign textAlign: TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
+    bool hasFocus,
     int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
@@ -125,6 +127,7 @@ class RenderEditable extends RenderBox {
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
+       _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
@@ -227,6 +230,17 @@ class RenderEditable extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether the editable is currently focused.
+  bool get hasFocus => _hasFocus;
+  bool _hasFocus;
+  set hasFocus(bool value) {
+    assert(value != null);
+    if (_hasFocus == value)
+      return;
+    _hasFocus = value;
+    markNeedsSemanticsUpdate();
+  }
+
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will extend
@@ -301,6 +315,15 @@ class RenderEditable extends RenderBox {
     if (attached)
       _offset.addListener(markNeedsPaint);
     markNeedsLayout();
+  }
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config
+      ..isFocused = hasFocus
+      ..isTextField = true;
   }
 
   @override
