@@ -1143,14 +1143,16 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
     @required this.hasDrawer,
+    @required this.hasEndDrawer,
     @required Widget child,
-  }) : assert(hasDrawer != null),
+  }) : assert(hasDrawer != null || hasEndDrawer != null),
        super(child: child);
 
   final bool hasDrawer;
+  final bool hasEndDrawer;
 
   @override
   bool updateShouldNotify(_ScaffoldScope oldWidget) {
-    return hasDrawer != oldWidget.hasDrawer;
+    return ((hasDrawer != oldWidget.hasDrawer) || (hasEndDrawer != oldWidget.hasEndDrawer));
   }
 }
