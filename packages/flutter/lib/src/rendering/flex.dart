@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -928,18 +927,20 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  String get overflowHints =>
-    'The edge of the $runtimeType that is overflowing has been marked '
-    'in the rendering with a yellow and black striped pattern. This is '
-    'usually caused by the contents being too big for the $runtimeType. '
-    'Consider applying a flex factor (e.g. using an Expanded widget) to '
-    'force the children of the $runtimeType to fit within the available '
-    'space instead of being sized to their natural size.\n'
-    'This is considered an error condition because it indicates that there '
-    'is content that cannot be seen. If the content is legitimately bigger '
-    'than the available space, consider clipping it with a ClipRect widget '
-    'before putting it in the flex, or using a scrollable container rather '
-    'than a Flex, for example using ListView.';
+  String get overflowHints {
+    return 'The overflowing $runtimeType has an orientation of $_direction.\n'
+      'The edge of the $runtimeType that is overflowing has been marked '
+      'in the rendering with a yellow and black striped pattern. This is '
+      'usually caused by the contents being too big for the $runtimeType. '
+      'Consider applying a flex factor (e.g. using an Expanded widget) to '
+      'force the children of the $runtimeType to fit within the available '
+      'space instead of being sized to their natural size.\n'
+      'This is considered an error condition because it indicates that there '
+      'is content that cannot be seen. If the content is legitimately bigger '
+      'than the available space, consider clipping it with a ClipRect widget '
+      'before putting it in the flex, or using a scrollable container rather '
+      'than a Flex, for example using ListView.';
+  }
 
   @override
   void reassemble() {

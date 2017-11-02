@@ -21,8 +21,6 @@ class _OverflowRegionData {
   final String label;
   final Offset labelOffset;
   final double rotation;
-
-  static final _OverflowRegionData empty = new _OverflowRegionData(rect: Rect.zero);
 }
 
 /// An mixin indicator that is drawn when a [RenderObject] overflows its
