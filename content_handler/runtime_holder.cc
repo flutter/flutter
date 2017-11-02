@@ -302,8 +302,10 @@ std::string RuntimeHolder::DefaultRouteName() {
   return "/";
 }
 
-void RuntimeHolder::ScheduleFrame() {
+void RuntimeHolder::ScheduleFrame(bool regenerate_layer_tree) {
   ASSERT_IS_UI_THREAD;
+  // TODO(mravn): We assume regenerate_layer_tree is true (and thus ignore
+  // that we may be able to reuse the current layer tree.)
   if (!frame_scheduled_) {
     frame_scheduled_ = true;
     if (!frame_outstanding_)
