@@ -35,6 +35,7 @@ import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.util.Preconditions;
 import io.flutter.view.FlutterMain;
 import io.flutter.view.FlutterView;
+import io.flutter.view.TextureRegistry;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -419,6 +420,11 @@ public final class FlutterActivityDelegate
 
         @Override
         public BinaryMessenger messenger() {
+            return flutterView;
+        }
+
+        @Override
+        public TextureRegistry textures() {
             return flutterView;
         }
 

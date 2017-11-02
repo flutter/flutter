@@ -1074,6 +1074,8 @@ FILE: ../../../flutter/flow/debug_print.h
 FILE: ../../../flutter/flow/export_node.h
 FILE: ../../../flutter/flow/layers/physical_model_layer.cc
 FILE: ../../../flutter/flow/layers/physical_model_layer.h
+FILE: ../../../flutter/flow/layers/texture_layer.cc
+FILE: ../../../flutter/flow/layers/texture_layer.h
 FILE: ../../../flutter/flow/matrix_decomposition.cc
 FILE: ../../../flutter/flow/matrix_decomposition.h
 FILE: ../../../flutter/flow/matrix_decomposition_unittests.cc
@@ -1082,6 +1084,8 @@ FILE: ../../../flutter/flow/paint_utils.h
 FILE: ../../../flutter/flow/raster_cache_key.cc
 FILE: ../../../flutter/flow/raster_cache_key.h
 FILE: ../../../flutter/flow/raster_cache_unittests.cc
+FILE: ../../../flutter/flow/texture.cc
+FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/fml/icu_util.cc
 FILE: ../../../flutter/fml/icu_util.h
 FILE: ../../../flutter/fml/mapping.cc
@@ -1142,6 +1146,8 @@ FILE: ../../../flutter/shell/common/null_platform_view.cc
 FILE: ../../../flutter/shell/common/null_platform_view.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
+FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.cc
+FILE: ../../../flutter/shell/platform/android/android_external_texture_gl.h
 FILE: ../../../flutter/shell/platform/android/android_surface_software.cc
 FILE: ../../../flutter/shell/platform/android/android_surface_software.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java
@@ -1149,9 +1155,11 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEven
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/EventChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/FlutterException.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMessageCodec.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MessageCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodCall.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/MethodChannel.java
@@ -1162,6 +1170,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StandardM
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/StringCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/PathUtils.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/util/Preconditions.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/view/TextureRegistry.java
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.cc
 FILE: ../../../flutter/shell/platform/android/platform_view_android_jni.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h
@@ -1170,6 +1179,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterHeadlessDartRunner.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterNavigationController.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterPlugin.h
+FILE: ../../../flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterChannels.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterCodecs.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterHeadlessDartRunner.mm
@@ -1181,6 +1191,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_codecs
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_main_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/flutter_standard_codec_unittest.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.h
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_external_texture_gl.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_gl_context.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.h
@@ -1251,8 +1263,6 @@ FILE: ../../../flutter/lib/ui/natives.dart
 FILE: ../../../flutter/lib/ui/window/window.h
 FILE: ../../../flutter/runtime/platform_impl.h
 FILE: ../../../flutter/shell/common/skia_event_tracer_impl.cc
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessenger.java
-FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONMethodCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/JSONUtil.java
 FILE: ../../../flutter/shell/platform/darwin/desktop/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/desktop/flutter_mac.xib

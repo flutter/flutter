@@ -74,13 +74,13 @@ class Engine : public blink::RuntimeDelegate {
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
   void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
+  void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
   void set_rasterizer(fml::WeakPtr<Rasterizer> rasterizer);
 
  private:
   // RuntimeDelegate methods:
   std::string DefaultRouteName() override;
-  void ScheduleFrame() override;
   void Render(std::unique_ptr<flow::LayerTree> layer_tree) override;
   void UpdateSemantics(std::vector<blink::SemanticsNode> update) override;
   void HandlePlatformMessage(

@@ -29,6 +29,7 @@ void GPURasterizer::Setup(std::unique_ptr<Surface> surface,
                           fxl::Closure continuation,
                           fxl::AutoResetWaitableEvent* setup_completion_event) {
   surface_ = std::move(surface);
+  compositor_context_.OnGrContextCreated();
 
   continuation();
 
@@ -59,16 +60,27 @@ void GPURasterizer::Clear(SkColor color, const SkISize& size) {
 
 void GPURasterizer::Teardown(
     fxl::AutoResetWaitableEvent* teardown_completion_event) {
+  compositor_context_.OnGrContextDestroyed();
   if (surface_) {
     surface_.reset();
   }
   last_layer_tree_.reset();
-  compositor_context_.OnGrContextDestroyed();
   teardown_completion_event->Signal();
 }
 
 flow::LayerTree* GPURasterizer::GetLastLayerTree() {
   return last_layer_tree_.get();
+}
+
+void GPURasterizer::DrawLastLayerTree() {
+  if (!last_layer_tree_ || !surface_) {
+    return;
+  }
+  DrawToSurface(*last_layer_tree_);
+}
+
+flow::TextureRegistry& GPURasterizer::GetTextureRegistry() {
+  return compositor_context_.texture_registry();
 }
 
 void GPURasterizer::Draw(

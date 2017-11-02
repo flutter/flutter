@@ -135,6 +135,25 @@ void PlatformView::HandlePlatformMessage(
     response->CompleteEmpty();
 }
 
+void PlatformView::RegisterTexture(std::shared_ptr<flow::Texture> texture) {
+  ASSERT_IS_PLATFORM_THREAD
+  blink::Threads::Gpu()->PostTask([this, texture]() {
+    rasterizer_->GetTextureRegistry().RegisterTexture(texture);
+  });
+}
+
+void PlatformView::UnregisterTexture(int64_t texture_id) {
+  ASSERT_IS_PLATFORM_THREAD
+  blink::Threads::Gpu()->PostTask([this, texture_id]() {
+    rasterizer_->GetTextureRegistry().UnregisterTexture(texture_id);
+  });
+}
+
+void PlatformView::MarkTextureFrameAvailable(int64_t texture_id) {
+  ASSERT_IS_PLATFORM_THREAD
+  blink::Threads::UI()->PostTask([this]() { engine_->ScheduleFrame(false); });
+}
+
 void PlatformView::SetupResourceContextOnIOThread() {
   fxl::AutoResetWaitableEvent latch;
 

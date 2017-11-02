@@ -197,6 +197,15 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   }
   void _addPicture(double dx, double dy, Picture picture, int hints) native "SceneBuilder_addPicture";
 
+  /// Adds a backend texture to the scene.
+  ///
+  /// The texture is scaled to the given size and rasterized at the given offset.
+  void addTexture(int textureId, { Offset offset: Offset.zero, double width: 0.0, double height: 0.0 }) {
+    assert(offset != null, 'Offset argument was null');
+    _addTexture(offset.dx, offset.dy, width, height, textureId);
+  }
+  void _addTexture(double dx, double dy, double width, double height, int textureId) native "SceneBuilder_addTexture";
+
   /// (Fuchsia-only) Adds a scene rendered by another application to the scene
   /// for this application.
   void addChildScene({

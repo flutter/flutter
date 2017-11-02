@@ -35,6 +35,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushPhysicalModel)                \
   V(SceneBuilder, pop)                              \
   V(SceneBuilder, addPicture)                       \
+  V(SceneBuilder, addTexture)                       \
   V(SceneBuilder, addChildScene)                    \
   V(SceneBuilder, addPerformanceOverlay)            \
   V(SceneBuilder, setRasterizerTracingThreshold)    \
@@ -122,6 +123,15 @@ void SceneBuilder::addPicture(double dx,
                               !!(hints & 1),          // picture is complex
                               !!(hints & 2)           // picture will change
   );
+}
+
+void SceneBuilder::addTexture(double dx,
+                              double dy,
+                              double width,
+                              double height,
+                              int64_t textureId) {
+  layer_builder_->PushTexture(SkPoint::Make(dx, dy),
+                              SkSize::Make(width, height), textureId);
 }
 
 void SceneBuilder::addChildScene(double dx,

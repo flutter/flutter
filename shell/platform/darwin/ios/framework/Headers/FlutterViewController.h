@@ -11,9 +11,10 @@
 #include "FlutterBinaryMessenger.h"
 #include "FlutterDartProject.h"
 #include "FlutterMacros.h"
+#include "FlutterTexture.h"
 
 FLUTTER_EXPORT
-@interface FlutterViewController : UIViewController<FlutterBinaryMessenger>
+@interface FlutterViewController : UIViewController<FlutterBinaryMessenger, FlutterTextureRegistry>
 
 - (instancetype)initWithProject:(FlutterDartProject*)project
                         nibName:(NSString*)nibNameOrNil

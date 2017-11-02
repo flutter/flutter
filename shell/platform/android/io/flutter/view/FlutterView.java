@@ -16,6 +16,7 @@ import android.graphics.Rect;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Matrix;
+import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
@@ -52,12 +53,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An Android view containing a Flutter app.
  */
 public class FlutterView extends SurfaceView
-    implements BinaryMessenger, AccessibilityManager.AccessibilityStateChangeListener {
+    implements BinaryMessenger, TextureRegistry, AccessibilityManager.AccessibilityStateChangeListener {
 
     /**
      * Interface for those objects that maintain and expose a reference to a
@@ -106,6 +108,7 @@ public class FlutterView extends SurfaceView
     private final BroadcastReceiver mDiscoveryReceiver;
     private final List<ActivityLifecycleListener> mActivityLifecycleListeners;
     private final List<FirstFrameListener> mFirstFrameListeners;
+    private final AtomicLong nextTextureId = new AtomicLong(0L);
     private long mNativePlatformView;
     private boolean mIsSoftwareRenderingEnabled = false; // using the software renderer or not
 
@@ -681,6 +684,12 @@ public class FlutterView extends SurfaceView
 
     private static native boolean nativeGetIsSoftwareRenderingEnabled();
 
+    private static native void nativeRegisterTexture(long nativePlatformViewAndroid, long textureId, SurfaceTexture surfaceTexture);
+
+    private static native void nativeMarkTextureFrameAvailable(long nativePlatformViewAndroid, long textureId);
+
+    private static native void nativeUnregisterTexture(long nativePlatformViewAndroid, long textureId);
+
     private void updateViewportMetrics() {
         if (!isAttached())
             return;
@@ -951,5 +960,52 @@ public class FlutterView extends SurfaceView
      */
     public interface FirstFrameListener {
         void onFirstFrame();
+    }
+
+    @Override
+    public TextureRegistry.SurfaceTextureEntry createSurfaceTexture() {
+        final SurfaceTexture surfaceTexture = new SurfaceTexture(0);
+        surfaceTexture.detachFromGLContext();
+        final SurfaceTextureRegistryEntry entry = new SurfaceTextureRegistryEntry(
+            nextTextureId.getAndIncrement(), surfaceTexture);
+        nativeRegisterTexture(mNativePlatformView, entry.id(), surfaceTexture);
+        return entry;
+    }
+
+    final class SurfaceTextureRegistryEntry implements TextureRegistry.SurfaceTextureEntry {
+        private final long id;
+        private final SurfaceTexture surfaceTexture;
+        private boolean released;
+
+        SurfaceTextureRegistryEntry(long id, SurfaceTexture surfaceTexture) {
+            this.id = id;
+            this.surfaceTexture = surfaceTexture;
+            this.surfaceTexture.setOnFrameAvailableListener(new SurfaceTexture.OnFrameAvailableListener() {
+                @Override
+                public void onFrameAvailable(SurfaceTexture texture) {
+                    nativeMarkTextureFrameAvailable(mNativePlatformView, SurfaceTextureRegistryEntry.this.id);
+                }
+            });
+        }
+
+        @Override
+        public SurfaceTexture surfaceTexture() {
+          return surfaceTexture;
+        }
+
+        @Override
+        public long id() {
+            return id;
+        }
+
+        @Override
+        public void release() {
+            if (released) {
+                return;
+            }
+            released = true;
+            nativeUnregisterTexture(mNativePlatformView, id);
+            surfaceTexture.release();
+        }
     }
 }

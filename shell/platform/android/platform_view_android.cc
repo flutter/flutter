@@ -18,6 +18,7 @@
 #include "flutter/runtime/dart_service_isolate.h"
 #include "flutter/shell/common/null_rasterizer.h"
 #include "flutter/shell/gpu/gpu_rasterizer.h"
+#include "flutter/shell/platform/android/android_external_texture_gl.h"
 #include "flutter/shell/platform/android/android_surface_gl.h"
 #include "flutter/shell/platform/android/android_surface_software.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
@@ -544,6 +545,25 @@ void PlatformViewAndroid::RunFromSource(const std::string& assets_directory,
 
   // Detaching from the VM deletes any stray local references.
   fml::jni::DetachFromVM();
+}
+
+void PlatformViewAndroid::RegisterExternalTexture(
+    int64_t texture_id,
+    const fml::jni::JavaObjectWeakGlobalRef& surface_texture) {
+  RegisterTexture(
+      std::make_shared<AndroidExternalTextureGL>(texture_id, surface_texture));
+}
+
+void PlatformViewAndroid::MarkTextureFrameAvailable(int64_t texture_id) {
+  blink::Threads::Gpu()->PostTask([this, texture_id]() {
+    std::shared_ptr<AndroidExternalTextureGL> texture =
+        static_pointer_cast<AndroidExternalTextureGL>(
+            rasterizer_->GetTextureRegistry().GetTexture(texture_id));
+    if (texture) {
+      texture->MarkNewFrameAvailable();
+    }
+  });
+  PlatformView::MarkTextureFrameAvailable(texture_id);
 }
 
 fml::jni::ScopedJavaLocalRef<jobject> PlatformViewAndroid::GetBitmap(

@@ -7,6 +7,7 @@ package io.flutter.plugin.common;
 import android.app.Activity;
 import android.content.Intent;
 import io.flutter.view.FlutterView;
+import io.flutter.view.TextureRegistry;
 
 /**
  * Registry used by plugins to set up interaction with Android APIs.
@@ -73,6 +74,12 @@ public interface PluginRegistry {
          * creating channels for communicating with the Dart side.
          */
         BinaryMessenger messenger();
+
+        /**
+         * Returns a {@link TextureRegistry} which the plugin can use for
+         * managing backend textures.
+         */
+        TextureRegistry textures();
 
         /**
          * Returns the {@link FlutterView} that's instantiated by this plugin's

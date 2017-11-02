@@ -28,6 +28,10 @@ class NullRasterizer : public Rasterizer {
 
   flow::LayerTree* GetLastLayerTree() override;
 
+  void DrawLastLayerTree() override;
+
+  flow::TextureRegistry& GetTextureRegistry() override;
+
   void Draw(fxl::RefPtr<flutter::Pipeline<flow::LayerTree>> pipeline) override;
 
   void AddNextFrameCallback(fxl::Closure nextFrameCallback) override;
@@ -35,6 +39,7 @@ class NullRasterizer : public Rasterizer {
  private:
   std::unique_ptr<Surface> surface_;
   fml::WeakPtrFactory<NullRasterizer> weak_factory_;
+  flow::TextureRegistry texture_registry_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
 };

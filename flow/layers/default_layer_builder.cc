@@ -17,6 +17,7 @@
 #include "flutter/flow/layers/physical_model_layer.h"
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/shader_mask_layer.h"
+#include "flutter/flow/layers/texture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 
 #if defined(OS_FUCHSIA)
@@ -148,6 +149,19 @@ void DefaultLayerBuilder::PushPicture(const SkPoint& offset,
   layer->set_picture(picture);
   layer->set_is_complex(picture_is_complex);
   layer->set_will_change(picture_will_change);
+  current_layer_->Add(std::move(layer));
+}
+
+void DefaultLayerBuilder::PushTexture(const SkPoint& offset,
+                                      const SkSize& size,
+                                      int64_t texture_id) {
+  if (!current_layer_) {
+    return;
+  }
+  auto layer = std::make_unique<flow::TextureLayer>();
+  layer->set_offset(offset);
+  layer->set_size(size);
+  layer->set_texture_id(texture_id);
   current_layer_->Add(std::move(layer));
 }
 
