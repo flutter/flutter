@@ -26,6 +26,10 @@ import '../vmservice.dart';
 
 const String protocolVersion = '0.2.0';
 
+/// Return whether the current zone is running in the context of daemon mode
+/// (i.e., being driven from an IDE vs the CLI).
+bool get isDaemonMode => logger is _AppRunLogger;
+
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
 /// JSON-RPC based responses and events to stdout.

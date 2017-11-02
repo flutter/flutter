@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'commands/daemon.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -376,7 +377,7 @@ class HotRunner extends ResidentRunner {
         restartTimer.elapsed.inMilliseconds);
     flutterUsage.sendEvent('hot', 'restart');
     flutterUsage.sendTiming('hot', 'restart', restartTimer.elapsed);
-    return OperationResult.kOk;
+    return OperationResult.ok;
   }
 
   /// Returns [true] if the reload was successful.
@@ -415,7 +416,7 @@ class HotRunner extends ResidentRunner {
         timer.stop();
         status.cancel();
         printStatus('Restarted app in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-        return OperationResult.kOk;
+        return OperationResult.ok;
       } catch (error) {
         status.cancel();
         rethrow;
@@ -575,7 +576,7 @@ class HotRunner extends ResidentRunner {
     }
     if (reassembleViews.isEmpty) {
       printTrace('Skipping reassemble because all isolates are paused.');
-      return new OperationResult(OperationResult.kOk.code, reloadMessage);
+      return new OperationResult(OperationResult.ok.code, reloadMessage);
     }
     printTrace('Evicting dirty assets');
     await _evictDirtyAssets();
@@ -632,11 +633,10 @@ class HotRunner extends ResidentRunner {
         unusedElements.addAll(await unusedReport);
 
       if (unusedElements.isNotEmpty) {
-        // TODO(devoncarew): Should we only show this once during a restart session?
-        // So, show it once, and don't show it again until they've restarted?
+        final String restartCommand = isDaemonMode ? '' : ' (by pressing "R")';
         unusedElementMessage =
-          'Some methods were changed by the reload but did not run when the view was reassembled;\n'
-          'you may need to restart the app for the changes to have an effect:';
+          'Some program elements were changed during reload but did not run when the view was reassembled;\n'
+          'you may need to restart the app$restartCommand for the changes to have an effect:';
         for (ProgramElement unusedElement in unusedElements) {
           final String name = unusedElement.qualifiedName;
           final String path = _uriToRelativePath(unusedElement.uri);
@@ -648,7 +648,7 @@ class HotRunner extends ResidentRunner {
     }
 
     return new OperationResult(
-      reassembleAndScheduleErrors ? 1 : OperationResult.kOk.code,
+      reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
       hint: unusedElementMessage
     );

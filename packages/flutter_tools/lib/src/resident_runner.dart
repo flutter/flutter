@@ -832,7 +832,7 @@ class OperationResult {
 
   bool get isOk => code == 0;
 
-  static final OperationResult kOk = new OperationResult(0, '');
+  static final OperationResult ok = new OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file
