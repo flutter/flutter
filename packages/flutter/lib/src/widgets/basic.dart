@@ -1885,7 +1885,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 
 /// A widget that attempts to size the child to a specific aspect ratio.
 ///
-/// The widget first tries the largest width permited by the layout
+/// The widget first tries the largest width permitted by the layout
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
