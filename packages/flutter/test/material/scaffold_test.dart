@@ -630,7 +630,7 @@ void main() {
     const String endDrawerLabel = 'I am the label on end side';
 
     final SemanticsTester semantics = new SemanticsTester(tester);
-    await tester.pumpWidget(new MaterialApp(home: new Scaffold(
+    await tester.pumpWidget(new MaterialApp(home: const Scaffold(
       body: const Text(bodyLabel),
       drawer: const Drawer(child:const Text(drawerLabel)),
       endDrawer: const Drawer(child:const Text(endDrawerLabel)),

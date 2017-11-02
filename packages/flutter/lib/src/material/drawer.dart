@@ -134,7 +134,7 @@ class DrawerController extends StatefulWidget {
     GlobalKey key,
     @required this.child,
     @required this.alignment,
-  }) : assert(child != null), 
+  }) : assert(child != null),
        assert(alignment != null),
        super(key: key);
 
@@ -300,21 +300,25 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
   AlignmentDirectional get _drawerOuterAlignment {
+    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerStart;
       case DrawerAlignment.end:
         return AlignmentDirectional.centerEnd;
     }
+    return null;
   }
 
   AlignmentDirectional get _drawerInnerAlignment {
+    assert(widget.alignment != null);
     switch (widget.alignment) {
       case DrawerAlignment.start:
         return AlignmentDirectional.centerEnd;
       case DrawerAlignment.end:
         return AlignmentDirectional.centerStart;
     }
+    return null;
   }
 
   Widget _buildDrawer(BuildContext context) {
