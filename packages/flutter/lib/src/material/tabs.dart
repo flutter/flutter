@@ -582,8 +582,8 @@ class _TabBarState extends State<TabBar> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     _updateTabController();
   }
 
@@ -883,8 +883,8 @@ class _TabBarViewState extends State<TabBarView> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     _updateTabController();
     _currentIndex = _controller?.index;
     _pageController = new PageController(initialPage: _currentIndex ?? 0);

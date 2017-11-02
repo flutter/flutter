@@ -26,8 +26,8 @@ class TestFocusableState extends State<TestFocusable> {
   bool _didAutofocus = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     if (!_didAutofocus && widget.autofocus) {
       _didAutofocus = true;
       FocusScope.of(context).autofocus(focusNode);

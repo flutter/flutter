@@ -30,7 +30,7 @@ export 'package:flutter/services.dart' show
 ///
 /// If this is not called from a build method, then it should be reinvoked
 /// whenever the dependencies change, e.g. by calling it from
-/// [State.didChangeDependencies], so that any changes in the environement are
+/// [State.didDependenciesChanged], so that any changes in the environement are
 /// picked up (e.g. if the device pixel ratio changes).
 ///
 /// See also:
@@ -445,9 +445,9 @@ class _ImageState extends State<Image> {
   ImageInfo _imageInfo;
 
   @override
-  void didChangeDependencies() {
+  void didDependenciesChanged() {
     _resolveImage();
-    super.didChangeDependencies();
+    super.didDependenciesChanged();
   }
 
   @override

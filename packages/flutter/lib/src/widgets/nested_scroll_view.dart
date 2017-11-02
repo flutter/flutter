@@ -130,8 +130,8 @@ class _NestedScrollViewState extends State<NestedScrollView> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     _coordinator.updateParent();
   }
 

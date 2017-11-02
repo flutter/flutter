@@ -46,8 +46,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   _ScrollbarPainter _painter;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     _painter ??= new _ScrollbarPainter(this);
     _painter
       ..color = Theme.of(context).highlightColor

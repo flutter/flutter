@@ -712,7 +712,7 @@ abstract class StatelessWidget extends Widget {
 /// [InheritedWidget]s. These will typically rebuild many times during the
 /// application's lifetime, and it is therefore important to minimise the impact
 /// of rebuilding such a widget. (They may also use [State.initState] or
-/// [State.didChangeDependencies] and allocate resources, but the important part
+/// [State.didDependenciesChanged] and allocate resources, but the important part
 /// is that they rebuild.)
 ///
 /// There are several techniques one can use to minimize the impact of
@@ -866,7 +866,7 @@ enum _StateLifecycle {
   created,
 
   /// The [State.initState] method has been called but the [State] object is
-  /// not yet ready to build. [State.didChangeDependencies] is called at this time.
+  /// not yet ready to build. [State.didDependenciesChanged] is called at this time.
   initialized,
 
   /// The [State] object is ready to build and [State.dispose] has not yet been
@@ -912,10 +912,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    [BuildContext] or the widget, which are available as the [context] and
 ///    [widget] properties, respectively, when the [initState] method is
 ///    called.
-///  * The framework calls [didChangeDependencies]. Subclasses of [State] should
-///    override [didChangeDependencies] to perform initialization involving
+///  * The framework calls [didDependenciesChanged]. Subclasses of [State] should
+///    override [didDependenciesChanged] to perform initialization involving
 ///    [InheritedWidget]s. If [BuildContext.inheritFromWidgetOfExactType] is
-///    called, the [didChangeDependencies] method will be called again if the
+///    called, the [didDependenciesChanged] method will be called again if the
 ///    inherited widgets subsequently change or if the widget moves in the tree.
 ///  * At this point, the [State] object is fully initialized and the framework
 ///    might call its [build] method any number of times to obtain a
@@ -1031,7 +1031,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// [didUpdateWidget], and then unsubscribe from the object in [dispose].
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
-  /// method. However, [didChangeDependencies] will be called immediately
+  /// method. However, [didDependenciesChanged] will be called immediately
   /// following this method, and [BuildContext.inheritFromWidgetOfExactType] can
   /// be used there.
   ///
@@ -1350,7 +1350,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// expensive to do for every build.
   @protected
   @mustCallSuper
-  void didChangeDependencies() { }
+  void didDependenciesChanged() { }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1587,7 +1587,7 @@ abstract class InheritedWidget extends ProxyWidget {
     : super(key: key, child: child);
 
   @override
-  InheritedElement createElement() => new InheritedElement(this);
+  InheritedElement createElement() => new DefaultInheritedElement(this);
 
   /// Whether the framework should notify widgets that inherit from this widget.
   ///
@@ -1912,12 +1912,12 @@ abstract class BuildContext {
   /// again if the inherited value were to change. To ensure that the widget
   /// correctly updates itself when the inherited value changes, only call this
   /// (directly or indirectly) from build methods, layout and paint callbacks, or
-  /// from [State.didChangeDependencies].
+  /// from [State.didDependenciesChanged].
   ///
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// in [State.didChangeDependencies].
+  /// in [State.didDependenciesChanged].
   ///
   /// It is also possible to call this from interaction event handlers (e.g.
   /// gesture callbacks) or timers, to obtain a value once, if that value is not
@@ -1927,7 +1927,7 @@ abstract class BuildContext {
   /// the widget being rebuilt more often.
   ///
   /// Once a widget registers a dependency on a particular type by calling this
-  /// method, it will be rebuilt, and [State.didChangeDependencies] will be
+  /// method, it will be rebuilt, and [State.didDependenciesChanged] will be
   /// called, whenever changes occur relating to that widget until the next time
   /// the widget or one of its ancestors is moved (for example, because an
   /// ancestor is added or removed).
@@ -1941,13 +1941,13 @@ abstract class BuildContext {
   /// This method does not establish a relationship with the target in the way
   /// that [inheritFromWidgetOfExactType] does. It is normally used by such
   /// widgets to obtain their corresponding [InheritedElement] object so that they
-  /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
+  /// can call [InheritedElement.dispatchDidDependenciesChanged] to actually
   /// notify the widgets that _did_ register such a relationship.
   ///
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [inheritFromWidgetOfExactType] in [State.didDependenciesChanged].
   InheritedElement ancestorInheritedElementForWidgetOfExactType(Type targetType);
 
   /// Returns the nearest ancestor widget of the given type, which must be the
@@ -1966,7 +1966,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [inheritFromWidgetOfExactType] in [State.didDependenciesChanged].
   Widget ancestorWidgetOfExactType(Type targetType);
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget
@@ -1992,7 +1992,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [inheritFromWidgetOfExactType] in [State.didDependenciesChanged].
   ///
   /// Example:
   ///
@@ -2026,7 +2026,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [inheritFromWidgetOfExactType] in [State.didDependenciesChanged].
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
@@ -2046,7 +2046,7 @@ abstract class BuildContext {
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
-  /// by calling [inheritFromWidgetOfExactType] in [State.didChangeDependencies].
+  /// by calling [inheritFromWidgetOfExactType] in [State.didDependenciesChanged].
   void visitAncestorElements(bool visitor(Element element));
 
   /// Walks the children of this widget.
@@ -2257,7 +2257,7 @@ class BuildOwner {
         assert(_dirtyElements[index]._inDirtyList);
         assert(!_dirtyElements[index]._active || _dirtyElements[index]._debugIsInScope(context));
         try {
-          _dirtyElements[index].rebuild();
+          _dirtyElements[index]._rebuild();
         } catch (e, stack) {
           _debugReportException(
             'while rebuilding dirty elements', e, stack,
@@ -2674,6 +2674,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
+    assert(owner._debugCurrentBuildTarget == this);
     if (newWidget == null) {
       if (child != null)
         deactivateChild(child);
@@ -2688,7 +2689,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       if (Widget.canUpdate(child.widget, newWidget)) {
         if (child.slot != newSlot)
           updateSlotForChild(child, newSlot);
-        child.update(newWidget);
+        child._update(newWidget);
         assert(child.widget == newWidget);
         assert(() {
           child.owner._debugElementWasRebuilt(child);
@@ -2753,6 +2754,52 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
         && _active
         && Widget.canUpdate(widget, newWidget));
     _widget = newWidget;
+  }
+
+  // Wrap [mount] in build phase.
+  void _mount(Element parent, dynamic newSlot) {
+    _buildScope(parent?.owner, () { mount(parent, newSlot); });
+  }
+
+  void _prepareRebuild() {
+    _prepareDependenciesRebuild();
+  }
+
+  void _finishRebuild() {
+    _finishDependenciesRebuild();
+  }
+
+  // Wrap [update] in build phase.
+  void _update(Widget newWidget) {
+    _buildScope(owner, () { update(newWidget); }, before: _prepareRebuild, after: _finishRebuild);
+  }
+
+  // Wrap [rebuild] in build phase.
+  void _rebuild() {
+    assert(_debugLifecycleState != _ElementLifecycle.initial);
+    if (!_active || !_dirty)
+      return;
+    _buildScope(owner, rebuild, before: _prepareRebuild, after: _finishRebuild);
+  }
+
+  void _buildScope(BuildOwner buildOwner, VoidCallback callback, {VoidCallback before = _nop, VoidCallback after = _nop}) {
+    Element debugPreviousBuildTarget;
+    try {
+      assert(() {
+        debugPreviousBuildTarget = buildOwner._debugCurrentBuildTarget;
+        buildOwner._debugCurrentBuildTarget = this;
+        return true;
+      }());
+      before();
+      callback();
+    } finally {
+      after();
+      assert(() {
+        assert(buildOwner._debugCurrentBuildTarget == this);
+        buildOwner._debugCurrentBuildTarget = debugPreviousBuildTarget;
+        return true;
+      }());
+    }
   }
 
   /// Change the slot that the given child occupies in its parent.
@@ -2882,6 +2929,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   @protected
   Element inflateWidget(Widget newWidget, dynamic newSlot) {
     assert(newWidget != null);
+    assert(owner._debugCurrentBuildTarget == this);
     final Key key = newWidget.key;
     if (key is GlobalKey) {
       final Element newChild = _retakeInactiveElement(key, newWidget);
@@ -2896,7 +2944,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }
     final Element newChild = newWidget.createElement();
     assert(() { _debugCheckForCycles(newChild); return true; }());
-    newChild.mount(this, newSlot);
+    newChild._mount(this, newSlot);
     assert(newChild._debugLifecycleState == _ElementLifecycle.active);
     return newChild;
   }
@@ -3000,7 +3048,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (_dirty)
       owner.scheduleBuildFor(this);
     if (hadDependencies)
-      didChangeDependencies();
+      markDependenciesChanged();
   }
 
   /// Transition from the "active" to the "inactive" lifecycle state.
@@ -3023,7 +3071,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
       for (InheritedElement dependency in _dependencies)
-        dependency._dependents.remove(this);
+        dependency.removeDependent(this);
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
       // get re-used, it doesn't matter. If we do, then we'll clear the list in
@@ -3187,7 +3235,40 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Map<Type, InheritedElement> _inheritedWidgets;
   Set<InheritedElement> _dependencies;
+  Set<InheritedElement> _obsolescentDependencies;
   bool _hadUnsatisfiedDependencies = false;
+
+  void _prepareDependenciesRebuild() {
+    assert(_obsolescentDependencies == null || _obsolescentDependencies.isEmpty);
+    final Set<InheritedElement> tmp = _obsolescentDependencies;
+    _obsolescentDependencies = _dependencies;
+    _dependencies = tmp;
+    _hadUnsatisfiedDependencies = false;
+    _checkDependenciesChanged();
+  }
+
+  void _finishDependenciesRebuild() {
+    if (_obsolescentDependencies != null && _obsolescentDependencies.isNotEmpty) {
+      for (InheritedElement dependency in _obsolescentDependencies) {
+        dependency.removeDependent(this);
+      }
+      _obsolescentDependencies.clear();
+    }
+  }
+
+  void _addDependency(InheritedElement ancestor) {
+    assert(ancestor is InheritedElement);
+    _dependencies ??= new HashSet<InheritedElement>();
+    final bool newDependency = _dependencies.add(ancestor);
+    final bool oldDependency = _obsolescentDependencies?.remove(ancestor) ?? false;
+    if (newDependency && !oldDependency) {
+      ancestor.addDependent(this);
+    }
+  }
+
+  bool _containsDependency(InheritedElement dependency) {
+    return _dependencies?.contains(dependency) ?? false;
+  }
 
   bool _debugCheckStateIsActiveForAncestorLoopkup() {
     assert(() {
@@ -3197,7 +3278,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'At this point the state of the widget\'s element tree is no longer '
           'stable. To safely refer to a widget\'s ancestor in its dispose() method, '
           'save a reference to the ancestor by calling inheritFromWidgetOfExactType() '
-          'in the widget\'s didChangeDependencies() method.\n'
+          'in the widget\'s didDependenciesChanged() method.\n'
         );
       }
       return true;
@@ -3210,10 +3291,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_debugCheckStateIsActiveForAncestorLoopkup());
     final InheritedElement ancestor = _inheritedWidgets == null ? null : _inheritedWidgets[targetType];
     if (ancestor != null) {
-      assert(ancestor is InheritedElement);
-      _dependencies ??= new HashSet<InheritedElement>();
-      _dependencies.add(ancestor);
-      ancestor._dependents.add(this);
+      _addDependency(ancestor);
       return ancestor.widget;
     }
     _hadUnsatisfiedDependencies = true;
@@ -3288,19 +3366,37 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       ancestor = ancestor._parent;
   }
 
-  /// Called when a dependency of this element changes.
+  bool _dependenciesChanged = false;
+
+  void markDependenciesChanged() {
+    assert(_active); // Otherwise this dependency should be unlinked in deactivate.
+    _dependenciesChanged = true;
+    markNeedsBuild();
+  }
+
+  void _checkDependenciesChanged() {
+    if (_dependenciesChanged) {
+      didDependenciesChanged();
+      _dependenciesChanged = false;
+    }
+  }
+
+  /// Called when dependencies of this element changed.
   ///
   /// The [inheritFromWidgetOfExactType] registers this element as depending on
   /// inherited information of the given type. When the information of that type
   /// changes at this location in the tree (e.g., because the [InheritedElement]
   /// updated to a new [InheritedWidget] and
   /// [InheritedWidget.updateShouldNotify] returned true), the framework calls
-  /// this function to notify this element of the change.
+  /// this function to notify this element of the change. If multiple
+  /// dependencies changed, this function is only fired once. This function will
+  /// not be called if this element is unmounted later in this frame.
+  @protected
   @mustCallSuper
-  void didChangeDependencies() {
-    assert(_active); // otherwise markNeedsBuild is a no-op
-    assert(_debugCheckOwnerBuildTargetExists('didChangeDependencies'));
-    markNeedsBuild();
+  void didDependenciesChanged() {
+    assert(_active && _debugLifecycleState == _ElementLifecycle.active);
+    assert(_debugCheckOwnerBuildTargetExists('didDependenciesChanged'));
+    assert(owner._debugCurrentBuildTarget == this);
   }
 
   bool _debugCheckOwnerBuildTargetExists(String methodName) {
@@ -3448,8 +3544,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// called to mark this element dirty, by [mount] when the element is first
   /// built, and by [update] when the widget has changed.
   void rebuild() {
-    assert(_debugLifecycleState != _ElementLifecycle.initial);
-    if (!_active || !_dirty)
+    assert(_active && _debugLifecycleState == _ElementLifecycle.active);
+    if (!_dirty)
       return;
     assert(() {
       if (debugPrintRebuildDirtyWidgets) {
@@ -3462,20 +3558,8 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       }
       return true;
     }());
-    assert(_debugLifecycleState == _ElementLifecycle.active);
     assert(owner._debugStateLocked);
-    Element debugPreviousBuildTarget;
-    assert(() {
-      debugPreviousBuildTarget = owner._debugCurrentBuildTarget;
-      owner._debugCurrentBuildTarget = this;
-      return true;
-    }());
     performRebuild();
-    assert(() {
-      assert(owner._debugCurrentBuildTarget == this);
-      owner._debugCurrentBuildTarget = debugPreviousBuildTarget;
-      return true;
-    }());
     assert(!_dirty);
   }
 
@@ -3685,7 +3769,7 @@ class StatefulElement extends ComponentElement {
       _debugSetAllowIgnoredCallsToMarkNeedsBuild(false);
     }
     assert(() { _state._debugLifecycleState = _StateLifecycle.initialized; return true; }());
-    _state.didChangeDependencies();
+    _state.didDependenciesChanged();
     assert(() { _state._debugLifecycleState = _StateLifecycle.ready; return true; }());
     super._firstBuild();
   }
@@ -3754,7 +3838,7 @@ class StatefulElement extends ComponentElement {
           'then the rebuilt dependent widget will not reflect the changes in the '
           'inherited widget.\n'
           'Typically references to to inherited widgets should occur in widget build() methods. Alternatively, '
-          'initialization based on inherited widgets can be placed in the didChangeDependencies method, which '
+          'initialization based on inherited widgets can be placed in the didDependenciesChanged method, which '
           'is called after initState and whenever the dependencies change thereafter.'
         );
       }
@@ -3784,9 +3868,9 @@ class StatefulElement extends ComponentElement {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _state.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
+    _state.didDependenciesChanged();
   }
 
   @override
@@ -3923,14 +4007,21 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
 }
 
 /// An [Element] that uses a [InheritedWidget] as its configuration.
-class InheritedElement extends ProxyElement {
+abstract class InheritedElement extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   InheritedElement(InheritedWidget widget) : super(widget);
 
   @override
   InheritedWidget get widget => super.widget;
 
-  final Set<Element> _dependents = new HashSet<Element>();
+  @protected
+  Iterable<Element> get dependents;
+
+  void addDependent(Element element);
+
+  void removeDependent(Element element);
+
+  bool containsDependent(Element element);
 
   @override
   void _updateInheritance() {
@@ -3946,7 +4037,7 @@ class InheritedElement extends ProxyElement {
   @override
   void debugDeactivated() {
     assert(() {
-      assert(_dependents.isEmpty);
+      assert(dependents.isEmpty);
       return true;
     }());
     super.debugDeactivated();
@@ -3956,7 +4047,7 @@ class InheritedElement extends ProxyElement {
   void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-    dispatchDidChangeDependencies();
+    dispatchDidDependenciesChanged();
   }
 
   /// Notifies all dependent elements that this inherited widget has changed.
@@ -3967,9 +4058,8 @@ class InheritedElement extends ProxyElement {
   /// the build phase. [InheritedWidget] subclasses can also call this directly
   /// by first obtaining their [InheritedElement] using
   /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
-  void dispatchDidChangeDependencies() {
-    assert(_debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies'));
-    for (Element dependent in _dependents) {
+  void dispatchDidDependenciesChanged() {
+    for (Element dependent in dependents) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -3977,10 +4067,35 @@ class InheritedElement extends ProxyElement {
           ancestor = ancestor._parent;
         return ancestor == this;
       }());
-      // check that it really deepends on us
-      assert(dependent._dependencies.contains(this));
-      dependent.didChangeDependencies();
+      // check that it really depends on us
+      assert(dependent._containsDependency(this));
+      dependent.markDependenciesChanged();
     }
+  }
+}
+
+/// Default implementation for [InheritedElement].
+class DefaultInheritedElement extends InheritedElement {
+  DefaultInheritedElement(InheritedWidget widget) : super(widget);
+
+  final Set<Element> _dependents = new HashSet<Element>();
+
+  @override
+  Iterable<Element> get dependents => _dependents;
+
+  @override
+  void addDependent(Element element) {
+    _dependents.add(element);
+  }
+
+  @override
+  void removeDependent(Element element) {
+    _dependents.remove(element);
+  }
+
+  @override
+  bool containsDependent(Element element) {
+    return _dependents.contains(element);
   }
 }
 
@@ -4234,6 +4349,7 @@ abstract class RenderObjectElement extends Element {
   List<Element> updateChildren(List<Element> oldChildren, List<Widget> newWidgets, { Set<Element> forgottenChildren }) {
     assert(oldChildren != null);
     assert(newWidgets != null);
+    assert(owner._debugCurrentBuildTarget == this);
 
     Element replaceWithNullIfForgotten(Element child) {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
@@ -4695,3 +4811,5 @@ void _debugReportException(String context, dynamic exception, StackTrace stack, 
     informationCollector: informationCollector,
   ));
 }
+
+void _nop() {}

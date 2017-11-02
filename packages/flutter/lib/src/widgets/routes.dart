@@ -872,14 +872,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// case, use the [Form.onWillPop] property to register the callback.
   ///
   /// To register a callback manually, look up the enclosing [ModalRoute] in a
-  /// [State.didChangeDependencies] callback:
+  /// [State.didDependenciesChanged] callback:
   ///
   /// ```dart
   /// ModalRoute<dynamic> _route;
   ///
   /// @override
-  /// void didChangeDependencies() {
-  ///  super.didChangeDependencies();
+  /// void didDependenciesChanged() {
+  ///  super.didDependenciesChanged();
   ///  _route?.removeScopedWillPopCallback(askTheUserIfTheyAreSure);
   ///  _route = ModalRoute.of(context);
   ///  _route?.addScopedWillPopCallback(askTheUserIfTheyAreSure);
@@ -1066,8 +1066,8 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
 ///
 ///   @override
-///   void didChangeDependencies() {
-///     super.didChangeDependencies();
+///   void didDependenciesChanged() {
+///     super.didDependenciesChanged();
 ///     routeObserver.subscribe(this, ModalRoute.of(context));
 ///   }
 ///

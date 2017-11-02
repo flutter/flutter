@@ -44,8 +44,8 @@ class _WillPopScopeState extends State<WillPopScope> {
   ModalRoute<dynamic> _route;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  void didDependenciesChanged() {
+    super.didDependenciesChanged();
     if (widget.onWillPop != null)
       _route?.removeScopedWillPopCallback(widget.onWillPop);
     _route = ModalRoute.of(context);
