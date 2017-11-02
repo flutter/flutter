@@ -64,6 +64,7 @@ if (is_fuchsia) {
   import("//packages/package.gni")
 
   package("package") {
+    system_image = true
     testonly = true
 
     package_name = "flutter"
