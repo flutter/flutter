@@ -408,7 +408,7 @@ class InputDecorator extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    description.add(new EnumProperty<TextStyle>('baseStyle', baseStyle));
+    description.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
     description.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
   }
