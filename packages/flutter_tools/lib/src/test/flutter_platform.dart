@@ -22,7 +22,7 @@ import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = const Duration(seconds: 5);
+const Duration _kTestStartupTimeout = const Duration(minutes: 1);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
@@ -274,6 +274,9 @@ class _FlutterPlatform extends PlatformPlugin {
           await controller.sink.done;
           break;
         case _InitialResult.timedOut:
+          // Could happen either if the process takes a long time starting
+          // (_kTestProcessTimeout), or if once Dart code starts running, it takes a
+          // long time to open the WebSocket connection (_kTestStartupTimeout).
           printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
