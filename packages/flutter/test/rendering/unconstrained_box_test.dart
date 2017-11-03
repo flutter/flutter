@@ -77,7 +77,7 @@ void main() {
           '   parentData: MISSING\n'
           '   constraints: MISSING\n'
           '   size: MISSING\n'
-          '   alignment: center\n'
+          '   alignment: Alignment.center\n'
           '   textDirection: ltr\n'),
     );
   });
