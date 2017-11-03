@@ -91,24 +91,75 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
     }
 
     private void setSystemChromePreferredOrientations(JSONArray orientations) throws JSONException {
-        // Currently the Android implementation only supports masks with zero or one
-        // selected device orientations.
-        int androidOrientation;
-        if (orientations.length() == 0) {
-            androidOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-        } else if (orientations.getString(0).equals("DeviceOrientation.portraitUp")) {
-            androidOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-        } else if (orientations.getString(0).equals("DeviceOrientation.landscapeLeft")) {
-            androidOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        } else if (orientations.getString(0).equals("DeviceOrientation.portraitDown")) {
-            androidOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT;
-        } else if (orientations.getString(0).equals("DeviceOrientation.landscapeRight")) {
-            androidOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
-        } else {
-            return;
+        int requestedOrientation = 0x00;
+        int firstRequestedOrientation = 0x00;
+        for (int index = 0; index < orientations.length(); index += 1) {
+            if (orientations.getString(index).equals("DeviceOrientation.portraitUp")) {
+                requestedOrientation |= 0x01;
+            } else if (orientations.getString(index).equals("DeviceOrientation.landscapeLeft")) {
+                requestedOrientation |= 0x02;
+            } else if (orientations.getString(index).equals("DeviceOrientation.portraitDown")) {
+                requestedOrientation |= 0x04;
+            } else if (orientations.getString(index).equals("DeviceOrientation.landscapeRight")) {
+                requestedOrientation |= 0x08;
+            }
+            if (firstRequestedOrientation == 0x00) {
+                firstRequestedOrientation = requestedOrientation;
+            }
         }
-
-        mActivity.setRequestedOrientation(androidOrientation);
+        switch (requestedOrientation) {
+            case 0x00:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+                break;
+            case 0x01:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                break;
+            case 0x02:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
+            case 0x04:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                break;
+            case 0x05:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+                break;
+            case 0x08:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                break;
+            case 0x0a:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_LANDSCAPE);
+                break;
+            case 0x0b:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
+                break;
+            case 0x0f:
+                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
+                break;
+            case 0x03: // portraitUp and landscapeLeft
+            case 0x06: // portraitDown and landscapeLeft
+            case 0x07: // portraitUp, portraitDown, and landscapeLeft
+            case 0x09: // portraitUp and landscapeRight
+            case 0x0c: // portraitDown and landscapeRight
+            case 0x0d: // portraitUp, portraitDown, and landscapeRight
+            case 0x0e: // portraitDown, landscapeLeft, and landscapeRight
+                // Android can't describe these cases, so just default to whatever the first
+                // specified value was.
+                switch (requestedOrientation) {
+                    case 0x01:
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                        break;
+                    case 0x02:
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                        break;
+                    case 0x04:
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                        break;
+                    case 0x08:
+                        mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                        break;
+                }
+                break;
+          }
     }
 
     private void setSystemChromeApplicationSwitcherDescription(JSONObject description) throws JSONException {
