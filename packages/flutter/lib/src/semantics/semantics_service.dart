@@ -5,9 +5,10 @@
 import 'dart:async';
 import 'dart:ui' show TextDirection;
 
-import 'package:flutter/rendering.dart' show AnnounceSemanticsEvent;
+import 'package:flutter/services.dart' show SystemChannels;
 
-import 'system_channels.dart';
+import 'semantics_event.dart' show AnnounceSemanticsEvent;
+
 
 /// Allows access to the platform's accessibility services.
 ///

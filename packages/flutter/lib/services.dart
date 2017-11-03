@@ -25,7 +25,6 @@ export 'src/services/message_codecs.dart';
 export 'src/services/platform_channel.dart';
 export 'src/services/platform_messages.dart';
 export 'src/services/raw_keyboard.dart';
-export 'src/services/semantics_service.dart';
 export 'src/services/system_channels.dart';
 export 'src/services/system_chrome.dart';
 export 'src/services/system_navigator.dart';

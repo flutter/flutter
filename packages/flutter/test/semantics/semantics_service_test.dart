@@ -4,7 +4,8 @@
 
 import 'dart:ui' show TextDirection;
 
-import 'package:flutter/services.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter/services.dart' show SystemChannels;
 import 'package:test/test.dart';
 
 void main() {

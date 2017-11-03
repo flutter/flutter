@@ -14,3 +14,4 @@
 library semantics;
 
 export 'src/semantics/semantics.dart';
+export 'src/semantics/semantics_service.dart';
