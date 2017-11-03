@@ -18,6 +18,7 @@ void main() {
     routes: <String, WidgetBuilder>{
       'underlines': (BuildContext context) => const Underlines(),
       'fallback': (BuildContext context) => const Fallback(),
+      'bidi': (BuildContext context) => const Bidi(),
       'fuzzer': (BuildContext context) => new Fuzzer(seed: seed),
       'zalgo': (BuildContext context) => new Zalgo(seed: seed),
       'painting': (BuildContext context) => new Painting(seed: seed),
@@ -44,31 +45,37 @@ class _HomeState extends State<Home> {
               children: <Widget>[
                 new FlatButton(
                   child: const Text('Test Underlines'),
-                  color: Colors.cyan.shade200,
+                  color: Colors.red.shade800,
                   textColor: Colors.white,
                   onPressed: () { Navigator.of(context).pushNamed('underlines'); },
                 ),
                 new FlatButton(
                   child: const Text('Test Font Fallback'),
-                  color: Colors.pink.shade700,
+                  color: Colors.orange.shade700,
                   textColor: Colors.white,
                   onPressed: () { Navigator.of(context).pushNamed('fallback'); },
                 ),
                 new FlatButton(
+                  child: const Text('Test Bidi Formatting'),
+                  color: Colors.yellow.shade700,
+                  textColor: Colors.black,
+                  onPressed: () { Navigator.of(context).pushNamed('bidi'); },
+                ),
+                new FlatButton(
                   child: const Text('TextSpan Fuzzer'),
-                  color: Colors.yellow,
+                  color: Colors.green.shade400,
                   textColor: Colors.black,
                   onPressed: () { Navigator.of(context).pushNamed('fuzzer'); },
                 ),
                 new FlatButton(
                   child: const Text('Diacritics Fuzzer'),
-                  color: Colors.black,
+                  color: Colors.blue.shade400,
                   textColor: Colors.white,
                   onPressed: () { Navigator.of(context).pushNamed('zalgo'); },
                 ),
                 new FlatButton(
                   child: const Text('Painting Fuzzer'),
-                  color: Colors.blueGrey.shade200,
+                  color: Colors.purple.shade200,
                   textColor: Colors.black,
                   onPressed: () { Navigator.of(context).pushNamed('painting'); },
                 ),
@@ -693,6 +700,81 @@ class _FallbackState extends State<Fallback> {
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class Bidi extends StatefulWidget {
+  const Bidi({ Key key }) : super(key: key);
+
+  @override
+  _BidiState createState() => new _BidiState();
+}
+
+class _BidiState extends State<Bidi> {
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      color: Colors.black,
+      child: new ListView(
+        padding: const EdgeInsets.symmetric(vertical: 40.0, horizontal: 20.0),
+        children: <Widget>[
+          new RichText(
+            text: new TextSpan(
+              children: <TextSpan>[
+                new TextSpan(text: 'abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                new TextSpan(text: 'ghi', style: new TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                new TextSpan(text: 'mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
+                new TextSpan(text: 'LKJ', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                new TextSpan(text: 'FED', style: new TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          new RichText(
+            text: new TextSpan(
+              children: <TextSpan>[
+                new TextSpan(text: '${Unicode.LRO}abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.blue.shade100)),
+                new TextSpan(text: '${Unicode.RLO}DEF', style: new TextStyle(fontWeight: FontWeight.w300, fontSize: 40.0, color: Colors.blue.shade300)),
+                new TextSpan(text: '${Unicode.LRO}ghi', style: new TextStyle(fontWeight: FontWeight.w400, fontSize: 40.0, color: Colors.blue.shade500)),
+                new TextSpan(text: '${Unicode.RLO}JKL', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 40.0, color: Colors.blue.shade700)),
+                new TextSpan(text: '${Unicode.LRO}mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 40.0, color: Colors.blue.shade900)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          const SizedBox(height: 40.0),
+          new RichText(
+            text: new TextSpan(
+              children: <TextSpan>[
+                new TextSpan(text: '${Unicode.LRO}abc${Unicode.RLO}D', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                new TextSpan(text: 'EF${Unicode.LRO}gh', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                new TextSpan(text: 'i${Unicode.RLO}JKL${Unicode.LRO}mno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          new RichText(
+            text: new TextSpan(
+              children: <TextSpan>[
+                new TextSpan(text: 'abc', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+                new TextSpan(text: 'gh', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                new TextSpan(text: 'imno', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                new TextSpan(text: 'LKJ', style: new TextStyle(fontWeight: FontWeight.w900, fontSize: 60.0, color: Colors.orange.shade900)),
+                new TextSpan(text: 'FE', style: new TextStyle(fontWeight: FontWeight.w500, fontSize: 50.0, color: Colors.orange.shade500)),
+                new TextSpan(text: 'D', style: new TextStyle(fontWeight: FontWeight.w100, fontSize: 40.0, color: Colors.orange.shade100)),
+              ],
+            ),
+            textAlign: TextAlign.center,
+            textDirection: TextDirection.ltr,
+          ),
+          const SizedBox(height: 40.0),
+          const Text('The pairs of lines above should match exactly.', textAlign: TextAlign.center, style: const TextStyle(inherit: false, fontSize: 14.0, color: Colors.white)),
         ],
       ),
     );
