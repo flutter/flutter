@@ -30,13 +30,7 @@ class Codec : public fxl::RefCountedThreadSafe<Codec>,
 };
 
 class MultiFrameCodec : public Codec {
-  FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
-
  public:
-  static fxl::RefPtr<MultiFrameCodec> Create(std::unique_ptr<SkCodec> codec) {
-    return fxl::MakeRefCounted<MultiFrameCodec>(std::move(codec));
-  }
-
   int frameCount() { return frameCount_; }
   int repetitionCount() { return repetitionCount_; }
 
@@ -44,10 +38,14 @@ class MultiFrameCodec : public Codec {
 
  private:
   MultiFrameCodec(std::unique_ptr<SkCodec> codec);
+  ~MultiFrameCodec() {}
 
   const std::unique_ptr<SkCodec> codec_;
   int frameCount_;
   int repetitionCount_;
+
+  FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
+  FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);
 };
 }  // namespace blink
 

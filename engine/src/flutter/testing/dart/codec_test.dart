@@ -15,7 +15,7 @@ void main() {
   test('Animation metadata', () async {
     Uint8List data = await _getSkiaResource('alphabetAnim.gif').readAsBytes();
     Completer<ui.Codec> completer = new Completer<ui.Codec>();
-    ui.instantiateImageCodec(data, completer.complete);
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
     ui.Codec codec = await completer.future;
     expect(codec.frameCount, 13);
     expect(codec.repetitionCount, 0);
@@ -23,10 +23,23 @@ void main() {
 
     data = await _getSkiaResource('test640x479.gif').readAsBytes();
     completer = new Completer<ui.Codec>();
-    ui.instantiateImageCodec(data, completer.complete);
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
     codec = await completer.future;
     expect(codec.frameCount, 4);
     expect(codec.repetitionCount, -1);
+  });
+
+  test('Fails when no callback provided', () async {
+    Uint8List data = await _getSkiaResource('alphabetAnim.gif').readAsBytes();
+    expect(ui.instantiateImageCodec(data, null), 'Callback must be a function');
+  });
+
+  test('Fails with invalid data', () async {
+    Uint8List data = new Uint8List.fromList([1, 2, 3]);
+    Completer<ui.Codec> completer = new Completer<ui.Codec>();
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
+    ui.Codec codec = await completer.future;
+    expect(codec, null);
   });
 }
 

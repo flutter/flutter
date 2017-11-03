@@ -55,8 +55,6 @@ std::unique_ptr<SkCodec> InitCodec(sk_sp<SkData> buffer, size_t trace_id) {
 }
 
 void InvokeCodecCallback(std::unique_ptr<SkCodec> codec,
-                         int frameCount,
-                         int repetitionCount,
                          std::unique_ptr<DartPersistentValue> callback,
                          size_t trace_id) {
   tonic::DartState* dart_state = callback->dart_state().get();
@@ -68,7 +66,8 @@ void InvokeCodecCallback(std::unique_ptr<SkCodec> codec,
   if (!codec) {
     DartInvoke(callback->value(), {Dart_Null()});
   } else {
-    fxl::RefPtr<Codec> resultCodec = MultiFrameCodec::Create(std::move(codec));
+    fxl::RefPtr<Codec> resultCodec =
+        fxl::MakeRefCounted<MultiFrameCodec>(std::move(codec));
     DartInvoke(callback->value(), {ToDart(resultCodec)});
   }
   TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
@@ -79,14 +78,10 @@ void InitCodecAndInvokeCodecCallback(
     sk_sp<SkData> buffer,
     size_t trace_id) {
   std::unique_ptr<SkCodec> codec = InitCodec(std::move(buffer), trace_id);
-  int frameCount = codec->getFrameCount();
-  int repetitionCount = codec->getRepetitionCount();
   Threads::UI()->PostTask(fxl::MakeCopyable([
-    callback = std::move(callback), codec = std::move(codec), trace_id,
-    frameCount, repetitionCount
+    callback = std::move(callback), codec = std::move(codec), trace_id
   ]() mutable {
-    InvokeCodecCallback(std::move(codec), frameCount, repetitionCount,
-                        std::move(callback), trace_id);
+    InvokeCodecCallback(std::move(codec), std::move(callback), trace_id);
   }));
 }
 
@@ -101,14 +96,14 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
       tonic::DartConverter<tonic::Uint8List>::FromArguments(args, 0, exception);
   if (exception) {
     TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
-    Dart_ThrowException(exception);
+    Dart_SetReturnValue(args, exception);
     return;
   }
 
   Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
   if (!Dart_IsClosure(callback_handle)) {
     TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
-    Dart_ThrowException(ToDart("Callback must be a function"));
+    Dart_SetReturnValue(args, ToDart("Callback must be a function"));
     return;
   }
 
