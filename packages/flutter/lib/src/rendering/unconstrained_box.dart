@@ -47,7 +47,6 @@ class RenderUnconstrainedBox extends RenderBox
   ///
   /// The textDirection is only used when [alignment] is an
   /// [AlignmentDirectional], but must be non-null in that case.
-  @override
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -85,6 +84,9 @@ class RenderUnconstrainedBox extends RenderBox
     markNeedsLayout();
   }
 
+  Rect _overflowContainerRect = Rect.zero;
+  Rect _overflowChildRect = Rect.zero;
+
   @override
   void setupParentData(RenderBox child) {
     if (child.parentData is! BoxParentData)
@@ -101,11 +103,20 @@ class RenderUnconstrainedBox extends RenderBox
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = constraints.constrain(child.size);
       childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
-      overflowChildRect = childParentData.offset & child.size;
-      overflowContainerRect = Offset.zero & size;
+      _overflowContainerRect = Offset.zero & size;
+      _overflowChildRect = childParentData.offset & child.size;
     } else {
       size = constraints.constrain(Size.zero);
     }
+  }
+
+  // Returns true if the [overflowContainerRect] has been found to overflow.
+  bool get _isOverflowing {
+    final RelativeRect overflow = new RelativeRect.fromRect(_overflowContainerRect, _overflowChildRect);
+    return overflow.left > 0.0 ||
+        overflow.right > 0.0 ||
+        overflow.top > 0.0 ||
+        overflow.bottom > 0.0;
   }
 
   @override
@@ -116,7 +127,7 @@ class RenderUnconstrainedBox extends RenderBox
       return;
 
     final BoxParentData childParentData = child.parentData;
-    if (!isOverflowing) {
+    if (!_isOverflowing) {
       super.paint(context, offset + childParentData.offset);
       return;
     }
@@ -131,31 +142,20 @@ class RenderUnconstrainedBox extends RenderBox
 
     // Display the overflow indicator.
     assert(() {
-      overflowRenderObject ??= this;
-      overflowPaintIndicator(context, offset);
-      return true;
-    });
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    // Each time we reassemble, we want to see the next overflow debug message.
-    assert(() {
-      overflowReportNeeded = true;
+      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
       return true;
     }());
   }
 
   @override
   Rect describeApproximatePaintClip(RenderObject child) {
-    return isOverflowing ? Offset.zero & size : null;
+    return _isOverflowing ? Offset.zero & size : null;
   }
 
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (isOverflowing)
+    if (_isOverflowing)
       header += ' OVERFLOWING';
     return header;
   }

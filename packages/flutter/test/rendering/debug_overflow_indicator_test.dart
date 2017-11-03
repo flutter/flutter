@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
 
@@ -52,14 +49,6 @@ void main() {
     // overflowReportNeeded.
     expect(tester.takeException(), isNull);
     expect(find.byType(UnconstrainedBox), paints..rect());
-
-    final RenderUnconstrainedBox boxRenderer = tester.renderObject(find.byType(UnconstrainedBox));
-    expect(boxRenderer.overflowReportNeeded, false);
-    expect(boxRenderer.overflowContainerRect, isNotNull);
-    expect(boxRenderer.overflowContainerRect, equals(new ui.Rect.fromLTRB(0.0, 0.0, 200.0, 100.0)));
-    expect(boxRenderer.overflowChildRect, equals(new ui.Rect.fromLTRB(0.0, -50.0, 200.0, 150.0)));
-    expect(boxRenderer.overflow, equals(const RelativeRect.fromLTRB(0.0, 50.0, 0.0, 50.0)));
-    expect(boxRenderer.isOverflowing, isTrue);
   });
 
   testWidgets('overflow indicator is not shown when constraint size is zero.', (WidgetTester tester) async {
