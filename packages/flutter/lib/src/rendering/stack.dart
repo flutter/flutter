@@ -17,10 +17,12 @@ import 'object.dart';
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
 ///
-/// The fields [left], [right], [bottom], and [top] may not be null.
+/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
+  ///
+  /// The arguments must not be null.
   const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom)
     : assert(left != null && top != null && right != null && bottom != null);
 
