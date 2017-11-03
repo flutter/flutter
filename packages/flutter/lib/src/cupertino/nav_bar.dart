@@ -416,7 +416,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
 }
 
 class _CupertinoLargeTitleNavigationBarSliverDelegate
-    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin{
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
   _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
     @required this.title,
