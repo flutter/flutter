@@ -39,9 +39,13 @@ class BenchmarkResultPrinter {
   /// for computer consumption and once formatted as plain text for humans.
   void printToStdout() {
     // IMPORTANT: keep these values in sync with dev/devicelab/bin/tasks/microbenchmarks.dart
-    print('================ RESULTS ================');
-    print(_printJson());
-    print('================ FORMATTED ==============');
+    const String jsonStart = '================ RESULTS ================';
+    const String jsonEnd = '================ FORMATTED ==============';
+    const String jsonPrefix = ':::JSON:::';
+
+    print(jsonStart);
+    print('$jsonPrefix ${_printJson()}');
+    print(jsonEnd);
     print(_printPlainText());
   }
 

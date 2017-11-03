@@ -73,6 +73,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';
+  const String jsonPrefix = ':::JSON:::';
   bool jsonStarted = false;
   final StringBuffer jsonBuf = new StringBuffer();
   final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
@@ -84,7 +85,6 @@ Future<Map<String, double>> _readJsonResults(Process process) {
         stderr.writeln('[STDERR] $line');
       });
 
-  int prefixLength = 0;
   bool processWasKilledIntentionally = false;
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
@@ -94,7 +94,6 @@ Future<Map<String, double>> _readJsonResults(Process process) {
 
     if (line.contains(jsonStart)) {
       jsonStarted = true;
-      prefixLength = line.indexOf(jsonStart);
       return;
     }
 
@@ -107,7 +106,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
     }
 
     if (jsonStarted)
-      jsonBuf.writeln(line.substring(prefixLength));
+      jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
   process.exitCode.then<int>((int code) {
