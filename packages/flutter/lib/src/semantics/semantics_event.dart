@@ -14,7 +14,7 @@ abstract class SemanticsEvent {
   /// Initializes internal fields.
   ///
   /// [type] is a string that identifies this class of [SemanticsEvent]s.
-  SemanticsEvent(this.type);
+  const SemanticsEvent(this.type);
 
   /// The type of this event.
   ///
@@ -131,7 +131,10 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
 /// announcements regarding objects in the viewfinder.
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
-  AnnounceSemanticsEvent(this.message, this.textDirection) : super('announce');
+  const AnnounceSemanticsEvent(this.message, this.textDirection) :
+    assert(message != null),
+    assert(textDirection != null),
+    super('announce');
 
   /// The message to announce.
   final String message;
@@ -141,11 +144,9 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
 
   @override
   Map<String, dynamic> getDataMap() {
-    final Map<String, dynamic> map = <String, dynamic>{
+    return <String, dynamic>{
       'message': message,
       'textDirection': textDirection.index,
     };
-
-    return map;
   }
 }
