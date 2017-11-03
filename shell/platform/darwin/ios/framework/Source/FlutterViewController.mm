@@ -615,7 +615,10 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
     _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
     _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
-    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
+    // TODO(cbracken) enable bottom padding once safe area and keyboard view
+    // occlusion are differentiated as two different Window getters (margin,
+    // padding).
+    // _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
 #pragma clang diagnostic pop
   } else {
     _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
@@ -639,17 +642,7 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
-  // TODO(cbracken) once clang toolchain compiler-rt has been updated, replace with
-  // if (@available(iOS 11, *)) {
-  if (_platformSupportsSafeAreaInsets) {
-    CGFloat scale = [UIScreen mainScreen].scale;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
-    _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
-#pragma clang diagnostic pop
-  } else {
-    _viewportMetrics.physical_padding_bottom = 0;
-  }
+  _viewportMetrics.physical_padding_bottom = 0;
   [self updateViewportMetrics];
 }
 
