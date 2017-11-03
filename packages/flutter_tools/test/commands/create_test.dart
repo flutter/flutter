@@ -239,9 +239,10 @@ void main() {
       final String xcodeProject = xcodeProjectFile.readAsStringSync();
       expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
 
-      final String versionPath = fs.path.join('.version');
+      final String versionPath = fs.path.join('.metadata');
       expectExists(versionPath);
       final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+      expect(version, contains('version:'));
       expect(version, contains('revision: 12345678'));
       expect(version, contains('channel: omega'));
     },
