@@ -3,10 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 
-/// Renders an [UnconstrainedBox], imposing no constraints on its child,
-/// allowing the child to render at its "natural" size.
+import 'box.dart';
+import 'debug_overflow_indicator.dart';
+import 'object.dart';
+import 'proxy_box.dart';
+import 'stack.dart';
+
+/// Renders a box, imposing no constraints on its child, allowing the child to
+/// render at its "natural" size.
 ///
 /// This allows a child to render at the size it would render if it were alone
 /// on an infinite canvas with no constraints. This container will then expand
@@ -26,8 +31,6 @@ import 'package:flutter/rendering.dart';
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-///  * [RenderUnconstrainedBox] for the [RenderObject] for this container.
-///  * The [catalog of layout containers](https://flutter.io/widgets/layout/).
 class RenderUnconstrainedBox extends RenderBox
   with RenderObjectWithChildMixin<RenderBox>,
        RenderProxyBoxMixin,
@@ -53,7 +56,7 @@ class RenderUnconstrainedBox extends RenderBox
   set textDirection(TextDirection value) {
     if (_textDirection != value) {
       _textDirection = value;
-      markNeedsLayout();
+      _markNeedResolution();
     }
   }
 
@@ -63,6 +66,7 @@ class RenderUnconstrainedBox extends RenderBox
   /// must not be null.
   ///
   /// See also:
+  ///
   ///  * [AlignmentDirectional] for direction-aware alignment.
   ///  * [Alignment] for non-direction-aware alignment.
   AlignmentGeometry get alignment => _alignment;
@@ -164,7 +168,6 @@ class RenderUnconstrainedBox extends RenderBox
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<AlignmentGeometry>('alignment', alignment));
-    description.add(
-        new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
