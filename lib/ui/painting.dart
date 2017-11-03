@@ -901,10 +901,15 @@ abstract class Codec extends NativeFieldWrapperClass2 {
 }
 
 /// Callback signature for [imageCodecFromList].
+///
+/// If parsing the data passed to [imageCodecFromList] failed, the result will
+/// be null.
 typedef void CodecCallback(Codec result);
 
 /// Instatiates a [Codec] object for an image binary data.
-void instantiateImageCodec(Uint8List list, CodecCallback callback)
+///
+/// Returns an error message if the instantiation has failed, null otherwise.
+String instantiateImageCodec(Uint8List list, CodecCallback callback)
   native "instantiateImageCodec";
 
 /// Convert an image file from a byte array into an [Image] object.
