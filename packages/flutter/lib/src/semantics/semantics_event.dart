@@ -14,6 +14,9 @@ abstract class SemanticsEvent {
   /// Initializes internal fields.
   ///
   /// [type] is a string that identifies this class of [SemanticsEvent]s.
+
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const SemanticsEvent(this.type);
 
   /// The type of this event.
@@ -131,15 +134,16 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
 /// announcements regarding objects in the viewfinder.
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
+  /// Constructs an event that triggers an announcement by the platform.
   const AnnounceSemanticsEvent(this.message, this.textDirection) :
     assert(message != null),
     assert(textDirection != null),
     super('announce');
 
-  /// The message to announce.
+  /// The message to announce. cannot be null.
   final String message;
 
-  /// Text direction for [message].
+  /// Text direction for [message]. cannot be null.
   final TextDirection textDirection;
 
   @override
