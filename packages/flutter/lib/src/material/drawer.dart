@@ -9,18 +9,18 @@ import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
 
-/// The alginment of a [Drawer] which is used to identify positioning
-/// of the [Drawer]
-///
+/// The possible alignments of a [Drawer].
 enum DrawerAlignment {
-  /// Denotes that the [Drawer] is at the start side of the [Scaffold]
-  /// i.e. left side when Directionality is LTR
-  /// and right side when Directionality is RTL
+  /// Denotes that the [Drawer] is at the start side of the [Scaffold].
+  ///
+  /// This corresponds to the left side when the text direction is left-to-right
+  /// and the right side when the text direction is right-to-left.
   start,
 
-  /// Denotes that the [Drawer] is at the end side of the [Scaffold]
-  /// i.e. right side when Directionality is LTR
-  /// and left side when Directionality is RTL
+  /// Denotes that the [Drawer] is at the end side of the [Scaffold].
+  ///
+  /// This corresponds to the right side when the text direction is left-to-right
+  /// and the left side when the text direction is right-to-left.
   end,
 }
 
@@ -122,8 +122,8 @@ class Drawer extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [Drawer]
-///  * [Scaffold.drawer]
+///  * [Drawer], a container with the default width of a drawer.
+///  * [Scaffold.drawer], the [Scaffold] slot for showing a drawer.
 class DrawerController extends StatefulWidget {
   /// Creates a controller for a [Drawer].
   ///
@@ -143,9 +143,10 @@ class DrawerController extends StatefulWidget {
   /// Typically a [Drawer].
   final Widget child;
 
-  /// The alginment of a [Drawer] which is used to identify positioning
-  /// of the [Drawer] i.e. either start-side or end-side
+  /// The alignment of the [Drawer].
   ///
+  /// This controls the direction in which the user should swipe to open and
+  /// close the drawer.
   final DrawerAlignment alignment;
 
   @override

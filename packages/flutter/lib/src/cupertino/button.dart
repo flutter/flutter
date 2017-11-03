@@ -30,8 +30,10 @@ final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
 );
 
 const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding =
-    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
+const EdgeInsets _kBackgroundButtonPadding = const EdgeInsets.symmetric(
+  vertical: 16.0,
+  horizontal: 64.0,
+);
 
 /// An iOS-style button.
 ///
@@ -199,22 +201,22 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
         button: true,
         child: new ConstrainedBox(
           constraints: widget.minSize == null
-          ? const BoxConstraints()
-          : new BoxConstraints(
-            minWidth: widget.minSize,
-            minHeight: widget.minSize,
-          ),
+            ? const BoxConstraints()
+            : new BoxConstraints(
+              minWidth: widget.minSize,
+              minHeight: widget.minSize,
+            ),
           child: new FadeTransition(
             opacity: _opacityTween.animate(new CurvedAnimation(
-                parent: _animationController,
-                curve: Curves.decelerate,
+              parent: _animationController,
+              curve: Curves.decelerate,
             )),
             child: new DecoratedBox(
               decoration: new BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                ? _kDisabledBackground
-                : backgroundColor,
+                  ? _kDisabledBackground
+                  : backgroundColor,
               ),
               child: new Padding(
                 padding: widget.padding ?? (backgroundColor != null
@@ -225,10 +227,10 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
                   heightFactor: 1.0,
                   child: new DefaultTextStyle(
                     style: backgroundColor != null
-                    ? _kBackgroundButtonTextStyle
-                    : enabled
-                    ? _kButtonTextStyle
-                    : _kDisabledButtonTextStyle,
+                      ? _kBackgroundButtonTextStyle
+                      : enabled
+                        ? _kButtonTextStyle
+                        : _kDisabledButtonTextStyle,
                     child: widget.child,
                   ),
                 ),
