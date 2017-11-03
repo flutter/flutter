@@ -10,8 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'debug.dart';
-
 /// A composited layer.
 ///
 /// During painting, the render tree generates a tree of composited layers that

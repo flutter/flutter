@@ -6,13 +6,13 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
-import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
