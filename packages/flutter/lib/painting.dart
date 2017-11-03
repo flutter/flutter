@@ -27,7 +27,6 @@ export 'src/painting/box_fit.dart';
 export 'src/painting/box_shadow.dart';
 export 'src/painting/circle_border.dart';
 export 'src/painting/colors.dart';
-export 'src/painting/debug_overflow_indicator.dart';
 export 'src/painting/decoration.dart';
 export 'src/painting/edge_insets.dart';
 export 'src/painting/flutter_logo.dart';

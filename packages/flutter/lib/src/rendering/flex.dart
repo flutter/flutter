@@ -299,6 +299,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
+      assert((){
+        _debugOverflowHints = null;
+        return true;
+      }());
     }
   }
 
@@ -380,7 +384,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
   /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
   /// [textDirection] must not be null.
-  @override
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -469,7 +472,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     return true;
   }
 
-  /// Set during layout if overflow occurred on the main axis.
+  // Set during layout if overflow occurred on the main axis.
   double _overflow;
 
   @override
@@ -601,6 +604,10 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return defaultComputeDistanceToHighestActualBaseline(baseline);
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
+
+  // Hints sent to console when the container overflows.
+  // Only set in debug mode.
+  String _debugOverflowHints;
 
   int _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData;
@@ -927,31 +934,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  String get overflowHints {
-    return 'The overflowing $runtimeType has an orientation of $_direction.\n'
-      'The edge of the $runtimeType that is overflowing has been marked '
-      'in the rendering with a yellow and black striped pattern. This is '
-      'usually caused by the contents being too big for the $runtimeType. '
-      'Consider applying a flex factor (e.g. using an Expanded widget) to '
-      'force the children of the $runtimeType to fit within the available '
-      'space instead of being sized to their natural size.\n'
-      'This is considered an error condition because it indicates that there '
-      'is content that cannot be seen. If the content is legitimately bigger '
-      'than the available space, consider clipping it with a ClipRect widget '
-      'before putting it in the flex, or using a scrollable container rather '
-      'than a Flex, for example using ListView.';
-  }
-
-  @override
-  void reassemble() {
-    super.reassemble();
-    assert(() {
-      overflowReportNeeded = true;
-      return true;
-    }());
-  }
-
-  @override
   void paint(PaintingContext context, Offset offset) {
     if (_overflow <= 0.0) {
       defaultPaint(context, offset);
@@ -966,11 +948,26 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     context.pushClipRect(needsCompositing, offset, Offset.zero & size, defaultPaint);
 
     assert(() {
-      overflowRenderObject ??= this;
-      overflowContainerRect = Offset.zero & size;
+      // Only set this if it's null to save work.  It gets reset to null if the
+      // _direction changes.
+      _debugOverflowHints ??=
+        'The overflowing $runtimeType has an orientation of $_direction.\n'
+        'The edge of the $runtimeType that is overflowing has been marked '
+        'in the rendering with a yellow and black striped pattern. This is '
+        'usually caused by the contents being too big for the $runtimeType. '
+        'Consider applying a flex factor (e.g. using an Expanded widget) to '
+        'force the children of the $runtimeType to fit within the available '
+        'space instead of being sized to their natural size.\n'
+        'This is considered an error condition because it indicates that there '
+        'is content that cannot be seen. If the content is legitimately bigger '
+        'than the available space, consider clipping it with a ClipRect widget '
+        'before putting it in the flex, or using a scrollable container rather '
+        'than a Flex, like a ListView.';
+
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
       // location and amount.
+      Rect overflowChildRect;
       switch (_direction) {
         case Axis.horizontal:
           overflowChildRect = new Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
@@ -979,9 +976,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           overflowChildRect = new Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
           break;
       }
-      overflowPaintIndicator(context, offset);
+      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: _debugOverflowHints);
       return true;
-    });
+    }());
   }
 
   @override
