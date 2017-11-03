@@ -33,8 +33,9 @@ TaskFunction createMicrobenchmarkTask() {
             await prepareProvisioningCertificates(appDir.path);
           return await _startFlutter(
             options: <String>[
-              '--profile',
+              '-v',
               // --release doesn't work on iOS due to code signing issues
+              '--profile',
               '-d',
               device.deviceId,
               benchmarkPath,
