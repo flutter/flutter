@@ -5,6 +5,7 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -277,6 +278,10 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
     child: child,
   );
 
+  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+  SystemChrome.setSystemUIOverlayStyle(
+      darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
 
@@ -410,8 +415,9 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   }
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDelegate {
-  const _CupertinoLargeTitleNavigationBarSliverDelegate({
+class _CupertinoLargeTitleNavigationBarSliverDelegate
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
+  _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
     @required this.title,
     this.leading,
