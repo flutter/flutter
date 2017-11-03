@@ -787,10 +787,17 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specified at the same time as an offset, both are applied.
-  final Alignment alignment;
+  /// If it is specified at the same time as the [origin], both are applied.
+  ///
+  /// A [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
+  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// whose [Alignment.x] value is `1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  final AlignmentGeometry alignment;
 
-  /// Whether to apply the translation when performing hit tests.
+  /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
   @override
@@ -799,6 +806,7 @@ class Transform extends SingleChildRenderObjectWidget {
       transform: transform,
       origin: origin,
       alignment: alignment,
+      textDirection: Directionality.of(context),
       transformHitTests: transformHitTests
     );
   }
@@ -809,6 +817,7 @@ class Transform extends SingleChildRenderObjectWidget {
       ..transform = transform
       ..origin = origin
       ..alignment = alignment
+      ..textDirection = Directionality.of(context)
       ..transformHitTests = transformHitTests;
   }
 }
