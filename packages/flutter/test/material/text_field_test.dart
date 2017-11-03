@@ -1664,4 +1664,30 @@ void main() {
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
   });
+
+  testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          controller: controller,
+          maxLines: null,
+        ),
+      )
+    );
+
+    final String testValue = 'x';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.baseOffset, -1);
+
+    // Tap the selection handle to bring up the "paste / select all" menu.
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is
+
+    // Confirm that the selection was updated.
+    expect(controller.selection.baseOffset, 0);
+  });
 }
