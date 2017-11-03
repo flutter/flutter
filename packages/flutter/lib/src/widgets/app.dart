@@ -117,6 +117,9 @@ class WidgetsApp extends StatefulWidget {
   /// localized title.
   ///
   /// This callback function must not return null.
+  ///
+  /// The [onGenerateTitle] callback is called each time the [WidgetsApp]
+  /// rebuilds.
   final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
