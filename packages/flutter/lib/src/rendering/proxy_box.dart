@@ -1635,7 +1635,7 @@ class RenderTransform extends RenderProxyBox {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
   ///
-  /// A [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
   /// whose [Alignment.x] value is `-1.0` if [textDirection] is
   /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
   /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
@@ -1831,7 +1831,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then
+  /// If this is set to an [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -1960,7 +1960,7 @@ class RenderFittedBox extends RenderProxyBox {
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// The translation is expressed as an [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///

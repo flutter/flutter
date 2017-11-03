@@ -789,7 +789,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as the [origin], both are applied.
   ///
-  /// A [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
   /// whose [Alignment.x] value is `-1.0` if [textDirection] is
   /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
   /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
@@ -1197,7 +1197,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///  * [Center], which is the same as [Align] but with the [alignment] always
 ///    set to [Alignment.center].
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [Alignment] value.
+///    size and positions the child according to an [Alignment] value.
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -1293,9 +1293,9 @@ class Center extends Align {
 ///
 ///  * [SingleChildLayoutDelegate], which controls the layout of the child.
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [Alignment] value.
+///    the child according to an [Alignment] value.
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [Alignment] value.
+///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
@@ -1570,7 +1570,7 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 /// * [Align] (which sizes itself based on its child's size and positions
-///   the child according to a [Alignment] value)
+///   the child according to an [Alignment] value)
 /// * [OverflowBox]
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to a fraction of the total available space.
@@ -2271,7 +2271,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [Alignment] value.
+///    the child according to an [Alignment] value.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
@@ -4025,7 +4025,7 @@ class RawImage extends LeafRenderObjectWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
   /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
