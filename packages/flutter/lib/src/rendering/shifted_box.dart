@@ -236,6 +236,13 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
+  /// A constructor to be used only when the extending class also has a mixin.
+  /// Be sure to also set fields like [alignment], [child], and [textDirection]
+  /// in the extending class's constructor.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/15101 is fixed.
+  @protected
+  RenderAligningShiftedBox.mixin() : this(textDirection: null);
+
   Alignment _resolvedAlignment;
 
   void _resolve() {

@@ -41,27 +41,39 @@ class _OverflowRegionData {
 /// ## Sample code
 ///
 /// ```dart
-/// class MyRenderObject extends RenderObject with DebugOverflowContainerMixin {
+/// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+///   MyRenderObject({
+///     RenderBox child,
+///     TextDirection textDirection,
+///     AlignmentGeometry alignment,
+///   }) : super.mixin() {
+///     this.textDirection = textDirection;
+///     this.alignment = alignment;
+///     this.child = child;
+///   }
+///   
 ///   Rect _containerRect;
 ///   Rect _childRect;
+///   bool _isOverflowing;
 ///
 ///   @override
 ///   void performLayout() {
 ///     // ...
+///     final BoxParentData childParentData = child.parentData;
 ///     _containerRect = Offset.zero & size;
 ///     _childRect = childParentData.offset & child.size;
 ///   }
 ///
 ///   @override
 ///   void paint(PaintingContext context, Offset offset) {
-///     if (!isOverflowing) {  // (However you determine this for your container)
+///     if (!_isOverflowing) {  // (However you determine this for your container)
 ///       // Do "normal" painting here and return, since there is no overflow.
 ///       // ...
 ///       return;
 ///     }
 ///     // ...
 ///     assert(() {
-///       overflowPaintIndicator(context, offset, _containerRect, _childRect);
+///       paintOverflowIndicator(context, offset, _containerRect, _childRect);
 ///       return true;
 ///     }());
 ///   }
@@ -238,7 +250,9 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   /// debug build.
   ///
   /// See example code in [DebugOverflowIndicatorMixin] documentation.
-  void paintOverflowIndicator(PaintingContext context, Offset offset, Rect containerRect, Rect childRect, { String overflowHints }) {
+  void paintOverflowIndicator(
+      PaintingContext context, Offset offset, Rect containerRect, Rect childRect,
+      {String overflowHints}) {
     final RelativeRect overflow = new RelativeRect.fromRect(containerRect, childRect);
 
     if (overflow.left <= 0.0 &&

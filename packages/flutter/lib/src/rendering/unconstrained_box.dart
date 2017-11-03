@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'box.dart';
 import 'debug_overflow_indicator.dart';
 import 'object.dart';
-import 'proxy_box.dart';
+import 'shifted_box.dart';
 import 'stack.dart';
 
 /// Renders a box, imposing no constraints on its child, allowing the child to
@@ -31,61 +31,16 @@ import 'stack.dart';
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-class RenderUnconstrainedBox extends RenderBox
-  with RenderObjectWithChildMixin<RenderBox>,
-       RenderProxyBoxMixin,
-       DebugOverflowIndicatorMixin {
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
   RenderUnconstrainedBox({
     RenderBox child,
     @required TextDirection textDirection,
     @required AlignmentGeometry alignment,
   }) : assert(alignment != null),
-       _textDirection = textDirection,
-       _alignment = alignment {
+       super.mixin() {
+    this.textDirection = textDirection;
+    this.alignment = alignment;
     this.child = child;
-  }
-
-  /// Determines the order to lay children out horizontally and how to interpret
-  /// `start` and `end` in the horizontal direction for the alignment.
-  ///
-  /// The textDirection is only used when [alignment] is an
-  /// [AlignmentDirectional], but must be non-null in that case.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    if (_textDirection != value) {
-      _textDirection = value;
-      _markNeedResolution();
-    }
-  }
-
-  /// How to align the the child in the box.
-  ///
-  /// If this is set to an [AlignmentDirectional] object, then [textDirection]
-  /// must not be null.
-  ///
-  /// See also:
-  ///
-  ///  * [AlignmentDirectional] for direction-aware alignment.
-  ///  * [Alignment] for non-direction-aware alignment.
-  AlignmentGeometry get alignment => _alignment;
-  AlignmentGeometry _alignment;
-  set alignment(AlignmentGeometry value) {
-    assert(value != null);
-    if (_alignment == value)
-      return;
-    _alignment = value;
-    _markNeedResolution();
-  }
-
-  Alignment _resolvedAlignment;
-  void _resolve() {
-    _resolvedAlignment ??= alignment.resolve(textDirection ?? TextDirection.ltr);
-  }
-
-  void _markNeedResolution() {
-    _resolvedAlignment = null;
-    markNeedsLayout();
   }
 
   Rect _overflowContainerRect = Rect.zero;
@@ -100,17 +55,17 @@ class RenderUnconstrainedBox extends RenderBox
   @override
   void performLayout() {
     if (child != null) {
-      _resolve();
-      assert(_resolvedAlignment != null);
-      final BoxParentData childParentData = child.parentData;
       // Let the child lay itself out at it's "natural" size.
       child.layout(const BoxConstraints(), parentUsesSize: true);
       size = constraints.constrain(child.size);
-      childParentData.offset = _resolvedAlignment.alongOffset(size - child.size);
+      alignChild();
+      final BoxParentData childParentData = child.parentData;
       _overflowContainerRect = Offset.zero & size;
       _overflowChildRect = childParentData.offset & child.size;
     } else {
       size = constraints.constrain(Size.zero);
+      _overflowContainerRect = Rect.zero;
+      _overflowChildRect = Rect.zero;
     }
   }
 
@@ -130,19 +85,13 @@ class RenderUnconstrainedBox extends RenderBox
     if (child == null || size.isEmpty)
       return;
 
-    final BoxParentData childParentData = child.parentData;
     if (!_isOverflowing) {
-      super.paint(context, offset + childParentData.offset);
+      super.paint(context, offset);
       return;
     }
 
     // We have overflow. Clip it.
-    context.pushClipRect(
-      needsCompositing,
-      offset + childParentData.offset,
-      (Offset.zero - childParentData.offset) & size,
-      super.paint,
-    );
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint);
 
     // Display the overflow indicator.
     assert(() {
@@ -162,12 +111,5 @@ class RenderUnconstrainedBox extends RenderBox
     if (_isOverflowing)
       header += ' OVERFLOWING';
     return header;
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new EnumProperty<AlignmentGeometry>('alignment', alignment));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
