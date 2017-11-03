@@ -5,9 +5,9 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 
 import 'box.dart';
+import 'debug_overflow_indicator.dart';
 import 'object.dart';
 
 /// How the child is inscribed into the available space.

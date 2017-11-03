@@ -5,7 +5,10 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart';
+import 'package:flutter/painting.dart';
+
+import 'object.dart';
+import 'stack.dart';
 
 // Data used by the DebugOverflowIndicator to manage the regions and labels for
 // the indicators.
@@ -66,6 +69,7 @@ class _OverflowRegionData {
 /// ```
 ///
 /// See also:
+///
 ///   * The code for [RenderUnconstrainedBox], and [RenderFlex] for examples of
 ///     classes that use this indicator mixin.
 abstract class DebugOverflowIndicatorMixin extends RenderObject {
