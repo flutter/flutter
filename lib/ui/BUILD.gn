@@ -16,6 +16,8 @@ source_set("ui") {
     "dart_ui.h",
     "painting/canvas.cc",
     "painting/canvas.h",
+    "painting/codec.cc",
+    "painting/codec.h",
     "painting/gradient.cc",
     "painting/gradient.h",
     "painting/image.cc",
