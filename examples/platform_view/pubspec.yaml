@@ -3,6 +3,7 @@ name: platform_view
 dependencies:
   flutter:
     sdk: flutter
+  material_icons_font: ^0.1.1
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
@@ -46,7 +47,5 @@ dependencies:
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
 
 flutter:
-
-  uses-material-design: true
   assets:
     - assets/flutter-mark-square-64.png

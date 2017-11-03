@@ -97,7 +97,6 @@ Future<List<String>> assemble({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  bool includeDefaultFonts: true,
   bool reportLicensedPackages: false
 }) async {
   outputPath ??= defaultFlxOutputPath;
@@ -111,7 +110,6 @@ Future<List<String>> assemble({
     manifestPath: manifestPath,
     workingDirPath: workingDirPath,
     packagesPath: packagesPath,
-    includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages
   );
   if (result != 0)

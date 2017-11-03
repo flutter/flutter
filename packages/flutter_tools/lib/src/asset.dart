@@ -5,11 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:yaml/yaml.dart';
-
 import 'base/file_system.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'flutter_manifest.dart';
@@ -22,8 +19,24 @@ class AssetBundle {
   static const String defaultManifestPath = 'pubspec.yaml';
   static const String _kAssetManifestJson = 'AssetManifest.json';
   static const String _kFontManifestJson = 'FontManifest.json';
-  static const String _kFontSetMaterial = 'material';
   static const String _kLICENSE = 'LICENSE';
+
+  static const String _materialIconsFontUpgradeInstructions = '''
+═══════════════════════════════════════════════════════════════════════════════════
+'uses-material-design' in pubspec.yaml is deprecated
+
+The flag is now replaced by a generic Dart package to provide the Material icons asset.
+
+Replace
+flutter:
+  uses-material-design: true
+
+in your pubspec.yaml with
+dependencies:
+  material_icons_font:
+
+Otherwise, icons in Material widgets may fail to appear correctly.
+═══════════════════════════════════════════════════════════════════════════════════''';
 
   bool _fixed = false;
   DateTime _lastBuildTimestamp;
@@ -67,7 +80,6 @@ class AssetBundle {
     String manifestPath: defaultManifestPath,
     String workingDirPath,
     String packagesPath,
-    bool includeDefaultFonts: true,
     bool reportLicensedPackages: false
   }) async {
     workingDirPath ??= getAssetBuildDirectory();
@@ -110,7 +122,6 @@ class AssetBundle {
 
     final List<Map<String, dynamic>> fonts = _parseFonts(
       flutterManifest,
-      includeDefaultFonts,
       packageMap,
     );
 
@@ -140,7 +151,6 @@ class AssetBundle {
 
         fonts.addAll(_parseFonts(
           packageFlutterManifest,
-          includeDefaultFonts,
           packageMap,
           packageName: packageName,
         ));
@@ -171,13 +181,8 @@ class AssetBundle {
       }
     }
 
-    final List<_Asset> materialAssets = <_Asset>[];
-    if (flutterManifest.usesMaterialDesign && includeDefaultFonts) {
-      materialAssets.addAll(_getMaterialAssets(_kFontSetMaterial));
-    }
-    for (_Asset asset in materialAssets) {
-      assert(asset.assetFileExists);
-      entries[asset.assetEntry] = new DevFSFileContent(asset.assetFile);
+    if (flutterManifest.usesMaterialDesign && !packageMap.map.containsKey('material_icons_font')) {
+      printError(_materialIconsFontUpgradeInstructions);
     }
 
     entries[_kAssetManifestJson] = _createAssetManifest(assetVariants);
@@ -252,36 +257,6 @@ class _Asset {
         ^relativePath.hashCode
         ^ source.hashCode;
   }
-}
-
-Map<String, dynamic> _readMaterialFontsManifest() {
-  final String fontsPath = fs.path.join(fs.path.absolute(Cache.flutterRoot),
-      'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
-
-  return loadYaml(fs.file(fontsPath).readAsStringSync());
-}
-
-final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
-
-List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
-  return _materialFontsManifest[fontSet];
-}
-
-List<_Asset> _getMaterialAssets(String fontSet) {
-  final List<_Asset> result = <_Asset>[];
-
-  for (Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (Map<String, dynamic> font in family['fonts']) {
-      final String assetKey = font['asset'];
-      result.add(new _Asset(
-        base: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
-        source: fs.path.basename(assetKey),
-        relativePath: assetKey
-      ));
-    }
-  }
-
-  return result;
 }
 
 final String _licenseSeparator = '\n' + ('-' * 80) + '\n';
@@ -369,14 +344,10 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
 
 List<Map<String, dynamic>> _parseFonts(
   FlutterManifest manifest,
-  bool includeDefaultFonts,
   PackageMap packageMap, {
   String packageName
 }) {
   final List<Map<String, dynamic>> fonts = <Map<String, dynamic>>[];
-  if (manifest.usesMaterialDesign && includeDefaultFonts) {
-    fonts.addAll(_getMaterialFonts(AssetBundle._kFontSetMaterial));
-  }
   if (packageName == null) {
     fonts.addAll(manifest.fontsDescriptor);
   } else {

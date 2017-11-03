@@ -2,6 +2,7 @@ name: flutter_examples_layers
 dependencies:
   flutter:
     sdk: flutter
+  material_icons_font: ^0.1.1
 
 dev_dependencies:
   flutter_test:
@@ -52,4 +53,3 @@ dev_dependencies:
 flutter:
   assets:
     - services/data.json
-  uses-material-design: true

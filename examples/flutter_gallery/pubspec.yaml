@@ -6,6 +6,7 @@ dependencies:
   intl: 0.15.2
   string_scanner: 1.0.2
   url_launcher: 0.4.2+5
+  material_icons_font: ^0.1.1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
@@ -63,7 +64,6 @@ dev_dependencies:
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
 
 flutter:
-  uses-material-design: true
   assets:
     - lib/gallery/example_code.dart
     - packages/flutter_gallery_assets/appbar_background.jpg

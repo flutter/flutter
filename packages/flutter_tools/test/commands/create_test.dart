@@ -181,6 +181,11 @@ void main() {
         expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
       }
 
+      expectExists('pubspec.yaml');
+      final String pubspec = fs.file(fs.path.join(projectDir.path, 'pubspec.yaml')).readAsStringSync();
+      expect(pubspec.contains('material_icons_font:'), true);
+      expect(pubspec.contains('uses-material-design:'), false);
+
       expectExists('lib/main.dart');
       for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
         if (file is File && file.path.endsWith('.dart')) {

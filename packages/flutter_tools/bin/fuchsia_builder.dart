@@ -90,7 +90,6 @@ Future<Null> run(List<String> args) async {
       workingDirPath: argResults[_kOptionWorking],
       packagesPath: argResults[_kOptionPackages],
       manifestPath: argResults[_kOptionManifest] ?? defaultManifestPath,
-      includeDefaultFonts: false,
     );
     final String depFilePath = argResults[_kOptionDepFile];
     final int depFileResult = _createDepfile(

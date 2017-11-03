@@ -20,7 +20,6 @@ class Cache {
   /// [artifacts] is configurable for testing.
   Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
-      _artifacts.add(new MaterialFonts(this));
       _artifacts.add(new FlutterEngine(this));
       _artifacts.add(new GradleWrapper(this));
     } else {
@@ -230,19 +229,6 @@ abstract class CachedArtifact {
 
   /// Template method to perform artifact update.
   Future<Null> updateInner();
-}
-
-/// A cached artifact containing fonts used for Material Design.
-class MaterialFonts extends CachedArtifact {
-  MaterialFonts(Cache cache): super('material_fonts', cache);
-
-  @override
-  Future<Null> updateInner() {
-    final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(version), location).then<Null>((_) {
-      status.stop();
-    }).whenComplete(status.cancel);
-  }
 }
 
 /// A cached artifact containing the Flutter engine binaries.

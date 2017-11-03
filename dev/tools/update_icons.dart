@@ -5,8 +5,12 @@
 // Regenerates the material icons file.
 // See https://github.com/flutter/flutter/wiki/Updating-Material-Design-Fonts
 
+import 'dart:async';
+
 import 'dart:convert' show LineSplitter;
 import 'dart:io';
+
+import 'package:http/http.dart' as http;
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
@@ -15,7 +19,7 @@ const String kOptionCodepointsPath = 'codepoints';
 const String kOptionIconsPath = 'icons';
 const String kOptionDryRun = 'dry-run';
 
-const String kDefaultCodepointsPath = 'bin/cache/artifacts/material_fonts/codepoints';
+const String kDefaultCodepointsPath = 'https://raw.githubusercontent.com/flutter/material_icons_font/master/assets/codepoints';
 const String kDefaultIconsPath = 'packages/flutter/lib/src/material/icons.dart';
 
 const String kBeginGeneratedMark = '// BEGIN GENERATED';
@@ -28,7 +32,7 @@ const Map<String, String> kIdentifierRewrites = const <String, String>{
   'class': 'class_',
 };
 
-void main(List<String> args) {
+Future<Null> main(List<String> args) async {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
@@ -44,20 +48,27 @@ void main(List<String> args) {
     stderr.writeln('Icons file not found: ${iconFile.path}');
     exit(1);
   }
-  final File codepointsFile = new File(path.absolute(argResults[kOptionCodepointsPath]));
-  if (!codepointsFile.existsSync()) {
-    stderr.writeln('Codepoints file not found: ${codepointsFile.path}');
+
+  print("Downloading latest codepoint map for 'cupertino_icons'...");
+  final http.Response codepointResponse = await http.get(argResults[kOptionCodepointsPath]);
+  if (codepointResponse.statusCode != 200) {
+    stderr.writeln('Codepoints retrieval of ${argResults[kOptionCodepointsPath]} failed:)');
+    stderr.writeln('${codepointResponse.statusCode}');
     exit(1);
   }
 
   final String iconData = iconFile.readAsStringSync();
-  final String codepointData = codepointsFile.readAsStringSync();
+  final String codepointData = codepointResponse.body;
   final String newIconData = regenerateIconsFile(iconData, codepointData);
+
+  print('Updating Material icons.dart...');
 
   if (argResults[kOptionDryRun])
     stdout.writeln(newIconData);
   else
     iconFile.writeAsStringSync(newIconData);
+
+  print('Success');
 }
 
 String regenerateIconsFile(String iconData, String codepointData) {
@@ -97,6 +108,6 @@ String getIconDeclaration(String line) {
   return '''
 
   /// <p><i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".</p>
-  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: 'MaterialIcons');
+  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: iconFont, fontPackage: iconFontPackage);
 ''';
 }

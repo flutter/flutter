@@ -6,6 +6,7 @@ dependencies:
     sdk: flutter
   flutter_driver:
     sdk: flutter
+  material_icons_font: ^0.1.1
 
   # Also examples/flutter_gallery/pubspec.yaml
   flutter_gallery_assets:
@@ -64,7 +65,6 @@ dev_dependencies:
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
 
 flutter:
-  uses-material-design: true
   assets:
     - packages/flutter_gallery_assets/ali_connors.png
     - packages/flutter_gallery_assets/ali_connors_sml.png

@@ -3,6 +3,7 @@ name: platform_channel_swift
 dependencies:
   flutter:
     sdk: flutter
+  material_icons_font: ^0.1.1
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +56,3 @@ dev_dependencies:
   vm_service_client: 0.2.3 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
   yaml: 2.1.13 # TRANSITIVE DEPENDENCY
-
-flutter:
-  uses-material-design: true

@@ -43,7 +43,7 @@ dependencies:
       expect(flutterManifest.assets, isEmpty);
     });
 
-    test('knows if material design is used', () async {
+    test('knows if material design flag is on', () async {
       final String manifest = '''
 name: test
 dependencies:
@@ -63,7 +63,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   assets:
     - a/foo
     - a/bar
@@ -79,7 +78,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -109,7 +107,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -146,7 +143,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -184,7 +180,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -245,7 +240,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -290,7 +284,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
@@ -330,7 +323,6 @@ dependencies:
   flutter:
     sdk: flutter
 flutter:
-  uses-material-design: true
   fonts:
     - family: foo
       fonts:
