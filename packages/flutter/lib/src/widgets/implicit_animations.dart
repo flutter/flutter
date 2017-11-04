@@ -931,10 +931,12 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [curve], and
+  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
   /// [duration] arguments must not be null.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
+  ///
+  /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
   const AnimatedPhysicalModel({
     Key key,
     @required this.child,
@@ -942,8 +944,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.borderRadius: BorderRadius.zero,
     @required this.elevation,
     @required this.color,
-    @required this.shadowColor,
     this.animateColor: true,
+    @required this.shadowColor,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
@@ -971,11 +973,11 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// The target background color.
   final Color color;
 
-  /// The target shadow color.
-  final Color shadowColor;
-
   /// Whether the color should be animated.
   final bool animateColor;
+
+  /// The target shadow color.
+  final Color shadowColor;
 
   @override
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
@@ -987,8 +989,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
-    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
     description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
   }
 }
 

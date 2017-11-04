@@ -97,8 +97,8 @@ abstract class MaterialInkController {
 /// splashes and ink highlights) won't move to account for the new layout.
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color] or [type]). The one exception is
-/// the [elevation], changes to which will be animated.
+/// [Material] should not change its [color], [shadowColor] or [type]). The one
+/// exception is the [elevation], changes to which will be animated.
 ///
 /// See also:
 ///
@@ -108,7 +108,7 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type] and the [elevation] arguments must not be null.
+  /// The [type], [elevation] and [shadowColor] arguments must not be null.
   const Material({
     Key key,
     this.type: MaterialType.canvas,

@@ -1298,7 +1298,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], and [color] must not be null.
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape: BoxShape.rectangle,
