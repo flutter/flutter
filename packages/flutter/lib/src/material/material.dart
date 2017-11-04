@@ -114,11 +114,13 @@ class Material extends StatefulWidget {
     this.type: MaterialType.canvas,
     this.elevation: 0.0,
     this.color,
+    this.shadowColor: const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
+       assert(shadowColor != null),
        assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
        super(key: key);
 
@@ -147,6 +149,11 @@ class Material extends StatefulWidget {
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
+
+  /// The color to paint the shadow below the material.
+  ///
+  /// Defaults to fully opaque black.
+  final Color shadowColor;
 
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
@@ -238,6 +245,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         shape: BoxShape.circle,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -258,6 +266,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: radius ?? BorderRadius.zero,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );

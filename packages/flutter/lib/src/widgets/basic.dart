@@ -655,10 +655,12 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     this.borderRadius,
     this.elevation: 0.0,
     @required this.color,
+    this.shadowColor: const Color(0xFF000000),
     Widget child,
   }) : assert(shape != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        super(key: key, child: child);
 
   /// The type of shape.
@@ -678,8 +680,11 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// The background color.
   final Color color;
 
+  /// The shadow color.
+  final Color shadowColor;
+
   @override
-  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color);
+  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color, shadowColor: shadowColor);
 
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
@@ -687,7 +692,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
       ..shape = shape
       ..borderRadius = borderRadius
       ..elevation = elevation
-      ..color = color;
+      ..color = color
+      ..shadowColor = shadowColor;
   }
 
   @override
@@ -697,6 +703,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
   }
 }
 

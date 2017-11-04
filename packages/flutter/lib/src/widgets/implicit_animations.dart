@@ -942,6 +942,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     this.borderRadius: BorderRadius.zero,
     @required this.elevation,
     @required this.color,
+    @required this.shadowColor,
     this.animateColor: true,
     Curve curve: Curves.linear,
     @required Duration duration,
@@ -950,6 +951,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(borderRadius != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -969,6 +971,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// The target background color.
   final Color color;
 
+  /// The target shadow color.
+  final Color shadowColor;
+
   /// Whether the color should be animated.
   final bool animateColor;
 
@@ -982,6 +987,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
     description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
   }
 }
@@ -1006,6 +1012,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
+      shadowColor: widget.shadowColor,
     );
   }
 }

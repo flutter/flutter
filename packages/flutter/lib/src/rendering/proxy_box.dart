@@ -1305,13 +1305,16 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     BorderRadius borderRadius,
     double elevation: 0.0,
     @required Color color,
+    Color shadowColor: const Color(0xFF000000),
   }) : assert(shape != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
+       _shadowColor = shadowColor,
        super(child: child);
 
   /// The shape of the layer.
@@ -1354,6 +1357,17 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
       return;
     _elevation = value;
     markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
+  /// The shadow color.
+  Color get shadowColor => _shadowColor;
+  Color _shadowColor;
+  set shadowColor(Color value) {
+    assert(value != null);
+    if (shadowColor == value)
+      return;
+    _shadowColor = value;
     markNeedsPaint();
   }
 
@@ -1427,7 +1441,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
           canvas.drawShadow(
             new Path()..addRRect(offsetClipRRect),
-            const Color(0xFF000000),
+            shadowColor,
             elevation,
             color.alpha != 0xFF,
           );
