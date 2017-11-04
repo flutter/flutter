@@ -184,7 +184,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 /// as well.
 ///
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
-/// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
+/// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [additionalConstraints].
 class RenderConstrainedBox extends RenderProxyBox {
   /// Creates a render box that constrains its child.
