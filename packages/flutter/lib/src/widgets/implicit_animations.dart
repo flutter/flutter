@@ -946,6 +946,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     @required this.color,
     this.animateColor: true,
     @required this.shadowColor,
+    this.animateShadowColor: true,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
@@ -979,6 +980,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// The target shadow color.
   final Color shadowColor;
 
+  /// Whether the shadow color should be animated.
+  final bool animateShadowColor;
+
   @override
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
 
@@ -991,6 +995,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }
 
@@ -998,12 +1003,14 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   BorderRadiusTween _borderRadius;
   Tween<double> _elevation;
   ColorTween _color;
+  ColorTween _shadowColor;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => new BorderRadiusTween(begin: value));
     _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
     _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
+    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => new ColorTween(begin: value));
   }
 
   @override
@@ -1014,7 +1021,9 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
-      shadowColor: widget.shadowColor,
+      shadowColor: widget.animateShadowColor 
+          ? _shadowColor.evaluate(animation)
+          : widget.shadowColor,
     );
   }
 }
