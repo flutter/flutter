@@ -48,7 +48,7 @@ class PaintRecorder extends CustomPainter {
 }
 
 void main() {
-  testWidgets('LayoutChangedNotificaion test', (WidgetTester tester) async {
+  testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Material(
         child: new NotifyMaterial(),
