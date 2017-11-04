@@ -626,9 +626,9 @@ abstract class StatelessWidget extends Widget {
   /// The given [BuildContext] contains information about the location in the
   /// tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree. A
-  /// given widget might be with multiple different [BuildContext] arguments
-  /// over time if the widget is moved around the tree or if the widget is
-  /// inserted into the tree in multiple places at once.
+  /// given widget might be built with multiple different [BuildContext]
+  /// arguments over time if the widget is moved around the tree or if the
+  /// widget is inserted into the tree in multiple places at once.
   ///
   /// The implementation of this method must only depend on:
   ///
