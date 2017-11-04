@@ -187,6 +187,7 @@ class Material extends StatefulWidget {
     description.add(new EnumProperty<MaterialType>('type', type));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
     description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
