@@ -185,7 +185,7 @@ class Material extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<MaterialType>('type', type));
-    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DoubleProperty('elevation', elevation, defaultValue: 0.0));
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
