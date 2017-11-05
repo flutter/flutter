@@ -955,6 +955,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
+       assert(animateColor != null),
+       assert(animateShadowColor != null),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
