@@ -18,7 +18,6 @@ import 'package:flutter_tools/src/version.dart';
 
 import 'src/context.dart';
 
-const JsonEncoder _kPrettyJsonEncoder = const JsonEncoder.withIndent('  ');
 final Clock _testClock = new Clock.fixed(new DateTime(2015, 1, 1));
 final DateTime _upToDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeConsideredUpToDate ~/ 2);
 final DateTime _outOfDateVersion = _testClock.agoBy(FlutterVersion.kVersionAgeConsideredUpToDate * 2);
