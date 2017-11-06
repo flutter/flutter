@@ -66,7 +66,7 @@ void main() {
               .where((List<String> pair) => pair != null),
           key: (dynamic key) {
             final List<String> pair = key;
-            pair[0];
+            return pair[0];
           },
           value: (dynamic value) {
             final List<String> pair = value;
