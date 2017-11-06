@@ -5,6 +5,8 @@
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
+import 'message_codecs_utils.dart';
+
 void main() {
   test('Haptic feedback control test', () async {
     final List<MethodCall> log = <MethodCall>[];
@@ -15,6 +17,7 @@ void main() {
 
     await HapticFeedback.vibrate();
 
-    expect(log, equals(<MethodCall>[const MethodCall('HapticFeedback.vibrate')]));
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: null));
   });
 }
