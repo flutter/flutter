@@ -636,13 +636,13 @@ class HotRunner extends ResidentRunner {
         final String restartCommand = isDaemonMode ? '' : ' (by pressing "R")';
         unusedElementMessage =
           'Some program elements were changed during reload but did not run when the view was reassembled;\n'
-          'you may need to restart the app$restartCommand for the changes to have an effect:';
+          'you may need to restart the app$restartCommand for the changes to have an effect.';
         for (ProgramElement unusedElement in unusedElements) {
           final String name = unusedElement.qualifiedName;
           final String path = _uriToRelativePath(unusedElement.uri);
           final int line = unusedElement.line;
           final String description = line == null ? '$name ($path)' : '$name ($path:$line)';
-          unusedElementMessage += '\n  $description';
+          unusedElementMessage += '\n  • $description';
         }
       }
     }
