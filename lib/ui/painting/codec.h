@@ -7,6 +7,10 @@
 
 #include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/core/SkBitmap.h"
+#include "third_party/skia/include/core/SkImage.h"
+
+using tonic::DartPersistentValue;
 
 namespace tonic {
 class DartLibraryNatives;
@@ -24,6 +28,7 @@ class Codec : public fxl::RefCountedThreadSafe<Codec>,
  public:
   virtual int frameCount() = 0;
   virtual int repetitionCount() = 0;
+  virtual Dart_Handle getNextFrame(Dart_Handle callback_handle) = 0;
   void dispose();
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
@@ -31,8 +36,9 @@ class Codec : public fxl::RefCountedThreadSafe<Codec>,
 
 class MultiFrameCodec : public Codec {
  public:
-  int frameCount() { return frameCount_; }
+  int frameCount() { return frameInfos_.size(); }
   int repetitionCount() { return repetitionCount_; }
+  Dart_Handle getNextFrame(Dart_Handle args);
 
   static void RegisterNatives(tonic::DartLibraryNatives* natives);
 
@@ -40,9 +46,17 @@ class MultiFrameCodec : public Codec {
   MultiFrameCodec(std::unique_ptr<SkCodec> codec);
   ~MultiFrameCodec() {}
 
+  sk_sp<SkImage> GetNextFrameImage();
+  void GetNextFrameAndInvokeCallback(
+      std::unique_ptr<DartPersistentValue> callback,
+      size_t trace_id);
+
   const std::unique_ptr<SkCodec> codec_;
-  int frameCount_;
   int repetitionCount_;
+  int nextFrameIndex_;
+
+  std::vector<SkCodec::FrameInfo> frameInfos_;
+  std::vector<SkBitmap> frameBitmaps_;
 
   FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
   FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);
