@@ -7,7 +7,11 @@
 /// The epsilon argument must be positive.
 bool nearEqual(double a, double b, double epsilon) {
   assert(epsilon >= 0.0);
-  return (a > (b - epsilon)) && (a < (b + epsilon));
+  if (a == null || b == null) {
+  	return (a == b);
+  } else {
+  	return (a > (b - epsilon)) && (a < (b + epsilon));
+  }
 }
 
 /// Whether a double is within a given distance of zero.

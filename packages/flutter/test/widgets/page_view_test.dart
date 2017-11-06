@@ -325,6 +325,60 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    final PageController controller = new PageController(viewportFraction: 0.9);
+
+    Widget build(PageController controller, {Size size}) {
+      final Widget pageView = new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          controller: controller,
+          onPageChanged: log.add,
+          physics: const BouncingScrollPhysics(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      );
+
+      if (size != null) {
+        return new OverflowBox(
+          child: pageView,
+          minWidth: size.width,
+          minHeight: size.height,
+          maxWidth: size.width,
+          maxHeight: size.height,
+        );
+      } else {
+        return pageView;
+      }
+    }
+
+    await tester.pumpWidget(build(controller));
+    expect(log, isEmpty);
+
+    // Fling right to move to a non-existent page at the beginning of the
+    // PageView, and confirm that the PageView settles back on the first page.
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
+
+    // Try again with a Cupertino "Plus" device size.
+    await tester.pumpWidget(build(controller, size: const Size(414.0, 736.0)));
+    expect(log, isEmpty);
+
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
+  });
+
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
     PageController controller = new PageController(viewportFraction: 7/8);
 
