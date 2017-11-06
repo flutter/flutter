@@ -879,6 +879,9 @@ abstract class FrameInfo extends NativeFieldWrapperClass2 {
   Image get image native "FrameInfo_image";
 }
 
+/// Callback signature for [Codec.getNextFrame].
+typedef void NextFrameInfoCallback(FrameInfo frameInfo);
+
 /// A handle to an image codec.
 abstract class Codec extends NativeFieldWrapperClass2 {
   /// Number of frames in this image.
@@ -890,10 +893,12 @@ abstract class Codec extends NativeFieldWrapperClass2 {
   /// * -1 for infinity repetitions.
   int get repetitionCount native "Codec_repetitionCount";
 
-  /// Returns the next animation frame.
+  /// Fetches the next animation frame.
   ///
   /// Wraps back to the first frame after returning the last frame.
-  FrameInfo getNextFrame() native "Codec_getNextFrame";
+  ///
+  /// Returns an error message on failure, null on success.
+  String getNextFrame(NextFrameInfoCallback callback) native "Codec_getNextFrame";
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.

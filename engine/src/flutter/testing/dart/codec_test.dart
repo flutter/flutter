@@ -41,6 +41,39 @@ void main() {
     ui.Codec codec = await completer.future;
     expect(codec, null);
   });
+
+  test('nextFrame fails when no callback provided', () async {
+    Uint8List data = await _getSkiaResource('alphabetAnim.gif').readAsBytes();
+    Completer<ui.Codec> completer = new Completer<ui.Codec>();
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
+    ui.Codec codec = await completer.future;
+    expect(codec.getNextFrame(null), 'Callback must be a function');
+  });
+
+  test('nextFrame', () async {
+    Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
+    Completer<ui.Codec> completer = new Completer<ui.Codec>();
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
+    ui.Codec codec = await completer.future;
+    List<List<int>> decodedFrameInfos = [];
+    for (int i = 0; i < 5; i++) {
+      Completer<ui.FrameInfo> frameCompleter = new Completer<ui.FrameInfo>();
+      codec.getNextFrame(frameCompleter.complete);
+      ui.FrameInfo frameInfo = await frameCompleter.future;
+      decodedFrameInfos.add([
+        frameInfo.durationMillis,
+        frameInfo.image.width,
+        frameInfo.image.height,
+      ]);
+    }
+    expect(decodedFrameInfos, equals([
+      [200, 640, 479],
+      [200, 640, 479],
+      [200, 640, 479],
+      [200, 640, 479],
+      [200, 640, 479],
+    ]));
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
