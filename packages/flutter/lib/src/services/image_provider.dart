@@ -159,7 +159,7 @@ class ImageConfiguration {
 /// To obtain an [ImageStream] from an [ImageProvider], call [resolve],
 /// passing it an [ImageConfiguration] object.
 ///
-/// ImageProvides uses the global [imageCache] to cache images.
+/// [ImageProvider] uses the global [imageCache] to cache images.
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
