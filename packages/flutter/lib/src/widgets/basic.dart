@@ -1628,8 +1628,6 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox], a widget that imposes different constraints on its child
 ///    than it gets from its parent, possibly allowing the child to overflow
 ///    the parent.
-///  * [RenderUnconstrainedBox] for the [RenderObject] for this container.
-///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes no constraints on its child, allowing it to
   /// render at its "natural" size. If the child overflows the parents
@@ -1638,7 +1636,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     Key key,
     Widget child,
     this.textDirection,
-    this.alignment = Alignment.center,
+    this.alignment: Alignment.center,
   }) : assert(alignment != null),
        super(key: key, child: child);
 
@@ -1657,19 +1655,16 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
   final AlignmentGeometry alignment;
 
-  bool get _needTextDirection => alignment is AlignmentDirectional
-      && alignment != AlignmentDirectional.center;
-
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
-      ..textDirection = textDirection ?? (_needTextDirection ? Directionality.of(context) : null)
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..alignment = alignment;
   }
 
   @override
   RenderUnconstrainedBox createRenderObject(BuildContext context) => new RenderUnconstrainedBox(
-    textDirection: textDirection ?? (_needTextDirection ? Directionality.of(context) : null),
+    textDirection: textDirection ?? Directionality.of(context),
     alignment: alignment,
   );
 
@@ -3534,6 +3529,7 @@ class Row extends Flex {
 ///    arrangement.
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
+///    that may size smaller (leaving some remaining room unused).
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
