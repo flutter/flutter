@@ -24,6 +24,7 @@ Future<TaskResult> runEndToEndTests() async {
     const List<String> entryPoints = const <String>[
       'lib/keyboard_resize.dart',
       'lib/driver.dart',
+      'lib/screenshot.dart',
     ];
 
     for (final String entryPoint in entryPoints) {
