@@ -463,10 +463,10 @@ class FlutterDriver {
     //       -------------------------------------------------------------------
     //       UI    : <-- build -->
     //       GPU   :               <-- rasterize -->
-    //       Gap   :              |    1 second or more   |
-    //       Driver:                                       <-- screenshot -->
+    //       Gap   :              |    2 seconds or more   |
+    //       Driver:                                        <-- screenshot -->
     //
-    //       The artificial gap should be long enough for the GPU thread to
+    //       The two-second gap should be long enough for the GPU thread to
     //       finish rasterizing the frame, but not longer than necessary to keep
     //       driver tests as fast a possible.
     await new Future<Null>.delayed(const Duration(seconds: 2));
