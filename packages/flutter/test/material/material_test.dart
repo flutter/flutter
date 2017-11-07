@@ -142,7 +142,7 @@ void main() {
   });
 
   testWidgets('Shadow colors animate smoothly', (WidgetTester tester) async {
-    // This code verifies that the PhysicalModel's elevation animates over
+    // This code verifies that the PhysicalModel's shadow color animates over
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
