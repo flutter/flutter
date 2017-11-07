@@ -14,7 +14,8 @@ void main() {
       decoration: new BoxDecoration(
         color: const Color(0xFF00FF00),
         gradient: new RadialGradient(
-          center: Alignment.topLeft, radius: 1.8,
+          center: Alignment.topLeft,
+          radius: 1.8,
           colors: <Color>[Colors.yellow[500], Colors.blue[500]],
         ),
         boxShadow: kElevationToShadow[3],
@@ -71,14 +72,17 @@ void main() {
     );
 
     expect(coloredBox, hasAGoodToStringDeep);
-    expect(coloredBox.toStringDeep(minLevel: DiagnosticLevel.info), equalsIgnoringHashCodes(
-        'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
-        '   parentData: MISSING\n'
-        '   constraints: MISSING\n'
-        '   size: MISSING\n'
-        '   decoration: BoxDecoration:\n'
-        '     <no decorations specified>\n'
-        '   configuration: ImageConfiguration()\n'));
+    expect(
+        coloredBox.toStringDeep(minLevel: DiagnosticLevel.info),
+        equalsIgnoringHashCodes(
+          'RenderDecoratedBox#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+          '   parentData: MISSING\n'
+          '   constraints: MISSING\n'
+          '   size: MISSING\n'
+          '   decoration: BoxDecoration:\n'
+          '     <no decorations specified>\n'
+          '   configuration: ImageConfiguration()\n'),
+    );
 
     final RenderBox paddingBox = new RenderPadding(
       padding: const EdgeInsets.all(10.0),
@@ -201,5 +205,61 @@ void main() {
           '   alignment: Alignment.center\n'
           '   textDirection: ltr\n'),
     );
+  });
+
+  test('honors constrainedAxis=Axis.horizontal', () {
+    final RenderConstrainedBox flexible =
+        new RenderConstrainedBox(additionalConstraints: const BoxConstraints.expand(height: 100.0));
+    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+      constrainedAxis: Axis.horizontal,
+      textDirection: TextDirection.ltr,
+      child: new RenderFlex(
+        direction: Axis.horizontal,
+        textDirection: TextDirection.ltr,
+        verticalDirection: VerticalDirection.down,
+        children: <RenderBox>[flexible],
+      ),
+      alignment: Alignment.center,
+    );
+    final FlexParentData flexParentData = flexible.parentData;
+    flexParentData.flex = 1;
+    flexParentData.fit = FlexFit.tight;
+
+    final BoxConstraints viewport = const BoxConstraints(maxHeight: 100.0, maxWidth: 100.0);
+    layout(unconstrained, constraints: viewport);
+
+    layout(
+      unconstrained,
+      constraints: const BoxConstraints(
+        maxWidth: 100.0,
+        maxHeight: 100.0,
+      ),
+    );
+
+    expect(unconstrained.size.width, equals(200.0), reason: 'constrained width');
+    expect(unconstrained.size.height, equals(200.0), reason: 'unconstrained height');
+  });
+
+  test('honors constrainedAxis=Axis.vertical', () {
+    final RenderUnconstrainedBox unconstrained = new RenderUnconstrainedBox(
+      constrainedAxis: Axis.vertical,
+      textDirection: TextDirection.ltr,
+      child: new RenderConstrainedBox(
+        additionalConstraints: const BoxConstraints.tightFor(width: 200.0, height: 200.0),
+      ),
+      alignment: Alignment.center,
+    );
+    layout(
+      unconstrained,
+      constraints: const BoxConstraints(
+        minWidth: 200.0,
+        maxWidth: 200.0,
+        minHeight: 200.0,
+        maxHeight: 200.0,
+      ),
+    );
+
+    expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
+    expect(unconstrained.size.height, equals(200.0), reason: 'constrained height');
   });
 }

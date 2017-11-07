@@ -20,8 +20,7 @@ enum ListTileStyle {
   /// Use a title font that's appropriate for a [ListTile] in a list.
   list,
 
-  /// Use a title font that's appropriate for a [ListTile] that appears in a
-  /// [Drawer].
+  /// Use a title font that's appropriate for a [ListTile] that appears in a [Drawer].
   drawer,
 }
 
@@ -82,16 +81,13 @@ class ListTileTheme extends InheritedWidget {
   /// If specified, [style] defines the font used for [ListTile] titles.
   final ListTileStyle style;
 
-  /// If specified, the color used for icons and text when a [ListTile] is
-  /// selected.
+  /// If specified, the color used for icons and text when a [ListTile] is selected.
   final Color selectedColor;
 
-  /// If specified, the icon color used for enabled [ListTile]s that are not
-  /// selected.
+  /// If specified, the icon color used for enabled [ListTile]s that are not selected.
   final Color iconColor;
 
-  /// If specified, the text color used for enabled [ListTile]s that are not
-  /// selected.
+  /// If specified, the text color used for enabled [ListTile]s that are not selected.
   final Color textColor;
 
   /// The closest instance of this class that encloses the given context.
@@ -141,8 +137,8 @@ enum ListTileControlAffinity {
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
 ///
-/// A list tile contains one to three lines of text optionally flanked by icons
-/// or other widgets, such as check boxes. The icons (or other widgets) for the
+/// A list tile contains one to three lines of text optionally flanked by icons or
+/// other widgets, such as check boxes. The icons (or other widgets) for the
 /// tile are defined with the [leading] and [trailing] parameters. The first
 /// line of text is not optional and is specified with [title]. The value of
 /// [subtitle], which _is_ optional, will occupy the space allocated for an
@@ -196,8 +192,7 @@ enum ListTileControlAffinity {
 ///    used as the [leading] element of a ListTile.
 ///  * [Card], which can be used with [Column] to show a few [ListTile]s.
 ///  * [Divider], which can be used to separate [ListTile]s.
-///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between
-///    [ListTile]s.
+///  * [ListTile.divideTiles], a utility for inserting [Divider]s in between [ListTile]s.
 ///  * [CheckboxListTile], [RadioListTile], and [SwitchListTile], widgets
 ///    that combine [ListTile] with other controls.
 ///  * <https://material.google.com/components/lists.html>
@@ -273,11 +268,10 @@ class ListTile extends StatelessWidget {
   /// Inoperative if [enabled] is false.
   final GestureLongPressCallback onLongPress;
 
-  /// If this tile is also [enabled] then icons and text are rendered with the
-  /// same color.
+  /// If this tile is also [enabled] then icons and text are rendered with the same color.
   ///
-  /// By default the selected color is the theme's primary color. The selected
-  /// color can be overridden with a [ListTileTheme].
+  /// By default the selected color is the theme's primary color. The selected color
+  /// can be overridden with a [ListTileTheme].
   final bool selected;
 
   /// Add a one pixel border in between each tile. If color isn't specified the
