@@ -299,10 +299,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     if (_direction != value) {
       _direction = value;
       markNeedsLayout();
-      assert((){
-        _debugOverflowHints = null;
-        return true;
-      }());
     }
   }
 
@@ -604,10 +600,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
       return defaultComputeDistanceToHighestActualBaseline(baseline);
     return defaultComputeDistanceToFirstActualBaseline(baseline);
   }
-
-  // Hints sent to console when the container overflows.
-  // Only set in debug mode.
-  String _debugOverflowHints;
 
   int _getFlex(RenderBox child) {
     final FlexParentData childParentData = child.parentData;
@@ -950,7 +942,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     assert(() {
       // Only set this if it's null to save work.  It gets reset to null if the
       // _direction changes.
-      _debugOverflowHints ??=
+      final String debugOverflowHints =
         'The overflowing $runtimeType has an orientation of $_direction.\n'
         'The edge of the $runtimeType that is overflowing has been marked '
         'in the rendering with a yellow and black striped pattern. This is '
@@ -976,7 +968,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           overflowChildRect = new Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
           break;
       }
-      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: _debugOverflowHints);
+      paintOverflowIndicator(context, offset, Offset.zero & size, overflowChildRect, overflowHints: debugOverflowHints);
       return true;
     }());
   }

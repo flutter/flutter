@@ -10,20 +10,30 @@ import 'package:flutter/painting.dart';
 import 'object.dart';
 import 'stack.dart';
 
+// Describes which side the region data overflows on.
+enum _OverflowSide {
+  left,
+  top,
+  bottom,
+  right,
+}
+
 // Data used by the DebugOverflowIndicator to manage the regions and labels for
 // the indicators.
 class _OverflowRegionData {
   const _OverflowRegionData({
     this.rect,
-    this.label = '',
-    this.labelOffset = Offset.zero,
-    this.rotation = 0.0,
+    this.label: '',
+    this.labelOffset: Offset.zero,
+    this.rotation: 0.0,
+    this.side,
   });
 
   final Rect rect;
   final String label;
   final Offset labelOffset;
   final double rotation;
+  final _OverflowSide side;
 }
 
 /// An mixin indicator that is drawn when a [RenderObject] overflows its
@@ -35,7 +45,7 @@ class _OverflowRegionData {
 /// [paintOverflowIndicator] is surrounded by an assert).
 ///
 /// This class will also print a debug message to the console when the container
-/// overflows, but only on the first occurrence, and after each time that
+/// overflows. It will print on the first occurrence, and once after each time that
 /// [reassemble] is called.
 ///
 /// ## Sample code
@@ -43,19 +53,14 @@ class _OverflowRegionData {
 /// ```dart
 /// class MyRenderObject extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
 ///   MyRenderObject({
-///     RenderBox child,
-///     TextDirection textDirection,
 ///     AlignmentGeometry alignment,
-///   }) : super.mixin() {
-///     this.textDirection = textDirection;
-///     this.alignment = alignment;
-///     this.child = child;
-///   }
-///   
+///     TextDirection textDirection,
+///     RenderBox child,
+///   }) : super.mixin(alignment, textDirection, child);
+/// 
 ///   Rect _containerRect;
 ///   Rect _childRect;
-///   bool _isOverflowing;
-///
+/// 
 ///   @override
 ///   void performLayout() {
 ///     // ...
@@ -63,15 +68,12 @@ class _OverflowRegionData {
 ///     _containerRect = Offset.zero & size;
 ///     _childRect = childParentData.offset & child.size;
 ///   }
-///
+/// 
 ///   @override
 ///   void paint(PaintingContext context, Offset offset) {
-///     if (!_isOverflowing) {  // (However you determine this for your container)
-///       // Do "normal" painting here and return, since there is no overflow.
-///       // ...
-///       return;
-///     }
+///     // Do normal painting here...
 ///     // ...
+/// 
 ///     assert(() {
 ///       paintOverflowIndicator(context, offset, _containerRect, _childRect);
 ///       return true;
@@ -82,7 +84,7 @@ class _OverflowRegionData {
 ///
 /// See also:
 ///
-///   * The code for [RenderUnconstrainedBox], and [RenderFlex] for examples of
+///   * The code for [RenderUnconstrainedBox] and [RenderFlex] for examples of
 ///     classes that use this indicator mixin.
 abstract class DebugOverflowIndicatorMixin extends RenderObject {
   // This class is intended to be used as a mixin, and should not be
@@ -110,8 +112,10 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
     );
   static final Paint _labelBackgroundPaint = new Paint()..color = const Color(0xFFFFFFFF);
 
-  final TextPainter _indicatorLabel = new TextPainter()
-    ..textDirection = TextDirection.ltr; // This label is in English.
+  final List<TextPainter> _indicatorLabel = new List<TextPainter>.filled(
+    _OverflowSide.values.length,
+    new TextPainter(textDirection: TextDirection.ltr), // This label is in English.
+  );
 
   // Set to true to trigger a debug message in the console upon
   // the next paint call.  Will be reset after each paint.
@@ -145,6 +149,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         labelOffset: markerRect.centerLeft +
             const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
         rotation: math.PI / 2.0,
+        side: _OverflowSide.left,
       ));
     }
     if (overflow.right > 0.0) {
@@ -160,6 +165,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         labelOffset: markerRect.centerRight -
             const Offset(_indicatorFontSizePixels + _indicatorLabelPaddingPixels, 0.0),
         rotation: -math.PI / 2.0,
+        side: _OverflowSide.right,
       ));
     }
     if (overflow.top > 0.0) {
@@ -174,6 +180,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         label: 'TOP OVERFLOWED BY ${_formatPixels(overflow.top)} PIXELS',
         labelOffset: markerRect.topCenter + const Offset(0.0, _indicatorLabelPaddingPixels),
         rotation: 0.0,
+        side: _OverflowSide.top,
       ));
     }
     if (overflow.bottom > 0.0) {
@@ -189,6 +196,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
         labelOffset: markerRect.bottomCenter -
             const Offset(0.0, _indicatorFontSizePixels + _indicatorLabelPaddingPixels),
         rotation: 0.0,
+        side: _OverflowSide.bottom,
       ));
     }
     return regions;
@@ -251,8 +259,12 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   ///
   /// See example code in [DebugOverflowIndicatorMixin] documentation.
   void paintOverflowIndicator(
-      PaintingContext context, Offset offset, Rect containerRect, Rect childRect,
-      {String overflowHints}) {
+    PaintingContext context,
+    Offset offset,
+    Rect containerRect,
+    Rect childRect, {
+    String overflowHints,
+  }) {
     final RelativeRect overflow = new RelativeRect.fromRect(containerRect, childRect);
 
     if (overflow.left <= 0.0 &&
@@ -266,20 +278,22 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
     for (_OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
 
-      _indicatorLabel.text = new TextSpan(
-        text: region.label,
-        style: _indicatorTextStyle,
-      );
-      _indicatorLabel.layout();
+      if (_indicatorLabel[region.side.index].text?.text != region.label) {
+        _indicatorLabel[region.side.index].text = new TextSpan(
+          text: region.label,
+          style: _indicatorTextStyle,
+        );
+        _indicatorLabel[region.side.index].layout();
+      }
 
       final Offset labelOffset = region.labelOffset + offset;
-      final Offset centerOffset = new Offset(-_indicatorLabel.width / 2.0, 0.0);
-      final Rect textBackgroundRect = centerOffset & _indicatorLabel.size;
+      final Offset centerOffset = new Offset(-_indicatorLabel[region.side.index].width / 2.0, 0.0);
+      final Rect textBackgroundRect = centerOffset & _indicatorLabel[region.side.index].size;
       context.canvas.save();
       context.canvas.translate(labelOffset.dx, labelOffset.dy);
       context.canvas.rotate(region.rotation);
       context.canvas.drawRect(textBackgroundRect, _labelBackgroundPaint);
-      _indicatorLabel.paint(context.canvas, centerOffset);
+      _indicatorLabel[region.side.index].paint(context.canvas, centerOffset);
       context.canvas.restore();
     }
 
@@ -292,7 +306,7 @@ abstract class DebugOverflowIndicatorMixin extends RenderObject {
   @override
   void reassemble() {
     super.reassemble();
-    // Each time we reassemble, we want to see the next overflow debug message.
+    // Users expect error messages to be shown again after hot reload.
     assert(() {
       _overflowReportNeeded = true;
       return true;
