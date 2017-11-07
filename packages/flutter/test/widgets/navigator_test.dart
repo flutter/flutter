@@ -91,6 +91,9 @@ class TestObserver extends NavigatorObserver {
   OnObservation onPushed;
   OnObservation onPopped;
   OnObservation onRemoved;
+  OnObservation onWillPushed;
+  OnObservation onWillPopped;
+  OnObservation onWillRemoved;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
@@ -110,6 +113,26 @@ class TestObserver extends NavigatorObserver {
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
     if (onRemoved != null)
       onRemoved(route, previousRoute);
+  }
+
+  @override
+  void willPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onWillPushed != null) {
+      onWillPushed(route, previousRoute);
+    }
+  }
+
+  @override
+  void willPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onWillPopped != null) {
+      onWillPopped(route, previousRoute);
+    }
+  }
+
+  @override
+  void willRemove(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (onWillRemoved != null)
+      onWillRemoved(route, previousRoute);
   }
 }
 
@@ -347,6 +370,8 @@ void main() {
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
     bool isPushed = false;
+    bool isWillPushed = false;
+    bool isWillPopped = false;
     bool isPopped = false;
     final TestObserver observer = new TestObserver()
       ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
@@ -354,6 +379,15 @@ void main() {
         expect(route is PageRoute && route.settings.name == '/', isTrue);
         expect(previousRoute, isNull);
         isPushed = true;
+      }
+      ..onWillPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        // Pushes the initial route.
+        expect(route is PageRoute && route.settings.name == '/', isTrue);
+        expect(previousRoute, isNull);
+        isWillPushed = true;
+      }
+      ..onWillPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isWillPopped = true;
       }
       ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
         isPopped = true;
@@ -366,11 +400,22 @@ void main() {
     expect(find.text('/'), findsOneWidget);
     expect(find.text('A'), findsNothing);
     expect(isPushed, isTrue);
+    expect(isWillPushed, isTrue);
+    expect(isWillPopped, isFalse);
     expect(isPopped, isFalse);
 
+    isWillPushed = false;
     isPushed = false;
+    isWillPopped = false;
     isPopped = false;
+    observer.onWillPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(isPushed, isFalse);
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isWillPushed = true;
+    };
     observer.onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(isWillPushed, isTrue);
       expect(route is PageRoute && route.settings.name == '/A', isTrue);
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPushed = true;
@@ -381,12 +426,23 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('/'), findsNothing);
     expect(find.text('A'), findsOneWidget);
+    expect(isWillPushed, isTrue);
     expect(isPushed, isTrue);
+    expect(isWillPopped, isFalse);
     expect(isPopped, isFalse);
 
+    isWillPushed = false;
     isPushed = false;
+    isWillPopped = false;
     isPopped = false;
+    observer.onWillPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(isPopped, isFalse);
+      expect(route is PageRoute && route.settings.name == '/A', isTrue);
+      expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
+      isWillPopped = true;
+    };
     observer.onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+      expect(isWillPopped, isTrue);
       expect(route is PageRoute && route.settings.name == '/A', isTrue);
       expect(previousRoute is PageRoute && previousRoute.settings.name == '/', isTrue);
       isPopped = true;
@@ -397,7 +453,9 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(find.text('/'), findsOneWidget);
     expect(find.text('A'), findsNothing);
+    expect(isWillPushed, isFalse);
     expect(isPushed, isFalse);
+    expect(isWillPopped, isTrue);
     expect(isPopped, isTrue);
   });
 
@@ -406,12 +464,20 @@ void main() {
        '/': (BuildContext context) => new OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => new OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
     };
+    bool isWillPushed = false;
     bool isPushed = false;
+    bool isWillPopped = false;
     bool isPopped = false;
     final TestObserver observer1 = new TestObserver();
     final TestObserver observer2 = new TestObserver()
+      ..onWillPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isWillPushed = true;
+      }
       ..onPushed = (Route<dynamic> route, Route<dynamic> previousRoute) {
         isPushed = true;
+      }
+      ..onWillPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
+        isWillPopped= true;
       }
       ..onPopped = (Route<dynamic> route, Route<dynamic> previousRoute) {
         isPopped = true;
@@ -421,7 +487,9 @@ void main() {
       routes: routes,
       navigatorObservers: <NavigatorObserver>[observer1],
     ));
+    expect(isWillPushed, isFalse);
     expect(isPushed, isFalse);
+    expect(isWillPopped, isFalse);
     expect(isPopped, isFalse);
 
     await tester.pumpWidget(new MaterialApp(
@@ -431,10 +499,14 @@ void main() {
     await tester.tap(find.text('/'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    expect(isWillPushed, isTrue);
     expect(isPushed, isTrue);
+    expect(isWillPopped, isFalse);
     expect(isPopped, isFalse);
 
     isPushed = false;
+    isWillPushed = false;
+    isWillPopped = false;
     isPopped = false;
 
     await tester.pumpWidget(new MaterialApp(
@@ -444,7 +516,9 @@ void main() {
     await tester.tap(find.text('A'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
+    expect(isWillPushed, isFalse);
     expect(isPushed, isFalse);
+    expect(isWillPopped, isFalse);
     expect(isPopped, isFalse);
   });
 

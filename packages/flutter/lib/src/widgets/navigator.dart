@@ -268,6 +268,15 @@ class NavigatorObserver {
   /// The [Navigator] removed `route`.
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
+  /// The [Navigator] will push `route`.
+  void willPush(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] will pop `route`.
+  void willPop(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
+  /// The [Navigator] will remove `route`.
+  void willRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
+
   /// The [Navigator]'s routes are being moved by a user gesture.
   ///
   /// For example, this is called when an iOS back gesture starts, and is used
@@ -545,7 +554,7 @@ class Navigator extends StatefulWidget {
   /// The new route and the previous route (if any) are notified (see
   /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didPush]).
+  /// [Navigator.willPush] and [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -687,7 +696,7 @@ class Navigator extends StatefulWidget {
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
   /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [NavigatorObserver.didRemove].
+  /// [Navigator.willRemove] and [NavigatorObserver.didRemove].
   ///
   /// The routes before and after the removed route, if any, are notified with
   /// [Route.didChangeNext] and [Route.didChangePrevious].
@@ -906,7 +915,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The new route and the previous route (if any) are notified (see
   /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
-  /// [NavigatorObserver.didPush]).
+  /// [Navigator.willPush] and [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -921,6 +930,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     setState(() {
       final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
       route._navigator = this;
+      for (NavigatorObserver observer in widget.observers)
+        observer.willPush(route, oldRoute);
       route.install(_currentOverlayEntry);
       _history.add(route);
       route.didPush();
@@ -998,6 +1009,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(index >= 0);
       assert(_history.indexOf(oldRoute) == index);
       newRoute._navigator = this;
+      for (NavigatorObserver observer in widget.observers)
+        observer.willPush(newRoute, oldRoute);
       newRoute.install(_currentOverlayEntry);
       _history[index] = newRoute;
       newRoute.didPush().whenCompleteOrCancel(() {
@@ -1100,6 +1113,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     setState(() {
       final Route<dynamic> oldRoute = _history.isNotEmpty ? _history.last : null;
       newRoute._navigator = this;
+      for (NavigatorObserver observer in widget.observers)
+        observer.willPush(newRoute, oldRoute);
       newRoute.install(_currentOverlayEntry);
       _history.add(newRoute);
       newRoute.didPush().whenCompleteOrCancel(() {
@@ -1167,8 +1182,9 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// If there are any routes left on the history, the top remaining route is
   /// notified (see [Route.didPopNext]), and the method returns true. In that
   /// case, if the [Navigator] has any [Navigator.observers], they will be notified
-  /// as well (see [NavigatorObserver.didPop]). Otherwise, if the popped route
-  /// was the last route, the method returns false.
+  /// as well (see [Navigator.willPop] and [NavigatorObserver.didPop]).
+  /// Otherwise, if the popped route was the last route, the method returns
+  /// false.
   ///
   /// Ongoing gestures within the current route are canceled when a route is
   /// popped.
@@ -1183,6 +1199,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(debugPredictedWouldPop);
       if (_history.length > 1) {
         setState(() {
+          for (NavigatorObserver observer in widget.observers)
+            observer.willPop(_history.last, _history[_history.length - 2]);
           // We use setState to guarantee that we'll rebuild, since the routes
           // can't do that for themselves, even if they have changed their own
           // state (e.g. ModalScope.isCurrent).
@@ -1213,7 +1231,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
   /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [NavigatorObserver.didRemove].
+  /// [Navigator.willRemove] and [NavigatorObserver.didRemove].
   ///
   /// This method is used to dismiss dropdown menus that are up when the screen's
   /// orientation changes.
@@ -1227,6 +1245,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     final Route<dynamic> previousRoute = index > 0 ? _history[index - 1] : null;
     final Route<dynamic> nextRoute = (index + 1 < _history.length) ? _history[index + 1] : null;
     setState(() {
+      for (NavigatorObserver observer in widget.observers)
+        observer.willRemove(route, previousRoute);
       _history.removeAt(index);
       previousRoute?.didChangeNext(nextRoute);
       nextRoute?.didChangePrevious(previousRoute);
