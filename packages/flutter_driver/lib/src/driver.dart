@@ -418,7 +418,10 @@ class FlutterDriver {
 
   /// Sends a string and returns a string.
   ///
-  /// The application can respond to this by providing a handler to [enableFlutterDriverExtension].
+  /// This enables generic communication between the driver and the application.
+  /// It's expected that the application has registered a [DataHandler]
+  /// callback in [enableFlutterDriverExtension] that can successfully handle
+  /// these requests.
   Future<String> requestData(String message, { Duration timeout }) async {
     return RequestDataResult.fromJson(await _sendCommand(new RequestData(message, timeout: timeout))).message;
   }
