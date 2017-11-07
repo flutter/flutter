@@ -1618,13 +1618,15 @@ class RenderTransform extends RenderProxyBox {
   RenderTransform({
     @required Matrix4 transform,
     Offset origin,
-    Alignment alignment,
+    AlignmentGeometry alignment,
+    TextDirection textDirection,
     this.transformHitTests: true,
     RenderBox child
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
+    this.textDirection = textDirection;
     this.origin = origin;
   }
 
@@ -1646,13 +1648,32 @@ class RenderTransform extends RenderProxyBox {
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
-  Alignment get alignment => _alignment;
-  Alignment _alignment;
-  set alignment(Alignment value) {
-    assert(value == null || (value.x != null && value.y != null));
+  ///
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
+  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// whose [Alignment.x] value is `1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     if (_alignment == value)
       return;
     _alignment = value;
+    markNeedsPaint();
+  }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     markNeedsPaint();
   }
 
@@ -1713,18 +1734,19 @@ class RenderTransform extends RenderProxyBox {
   }
 
   Matrix4 get _effectiveTransform {
-    if (_origin == null && _alignment == null)
+    final Alignment resolvedAlignment = alignment?.resolve(textDirection);
+    if (_origin == null && resolvedAlignment == null)
       return _transform;
     final Matrix4 result = new Matrix4.identity();
     if (_origin != null)
       result.translate(_origin.dx, _origin.dy);
     Offset translation;
-    if (_alignment != null) {
-      translation = _alignment.alongSize(size);
+    if (resolvedAlignment != null) {
+      translation = resolvedAlignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
     result.multiply(_transform);
-    if (_alignment != null)
+    if (resolvedAlignment != null)
       result.translate(-translation.dx, -translation.dy);
     if (_origin != null)
       result.translate(-_origin.dx, -_origin.dy);
@@ -1770,6 +1792,7 @@ class RenderTransform extends RenderProxyBox {
     description.add(new TransformProperty('transform matrix', _transform));
     description.add(new DiagnosticsProperty<Offset>('origin', origin));
     description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1822,7 +1845,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then
+  /// If this is set to an [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -1951,7 +1974,7 @@ class RenderFittedBox extends RenderProxyBox {
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// The translation is expressed as an [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///
