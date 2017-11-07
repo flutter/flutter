@@ -5,6 +5,8 @@
 import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
+import 'message_codecs_utils.dart';
+
 void main() {
   test('System sound control test', () async {
     final List<MethodCall> log = <MethodCall>[];
@@ -15,6 +17,7 @@ void main() {
 
     await SystemSound.play(SystemSoundType.click);
 
-    expect(log, equals(<MethodCall>[const MethodCall('SystemSound.play', 'SystemSoundType.click')]));
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall('SystemSound.play', arguments: 'SystemSoundType.click'));
   });
 }

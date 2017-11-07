@@ -817,40 +817,22 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Align items along the main axis.
+    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    double actualSize;
     double actualSizeDelta;
-    double preferredSize;
-    if (canFlex) {
-      final bool isMainAxisSizeMax = mainAxisSize == MainAxisSize.max;
-      preferredSize = isMainAxisSizeMax ? maxMainSize : allocatedSize;
-      switch (_direction) {
-        case Axis.horizontal:
-          size = constraints.constrain(new Size(preferredSize, crossSize));
-          actualSizeDelta = size.width - allocatedSize;
-          crossSize = size.height;
-          assert(isMainAxisSizeMax ? size.width == maxMainSize : size.width >= constraints.minWidth);
-          break;
-        case Axis.vertical:
-          size = constraints.constrain(new Size(crossSize, preferredSize));
-          actualSizeDelta = size.height - allocatedSize;
-          crossSize = size.width;
-          assert(isMainAxisSizeMax ? size.height == maxMainSize : size.height >= constraints.minHeight);
-          break;
-      }
-    } else {
-      switch (_direction) {
-        case Axis.horizontal:
-          size = constraints.constrain(new Size(allocatedSize, crossSize));
-          preferredSize = size.width;
-          crossSize = size.height;
-          break;
-        case Axis.vertical:
-          size = constraints.constrain(new Size(crossSize, allocatedSize));
-          preferredSize = size.height;
-          crossSize = size.width;
-          break;
-      }
-      actualSizeDelta = preferredSize - allocatedSize;
+    switch (_direction) {
+      case Axis.horizontal:
+        size = constraints.constrain(new Size(idealSize, crossSize));
+        actualSize = size.width;
+        crossSize = size.height;
+        break;
+      case Axis.vertical:
+        size = constraints.constrain(new Size(crossSize, idealSize));
+        actualSize = size.height;
+        crossSize = size.width;
+        break;
     }
+    actualSizeDelta = actualSize - allocatedSize;
     _overflow = math.max(0.0, -actualSizeDelta);
 
     final double remainingSpace = math.max(0.0, actualSizeDelta);
@@ -889,7 +871,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Position elements
-    double childMainPosition = flipMainAxis ? preferredSize - leadingSpace : leadingSpace;
+    double childMainPosition = flipMainAxis ? actualSize - leadingSpace : leadingSpace;
     child = firstChild;
     while (child != null) {
       final FlexParentData childParentData = child.parentData;
