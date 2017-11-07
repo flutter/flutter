@@ -17,9 +17,8 @@ Flags get flags => context?.getVariable(Flags) ?? const _EmptyFlags();
 /// the Flutter tool (immediately after the arguments have been parsed in
 /// [FlutterCommandRunner]) and is available via the [flags] global property.
 class Flags {
-  Flags(this._globalResults) {
-    assert(_globalResults != null);
-  }
+  Flags(this._globalResults)
+    : assert(_globalResults != null);
 
   final ArgResults _globalResults;
 

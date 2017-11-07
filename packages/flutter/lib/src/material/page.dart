@@ -71,6 +71,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     bool fullscreenDialog: false,
   }) : assert(builder != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
     assert(opaque);
   }
 
