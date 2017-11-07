@@ -39,6 +39,7 @@ class ExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.children: const <Widget>[],
     this.trailing,
+    this.isExpanded,
   }) : super(key: key);
 
   /// A widget to display before the title.
@@ -68,6 +69,9 @@ class ExpansionTile extends StatefulWidget {
   
   /// A widget to display instead of a rotating arrow icon.
   final Widget trailing;
+  
+  /// Describes if the tile should be initially expanded
+  final bool isExpanded;
 
   @override
   _ExpansionTileState createState() => new _ExpansionTileState();
@@ -97,7 +101,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
     _backgroundColor = new ColorTween();
 
-    _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
+    _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.isExpanded ?? false;
     if (_isExpanded)
       _controller.value = 1.0;
   }
