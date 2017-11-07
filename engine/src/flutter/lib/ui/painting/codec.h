@@ -5,6 +5,7 @@
 #ifndef FLUTTER_LIB_UI_PAINTING_CODEC_H_
 #define FLUTTER_LIB_UI_PAINTING_CODEC_H_
 
+#include "flutter/lib/ui/painting/frame_info.h"
 #include "lib/tonic/dart_wrappable.h"
 #include "third_party/skia/include/codec/SkCodec.h"
 #include "third_party/skia/include/core/SkBitmap.h"
@@ -40,8 +41,6 @@ class MultiFrameCodec : public Codec {
   int repetitionCount() { return repetitionCount_; }
   Dart_Handle getNextFrame(Dart_Handle args);
 
-  static void RegisterNatives(tonic::DartLibraryNatives* natives);
-
  private:
   MultiFrameCodec(std::unique_ptr<SkCodec> codec);
   ~MultiFrameCodec() {}
@@ -61,6 +60,23 @@ class MultiFrameCodec : public Codec {
   FRIEND_MAKE_REF_COUNTED(MultiFrameCodec);
   FRIEND_REF_COUNTED_THREAD_SAFE(MultiFrameCodec);
 };
+
+class SingleFrameCodec : public Codec {
+ public:
+  int frameCount() { return 1; }
+  int repetitionCount() { return 0; }
+  Dart_Handle getNextFrame(Dart_Handle args);
+
+ private:
+  SingleFrameCodec(fxl::RefPtr<FrameInfo> frame) : frame_(std::move(frame)) {}
+  ~SingleFrameCodec() {}
+
+  fxl::RefPtr<FrameInfo> frame_;
+
+  FRIEND_MAKE_REF_COUNTED(SingleFrameCodec);
+  FRIEND_REF_COUNTED_THREAD_SAFE(SingleFrameCodec);
+};
+
 }  // namespace blink
 
 #endif  // FLUTTER_LIB_UI_PAINTING_CODEC_H_
