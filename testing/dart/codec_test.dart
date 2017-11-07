@@ -74,6 +74,28 @@ void main() {
       [200, 640, 479],
     ]));
   });
+
+  test('non animated image', () async {
+    Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
+    Completer<ui.Codec> completer = new Completer<ui.Codec>();
+    expect(ui.instantiateImageCodec(data, completer.complete), null);
+    ui.Codec codec = await completer.future;
+    List<List<int>> decodedFrameInfos = [];
+    for (int i = 0; i < 2; i++) {
+      Completer<ui.FrameInfo> frameCompleter = new Completer<ui.FrameInfo>();
+      codec.getNextFrame(frameCompleter.complete);
+      ui.FrameInfo frameInfo = await frameCompleter.future;
+      decodedFrameInfos.add([
+        frameInfo.durationMillis,
+        frameInfo.image.width,
+        frameInfo.image.height,
+      ]);
+    }
+    expect(decodedFrameInfos, equals([
+      [0, 240, 246],
+      [0, 240, 246],
+    ]));
+  });
 }
 
 /// Returns a File handle to a file in the skia/resources directory.
