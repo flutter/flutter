@@ -24,9 +24,6 @@ import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
-/// Test device created by Flutter when no other device is available.
-const String _kFlutterTestDeviceSuffix = '(Flutter)';
-
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('iOS simulators');
 
