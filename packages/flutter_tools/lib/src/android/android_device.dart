@@ -680,7 +680,7 @@ class _AdbLogReader extends DeviceLogReader {
   static final RegExp _fatalLog = new RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
 
   // 'I/DEBUG(pid): ...'
-  static final RegExp _tombstoneLine = new RegExp(r'^I\/DEBUG\s*\(\s*\d+\):\s(.+)$');
+  static final RegExp _tombstoneLine = new RegExp(r'^[IF]\/DEBUG\s*\(\s*\d+\):\s(.+)$');
 
   // 'I/DEBUG(pid): Tombstone written to: '
   static final RegExp _tombstoneTerminator = new RegExp(r'^Tombstone written to:\s');
