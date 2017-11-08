@@ -56,7 +56,7 @@ WTF_EXPORT void unlockAtomicallyInitializedStaticMutex();
 
 }  // namespace WTF
 
-using WTF::ThreadIdentifier;
 using WTF::currentThread;
+using WTF::ThreadIdentifier;
 
 #endif  // SKY_ENGINE_WTF_THREADING_H_

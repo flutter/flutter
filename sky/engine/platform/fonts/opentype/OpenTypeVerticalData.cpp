@@ -238,7 +238,7 @@ void OpenTypeVerticalData::getVerticalTranslationsForGlyphs(
   bool useVORG = hasVORG();
   size_t countTopSideBearings = m_topSideBearings.size();
   float defaultVertOriginY = std::numeric_limits<float>::quiet_NaN();
-  for (float *end = &(outXYArray[count * 2]); outXYArray != end;
+  for (float* end = &(outXYArray[count * 2]); outXYArray != end;
        ++glyphs, outXYArray += 2) {
     Glyph glyph = *glyphs;
     uint16_t widthFUnit =

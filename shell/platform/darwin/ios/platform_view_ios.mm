@@ -63,7 +63,7 @@ void PlatformViewIOS::SetupAndLoadFromSource(const std::string& assets_directory
                                              const std::string& main,
                                              const std::string& packages) {
   blink::Threads::UI()->PostTask(
-      [ engine = engine().GetWeakPtr(), assets_directory, main, packages ] {
+      [engine = engine().GetWeakPtr(), assets_directory, main, packages] {
         if (engine)
           engine->RunBundleAndSource(assets_directory, main, packages);
       });

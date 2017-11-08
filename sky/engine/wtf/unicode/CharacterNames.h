@@ -93,7 +93,6 @@ const UChar zeroWidthNoBreakSpace = 0xFEFF;
 }  // namespace Unicode
 }  // namespace WTF
 
-using WTF::Unicode::HiraganaLetterSmallA;
 using WTF::Unicode::aegeanWordSeparatorDot;
 using WTF::Unicode::aegeanWordSeparatorLine;
 using WTF::Unicode::blackCircle;
@@ -108,6 +107,7 @@ using WTF::Unicode::ethiopicWordspace;
 using WTF::Unicode::fisheye;
 using WTF::Unicode::hebrewPunctuationGeresh;
 using WTF::Unicode::hebrewPunctuationGershayim;
+using WTF::Unicode::HiraganaLetterSmallA;
 using WTF::Unicode::horizontalEllipsis;
 using WTF::Unicode::hyphen;
 using WTF::Unicode::hyphenMinus;

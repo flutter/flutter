@@ -42,7 +42,7 @@ void PlatformViewMac::SetupAndLoadDart() {
 
   std::string bundle_path = command_line.GetOptionValueWithDefault(FlagForSwitch(Switch::FLX), "");
   if (!bundle_path.empty()) {
-    blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), bundle_path ] {
+    blink::Threads::UI()->PostTask([engine = engine().GetWeakPtr(), bundle_path] {
       if (engine)
         engine->RunBundle(bundle_path);
     });
@@ -54,7 +54,7 @@ void PlatformViewMac::SetupAndLoadDart() {
     std::string main = args[0];
     std::string packages =
         command_line.GetOptionValueWithDefault(FlagForSwitch(Switch::Packages), "");
-    blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), main, packages ] {
+    blink::Threads::UI()->PostTask([engine = engine().GetWeakPtr(), main, packages] {
       if (engine)
         engine->RunBundleAndSource(std::string(), main, packages);
     });
@@ -66,7 +66,7 @@ void PlatformViewMac::SetupAndLoadFromSource(const std::string& assets_directory
                                              const std::string& main,
                                              const std::string& packages) {
   blink::Threads::UI()->PostTask(
-      [ engine = engine().GetWeakPtr(), assets_directory, main, packages ] {
+      [engine = engine().GetWeakPtr(), assets_directory, main, packages] {
         if (engine)
           engine->RunBundleAndSource(assets_directory, main, packages);
       });

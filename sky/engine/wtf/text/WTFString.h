@@ -825,11 +825,6 @@ WTF_EXPORT extern const String& xmlnsWithColon;
 
 WTF_ALLOW_MOVE_AND_INIT_WITH_MEM_FUNCTIONS(String);
 
-using WTF::CString;
-using WTF::KeepTrailingZeros;
-using WTF::StrictUTF8Conversion;
-using WTF::StrictUTF8ConversionReplacingUnpairedSurrogatesWithFFFD;
-using WTF::String;
 using WTF::append;
 using WTF::appendNumber;
 using WTF::charactersAreAllASCII;
@@ -845,13 +840,18 @@ using WTF::charactersToUInt;
 using WTF::charactersToUInt64;
 using WTF::charactersToUInt64Strict;
 using WTF::charactersToUIntStrict;
+using WTF::CString;
 using WTF::emptyString;
 using WTF::equal;
 using WTF::equalIgnoringCase;
 using WTF::find;
 using WTF::isAllSpecialCharacters;
 using WTF::isSpaceOrNewline;
+using WTF::KeepTrailingZeros;
 using WTF::reverseFind;
+using WTF::StrictUTF8Conversion;
+using WTF::StrictUTF8ConversionReplacingUnpairedSurrogatesWithFFFD;
+using WTF::String;
 
 #include "flutter/sky/engine/wtf/text/AtomicString.h"
 #endif  // SKY_ENGINE_WTF_TEXT_WTFSTRING_H_

@@ -184,9 +184,9 @@ inline T* getPtr(const PassOwnPtr<T>& p) {
 
 }  // namespace WTF
 
-using WTF::PassOwnPtr;
 using WTF::adoptArrayPtr;
 using WTF::adoptPtr;
+using WTF::PassOwnPtr;
 using WTF::static_pointer_cast;
 
 #endif  // SKY_ENGINE_WTF_PASSOWNPTR_H_

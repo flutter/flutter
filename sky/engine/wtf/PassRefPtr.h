@@ -224,8 +224,8 @@ inline T* getPtr(const PassRefPtr<T>& p) {
 
 }  // namespace WTF
 
-using WTF::PassRefPtr;
 using WTF::adoptRef;
+using WTF::PassRefPtr;
 using WTF::static_pointer_cast;
 
 #endif  // SKY_ENGINE_WTF_PASSREFPTR_H_
