@@ -1,13 +1,11 @@
-*.iml
 .gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
+local.properties
 /build
 /captures
 GeneratedPluginRegistrant.java
 
+# Gradle wrapper files should normally be checked into source control.
+# See ../../README.md
 gradle-wrapper.jar
 /gradlew
 /gradlew.bat
