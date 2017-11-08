@@ -1,4 +1,5 @@
 .idea
+*.iml
 .pub/
 pubspec.lock
 doc/api/

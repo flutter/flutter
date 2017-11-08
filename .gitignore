@@ -1,4 +1,31 @@
-.idea
+# IDEA/Android Studio project
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# Visual Studio project
+.vscode/
+
+# Atom project
+.atom/
+
+# Pub and build outputs
+.buildlog/
+.packages
+.pub/
+build/
+packages/
+.flutter-plugins
+pubspec.lock
+unlinked.ds
+unlinked_spec.ds
+
+# Test coverage output
+coverage/
+
 .history
+
+# macOS cached data
 .DS_Store
 *.iml
