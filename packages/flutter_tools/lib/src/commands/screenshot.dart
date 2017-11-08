@@ -80,7 +80,7 @@ class ScreenshotCommand extends FlutterCommand {
   Future<Null> runSkia(File outputFile) async {
     final Uri observatoryUri = new Uri(scheme: 'http', host: '127.0.0.1',
         port: int.parse(argResults[_kSkia]));
-    final VMService vmService = VMService.connect(observatoryUri);
+    final VMService vmService = await VMService.connect(observatoryUri);
     final Map<String, dynamic> skp = await vmService.vm.invokeRpcRaw('_flutter.screenshotSkp');
 
     outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
