@@ -114,7 +114,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a6e52dbb776c45cc8c57d7143b8eb8b2e762fdfb',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'a457e1429ed9e4a1869c8192b846bebb481f333a',
 
    # Fuchsia compatibility
    #
@@ -123,7 +123,7 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/garnet':
-   Var('fuchsia_git') + '/garnet' + '@' + '73eeb0583e7967016ad7386a90353bf6937488b9',
+   Var('fuchsia_git') + '/garnet' + '@' + 'b3ba6b6d6ab8ef658278cc43c9f839a8a8d1718e',
 
   'src/topaz':
    Var('fuchsia_git') + '/topaz' + '@' + 'da66b94839f788a0bffc34fd9bdfef3360af8c18',

@@ -2145,9 +2145,11 @@ class RepositoryGarnetDirectory extends RepositoryDirectory {
   bool shouldRecurse(fs.IoNode entry) {
     return entry.name != 'bin'
         && entry.name != 'docs'
+        && entry.name != 'drivers'
         && entry.name != 'examples'
         && entry.name != 'go'
         && entry.name != 'lib'
+        && entry.name != 'packages'
         && super.shouldRecurse(entry);
   }
 
@@ -2163,6 +2165,14 @@ class RepositoryGarnetPublicDirectory extends RepositoryDirectory {
   RepositoryGarnetPublicDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
   @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'dart-pkg'
+        && entry.name != 'build'
+        && entry.name != 'rust'
+        && super.shouldRecurse(entry);
+  }
+
+  @override
   RepositoryDirectory createSubdirectory(fs.Directory entry) {
     if (entry.name == 'lib')
       return new RepositoryGarnetLibDirectory(this, entry);
@@ -2175,7 +2185,9 @@ class RepositoryGarnetLibDirectory extends RepositoryDirectory {
 
   @override
   bool shouldRecurse(fs.IoNode entry) {
-    return entry.name != 'url'
+    return entry.name != 'app'
+        && entry.name != 'escher'
+        && entry.name != 'url'
         && super.shouldRecurse(entry);
   }
 
