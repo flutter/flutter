@@ -1,4 +1,4 @@
-Signature: 35d3f6005ca741ef2a4dcc8260335281
+Signature: 8b6f51141e2c8d72f00e4008145a5e90
 
 UNUSED LICENSES:
 
@@ -8,10 +8,493 @@ USED LICENSES:
 
 ====================================================================================================
 LIBRARY: topaz
+ORIGIN: ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../topaz/public/lib/fidl/dart/lib/bindings.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/message.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2014 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: topaz
 ORIGIN: ../../../garnet/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/main.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/base_page_watcher.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/chat_content_provider_impl.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/chat_message_transporter.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/conversation_list_watcher.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/conversation_watcher.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/firebase_chat_message_transporter.dart
+FILE: ../../../topaz/app/chat/agents/content_provider/lib/src/proposer.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/fixtures.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/models.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/fixtures/fixtures.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models/command_message.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models/image_url_message.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models/message.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models/section.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/models/text_message.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/modular/conversation_module_model.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/modular/conversation_screen.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/modular/embedder.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/chat_bubble.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/chat_conversation.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/chat_section.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/message_input.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/widgets.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/fixtures.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/models.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/fixtures/fixtures.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/models.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/models/conversation.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/modular/conversation_list_module_model.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/modular/conversation_list_screen.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/chat_conversation_list.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/chat_conversation_list_item.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/chat_group_avatar.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/constants.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/new_chat_conversation_form.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/widgets.dart
+FILE: ../../../topaz/app/chat/services/chat_content_provider.fidl
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/main.dart
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/src/modular/contacts_content_provider_impl.dart
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/src/modular/contacts_watcher.dart
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/src/store/contacts_store.dart
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/src/store/prefix_tree.dart
+FILE: ../../../topaz/app/contacts/agents/content_provider/lib/store.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/main.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/models.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/src/models/contact_list_item.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/src/models/contact_list_model.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/src/modular/contact_list_module_model.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/src/widgets/contact_list.dart
+FILE: ../../../topaz/app/contacts/modules/contact_list/lib/src/widgets/list_item.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/fixtures.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/models.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/models.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/models/contact.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/models/entry_types.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/models/fixtures.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/screens/contact_card_screen.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/screens/contact_list_screen.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/address_details_group.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_card.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_details_group.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_details_row.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_header.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_list_item.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/email_details_group.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/widgets.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/main.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/modular/contacts_picker_module_model.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/stores/contact_item_store.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/stores/contacts_picker_store.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/stores/link_data.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/widgets/contact_item.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/src/widgets/contacts_picker.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/stores.dart
+FILE: ../../../topaz/app/contacts/modules/contacts_picker/lib/widgets.dart
+FILE: ../../../topaz/app/contacts/services/contacts_content_provider.fidl
+FILE: ../../../topaz/app/dashboard/lib/build_status_model.dart
+FILE: ../../../topaz/app/dashboard/lib/build_status_widget.dart
+FILE: ../../../topaz/app/dashboard/lib/buildbucket/build_bucket_service.dart
+FILE: ../../../topaz/app/dashboard/lib/chatter.dart
+FILE: ../../../topaz/app/dashboard/lib/dashboard_app.dart
+FILE: ../../../topaz/app/dashboard/lib/dashboard_module_model.dart
+FILE: ../../../topaz/app/dashboard/lib/enums.dart
+FILE: ../../../topaz/app/dashboard/lib/info_text.dart
+FILE: ../../../topaz/app/dashboard/lib/main.dart
+FILE: ../../../topaz/app/dashboard/lib/service/build_info.dart
+FILE: ../../../topaz/app/dashboard/lib/service/build_service.dart
+FILE: ../../../topaz/app/documents/agents/content_provider/lib/main.dart
+FILE: ../../../topaz/app/documents/agents/content_provider/lib/src/documents_content_provider_impl.dart
+FILE: ../../../topaz/app/documents/modules/browser/lib/main.dart
+FILE: ../../../topaz/app/documents/modules/browser/lib/src/modular/browser_module_model.dart
+FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/browser.dart
+FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/browser_app.dart
+FILE: ../../../topaz/app/documents/modules/browser/lib/src/widgets/thumbnail.dart
+FILE: ../../../topaz/app/documents/services/document.fidl
+FILE: ../../../topaz/app/latin-ime/hard_kb_ime/main.dart
+FILE: ../../../topaz/app/latin-ime/main.dart
+FILE: ../../../topaz/app/ledger/ledger_dashboard/main.dart
+FILE: ../../../topaz/app/ledger/ledger_dashboard/src/data_handler.dart
+FILE: ../../../topaz/app/ledger/ledger_dashboard/src/ledger_debug_data_handler.dart
+FILE: ../../../topaz/app/ledger/ledger_dashboard/webroot/index.html
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/main.dart
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/src/action_log.dart
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/src/context.dart
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/src/data_handler.dart
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/src/proposal_subscribers.dart
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/index.html
+FILE: ../../../topaz/app/maxwell/agents/module_suggester_dart/main.dart
+FILE: ../../../topaz/app/maxwell/agents/usage_log/main.dart
+FILE: ../../../topaz/app/maxwell/modules/resolution_failed/lib/src/module_data_module_model.dart
+FILE: ../../../topaz/app/moterm/history.cc
+FILE: ../../../topaz/app/moterm/history.h
+FILE: ../../../topaz/app/moterm/ledger_helpers.cc
+FILE: ../../../topaz/app/moterm/ledger_helpers.h
+FILE: ../../../topaz/app/music/agents/concert_agent/lib/main.dart
+FILE: ../../../topaz/app/music/agents/last_fm_agent/lib/main.dart
+FILE: ../../../topaz/app/music/agents/music_artist_agent/lib/main.dart
+FILE: ../../../topaz/app/music/agents/music_playback_agent/lib/main.dart
+FILE: ../../../topaz/app/music/agents/music_playback_agent/lib/src/command_handler.dart
+FILE: ../../../topaz/app/music/agents/music_playback_agent/lib/src/player_impl.dart
+FILE: ../../../topaz/app/music/modules/concert_event/lib/main.dart
+FILE: ../../../topaz/app/music/modules/concert_event/lib/modular/event_module_model.dart
+FILE: ../../../topaz/app/music/modules/concert_event_list/lib/main.dart
+FILE: ../../../topaz/app/music/modules/concert_event_list/lib/modular/event_list_module_model.dart
+FILE: ../../../topaz/app/music/modules/concert_event_list/lib/modular/event_selector.dart
+FILE: ../../../topaz/app/music/modules/concert_event_page/lib/main.dart
+FILE: ../../../topaz/app/music/modules/concert_event_page/lib/modular/event_page_module_model.dart
+FILE: ../../../topaz/app/music/modules/last_fm_artist_bio/lib/main.dart
+FILE: ../../../topaz/app/music/modules/last_fm_artist_bio/lib/modular/artist_bio_module_model.dart
+FILE: ../../../topaz/app/music/modules/last_fm_artist_bio/lib/modular/artist_bio_module_screen.dart
+FILE: ../../../topaz/app/music/modules/music_album/lib/main.dart
+FILE: ../../../topaz/app/music/modules/music_album/lib/modular/album_module_model.dart
+FILE: ../../../topaz/app/music/modules/music_artist/lib/main.dart
+FILE: ../../../topaz/app/music/modules/music_artist/lib/modular/artist_module_model.dart
+FILE: ../../../topaz/app/music/modules/music_artist/lib/modular/artist_module_screen.dart
+FILE: ../../../topaz/app/music/modules/music_playback/lib/main.dart
+FILE: ../../../topaz/app/music/modules/music_playback/lib/modular/playback_module_model.dart
+FILE: ../../../topaz/app/music/modules/music_playback/lib/modular/player_status_listener.dart
+FILE: ../../../topaz/app/music/packages/concert_api/lib/api.dart
+FILE: ../../../topaz/app/music/packages/concert_models/lib/concert_models.dart
+FILE: ../../../topaz/app/music/packages/concert_models/lib/src/artist.dart
+FILE: ../../../topaz/app/music/packages/concert_models/lib/src/event.dart
+FILE: ../../../topaz/app/music/packages/concert_models/lib/src/fixtures.dart
+FILE: ../../../topaz/app/music/packages/concert_models/lib/src/venue.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/concert_widgets.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/concert_guide_header.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/event_card.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/event_list.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/event_list_item.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/event_page.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/fallback_image.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/loading_status.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/pageable_event_list.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/text_placeholder.dart
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/src/typedefs.dart
+FILE: ../../../topaz/app/music/packages/last_fm_api/lib/api.dart
+FILE: ../../../topaz/app/music/packages/last_fm_models/lib/last_fm_models.dart
+FILE: ../../../topaz/app/music/packages/last_fm_models/lib/src/artist.dart
+FILE: ../../../topaz/app/music/packages/last_fm_models/lib/src/fixtures.dart
+FILE: ../../../topaz/app/music/packages/last_fm_widgets/lib/last_fm_widgets.dart
+FILE: ../../../topaz/app/music/packages/last_fm_widgets/lib/src/artist_bio.dart
+FILE: ../../../topaz/app/music/packages/last_fm_widgets/lib/src/loading_status.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/music_models.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/src/album.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/src/artist.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/src/fixtures.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/src/music_image.dart
+FILE: ../../../topaz/app/music/packages/music_models/lib/src/track.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/album_screen.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/artist_grid.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/artist_screen.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/edge_to_edge_player.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/follow_button.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/hero_banner_scaffold.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/inline_album.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/loading_status.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/playback_slider.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/player.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/track_art.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/track_list_item.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/typedefs.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/utils.dart
+FILE: ../../../topaz/app/music/services/player/player.fidl
+FILE: ../../../topaz/app/music/services/player/repeat_mode.fidl
+FILE: ../../../topaz/app/music/services/player/status.fidl
+FILE: ../../../topaz/app/music/services/player/track.fidl
+FILE: ../../../topaz/app/todo/agents/content_provider/src/main.rs
+FILE: ../../../topaz/app/todo/modules/story/lib/main.dart
+FILE: ../../../topaz/app/todo/modules/story/lib/src/module_model.dart
+FILE: ../../../topaz/app/todo/modules/story/lib/src/screen.dart
+FILE: ../../../topaz/app/todo/services/todo.fidl
+FILE: ../../../topaz/app/video/modules/video/lib/main.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/modular/player_model.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/modular/video_module_model.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/asset.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/constants.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/device_chooser.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/device_target_icon.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/loading.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/play_controls.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/player.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/remote_control.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/screen.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/scrubber.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/standby.dart
+FILE: ../../../topaz/app/video/modules/video/lib/src/widgets/video_app.dart
+FILE: ../../../topaz/app/xi/modules/xi-core/src/main.rs
+FILE: ../../../topaz/app/xi/modules/xi_app/lib/main.dart
+FILE: ../../../topaz/app/xi/modules/xi_app/lib/src/xi_fuchsia_client.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/src/editor.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/src/home_page.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/src/line_cache.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/src/text_line.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/src/xi_app.dart
+FILE: ../../../topaz/app/xi/packages/widgets/lib/widgets.dart
+FILE: ../../../topaz/app/xi/packages/xi_client/lib/client.dart
+FILE: ../../../topaz/app/xi/services/xi.fidl
+FILE: ../../../topaz/app/xi/xi_flutter/lib/main.dart
+FILE: ../../../topaz/app/xi/xi_flutter/lib/src/xi_flutter_client.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/main.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/manufacturer_names.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/modular/module_model.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/screen.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/widgets/scan_filter_button.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/widgets/scan_filter_dialog.dart
+FILE: ../../../topaz/examples/bluetooth/ble_scanner/lib/src/widgets/scan_results_widget.dart
+FILE: ../../../topaz/examples/bluetooth/eddystone_advertiser/lib/main.dart
+FILE: ../../../topaz/examples/bluetooth/eddystone_advertiser/lib/src/modular/module_model.dart
+FILE: ../../../topaz/examples/bluetooth/eddystone_advertiser/lib/src/screen.dart
+FILE: ../../../topaz/examples/bluetooth/settings/lib/main.dart
+FILE: ../../../topaz/examples/bluetooth/settings/lib/src/modular/module_model.dart
+FILE: ../../../topaz/examples/bluetooth/settings/lib/src/screen.dart
+FILE: ../../../topaz/examples/eddystone_agent/main.dart
+FILE: ../../../topaz/examples/ledger/todo_list/lib/main.dart
+FILE: ../../../topaz/examples/ledger/todo_list/lib/src/ledger_helpers.dart
+FILE: ../../../topaz/examples/ledger/todo_list/lib/src/modular/todo_list_module_model.dart
+FILE: ../../../topaz/examples/ledger/todo_list/lib/src/modular/todo_list_module_screen.dart
+FILE: ../../../topaz/examples/ledger/todo_list/lib/src/widgets/new_item_input.dart
+FILE: ../../../topaz/examples/media/media_player_flutter/lib/asset.dart
+FILE: ../../../topaz/examples/media/media_player_flutter/lib/config.dart
+FILE: ../../../topaz/examples/media/media_player_flutter/lib/main.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/child/lib/home.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/child/lib/main.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/child/lib/module_model.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_embed/lib/home.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_embed/lib/main.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_embed/lib/module_model.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_story_shell/lib/home.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_story_shell/lib/main.dart
+FILE: ../../../topaz/examples/modular/counter_flutter/parent_story_shell/lib/module_model.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/dummy_photo_storage.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/home.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/main.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/photo.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/photo_storage.dart
+FILE: ../../../topaz/examples/modular/photos_flutter/lib/photo_view.dart
+FILE: ../../../topaz/examples/modular/story_shell_flutter/lib/main.dart
+FILE: ../../../topaz/examples/modular/suggest_shell/controller/main.cc
+FILE: ../../../topaz/examples/modular/suggest_shell/view/lib/main.dart
+FILE: ../../../topaz/examples/modular/todo_story/lib/data.dart
+FILE: ../../../topaz/examples/modular/todo_story/lib/generator.dart
+FILE: ../../../topaz/examples/modular/todo_story/lib/main.dart
+FILE: ../../../topaz/examples/modular/todo_story/lib/view.dart
+FILE: ../../../topaz/examples/oauth_token_manager/credentials.fbs
+FILE: ../../../topaz/examples/oauth_token_manager/oauth_token_manager.cc
+FILE: ../../../topaz/examples/ui/sketchy_flutter/lib/main.dart
+FILE: ../../../topaz/examples/ui/sketchy_flutter/lib/scenic.dart
+FILE: ../../../topaz/examples/ui/sketchy_flutter/lib/scenic_widget.dart
+FILE: ../../../topaz/examples/ui/sketchy_flutter/lib/src/resources.dart
+FILE: ../../../topaz/examples/ui/sketchy_flutter/lib/src/session.dart
 FILE: ../../../topaz/lib/tonic/dart_list.cc
 FILE: ../../../topaz/lib/tonic/dart_list.h
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/constants.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/handle.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/handle_wrapper.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/system.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/vmo.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/handle.cc
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/handle.h
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/system.cc
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/system.h
+FILE: ../../../topaz/public/dart/fuchsia/lib/module.dart
+FILE: ../../../topaz/public/dart/fuchsia/lib/peridot.dart
+FILE: ../../../topaz/public/dart/fuchsia/lib/src/peridot/link_watcher_impl.dart
+FILE: ../../../topaz/public/dart/fuchsia/lib/src/peridot/module_impl.dart
+FILE: ../../../topaz/public/dart/fuchsia/lib/src/simple_module.dart
+FILE: ../../../topaz/public/dart/logging/lib/logging.dart
+FILE: ../../../topaz/public/dart/modular/lib/ledger.dart
+FILE: ../../../topaz/public/dart/modular/lib/modular.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/ledger/ledger_utils.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/agent_impl.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/device_shell_impl.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/link_watcher_impl.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/message_receiver_impl.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/module_impl.dart
+FILE: ../../../topaz/public/dart/modular/lib/src/modular/user_shell_impl.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/application/application_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/model/embedder_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/model/idle_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/model/spring_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/model/ticking_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/device_shell_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/device_shell_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/module_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/module_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/user_shell_model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/modular/user_shell_widget.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/simulated_positioned.dart
+FILE: ../../../topaz/public/lib/context/dart/context_listener_impl.dart
+FILE: ../../../topaz/public/lib/decomposition/dart/decomposition.dart
+FILE: ../../../topaz/public/lib/media/dart/audio_player_controller.dart
+FILE: ../../../topaz/public/lib/media/dart/audio_policy.dart
+FILE: ../../../topaz/public/lib/media/dart/timeline.dart
+FILE: ../../../topaz/public/lib/media/flutter/media_player.dart
+FILE: ../../../topaz/public/lib/media/flutter/media_player_controller.dart
+FILE: ../../../topaz/public/lib/media/flutter/progress_notifier.dart
+FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/src/natives.cc
+FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/src/natives.h
+FILE: ../../../topaz/runtime/dart_runner/bundler/main.cc
+FILE: ../../../topaz/runtime/dart_runner/integration/main.dart
+FILE: ../../../topaz/runtime/web_runner/lib/dart/web_view.dart
+FILE: ../../../topaz/runtime/web_runner/services/web_view.fidl
+FILE: ../../../topaz/runtime/web_view/schema_org_context.h
+FILE: ../../../topaz/runtime/web_view/web_view_impl.cpp
+FILE: ../../../topaz/runtime/web_view/web_view_impl.h
+FILE: ../../../topaz/runtime/web_view/web_view_provider.cpp
+FILE: ../../../topaz/runtime/web_view/web_view_provider.h
+FILE: ../../../topaz/shell/agents/home_work_agent/lib/home_work_proposer.dart
+FILE: ../../../topaz/shell/agents/home_work_agent/lib/main.dart
+FILE: ../../../topaz/shell/armadillo/lib/candidate_info.dart
+FILE: ../../../topaz/shell/armadillo/lib/cluster_layout.dart
+FILE: ../../../topaz/shell/armadillo/lib/conductor_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/debug_enabler.dart
+FILE: ../../../topaz/shell/armadillo/lib/debug_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/default_scroll_configuration.dart
+FILE: ../../../topaz/shell/armadillo/lib/display_mode.dart
+FILE: ../../../topaz/shell/armadillo/lib/drag_direction.dart
+FILE: ../../../topaz/shell/armadillo/lib/edge_scroll_drag_target.dart
+FILE: ../../../topaz/shell/armadillo/lib/elevations.dart
+FILE: ../../../topaz/shell/armadillo/lib/idle_mode_builder.dart
+FILE: ../../../topaz/shell/armadillo/lib/interruption_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/kenichi_edge_scrolling.dart
+FILE: ../../../topaz/shell/armadillo/lib/line_segment.dart
+FILE: ../../../topaz/shell/armadillo/lib/long_press_gesture_detector.dart
+FILE: ../../../topaz/shell/armadillo/lib/next_builder.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/context_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/important_info.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/minimized_now_bar.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/now_builder.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/now_minimization_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/now_user_and_maximized_info.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/now_user_image.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/power_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/quick_settings_progress_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/timezone_picker.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/user_context_text.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/volume_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_drag_target.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_drag_target_generator.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_event_handler.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_resizing_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_resizing_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/peek_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/recents_builder.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_drag_data.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_drag_state_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_entrance_transition_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_drag_transition_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_rearrangement_scrim_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/suggestion_layout.dart
+FILE: ../../../topaz/shell/armadillo/lib/target_influence_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/target_overlay.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/active_agents_manager.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/armadillo_user_shell_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/audio_policy_volume_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/context_provider_context_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/focus_request_watcher_impl.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/initial_focus_setter.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/power_manager_power_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/story_importance_watcher_impl.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/user_logoutter.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/wallpaper_chooser.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/launcher.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/launcher_toggle.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/main.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/root.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/status_panel.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/status_tray.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/widgets/animated_content_builder.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/widgets/system_overlay.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/widgets/toggle.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/window/model.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/window/window.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/window_playground.dart
+FILE: ../../../topaz/shell/infinite_scroller/lib/main.dart
+FILE: ../../../topaz/shell/infra/config/cq.cfg
+FILE: ../../../topaz/shell/kernel_panic/lib/kernel_panic.dart
+FILE: ../../../topaz/shell/kernel_panic/lib/main.dart
+FILE: ../../../topaz/shell/kernel_panic/lib/qr_code_widget.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/examples/manual/lib/main.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/child_view.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/copresent_layout.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/flux.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/isometric_widget.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/layout_model.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/logo.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/main.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/model.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/overview.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/sim.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/sized_surface.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/surface_details.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/surface_director.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/surface_form.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/surface_frame.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/surface_stage.dart
+FILE: ../../../topaz/shell/mondrian_story_shell/lib/tree.dart
+FILE: ../../../topaz/shell/perspective/lib/main.dart
+FILE: ../../../topaz/shell/spinning_cube/lib/spinning_cube_gem.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/authentication_context_impl.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/authentication_overlay.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/authentication_overlay_model.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/child_constraints_changer.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/circular_button.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/clock.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/constraints_model.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/debug_text.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/device_extender.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/device_extension_state.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/main.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/memory_indicator.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/netstack_model.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/rounded_corner_decoration.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/soft_keyboard_container_impl.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_list.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_picker_device_shell_model.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_picker_device_shell_screen.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_picker_screen.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_shell_chooser.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/user_watcher_impl.dart
+FILE: ../../../topaz/shell/wifi_settings/lib/main.dart
+FILE: ../../../topaz/shell/wifi_settings/lib/src/fuchsia/access_point.dart
+FILE: ../../../topaz/shell/wifi_settings/lib/src/fuchsia/wifi_settings_module_model.dart
+FILE: ../../../topaz/shell/wifi_settings/lib/src/wlan_info.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2017 The Fuchsia Authors. All rights reserved.
 
@@ -44,8 +527,185 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../lib/ftl/LICENSE
+ORIGIN: ../../../third_party/icu/scripts/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../topaz/shell/widgets/lib/icon_slider.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2015 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: topaz
+ORIGIN: ../../../topaz/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../topaz/app/chat/modules/conversation/lib/main.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets.dart
+FILE: ../../../topaz/app/chat/modules/conversation/lib/src/widgets/time_util.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/main.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/models/user.dart
+FILE: ../../../topaz/app/chat/modules/conversation_list/lib/src/widgets/time_util.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/android/AndroidManifest.xml
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/main.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/modular_main.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/app.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/contact_api.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/screens.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/contact_details.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/phone_details_group.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/theme.dart
+FILE: ../../../topaz/app/contacts/modules/contacts/lib/src/widgets/type_defs.dart
+FILE: ../../../topaz/app/dashboard/android/app/src/main/AndroidManifest.xml
+FILE: ../../../topaz/app/dashboard/android/app/src/main/java/com/yourcompany/dashboard/MainActivity.java
+FILE: ../../../topaz/app/dashboard/android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+FILE: ../../../topaz/app/dashboard/android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+FILE: ../../../topaz/app/dashboard/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+FILE: ../../../topaz/app/dashboard/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+FILE: ../../../topaz/app/dashboard/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+FILE: ../../../topaz/app/dashboard/android/gradle.properties
+FILE: ../../../topaz/app/dashboard/ios/Flutter/Debug.xcconfig
+FILE: ../../../topaz/app/dashboard/ios/Flutter/Release.xcconfig
+FILE: ../../../topaz/app/dashboard/ios/Podfile
+FILE: ../../../topaz/app/dashboard/ios/Podfile.lock
+FILE: ../../../topaz/app/dashboard/ios/Pods/Manifest.lock
+FILE: ../../../topaz/app/dashboard/ios/Pods/Pods.xcodeproj/project.pbxproj
+FILE: ../../../topaz/app/dashboard/ios/Pods/Pods.xcodeproj/xcshareddata/xcschemes/Pods-Runner.xcscheme
+FILE: ../../../topaz/app/dashboard/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.markdown
+FILE: ../../../topaz/app/dashboard/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.plist
+FILE: ../../../topaz/app/dashboard/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m
+FILE: ../../../topaz/app/dashboard/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig
+FILE: ../../../topaz/app/dashboard/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig
+FILE: ../../../topaz/app/dashboard/ios/Runner.xcodeproj/project.pbxproj
+FILE: ../../../topaz/app/dashboard/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+FILE: ../../../topaz/app/dashboard/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+FILE: ../../../topaz/app/dashboard/ios/Runner.xcworkspace/contents.xcworkspacedata
+FILE: ../../../topaz/app/dashboard/ios/Runner/AppDelegate.h
+FILE: ../../../topaz/app/dashboard/ios/Runner/AppDelegate.m
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@1x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@3x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
+FILE: ../../../topaz/app/dashboard/ios/Runner/Base.lproj/LaunchScreen.storyboard
+FILE: ../../../topaz/app/dashboard/ios/Runner/Base.lproj/Main.storyboard
+FILE: ../../../topaz/app/dashboard/ios/Runner/Info.plist
+FILE: ../../../topaz/app/dashboard/ios/Runner/main.m
+FILE: ../../../topaz/app/ledger/ledger_dashboard/dashboard.config
+FILE: ../../../topaz/app/ledger/ledger_dashboard/webroot/dashboard.js
+FILE: ../../../topaz/app/ledger/ledger_dashboard/webroot/logo.png
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/dashboard.config
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/dashboard.js
+FILE: ../../../topaz/app/maxwell/agents/mi_dashboard/webroot/logo.png
+FILE: ../../../topaz/app/maxwell/modules/basic_text_reporter/lib/main.dart
+FILE: ../../../topaz/app/maxwell/modules/resolution_failed/lib/main.dart
+FILE: ../../../topaz/app/moterm/command.cc
+FILE: ../../../topaz/app/moterm/command.h
+FILE: ../../../topaz/app/moterm/key_util.cc
+FILE: ../../../topaz/app/moterm/key_util.h
+FILE: ../../../topaz/app/moterm/main.cc
+FILE: ../../../topaz/app/moterm/moterm_model.cc
+FILE: ../../../topaz/app/moterm/moterm_model.h
+FILE: ../../../topaz/app/moterm/moterm_params.cc
+FILE: ../../../topaz/app/moterm/moterm_params.h
+FILE: ../../../topaz/app/moterm/moterm_view.cc
+FILE: ../../../topaz/app/moterm/moterm_view.h
+FILE: ../../../topaz/app/moterm/shell_controller.cc
+FILE: ../../../topaz/app/moterm/shell_controller.h
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/res/concert_bg.jpg
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/res/myseat.png
+FILE: ../../../topaz/app/music/packages/concert_widgets/lib/res/plat_logo.png
+FILE: ../../../topaz/app/music/packages/last_fm_widgets/lib/res/background.jpg
+FILE: ../../../topaz/app/music/packages/music_api/lib/api.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/music_widgets.dart
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/res/music_wallpaper.jpg
+FILE: ../../../topaz/app/music/packages/music_widgets/lib/src/home_page.dart
+FILE: ../../../topaz/app/todo/agents/content_provider/Cargo.toml
+FILE: ../../../topaz/app/video/modules/video/assets/video-background.png
+FILE: ../../../topaz/app/video/modules/video/assets/video-thumbnail.png
+FILE: ../../../topaz/app/xi/modules/xi-core/Cargo.lock
+FILE: ../../../topaz/app/xi/modules/xi-core/Cargo.toml
+FILE: ../../../topaz/app/xi/xi_flutter/android/AndroidManifest.xml
+FILE: ../../../topaz/app/xi/xi_flutter/android/res/mipmap-hdpi/ic_launcher.png
+FILE: ../../../topaz/app/xi/xi_flutter/android/res/mipmap-mdpi/ic_launcher.png
+FILE: ../../../topaz/app/xi/xi_flutter/android/res/mipmap-xhdpi/ic_launcher.png
+FILE: ../../../topaz/app/xi/xi_flutter/android/res/mipmap-xxhdpi/ic_launcher.png
+FILE: ../../../topaz/app/xi/xi_flutter/android/res/mipmap-xxxhdpi/ic_launcher.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Flutter/Debug.xcconfig
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Flutter/Release.xcconfig
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Podfile
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Podfile.lock
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Manifest.lock
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Pods.xcodeproj/project.pbxproj
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Pods.xcodeproj/xcshareddata/xcschemes/Pods-Runner.xcscheme
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.markdown
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-acknowledgements.plist
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-dummy.m
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner.xcodeproj/project.pbxproj
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner.xcworkspace/contents.xcworkspacedata
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/AppDelegate.h
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/AppDelegate.m
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Contents.json
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@1x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@2x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-29x29@3x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@1x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@2x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-40x40@3x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@1x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@2x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@1x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@2x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-76x76@3x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-83.5x83.5@2x.png
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Base.lproj/LaunchScreen.storyboard
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Base.lproj/Main.storyboard
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/Info.plist
+FILE: ../../../topaz/app/xi/xi_flutter/ios/Runner/main.m
+FILE: ../../../topaz/app/xi/xi_flutter/xi_flutter.iml
+FILE: ../../../topaz/examples/media/media_player_flutter/media_player_flutter.config
+FILE: ../../../topaz/examples/modular/hello_world_flutter/lib/main.dart
+FILE: ../../../topaz/examples/ui/basic_wm/main.dart
+FILE: ../../../topaz/examples/ui/basic_wm/window_manager.dart
+FILE: ../../../topaz/examples/ui/hello_material/main.dart
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.cc
 FILE: ../../../topaz/lib/tonic/converter/dart_converter.h
 FILE: ../../../topaz/lib/tonic/dart_message_handler.cc
@@ -68,6 +728,283 @@ FILE: ../../../topaz/lib/tonic/scopes/dart_isolate_scope.h
 FILE: ../../../topaz/lib/tonic/typed_data/dart_byte_data.h
 FILE: ../../../topaz/lib/tonic/typed_data/int32_list.h
 FILE: ../../../topaz/lib/tonic/typed_data/uint8_list.h
+FILE: ../../../topaz/packages/cairo
+FILE: ../../../topaz/packages/chat
+FILE: ../../../topaz/packages/config.json
+FILE: ../../../topaz/packages/contacts
+FILE: ../../../topaz/packages/curl
+FILE: ../../../topaz/packages/dart
+FILE: ../../../topaz/packages/dart_runner
+FILE: ../../../topaz/packages/dashboard
+FILE: ../../../topaz/packages/default
+FILE: ../../../topaz/packages/documents
+FILE: ../../../topaz/packages/examples
+FILE: ../../../topaz/packages/flutter
+FILE: ../../../topaz/packages/git
+FILE: ../../../topaz/packages/latin-ime
+FILE: ../../../topaz/packages/ledger
+FILE: ../../../topaz/packages/lib_widgets_test
+FILE: ../../../topaz/packages/libxml2
+FILE: ../../../topaz/packages/lua
+FILE: ../../../topaz/packages/maxwell
+FILE: ../../../topaz/packages/mods
+FILE: ../../../topaz/packages/modular_examples
+FILE: ../../../topaz/packages/mondrian
+FILE: ../../../topaz/packages/moterm
+FILE: ../../../topaz/packages/music
+FILE: ../../../topaz/packages/oauth_token_manager
+FILE: ../../../topaz/packages/speccpu2000
+FILE: ../../../topaz/packages/sqlite
+FILE: ../../../topaz/packages/sysui
+FILE: ../../../topaz/packages/todo
+FILE: ../../../topaz/packages/tools
+FILE: ../../../topaz/packages/ui_examples
+FILE: ../../../topaz/packages/video
+FILE: ../../../topaz/packages/web_view
+FILE: ../../../topaz/packages/webkit
+FILE: ../../../topaz/packages/xi
+FILE: ../../../topaz/public/dart-pkg/fuchsia/lib/fuchsia.dart
+FILE: ../../../topaz/public/dart-pkg/fuchsia/sdk_ext/fuchsia.cc
+FILE: ../../../topaz/public/dart-pkg/fuchsia/sdk_ext/fuchsia.h
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/channel.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/channel_reader.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/errors.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/handle_waiter.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/socket.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/src/socket_reader.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/lib/zircon.dart
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/handle_waiter.cc
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/handle_waiter.h
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/natives.cc
+FILE: ../../../topaz/public/dart-pkg/zircon/sdk_ext/natives.h
+FILE: ../../../topaz/public/dart/config/lib/config.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/fixtures.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/src/fixtures.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/src/name.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/src/names.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/src/namespace.dart
+FILE: ../../../topaz/public/dart/fixtures/lib/src/sequence.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/model/model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/rk4_spring_simulation.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/ticking_double_state.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/ticking_state.dart
+FILE: ../../../topaz/public/lib/app/dart/app.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/_sdkext
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/codec.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/enum.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/interface.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/struct.dart
+FILE: ../../../topaz/public/lib/fidl/dart/lib/src/bindings/union.dart
+FILE: ../../../topaz/public/lib/ui/flutter/_sdkext
+FILE: ../../../topaz/public/lib/ui/flutter/child_view.dart
+FILE: ../../../topaz/public/lib/ui/flutter/sdk_ext/mozart.dart
+FILE: ../../../topaz/runtime/dart_runner/application_runner_impl.cc
+FILE: ../../../topaz/runtime/dart_runner/application_runner_impl.h
+FILE: ../../../topaz/runtime/dart_runner/builtin_libraries.cc
+FILE: ../../../topaz/runtime/dart_runner/builtin_libraries.h
+FILE: ../../../topaz/runtime/dart_runner/dart_application_controller.cc
+FILE: ../../../topaz/runtime/dart_runner/dart_application_controller.h
+FILE: ../../../topaz/runtime/dart_runner/embedder/builtin.dart
+FILE: ../../../topaz/runtime/dart_runner/embedder/snapshot.cc.tmpl
+FILE: ../../../topaz/runtime/dart_runner/embedder/snapshot.dart
+FILE: ../../../topaz/runtime/dart_runner/embedder/snapshot.h
+FILE: ../../../topaz/runtime/dart_runner/examples/goodbye_dart/goodbye_dart.dart
+FILE: ../../../topaz/runtime/dart_runner/examples/greeting/greeting.dart
+FILE: ../../../topaz/runtime/dart_runner/examples/hello_app_dart/interfaces/hello.fidl
+FILE: ../../../topaz/runtime/dart_runner/examples/hello_app_dart/main.dart
+FILE: ../../../topaz/runtime/dart_runner/examples/hello_dart/bin/hello_dart.dart
+FILE: ../../../topaz/runtime/dart_runner/main.cc
+FILE: ../../../topaz/runtime/dart_runner/snapshotter/main.cc
+FILE: ../../../topaz/runtime/web_runner/web_view_component.json
+FILE: ../../../topaz/runtime/web_view/schema_org_context.cpp
+FILE: ../../../topaz/runtime/web_view/test_webview.cpp
+FILE: ../../../topaz/shell/Armadillo.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/1-portugal-the-man.jpeg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/9-hotel.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/9-nonch-harpin.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/ask_proposals.json
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/calendar.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/cc0_calafia.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/cc0_music.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/chat_96dp.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/cinefilm_96.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/contextual_location_proposals.json
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/danielle_cc0.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/docs.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/drawing.jpeg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/expenses_96.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/google_photos.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/ic_stat_3_googblue_2x_web_24dp.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/inbox_96dp.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/logo_fitness_color_2x_web_96.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/logo_mostly_sunny_light_color_96dp.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/miguel_cc0.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/music_96dp.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/panda.png.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/pavlova.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/shamra.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/simon_96.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/slides.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/sophie_cc0.jpg
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_calendar.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_cinefilm.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_expense.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_fluxMemories.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_googleIO.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_hype.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_marketing.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_natureSense.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_overthrough.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_phonecall.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_steps.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_threepeaks.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_toetheline.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_topcook.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/story_truefoods.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/tahiti_240.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/threepeaks.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/truefood.png
+FILE: ../../../topaz/shell/agents/home_work_agent/assets/youtube_96dp.png
+FILE: ../../../topaz/shell/armadillo/lib/armadillo.dart
+FILE: ../../../topaz/shell/armadillo/lib/armadillo_drag_target.dart
+FILE: ../../../topaz/shell/armadillo/lib/armadillo_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/conductor.dart
+FILE: ../../../topaz/shell/armadillo/lib/expand_suggestion.dart
+FILE: ../../../topaz/shell/armadillo/lib/nothing.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/now.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/quick_settings.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/toggle_icon.dart
+FILE: ../../../topaz/shell/armadillo/lib/now/vertical_shifter.dart
+FILE: ../../../topaz/shell/armadillo/lib/optional_wrapper.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel.dart
+FILE: ../../../topaz/shell/armadillo/lib/panel_drag_targets.dart
+FILE: ../../../topaz/shell/armadillo/lib/peeking_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/place_holder_story.dart
+FILE: ../../../topaz/shell/armadillo/lib/render_story_list_body.dart
+FILE: ../../../topaz/shell/armadillo/lib/res/Background.jpg
+FILE: ../../../topaz/shell/armadillo/lib/res/googlelogo_color_62x24dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/googlemic_color_24dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/guest_user_image.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_airplanemode_active_black.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_airplanemode_inactive_grey600.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_20_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_30_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_50_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_60_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_80_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_90_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_alert_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_20_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_30_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_50_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_60_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_80_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_90_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_charging_full_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_full_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_battery_unknown_white_48dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_brightness_high_grey600.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_do_not_disturb_off_grey600.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_do_not_disturb_on_black.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_mic_grey600_1x_web_24dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_screen_lock_rotation_black.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_screen_rotation_black.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_signal_cellular_connected_no_internet_0_bar_grey600_24dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_signal_wifi_3_bar_grey600_24dp.png
+FILE: ../../../topaz/shell/armadillo/lib/res/ic_volume_up_grey600.png
+FILE: ../../../topaz/shell/armadillo/lib/res/logo_googleg_24dpx4.png
+FILE: ../../../topaz/shell/armadillo/lib/scroll_locker.dart
+FILE: ../../../topaz/shell/armadillo/lib/selected_suggestion_overlay.dart
+FILE: ../../../topaz/shell/armadillo/lib/simulated_fractional.dart
+FILE: ../../../topaz/shell/armadillo/lib/simulated_fractionally_sized_box.dart
+FILE: ../../../topaz/shell/armadillo/lib/simulated_padding.dart
+FILE: ../../../topaz/shell/armadillo/lib/simulated_sized_box.dart
+FILE: ../../../topaz/shell/armadillo/lib/simulated_transform.dart
+FILE: ../../../topaz/shell/armadillo/lib/size_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/splash_painter.dart
+FILE: ../../../topaz/shell/armadillo/lib/splash_suggestion.dart
+FILE: ../../../topaz/shell/armadillo/lib/story.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_bar.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_drag_feedback.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_id.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_panels_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_stories_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_cluster_widget.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_full_size_simulated_sized_box.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_list.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_list_body_parent_data.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_list_layout.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_panels.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_positioned.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_time_randomizer.dart
+FILE: ../../../topaz/shell/armadillo/lib/story_title.dart
+FILE: ../../../topaz/shell/armadillo/lib/suggestion.dart
+FILE: ../../../topaz/shell/armadillo/lib/suggestion_list.dart
+FILE: ../../../topaz/shell/armadillo/lib/suggestion_model.dart
+FILE: ../../../topaz/shell/armadillo/lib/suggestion_widget.dart
+FILE: ../../../topaz/shell/armadillo/lib/wrapper_builder.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/AgentIcon.png
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/aparna-home.jpg
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/aparna-sf.jpg
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/aparna-work.jpg
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/contextual_config.json
+FILE: ../../../topaz/shell/armadillo_user_shell/assets/danielle-home.jpg
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/hit_test_model.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/main.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/story_provider_story_generator.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/story_provider_watcher_impl.dart
+FILE: ../../../topaz/shell/armadillo_user_shell/lib/suggestion_provider_suggestion_model.dart
+FILE: ../../../topaz/shell/capybara_user_shell/lib/res/background.jpg
+FILE: ../../../topaz/shell/docs/buttons.png
+FILE: ../../../topaz/shell/docs/profiling.patch
+FILE: ../../../topaz/shell/docs/profiling.png
+FILE: ../../../topaz/shell/docs/timeline_settings.png
+FILE: ../../../topaz/shell/docs/vm.png
+FILE: ../../../topaz/shell/keyboard/lib/keyboard.dart
+FILE: ../../../topaz/shell/keyboard/lib/keys.dart
+FILE: ../../../topaz/shell/keyboard/lib/res/ArrowDown.png
+FILE: ../../../topaz/shell/keyboard/lib/res/ArrowUp.png
+FILE: ../../../topaz/shell/keyboard/lib/res/Delete.png
+FILE: ../../../topaz/shell/keyboard/lib/res/Icon_Input_En.png
+FILE: ../../../topaz/shell/keyboard/lib/res/Space.png
+FILE: ../../../topaz/shell/keyboard/lib/word_suggestion_service.dart
+FILE: ../../../topaz/shell/perspective/lib/res/module-a-photos/1-sea-withtext.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-a-photos/2-pano-withtext.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/1.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/10.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/11.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/2.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/3.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/4.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/5.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/6.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/7.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/8.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-b-gallery-photos/9.png
+FILE: ../../../topaz/shell/perspective/lib/res/module-c-video/1-vid.png
+FILE: ../../../topaz/shell/spinning_cube/lib/main.dart
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/ArmadilloSilhouette.png
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/BlackHole.png
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/CapybaraSilhouette.png
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/Fuchsia_Logo_40dp_Accent.png
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/bg.jpg
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/fuchsia.png
+FILE: ../../../topaz/shell/userpicker_device_shell/lib/res/screen_config.json
+FILE: ../../../topaz/shell/widgets/lib/default_bundle.dart
+FILE: ../../../topaz/shell/widgets/lib/key_mappings.dart
+FILE: ../../../topaz/shell/widgets/lib/three_column_aligned_layout_delegate.dart
+FILE: ../../../topaz/shell/widgets/lib/time_stringer.dart
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_0_bar_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_1_bar_lock_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_1_bar_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_2_bar_lock_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_2_bar_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_3_bar_lock_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_3_bar_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_4_bar_lock_white_48dp.png
+FILE: ../../../topaz/shell/wifi_settings/assets/ic_signal_wifi_4_bar_white_48dp.png
 ----------------------------------------------------------------------------------------------------
 Copyright 2016 The Fuchsia Authors. All rights reserved.
 
@@ -100,7 +1037,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: topaz
-ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../lib/ftl/LICENSE
+ORIGIN: ../../../topaz/app/maxwell/modules/resolution_failed/lib/src/stores.dart + ../../../topaz/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../topaz/app/maxwell/modules/resolution_failed/lib/src/stores.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2017, the Flutter project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: topaz
+ORIGIN: ../../../topaz/lib/tonic/typed_data/dart_byte_data.cc + ../../../topaz/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../topaz/lib/tonic/dart_args.h
 FILE: ../../../topaz/lib/tonic/dart_binding_macros.h
@@ -153,4 +1126,77 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
-Total license count: 3
+
+====================================================================================================
+LIBRARY: topaz
+ORIGIN: ../../../topaz/public/dart/widgets/lib/src/widgets/alphatar.dart + ../../../LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../topaz/public/dart/widgets/lib/application.dart
+FILE: ../../../topaz/public/dart/widgets/lib/model.dart
+FILE: ../../../topaz/public/dart/widgets/lib/modular.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/alphatar.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/fuchsia_spinner.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/mondrian_spinner.dart
+FILE: ../../../topaz/public/dart/widgets/lib/src/widgets/window_media_query.dart
+FILE: ../../../topaz/public/dart/widgets/lib/widgets.dart
+----------------------------------------------------------------------------------------------------
+Copyright 2017 The Chromium Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: topaz
+ORIGIN: ../../../topaz/runtime/web_view/main.cpp
+TYPE: LicenseType.bsd
+FILE: ../../../topaz/runtime/web_view/main.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2016 The Fuchsia Authors. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1.  Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+2.  Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+Total license count: 8

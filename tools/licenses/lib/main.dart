@@ -2205,6 +2205,44 @@ class RepositoryGarnetFidlDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryTopazDirectory extends RepositoryDirectory {
+  RepositoryTopazDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+      return entry.name != 'tools'
+          && super.shouldRecurse(entry);
+  }
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'shell')
+      return new RepositoryTopazShellDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryTopazShellDirectory extends RepositoryDirectory {
+  RepositoryTopazShellDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'third_party')
+      return new RepositoryTopazShellThirdPartyDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class RepositoryTopazShellThirdPartyDirectory extends RepositoryDirectory {
+  RepositoryTopazShellThirdPartyDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+      return entry.name != 'QR-Code-generator'
+          && super.shouldRecurse(entry);
+  }
+}
+
 class RepositoryRoot extends RepositoryDirectory {
   RepositoryRoot(fs.Directory io) : super(null, io);
 
@@ -2241,6 +2279,8 @@ class RepositoryRoot extends RepositoryDirectory {
       return new RepositoryFlutterDirectory(this, entry);
     if (entry.name == 'garnet')
       return new RepositoryGarnetDirectory(this, entry);
+    if (entry.name == 'topaz')
+      return new RepositoryTopazDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 }

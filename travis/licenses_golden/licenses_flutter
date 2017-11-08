@@ -9517,7 +9517,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: engine
-ORIGIN: ../../../topaz/lib/tonic/LICENSE
+ORIGIN: ../../../topaz/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../flutter/fml/memory/weak_ptr.h
 FILE: ../../../flutter/fml/memory/weak_ptr_internal.cc
