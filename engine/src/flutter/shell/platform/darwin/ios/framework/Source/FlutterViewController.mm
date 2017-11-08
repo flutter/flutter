@@ -607,6 +607,28 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   _viewportMetrics.physical_width = viewSize.width * scale;
   _viewportMetrics.physical_height = viewSize.height * scale;
 
+  [self updateViewportPadding];
+  [self updateViewportMetrics];
+
+  // This must run after updateViewportMetrics so that the surface creation tasks are queued after
+  // the viewport metrics update tasks.
+  if (firstViewBoundsUpdate)
+    [self surfaceUpdated:YES];
+}
+
+- (void)viewSafeAreaInsetsDidChange {
+  if (_platformSupportsSafeAreaInsets) {
+    [self updateViewportPadding];
+    [self updateViewportMetrics];
+    [super viewSafeAreaInsetsDidChange];
+  }
+}
+
+// Updates _viewportMetrics physical padding.
+//
+// Viewport padding represents the iOS safe area insets.
+- (void)updateViewportPadding {
+  CGFloat scale = [UIScreen mainScreen].scale;
   // TODO(cbracken) once clang toolchain compiler-rt has been updated, replace with
   // if (@available(iOS 11, *)) {
   if (_platformSupportsSafeAreaInsets) {
@@ -623,12 +645,6 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   } else {
     _viewportMetrics.physical_padding_top = [self statusBarPadding] * scale;
   }
-  [self updateViewportMetrics];
-
-  // This must run after updateViewportMetrics so that the surface creation tasks are queued after
-  // the viewport metrics update tasks.
-  if (firstViewBoundsUpdate)
-    [self surfaceUpdated:YES];
 }
 
 #pragma mark - Keyboard events
