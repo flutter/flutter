@@ -19,10 +19,8 @@ PlatformMessageResponseDart::PlatformMessageResponseDart(
 
 PlatformMessageResponseDart::~PlatformMessageResponseDart() {
   if (!callback_.is_empty()) {
-    Threads::UI()->PostTask(
-        fxl::MakeCopyable([callback = std::move(callback_)]() mutable {
-          callback.Clear();
-        }));
+    Threads::UI()->PostTask(fxl::MakeCopyable(
+        [callback = std::move(callback_)]() mutable { callback.Clear(); }));
   }
 }
 
@@ -32,7 +30,7 @@ void PlatformMessageResponseDart::Complete(std::vector<uint8_t> data) {
   FXL_DCHECK(!is_complete_);
   is_complete_ = true;
   Threads::UI()->PostTask(fxl::MakeCopyable(
-      [ callback = std::move(callback_), data = std::move(data) ]() mutable {
+      [callback = std::move(callback_), data = std::move(data)]() mutable {
         tonic::DartState* dart_state = callback.dart_state().get();
         if (!dart_state)
           return;

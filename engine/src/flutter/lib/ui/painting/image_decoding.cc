@@ -68,9 +68,10 @@ void DecodeImageAndInvokeImageCallback(
     sk_sp<SkData> buffer,
     size_t trace_id) {
   sk_sp<SkImage> image = DecodeImage(std::move(buffer), trace_id);
-  Threads::UI()->PostTask(fxl::MakeCopyable([
-    callback = std::move(callback), image, trace_id
-  ]() mutable { InvokeImageCallback(image, std::move(callback), trace_id); }));
+  Threads::UI()->PostTask(fxl::MakeCopyable(
+      [callback = std::move(callback), image, trace_id]() mutable {
+        InvokeImageCallback(image, std::move(callback), trace_id);
+      }));
 }
 
 void DecodeImageFromList(Dart_NativeArguments args) {
@@ -97,14 +98,13 @@ void DecodeImageFromList(Dart_NativeArguments args) {
 
   auto buffer = SkData::MakeWithCopy(list.data(), list.num_elements());
 
-  Threads::IO()->PostTask(fxl::MakeCopyable([
-    callback = std::make_unique<DartPersistentValue>(
-        tonic::DartState::Current(), callback_handle),
-    buffer = std::move(buffer), trace_id
-  ]() mutable {
-    DecodeImageAndInvokeImageCallback(std::move(callback), std::move(buffer),
-                                      trace_id);
-  }));
+  Threads::IO()->PostTask(
+      fxl::MakeCopyable([callback = std::make_unique<DartPersistentValue>(
+                             tonic::DartState::Current(), callback_handle),
+                         buffer = std::move(buffer), trace_id]() mutable {
+        DecodeImageAndInvokeImageCallback(std::move(callback),
+                                          std::move(buffer), trace_id);
+      }));
 }
 
 }  // namespace

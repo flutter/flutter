@@ -93,11 +93,11 @@ void InitCodecAndInvokeCodecCallback(
     sk_sp<SkData> buffer,
     size_t trace_id) {
   auto codec = InitCodec(std::move(buffer), trace_id);
-  Threads::UI()->PostTask(fxl::MakeCopyable([
-    callback = std::move(callback), codec = std::move(codec), trace_id
-  ]() mutable {
-    InvokeCodecCallback(std::move(codec), std::move(callback), trace_id);
-  }));
+  Threads::UI()->PostTask(
+      fxl::MakeCopyable([callback = std::move(callback),
+                         codec = std::move(codec), trace_id]() mutable {
+        InvokeCodecCallback(std::move(codec), std::move(callback), trace_id);
+      }));
 }
 
 void InstantiateImageCodec(Dart_NativeArguments args) {
@@ -124,14 +124,13 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
 
   auto buffer = SkData::MakeWithCopy(list.data(), list.num_elements());
 
-  Threads::IO()->PostTask(fxl::MakeCopyable([
-    callback = std::make_unique<DartPersistentValue>(
-        tonic::DartState::Current(), callback_handle),
-    buffer = std::move(buffer), trace_id
-  ]() mutable {
-    InitCodecAndInvokeCodecCallback(std::move(callback), std::move(buffer),
-                                    trace_id);
-  }));
+  Threads::IO()->PostTask(
+      fxl::MakeCopyable([callback = std::make_unique<DartPersistentValue>(
+                             tonic::DartState::Current(), callback_handle),
+                         buffer = std::move(buffer), trace_id]() mutable {
+        InitCodecAndInvokeCodecCallback(std::move(callback), std::move(buffer),
+                                        trace_id);
+      }));
 }
 
 bool copy_to(SkBitmap* dst, SkColorType dstColorType, const SkBitmap& src) {
@@ -253,7 +252,7 @@ void MultiFrameCodec::GetNextFrameAndInvokeCallback(
   nextFrameIndex_ = (nextFrameIndex_ + 1) % frameInfos_.size();
 
   Threads::UI()->PostTask(fxl::MakeCopyable(
-      [ callback = std::move(callback), frameInfo, trace_id ]() mutable {
+      [callback = std::move(callback), frameInfo, trace_id]() mutable {
         InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
       }));
 
@@ -270,13 +269,12 @@ Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
     return ToDart("Callback must be a function");
   }
 
-  Threads::IO()->PostTask(fxl::MakeCopyable([
-    callback = std::make_unique<DartPersistentValue>(
-        tonic::DartState::Current(), callback_handle),
-    this, trace_id
-  ]() mutable {
-    GetNextFrameAndInvokeCallback(std::move(callback), trace_id);
-  }));
+  Threads::IO()->PostTask(
+      fxl::MakeCopyable([callback = std::make_unique<DartPersistentValue>(
+                             tonic::DartState::Current(), callback_handle),
+                         this, trace_id]() mutable {
+        GetNextFrameAndInvokeCallback(std::move(callback), trace_id);
+      }));
 
   return Dart_Null();
 }

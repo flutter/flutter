@@ -38,7 +38,7 @@ class PlatformMessageResponseAndroid : public blink::PlatformMessageResponse {
   void Complete(std::vector<uint8_t> data) override {
     fxl::RefPtr<PlatformMessageResponseAndroid> self(this);
     blink::Threads::Platform()->PostTask(
-        fxl::MakeCopyable([ self, data = std::move(data) ]() mutable {
+        fxl::MakeCopyable([self, data = std::move(data)]() mutable {
           std::shared_ptr<PlatformView> view = self->view_.lock();
           if (!view)
             return;
@@ -182,9 +182,11 @@ void PlatformViewAndroid::SurfaceCreated(JNIEnv* env,
     return;
   }
 
-  NotifyCreated(std::move(gpu_surface), [
-    this, backgroundColor, native_window_size = native_window->GetSize()
-  ] { rasterizer().Clear(backgroundColor, native_window_size); });
+  NotifyCreated(
+      std::move(gpu_surface),
+      [this, backgroundColor, native_window_size = native_window->GetSize()] {
+        rasterizer().Clear(backgroundColor, native_window_size);
+      });
 }
 
 void PlatformViewAndroid::SurfaceChanged(jint width, jint height) {
@@ -211,30 +213,28 @@ void PlatformViewAndroid::RunBundleAndSnapshot(std::string bundle_path,
                                                std::string snapshot_override,
                                                std::string entrypoint,
                                                bool reuse_runtime_controller) {
-  blink::Threads::UI()->PostTask([
-    engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
-    snapshot_override = std::move(snapshot_override),
-    entrypoint = std::move(entrypoint),
-    reuse_runtime_controller = reuse_runtime_controller
-  ] {
-    if (engine)
-      engine->RunBundleAndSnapshot(
-          std::move(bundle_path), std::move(snapshot_override),
-          std::move(entrypoint), reuse_runtime_controller);
-  });
+  blink::Threads::UI()->PostTask(
+      [engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
+       snapshot_override = std::move(snapshot_override),
+       entrypoint = std::move(entrypoint),
+       reuse_runtime_controller = reuse_runtime_controller] {
+        if (engine)
+          engine->RunBundleAndSnapshot(
+              std::move(bundle_path), std::move(snapshot_override),
+              std::move(entrypoint), reuse_runtime_controller);
+      });
 }
 
 void PlatformViewAndroid::RunBundleAndSource(std::string bundle_path,
                                              std::string main,
                                              std::string packages) {
-  blink::Threads::UI()->PostTask([
-    engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
-    main = std::move(main), packages = std::move(packages)
-  ] {
-    if (engine)
-      engine->RunBundleAndSource(std::move(bundle_path), std::move(main),
-                                 std::move(packages));
-  });
+  blink::Threads::UI()->PostTask(
+      [engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path),
+       main = std::move(main), packages = std::move(packages)] {
+        if (engine)
+          engine->RunBundleAndSource(std::move(bundle_path), std::move(main),
+                                     std::move(packages));
+      });
 }
 
 void PlatformViewAndroid::SetViewportMetrics(jfloat device_pixel_ratio,
@@ -253,7 +253,7 @@ void PlatformViewAndroid::SetViewportMetrics(jfloat device_pixel_ratio,
   metrics.physical_padding_bottom = physical_padding_bottom;
   metrics.physical_padding_left = physical_padding_left;
 
-  blink::Threads::UI()->PostTask([ engine = engine_->GetWeakPtr(), metrics ] {
+  blink::Threads::UI()->PostTask([engine = engine_->GetWeakPtr(), metrics] {
     if (engine)
       engine->SetViewportMetrics(metrics);
   });
@@ -299,13 +299,12 @@ void PlatformViewAndroid::DispatchPointerDataPacket(JNIEnv* env,
                                                     jint position) {
   uint8_t* data = static_cast<uint8_t*>(env->GetDirectBufferAddress(buffer));
 
-  blink::Threads::UI()->PostTask(fxl::MakeCopyable([
-    engine = engine_->GetWeakPtr(),
-    packet = std::make_unique<PointerDataPacket>(data, position)
-  ] {
-    if (engine.get())
-      engine->DispatchPointerDataPacket(*packet);
-  }));
+  blink::Threads::UI()->PostTask(fxl::MakeCopyable(
+      [engine = engine_->GetWeakPtr(),
+       packet = std::make_unique<PointerDataPacket>(data, position)] {
+        if (engine.get())
+          engine->DispatchPointerDataPacket(*packet);
+      }));
 }
 
 void PlatformViewAndroid::InvokePlatformMessageResponseCallback(

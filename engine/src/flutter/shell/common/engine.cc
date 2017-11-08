@@ -540,12 +540,12 @@ void Engine::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 }
 
 void Engine::UpdateSemantics(std::vector<blink::SemanticsNode> update) {
-  blink::Threads::Platform()->PostTask(fxl::MakeCopyable([
-    platform_view = platform_view_.lock(), update = std::move(update)
-  ]() mutable {
-    if (platform_view)
-      platform_view->UpdateSemantics(std::move(update));
-  }));
+  blink::Threads::Platform()->PostTask(
+      fxl::MakeCopyable([platform_view = platform_view_.lock(),
+                         update = std::move(update)]() mutable {
+        if (platform_view)
+          platform_view->UpdateSemantics(std::move(update));
+      }));
 }
 
 void Engine::HandlePlatformMessage(
@@ -554,12 +554,12 @@ void Engine::HandlePlatformMessage(
     HandleAssetPlatformMessage(std::move(message));
     return;
   }
-  blink::Threads::Platform()->PostTask([
-    platform_view = platform_view_.lock(), message = std::move(message)
-  ]() mutable {
-    if (platform_view)
-      platform_view->HandlePlatformMessage(std::move(message));
-  });
+  blink::Threads::Platform()->PostTask(
+      [platform_view = platform_view_.lock(),
+       message = std::move(message)]() mutable {
+        if (platform_view)
+          platform_view->HandlePlatformMessage(std::move(message));
+      });
 }
 
 void Engine::HandleAssetPlatformMessage(

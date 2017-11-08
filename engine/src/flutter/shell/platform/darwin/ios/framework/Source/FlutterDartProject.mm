@@ -268,9 +268,8 @@ static NSString* NSStringFromVMType(VMType type) {
   }
 
   std::string bundle_path = path.UTF8String;
-  blink::Threads::UI()->PostTask([
-    engine = engine->GetWeakPtr(), bundle_path, entrypoint = std::string([entrypoint UTF8String])
-  ] {
+  blink::Threads::UI()->PostTask([engine = engine->GetWeakPtr(), bundle_path,
+                                  entrypoint = std::string([entrypoint UTF8String])] {
     if (engine)
       engine->RunBundle(bundle_path, entrypoint);
   });
@@ -296,21 +295,18 @@ static NSString* NSStringFromVMType(VMType type) {
     std::string bundle_path = _dartSource.flxArchive.absoluteURL.path.UTF8String;
 
     if (_dartSource.archiveContainsScriptSnapshot) {
-      blink::Threads::UI()->PostTask([
-        engine = engine->GetWeakPtr(), bundle_path,
-        entrypoint = std::string([entrypoint UTF8String])
-      ] {
+      blink::Threads::UI()->PostTask([engine = engine->GetWeakPtr(), bundle_path,
+                                      entrypoint = std::string([entrypoint UTF8String])] {
         if (engine)
           engine->RunBundle(bundle_path, entrypoint);
       });
     } else {
       std::string main = _dartSource.dartMain.absoluteURL.path.UTF8String;
       std::string packages = _dartSource.packages.absoluteURL.path.UTF8String;
-      blink::Threads::UI()->PostTask(
-          [ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
-            if (engine)
-              engine->RunBundleAndSource(bundle_path, main, packages);
-          });
+      blink::Threads::UI()->PostTask([engine = engine->GetWeakPtr(), bundle_path, main, packages] {
+        if (engine)
+          engine->RunBundleAndSource(bundle_path, main, packages);
+      });
     }
 
     result(YES, @"Success");
