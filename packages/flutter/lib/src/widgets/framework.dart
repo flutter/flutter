@@ -2483,7 +2483,7 @@ class BuildOwner {
 ///    element to the [owner]'s list of inactive elements, causing the framework
 ///    to call [deactivate] on this element.
 ///  * At this point, the element is considered "inactive" and will not appear
-///    on screen. An element can remain in the inactive state only only until
+///    on screen. An element can remain in the inactive state only until
 ///    the end of the current animation frame. At the end of the animation
 ///    frame, any elements that are still inactive will be unmounted.
 ///  * If the element gets reincorporated into the tree (e.g., because it or one
