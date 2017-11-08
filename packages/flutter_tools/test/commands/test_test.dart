@@ -143,11 +143,13 @@ Future<ProcessResult> _runFlutterTest(
   if (!testFile.existsSync())
     fail('missing test file: $testFile');
 
-  final List<String> args = <String>[
-    fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-    'test',
-    '--no-color'
-  ]..addAll(extraArgs)..add(testFilePath);
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
+    ..add('test')
+    ..add('--no-color')
+    ..addAll(extraArgs)
+    ..add(testFilePath);
 
   while (_testExclusionLock != null)
     await _testExclusionLock;

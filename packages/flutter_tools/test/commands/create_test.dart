@@ -209,12 +209,12 @@ void main() {
       // TODO(pq): enable when sky_shell is available
       if (!io.Platform.isWindows) {
         // Verify that the sample widget test runs cleanly.
-        final List<String> args = <String>[
-          fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')),
-          'test',
-          '--no-color',
-          fs.path.join(projectDir.path, 'test', 'widget_test.dart'),
-        ];
+        final List<String> args = <String>[]
+          ..addAll(dartVmFlags)
+          ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
+          ..add('test')
+          ..add('--no-color')
+          ..add(fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
         final ProcessResult result = await Process.run(
           fs.path.join(dartSdkPath, 'bin', 'dart'),
@@ -338,7 +338,10 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
     'flutter_tools.dart',
   ));
 
-  final List<String> args = <String>[flutterToolsPath, 'analyze'];
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..add('analyze');
   if (target != null)
     args.add(target);
 
