@@ -142,7 +142,7 @@ void main() {
   });
 
   testWidgets('Shadow colors animate smoothly', (WidgetTester tester) async {
-    // This code verifies that the PhysicalModel's elevation animates over
+    // This code verifies that the PhysicalModel's shadowColor animates over
     // a kThemeChangeDuration time interval.
 
     await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
@@ -155,17 +155,11 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 1));
     final RenderPhysicalModel modelC = getShadow(tester);
-    expect(modelC.shadowColor.alpha, equals(0xFF));
-    expect(modelC.shadowColor.red, closeTo(0x00, 1));
-    expect(modelC.shadowColor.green, closeTo(0xFF, 1));
-    expect(modelC.shadowColor.blue, equals(0x00));
+    expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
 
     await tester.pump(kThemeChangeDuration ~/ 2);
     final RenderPhysicalModel modelD = getShadow(tester);
-    expect(modelD.shadowColor.alpha, equals(0xFF));
-    expect(modelD.shadowColor.red, isNot(closeTo(0x00, 1)));
-    expect(modelD.shadowColor.green, isNot(closeTo(0xFF, 1)));
-    expect(modelD.shadowColor.blue, equals(0x00));
+    expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
 
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalModel modelE = getShadow(tester);
