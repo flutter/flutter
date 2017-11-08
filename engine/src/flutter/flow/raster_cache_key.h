@@ -15,14 +15,29 @@ namespace flow {
 
 class RasterCacheKey {
  public:
-  RasterCacheKey(const SkPicture& picture, const MatrixDecomposition& matrix)
+  RasterCacheKey(const SkPicture& picture,
+#if defined(OS_FUCHSIA)
+                 float metrics_scale_x,
+                 float metrics_scale_y,
+#endif
+                 const MatrixDecomposition& matrix)
       : picture_id_(picture.uniqueID()),
-        scale_key_(SkISize::Make(matrix.scale().x() * 1e3,
-                                 matrix.scale().y() * 1e3)) {}
+#if defined(OS_FUCHSIA)
+        metrics_scale_x_(metrics_scale_x),
+        metrics_scale_y_(metrics_scale_y),
+#endif
+        scale_key_(
+            SkISize::Make(matrix.scale().x() * 1e3, matrix.scale().y() * 1e3)) {
+  }
 
   uint32_t picture_id() const { return picture_id_; }
 
   const SkISize& scale_key() const { return scale_key_; }
+
+#if defined(OS_FUCHSIA)
+  float metrics_scale_x() const { return metrics_scale_x_; }
+  float metrics_scale_y() const { return metrics_scale_y_; }
+#endif
 
   struct Hash {
     std::size_t operator()(RasterCacheKey const& key) const {
@@ -34,6 +49,11 @@ class RasterCacheKey {
     constexpr bool operator()(const RasterCacheKey& lhs,
                               const RasterCacheKey& rhs) const {
       return lhs.picture_id_ == rhs.picture_id_ &&
+#if defined(OS_FUCHSIA)
+             lhs.metrics_scale_x_ == rhs.metrics_scale_x_ &&
+
+             lhs.metrics_scale_y_ == rhs.metrics_scale_y_ &&
+#endif
              lhs.scale_key_ == rhs.scale_key_;
     }
   };
@@ -43,6 +63,10 @@ class RasterCacheKey {
 
  private:
   uint32_t picture_id_;
+#if defined(OS_FUCHSIA)
+  float metrics_scale_x_;
+  float metrics_scale_y_;
+#endif
   SkISize scale_key_;
 };
 

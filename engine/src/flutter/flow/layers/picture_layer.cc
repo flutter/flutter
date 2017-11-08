@@ -24,6 +24,9 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   if (auto cache = context->raster_cache) {
     raster_cache_result_ = cache->GetPrerolledImage(
         context->gr_context, picture_.get(), matrix, context->dst_color_space,
+#if defined(OS_FUCHSIA)
+        context->metrics,
+#endif
         is_complex_, will_change_);
   }
 

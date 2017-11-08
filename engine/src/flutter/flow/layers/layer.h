@@ -44,6 +44,9 @@ class Layer {
   virtual ~Layer();
 
   struct PrerollContext {
+#if defined(OS_FUCHSIA)
+    scenic::Metrics* metrics = nullptr;
+#endif
     RasterCache* raster_cache;
     GrContext* gr_context;
     SkColorSpace* dst_color_space;

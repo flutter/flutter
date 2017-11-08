@@ -121,6 +121,7 @@ class SceneUpdateContext {
   void set_metrics(scenic::MetricsPtr metrics) {
     metrics_ = std::move(metrics);
   }
+  const scenic::MetricsPtr& metrics() const { return metrics_; }
 
   void AddChildScene(ExportNode* export_node,
                      SkPoint offset,

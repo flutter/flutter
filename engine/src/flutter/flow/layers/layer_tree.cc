@@ -18,23 +18,42 @@ LayerTree::LayerTree()
 LayerTree::~LayerTree() = default;
 
 void LayerTree::Raster(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+                       scenic::Metrics* metrics,
+#endif
                        bool ignore_raster_cache) {
-  Preroll(frame, ignore_raster_cache);
+#if defined(OS_FUCHSIA)
+  FXL_DCHECK(metrics);
+#endif
+  Preroll(frame,
+#if defined(OS_FUCHSIA)
+          metrics,
+#endif
+          ignore_raster_cache);
   Paint(frame);
 }
 
 void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+                        scenic::Metrics* metrics,
+#endif
                         bool ignore_raster_cache) {
+#if defined(OS_FUCHSIA)
+  FXL_DCHECK(metrics);
+#endif
   TRACE_EVENT0("flutter", "LayerTree::Preroll");
   SkColorSpace* color_space =
       frame.canvas() ? frame.canvas()->imageInfo().colorSpace() : nullptr;
   frame.context().raster_cache().SetCheckboardCacheImages(
       checkerboard_raster_cache_images_);
   Layer::PrerollContext context = {
-      ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
-      frame.gr_context(),
-      color_space,
-      SkRect::MakeEmpty(),
+#if defined(OS_FUCHSIA)
+    metrics,
+#endif
+    ignore_raster_cache ? nullptr : &frame.context().raster_cache(),
+    frame.gr_context(),
+    color_space,
+    SkRect::MakeEmpty(),
   };
 
   root_layer_->Preroll(&context, SkMatrix::I());
