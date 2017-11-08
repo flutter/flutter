@@ -1,9 +1,5 @@
-*.iml
 .gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
-.DS_Store
+local.properties
 /build
 /captures
 GeneratedPluginRegistrant.java

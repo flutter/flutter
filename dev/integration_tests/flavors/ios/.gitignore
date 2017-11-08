@@ -1,14 +1,12 @@
-.idea/
+.generated/
 .vagrant/
 .sconsign.dblite
 .svn/
 
-.DS_Store
 *.swp
 profile
 
 DerivedData/
-build/
 GeneratedPluginRegistrant.h
 GeneratedPluginRegistrant.m
 
