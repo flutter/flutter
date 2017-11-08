@@ -11,6 +11,9 @@ String get dartSdkPath {
   return fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'dart-sdk');
 }
 
+/// The required Dart language flags
+const List<String> dartVmFlags = const <String>['--assert-initializer'];
+
 /// Return the platform specific name for the given Dart SDK binary. So, `pub`
 /// ==> `pub.bat`.  The default SDK location can be overridden with a specified
 /// [sdkLocation].

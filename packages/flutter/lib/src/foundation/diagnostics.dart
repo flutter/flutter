@@ -642,12 +642,11 @@ abstract class DiagnosticsNode {
     this.showName: true,
     this.showSeparator: true,
   }) : assert(showName != null),
-       assert(showSeparator != null) {
-    // A name ending with ':' indicates that the user forgot that the ':' will
-    // be automatically added for them when generating descriptions of the
-    // property.
-    assert(name == null || !name.endsWith(':'), 'Names of diagnostic nodes must not end with colons.');
-  }
+       assert(showSeparator != null),
+       // A name ending with ':' indicates that the user forgot that the ':' will
+       // be automatically added for them when generating descriptions of the
+       // property.
+       assert(name == null || !name.endsWith(':'), 'Names of diagnostic nodes must not end with colons.');
 
   /// Diagnostics containing just a string `message` and not a concrete name or
   /// value.
@@ -1318,15 +1317,14 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
+       assert(ifTrue != null || ifFalse != null),
        super(
-    name,
-    value,
-    showName: showName,
-    defaultValue: defaultValue,
-    level: level,
-  ) {
-    assert(ifTrue != null || ifFalse != null);
-  }
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+       );
 
   /// Description to use if the property [value] is true.
   ///
