@@ -1,0 +1,11 @@
+# Copyright 2017 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  # The directories to search for parts of the SDK.
+  #
+  # By default, we search the public directories for the various layers.
+  # In the future, we'll search a pre-built SDK as well.
+  sdk_dirs = [ "//garnet/public", "//topaz/public" ]
+}
