@@ -13,6 +13,9 @@
 #include "flutter/flow/layers/layer.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/time/time_delta.h"
+#if defined(OS_FUCHSIA)
+#include "lib/ui/scenic/fidl/events.fidl.h"
+#endif
 #include "third_party/skia/include/core/SkSize.h"
 
 namespace flow {
@@ -25,9 +28,15 @@ class LayerTree {
 
   // Raster includes both Preroll and Paint.
   void Raster(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+              scenic::Metrics* metrics,
+#endif
               bool ignore_raster_cache = false);
 
   void Preroll(CompositorContext::ScopedFrame& frame,
+#if defined(OS_FUCHSIA)
+               scenic::Metrics* metrics,
+#endif
                bool ignore_raster_cache = false);
 
 #if defined(OS_FUCHSIA)

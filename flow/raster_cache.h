@@ -12,6 +12,9 @@
 #include "flutter/flow/raster_cache_key.h"
 #include "lib/fxl/macros.h"
 #include "lib/fxl/memory/weak_ptr.h"
+#if defined(OS_FUCHSIA)
+#include "lib/ui/scenic/fidl/events.fidl.h"
+#endif
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkSize.h"
 
@@ -54,6 +57,9 @@ class RasterCache {
                                       SkPicture* picture,
                                       const SkMatrix& transformation_matrix,
                                       SkColorSpace* dst_color_space,
+#if defined(OS_FUCHSIA)
+                                      scenic::Metrics* metrics,
+#endif
                                       bool is_complex,
                                       bool will_change);
 

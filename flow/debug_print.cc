@@ -72,6 +72,11 @@ std::ostream& operator<<(std::ostream& os, const SkPoint& r) {
 
 std::ostream& operator<<(std::ostream& os, const flow::RasterCacheKey& k) {
   os << "Picture: " << k.picture_id() << " Scale: " << k.scale_key().width()
-     << ", " << k.scale_key().height();
+     << ", " << k.scale_key().height()
+#if defined(OS_FUCHSIA)
+     << " Metrics scale: (" << k.metrics_scale_x() << ", "
+     << k.metrics_scale_y() << ")"
+#endif
+      ;
   return os;
 }

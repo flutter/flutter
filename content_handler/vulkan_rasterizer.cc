@@ -97,7 +97,7 @@ void VulkanRasterizer::Draw(std::unique_ptr<flow::LayerTree> layer_tree,
     // Preroll the Flutter layer tree. This allows Flutter to perform pre-paint
     // optimizations.
     TRACE_EVENT0("flutter", "Preroll");
-    layer_tree->Preroll(frame);
+    layer_tree->Preroll(frame, session_connection_->metrics().get());
   }
 
   {

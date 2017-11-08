@@ -27,6 +27,10 @@ class SessionConnection {
 
   bool has_metrics() const { return scene_update_context_.has_metrics(); }
 
+  const scenic::MetricsPtr& metrics() const {
+    return scene_update_context_.metrics();
+  }
+
   void set_metrics_changed_callback(fxl::Closure callback) {
     metrics_changed_callback_ = std::move(callback);
   }
