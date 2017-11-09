@@ -268,7 +268,7 @@ class EventChannel {
   /// * a decoded data event (possibly null) for each successful event
   /// received from the platform plugin;
   /// * an error event containing a [PlatformException] for each error event
-  /// received from the platform plugin;
+  /// received from the platform plugin.
   ///
   /// Errors occurring during stream activation or deactivation are reported
   /// through the [FlutterError] facility. Stream activation happens only when
@@ -279,10 +279,15 @@ class EventChannel {
     StreamController<dynamic> controller;
     controller = new StreamController<dynamic>.broadcast(onListen: () async {
       BinaryMessages.setMessageHandler(name, (ByteData reply) async {
-        if (reply == null)
+        if (reply == null) {
           controller.close();
-        else
-          controller.add(codec.decodeEnvelope(reply));
+        } else {
+          try {
+            controller.add(codec.decodeEnvelope(reply));
+          } on PlatformException catch (e) {
+            controller.addError(e);
+          }
+        }
       });
       try {
         await methodChannel.invokeMethod('listen', arguments);
