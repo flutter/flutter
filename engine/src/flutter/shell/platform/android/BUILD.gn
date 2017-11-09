@@ -113,6 +113,7 @@ java_library("flutter_shell_java") {
     "io/flutter/util/Preconditions.java",
     "io/flutter/view/AccessibilityBridge.java",
     "io/flutter/view/FlutterMain.java",
+    "io/flutter/view/FlutterNativeView.java",
     "io/flutter/view/FlutterView.java",
     "io/flutter/view/ResourceCleaner.java",
     "io/flutter/view/ResourceExtractor.java",

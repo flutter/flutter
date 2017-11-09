@@ -19,6 +19,8 @@
 namespace shell {
 
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_view_class = nullptr;
+static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_native_view_class =
+    nullptr;
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_surface_texture_class = nullptr;
 
 // Called By Native
@@ -92,7 +94,7 @@ static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
   return reinterpret_cast<jlong>(storage);
 }
 
-static void Detach(JNIEnv* env, jobject jcaller, jlong platform_view) {
+static void Destroy(JNIEnv* env, jobject jcaller, jlong platform_view) {
   PLATFORM_VIEW->Detach();
   delete &PLATFORM_VIEW;
 }
@@ -276,28 +278,72 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
     return false;
   }
 
+  g_flutter_native_view_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("io/flutter/view/FlutterNativeView"));
+  if (g_flutter_native_view_class->is_null()) {
+    return false;
+  }
+
   g_surface_texture_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
       env, env->FindClass("android/graphics/SurfaceTexture"));
   if (g_surface_texture_class->is_null()) {
     return false;
   }
 
-  static const JNINativeMethod methods[] = {
+  static const JNINativeMethod native_view_methods[] = {
       {
           .name = "nativeAttach",
-          .signature = "(Lio/flutter/view/FlutterView;)J",
+          .signature = "(Lio/flutter/view/FlutterNativeView;)J",
           .fnPtr = reinterpret_cast<void*>(&shell::Attach),
       },
       {
-          .name = "nativeDetach",
+          .name = "nativeDestroy",
           .signature = "(J)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::Detach),
+          .fnPtr = reinterpret_cast<void*>(&shell::Destroy),
+      },
+      {
+          .name = "nativeRunBundleAndSnapshot",
+          .signature =
+              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSnapshot),
+      },
+      {
+          .name = "nativeRunBundleAndSource",
+          .signature =
+              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSource),
       },
       {
           .name = "nativeGetObservatoryUri",
           .signature = "()Ljava/lang/String;",
           .fnPtr = reinterpret_cast<void*>(&shell::GetObservatoryUri),
       },
+      {
+          .name = "nativeDispatchEmptyPlatformMessage",
+          .signature = "(JLjava/lang/String;I)V",
+          .fnPtr =
+              reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
+      },
+      {
+          .name = "nativeDispatchPlatformMessage",
+          .signature = "(JLjava/lang/String;Ljava/nio/ByteBuffer;II)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::DispatchPlatformMessage),
+      },
+      {
+          .name = "nativeInvokePlatformMessageResponseCallback",
+          .signature = "(JILjava/nio/ByteBuffer;I)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &shell::InvokePlatformMessageResponseCallback),
+      },
+      {
+          .name = "nativeInvokePlatformMessageEmptyResponseCallback",
+          .signature = "(JI)V",
+          .fnPtr = reinterpret_cast<void*>(
+              &shell::InvokePlatformMessageEmptyResponseCallback),
+      },
+  };
+
+  static const JNINativeMethod view_methods[] = {
       {
           .name = "nativeSurfaceCreated",
           .signature = "(JLandroid/view/Surface;I)V",
@@ -314,18 +360,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .fnPtr = reinterpret_cast<void*>(&shell::SurfaceDestroyed),
       },
       {
-          .name = "nativeRunBundleAndSnapshot",
-          .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSnapshot),
-      },
-      {
-          .name = "nativeRunBundleAndSource",
-          .signature =
-              "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSource),
-      },
-      {
           .name = "nativeSetViewportMetrics",
           .signature = "(JFIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&shell::SetViewportMetrics),
@@ -334,17 +368,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .name = "nativeGetBitmap",
           .signature = "(J)Landroid/graphics/Bitmap;",
           .fnPtr = reinterpret_cast<void*>(&shell::GetBitmap),
-      },
-      {
-          .name = "nativeDispatchPlatformMessage",
-          .signature = "(JLjava/lang/String;Ljava/nio/ByteBuffer;II)V",
-          .fnPtr = reinterpret_cast<void*>(&shell::DispatchPlatformMessage),
-      },
-      {
-          .name = "nativeDispatchEmptyPlatformMessage",
-          .signature = "(JLjava/lang/String;I)V",
-          .fnPtr =
-              reinterpret_cast<void*>(&shell::DispatchEmptyPlatformMessage),
       },
       {
           .name = "nativeDispatchPointerDataPacket",
@@ -360,18 +383,6 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .name = "nativeSetSemanticsEnabled",
           .signature = "(JZ)V",
           .fnPtr = reinterpret_cast<void*>(&shell::SetSemanticsEnabled),
-      },
-      {
-          .name = "nativeInvokePlatformMessageResponseCallback",
-          .signature = "(JILjava/nio/ByteBuffer;I)V",
-          .fnPtr = reinterpret_cast<void*>(
-              &shell::InvokePlatformMessageResponseCallback),
-      },
-      {
-          .name = "nativeInvokePlatformMessageEmptyResponseCallback",
-          .signature = "(JI)V",
-          .fnPtr = reinterpret_cast<void*>(
-              &shell::InvokePlatformMessageEmptyResponseCallback),
       },
       {
           .name = "nativeGetIsSoftwareRenderingEnabled",
@@ -395,36 +406,43 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       },
   };
 
-  if (env->RegisterNatives(g_flutter_view_class->obj(), methods,
-                           arraysize(methods)) != 0) {
+  if (env->RegisterNatives(g_flutter_native_view_class->obj(),
+                           native_view_methods,
+                           arraysize(native_view_methods)) != 0) {
+    return false;
+  }
+
+  if (env->RegisterNatives(g_flutter_view_class->obj(), view_methods,
+                           arraysize(view_methods)) != 0) {
     return false;
   }
 
   g_handle_platform_message_method =
-      env->GetMethodID(g_flutter_view_class->obj(), "handlePlatformMessage",
-                       "(Ljava/lang/String;[BI)V");
+      env->GetMethodID(g_flutter_native_view_class->obj(),
+                       "handlePlatformMessage", "(Ljava/lang/String;[BI)V");
 
   if (g_handle_platform_message_method == nullptr) {
     return false;
   }
 
-  g_handle_platform_message_response_method = env->GetMethodID(
-      g_flutter_view_class->obj(), "handlePlatformMessageResponse", "(I[B)V");
+  g_handle_platform_message_response_method =
+      env->GetMethodID(g_flutter_native_view_class->obj(),
+                       "handlePlatformMessageResponse", "(I[B)V");
 
   if (g_handle_platform_message_response_method == nullptr) {
     return false;
   }
 
   g_update_semantics_method =
-      env->GetMethodID(g_flutter_view_class->obj(), "updateSemantics",
+      env->GetMethodID(g_flutter_native_view_class->obj(), "updateSemantics",
                        "(Ljava/nio/ByteBuffer;[Ljava/lang/String;)V");
 
   if (g_update_semantics_method == nullptr) {
     return false;
   }
 
-  g_on_first_frame_method =
-      env->GetMethodID(g_flutter_view_class->obj(), "onFirstFrame", "()V");
+  g_on_first_frame_method = env->GetMethodID(g_flutter_native_view_class->obj(),
+                                             "onFirstFrame", "()V");
 
   if (g_on_first_frame_method == nullptr) {
     return false;
