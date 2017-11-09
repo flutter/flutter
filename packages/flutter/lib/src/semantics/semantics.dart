@@ -4,14 +4,15 @@
 
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'dart:ui' show Rect, SemanticsAction, SemanticsFlags;
+import 'dart:ui' show Offset, Rect, SemanticsAction, SemanticsFlags,
+       TextDirection;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/painting.dart' show MatrixUtils, TransformProperty;
 import 'package:flutter/services.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'debug.dart';
+
 import 'semantics_event.dart';
 
 export 'dart:ui' show SemanticsAction;
@@ -197,7 +198,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  int get hashCode => hashValues(flags, actions, label, textDirection, rect, tags, transform);
+  int get hashCode => ui.hashValues(flags, actions, label, textDirection, rect, tags, transform);
 }
 
 class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
@@ -328,6 +329,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// decedent nodes are merged into this node.
   ///
   /// See also:
+  ///
   ///  * [isMergedIntoParent]
   ///  * [mergeAllDescendantsIntoThisNode]
   bool get isPartOfNodeMerging => mergeAllDescendantsIntoThisNode || isMergedIntoParent;
@@ -596,9 +598,18 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
 
+  /// Reconfigures the properties of this object to describe the configuration
+  /// provided in the `config` argument and the children listen in the
+  /// `childrenInInversePaintOrder` argument.
+  ///
+  /// The arguments may be null; this represents an empty configuration (all
+  /// values at their defaults, no children).
+  ///
+  /// No reference is kept to the [SemanticsConfiguration] object, but the child
+  /// list is used as-is and should therefore not be changed after this call.
   void updateWith({
     @required SemanticsConfiguration config,
-    @required  List<SemanticsNode> childrenInInversePaintOrder,
+    @required List<SemanticsNode> childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))
@@ -774,7 +785,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     if (_hasFlag(SemanticsFlags.hasCheckedState))
       properties.add(new FlagProperty('isChecked', value: _hasFlag(SemanticsFlags.isChecked), ifTrue: 'checked', ifFalse: 'unchecked'));
     properties.add(new FlagProperty('isSelected', value: _hasFlag(SemanticsFlags.isSelected), ifTrue: 'selected'));
+    properties.add(new FlagProperty('isFocused', value: _hasFlag(SemanticsFlags.isFocused), ifTrue: 'focused'));
     properties.add(new FlagProperty('isButton', value: _hasFlag(SemanticsFlags.isButton), ifTrue: 'button'));
+    properties.add(new FlagProperty('isTextField', value: _hasFlag(SemanticsFlags.isTextField), ifTrue: 'textField'));
     properties.add(new StringProperty('label', _label, defaultValue: ''));
     properties.add(new StringProperty('value', _value, defaultValue: ''));
     properties.add(new StringProperty('increasedValue', _increasedValue, defaultValue: ''));
@@ -1081,6 +1094,7 @@ class SemanticsConfiguration {
   /// would like to contribute to the semantics tree.
   ///
   /// See also:
+  ///
   /// * [addAction] to add an action.
   final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
 
@@ -1100,6 +1114,7 @@ class SemanticsConfiguration {
   /// registered.
   ///
   /// See also:
+  ///
   ///  * [addAction] to add an action.
   VoidCallback getActionHandler(SemanticsAction action) => _actions[action];
 
@@ -1142,6 +1157,7 @@ class SemanticsConfiguration {
   /// The reading direction is given by [textDirection].
   ///
   /// See also:
+  ///
   ///  * [decreasedValue], describes what [value] will be after performing
   ///    [SemanticsAction.decrease]
   ///  * [increasedValue], describes what [value] will be after performing
@@ -1224,9 +1240,19 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlags.isChecked, value);
   }
 
+  /// Whether the owning [RenderObject] currently holds the user's focus.
+  set isFocused(bool value) {
+    _setFlag(SemanticsFlags.isFocused, value);
+  }
+
   /// Whether the owning [RenderObject] is a button (true) or not (false).
   set isButton(bool value) {
     _setFlag(SemanticsFlags.isButton, value);
+  }
+
+  /// Whether the owning [RenderObject] is a text field.
+  set isTextField(bool value) {
+    _setFlag(SemanticsFlags.isTextField, value);
   }
 
   // TAGS
@@ -1235,6 +1261,7 @@ class SemanticsConfiguration {
   /// [SemanticsNode]s.
   ///
   /// See also:
+  ///
   ///  * [addTagForChildren] to add a tag and for more information about their
   ///    usage.
   Iterable<SemanticsTag> get tagsForChildren => _tagsForChildren;
@@ -1252,6 +1279,7 @@ class SemanticsConfiguration {
   /// can use this information to determine the shape of the semantics tree.
   ///
   /// See also:
+  ///
   ///  * [RenderSemanticsGestureHandler.excludeFromScrolling] for an example of
   ///    how tags are used.
   void addTagForChildren(SemanticsTag tag) {
@@ -1347,6 +1375,23 @@ class SemanticsConfiguration {
       .._actionsAsBits = _actionsAsBits
       .._actions.addAll(_actions);
   }
+}
+
+/// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
+/// are printed.
+enum DebugSemanticsDumpOrder {
+  /// Print nodes in inverse hit test order.
+  ///
+  /// In inverse hit test order, the last child of a [SemanticsNode] will be
+  /// asked first if it wants to respond to a user's interaction, followed by
+  /// the second last, etc. until a taker is found.
+  inverseHitTest,
+
+  /// Print nodes in traversal order.
+  ///
+  /// Traversal order defines how the user can move the accessibility focus from
+  /// one node to another.
+  traversal,
 }
 
 String _concatStrings({

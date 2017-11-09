@@ -55,7 +55,7 @@ class TraceCommand extends FlutterCommand {
     Tracing tracing;
 
     try {
-      tracing = Tracing.connect(observatoryUri);
+      tracing = await Tracing.connect(observatoryUri);
     } catch (error) {
       throwToolExit('Error connecting to observatory: $error');
     }
@@ -97,8 +97,8 @@ class TraceCommand extends FlutterCommand {
 class Tracing {
   Tracing(this.vmService);
 
-  static Tracing connect(Uri uri) {
-    final VMService observatory = VMService.connect(uri);
+  static Future<Tracing> connect(Uri uri) async {
+    final VMService observatory = await VMService.connect(uri);
     return new Tracing(observatory);
   }
 

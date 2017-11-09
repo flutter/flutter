@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/semantics.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'rendering_tester.dart';
+import '../rendering/rendering_tester.dart';
 
 
 void main() {
@@ -198,7 +199,7 @@ void main() {
 
     expect(
       minimalProperties.toStringDeep(minLevel: DiagnosticLevel.hidden),
-      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isSelected: false, isButton: false, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null)\n',
+      'SemanticsNode#16(owner: null, isPartOfNodeMerging: false, Rect.fromLTRB(0.0, 0.0, 0.0, 0.0), actions: [], isSelected: false, isFocused: false, isButton: false, isTextField: false, label: "", value: "", increasedValue: "", decreasedValue: "", hint: "", textDirection: null)\n'
     );
 
     final SemanticsConfiguration config = new SemanticsConfiguration()

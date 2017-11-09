@@ -4,29 +4,11 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 export 'package:flutter/foundation.dart' show debugPrint;
 
 // Any changes to this file should be reflected in the debugAssertAllRenderVarsUnset()
 // function below.
-
-/// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
-/// are printed.
-enum DebugSemanticsDumpOrder {
-  /// Print nodes in inverse hit test order.
-  ///
-  /// In inverse hit test order, the last child of a [SemanticsNode] will be
-  /// asked first if it wants to respond to a user's interaction, followed by
-  /// the second last, etc. until a taker is found.
-  inverseHitTest,
-
-  /// Print nodes in traversal order.
-  ///
-  /// Traversal order defines how the user can move the accessibility focus from
-  /// one node to another.
-  traversal,
-}
 
 const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1.0, 1.0);
 
@@ -129,54 +111,6 @@ bool debugCheckIntrinsicSizes = false;
 ///  * The discussion at [RendererBinding.drawFrame].
 bool debugProfilePaintsEnabled = false;
 
-
-/// Returns a list of strings representing the given transform in a format
-/// useful for [TransformProperty].
-///
-/// If the argument is null, returns a list with the single string "null".
-List<String> debugDescribeTransform(Matrix4 transform) {
-  if (transform == null)
-    return const <String>['null'];
-  final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
-  matrix.removeLast();
-  return matrix;
-}
-
-/// Property which handles [Matrix4] that represent transforms.
-class TransformProperty extends DiagnosticsProperty<Matrix4> {
-  /// Create a diagnostics property for [Matrix4] objects.
-  ///
-  /// The [showName] and [level] arguments must not be null.
-  TransformProperty(String name, Matrix4 value, {
-    bool showName: true,
-    Object defaultValue: kNoDefaultValue,
-    DiagnosticLevel level: DiagnosticLevel.info,
-  }) : assert(showName != null),
-       assert(level != null),
-       super(
-         name,
-         value,
-         showName: showName,
-         defaultValue: defaultValue,
-         level: level,
-       );
-
-  @override
-  String valueToString({ TextTreeConfiguration parentConfiguration }) {
-    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
-      // Format the value on a single line to be compatible with the parent's
-      // style.
-      final List<Vector4> rows = <Vector4>[
-        value.getRow(0),
-        value.getRow(1),
-        value.getRow(2),
-        value.getRow(3),
-      ];
-      return '[${rows.join("; ")}]';
-    }
-    return debugDescribeTransform(value).join('\n');
-  }
-}
 
 void _debugDrawDoubleRect(Canvas canvas, Rect outerRect, Rect innerRect, Color color) {
   final Path path = new Path()

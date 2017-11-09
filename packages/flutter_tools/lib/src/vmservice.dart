@@ -140,15 +140,19 @@ class VMService {
   /// protocol itself.
   ///
   /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
-  static VMService connect(
+  static Future<VMService> connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
     ReloadSources reloadSources,
-  }) {
+  }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    return new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
+    final VMService service = new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
+    // This call is to ensure we are able to establish a connection instead of
+    // keeping on trucking and failing farther down the process.
+    await service._sendRequest('getVersion', const <String, dynamic>{});
+    return service;
   }
 
   final Uri httpAddress;
@@ -737,6 +741,10 @@ class VM extends ServiceObjectOwner {
       return null;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
+      return null;
+    } on rpc.RpcException catch (error) {
+      printError('Error ${error.code} received from application: ${error.message}');
+      printTrace('${error.data}');
       return null;
     }
   }

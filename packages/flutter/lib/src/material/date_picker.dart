@@ -599,31 +599,8 @@ class _MonthPickerState extends State<MonthPicker> {
     });
   }
 
-  Icon _getPreviousMonthIcon(TextDirection textDirection) {
-    assert(textDirection != null);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return const Icon(Icons.chevron_right);
-      case TextDirection.ltr:
-        return const Icon(Icons.chevron_left);
-    }
-    return null;
-  }
-
-  Icon _getNextMonthIcon(TextDirection textDirection) {
-    assert(textDirection != null);
-    switch (textDirection) {
-      case TextDirection.rtl:
-        return const Icon(Icons.chevron_left);
-      case TextDirection.ltr:
-        return const Icon(Icons.chevron_right);
-    }
-    return null;
-  }
-
   @override
   Widget build(BuildContext context) {
-    final TextDirection textDirection = Directionality.of(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     return new SizedBox(
       width: _kMonthPickerPortraitWidth,
@@ -642,7 +619,7 @@ class _MonthPickerState extends State<MonthPicker> {
             top: 0.0,
             start: 8.0,
             child: new IconButton(
-              icon: _getPreviousMonthIcon(textDirection),
+              icon: const Icon(Icons.chevron_left),
               tooltip: localizations.previousMonthTooltip,
               onPressed: _isDisplayingFirstMonth ? null : _handlePreviousMonth,
             ),
@@ -651,7 +628,7 @@ class _MonthPickerState extends State<MonthPicker> {
             top: 0.0,
             end: 8.0,
             child: new IconButton(
-              icon: _getNextMonthIcon(textDirection),
+              icon: const Icon(Icons.chevron_right),
               tooltip: localizations.nextMonthTooltip,
               onPressed: _isDisplayingLastMonth ? null : _handleNextMonth,
             ),

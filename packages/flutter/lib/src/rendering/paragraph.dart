@@ -6,13 +6,13 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'semantics.dart';
 
 /// How overflowing text should be handled.
 enum TextOverflow {
@@ -401,6 +401,20 @@ class RenderParagraph extends RenderBox {
     assert(!debugNeedsLayout);
     _layoutTextWithConstraints(constraints);
     return _textPainter.getWordBoundary(position);
+  }
+
+  /// Returns the size of the text as laid out.
+  ///
+  /// This can differ from [size] if the text overflowed or if the [constraints]
+  /// provided by the parent [RenderObject] forced the layout to be bigger than
+  /// necessary for the given [text].
+  ///
+  /// This returns the [TextPainter.size] of the underlying [TextPainter].
+  ///
+  /// Valid only after [layout].
+  Size get textSize {
+    assert(!debugNeedsLayout);
+    return _textPainter.size;
   }
 
   @override

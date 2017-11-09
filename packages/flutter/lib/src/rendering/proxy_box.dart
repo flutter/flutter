@@ -7,15 +7,14 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
-import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'semantics.dart';
 
 export 'package:flutter/gestures.dart' show
   PointerEvent,
@@ -28,7 +27,7 @@ export 'package:flutter/gestures.dart' show
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
 /// child by calling through to the child for each function in the render box
-/// protocol. For example, a proxy box determines its size by askings its child
+/// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
 ///
 /// A proxy box isn't useful on its own because you might as well just replace
@@ -185,7 +184,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 /// as well.
 ///
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
-/// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
+/// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [additionalConstraints].
 class RenderConstrainedBox extends RenderProxyBox {
   /// Creates a render box that constrains its child.
@@ -361,7 +360,7 @@ class RenderLimitedBox extends RenderProxyBox {
 
 /// Attempts to size the child to a specific aspect ratio.
 ///
-/// The render object first tries the largest width permited by the layout
+/// The render object first tries the largest width permitted by the layout
 /// constraints. The height of the render object is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -1299,20 +1298,23 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], and [color] must not be null.
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape: BoxShape.rectangle,
     BorderRadius borderRadius,
     double elevation: 0.0,
     @required Color color,
+    Color shadowColor: const Color(0xFF000000),
   }) : assert(shape != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
+       _shadowColor = shadowColor,
        super(child: child);
 
   /// The shape of the layer.
@@ -1358,6 +1360,17 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     markNeedsPaint();
   }
 
+  /// The shadow color.
+  Color get shadowColor => _shadowColor;
+  Color _shadowColor;
+  set shadowColor(Color value) {
+    assert(value != null);
+    if (shadowColor == value)
+      return;
+    _shadowColor = value;
+    markNeedsPaint();
+  }
+
   /// The background color.
   Color get color => _color;
   Color _color;
@@ -1372,12 +1385,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     assert(hasSize);
-    if (_shape == BoxShape.rectangle) {
-      return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
-    } else {
-      final Rect rect = Offset.zero & size;
-      return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    assert(_shape != null);
+    switch (_shape) {
+      case BoxShape.rectangle:
+        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+      case BoxShape.circle:
+        final Rect rect = Offset.zero & size;
+        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
+    return null;
   }
 
   @override
@@ -1425,7 +1441,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
           canvas.drawShadow(
             new Path()..addRRect(offsetClipRRect),
-            const Color(0xFF000000),
+            shadowColor,
             elevation,
             color.alpha != 0xFF,
           );
@@ -1602,13 +1618,15 @@ class RenderTransform extends RenderProxyBox {
   RenderTransform({
     @required Matrix4 transform,
     Offset origin,
-    Alignment alignment,
+    AlignmentGeometry alignment,
+    TextDirection textDirection,
     this.transformHitTests: true,
     RenderBox child
   }) : assert(transform != null),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
+    this.textDirection = textDirection;
     this.origin = origin;
   }
 
@@ -1630,13 +1648,32 @@ class RenderTransform extends RenderProxyBox {
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
-  Alignment get alignment => _alignment;
-  Alignment _alignment;
-  set alignment(Alignment value) {
-    assert(value == null || (value.x != null && value.y != null));
+  ///
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
+  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// whose [Alignment.x] value is `1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     if (_alignment == value)
       return;
     _alignment = value;
+    markNeedsPaint();
+  }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     markNeedsPaint();
   }
 
@@ -1697,18 +1734,19 @@ class RenderTransform extends RenderProxyBox {
   }
 
   Matrix4 get _effectiveTransform {
-    if (_origin == null && _alignment == null)
+    final Alignment resolvedAlignment = alignment?.resolve(textDirection);
+    if (_origin == null && resolvedAlignment == null)
       return _transform;
     final Matrix4 result = new Matrix4.identity();
     if (_origin != null)
       result.translate(_origin.dx, _origin.dy);
     Offset translation;
-    if (_alignment != null) {
-      translation = _alignment.alongSize(size);
+    if (resolvedAlignment != null) {
+      translation = resolvedAlignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
     result.multiply(_transform);
-    if (_alignment != null)
+    if (resolvedAlignment != null)
       result.translate(-translation.dx, -translation.dy);
     if (_origin != null)
       result.translate(-_origin.dx, -_origin.dy);
@@ -1754,6 +1792,7 @@ class RenderTransform extends RenderProxyBox {
     description.add(new TransformProperty('transform matrix', _transform));
     description.add(new DiagnosticsProperty<Offset>('origin', origin));
     description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1806,7 +1845,7 @@ class RenderFittedBox extends RenderProxyBox {
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
   ///
-  /// If this is set to a [AlignmentDirectional] object, then
+  /// If this is set to an [AlignmentDirectional] object, then
   /// [textDirection] must not be null.
   AlignmentGeometry get alignment => _alignment;
   AlignmentGeometry _alignment;
@@ -1935,7 +1974,7 @@ class RenderFittedBox extends RenderProxyBox {
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// The translation is expressed as an [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
 ///

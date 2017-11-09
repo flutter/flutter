@@ -48,8 +48,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
-  final Element timePickerElement = tester.element(find.byElementPredicate((Element element) => element.widget.runtimeType.toString() == '_TimePickerDialog'));
-  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(timePickerElement);
+  final MaterialLocalizations materialLocalizations = MaterialLocalizations.of(tester.element(find.byType(RaisedButton)));
   await tester.tap(find.text(materialLocalizations.okButtonLabel));
   await tester.pumpAndSettle(const Duration(seconds: 1));
 }
@@ -58,11 +57,11 @@ void main() {
   testWidgets('can localize the header in all known formats', (WidgetTester tester) async {
     // TODO(yjbanov): also test `HH.mm` (in_ID), `a h:mm` (ko_KR) and `HH:mm น.` (th_TH) when we have .arb files for them
     final Map<Locale, List<String>> locales = <Locale, List<String>>{
-      const Locale('en', 'US'): const <String>['hour h', 'string :', 'minute', 'period'], //'h:mm a'
-      const Locale('en', 'GB'): const <String>['hour HH', 'string :', 'minute'], //'HH:mm'
-      const Locale('es', 'ES'): const <String>['hour H', 'string :', 'minute'], //'H:mm'
-      const Locale('fr', 'CA'): const <String>['hour HH', 'string h', 'minute'], //'HH \'h\' mm'
-      const Locale('zh', 'ZH'): const <String>['period', 'hour h', 'string :', 'minute'], //'ah:mm'
+      const Locale('en', 'US'): const <String>['hour', 'string :', 'minute', 'period'], //'h:mm a'
+      const Locale('en', 'GB'): const <String>['hour', 'string :', 'minute'], //'HH:mm'
+      const Locale('es', 'ES'): const <String>['hour', 'string :', 'minute'], //'H:mm'
+      const Locale('fr', 'CA'): const <String>['hour', 'string h', 'minute'], //'HH \'h\' mm'
+      const Locale('zh', 'ZH'): const <String>['period', 'hour', 'string :', 'minute'], //'ah:mm'
     };
 
     for (Locale locale in locales.keys) {
@@ -77,7 +76,7 @@ void main() {
         } else if (fragmentType == '_DayPeriodControl') {
           actual.add('period');
         } else if (fragmentType == '_HourControl') {
-          actual.add('hour ${widget.hourFormat.toString().split('.').last}');
+          actual.add('hour');
         } else if (fragmentType == '_StringFragment') {
           actual.add('string ${widget.value}');
         } else {
@@ -125,5 +124,73 @@ void main() {
         expect(result, equals(new TimeOfDay(hour: i < 7 ? 12 : 0, minute: 0)));
       }
     }
+  });
+
+  const List<String> labels12To11 = const <String>['12', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11'];
+  const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
+  const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
+
+  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
+    await tester.pumpWidget(
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          GlobalMaterialLocalizations.delegate,
+          DefaultWidgetsLocalizations.delegate,
+        ],
+        child: new MediaQuery(
+          data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
+          child: new Directionality(
+            textDirection: TextDirection.ltr,
+            child: new Navigator(
+              onGenerateRoute: (RouteSettings settings) {
+                return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+                  showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
+                  return new Container();
+                });
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    // Pump once, because the dialog shows up asynchronously.
+    await tester.pump();
+  }
+
+  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false);
+
+    final CustomPaint dialPaint = tester.widget(find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      matching: find.byType(CustomPaint),
+    ));
+    final dynamic dialPainter = dialPaint.painter;
+    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    expect(dialPainter.primaryInnerLabels, null);
+
+    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    expect(dialPainter.secondaryInnerLabels, null);
+  });
+
+  testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true);
+
+    final CustomPaint dialPaint = tester.widget(find.descendant(
+      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+      matching: find.byType(CustomPaint),
+    ));
+    final dynamic dialPainter = dialPaint.painter;
+    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
+    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+
+    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
+    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
   });
 }

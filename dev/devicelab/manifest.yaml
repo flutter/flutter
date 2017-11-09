@@ -64,7 +64,6 @@ tasks:
       Checks that flavored builds work on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   channels_integration_test:
     description: >
@@ -102,7 +101,6 @@ tasks:
       --preview-dart-2 option, that enables Dart 2.0 frontend.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   complex_layout_scroll_perf__memory:
     description: >
@@ -146,14 +144,12 @@ tasks:
       Validates our service protocol extensions.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   android_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and Android screenshots
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   complex_layout_semantics_perf:
     description: >
@@ -188,7 +184,6 @@ tasks:
       Checks that flavored builds work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   channels_integration_test_ios:
     description: >
@@ -215,19 +210,19 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
-#  flutter_gallery_ios__start_up:
-#    description: >
-#      Measures the startup time of the Flutter Gallery app on iOS.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["has-ios-device"]
-#    flaky: true
+  flutter_gallery_ios__start_up:
+    description: >
+      Measures the startup time of the Flutter Gallery app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
-#  complex_layout_ios__start_up:
-#    description: >
-#      Measures the startup time of the Complex Layout sample app on iOS.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["has-ios-device"]
-#    flaky: true
+  complex_layout_ios__start_up:
+    description: >
+      Measures the startup time of the Complex Layout sample app on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
@@ -242,13 +237,13 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
-#  microbenchmarks_ios:
-#    description: >
-#      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
-#    stage: devicelab_ios
-#    required_agent_capabilities: ["has-ios-device"]
-#    timeout_in_minutes: 30
-#    flaky: true
+  microbenchmarks_ios:
+    description: >
+      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    timeout_in_minutes: 30
+    flaky: true
 
 #  flutter_view_ios__start_up:
 #    description: >
@@ -276,7 +271,6 @@ tasks:
       Checks that flavored builds work on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
-    flaky: true
 
   channels_integration_test_win:
     description: >
@@ -350,7 +344,6 @@ tasks:
       with semantics enabled.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__memory_nav:
     description: >

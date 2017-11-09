@@ -420,4 +420,95 @@ void main() {
     expect(tester.getRect(find.text('S')).left, anyOf(783.0, 784.0));
     expect(tester.getRect(find.text('S')).top, equals(295.5));
   });
+
+  testWidgets('InputDecorator animates properly', (WidgetTester tester) async {
+    final Widget child = const InputDecorator(
+      key: const Key('key'),
+      decoration: const InputDecoration(),
+      baseStyle: const TextStyle(),
+      textAlign: TextAlign.center,
+      isFocused: false,
+      isEmpty: false,
+      child: const Placeholder(),
+    );
+    expect(
+      child.toString(),
+      'InputDecorator-[<\'key\'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)',
+    );
+  });
+
+  testWidgets('InputDecorator works with partially specified styles', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(
+        child: const DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: const Center(
+            child: const TextField(
+              decoration: const InputDecoration(
+                labelText: 'label',
+                labelStyle: const TextStyle(),
+                helperText: 'helper',
+                helperStyle: const TextStyle(),
+                hintText: 'hint',
+                hintStyle: const TextStyle(),
+                errorText: 'error',
+                errorStyle: const TextStyle(),
+                prefixText: 'prefix',
+                prefixStyle: const TextStyle(),
+                suffixText: 'suffix',
+                suffixStyle: const TextStyle(),
+                counterText: 'counter',
+                counterStyle: const TextStyle(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('label'), findsOneWidget);
+
+    // Tap to make the hint show up.
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('hint'), findsOneWidget);
+
+    // Enter text to make the text style get used.
+    await tester.enterText(find.byType(TextField), 'Test');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.text('prefix'), findsOneWidget);
+    expect(find.text('suffix'), findsOneWidget);
+
+    // Test again without error, so helper style gets used.
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(
+        child: const DefaultTextStyle(
+          style: const TextStyle(),
+          child: const Center(
+            child: const TextField(
+              decoration: const InputDecoration(
+                labelText: 'label',
+                labelStyle: const TextStyle(),
+                helperText: 'helper',
+                helperStyle: const TextStyle(),
+                hintText: 'hint',
+                hintStyle: const TextStyle(),
+                prefixText: 'prefix',
+                prefixStyle: const TextStyle(),
+                suffixText: 'suffix',
+                suffixStyle: const TextStyle(),
+                counterText: 'counter',
+                counterStyle: const TextStyle(),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('label'), findsOneWidget);
+    expect(find.text('helper'), findsOneWidget);
+  });
 }

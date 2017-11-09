@@ -325,6 +325,10 @@ class _AppBarState extends State<AppBar> {
     Scaffold.of(context).openDrawer();
   }
 
+  void _handleDrawerButtonEnd() {
+    Scaffold.of(context).openEndDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(!widget.primary || debugCheckHasMediaQuery(context));
@@ -333,6 +337,7 @@ class _AppBarState extends State<AppBar> {
     final ModalRoute<dynamic> parentRoute = ModalRoute.of(context);
 
     final bool hasDrawer = scaffold?.hasDrawer ?? false;
+    final bool hasEndDrawer = scaffold?.hasEndDrawer ?? false;
     final bool canPop = parentRoute?.canPop ?? false;
     final bool useCloseButton = parentRoute is MaterialPageRoute<dynamic> && parentRoute.fullscreenDialog;
 
@@ -393,6 +398,12 @@ class _AppBarState extends State<AppBar> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: widget.actions,
       );
+    } else if (hasEndDrawer) {
+      actions = new IconButton(
+        icon: const Icon(Icons.menu),
+        onPressed: _handleDrawerButtonEnd,
+        tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+      );      
     }
 
     final Widget toolbar = new Padding(

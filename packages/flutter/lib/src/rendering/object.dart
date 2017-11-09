@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
-import 'semantics.dart';
 
 export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
@@ -2114,6 +2114,39 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     owner.requestVisualUpdate();
   }
 
+  /// Report the semantics of this node, for example for accessibility purposes.
+  ///
+  /// This method should be overridden by subclasses that have interesting
+  /// semantic information.
+  ///
+  /// The given [SemanticsConfiguration] object is mutable and should be
+  /// annotated in a manner that describes the current state. No reference
+  /// should be kept to that object; mutating it outside of the context of the
+  /// [describeSemanticsConfiguration] call (for example as a result of
+  /// asynchronous computation) will at best have no useful effect and at worse
+  /// will cause crashes as the data will be in an inconsistent state.
+  ///
+  /// ## Sample code
+  ///
+  /// The following snippet will describe the node as a button that responds to
+  /// tap actions.
+  ///
+  /// ```dart
+  /// abstract class SemanticButtonRenderObject extends RenderObject {
+  ///   @override
+  ///   void describeSemanticsConfiguration(SemanticsConfiguration config) {
+  ///     super.describeSemanticsConfiguration(config);
+  ///     config
+  ///       ..addAction(SemanticsAction.tap, _handleTap)
+  ///       ..label = 'I am a button'
+  ///       ..isButton = true;
+  ///   }
+  ///
+  ///   void _handleTap() {
+  ///     // Do something.
+  ///   }
+  /// }
+  /// ```
   @protected
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     // Nothing to do by default.
@@ -2937,6 +2970,7 @@ abstract class _SemanticsFragment {
   /// previously painted [RenderObject]s unreachable for accessibility purposes.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes]
   ///    describes what semantics are dropped in more detail.
   final bool dropsSemanticsOfPreviousSiblings;

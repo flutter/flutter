@@ -629,4 +629,122 @@ void main() {
       ),
     );
   });
+
+  testWidgets('Alignment with partially-positioned children', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            const SizedBox(width: 100.0, height: 100.0),
+            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(SizedBox).at(0)), new Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)), new Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)), new Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)), new Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)), new Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)), new Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)), new Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)), new Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)), new Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          alignment: Alignment.center,
+          children: <Widget>[
+            const SizedBox(width: 100.0, height: 100.0),
+            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(SizedBox).at(0)), new Rect.fromLTWH(350.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)), new Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)), new Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)), new Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)), new Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)), new Rect.fromLTWH(0.0,   250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)), new Rect.fromLTWH(700.0, 250.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)), new Rect.fromLTWH(350.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)), new Rect.fromLTWH(350.0, 500.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          alignment: Alignment.bottomRight,
+          children: <Widget>[
+            const SizedBox(width: 100.0, height: 100.0),
+            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(SizedBox).at(0)), new Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)), new Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)), new Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)), new Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)), new Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)), new Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)), new Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)), new Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)), new Rect.fromLTWH(700.0, 500.0, 100.0, 100.0));
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Stack(
+          alignment: Alignment.topLeft,
+          children: <Widget>[
+            const SizedBox(width: 100.0, height: 100.0),
+            const Positioned(left: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(right: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const Positioned(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(start: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(end: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(top: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+            const PositionedDirectional(bottom: 0.0, child: const SizedBox(width: 100.0, height: 100.0)),
+          ],
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(SizedBox).at(0)), new Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(1)), new Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(2)), new Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(3)), new Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(4)), new Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(5)), new Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(6)), new Rect.fromLTWH(700.0, 0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(7)), new Rect.fromLTWH(0.0,   0.0,   100.0, 100.0));
+    expect(tester.getRect(find.byType(SizedBox).at(8)), new Rect.fromLTWH(0.0,   500.0, 100.0, 100.0));
+  });
 }

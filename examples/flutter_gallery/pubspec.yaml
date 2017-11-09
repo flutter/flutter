@@ -6,12 +6,13 @@ dependencies:
   intl: 0.15.2
   string_scanner: 1.0.2
   url_launcher: 0.4.2+5
+  cupertino_icons: 0.1.1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
     git:
       url: https://flutter.googlesource.com/gallery-assets
-      ref: 0b6cdb29b24ecc60781c2828086d955dacdc0152
+      ref: 6427f36af1bdb2fffaeda1c46d5e52d7b636c93d
 
 dev_dependencies:
   flutter_test:
@@ -44,15 +45,15 @@ dev_dependencies:
   path: 1.4.2 # TRANSITIVE DEPENDENCY
   pool: 1.3.3 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
-  quiver: 0.25.0 # TRANSITIVE DEPENDENCY
-  shelf: 0.7.0 # TRANSITIVE DEPENDENCY
+  quiver: 0.26.0 # TRANSITIVE DEPENDENCY
+  shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
   shelf_static: 0.2.6 # TRANSITIVE DEPENDENCY
   shelf_web_socket: 0.2.2 # TRANSITIVE DEPENDENCY
   source_map_stack_trace: 1.1.4 # TRANSITIVE DEPENDENCY
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.8.3 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.0 # TRANSITIVE DEPENDENCY
   stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   test: 0.12.26 # TRANSITIVE DEPENDENCY
@@ -137,6 +138,8 @@ flutter:
     - packages/flutter_gallery_assets/shrine/vendors/peter-carlsson.png
     - packages/flutter_gallery_assets/shrine/vendors/sandra-adams.jpg
     - packages/flutter_gallery_assets/shrine/vendors/zach.jpg
+    - packages/flutter_gallery_assets/cupertino_navigation/person1.jpg
+    - packages/flutter_gallery_assets/cupertino_navigation/person2.jpg
   fonts:
     - family: Raleway
       fonts:

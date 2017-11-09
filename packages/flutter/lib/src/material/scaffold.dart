@@ -32,6 +32,7 @@ enum _ScaffoldSlot {
   bottomNavigationBar,
   floatingActionButton,
   drawer,
+  endDrawer,
   statusBar,
 }
 
@@ -149,6 +150,11 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ScaffoldSlot.drawer)) {
       layoutChild(_ScaffoldSlot.drawer, new BoxConstraints.tight(size));
       positionChild(_ScaffoldSlot.drawer, Offset.zero);
+    }
+
+    if (hasChild(_ScaffoldSlot.endDrawer)) {
+      layoutChild(_ScaffoldSlot.endDrawer, new BoxConstraints.tight(size));
+      positionChild(_ScaffoldSlot.endDrawer, Offset.zero);
     }
   }
 
@@ -312,6 +318,7 @@ class Scaffold extends StatefulWidget {
     this.floatingActionButton,
     this.persistentFooterButtons,
     this.drawer,
+    this.endDrawer,
     this.bottomNavigationBar,
     this.backgroundColor,
     this.resizeToAvoidBottomPadding: true,
@@ -360,13 +367,24 @@ class Scaffold extends StatefulWidget {
   final List<Widget> persistentFooterButtons;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
-  /// devices.
-  ///
+  /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
+  /// right-to-left ([TextDirection.rtl])
+  /// 
   /// In the uncommon case that you wish to open the drawer manually, use the
   /// [ScaffoldState.openDrawer] function.
   ///
   /// Typically a [Drawer].
   final Widget drawer;
+
+  /// A panel displayed to the side of the [body], often hidden on mobile
+  /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
+  /// left-to-right ([TextDirection.rtl])
+  ///
+  /// In the uncommon case that you wish to open the drawer manually, use the
+  /// [ScaffoldState.openDrawer] function.
+  ///
+  /// Typically a [Drawer].
+  final Widget endDrawer;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -528,9 +546,12 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   // DRAWER API
 
   final GlobalKey<DrawerControllerState> _drawerKey = new GlobalKey<DrawerControllerState>();
+  final GlobalKey<DrawerControllerState> _endDrawerKey = new GlobalKey<DrawerControllerState>();
 
   /// Whether this scaffold has a non-null [Scaffold.drawer].
   bool get hasDrawer => widget.drawer != null;
+  /// Whether this scaffold has a non-null [Scaffold.endDrawer].
+  bool get hasEndDrawer => widget.endDrawer != null;
 
   /// Opens the [Drawer] (if any).
   ///
@@ -546,6 +567,22 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
   void openDrawer() {
     _drawerKey.currentState?.open();
+  }
+
+  /// Opens the end side [Drawer] (if any).
+  ///
+  /// If the scaffold has a non-null [Scaffold.endDrawer], this function will cause
+  /// the end side drawer to begin its entrance animation.
+  ///
+  /// Normally this is not needed since the [Scaffold] automatically shows an
+  /// appropriate [IconButton], and handles the edge-swipe gesture, to show the
+  /// drawer.
+  ///
+  /// To close the end side drawer once it is open, use [Navigator.pop].
+  ///
+  /// See [Scaffold.of] for information about how to obtain the [ScaffoldState].
+  void openEndDrawer() {
+    _endDrawerKey.currentState?.open();
   }
 
   // SNACKBAR API
@@ -945,6 +982,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         children,
         new DrawerController(
           key: _drawerKey,
+          alignment: DrawerAlignment.start,
           child: widget.drawer,
         ),
         _ScaffoldSlot.drawer,
@@ -952,6 +990,24 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: textDirection == TextDirection.rtl,
         removeTopPadding: false,
         removeRightPadding: textDirection == TextDirection.ltr,
+        removeBottomPadding: false,
+      );
+    }
+
+    if (widget.endDrawer != null) {
+      assert(hasEndDrawer);
+      _addIfNonNull(
+        children,
+        new DrawerController(
+          key: _endDrawerKey,
+          alignment: DrawerAlignment.end,
+          child: widget.endDrawer,
+        ),
+        _ScaffoldSlot.endDrawer,
+        // remove the side padding from the side we're not touching
+        removeLeftPadding: textDirection == TextDirection.ltr,
+        removeTopPadding: false,
+        removeRightPadding: textDirection == TextDirection.rtl,
         removeBottomPadding: false,
       );
     }

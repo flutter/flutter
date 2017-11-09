@@ -142,6 +142,10 @@ void main(List<String> rawArgs) {
   final Directory directory = new Directory(pathlib.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n'));
   final RegExp filenameRE = new RegExp(r'material_(\w+)\.arb$');
 
+  exitWithError(
+    validateEnglishLocalizations(new File(pathlib.join(directory.path, 'material_en.arb')))
+  );
+
   for (FileSystemEntity entity in directory.listSync()) {
     final String path = entity.path;
     if (FileSystemEntity.isFileSync(path) && filenameRE.hasMatch(path)) {
@@ -149,7 +153,10 @@ void main(List<String> rawArgs) {
       processBundle(new File(path), locale);
     }
   }
-  validateLocalizations(localeToResources, localeToResourceAttributes);
+
+  exitWithError(
+    validateLocalizations(localeToResources, localeToResourceAttributes)
+  );
 
   final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
   final StringBuffer buffer = new StringBuffer();
