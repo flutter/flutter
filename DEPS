@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '16d4e9606f8186fb81886c34fca02b95ffcc09b9',
+  'dart_revision': '4dd4fd745e588eef64b8d85811d847ab72633cb7',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.0',
@@ -59,11 +59,11 @@ vars = {
   'dart_intl_tag': '0.15.1',
   'dart_isolate_tag': '1.1.0',
   'dart_json_rpc_2_tag': '2.0.4',
-  'dart_linter_rev': 'ae88f710dce03bc92e20f78645cbdf069b39d529',
+  'dart_linter_tag': '0.1.39',
   'dart_logging_tag': '0.11.3+1',
   'dart_markdown_tag': '0.11.4',
   'dart_matcher_tag': '0.12.1+4',
-  'dart_mime_rev': '367087506c0a8a746bd75c685487b01ffed7f1c5',
+  'dart_mime_tag': '0.9.4',
   'dart_mockito_tag': '2.0.2',
   'dart_mustache4dart_tag': 'v1.1.0',
   'dart_oauth2_tag': '1.1.0',
@@ -242,7 +242,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/dart-lang/logging' + '@' + Var('dart_logging_tag'),
 
   'src/third_party/dart/third_party/pkg/linter':
-   Var('chromium_git') + '/external/github.com/dart-lang/linter' + '@' + Var('dart_linter_rev'),
+   Var('chromium_git') + '/external/github.com/dart-lang/linter' + '@' + Var('dart_linter_tag'),
 
   'src/third_party/dart/third_party/pkg/markdown':
    Var('chromium_git') + '/external/github.com/dart-lang/markdown' + '@' + Var('dart_markdown_tag'),
@@ -251,7 +251,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/dart-lang/matcher' + '@' + Var('dart_matcher_tag'),
 
   'src/third_party/dart/third_party/pkg/mime':
-   Var('chromium_git') + '/external/github.com/dart-lang/mime' + '@' + Var('dart_mime_rev'),
+   Var('chromium_git') + '/external/github.com/dart-lang/mime' + '@' + Var('dart_mime_tag'),
 
   'src/third_party/dart/third_party/pkg/mockito':
    Var('chromium_git') + '/external/github.com/dart-lang/mockito' + '@' + Var('dart_mockito_tag'),
