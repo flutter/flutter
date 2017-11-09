@@ -873,7 +873,9 @@ typedef void ImageDecoderCallback(Image result);
 /// Obtain a FrameInfo with [Codec.getNextFrame].
 abstract class FrameInfo extends NativeFieldWrapperClass2 {
   // The duration this frame should be shown.
-  int get durationMillis native "FrameInfo_durationMillis";
+  Duration get duration => new Duration(milliseconds: _durationMillis);
+
+  int get _durationMillis native "FrameInfo_durationMillis";
 
   // The Image object for this frame.
   Image get image native "FrameInfo_image";
