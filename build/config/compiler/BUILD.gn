@@ -622,11 +622,6 @@ if (is_win) {
     # Disables.
     "-Wno-missing-field-initializers",  # "struct foo f = {0};"
     "-Wno-unused-parameter",  # Unused function parameters.
-
-    # TODO(cbracken): Temporarily disable this warning type because the current
-    # clang implementation is too agressive and is reporting cases that are
-    # generally safe. Remove once https://reviews.llvm.org/D39462 lands.
-    "-Wno-tautological-constant-compare",
   ]
 
   if (is_mac) {
