@@ -229,6 +229,66 @@ class TextSpan extends DiagnosticableTree {
     return buffer.toString();
   }
 
+  /// Checks if the [TextSpan] tree has any text in it.
+  bool get isEmpty {
+    assert(debugAssertIsValid());
+    bool isEmpty;
+    visitTextSpan((TextSpan span) {
+      if (span.text.isNotEmpty) {
+        isEmpty = false;
+        return isEmpty;
+      } else {
+        isEmpty = true;
+        return isEmpty;
+      }
+    });
+    return isEmpty;
+  }
+
+  bool get isNotEmpty => !isEmpty;
+
+  /// Return the length of the text contained in this [TextSpan] tree.
+  int get length {
+    assert(debugAssertIsValid());
+    int length = 0;
+    visitTextSpan((TextSpan span) {
+      length += span.text.length;
+      return true;
+    });
+    return length;
+  }
+
+  /// Return the offset of this child in plain text or -1 if the children list
+  /// is null or this [TextSpan] is not contained in this children list.
+  int getOffsetInParent(TextSpan span) {
+    assert(debugAssertIsValid());
+    if (children == null || !children.contains(span)) return -1;
+
+    int length = 0;
+    visitTextSpan((TextSpan sibling) {
+      if (span != sibling) {
+        length += sibling.text.length;
+        return true;
+      } else
+        return false;
+    });
+    return length;
+  }
+
+  /// Creates a copy of this [TextSpan] but with the given fields replaced with the new values.
+  TextSpan copyWith(
+      {TextSpan parent,
+        TextStyle style,
+        String text,
+        List<TextSpan> children,
+        GestureRecognizer recognizer}) {
+    return new TextSpan(
+        style: style ?? this.style,
+        text: text ?? this.text,
+        children: children ?? this.children,
+        recognizer: recognizer ?? this.recognizer);
+  }
+
   /// Returns the UTF-16 code unit at the given index in the flattened string.
   ///
   /// Returns null if the index is out of bounds.
