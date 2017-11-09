@@ -697,9 +697,11 @@ class PartitionAllocatorGeneric {
 
 }  // namespace WTF
 
+using WTF::PartitionAllocatorGeneric;
+using WTF::PartitionRoot;
+using WTF::SizeSpecificPartitionAllocator;
 using WTF::partitionAlloc;
 using WTF::partitionAllocActualSize;
-using WTF::PartitionAllocatorGeneric;
 using WTF::partitionAllocGeneric;
 using WTF::partitionAllocGetSize;
 using WTF::partitionAllocInit;
@@ -708,7 +710,5 @@ using WTF::partitionAllocSupportsGetSize;
 using WTF::partitionFree;
 using WTF::partitionFreeGeneric;
 using WTF::partitionReallocGeneric;
-using WTF::PartitionRoot;
-using WTF::SizeSpecificPartitionAllocator;
 
 #endif  // SKY_ENGINE_WTF_PARTITIONALLOC_H_

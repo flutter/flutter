@@ -813,11 +813,11 @@ struct DefaultHash<RefPtr<StringImpl>> {
 
 }  // namespace WTF
 
-using WTF::equal;
-using WTF::equalNonNull;
 using WTF::StringImpl;
 using WTF::TextCaseInsensitive;
 using WTF::TextCaseSensitive;
 using WTF::TextCaseSensitivity;
+using WTF::equal;
+using WTF::equalNonNull;
 
 #endif  // SKY_ENGINE_WTF_TEXT_STRINGIMPL_H_

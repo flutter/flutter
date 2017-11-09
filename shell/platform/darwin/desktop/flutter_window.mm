@@ -79,7 +79,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
   metrics.physical_width = size.width;
   metrics.physical_height = size.height;
 
-  blink::Threads::UI()->PostTask([engine = _platformView->engine().GetWeakPtr(), metrics] {
+  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), metrics ] {
     if (engine.get()) {
       engine->SetViewportMetrics(metrics);
     }
@@ -134,7 +134,7 @@ static inline blink::PointerData::Change PointerChangeFromNSEventPhase(NSEventPh
       break;
   }
 
-  blink::Threads::UI()->PostTask([engine = _platformView->engine().GetWeakPtr(), pointer_data] {
+  blink::Threads::UI()->PostTask([ engine = _platformView->engine().GetWeakPtr(), pointer_data ] {
     if (engine.get()) {
       blink::PointerDataPacket packet(1);
       packet.SetPointerData(0, pointer_data);

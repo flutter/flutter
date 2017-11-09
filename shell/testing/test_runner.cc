@@ -22,7 +22,7 @@ TestRunner::TestRunner()
   metrics.physical_height = 1800;  // 600 at 3x resolution
 
   blink::Threads::UI()->PostTask(
-      [engine = platform_view_->engine().GetWeakPtr(), metrics] {
+      [ engine = platform_view_->engine().GetWeakPtr(), metrics ] {
         if (engine)
           engine->SetViewportMetrics(metrics);
       });
@@ -39,7 +39,7 @@ TestRunner& TestRunner::Shared() {
 
 void TestRunner::Run(const TestDescriptor& test) {
   blink::Threads::UI()->PostTask(
-      [engine = platform_view_->engine().GetWeakPtr(), test] {
+      [ engine = platform_view_->engine().GetWeakPtr(), test ] {
         if (engine)
           engine->RunBundleAndSource(std::string(), test.path, test.packages);
       });

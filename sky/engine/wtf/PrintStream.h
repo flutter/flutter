@@ -422,7 +422,7 @@ PointerDump<T> pointerDump(const T* ptr) {
 
 using WTF::CharacterDump;
 using WTF::PointerDump;
-using WTF::pointerDump;
 using WTF::PrintStream;
+using WTF::pointerDump;
 
 #endif  // SKY_ENGINE_WTF_PRINTSTREAM_H_

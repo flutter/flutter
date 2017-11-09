@@ -76,10 +76,9 @@
   //
   // We are not using the PostTask for thread switching, but to make task
   // observers work.
-  blink::Threads::UI()->PostTask(
-      [callback = _pendingCallback, frame_start_time, frame_target_time]() {
-        callback(frame_start_time, frame_target_time);
-      });
+  blink::Threads::UI()->PostTask([
+    callback = _pendingCallback, frame_start_time, frame_target_time
+  ]() { callback(frame_start_time, frame_target_time); });
 
   _pendingCallback = nullptr;
 }

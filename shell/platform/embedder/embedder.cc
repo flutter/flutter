@@ -82,18 +82,24 @@ FlutterResult FlutterEngineRun(size_t version,
     return kInvalidArguments;
   }
 
-  auto make_current = [ptr = config->open_gl.make_current,
-                       user_data]() -> bool { return ptr(user_data); };
-
-  auto clear_current = [ptr = config->open_gl.clear_current,
-                        user_data]() -> bool { return ptr(user_data); };
-
-  auto present = [ptr = config->open_gl.present, user_data]() -> bool {
+  auto make_current =
+      [ ptr = config->open_gl.make_current, user_data ]()->bool {
     return ptr(user_data);
   };
 
-  auto fbo_callback = [ptr = config->open_gl.fbo_callback,
-                       user_data]() -> intptr_t { return ptr(user_data); };
+  auto clear_current =
+      [ ptr = config->open_gl.clear_current, user_data ]()->bool {
+    return ptr(user_data);
+  };
+
+  auto present = [ ptr = config->open_gl.present, user_data ]()->bool {
+    return ptr(user_data);
+  };
+
+  auto fbo_callback =
+      [ ptr = config->open_gl.fbo_callback, user_data ]()->intptr_t {
+    return ptr(user_data);
+  };
 
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
@@ -131,20 +137,20 @@ FlutterResult FlutterEngineRun(size_t version,
   std::string main(args->main_path);
   std::string packages(args->packages_path);
 
-  blink::Threads::UI()->PostTask(
-      [weak_engine = platform_view->engine().GetWeakPtr(),  //
-       assets = std::move(assets),                          //
-       main = std::move(main),                              //
-       packages = std::move(packages)                       //
+  blink::Threads::UI()->PostTask([
+    weak_engine = platform_view->engine().GetWeakPtr(),  //
+    assets = std::move(assets),                          //
+    main = std::move(main),                              //
+    packages = std::move(packages)                       //
   ] {
-        if (auto engine = weak_engine) {
-          if (main.empty()) {
-            engine->RunBundle(assets);
-          } else {
-            engine->RunBundleAndSource(assets, main, packages);
-          }
-        }
-      });
+    if (auto engine = weak_engine) {
+      if (main.empty()) {
+        engine->RunBundle(assets);
+      } else {
+        engine->RunBundleAndSource(assets, main, packages);
+      }
+    }
+  });
 
   *engine_out = reinterpret_cast<FlutterEngine>(
       new PlatformViewHolder(std::move(platform_view)));
@@ -176,7 +182,7 @@ FlutterResult FlutterEngineSendWindowMetricsEvent(
   metrics.device_pixel_ratio = SAFE_ACCESS(flutter_metrics, pixel_ratio, 1.0);
 
   blink::Threads::UI()->PostTask(
-      [weak_engine = holder->view()->engine().GetWeakPtr(), metrics] {
+      [ weak_engine = holder->view()->engine().GetWeakPtr(), metrics ] {
         if (auto engine = weak_engine) {
           engine->SetViewportMetrics(metrics);
         }
@@ -224,16 +230,17 @@ FlutterResult FlutterEngineSendPointerEvent(FlutterEngine engine,
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
   }
 
-  blink::Threads::UI()->PostTask(fxl::MakeCopyable(
-      [weak_engine = reinterpret_cast<PlatformViewHolder*>(engine)
-                         ->view()
-                         ->engine()
-                         .GetWeakPtr(),
-       packet = std::move(packet)] {
-        if (auto engine = weak_engine) {
-          engine->DispatchPointerDataPacket(*packet);
-        }
-      }));
+  blink::Threads::UI()->PostTask(fxl::MakeCopyable([
+    weak_engine = reinterpret_cast<PlatformViewHolder*>(engine)
+                      ->view()
+                      ->engine()
+                      .GetWeakPtr(),
+    packet = std::move(packet)
+  ] {
+    if (auto engine = weak_engine) {
+      engine->DispatchPointerDataPacket(*packet);
+    }
+  }));
 
   return kSuccess;
 }
@@ -260,7 +267,7 @@ FlutterResult FlutterEngineSendPlatformMessage(
       nullptr);
 
   blink::Threads::UI()->PostTask(
-      [weak_engine = holder->view()->engine().GetWeakPtr(), message] {
+      [ weak_engine = holder->view()->engine().GetWeakPtr(), message ] {
         if (auto engine = weak_engine) {
           engine->DispatchPlatformMessage(message);
         }

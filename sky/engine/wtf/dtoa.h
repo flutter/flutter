@@ -102,11 +102,11 @@ inline double parseDouble(const UChar* string,
 
 }  // namespace WTF
 
+using WTF::NumberToLStringBuffer;
+using WTF::NumberToStringBuffer;
 using WTF::numberToFixedPrecisionString;
 using WTF::numberToFixedWidthString;
-using WTF::NumberToLStringBuffer;
 using WTF::numberToString;
-using WTF::NumberToStringBuffer;
 using WTF::parseDouble;
 
 #endif  // SKY_ENGINE_WTF_DTOA_H_

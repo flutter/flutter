@@ -96,8 +96,8 @@ RuntimeHolder::RuntimeHolder()
 
 RuntimeHolder::~RuntimeHolder() {
   blink::Threads::Gpu()->PostTask(
-      fxl::MakeCopyable([rasterizer = std::move(rasterizer_)]() {
-        // Deletes rasterizer.
+      fxl::MakeCopyable([rasterizer = std::move(rasterizer_)](){
+          // Deletes rasterizer.
       }));
 }
 
@@ -227,32 +227,33 @@ void RuntimeHolder::CreateView(
   fidl::InterfaceHandle<scenic::SceneManager> scene_manager;
   view_manager_->GetSceneManager(scene_manager.NewRequest());
 
-  blink::Threads::Gpu()->PostTask(
-      fxl::MakeCopyable([rasterizer = rasterizer_.get(),            //
-                         scene_manager = std::move(scene_manager),  //
-                         import_token = std::move(import_token),    //
-                         weak_runtime_holder = GetWeakPtr()]() mutable {
-        ASSERT_IS_GPU_THREAD;
-        rasterizer->SetScene(
-            std::move(scene_manager), std::move(import_token),
-            // TODO(MZ-222): Ideally we would immediately redraw the previous
-            // layer tree when the metrics change since there's no need to
-            // rerecord it. However, we want to make sure there's only one
-            // outstanding frame. We should improve the frame scheduling so that
-            // the rasterizer thread can self-schedule re-rasterization.
-            [weak_runtime_holder] {
-              // This is on the GPU thread thread. Post to the Platform/UI
-              // thread for the completion callback.
-              ASSERT_IS_GPU_THREAD;
-              blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
-                // On the Platform/UI thread.
-                ASSERT_IS_UI_THREAD;
-                if (weak_runtime_holder) {
-                  weak_runtime_holder->OnRedrawFrame();
-                }
-              });
-            });
-      }));
+  blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
+    rasterizer = rasterizer_.get(),            //
+    scene_manager = std::move(scene_manager),  //
+    import_token = std::move(import_token),    //
+    weak_runtime_holder = GetWeakPtr()
+  ]() mutable {
+    ASSERT_IS_GPU_THREAD;
+    rasterizer->SetScene(
+        std::move(scene_manager), std::move(import_token),
+        // TODO(MZ-222): Ideally we would immediately redraw the previous layer
+        // tree when the metrics change since there's no need to rerecord it.
+        // However, we want to make sure there's only one outstanding frame.
+        // We should improve the frame scheduling so that the rasterizer thread
+        // can self-schedule re-rasterization.
+        [weak_runtime_holder] {
+          // This is on the GPU thread thread. Post to the Platform/UI
+          // thread for the completion callback.
+          ASSERT_IS_GPU_THREAD;
+          blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
+            // On the Platform/UI thread.
+            ASSERT_IS_UI_THREAD;
+            if (weak_runtime_holder) {
+              weak_runtime_holder->OnRedrawFrame();
+            }
+          });
+        });
+  }));
   runtime_ = blink::RuntimeController::Create(this);
 
   const uint8_t* isolate_snapshot_data;
@@ -330,27 +331,27 @@ void RuntimeHolder::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
 
   // We are on the Platform/UI thread. Post to the GPU thread to render.
   ASSERT_IS_PLATFORM_THREAD;
-  blink::Threads::Gpu()->PostTask(
-      fxl::MakeCopyable([rasterizer = rasterizer_.get(),      //
-                         layer_tree = std::move(layer_tree),  //
-                         weak_runtime_holder = GetWeakPtr()   //
+  blink::Threads::Gpu()->PostTask(fxl::MakeCopyable([
+    rasterizer = rasterizer_.get(),      //
+    layer_tree = std::move(layer_tree),  //
+    weak_runtime_holder = GetWeakPtr()   //
   ]() mutable {
-        // On the GPU Thread.
-        ASSERT_IS_GPU_THREAD;
-        rasterizer->Draw(std::move(layer_tree), [weak_runtime_holder]() {
-          // This is on the GPU thread thread. Post to the Platform/UI thread
-          // for the completion callback.
-          ASSERT_IS_GPU_THREAD;
-          blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
-            // On the Platform/UI thread.
-            ASSERT_IS_UI_THREAD;
-            if (weak_runtime_holder) {
-              weak_runtime_holder->frame_rendering_ = false;
-              weak_runtime_holder->OnFrameComplete();
-            }
-          });
-        });
-      }));
+    // On the GPU Thread.
+    ASSERT_IS_GPU_THREAD;
+    rasterizer->Draw(std::move(layer_tree), [weak_runtime_holder]() {
+      // This is on the GPU thread thread. Post to the Platform/UI thread
+      // for the completion callback.
+      ASSERT_IS_GPU_THREAD;
+      blink::Threads::Platform()->PostTask([weak_runtime_holder]() {
+        // On the Platform/UI thread.
+        ASSERT_IS_UI_THREAD;
+        if (weak_runtime_holder) {
+          weak_runtime_holder->frame_rendering_ = false;
+          weak_runtime_holder->OnFrameComplete();
+        }
+      });
+    });
+  }));
 }
 
 void RuntimeHolder::UpdateSemantics(std::vector<blink::SemanticsNode> update) {

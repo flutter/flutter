@@ -102,10 +102,10 @@ inline void appendUnsignedAsHexFixedSize(unsigned number,
 
 }  // namespace WTF
 
+using WTF::Lowercase;
 using WTF::appendByteAsHex;
 using WTF::appendUnsignedAsHex;
 using WTF::appendUnsignedAsHexFixedSize;
-using WTF::Lowercase;
 using WTF::placeByteAsHex;
 using WTF::placeByteAsHexCompressIfPossible;
 

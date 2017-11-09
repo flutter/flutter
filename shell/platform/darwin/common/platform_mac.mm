@@ -146,7 +146,7 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
 
   [defaults synchronize];
 
-  blink::Threads::UI()->PostTask([engine = engine->GetWeakPtr(), bundle_path, main, packages] {
+  blink::Threads::UI()->PostTask([ engine = engine->GetWeakPtr(), bundle_path, main, packages ] {
     if (engine)
       engine->RunBundleAndSource(bundle_path, main, packages);
   });
