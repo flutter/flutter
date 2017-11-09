@@ -33,15 +33,21 @@ void main() {
     Future<String> runCommand(String verb, { List<String> args }) async {
       final String projectPath = await createProject(temp);
 
-      final PackagesCommand command = new PackagesCommand();
-      final CommandRunner<Null> runner = createTestCommandRunner(command);
+      final Directory cwd = fs.currentDirectory;
+      fs.currentDirectory = projectPath;
+      try {
+        final PackagesCommand command = new PackagesCommand();
+        final CommandRunner<Null> runner = createTestCommandRunner(command);
 
-      final List<String> commandArgs = <String>['packages', verb];
-      if (args != null)
-        commandArgs.addAll(args);
-      commandArgs.add(projectPath);
+        final List<String> commandArgs = <String>['packages', verb];
+        if (args != null)
+          commandArgs.addAll(args);
+        commandArgs.add(projectPath);
 
-      await runner.run(commandArgs);
+        await runner.run(commandArgs);
+      } finally {
+        fs.currentDirectory = cwd;
+      }
 
       return projectPath;
     }
