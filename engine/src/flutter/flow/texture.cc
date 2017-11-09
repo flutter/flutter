@@ -36,7 +36,8 @@ void TextureRegistry::OnGrContextDestroyed() {
 
 std::shared_ptr<Texture> TextureRegistry::GetTexture(int64_t id) {
   ASSERT_IS_GPU_THREAD
-  return mapping_[id];
+  auto it = mapping_.find(id);
+  return it != mapping_.end() ? it->second : nullptr;
 }
 
 Texture::Texture(int64_t id) : id_(id) {}
