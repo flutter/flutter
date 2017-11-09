@@ -201,9 +201,9 @@ void main() {
           if (methodCall['method'] == 'listen') {
             final String argument = methodCall['args'];
             emitEvent(jsonMethod.encodeErrorEnvelope(code: '404', message: 'Not Found.', details: argument));
-            return jsonMessage.encodeMessage(<dynamic>[null]);
+            return jsonMethod.encodeSuccessEnvelope(null);
           } else if (methodCall['method'] == 'cancel') {
-            return jsonMessage.encodeMessage(<dynamic>[null]);
+            return jsonMethod.encodeSuccessEnvelope(null);
           } else {
             fail('Expected listen or cancel');
           }
