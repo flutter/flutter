@@ -161,14 +161,14 @@ void main() {
     const MessageCodec<dynamic> jsonMessage = const JSONMessageCodec();
     const MethodCodec jsonMethod = const JSONMethodCodec();
     const EventChannel channel = const EventChannel('ch', jsonMethod);
+    void emitEvent(dynamic event) {
+      BinaryMessages.handlePlatformMessage(
+        'ch',
+        event,
+            (ByteData reply) {},
+      );
+    }
     test('can receive event stream', () async {
-      void emitEvent(dynamic event) {
-        BinaryMessages.handlePlatformMessage(
-          'ch',
-          event,
-          (ByteData reply) {},
-        );
-      }
       bool canceled = false;
       BinaryMessages.setMockMessageHandler(
         'ch',
@@ -176,13 +176,13 @@ void main() {
           final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
           if (methodCall['method'] == 'listen') {
             final String argument = methodCall['args'];
-            emitEvent(jsonMessage.encodeMessage(<dynamic>[argument + '1']));
-            emitEvent(jsonMessage.encodeMessage(<dynamic>[argument + '2']));
+            emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '1'));
+            emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '2'));
             emitEvent(null);
-            return jsonMessage.encodeMessage(<dynamic>[null]);
+            return jsonMethod.encodeSuccessEnvelope(null);
           } else if (methodCall['method'] == 'cancel') {
             canceled = true;
-            return jsonMessage.encodeMessage(<dynamic>[null]);
+            return jsonMethod.encodeSuccessEnvelope(null);
           } else {
             fail('Expected listen or cancel');
           }
@@ -192,6 +192,34 @@ void main() {
       expect(events, orderedEquals(<String>['hello1', 'hello2']));
       await new Future<Null>.delayed(Duration.ZERO);
       expect(canceled, isTrue);
+    });
+    test('can receive error event', () async {
+      BinaryMessages.setMockMessageHandler(
+        'ch',
+        (ByteData message) async {
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          if (methodCall['method'] == 'listen') {
+            final String argument = methodCall['args'];
+            emitEvent(jsonMethod.encodeErrorEnvelope(code: '404', message: 'Not Found.', details: argument));
+            return jsonMessage.encodeMessage(<dynamic>[null]);
+          } else if (methodCall['method'] == 'cancel') {
+            return jsonMessage.encodeMessage(<dynamic>[null]);
+          } else {
+            fail('Expected listen or cancel');
+          }
+        },
+      );
+      final List<dynamic> events = <dynamic>[];
+      final List<dynamic> errors = <dynamic>[];
+      channel.receiveBroadcastStream('hello').listen(events.add, onError: errors.add);
+      await new Future<Null>.delayed(Duration.ZERO);
+      expect(events, isEmpty);
+      expect(errors, hasLength(1));
+      expect(errors[0], const isInstanceOf<PlatformException>());
+      final PlatformException error = errors[0];
+      expect(error.code, '404');
+      expect(error.message, 'Not Found.');
+      expect(error.details, 'hello');
     });
   });
 }
