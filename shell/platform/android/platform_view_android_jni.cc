@@ -18,6 +18,21 @@
 
 namespace shell {
 
+namespace {
+
+bool CheckException(JNIEnv* env) {
+  if (env->ExceptionCheck() == JNI_FALSE)
+    return true;
+
+  jthrowable exception = env->ExceptionOccurred();
+  env->ExceptionClear();
+  FXL_LOG(INFO) << fml::jni::GetJavaExceptionInfo(env, exception);
+  env->DeleteLocalRef(exception);
+  return false;
+}
+
+}  // anonymous namespace
+
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_view_class = nullptr;
 static fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_native_view_class =
     nullptr;
@@ -33,7 +48,7 @@ void FlutterViewHandlePlatformMessage(JNIEnv* env,
                                       jint responseId) {
   env->CallVoidMethod(obj, g_handle_platform_message_method, channel, message,
                       responseId);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_handle_platform_message_response_method = nullptr;
@@ -43,7 +58,7 @@ void FlutterViewHandlePlatformMessageResponse(JNIEnv* env,
                                               jobject response) {
   env->CallVoidMethod(obj, g_handle_platform_message_response_method,
                       responseId, response);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_update_semantics_method = nullptr;
@@ -52,34 +67,34 @@ void FlutterViewUpdateSemantics(JNIEnv* env,
                                 jobject buffer,
                                 jobjectArray strings) {
   env->CallVoidMethod(obj, g_update_semantics_method, buffer, strings);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_on_first_frame_method = nullptr;
 void FlutterViewOnFirstFrame(JNIEnv* env, jobject obj) {
   env->CallVoidMethod(obj, g_on_first_frame_method);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_attach_to_gl_context_method = nullptr;
 void SurfaceTextureAttachToGLContext(JNIEnv* env, jobject obj, jint textureId) {
   ASSERT_IS_GPU_THREAD;
   env->CallVoidMethod(obj, g_attach_to_gl_context_method, textureId);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_update_tex_image_method = nullptr;
 void SurfaceTextureUpdateTexImage(JNIEnv* env, jobject obj) {
   ASSERT_IS_GPU_THREAD;
   env->CallVoidMethod(obj, g_update_tex_image_method);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 static jmethodID g_detach_from_gl_context_method = nullptr;
 void SurfaceTextureDetachFromGLContext(JNIEnv* env, jobject obj) {
   ASSERT_IS_GPU_THREAD;
   env->CallVoidMethod(obj, g_detach_from_gl_context_method);
-  FXL_CHECK(env->ExceptionCheck() == JNI_FALSE);
+  FXL_CHECK(CheckException(env));
 }
 
 // Called By Java
