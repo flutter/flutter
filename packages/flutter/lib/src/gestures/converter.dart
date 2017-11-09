@@ -37,6 +37,8 @@ class _PointerState {
 /// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
+  PointerEventConverter._();
+
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
