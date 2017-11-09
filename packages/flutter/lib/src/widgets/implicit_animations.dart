@@ -41,6 +41,7 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 /// interpolation between decorations.
 ///
 /// See also:
+///
 ///   * [Tween] for a discussion on how to use interpolation objects.
 ///   * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
 ///     [StadiumBorder] for examples of shape borders that can be smoothly
@@ -346,6 +347,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
