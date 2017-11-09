@@ -4,30 +4,8 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart' show required;
-
-import '../android/android_sdk.dart';
-import '../android/gradle.dart';
-import '../base/common.dart';
-import '../build_info.dart';
-import '../globals.dart';
+import '../android/apk.dart';
 import 'build.dart';
-
-export '../android/android_device.dart' show AndroidDevice;
-
-class ApkKeystoreInfo {
-  ApkKeystoreInfo({
-    @required this.keystore,
-    this.password,
-    this.keyAlias,
-    @required this.keyPassword,
-  }) : assert(keystore != null);
-
-  final String keystore;
-  final String password;
-  final String keyAlias;
-  final String keyPassword;
-}
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand() {
@@ -52,30 +30,4 @@ class BuildApkCommand extends BuildSubCommand {
     await super.runCommand();
     await buildApk(buildInfo: getBuildInfo(), target: targetFile);
   }
-}
-
-Future<Null> buildApk({
-  String target,
-  BuildInfo buildInfo: BuildInfo.debug
-}) async {
-  if (!isProjectUsingGradle()) {
-    throwToolExit(
-        'The build process for Android has changed, and the current project configuration\n'
-        'is no longer valid. Please consult\n\n'
-        '  https://github.com/flutter/flutter/wiki/Upgrading-Flutter-projects-to-build-with-gradle\n\n'
-        'for details on how to upgrade the project.'
-    );
-  }
-
-  // Validate that we can find an android sdk.
-  if (androidSdk == null)
-    throwToolExit('No Android SDK found. Try setting the ANDROID_HOME environment variable.');
-
-  final List<String> validationResult = androidSdk.validateSdkWellFormed();
-  if (validationResult.isNotEmpty) {
-    validationResult.forEach(printError);
-    throwToolExit('Try re-installing or updating your Android SDK.');
-  }
-
-  return buildGradleProject(buildInfo, target);
 }

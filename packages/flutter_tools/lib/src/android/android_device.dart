@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
+import '../android/apk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -17,7 +18,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../commands/build_apk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
