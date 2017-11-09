@@ -879,9 +879,6 @@ abstract class FrameInfo extends NativeFieldWrapperClass2 {
   Image get image native "FrameInfo_image";
 }
 
-/// Callback signature for [Codec.getNextFrame].
-typedef void NextFrameInfoCallback(FrameInfo frameInfo);
-
 /// A handle to an image codec.
 abstract class Codec extends NativeFieldWrapperClass2 {
   /// Number of frames in this image.
@@ -897,24 +894,36 @@ abstract class Codec extends NativeFieldWrapperClass2 {
   ///
   /// Wraps back to the first frame after returning the last frame.
   ///
+  /// The returned future can complete with an error if the decoding has failed.
+  Future<FrameInfo> getNextFrame() {
+    return _futurize(_getNextFrame);
+  }
+
   /// Returns an error message on failure, null on success.
-  String getNextFrame(NextFrameInfoCallback callback) native "Codec_getNextFrame";
+  String _getNextFrame(_Callback<FrameInfo> callback) native "Codec_getNextFrame";
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
   void dispose() native "Codec_dispose";
 }
 
-/// Callback signature for [imageCodecFromList].
+/// Instantiates an image codec [Codec] object.
 ///
-/// If parsing the data passed to [imageCodecFromList] failed, the result will
-/// be null.
-typedef void CodecCallback(Codec result);
+/// [list] is the binary image data (e.g a PNG or GIF binary data).
+/// The data can be for either static or animated images.
+///
+/// The returned future can complete with an error if the image decoding has
+/// failed.
+Future<Codec> instantiateImageCodec(Uint8List list) {
+  return _futurize(
+    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback)
+  );
+}
 
-/// Instatiates a [Codec] object for an image binary data.
+/// Instantiates a [Codec] object for an image binary data.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String instantiateImageCodec(Uint8List list, CodecCallback callback)
+String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback)
   native "instantiateImageCodec";
 
 /// Convert an image file from a byte array into an [Image] object.
@@ -2433,3 +2442,42 @@ class PictureRecorder extends NativeFieldWrapperClass2 {
   /// Returns null if the PictureRecorder is not associated with a canvas.
   Picture endRecording() native "PictureRecorder_endRecording";
 }
+
+/// Generic callback signature, used by [_futurize].
+typedef void _Callback<T>(T result);
+
+/// Signature for a method that receives a [_Callback].
+///
+/// Return value should be null on success, and a string error message on
+/// failure.
+typedef String _Callbacker<T>(_Callback<T> callback);
+
+/// Converts a method that receives a value-returning callback to a method that
+/// returns a Future.
+///
+/// Example usage:
+/// ```dart
+/// typedef void IntCallback(int result);
+/// 
+/// void doSomethingAndCallback(IntCallback callback) {
+///   new Timer(new Duration(seconds: 1), () { callback(1); });
+/// }
+/// 
+/// Future<int> doSomething() {
+///   return _futurize(domeSomethingAndCallback);
+/// }
+/// ```
+///
+Future<T> _futurize<T>(_Callbacker<T> callbacker) async {
+  Completer<T> completer = new Completer<T>();
+  String err = callbacker(completer.complete);
+  if (err != null) {
+    throw new Exception(err);
+  }
+  T result = await completer.future;
+  if (result == null) {
+    throw new Exception('operation failed');
+  }
+  return result;
+}
+
