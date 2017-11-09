@@ -684,7 +684,14 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   final Color shadowColor;
 
   @override
-  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color, shadowColor: shadowColor);
+  RenderPhysicalModel createRenderObject(BuildContext context) {
+    return new RenderPhysicalModel(
+      shape: shape,
+      borderRadius: borderRadius,
+      elevation: elevation, color: color,
+      shadowColor: shadowColor,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
@@ -732,6 +739,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 /// ```
 ///
 /// See also:
+///
 ///  * [RotatedBox], which rotates the child widget during layout, not just
 ///    during painting.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
@@ -969,6 +977,7 @@ class CompositedTransformFollower extends SingleChildRenderObjectWidget {
 ///
 ///  * [Transform], which applies an arbitrary transform to its child widget at
 ///    paint time.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FittedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that scales and positions its child within itself according to [fit].
   ///
@@ -1026,6 +1035,10 @@ class FittedBox extends SingleChildRenderObjectWidget {
 /// Hit tests will only be detected inside the bounds of the
 /// [FractionalTranslation], even if the contents are offset such that
 /// they overflow.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Creates a widget that translates its child's painting.
   ///
@@ -1048,7 +1061,12 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
   final bool transformHitTests;
 
   @override
-  RenderFractionalTranslation createRenderObject(BuildContext context) => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
+  RenderFractionalTranslation createRenderObject(BuildContext context) {
+    return new RenderFractionalTranslation(
+      translation: translation,
+      transformHitTests: transformHitTests,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionalTranslation renderObject) {
@@ -1080,6 +1098,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 ///
 ///  * [Transform], which is a paint effect that allows you to apply an
 ///    arbitrary transform to a child.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class RotatedBox extends SingleChildRenderObjectWidget {
   /// A widget that rotates its child.
   ///
@@ -1112,7 +1131,8 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// ## Sample code
 ///
-/// This snippet indents the child (a [Card] with some [Text]) by eight pixels in each direction:
+/// This snippet indents the child (a [Card] with some [Text]) by eight pixels
+/// in each direction:
 ///
 /// ```dart
 /// new Padding(
@@ -1139,13 +1159,12 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// In fact, the majority of widgets in Flutter are simply combinations of other
 /// simpler widgets. Composition, rather than inheritance, is the primary
-/// mechansim for building up widgets.
+/// mechanism for building up widgets.
 ///
 /// See also:
 ///
 ///  * [EdgeInsets], the class that is used to describe the padding dimensions.
-///  * [Center], which positions the child at its natural dimensions, centered
-///    in the parent.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
   ///
@@ -1203,8 +1222,9 @@ class Padding extends SingleChildRenderObjectWidget {
 ///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
 ///    set to [Alignment.center].
-///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to an [Alignment] value.
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its
+///    own size and positions the child according to an [Alignment] value.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
@@ -1283,6 +1303,11 @@ class Align extends SingleChildRenderObjectWidget {
 ///
 ///  * [Align], which lets you arbitrarily position a child within itself,
 ///    rather than just centering it.
+///  * [Row], a widget that displays its children in a horizontal array.
+///  * [Column], a widget that displays its children in a vertical array.
+///  * [Container], a convenience widget that combines common painting,
+///    positioning, and sizing widgets.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Center extends Align {
   /// Creates a widget that centers its child.
   const Center({ Key key, double widthFactor, double heightFactor, Widget child })
@@ -1320,7 +1345,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   final SingleChildLayoutDelegate delegate;
 
   @override
-  RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomSingleChildLayoutBox(delegate: delegate);
+  RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) {
+    return new RenderCustomSingleChildLayoutBox(delegate: delegate);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomSingleChildLayoutBox renderObject) {
@@ -1448,12 +1475,15 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 ///  * [ConstrainedBox], a more generic version of this class that takes
 ///    arbitrary [BoxConstraints] instead of an explicit width and height.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
 ///  * [FractionallySizedBox], a widget that sizes its child to a fraction of
 ///    the total available space.
 ///  * [AspectRatio], a widget that attempts to fit within the parent's
 ///    constraints while also sizing its child to match a given sapect ratio.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
@@ -1505,7 +1535,9 @@ class SizedBox extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    final DiagnosticLevel level = (width == double.INFINITY && height == double.INFINITY) ? DiagnosticLevel.hidden : DiagnosticLevel.info;
+    final DiagnosticLevel level = (width == double.INFINITY && height == double.INFINITY)
+        ? DiagnosticLevel.hidden
+        : DiagnosticLevel.info;
     description.add(new DoubleProperty('width', width, defaultValue: null, level: level));
     description.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
@@ -1534,12 +1566,15 @@ class SizedBox extends SingleChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [BoxConstraints], the class that describes constraints.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
 ///  * [SizedBox], which lets you specify tight constraints by explicitly
 ///    specifying the height or width.
-///  * [FractionallySizedBox], a widget that sizes its child to a fraction of
-///    the total available space.
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its
+///    own size and positions the child according to an [Alignment] value.
 ///  * [AspectRatio], a widget that attempts to fit within the parent's
-///    constraints while also sizing its child to match a given sapect ratio.
+///    constraints while also sizing its child to match a given aspect ratio.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
   ///
@@ -1556,7 +1591,9 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   final BoxConstraints constraints;
 
   @override
-  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(additionalConstraints: constraints);
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedBox(additionalConstraints: constraints);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
@@ -1570,15 +1607,87 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A widget that imposes no constraints on its child, allowing it to render
+/// at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This container will then expand
+/// as much as it can within its own constraints and align the child based on
+/// [alignment].  If the container cannot expand enough to accommodate the
+/// entire child, the child will be clipped.
+///
+/// In debug mode, if the child overflows the container, a warning will be
+/// printed on the console, and black and yellow striped areas will appear where
+/// the overflow occurs.
+///
+/// See also:
+///
+///  * [ConstrainedBox] for a box which imposes constraints on its child.
+///  * [Container], a convenience widget that combines common painting,
+///    positioning, and sizing widgets.
+///  * [OverflowBox], a widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow
+///    the parent.
+class UnconstrainedBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that imposes no constraints on its child, allowing it to
+  /// render at its "natural" size. If the child overflows the parents
+  /// constraints, a warning will be given in debug mode.
+  const UnconstrainedBox({
+    Key key,
+    Widget child,
+    this.textDirection,
+    this.alignment: Alignment.center,
+  }) : assert(alignment != null),
+       super(key: key, child: child);
+
+  /// The text direction to use when interpreting the [alignment] if it is an
+  /// [AlignmentDirectional].
+  final TextDirection textDirection;
+
+  /// The alignment to use when laying out the child.
+  ///
+  /// If this is an [AlignmentDirectional], then [textDirection] must not be
+  /// null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment] for non-[Directionality]-aware alignments.
+  ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
+  final AlignmentGeometry alignment;
+
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
+    renderObject
+      ..textDirection = textDirection ?? Directionality.of(context)
+      ..alignment = alignment;
+  }
+
+  @override
+  RenderUnconstrainedBox createRenderObject(BuildContext context) => new RenderUnconstrainedBox(
+    textDirection: textDirection ?? Directionality.of(context),
+    alignment: alignment,
+  );
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  }
+}
+
 /// A widget that sizes its child to a fraction of the total available space.
 /// For more details about the layout algorithm, see
 /// [RenderFractionallySizedOverflowBox].
 ///
 /// See also:
 ///
-/// * [Align] (which sizes itself based on its child's size and positions
-///   the child according to an [Alignment] value)
-/// * [OverflowBox]
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to an [Alignment] value.
+///  * [OverflowBox], a widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow the
+///    parent.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to a fraction of the total available space.
   ///
@@ -1674,6 +1783,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 ///    when the incoming constraints are unbounded.
 ///  * [SizedBox], which lets you specify tight constraints by explicitly
 ///    specifying the height or width.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class LimitedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that limits its size only when it's unconstrained.
   ///
@@ -1722,7 +1832,18 @@ class LimitedBox extends SingleChildRenderObjectWidget {
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
-/// See [RenderConstrainedOverflowBox] for details.
+/// See also:
+///
+///  * [RenderConstrainedOverflowBox] for details about how [OverflowBox] is
+///    rendered.
+///  * [SizedOverflowBox], a widget that is a specific size but passes its
+///    original constraints through to its child, which may then overflow.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * [SizedBox], a box with a specified size.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class OverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that lets its child overflow itself.
   const OverflowBox({
@@ -1797,7 +1918,18 @@ class OverflowBox extends SingleChildRenderObjectWidget {
 }
 
 /// A widget that is a specific size but passes its original constraints
-/// through to its child, which will probably overflow.
+/// through to its child, which may then overflow.
+///
+/// See also:
+///
+///  * [OverflowBox], A widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow the
+///    parent.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget of a given size that lets its child overflow.
   ///
@@ -1853,6 +1985,10 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// A widget that lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage: true, Widget child })
@@ -1925,6 +2061,16 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// find a feasible size after consulting each constraint, the widget
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
+///
+/// See also:
+///
+///  * [Align], a widget that aligns its child within itself and optionally
+///    sizes itself based on the child's size.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class AspectRatio extends SingleChildRenderObjectWidget {
   /// Creates a widget with a specific aspect ratio.
   ///
@@ -1972,6 +2118,10 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 /// pass before the final layout phase. Avoid using it where possible. In the
 /// worst case, this widget can result in a layout that is O(N²) in the depth of
 /// the tree.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -1986,7 +2136,9 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   final double stepHeight;
 
   @override
-  RenderIntrinsicWidth createRenderObject(BuildContext context) => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  RenderIntrinsicWidth createRenderObject(BuildContext context) {
+    return new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
@@ -2006,6 +2158,10 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// pass before the final layout phase. Avoid using it where possible. In the
 /// worst case, this widget can result in a layout that is O(N²) in the depth of
 /// the tree.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -2024,6 +2180,13 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// contain the child. If [baseline] is less than the distance from
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
+///
+/// See also:
+///
+///  * [Align], a widget that aligns its child within itself and optionally
+///    sizes itself based on the child's size.
+///  * [Center], a widget that centers its child within itself.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
   ///
@@ -2045,7 +2208,9 @@ class Baseline extends SingleChildRenderObjectWidget {
   final TextBaseline baselineType;
 
   @override
-  RenderBaseline createRenderObject(BuildContext context) => new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  RenderBaseline createRenderObject(BuildContext context) {
+    return new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderBaseline renderObject) {
@@ -2285,6 +2450,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 ///    children.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   ///
@@ -2367,7 +2533,10 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 /// If value is null, then nothing is displayed.
 ///
-/// For more details, see [Stack].
+/// See also:
+///
+///  * [Stack], for more details about stacks.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
@@ -2838,6 +3007,7 @@ class PositionedDirectional extends StatelessWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
@@ -3168,6 +3338,7 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
@@ -3359,6 +3530,7 @@ class Row extends Flex {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may size smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
@@ -3409,6 +3581,7 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
@@ -3481,6 +3654,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// expand to fill the available space in the main axis.
@@ -3539,6 +3713,7 @@ class Expanded extends Flexible {
 ///
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Wrap extends MultiChildRenderObjectWidget {
   /// Creates a wrap layout.
   ///
@@ -3769,6 +3944,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -4577,6 +4753,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// or an explicit [textDirection] should be provided.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.label] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String label;
@@ -4587,6 +4764,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// or an explicit [textDirection] should be provided.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.value] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String value;
@@ -4599,6 +4777,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// must be provided.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.increasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
   final String increasedValue;
@@ -4611,6 +4790,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// must be provided.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
   ///    is exposed in TalkBack and VoiceOver.
   final String decreasedValue;
@@ -4622,6 +4802,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// or an explicit [textDirection] should be provided.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
   ///    in TalkBack and VoiceOver.
   final String hint;
