@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'debug.dart';
+import 'debug_overflow_indicator.dart';
 import 'object.dart';
+import 'stack.dart' show RelativeRect;
 
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
@@ -235,6 +237,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _alignment = alignment,
        _textDirection = textDirection,
        super(child);
+
+  /// A constructor to be used only when the extending class also has a mixin.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/15101 is fixed.
+  @protected
+  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
+    : this(alignment: alignment, textDirection: textDirection, child: child);
 
   Alignment _resolvedAlignment;
 
@@ -467,6 +475,16 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 /// The child is positioned according to [alignment]. To position a smaller
 /// child inside a larger parent, use [RenderPositionedBox] and
 /// [RenderConstrainedBox] rather than RenderConstrainedOverflowBox.
+///
+/// See also:
+///
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
@@ -562,8 +580,110 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A render box that is a specific size but passes its original constraints
-/// through to its child, which will probably overflow.
+/// Renders a box, imposing no constraints on its child, allowing the child to
+/// render at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This box will then expand
+/// as much as it can within its own constraints and align the child based on
+/// [alignment].  If the box cannot expand enough to accommodate the entire
+/// child, the child will be clipped.
+///
+/// In debug mode, if the child overflows the box, a warning will be printed on
+/// the console, and black and yellow striped areas will appear where theR
+/// overflow occurs.
+///
+/// See also:
+///
+///  * [RenderConstrainedBox] renders a box which imposes constraints on its
+///    child.
+///  * [RenderConstrainedOverflowBox], renders a box that imposes different
+///    constraints on its child than it gets from its parent, possibly allowing
+///    the child to overflow the parent.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+  RenderUnconstrainedBox({
+    @required AlignmentGeometry alignment,
+    @required TextDirection textDirection,
+    RenderBox child,
+  }) : assert(alignment != null),
+      super.mixin(alignment, textDirection, child);
+
+  Rect _overflowContainerRect = Rect.zero;
+  Rect _overflowChildRect = Rect.zero;
+  bool _isOverflowing = false;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      // Let the child lay itself out at it's "natural" size.
+      child.layout(const BoxConstraints(), parentUsesSize: true);
+      size = constraints.constrain(child.size);
+      alignChild();
+      final BoxParentData childParentData = child.parentData;
+      _overflowContainerRect = Offset.zero & size;
+      _overflowChildRect = childParentData.offset & child.size;
+    } else {
+      size = constraints.constrain(Size.zero);
+      _overflowContainerRect = Rect.zero;
+      _overflowChildRect = Rect.zero;
+    }
+
+    final RelativeRect overflow = new RelativeRect.fromRect(_overflowContainerRect, _overflowChildRect);
+    _isOverflowing = overflow.left > 0.0 ||
+      overflow.right > 0.0 ||
+      overflow.top > 0.0 ||
+      overflow.bottom > 0.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    // There's no point in drawing the child if we're empty, or there is no
+    // child.
+    if (child == null || size.isEmpty)
+      return;
+
+    if (!_isOverflowing) {
+      super.paint(context, offset);
+      return;
+    }
+
+    // We have overflow. Clip it.
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint);
+
+    // Display the overflow indicator.
+    assert(() {
+      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+      return true;
+    }());
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) {
+    return _isOverflowing ? Offset.zero & size : null;
+  }
+
+  @override
+  String toStringShort() {
+    String header = super.toStringShort();
+    if (_isOverflowing)
+      header += ' OVERFLOWING';
+    return header;
+  }
+}
+
+/// A render object that is a specific size but passes its original constraints
+/// through to its child, which it allows to overflow.
+///
+/// See also:
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderConstrainedOverflowBox] for a render object that imposes
+///    different constraints on its child than it gets from its parent,
+///    possibly allowing the child to overflow the parent.
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box of a given size that lets its child overflow.
   ///

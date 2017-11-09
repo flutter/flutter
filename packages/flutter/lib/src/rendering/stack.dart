@@ -17,12 +17,14 @@ import 'object.dart';
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
 ///
-/// If you create the RelativeRect with null values, the methods on
-/// RelativeRect will not work usefully (or at all).
+/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
+  ///
+  /// The arguments must not be null.
+  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom)
+    : assert(left != null && top != null && right != null && bottom != null);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
@@ -56,15 +58,23 @@ class RelativeRect {
   static final RelativeRect fill = const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
 
   /// Distance from the left side of the container to the left side of this rectangle.
+  ///
+  /// May be negative if the left side of the rectangle is outside of the container.
   final double left;
 
   /// Distance from the top side of the container to the top side of this rectangle.
+  ///
+  /// May be negative if the top side of the rectangle is outside of the container.
   final double top;
 
   /// Distance from the right side of the container to the right side of this rectangle.
+  ///
+  /// May be negative if the right side of the rectangle is outside of the container.
   final double right;
 
   /// Distance from the bottom side of the container to the bottom side of this rectangle.
+  ///
+  /// May be negative if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
   /// Returns a new rectangle object translated by the given offset.

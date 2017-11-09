@@ -2970,6 +2970,7 @@ abstract class _SemanticsFragment {
   /// previously painted [RenderObject]s unreachable for accessibility purposes.
   ///
   /// See also:
+  ///
   ///  * [SemanticsConfiguration.isBlockingSemanticsOfPreviouslyPaintedNodes]
   ///    describes what semantics are dropped in more detail.
   final bool dropsSemanticsOfPreviousSiblings;
