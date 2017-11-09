@@ -124,7 +124,7 @@ class Template {
           return;
         }
       } else {
-        printTrace('  $relativePathForLogging (created)');
+        printStatus('  $relativePathForLogging (created)');
       }
 
       fileCount++;

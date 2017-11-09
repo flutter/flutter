@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -151,7 +151,8 @@ class IdeConfigCommand extends FlutterCommand {
         parentDir.deleteSync();
         printTrace('  ${fs.path.relative(parentDir.absolute.path)} (empty directory - removed)');
         parentDir = fs.directory(parentDir.dirname);
-        if (fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) break;
+        if (fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path))
+          break;
       }
     }
   }
