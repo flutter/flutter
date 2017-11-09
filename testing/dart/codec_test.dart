@@ -41,7 +41,7 @@ void main() {
     for (int i = 0; i < 5; i++) {
       ui.FrameInfo frameInfo = await codec.getNextFrame();
       decodedFrameInfos.add([
-        frameInfo.durationMillis,
+        frameInfo.duration.inMilliseconds,
         frameInfo.image.width,
         frameInfo.image.height,
       ]);
@@ -62,7 +62,7 @@ void main() {
     for (int i = 0; i < 2; i++) {
       ui.FrameInfo frameInfo = await codec.getNextFrame();
       decodedFrameInfos.add([
-        frameInfo.durationMillis,
+        frameInfo.duration.inMilliseconds,
         frameInfo.image.width,
         frameInfo.image.height,
       ]);
