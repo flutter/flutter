@@ -132,7 +132,7 @@ class Template {
       finalDestinationFile.createSync(recursive: true);
       final File sourceFile = fs.file(absoluteSourcePath);
 
-      // Step 2: If the absolute paths ends with a 'copy.tmpl', this file does
+      // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
 
       if (sourceFile.path.endsWith(_kCopyTemplateExtension)) {
