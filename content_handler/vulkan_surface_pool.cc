@@ -5,6 +5,7 @@
 #include <trace/event.h>
 
 #include "flutter/content_handler/vulkan_surface_pool.h"
+#include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 
 namespace flutter_runner {
@@ -30,7 +31,7 @@ VulkanSurfacePool::AcquireSurface(const SkISize& size) {
   }
 
   if (!surface->FlushSessionAcquireAndReleaseEvents()) {
-    FXL_DLOG(ERROR) << "Could not flush acquir/release events for buffer.";
+    FXL_DLOG(ERROR) << "Could not flush acquire/release events for buffer.";
     return nullptr;
   }
 
@@ -63,6 +64,7 @@ VulkanSurfacePool::GetCachedOrCreateSurface(const SkISize& size) {
 void VulkanSurfacePool::SubmitSurface(
     std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>
         p_surface) {
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::SubmitSurface");
   if (!p_surface) {
     return;
   }

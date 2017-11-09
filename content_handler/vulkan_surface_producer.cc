@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 #include "flutter/content_handler/vulkan_surface_producer.h"
+
 #include <memory>
 #include <string>
 #include <vector>
+#include "flutter/glue/trace_event.h"
 #include "third_party/skia/include/gpu/GrBackendSemaphore.h"
 #include "third_party/skia/include/gpu/GrContext.h"
 #include "third_party/skia/include/gpu/vk/GrVkTypes.h"
@@ -118,6 +120,7 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
     std::vector<
         std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>
         surfaces) {
+  TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
   std::vector<GrBackendSemaphore> semaphores;
   semaphores.reserve(surfaces.size());
   for (auto& surface : surfaces) {
@@ -126,8 +129,10 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
   }
 
   // Do a single flush for all canvases derived from the context.
-  context_->flushAndSignalSemaphores(semaphores.size(), semaphores.data());
-
+  {
+    TRACE_EVENT0("flutter", "GrContext::flushAndSignalSemaphores");
+    context_->flushAndSignalSemaphores(semaphores.size(), semaphores.data());
+  }
   // Submit surface
   for (auto& surface : surfaces) {
     SubmitSurface(std::move(surface));
