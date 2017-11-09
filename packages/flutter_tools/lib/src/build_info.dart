@@ -205,3 +205,8 @@ String getAssetBuildDirectory() {
 String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
 }
+
+/// Returns directory used by incremental compiler to store cached artifacts.
+String getIncrementalCompilerByteStoreDirectory() {
+  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
+}

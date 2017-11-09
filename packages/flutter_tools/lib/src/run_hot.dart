@@ -348,8 +348,19 @@ class HotRunner extends ResidentRunner {
     // TODO(aam): Add generator reset logic once we switch to using incremental
     // compiler for full application recompilation on restart.
     final bool updatedDevFS = await _updateDevFS(fullRestart: true);
-    if (!updatedDevFS)
+    if (!updatedDevFS) {
+      for (FlutterDevice device in flutterDevices) {
+        if (device.generator != null)
+          device.generator.reject();
+      }
       return new OperationResult(1, 'DevFS synchronization failed');
+    }
+    for (FlutterDevice device in flutterDevices) {
+      // VM must have accepted the kernel binary, there will be no reload
+      // report, so we let incremental compiler know that source code was accepted.
+      if (device.generator != null)
+        device.generator.accept();
+    }
     // Check if the isolate is paused and resume it.
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
