@@ -267,4 +267,41 @@ void main() {
        new ImageInfo(image: frame2.image),
      ]));
    });
+
+   testWidgets('frames are only decoded when there are active listeners', (WidgetTester tester) async {
+     MockCodec mockCodec = new MockCodec();
+     mockCodec.frameCount = 2;
+     mockCodec.repetitionCount = -1;
+     Completer<Codec> codecCompleter = new Completer<Codec>();
+
+     ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+       codec: codecCompleter.future,
+       scale: 1.0,
+     );
+
+     ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+     imageStream.addListener(listener);
+
+     codecCompleter.complete(mockCodec);
+     await tester.idle();
+
+     FrameInfo frame1 = new FakeFrameInfo(20, 10, new Duration(milliseconds: 200));
+     FrameInfo frame2 = new FakeFrameInfo(200, 100, new Duration(milliseconds: 400));
+
+     mockCodec.completeNextFrame(frame1);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // first animation frame shows on first app frame.
+     mockCodec.completeNextFrame(frame2);
+     imageStream.removeListener(listener);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(new Duration(milliseconds: 400)); // emit 2nd frame.
+
+     // Decoding of the 3rd frame should not start as there are no registered
+     // listeners to the stream
+     expect(mockCodec.numFramesAsked, 2);
+
+     imageStream.addListener(listener);
+     await tester.idle(); // let nextFrameFuture complete
+     expect(mockCodec.numFramesAsked, 3);
+   });
 }

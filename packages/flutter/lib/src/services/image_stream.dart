@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui show Image, Codec, FrameInfo;
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -332,7 +333,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }) :
     _informationCollector = informationCollector,
     _scale = scale,
-    _framesEmitted = 0
+    _framesEmitted = 0,
+    _timer = null
   {
     assert(codec != null);
     codec.then<Null>(_onCodecReady, onError: (dynamic error, StackTrace stack) {
@@ -357,13 +359,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   Duration _frameDuration;
   // How many frames have been emitted so far.
   int _framesEmitted;
+  Timer _timer;
 
   void _onCodecReady(ui.Codec codec){
+    print('codec ready');
     _codec = codec;
     _decodeNextFrameAndSchedule();
   }
 
   void _onAppFrame(Duration timestamp) {
+    if (!_hasActiveListeners)
+      return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
       _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
       _shownTimestamp = timestamp;
@@ -375,7 +381,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       }
       return;
     }
-    new Timer(_frameDuration - (timestamp - _shownTimestamp),
+    _timer = new Timer(_frameDuration - (timestamp - _shownTimestamp),
       () {
         SchedulerBinding.instance.scheduleFrameCallback(_onAppFrame);
       }
@@ -417,5 +423,28 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   void _emitFrame(ImageInfo imageInfo) {
     setImage(imageInfo);
     _framesEmitted += 1;
+  }
+
+  bool get _hasActiveListeners => _listeners.length > 0;
+
+  @override
+  void addListener(ImageListener listener) {
+    print('add listener');
+    if (!_hasActiveListeners && _codec != null) {
+      print('kicking decode');
+      _decodeNextFrameAndSchedule();
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ImageListener listener) {
+    print('remove listener');
+    super.removeListener(listener);
+    if (_hasActiveListeners) {
+      print ('cancelling timer');
+      _timer?.cancel();
+      _timer = null;
+    }
   }
 }
