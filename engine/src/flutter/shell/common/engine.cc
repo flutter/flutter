@@ -326,6 +326,11 @@ void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
   viewport_metrics_ = metrics;
   if (runtime_)
     runtime_->SetViewportMetrics(viewport_metrics_);
+  if (animator_) {
+    animator_->SetDimensionChangePending();
+    if (have_surface_)
+      ScheduleFrame();
+  }
 }
 
 void Engine::DispatchPlatformMessage(

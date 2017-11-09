@@ -25,6 +25,7 @@ Animator::Animator(fml::WeakPtr<Rasterizer> rasterizer,
       paused_(false),
       regenerate_layer_tree_(false),
       frame_scheduled_(false),
+      dimension_change_pending_(false),
       weak_factory_(this) {}
 
 Animator::~Animator() = default;
@@ -40,6 +41,12 @@ void Animator::Start() {
 
   paused_ = false;
   RequestFrame();
+}
+
+// Indicate that screen dimensions will be changing in order to force rendering
+// of an updated frame even if the animator is currently paused.
+void Animator::SetDimensionChangePending() {
+  dimension_change_pending_ = true;
 }
 
 // This Parity is used by the timeline component to correctly align
@@ -98,6 +105,12 @@ void Animator::BeginFrame(fxl::TimePoint frame_start_time,
 }
 
 void Animator::Render(std::unique_ptr<flow::LayerTree> layer_tree) {
+  if (dimension_change_pending_ &&
+      layer_tree->frame_size() != last_layer_tree_size_) {
+    dimension_change_pending_ = false;
+  }
+  last_layer_tree_size_ = layer_tree->frame_size();
+
   if (layer_tree) {
     // Note the frame time for instrumentation.
     layer_tree->set_construction_time(fxl::TimePoint::Now() -
@@ -134,7 +147,7 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   if (regenerate_layer_tree) {
     regenerate_layer_tree_ = true;
   }
-  if (paused_) {
+  if (paused_ && !dimension_change_pending_) {
     return;
   }
 
