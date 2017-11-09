@@ -279,9 +279,9 @@ class EventChannel {
     StreamController<dynamic> controller;
     controller = new StreamController<dynamic>.broadcast(onListen: () async {
       BinaryMessages.setMessageHandler(name, (ByteData reply) async {
-        if (reply == null)
+        if (reply == null) {
           controller.close();
-        else {
+        } else {
           try {
             controller.add(codec.decodeEnvelope(reply));
           } on PlatformException catch (e) {
