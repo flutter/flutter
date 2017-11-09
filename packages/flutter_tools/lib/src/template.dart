@@ -107,6 +107,7 @@ class Template {
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final String finalDestinationPath = renderPath(relativeDestinationPath);
+      print ("src: $absoluteSourcePath, dest: $finalDestinationPath");
       if (finalDestinationPath == null)
         return;
       final File finalDestinationFile = fs.file(finalDestinationPath);
