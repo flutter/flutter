@@ -480,6 +480,83 @@ class TextStyle extends Diagnosticable {
     );
   }
 
+  /// Returns a new text style that matches this text style but with some values
+  /// replaced by the non-null parameters of the given text style. This merge
+  /// take into consideration the [TextDecoration] values and combines them. If
+  /// the given text style is null, simply returns this text style.
+  TextStyle deepMerge(TextStyle other) {
+    if (other == null)
+      return this;
+    assert(other.inherit);
+
+    TextDecoration decoration;
+    if (this.decoration == null)
+      decoration = other.decoration;
+    else if (other.decoration == null)
+      decoration = this.decoration;
+    else {
+      if (other.decoration == TextDecoration.none) {
+        decoration = TextDecoration.none;
+      }
+      else if (getDecorationList(this.decoration).length > getDecorationList(other.decoration).length) {
+        decoration = other.decoration;
+      }
+      else {
+        decoration = new TextDecoration.combine(<TextDecoration>[this.decoration, other.decoration]);
+      }
+    }
+
+    return new TextStyle(
+      color: other.color ?? color,
+      fontFamily: other.fontFamily ?? fontFamily,
+      fontSize: other.fontSize ?? fontSize,
+      fontWeight: other.fontWeight ?? fontWeight,
+      fontStyle: other.fontStyle ?? fontStyle,
+      letterSpacing: other.letterSpacing ?? letterSpacing,
+      wordSpacing: other.wordSpacing ?? wordSpacing,
+      textBaseline: other.textBaseline ?? textBaseline,
+      height: other.height ?? height,
+      decoration: decoration,
+      decorationColor: other.decorationColor ?? decorationColor,
+      decorationStyle: other.decorationStyle ?? decorationStyle,
+    );
+  }
+
+
+  /// Return a List with all the decoration contained by the [TextDecoration].
+  List<TextDecoration> getDecorationList(TextDecoration decoration) {
+    final List<TextDecoration> decorationList = <TextDecoration>[];
+
+    if(decoration == null){
+    } else if (decoration == TextDecoration.none) {
+      decorationList.add(TextDecoration.none);
+    } else {
+      if (decoration.contains(TextDecoration.underline)) decorationList.add(TextDecoration.underline);
+      if (decoration.contains(TextDecoration.overline)) decorationList.add(TextDecoration.overline);
+      if (decoration.contains(TextDecoration.lineThrough)) decorationList.add(TextDecoration.lineThrough);
+    }
+
+    return decorationList;
+  }
+
+  /// Return a new TextStyle with the differences between the base style and the
+  /// provided style.
+  static TextStyle getDifferenceStyle(TextStyle base, TextStyle style) {
+    return new TextStyle(
+        color: base.color != style.color ? style.color : null,
+        fontFamily: base.fontFamily != style.fontFamily ? style.fontFamily : null,
+        fontSize: base.fontSize != style.fontSize ? style.fontSize : null,
+        fontWeight: base.fontWeight != style.fontWeight ? style.fontWeight : null,
+        fontStyle: base.fontStyle != style.fontStyle ? style.fontStyle : null,
+        letterSpacing: base.letterSpacing != style.letterSpacing ? style.letterSpacing : null,
+        wordSpacing: base.wordSpacing != style.wordSpacing ? style.wordSpacing : null,
+        textBaseline: base.textBaseline != style.textBaseline ? style.textBaseline : null,
+        height: base.height != style.height ? style.height : null,
+        decoration: base.decoration != style.decoration ? style.decoration : null,
+        decorationColor: base.decorationColor != style.decorationColor ? style.decorationColor : null,
+        decorationStyle: base.decorationStyle != style.decorationStyle ? style.decorationStyle : null);
+  }
+
   /// Interpolate between two text styles.
   ///
   /// This will not work well if the styles don't set the same fields.
