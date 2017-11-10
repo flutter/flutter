@@ -53,7 +53,7 @@ Future<Null> main(List<String> args) async {
     new DriveCommand(),
     new FormatCommand(),
     new FuchsiaReloadCommand(),
-    new IdeConfigCommand(),
+    new IdeConfigCommand(hidden: !verboseHelp),
     new InstallCommand(),
     new LogsCommand(),
     new PackagesCommand(),

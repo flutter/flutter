@@ -50,7 +50,7 @@ void main() {
         fs.path.join(basePath, '.idea'): 'dir',
         fs.path.join(basePath, '.idea', 'modules.xml$suffix'): 'modules $marker',
         fs.path.join(basePath, '.idea', 'vcs.xml$suffix'): 'vcs $marker',
-        fs.path.join(basePath, '.idea', 'codeStyleSettings.xml$suffix'):
+        fs.path.join(basePath, '.idea', '.name$suffix'):
             'codeStyleSettings $marker',
         fs.path.join(basePath, '.idea', 'runConfigurations'): 'dir',
         fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'):
@@ -115,7 +115,7 @@ void main() {
       temp = fs.systemTempDirectory.createTempSync('flutter_tools_');
       final Directory packagesDir = temp.childDirectory('packages')..createSync(recursive: true);
       toolsDir = packagesDir.childDirectory('flutter_tools')..createSync();
-      templateDir = toolsDir.childDirectory('templates')..createSync();
+      templateDir = toolsDir.childDirectory('ide_templates')..createSync();
       intellijDir = templateDir.childDirectory('intellij')..createSync();
     });
 
@@ -192,7 +192,7 @@ void main() {
       final String flutterIml = fs.path.join(
         'packages',
         'flutter_tools',
-        'templates',
+        'ide_templates',
         'intellij',
         'flutter.iml${Template.copyTemplateExtension}',
       );
@@ -258,7 +258,7 @@ void main() {
       final String flutterIml = fs.path.join(
         'packages',
         'flutter_tools',
-        'templates',
+        'ide_templates',
         'intellij',
         'flutter.iml${Template.copyTemplateExtension}',
       );
@@ -292,7 +292,7 @@ void main() {
       String deepIml = fs.path.join(
         'packages',
         'flutter_tools',
-        'templates',
+        'ide_templates',
         'intellij');
       // Remove the all the dir entries too.
       updatedTemplates.remove(deepIml);
