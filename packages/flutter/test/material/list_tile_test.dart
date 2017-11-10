@@ -45,20 +45,25 @@ void main() {
   testWidgets('ListTile geometry (LTR)', (WidgetTester tester) async {
     // See https://material.io/guidelines/components/lists.html
 
+    final Key leadingKey = new GlobalKey();
+    final Key trailingKey = new GlobalKey();
     bool hasSubtitle;
 
-    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false }) {
+    Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0 }) {
       hasSubtitle = isTwoLine || isThreeLine;
       return new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new ListTile(
-              leading: const Text('leading'),
-              title: const Text('title'),
-              subtitle: hasSubtitle ? const Text('subtitle') : null,
-              trailing: const Text('trailing'),
-              dense: dense,
-              isThreeLine: isThreeLine,
+        home: new MediaQuery(
+          data: new MediaQueryData(textScaleFactor: textScaleFactor),
+          child: new Material(
+            child: new Center(
+              child: new ListTile(
+                leading: new Container(key: leadingKey, width: 24.0, height: 24.0),
+                title: const Text('title'),
+                subtitle: hasSubtitle ? const Text('subtitle') : null,
+                trailing: new Container(key: trailingKey, width: 24.0, height: 24.0),
+                dense: dense,
+                isThreeLine: isThreeLine,
+              ),
             ),
           ),
         ),
@@ -66,36 +71,39 @@ void main() {
     }
 
     void testChildren() {
-      expect(find.text('leading'), findsOneWidget);
+      expect(find.byKey(leadingKey), findsOneWidget);
       expect(find.text('title'), findsOneWidget);
       if (hasSubtitle)
         expect(find.text('subtitle'), findsOneWidget);
-      expect(find.text('trailing'), findsOneWidget);
+      expect(find.byKey(trailingKey), findsOneWidget);
     }
 
     double left(String text) => tester.getTopLeft(find.text(text)).dx;
-    double right(String text) => tester.getTopRight(find.text(text)).dx;
     double top(String text) => tester.getTopLeft(find.text(text)).dy;
     double bottom(String text) => tester.getBottomLeft(find.text(text)).dy;
-    double width(String text) => tester.getSize(find.text(text)).width;
-    double height(String text) => tester.getSize(find.text(text)).height;
+
+    double leftKey(Key key) => tester.getTopLeft(find.byKey(key)).dx;
+    double rightKey(Key key) => tester.getTopRight(find.byKey(key)).dx;
+    double widthKey(Key key) => tester.getSize(find.byKey(key)).width;
+    double heightKey(Key key) => tester.getSize(find.byKey(key)).height;
+
 
     // 16.0 padding to the left and right of the leading and trailing widgets
     void testHorizontalGeometry() {
-      expect(left('leading'), 16.0);
+      expect(leftKey(leadingKey), 16.0);
       expect(left('title'), 72.0);
       if (hasSubtitle)
         expect(left('subtitle'), 72.0);
-      expect(left('title'), right('leading') + 16.0);
-      expect(right('trailing'), 800.0 - 16.0);
-      expect(width('trailing'), 112.0);
+      expect(left('title'), rightKey(leadingKey) + 32.0);
+      expect(rightKey(trailingKey), 800.0 - 16.0);
+      expect(widthKey(trailingKey), 24.0);
     }
 
     void testVerticalGeometry(double expectedHeight) {
       expect(tester.getSize(find.byType(ListTile)), new Size(800.0, expectedHeight));
       if (hasSubtitle)
         expect(top('subtitle'), bottom('title'));
-      expect(height('trailing'), 14.0); // Fits on one line (doesn't wrap)
+      expect(heightKey(trailingKey), 24.0);
     }
 
     await tester.pumpWidget(buildFrame());
@@ -127,7 +135,38 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(76.0);
+
+    await tester.pumpWidget(buildFrame(textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(64.0);
+
+    await tester.pumpWidget(buildFrame(dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(64.0);
+
+    await tester.pumpWidget(buildFrame(isTwoLine: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isTwoLine: true, dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
+
+    await tester.pumpWidget(buildFrame(isThreeLine: true, dense: true, textScaleFactor: 4.0));
+    testChildren();
+    testHorizontalGeometry();
+    testVerticalGeometry(120.0);
   });
+
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
