@@ -651,7 +651,7 @@ class HotRunner extends ResidentRunner {
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
       reloadMessage,
-      hint: unusedElementMessage
+      hint: unusedElementMessage,
     );
   }
 
