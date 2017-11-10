@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
@@ -446,11 +445,6 @@ class DevFS {
       // that isModified does not reset last check timestamp because we
       // want to report all modified files to incremental compiler next time
       // user does hot reload.
-      // TODO(aam): Remove this logic once we switch to using incremental
-      // compiler for full application compilation when doing full restart.
-      if (fullRestart && generator != null && content is DevFSFileContent) {
-        content = DevFSFileContent.clone(content);
-      }
       if (content.isModified || (bundleDirty && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
@@ -480,11 +474,11 @@ class DevFS {
       // host and result of compilation is single kernel file.
       filesUris.forEach(dirtyEntries.remove);
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-      final String compiledBinary = fullRestart
-        ? await compile(
-              sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
-              mainPath: mainPath)
-        : await generator.recompile(mainPath, invalidatedFiles);
+      if (fullRestart) {
+        generator.reset();
+      }
+      final String compiledBinary =
+          await generator.recompile(mainPath, invalidatedFiles);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
           Uri.parse(target + '.dill'),
