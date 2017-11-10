@@ -1157,7 +1157,7 @@ class SemanticsConfiguration {
   /// The reading direction is given by [textDirection].
   ///
   /// See also:
-  /// 
+  ///
   ///  * [decreasedValue], describes what [value] will be after performing
   ///    [SemanticsAction.decrease]
   ///  * [increasedValue], describes what [value] will be after performing

@@ -16,7 +16,7 @@ class _ColorsAndStops {
   final List<double> stops;
 }
 
-_ColorsAndStops interpolateColorsAndStops(List<Color> aColors, List<double> aStops, List<Color> bColors, List<double> bStops, double t) {
+_ColorsAndStops _interpolateColorsAndStops(List<Color> aColors, List<double> aStops, List<Color> bColors, List<double> bStops, double t) {
   assert(aColors.length == bColors.length, 'Cannot interpolate between two gradients with a different number of colors.'); // TODO(ianh): remove limitation
   assert((aStops == null && aColors.length == 2) || (aStops != null && aStops.length == aColors.length));
   assert((bStops == null && bColors.length == 2) || (bStops != null && bStops.length == bColors.length));
@@ -305,7 +305,7 @@ class LinearGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
     return new LinearGradient(
       begin: AlignmentGeometry.lerp(a.begin, b.begin, t),
       end: AlignmentGeometry.lerp(a.end, b.end, t),
@@ -539,7 +539,7 @@ class RadialGradient extends Gradient {
       return b.scale(t);
     if (b == null)
       return a.scale(1.0 - t);
-    final _ColorsAndStops interpolated = interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
+    final _ColorsAndStops interpolated = _interpolateColorsAndStops(a.colors, a.stops, b.colors, b.stops, t);
     return new RadialGradient(
       center: AlignmentGeometry.lerp(a.center, b.center, t),
       radius: math.max(0.0, ui.lerpDouble(a.radius, b.radius, t)),

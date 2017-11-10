@@ -26,8 +26,6 @@ import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
 
-const String _defaultAdbPath = 'adb';
-
 enum _HardwareType { emulator, physical }
 
 /// Map to help our `isLocalEmulator` detection.

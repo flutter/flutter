@@ -692,7 +692,7 @@ abstract class StatelessWidget extends Widget {
 /// location). The [State] objects associated with [StatefulWidget] are grafted
 /// along with the rest of the subtree, which means the [State] object is reused
 /// (instead of being recreated) in the new location. However, in order to be
-/// eligible for grafting, the widget might be inserted into the new location in
+/// eligible for grafting, the widget must be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
 ///
 /// ## Performance considerations
@@ -2483,7 +2483,7 @@ class BuildOwner {
 ///    element to the [owner]'s list of inactive elements, causing the framework
 ///    to call [deactivate] on this element.
 ///  * At this point, the element is considered "inactive" and will not appear
-///    on screen. An element can remain in the inactive state only only until
+///    on screen. An element can remain in the inactive state only until
 ///    the end of the current animation frame. At the end of the animation
 ///    frame, any elements that are still inactive will be unmounted.
 ///  * If the element gets reincorporated into the tree (e.g., because it or one

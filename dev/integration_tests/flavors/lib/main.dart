@@ -27,8 +27,11 @@ class _FlavorState extends State<Flavor> {
 
   @override
   Widget build(BuildContext context) {
-    return _flavor == null
-      ? const Text('Awaiting flavor...')
-      : new Text(_flavor, key: const ValueKey<String>('flavor'));
+    return new Directionality(
+      textDirection: TextDirection.ltr,
+      child: _flavor == null
+        ? const Text('Awaiting flavor...')
+        : new Text(_flavor, key: const ValueKey<String>('flavor')),
+    );
   }
 }

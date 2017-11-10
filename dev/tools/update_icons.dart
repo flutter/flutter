@@ -28,6 +28,82 @@ const Map<String, String> kIdentifierRewrites = const <String, String>{
   'class': 'class_',
 };
 
+final Set<String> kMirroredIcons = new Set<String>.from(<String>[
+  // This list is obtained from:
+  // http://google.github.io/material-design-icons/#icons-in-rtl
+  'arrow_back',
+  'arrow_back_ios',
+  'arrow_forward',
+  'arrow_forward_ios',
+  'arrow_left',
+  'arrow_right',
+  'assignment',
+  'assignment_return',
+  'backspace',
+  'battery_unknown',
+  'call_made',
+  'call_merge',
+  'call_missed',
+  'call_missed_outgoing',
+  'call_received',
+  'call_split',
+  'chevron_left',
+  'chevron_right',
+  'chrome_reader_mode',
+  'device_unknown',
+  'dvr',
+  'event_note',
+  'featured_play_list',
+  'featured_video',
+  'first_page',
+  'flight_land',
+  'flight_takeoff',
+  'format_indent_decrease',
+  'format_indent_increase',
+  'format_list_bulleted',
+  'forward',
+  'functions',
+  'help',
+  'help_outline',
+  'input',
+  'keyboard_backspace',
+  'keyboard_tab',
+  'label',
+  'label_important',
+  'label_outline',
+  'last_page',
+  'launch',
+  'list',
+  'live_help',
+  'mobile_screen_share',
+  'multiline_chart',
+  'navigate_before',
+  'navigate_next',
+  'next_week',
+  'note',
+  'open_in_new',
+  'playlist_add',
+  'queue_music',
+  'redo',
+  'reply',
+  'reply_all',
+  'screen_share',
+  'send',
+  'short_text',
+  'show_chart',
+  'sort',
+  'star_half',
+  'subject',
+  'trending_flat',
+  'toc',
+  'trending_down',
+  'trending_up',
+  'undo',
+  'view_list',
+  'view_quilt',
+  'wrap_text',
+]);
+
 void main(List<String> args) {
   // If we're run from the `tools` dir, set the cwd to the repo root.
   if (path.basename(Directory.current.path) == 'tools')
@@ -94,9 +170,10 @@ String getIconDeclaration(String line) {
   final String codepoint = tokens[1];
   final String identifier = kIdentifierRewrites[name] ?? name;
   final String description = name.replaceAll('_', ' ');
+  final String rtl = kMirroredIcons.contains(name) ? ', matchTextDirection: true' : '';
   return '''
 
   /// <p><i class="material-icons md-36">$name</i> &#x2014; material icon named "$description".</p>
-  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: 'MaterialIcons');
+  static const IconData $identifier = const IconData(0x$codepoint, fontFamily: 'MaterialIcons'$rtl);
 ''';
 }
