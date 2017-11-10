@@ -15,6 +15,7 @@
 #include "lib/tonic/logging/dart_invoke.h"
 #include "lib/tonic/typed_data/uint8_list.h"
 #include "third_party/skia/include/codec/SkCodec.h"
+#include "third_party/skia/include/core/SkPixelRef.h"
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;
@@ -236,7 +237,17 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage() {
     }
   }
 
-  return SkImage::MakeFromBitmap(bitmap);
+  GrContext* context = ResourceContext::Get();
+  if (context) {
+    SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
+                    bitmap.pixelRef()->rowBytes());
+    // This acts as a flag to indicate that we want a color space aware decode.
+    sk_sp<SkColorSpace> dstColorSpace = SkColorSpace::MakeSRGB();
+    return SkImage::MakeCrossContextFromPixmap(context, pixmap, false,
+                                               dstColorSpace.get());
+  } else {
+    return SkImage::MakeFromBitmap(bitmap);
+  }
 }
 
 void MultiFrameCodec::GetNextFrameAndInvokeCallback(
