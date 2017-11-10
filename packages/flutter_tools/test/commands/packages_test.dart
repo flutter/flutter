@@ -17,6 +17,8 @@ import 'package:test/test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
+const Timeout remotePubTimeout = const Timeout.factor(10.0);
+
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
@@ -55,7 +57,7 @@ void main() {
       final String projectPath = await runCommand('get');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    }, timeout: const Timeout.factor(3.0));
+    }, timeout: remotePubTimeout);
 
     testUsingContext('get --offline', () async {
       final String projectPath = await runCommand('get', args: <String>['--offline']);
@@ -67,7 +69,7 @@ void main() {
       final String projectPath = await runCommand('upgrade');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    }, timeout: const Timeout.factor(3.0));
+    }, timeout: remotePubTimeout);
   });
 
   group('packages test/pub', () {
