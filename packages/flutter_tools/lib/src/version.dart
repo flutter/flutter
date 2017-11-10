@@ -28,8 +28,8 @@ class FlutterVersion {
   @visibleForTesting
   FlutterVersion(this._clock) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
-    _branch = _runGit('git rev-parse --abbrev-ref HEAD');
-
+    final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+    _branch = branch == 'HEAD' ? _channel : branch;
 
     final int slash = _channel.indexOf('/');
     if (slash != -1) {
