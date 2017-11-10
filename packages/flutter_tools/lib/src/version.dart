@@ -167,8 +167,8 @@ class FlutterVersion {
     return _branch;
   }
 
-  /// Returns true if `tentativeDescendantRevision` is a direct descendant to
-  /// the `tentativeAncestorRevision` revision on the Flutter framework repo
+  /// Returns true if [tentativeDescendantRevision] is a direct descendant to
+  /// the [tentativeAncestorRevision] revision on the Flutter framework repo
   /// tree.
   static bool checkRevisionAncestry({
     String tentativeDescendantRevision,
