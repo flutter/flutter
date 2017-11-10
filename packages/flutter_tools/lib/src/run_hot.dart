@@ -13,7 +13,6 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'commands/daemon.dart';
 import 'dart/dependencies.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -41,6 +40,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode: false,
     this.applicationBinary,
     this.previewDart2: false,
+    this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -55,6 +55,7 @@ class HotRunner extends ResidentRunner {
              stayResident: stayResident);
 
   final String applicationBinary;
+  final bool hostIsIde;
   Set<String> _dartDependencies;
 
   final bool benchmarkMode;
@@ -633,7 +634,7 @@ class HotRunner extends ResidentRunner {
         unusedElements.addAll(await unusedReport);
 
       if (unusedElements.isNotEmpty) {
-        final String restartCommand = isDaemonMode ? '' : ' (by pressing "R")';
+        final String restartCommand = hostIsIde ? '' : ' (by pressing "R")';
         unusedElementMessage =
           'Some program elements were changed during reload but did not run when the view was reassembled;\n'
           'you may need to restart the app$restartCommand for the changes to have an effect.';
