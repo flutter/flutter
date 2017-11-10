@@ -57,7 +57,7 @@ void main() {
           'flutter_project.iml',
         ],
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('kotlin/swift project', () async {
       return _createProject(
@@ -76,7 +76,7 @@ void main() {
           'ios/Runner/main.m',
         ],
       );
-    });
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('package project', () async {
       return _createAndAnalyzeProject(
@@ -103,7 +103,7 @@ void main() {
           'test/widget_test.dart',
         ],
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
@@ -123,7 +123,7 @@ void main() {
         ],
         plugin: true,
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('kotlin/swift plugin project', () async {
       return _createProject(
@@ -149,7 +149,7 @@ void main() {
         ],
         plugin: true,
       );
-    });
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('plugin project with custom org', () async {
       return _createProject(
@@ -165,7 +165,7 @@ void main() {
           ],
           plugin: true,
       );
-    });
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
@@ -173,7 +173,7 @@ void main() {
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
-    }, timeout: const Timeout.factor(2.0));
+    }, timeout: const Timeout.factor(3.0));
 
     // Verify content and formatting
     testUsingContext('content', () async {
@@ -248,7 +248,8 @@ void main() {
     },
     overrides: <Type, Generator>{
       FlutterVersion: () => mockFlutterVersion,
-    });
+    },
+    timeout: const Timeout.factor(3.0));
 
     // Verify that we can regenerate over an existing project.
     testUsingContext('can re-gen over existing project', () async {
@@ -260,7 +261,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    });
+    }, timeout: const Timeout.factor(3.0));
 
     // Verify that we help the user correct an option ordering issue
     testUsingContext('produces sensible error message', () async {
