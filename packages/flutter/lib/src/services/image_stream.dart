@@ -290,8 +290,12 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
 }
 
 /// Manages the decoding and scheduling of image frames.
-/// 
+///
+/// New frames will only be emitted while there are registered listeners to the
+/// stream (registered with [addListener]).
+///
 /// This class deals with 2 types of frames:
+///
 ///  * image frames - image frames of an animated image.
 ///  * app frames - frames that the flutter engine is drawing to the screen to
 ///    show the app GUI.
@@ -330,14 +334,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     @required Future<ui.Codec> codec,
     @required double scale,
     InformationCollector informationCollector
-  }) :
-    _informationCollector = informationCollector,
-    _scale = scale,
-    _framesEmitted = 0,
-    _timer = null
-  {
+  }) : _informationCollector = informationCollector,
+       _scale = scale,
+       _framesEmitted = 0,
+       _timer = null {
     assert(codec != null);
-    codec.then<Null>(_onCodecReady, onError: (dynamic error, StackTrace stack) {
+    codec.then<Null>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
         stack: stack,
@@ -361,13 +363,12 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   int _framesEmitted;
   Timer _timer;
 
-  void _onCodecReady(ui.Codec codec){
-    print('codec ready');
+  void _handleCodecReady(ui.Codec codec){
     _codec = codec;
     _decodeNextFrameAndSchedule();
   }
 
-  void _onAppFrame(Duration timestamp) {
+  void _handleAppFrame(Duration timestamp) {
     if (!_hasActiveListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
@@ -375,17 +376,16 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame.duration;
       _nextFrame = null;
-      int completedCycles = (_framesEmitted / _codec.frameCount).floor();
+      int completedCycles = _framesEmitted ~/ _codec.frameCount;
       if (_codec.repetitionCount == -1 || completedCycles <= _codec.repetitionCount) {
         _decodeNextFrameAndSchedule();
       }
       return;
     }
-    _timer = new Timer(_frameDuration - (timestamp - _shownTimestamp),
-      () {
-        SchedulerBinding.instance.scheduleFrameCallback(_onAppFrame);
-      }
-    );
+    Duration delay = _frameDuration - (timestamp - _shownTimestamp);
+    _timer = new Timer(delay, () {
+      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+    });
   }
 
   bool _isFirstFrame() {
@@ -417,7 +417,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
       return;
     }
-    SchedulerBinding.instance.scheduleFrameCallback(_onAppFrame);
+    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 
   void _emitFrame(ImageInfo imageInfo) {
@@ -429,9 +429,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void addListener(ImageListener listener) {
-    print('add listener');
     if (!_hasActiveListeners && _codec != null) {
-      print('kicking decode');
       _decodeNextFrameAndSchedule();
     }
     super.addListener(listener);
@@ -439,10 +437,8 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   @override
   void removeListener(ImageListener listener) {
-    print('remove listener');
     super.removeListener(listener);
     if (_hasActiveListeners) {
-      print ('cancelling timer');
       _timer?.cancel();
       _timer = null;
     }
