@@ -55,7 +55,7 @@ void main() {
       final String projectPath = await runCommand('get');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    });
+    }, timeout: const Timeout.factor(3.0));
 
     testUsingContext('get --offline', () async {
       final String projectPath = await runCommand('get', args: <String>['--offline']);
@@ -67,7 +67,7 @@ void main() {
       final String projectPath = await runCommand('upgrade');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    });
+    }, timeout: const Timeout.factor(3.0));
   });
 
   group('packages test/pub', () {
