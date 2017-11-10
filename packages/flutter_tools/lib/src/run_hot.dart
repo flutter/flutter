@@ -40,6 +40,7 @@ class HotRunner extends ResidentRunner {
     this.benchmarkMode: false,
     this.applicationBinary,
     this.previewDart2: false,
+    this.hostIsIde: false,
     String projectRootPath,
     String packagesFilePath,
     String projectAssets,
@@ -54,6 +55,7 @@ class HotRunner extends ResidentRunner {
              stayResident: stayResident);
 
   final String applicationBinary;
+  final bool hostIsIde;
   Set<String> _dartDependencies;
 
   final bool benchmarkMode;
@@ -452,7 +454,7 @@ class HotRunner extends ResidentRunner {
         if (result.isOk)
           printStatus('${result.message} in ${getElapsedAsMilliseconds(timer.elapsed)}.');
         if (result.hint != null)
-          printStatus(result.hint);
+          printStatus('\n${result.hint}');
         return result;
       } catch (error) {
         status.cancel();
@@ -649,28 +651,24 @@ class HotRunner extends ResidentRunner {
         unusedElements.addAll(await unusedReport);
 
       if (unusedElements.isNotEmpty) {
+        final String restartCommand = hostIsIde ? '' : ' (by pressing "R")';
         unusedElementMessage =
-          '\nThe following program elements were changed by the reload, '
-          'but did not run when the view was reassembled. If this code '
-          'only runs at start-up, you will need to restart ("R") for '
-          'the changes to have an effect.';
+          'Some program elements were changed during reload but did not run when the view was reassembled;\n'
+          'you may need to restart the app$restartCommand for the changes to have an effect.';
         for (ProgramElement unusedElement in unusedElements) {
           final String name = unusedElement.qualifiedName;
           final String path = _uriToRelativePath(unusedElement.uri);
           final int line = unusedElement.line;
-          String elementDescription;
-          if (line == null)
-            elementDescription = '$name ($path)';
-          else
-            elementDescription = '$name ($path:$line)';
-          unusedElementMessage += '\n - $elementDescription';
+          final String description = line == null ? '$name ($path)' : '$name ($path:$line)';
+          unusedElementMessage += '\n  • $description';
         }
       }
     }
 
     return new OperationResult(
       reassembleAndScheduleErrors ? 1 : OperationResult.ok.code,
-      reloadMessage, unusedElementMessage
+      reloadMessage,
+      hint: unusedElementMessage,
     );
   }
 

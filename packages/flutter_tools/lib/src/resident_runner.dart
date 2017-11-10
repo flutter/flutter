@@ -824,7 +824,7 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, [this.hint]);
+  OperationResult(this.code, this.message, { this.hint });
 
   final int code;
   final String message;

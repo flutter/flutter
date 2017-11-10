@@ -906,9 +906,9 @@ class HeapSpace extends ServiceObject {
   }
 }
 
-// A function, field or class along with its source location.
+/// A function, field or class along with its source location.
 class ProgramElement {
-  ProgramElement(this.qualifiedName, this.uri, this.line, this.column);
+  ProgramElement(this.qualifiedName, this.uri, [this.line, this.column]);
 
   final String qualifiedName;
   final Uri uri;
@@ -1091,7 +1091,7 @@ class Isolate extends ServiceObjectOwner {
         }
       }
     }
-    return new ProgramElement(name, uri, null, null);
+    return new ProgramElement(name, uri);
   }
 
   // Lists program elements changed in the most recent reload that have not
