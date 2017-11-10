@@ -102,6 +102,5 @@ Future<String> createProject(Directory temp) async {
 const Timeout allowForRemotePubInvocation = const Timeout.factor(10.0);
 
 /// Test case timeout for tests involving creating a Flutter project with
-/// `--no-pub`. Use [forRemotePubInvocation] when the create command is executed
-/// with pub invocation enabled.
+/// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
 const Timeout allowForCreateFlutterProject = const Timeout.factor(2.0);
