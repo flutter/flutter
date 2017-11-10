@@ -296,6 +296,11 @@ class HotRunner extends ResidentRunner {
     }
   }
 
+  void _resetDirtyAssets() {
+    for (FlutterDevice device in flutterDevices)
+      device.devFS.assetPathsToEvict.clear();
+  }
+
   Future<Null> _cleanupDevFS() async {
     for (FlutterDevice device in flutterDevices) {
       if (device.devFS != null) {
@@ -355,6 +360,7 @@ class HotRunner extends ResidentRunner {
       }
       return new OperationResult(1, 'DevFS synchronization failed');
     }
+    _resetDirtyAssets();
     for (FlutterDevice device in flutterDevices) {
       // VM must have accepted the kernel binary, there will be no reload
       // report, so we let incremental compiler know that source code was accepted.
