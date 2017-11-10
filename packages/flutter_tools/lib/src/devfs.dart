@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert' show BASE64, UTF8;
 
-import 'package:flutter_tools/src/artifacts.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 
 import 'asset.dart';
