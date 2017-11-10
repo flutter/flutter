@@ -1,4 +1,4 @@
-Signature: fd3234d28554e9ff779f9fe19764fc43
+Signature: d6eb20541eb41a3b453a20228d17c9ab
 
 UNUSED LICENSES:
 
@@ -5042,6 +5042,7 @@ FILE: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_patch.dart
 FILE: ../../../third_party/dart/runtime/bin/sync_socket_win.cc
 FILE: ../../../third_party/dart/runtime/lib/async.cc
+FILE: ../../../third_party/dart/runtime/lib/class_id_fasta.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/search_bar.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/allocations.dart
 FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/dashboard.dart
@@ -5090,6 +5091,10 @@ FILE: ../../../third_party/dart/runtime/vm/fixed_cache_test.cc
 FILE: ../../../third_party/dart/runtime/vm/gc_compactor.cc
 FILE: ../../../third_party/dart/runtime/vm/gc_compactor.h
 FILE: ../../../third_party/dart/runtime/vm/gdb_helpers.cc
+FILE: ../../../third_party/dart/runtime/vm/image_snapshot.cc
+FILE: ../../../third_party/dart/runtime/vm/image_snapshot.h
+FILE: ../../../third_party/dart/runtime/vm/json_writer.cc
+FILE: ../../../third_party/dart/runtime/vm/json_writer.h
 FILE: ../../../third_party/dart/runtime/vm/kernel_binary.h
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks.h
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm.cc
@@ -5100,6 +5105,7 @@ FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_tcmalloc.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_unsupported.cc
 FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/mixin_test.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_trace.cc
 FILE: ../../../third_party/dart/runtime/vm/stack_trace.h
 FILE: ../../../third_party/dart/runtime/vm/timeline_android.cc
@@ -5111,6 +5117,7 @@ FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.cc
 FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.h
 FILE: ../../../third_party/dart/sdk/lib/_http/overrides.dart
 FILE: ../../../third_party/dart/sdk/lib/internal/linked_list.dart
+FILE: ../../../third_party/dart/sdk/lib/internal/patch.dart
 FILE: ../../../third_party/dart/sdk/lib/io/embedder_config.dart
 FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
@@ -14840,7 +14847,7 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlob_regenInOp.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrAtlasTextBlobVertexRegenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyPipeline.cpp
@@ -17891,6 +17898,7 @@ FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrOverdrawFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
 FILE: ../../../third_party/skia/src/sksl/lex/layout.lex
@@ -19711,6 +19719,7 @@ FILE: ../../../third_party/skia/src/gpu/GrProcessorSet.h
 FILE: ../../../third_party/skia/src/gpu/GrResourceAllocator.cpp
 FILE: ../../../third_party/skia/src/gpu/GrResourceAllocator.h
 FILE: ../../../third_party/skia/src/gpu/GrSemaphore.h
+FILE: ../../../third_party/skia/src/gpu/GrStencilClip.h
 FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxyPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProxyCacheAccess.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProxyPriv.h
@@ -19750,6 +19759,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrNonlinearColorSpaceXformEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrNonlinearColorSpaceXformEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrOverdrawFragmentProcessor.cpp
@@ -20129,6 +20140,7 @@ FILE: ../../../third_party/skia/src/core/SkOSFile.h
 FILE: ../../../third_party/skia/src/core/SkPaint.cpp
 FILE: ../../../third_party/skia/src/core/SkPath.cpp
 FILE: ../../../third_party/skia/src/core/SkPathEffect.cpp
+FILE: ../../../third_party/skia/src/core/SkPointPriv.h
 FILE: ../../../third_party/skia/src/core/SkRasterizer.cpp
 FILE: ../../../third_party/skia/src/core/SkRect.cpp
 FILE: ../../../third_party/skia/src/core/SkRegion.cpp
