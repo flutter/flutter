@@ -7,8 +7,6 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'message_codecs_utils.dart';
-
 void main() {
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
     // The first call is a cache miss and will queue a microtask

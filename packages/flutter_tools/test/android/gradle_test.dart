@@ -7,9 +7,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:test/test.dart';
 
-
-const String _kBuildDirectory = '/build/app/outputs';
-
 void main() {
   group('gradle project', () {
     GradleProject projectFrom(String properties) => new GradleProject.fromAppProperties(properties);

@@ -232,6 +232,7 @@ class TextField extends StatefulWidget {
   /// characters.
   ///
   /// See also:
+  ///
   ///  * [LengthLimitingTextInputFormatter] for more information on how it
   ///    counts characters, and how it may differ from the intuitive meaning.
   final int maxLength;

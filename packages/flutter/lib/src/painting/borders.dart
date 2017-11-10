@@ -411,11 +411,10 @@ abstract class ShapeBorder {
 ///
 /// The borders are listed from the outside to the inside.
 class _CompoundBorder extends ShapeBorder {
-  _CompoundBorder(this.borders) {
-    assert(borders != null);
-    assert(borders.length >= 2);
-    assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
-  }
+  _CompoundBorder(this.borders)
+    : assert(borders != null),
+      assert(borders.length >= 2),
+      assert(!borders.any((ShapeBorder border) => border is _CompoundBorder));
 
   final List<ShapeBorder> borders;
 

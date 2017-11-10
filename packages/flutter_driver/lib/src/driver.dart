@@ -418,7 +418,10 @@ class FlutterDriver {
 
   /// Sends a string and returns a string.
   ///
-  /// The application can respond to this by providing a handler to [enableFlutterDriverExtension].
+  /// This enables generic communication between the driver and the application.
+  /// It's expected that the application has registered a [DataHandler]
+  /// callback in [enableFlutterDriverExtension] that can successfully handle
+  /// these requests.
   Future<String> requestData(String message, { Duration timeout }) async {
     return RequestDataResult.fromJson(await _sendCommand(new RequestData(message, timeout: timeout))).message;
   }
@@ -435,6 +438,42 @@ class FlutterDriver {
   /// Take a screenshot.  The image will be returned as a PNG.
   Future<List<int>> screenshot({ Duration timeout }) async {
     timeout ??= _kLongTimeout;
+
+    // HACK: this artificial delay here is to deal with a race between the
+    //       driver script and the GPU thread. The issue is that driver API
+    //       synchronizes with the framework based on transient callbacks, which
+    //       are out of sync with the GPU thread. Here's the timeline of events
+    //       in ASCII art:
+    //
+    //       -------------------------------------------------------------------
+    //       Before this change:
+    //       -------------------------------------------------------------------
+    //       UI    : <-- build -->
+    //       GPU   :               <-- rasterize -->
+    //       Gap   :              | random |
+    //       Driver:                        <-- screenshot -->
+    //
+    //       In the diagram above, the gap is the time between the last driver
+    //       action taken, such as a `tap()`, and the subsequent call to
+    //       `screenshot()`. The gap is random because it is determined by the
+    //       unpredictable network communication between the driver process and
+    //       the application. If this gap is too short, the screenshot is taken
+    //       before the GPU thread is done rasterizing the frame, so the
+    //       screenshot of the previous frame is taken, which is wrong.
+    //
+    //       -------------------------------------------------------------------
+    //       After this change:
+    //       -------------------------------------------------------------------
+    //       UI    : <-- build -->
+    //       GPU   :               <-- rasterize -->
+    //       Gap   :              |    2 seconds or more   |
+    //       Driver:                                        <-- screenshot -->
+    //
+    //       The two-second gap should be long enough for the GPU thread to
+    //       finish rasterizing the frame, but not longer than necessary to keep
+    //       driver tests as fast a possible.
+    await new Future<Null>.delayed(const Duration(seconds: 2));
+
     final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot').timeout(timeout);
     return BASE64.decode(result['screenshot']);
   }

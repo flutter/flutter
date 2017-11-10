@@ -297,7 +297,7 @@ Future<Null> _runTests(List<String> testArgs, String observatoryUri) async {
     ..add('-rexpanded');
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]..addAll(args),
+    <String>[dartVmPath]..addAll(dartVmFlags)..addAll(args),
     environment: <String, String>{ 'VM_SERVICE_URL': observatoryUri }
   );
   if (result != 0)

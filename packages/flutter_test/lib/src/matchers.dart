@@ -2,7 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
 import 'finders.dart';
@@ -211,6 +215,14 @@ Matcher moreOrLessEquals(double value, { double epsilon: 1e-10 }) {
 ///    typically containing multiple hash codes.
 Matcher equalsIgnoringHashCodes(String value) {
   return new _EqualsIgnoringHashCodes(value);
+}
+
+/// A matcher for [MethodCall]s, asserting that it has the specified
+/// method [name] and [arguments].
+///
+/// Arguments checking implements deep equality for [List] and [Map] types.
+Matcher isMethodCall(String name, {@required dynamic arguments}) {
+  return new _IsMethodCall(name, arguments);
 }
 
 class _FindsWidgetMatcher extends Matcher {
@@ -565,6 +577,105 @@ class _HasGoodToStringDeep extends Matcher {
   }
 }
 
+/// Computes the distance between two values.
+///
+/// The distance should be a metric in a metric space (see
+/// https://en.wikipedia.org/wiki/Metric_space). Specifically, if `f` is a
+/// distance function then the following conditions should hold:
+///
+/// - f(a, b) >= 0
+/// - f(a, b) == 0 if and only if a == b
+/// - f(a, b) == f(b, a)
+/// - f(a, c) <= f(a, b) + f(b, c), known as triangle inequality
+///
+/// This makes it useful for comparing numbers, [Color]s, [Offset]s and other
+/// sets of value for which a metric space is defined.
+typedef num DistanceFunction<T>(T a, T b);
+
+const Map<Type, DistanceFunction<dynamic>> _kStandardDistanceFunctions = const <Type, DistanceFunction<dynamic>>{
+  Color: _maxComponentColorDistance,
+  Offset: _offsetDistance,
+  int: _intDistance,
+  double: _doubleDistance,
+};
+
+int _intDistance(int a, int b) => (b - a).abs();
+double _doubleDistance(double a, double b) => (b - a).abs();
+double _offsetDistance(Offset a, Offset b) => (b - a).distance;
+
+double _maxComponentColorDistance(Color a, Color b) {
+  int delta = math.max<int>((a.red - b.red).abs(), (a.green - b.green).abs());
+  delta = math.max<int>(delta, (a.blue - b.blue).abs());
+  delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
+  return delta.toDouble();
+}
+
+/// Asserts that two values are within a certain distance from each other.
+///
+/// The distance is computed by a [DistanceFunction].
+///
+/// If `distanceFunction` is null, a standard distance function is used for the
+/// `runtimeType` of the `from` argument. Standard functions are defined for
+/// the following types:
+///
+///  * [Color], whose distance is the maximum component-wise delta.
+///  * [Offset], whose distance is the Euclidean distance computed using the
+///    method [Offset.distance].
+///  * [int], whose distance is the absolute difference between two integers.
+///  * [double], whose distance is the absolute difference between two doubles.
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is similar to this function, but specializes in
+///    [double]s and has an optional `epsilon` parameter.
+///  * [closeTo], which specializes in numbers only.
+Matcher within<T>({
+  @required num distance,
+  @required T from,
+  DistanceFunction<T> distanceFunction,
+}) {
+  distanceFunction ??= _kStandardDistanceFunctions[from.runtimeType];
+
+  if (distanceFunction == null) {
+    throw new ArgumentError(
+      'The specified distanceFunction was null, and a standard distance '
+      'function was not found for type ${from.runtimeType} of the provided '
+      '`from` argument.'
+    );
+  }
+
+  return new _IsWithinDistance<T>(distanceFunction, from, distance);
+}
+
+class _IsWithinDistance<T> extends Matcher {
+  const _IsWithinDistance(this.distanceFunction, this.value, this.epsilon);
+
+  final DistanceFunction<T> distanceFunction;
+  final T value;
+  final num epsilon;
+
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    if (object is! T)
+      return false;
+    if (object == value)
+      return true;
+    final T test = object;
+    final num distance = distanceFunction(test, value);
+    if (distance < 0) {
+      throw new ArgumentError(
+        'Invalid distance function was used to compare a ${value.runtimeType} '
+        'to a ${object.runtimeType}. The function must return a non-negative '
+        'double value, but it returned $distance.'
+      );
+    }
+    return distance <= epsilon;
+  }
+
+  @override
+  Description describe(Description description) => description.add('$value (±$epsilon)');
+}
+
 class _MoreOrLessEquals extends Matcher {
   const _MoreOrLessEquals(this.value, this.epsilon);
 
@@ -584,3 +695,57 @@ class _MoreOrLessEquals extends Matcher {
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
 }
+
+class _IsMethodCall extends Matcher {
+  const _IsMethodCall(this.name, this.arguments);
+
+  final String name;
+  final dynamic arguments;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item is! MethodCall)
+      return false;
+    if (item.method != name)
+      return false;
+    return _deepEquals(item.arguments, arguments);
+  }
+
+  bool _deepEquals(dynamic a, dynamic b) {
+    if (a == b)
+      return true;
+    if (a is List)
+      return b is List && _deepEqualsList(a, b);
+    if (a is Map)
+      return b is Map && _deepEqualsMap(a, b);
+    return false;
+  }
+
+  bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
+    if (a.length != b.length)
+      return false;
+    for (int i = 0; i < a.length; i++) {
+      if (!_deepEquals(a[i], b[i]))
+        return false;
+    }
+    return true;
+  }
+
+  bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
+    if (a.length != b.length)
+      return false;
+    for (dynamic key in a.keys) {
+      if (!b.containsKey(key) || !_deepEquals(a[key], b[key]))
+        return false;
+    }
+    return true;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description
+        .add('has method name: ').addDescriptionOf(name)
+        .add(' with arguments: ').addDescriptionOf(arguments);
+  }
+}
+
