@@ -28,6 +28,8 @@ class FlutterVersion {
   @visibleForTesting
   FlutterVersion(this._clock) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+    _branch = _runGit('git rev-parse --abbrev-ref HEAD');
+
 
     final int slash = _channel.indexOf('/');
     if (slash != -1) {
@@ -50,6 +52,9 @@ class FlutterVersion {
   String _channel;
   /// `master`, `alpha`, `hackathon`, ...
   String get channel => _channel;
+
+  /// The name of the local branch
+  String _branch;
 
   String _frameworkRevision;
   String get frameworkRevision => _frameworkRevision;
@@ -154,12 +159,12 @@ class FlutterVersion {
   /// If [whitelistBranchName] is true and the branch is unknown,
   /// the branch name will be returned as 'dev'.
   String getBranchName({ bool whitelistBranchName: false }) {
-    if (whitelistBranchName || channel.isEmpty) {
+    if (whitelistBranchName || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kKnownBranchNames.contains(channel))
+      if (!kKnownBranchNames.contains(_branch))
         return 'dev';
     }
-    return channel;
+    return _branch;
   }
 
   /// The amount of time we wait before pinging the server to check for the
