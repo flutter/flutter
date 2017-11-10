@@ -151,7 +151,7 @@ class FlutterVersion {
 
   /// Return the branch name.
   ///
-  /// If whitelistBranchName is true and the branch is unknown,
+  /// If [whitelistBranchName] is true and the branch is unknown,
   /// the branch name will be returned as 'dev'.
   String getBranchName({ bool whitelistBranchName: false }) {
     if (whitelistBranchName || channel.isEmpty) {
