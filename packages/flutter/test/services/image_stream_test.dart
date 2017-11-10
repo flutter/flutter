@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui';
+import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -303,5 +304,42 @@ void main() {
      imageStream.addListener(listener);
      await tester.idle(); // let nextFrameFuture complete
      expect(mockCodec.numFramesAsked, 3);
+   });
+
+   testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
+     MockCodec mockCodec = new MockCodec();
+     mockCodec.frameCount = 2;
+     mockCodec.repetitionCount = -1;
+     Completer<Codec> codecCompleter = new Completer<Codec>();
+
+     ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+       codec: codecCompleter.future,
+       scale: 1.0,
+     );
+
+     ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+     imageStream.addListener(listener);
+
+     codecCompleter.complete(mockCodec);
+     await tester.idle();
+
+     FrameInfo frame1 = new FakeFrameInfo(20, 10, new Duration(milliseconds: 200));
+     FrameInfo frame2 = new FakeFrameInfo(200, 100, new Duration(milliseconds: 400));
+
+     mockCodec.completeNextFrame(frame1);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // first animation frame shows on first app frame.
+
+     timeDilation = 2.0;
+     mockCodec.completeNextFrame(frame2);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // schedule next app frame
+     await tester.pump(new Duration(milliseconds: 200)); // emit 2nd frame.
+     // Decoding of the 3rd frame should not start after 200 ms, as time is
+     // dilated by a factor of 2.
+     expect(mockCodec.numFramesAsked, 2);
+     await tester.pump(new Duration(milliseconds: 200)); // emit 2nd frame.
+     expect(mockCodec.numFramesAsked, 3);
+
    });
 }

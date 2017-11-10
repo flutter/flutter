@@ -383,7 +383,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       return;
     }
     Duration delay = _frameDuration - (timestamp - _shownTimestamp);
-    _timer = new Timer(delay, () {
+    _timer = new Timer(delay * timeDilation, () {
       SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
     });
   }
