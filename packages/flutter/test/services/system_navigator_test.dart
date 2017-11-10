@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
-
-import 'message_codecs_utils.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('System navigator control test', () async {

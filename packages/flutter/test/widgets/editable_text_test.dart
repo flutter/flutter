@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 
-import '../services/message_codecs_utils.dart';
 import 'semantics_tester.dart';
 
 void main() {
