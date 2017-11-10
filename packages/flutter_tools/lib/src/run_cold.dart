@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
-import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
+import 'tracing.dart';
 
 class ColdRunner extends ResidentRunner {
   ColdRunner(
