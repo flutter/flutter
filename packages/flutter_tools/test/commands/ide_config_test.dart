@@ -14,9 +14,6 @@ import 'package:test/test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
-const String frameworkRevision = '12345678';
-const String frameworkChannel = 'omega';
-
 void main() {
   group('ide_config', () {
     Directory temp;
