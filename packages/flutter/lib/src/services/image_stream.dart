@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show Image, Codec, FrameInfo;
+import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 
 /// A [dart:ui.Image] object with its corresponding scale.
 ///
@@ -40,6 +42,18 @@ class ImageInfo {
 
   @override
   String toString() => '$image @ ${scale}x';
+
+  @override
+  int get hashCode => hashValues(image, scale);
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final ImageInfo typedOther = other;
+    return typedOther.image == image
+        && typedOther.scale == scale;
+  }
 }
 
 /// Signature for callbacks reporting that an image is available.
@@ -272,5 +286,161 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
         silent: true,
       ));
     });
+  }
+}
+
+/// Manages the decoding and scheduling of image frames.
+///
+/// New frames will only be emitted while there are registered listeners to the
+/// stream (registered with [addListener]).
+///
+/// This class deals with 2 types of frames:
+///
+///  * image frames - image frames of an animated image.
+///  * app frames - frames that the flutter engine is drawing to the screen to
+///    show the app GUI.
+///
+/// For single frame images the stream will only complete once.
+///
+/// For animated images, this class eagerly decodes the next image frame,
+/// and notifies the listeners that a new frame is ready on the first app frame
+/// that is scheduled after the image frame duration has passed.
+///
+/// Scheduling new timers only from scheduled app frames, makes sure we pause
+/// the animation when the app is not visible (as new app frames will not be
+/// scheduled).
+///
+/// See the following timeline example:
+///
+/// | Time | Event                                      | Comment                   |
+/// |------|--------------------------------------------|---------------------------|
+/// | t1   | App frame scheduled (image frame A posted) |                           |
+/// | t2   | App frame scheduled                        |                           |
+/// | t3   | App frame scheduled                        |                           |
+/// | t4   | Image frame B decoded                      |                           |
+/// | t5   | App frame scheduled                        | t5 - t1 < frameB_duration | 
+/// | t6   | App frame scheduled (image frame B posted) | t6 - t1 > frameB_duration |
+///
+class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
+  /// Creates a image stream completer.
+  ///
+  /// Immediately starts decoding the first image frame when the codec is ready.
+  ///
+  /// [codec] is a future for an initialized [ui.Codec] that will be used to
+  /// decode the image.
+  /// [scale] is the linear scale factor for drawing this frames of this image
+  /// at their intended size.
+  MultiFrameImageStreamCompleter({
+    @required Future<ui.Codec> codec,
+    @required double scale,
+    InformationCollector informationCollector
+  }) : assert(codec != null),
+       _informationCollector = informationCollector,
+       _scale = scale,
+       _framesEmitted = 0,
+       _timer = null {
+    codec.then<Null>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+        exception: error,
+        stack: stack,
+        library: 'services',
+        context: 'resolving an image codec',
+        informationCollector: informationCollector,
+        silent: true,
+      ));
+    });
+  }
+
+  ui.Codec _codec;
+  final double _scale;
+  final InformationCollector _informationCollector;
+  ui.FrameInfo _nextFrame;
+  // When the current was first shown.
+  Duration _shownTimestamp;
+  // The requested duration for the current frame;
+  Duration _frameDuration;
+  // How many frames have been emitted so far.
+  int _framesEmitted;
+  Timer _timer;
+
+  void _handleCodecReady(ui.Codec codec){
+    _codec = codec;
+    _decodeNextFrameAndSchedule();
+  }
+
+  void _handleAppFrame(Duration timestamp) {
+    if (!_hasActiveListeners)
+      return;
+    if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
+      _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
+      _shownTimestamp = timestamp;
+      _frameDuration = _nextFrame.duration;
+      _nextFrame = null;
+      final int completedCycles = _framesEmitted ~/ _codec.frameCount;
+      if (_codec.repetitionCount == -1 || completedCycles <= _codec.repetitionCount) {
+        _decodeNextFrameAndSchedule();
+      }
+      return;
+    }
+    final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
+    _timer = new Timer(delay * timeDilation, () {
+      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+    });
+  }
+
+  bool _isFirstFrame() {
+    return _frameDuration == null;
+  }
+
+  bool _hasFrameDurationPassed(Duration timestamp) {
+    assert(_shownTimestamp != null);
+    return timestamp - _shownTimestamp >= _frameDuration;
+  }
+
+  Future<Null> _decodeNextFrameAndSchedule() async {
+    try {
+      _nextFrame = await _codec.getNextFrame();
+    } catch (exception, stack) {
+      FlutterError.reportError(new FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services',
+          context: 'resolving an image frame',
+          informationCollector: _informationCollector,
+          silent: true,
+      ));
+      return;
+    }
+    if (_codec.frameCount == 1) {
+      // This is not an animated image, just return it and don't schedule more
+      // frames.
+      _emitFrame(new ImageInfo(image: _nextFrame.image, scale: _scale));
+      return;
+    }
+    SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+  }
+
+  void _emitFrame(ImageInfo imageInfo) {
+    setImage(imageInfo);
+    _framesEmitted += 1;
+  }
+
+  bool get _hasActiveListeners => _listeners.isNotEmpty;
+
+  @override
+  void addListener(ImageListener listener) {
+    if (!_hasActiveListeners && _codec != null) {
+      _decodeNextFrameAndSchedule();
+    }
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(ImageListener listener) {
+    super.removeListener(listener);
+    if (_hasActiveListeners) {
+      _timer?.cancel();
+      _timer = null;
+    }
   }
 }
