@@ -92,7 +92,7 @@ abstract class OffsetBase {
   int get hashCode => hashValues(_dx, _dy);
 
   @override
-  String toString() => "$runtimeType(${_dx?.toStringAsFixed(1)}, ${_dy?.toStringAsFixed(1)})";
+  String toString() => '$runtimeType(${_dx?.toStringAsFixed(1)}, ${_dy?.toStringAsFixed(1)})';
 }
 
 /// An immutable 2D floating-point offset.
@@ -284,7 +284,7 @@ class Offset extends OffsetBase {
   }
 
   @override
-  String toString() => "Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})";
+  String toString() => 'Offset(${dx?.toStringAsFixed(1)}, ${dy?.toStringAsFixed(1)})';
 }
 
 /// Holds a 2D floating-point size.
@@ -405,12 +405,11 @@ class Size extends OffsetBase {
   /// [double]).
   Size operator %(double operand) => new Size(width % operand, height % operand);
 
-  /// The lesser of the [width] and the [height].
-  double get shortestSide {
-    double w = width.abs();
-    double h = height.abs();
-    return w < h ? w : h;
-  }
+  /// The lesser of the magnitudes of the [width] and the [height].
+  double get shortestSide => math.min(width.abs(), height.abs());
+
+  /// The greater of the magnitudes of the [width] and the [height].
+  double get longestSide => math.max(width.abs(), height.abs());
 
   // Convenience methods that do the equivalent of calling the similarly named
   // methods on a Rect constructed from the given origin and this size.
@@ -513,7 +512,7 @@ class Size extends OffsetBase {
   }
 
   @override
-  String toString() => "Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})";
+  String toString() => 'Size(${width?.toStringAsFixed(1)}, ${height?.toStringAsFixed(1)})';
 }
 
 /// An immutable, 2D, axis-aligned, floating-point rectangle whose coordinates
@@ -653,6 +652,17 @@ class Rect {
     );
   }
 
+  /// Returns a new rectangle which is the bounding box containing this
+  /// rectangle and the given rectangle.
+  Rect expandToInclude(Rect other) {
+    return new Rect.fromLTRB(
+        math.min(left, other.left),
+        math.min(top, other.top),
+        math.max(right, other.right),
+        math.max(bottom, other.bottom),
+    );
+  }
+
   /// Whether `other` has a nonzero area of overlap with this rectangle.
   bool overlaps(Rect other) {
     if (right <= other.left || other.right <= left)
@@ -662,13 +672,13 @@ class Rect {
     return true;
   }
 
-  /// The lesser of the magnitudes of the width and the height of this
+  /// The lesser of the magnitudes of the [width] and the [height] of this
   /// rectangle.
-  double get shortestSide {
-    double w = width.abs();
-    double h = height.abs();
-    return w < h ? w : h;
-  }
+  double get shortestSide => math.min(width.abs(), height.abs());
+
+  /// The greater of the magnitudes of the [width] and the [height] of this
+  /// rectangle.
+  double get longestSide => math.max(width.abs(), height.abs());
 
   /// The offset to the intersection of the top and left edges of this rectangle.
   ///
@@ -735,7 +745,7 @@ class Rect {
     if (a == null)
       return new Rect.fromLTRB(b.left * t, b.top * t, b.right * t, b.bottom * t);
     if (b == null) {
-      double k = 1.0 - t;
+      final double k = 1.0 - t;
       return new Rect.fromLTRB(a.left * k, a.top * k, a.right * k, a.bottom * k);
     }
     return new Rect.fromLTRB(
@@ -764,7 +774,7 @@ class Rect {
   int get hashCode => hashList(_value);
 
   @override
-  String toString() => "Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})";
+  String toString() => 'Rect.fromLTRB(${left.toStringAsFixed(1)}, ${top.toStringAsFixed(1)}, ${right.toStringAsFixed(1)}, ${bottom.toStringAsFixed(1)})';
 }
 
 /// A radius for either circular or elliptical shapes.
@@ -847,7 +857,7 @@ class Radius {
     if (a == null)
       return new Radius.elliptical(b.x * t, b.y * t);
     if (b == null) {
-      double k = 1.0 - t;
+      final double k = 1.0 - t;
       return new Radius.elliptical(a.x * k, a.y * k);
     }
     return new Radius.elliptical(
@@ -1241,13 +1251,14 @@ class RRect {
   /// Whether this rounded rectangle would draw as a circle.
   bool get isCircle => width == height && isEllipse;
 
-  /// The lesser of the magnitudes of the width and the height of this rounded
-  /// rectangle.
-  double get shortestSide {
-    double w = width.abs();
-    double h = height.abs();
-    return w < h ? w : h;
-  }
+  /// The lesser of the magnitudes of the [width] and the [height] of this
+  /// rounded rectangle.
+  double get shortestSide => math.min(width.abs(), height.abs());
+
+  /// The greater of the magnitudes of the [width] and the [height] of this
+  /// rounded rectangle.
+  double get longestSide => math.max(width.abs(), height.abs());
+
 
   /// The offset to the point halfway between the left and right and the top and
   /// bottom edges of this rectangle.
@@ -1256,7 +1267,7 @@ class RRect {
   // Returns the minimum between min and scale to which radius1 and radius2
   // should be scaled with in order not to exceed the limit.
   double _getMin(double min, double radius1, double radius2, double limit) {
-    double sum = radius1 + radius2;
+    final double sum = radius1 + radius2;
     if (sum > limit && sum != 0.0)
       return math.min(min, limit / sum);
     return min;
@@ -1270,7 +1281,7 @@ class RRect {
   void _scaleRadii() {
     if (_scaled == null) {
       double scale = 1.0;
-      final List<double> scaled = new List.from(_value);
+      final List<double> scaled = new List<double>.from(_value);
 
       scale = _getMin(scale, scaled[11], scaled[5], height);
       scale = _getMin(scale, scaled[4], scaled[6], width);
@@ -1364,7 +1375,7 @@ class RRect {
       ]);
     }
     if (b == null) {
-      double k = 1.0 - t;
+      final double k = 1.0 - t;
       return new RRect._fromList(<double>[
         a.left * k,
         a.top * k,
