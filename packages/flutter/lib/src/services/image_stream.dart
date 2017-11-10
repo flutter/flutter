@@ -334,11 +334,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     @required Future<ui.Codec> codec,
     @required double scale,
     InformationCollector informationCollector
-  }) : _informationCollector = informationCollector,
+  }) : assert(codec != null),
+       _informationCollector = informationCollector,
        _scale = scale,
        _framesEmitted = 0,
        _timer = null {
-    assert(codec != null);
     codec.then<Null>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       FlutterError.reportError(new FlutterErrorDetails(
         exception: error,
@@ -376,13 +376,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _shownTimestamp = timestamp;
       _frameDuration = _nextFrame.duration;
       _nextFrame = null;
-      int completedCycles = _framesEmitted ~/ _codec.frameCount;
+      final int completedCycles = _framesEmitted ~/ _codec.frameCount;
       if (_codec.repetitionCount == -1 || completedCycles <= _codec.repetitionCount) {
         _decodeNextFrameAndSchedule();
       }
       return;
     }
-    Duration delay = _frameDuration - (timestamp - _shownTimestamp);
+    final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
     _timer = new Timer(delay * timeDilation, () {
       SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
     });
@@ -425,7 +425,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     _framesEmitted += 1;
   }
 
-  bool get _hasActiveListeners => _listeners.length > 0;
+  bool get _hasActiveListeners => _listeners.isNotEmpty;
 
   @override
   void addListener(ImageListener listener) {
