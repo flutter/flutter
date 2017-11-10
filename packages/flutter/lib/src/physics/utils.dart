@@ -4,14 +4,15 @@
 
 /// Whether two doubles are within a given distance of each other.
 ///
-/// The epsilon argument must be positive.
+/// The `epsilon` argument must be positive and not null.
+/// The `a` and `b` arguments may be null. A null value is only considered
+/// near-equal to another null value.
 bool nearEqual(double a, double b, double epsilon) {
+  assert(epsilon != null);
   assert(epsilon >= 0.0);
-  if (a == null || b == null) {
-  	return (a == b);
-  } else {
-  	return (a > (b - epsilon)) && (a < (b + epsilon));
-  }
+  if (a == null || b == null)
+    return a == b;
+  return (a > (b - epsilon)) && (a < (b + epsilon));
 }
 
 /// Whether a double is within a given distance of zero.
