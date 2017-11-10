@@ -22,9 +22,6 @@ import '../src/context.dart';
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
 
-const Timeout createProjectTimeout = const Timeout.factor(2.0);
-const Timeout createProjectAndGetPackagesTimeout = const Timeout.factor(10.0);
-
 void main() {
   group('create', () {
     Directory temp;
@@ -60,7 +57,7 @@ void main() {
           'flutter_project.iml',
         ],
       );
-    }, timeout: createProjectAndGetPackagesTimeout);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift project', () async {
       return _createProject(
@@ -79,7 +76,7 @@ void main() {
           'ios/Runner/main.m',
         ],
       );
-    }, timeout: createProjectTimeout);
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('package project', () async {
       return _createAndAnalyzeProject(
@@ -106,7 +103,7 @@ void main() {
           'test/widget_test.dart',
         ],
       );
-    }, timeout: createProjectAndGetPackagesTimeout);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
       return _createAndAnalyzeProject(
@@ -126,7 +123,7 @@ void main() {
         ],
         plugin: true,
       );
-    }, timeout: createProjectAndGetPackagesTimeout);
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift plugin project', () async {
       return _createProject(
@@ -152,7 +149,7 @@ void main() {
         ],
         plugin: true,
       );
-    }, timeout: createProjectTimeout);
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('plugin project with custom org', () async {
       return _createProject(
@@ -168,7 +165,7 @@ void main() {
           ],
           plugin: true,
       );
-    }, timeout: createProjectTimeout);
+    }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('project with-driver-test', () async {
       return _createAndAnalyzeProject(
@@ -176,7 +173,7 @@ void main() {
         <String>['--with-driver-test'],
         <String>['lib/main.dart'],
       );
-    }, timeout: createProjectAndGetPackagesTimeout);
+    }, timeout: allowForRemotePubInvocation);
 
     // Verify content and formatting
     testUsingContext('content', () async {
@@ -252,7 +249,7 @@ void main() {
     overrides: <Type, Generator>{
       FlutterVersion: () => mockFlutterVersion,
     },
-    timeout: createProjectTimeout);
+    timeout: allowForCreateFlutterProject);
 
     // Verify that we can regenerate over an existing project.
     testUsingContext('can re-gen over existing project', () async {
@@ -264,7 +261,7 @@ void main() {
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
       await runner.run(<String>['create', '--no-pub', projectDir.path]);
-    }, timeout: createProjectTimeout);
+    }, timeout: allowForCreateFlutterProject);
 
     // Verify that we help the user correct an option ordering issue
     testUsingContext('produces sensible error message', () async {
