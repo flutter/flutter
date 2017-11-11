@@ -230,25 +230,45 @@ void main() {
       });
     });
 
+    group('clearTimeline', () {
+      test('clears timeline', () async {
+        bool clearWasCalled = false;
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((_) async {
+          clearWasCalled = true;
+          return null;
+        });
+        await driver.clearTimeline();
+        expect(clearWasCalled, isTrue);
+      });
+    });
+
     group('traceAction', () {
-      test('traces action', () async {
-        bool actionCalled = false;
-        bool startTracingCalled = false;
-        bool stopTracingCalled = false;
+      List<String> log;
+
+      setUp(() async {
+        log = <String>[];
+
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((_) async {
+          log.add('clear');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-          .thenAnswer((_) async {
-            startTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((_) async {
+          log.add('startTracing');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-          .thenAnswer((_) async {
-            stopTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((_) async {
+          log.add('stopTracing');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+          log.add('download');
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
@@ -257,14 +277,34 @@ void main() {
             ],
           };
         });
+      });
 
+      test('without clearing timeline', () async {
         final Timeline timeline = await driver.traceAction(() {
-          actionCalled = true;
+          log.add('action');
+        }, retainPriorEvents: true);
+
+        expect(log, const <String>[
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
+        expect(timeline.events.single.name, 'test event');
+      });
+
+      test('with clearing timeline', () async {
+        final Timeline timeline = await driver.traceAction(() {
+          log.add('action');
         });
 
-        expect(actionCalled, isTrue);
-        expect(startTracingCalled, isTrue);
-        expect(stopTracingCalled, isTrue);
+        expect(log, const <String>[
+          'clear',
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
         expect(timeline.events.single.name, 'test event');
       });
     });
@@ -304,7 +344,8 @@ void main() {
           TimelineStream.dart,
           TimelineStream.gc,
           TimelineStream.compiler
-        ]);
+        ],
+        retainPriorEvents: true);
 
         expect(actionCalled, isTrue);
         expect(startTracingCalled, isTrue);

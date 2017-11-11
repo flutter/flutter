@@ -127,6 +127,7 @@ class FlutterDriver {
   static const String _kFlutterExtensionMethod = 'ext.flutter.driver';
   static const String _kSetVMTimelineFlagsMethod = '_setVMTimelineFlags';
   static const String _kGetVMTimelineMethod = '_getVMTimeline';
+  static const String _kClearVMTimelineMethod = '_clearVMTimeline';
 
   static int _nextDriverId = 0;
 
@@ -503,7 +504,10 @@ class FlutterDriver {
   }
 
   /// Starts recording performance traces.
-  Future<Null> startTracing({ List<TimelineStream> streams: _defaultStreams, Duration timeout: _kShortTimeout }) async {
+  Future<Null> startTracing({
+    List<TimelineStream> streams: _defaultStreams,
+    Duration timeout: _kShortTimeout,
+  }) async {
     assert(streams != null && streams.isNotEmpty);
     try {
       await _peer.sendRequest(_kSetVMTimelineFlagsMethod, <String, String>{
@@ -545,10 +549,36 @@ class FlutterDriver {
   ///
   /// [streams] limits the recorded timeline event streams to only the ones
   /// listed. By default, all streams are recorded.
-  Future<Timeline> traceAction(Future<dynamic> action(), { List<TimelineStream> streams: _defaultStreams }) async {
+  ///
+  /// If [retainPriorEvents] is true, retains events recorded prior to calling
+  /// [action]. Otherwise, prior events are cleared before calling [action]. By
+  /// default, prior events are cleared.
+  Future<Timeline> traceAction(
+    Future<dynamic> action(), {
+    List<TimelineStream> streams: _defaultStreams,
+    bool retainPriorEvents: false,
+  }) async {
+    if (!retainPriorEvents) {
+      await clearTimeline();
+    }
     await startTracing(streams: streams);
     await action();
     return stopTracingAndDownloadTimeline();
+  }
+
+  /// Clears all timeline events recorded up until now.
+  Future<Null> clearTimeline({ Duration timeout: _kShortTimeout }) async {
+    try {
+      await _peer
+          .sendRequest(_kClearVMTimelineMethod, <String, String>{})
+          .timeout(timeout);
+    } catch(error, stackTrace) {
+      throw new DriverError(
+          'Failed to clear event timeline due to remote error',
+          error,
+          stackTrace
+      );
+    }
   }
 
   /// [action] will be executed with the frame sync mechanism disabled.
