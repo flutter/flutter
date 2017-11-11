@@ -554,7 +554,7 @@ class Navigator extends StatefulWidget {
   /// The new route and the previous route (if any) are notified (see
   /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
-  /// [Navigator.willPush] and [NavigatorObserver.didPush]).
+  /// [NavigatorObserver.willPush] and [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
@@ -915,7 +915,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The new route and the previous route (if any) are notified (see
   /// [Route.didPush] and [Route.didChangeNext]). If the [Navigator] has any
   /// [Navigator.observers], they will be notified as well (see
-  /// [Navigator.willPush] and [NavigatorObserver.didPush]).
+  /// [NavigatorObserver.willPush] and [NavigatorObserver.didPush]).
   ///
   /// Ongoing gestures within the current route are canceled when a new route is
   /// pushed.
