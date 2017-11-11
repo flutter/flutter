@@ -696,7 +696,7 @@ class Navigator extends StatefulWidget {
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
   /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [Navigator.willRemove] and [NavigatorObserver.didRemove].
+  /// [NavigatorObserver.willRemove] and [NavigatorObserver.didRemove].
   ///
   /// The routes before and after the removed route, if any, are notified with
   /// [Route.didChangeNext] and [Route.didChangePrevious].
@@ -1182,7 +1182,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// If there are any routes left on the history, the top remaining route is
   /// notified (see [Route.didPopNext]), and the method returns true. In that
   /// case, if the [Navigator] has any [Navigator.observers], they will be notified
-  /// as well (see [Navigator.willPop] and [NavigatorObserver.didPop]).
+  /// as well (see [NavigatorObserver.willPop] and [NavigatorObserver.didPop]).
   /// Otherwise, if the popped route was the last route, the method returns
   /// false.
   ///
@@ -1231,7 +1231,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The route's animation does not run and the future returned from pushing
   /// the route will not complete. Ongoing input gestures are cancelled. If
   /// the [Navigator] has any [Navigator.observers], they will be notified with
-  /// [Navigator.willRemove] and [NavigatorObserver.didRemove].
+  /// [NavigatorObserver.willRemove] and [NavigatorObserver.didRemove].
   ///
   /// This method is used to dismiss dropdown menus that are up when the screen's
   /// orientation changes.
