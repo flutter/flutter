@@ -21,13 +21,14 @@ Usage get flutterUsage => Usage.instance;
 class Usage {
   /// Create a new Usage instance; [versionOverride] is used for testing.
   Usage({ String settingsName: 'flutter', String versionOverride }) {
-    final String version = versionOverride ?? FlutterVersion.getVersionString(whitelistBranchName: true);
+    final FlutterVersion flutterVersion = FlutterVersion.instance;
+    final String version = versionOverride ?? flutterVersion.getVersionString(whitelistBranchName: true);
     _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue('cd1', os.name);
     // Send the branch name as the "channel".
-    _analytics.setSessionValue('cd2', FlutterVersion.getBranchName(whitelistBranchName: true));
+    _analytics.setSessionValue('cd2', flutterVersion.getBranchName(whitelistBranchName: true));
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
