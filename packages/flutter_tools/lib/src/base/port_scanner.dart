@@ -61,7 +61,12 @@ class HostPortScanner extends PortScanner {
 
   @override
   Future<int> findAvailablePort() async {
-    final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+    ServerSocket socket;
+    try {
+      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+    } on SocketException {
+      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V6, 0, v6Only: true);
+    }
     final int port = socket.port;
     await socket.close();
     return port;
