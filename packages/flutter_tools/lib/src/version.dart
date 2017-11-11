@@ -28,6 +28,8 @@ class FlutterVersion {
   @visibleForTesting
   FlutterVersion(this._clock) {
     _channel = _runGit('git rev-parse --abbrev-ref --symbolic @{u}');
+    final String branch = _runGit('git rev-parse --abbrev-ref HEAD');
+    _branch = branch == 'HEAD' ? _channel : branch;
 
     final int slash = _channel.indexOf('/');
     if (slash != -1) {
@@ -50,6 +52,9 @@ class FlutterVersion {
   String _channel;
   /// `master`, `alpha`, `hackathon`, ...
   String get channel => _channel;
+
+  /// The name of the local branch
+  String _branch;
 
   String _frameworkRevision;
   String get frameworkRevision => _frameworkRevision;
@@ -145,30 +150,21 @@ class FlutterVersion {
   static FlutterVersion get instance => context.putIfAbsent(FlutterVersion, () => new FlutterVersion(const Clock()));
 
   /// Return a short string for the version (`alpha/a76bc8e22b`).
-  static String getVersionString({ bool whitelistBranchName: false }) {
-    String commit = _shortGitRevision(_runSync(<String>['git', 'rev-parse', 'HEAD']));
-    commit = commit.isEmpty ? 'unknown' : commit;
-
-    final String branch = getBranchName(whitelistBranchName: whitelistBranchName);
-
-    return '$branch/$commit';
+  String getVersionString({bool whitelistBranchName: false}) {
+    return '${getBranchName(whitelistBranchName: whitelistBranchName)}/$frameworkRevisionShort';
   }
 
   /// Return the branch name.
   ///
-  /// If whitelistBranchName is true and the branch is unknown,
+  /// If [whitelistBranchName] is true and the branch is unknown,
   /// the branch name will be returned as 'dev'.
-  static String getBranchName({ bool whitelistBranchName: false }) {
-    String branch = _runSync(<String>['git', 'rev-parse', '--abbrev-ref', 'HEAD']);
-    branch = branch == 'HEAD' ? 'master' : branch;
-
-    if (whitelistBranchName || branch.isEmpty) {
+  String getBranchName({ bool whitelistBranchName: false }) {
+    if (whitelistBranchName || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!kKnownBranchNames.contains(branch))
-        branch = 'dev';
+      if (!kKnownBranchNames.contains(_branch))
+        return 'dev';
     }
-
-    return branch;
+    return _branch;
   }
 
   /// The amount of time we wait before pinging the server to check for the
