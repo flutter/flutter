@@ -264,7 +264,7 @@ class IOSDevice extends Device {
           return null;
         }
 
-        printTrace('Application launched on the device. Attempting to forward ports.');
+        printTrace('Application launched on the device. Waiting for observatory port.');
         return await forwardObservatoryUri;
       }).whenComplete(() {
         observatoryDiscovery.cancel();
