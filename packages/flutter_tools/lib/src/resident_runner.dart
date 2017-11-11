@@ -58,9 +58,10 @@ class FlutterDevice {
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
+      printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       vmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources);
-      printTrace('Connected to service protocol: ${observatoryUris[i]}');
+      printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
   }
 
