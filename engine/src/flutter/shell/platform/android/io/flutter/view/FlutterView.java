@@ -319,6 +319,9 @@ public class FlutterView extends SurfaceView
         }
 
         getHolder().removeCallback(mSurfaceCallback);
+
+        mNativeView.destroy();
+        mNativeView = null;
     }
 
     @Override
