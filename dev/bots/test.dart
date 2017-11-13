@@ -174,7 +174,7 @@ Future<Null> _runCoverage() async {
   if (Platform.environment['TRAVIS'] == null ||
       Platform.environment['TRAVIS_PULL_REQUEST'] != 'false' ||
       Platform.environment['TRAVIS_OS_NAME'] != 'linux') {
-    print('${bold}DONE: test.dart does not run coverage for Travis pull requests or not non-Linux environments');
+    print('${bold}DONE: test.dart does not run coverage for Travis pull requests or in non-Linux environments');
     return;
   }
 
