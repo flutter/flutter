@@ -21,9 +21,6 @@ pubspec.lock
 unlinked.ds
 unlinked_spec.ds
 
-# Test coverage output
-coverage/
-
 .history
 
 # macOS cached data
