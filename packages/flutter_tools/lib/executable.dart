@@ -17,6 +17,7 @@ import 'src/commands/doctor.dart';
 import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
 import 'src/commands/fuchsia_reload.dart';
+import 'src/commands/ide_config.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
@@ -52,6 +53,7 @@ Future<Null> main(List<String> args) async {
     new DriveCommand(),
     new FormatCommand(),
     new FuchsiaReloadCommand(),
+    new IdeConfigCommand(hidden: !verboseHelp),
     new InstallCommand(),
     new LogsCommand(),
     new PackagesCommand(),

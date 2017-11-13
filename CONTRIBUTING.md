@@ -44,14 +44,17 @@ Getting the code and configuring your environment
  * Run `flutter update-packages` This will fetch all the Dart packages that
    Flutter depends on. You can replicate what this script does by running
    `pub get` in each directory that contains a `pubspec.yaml` file.
+ * If you plan on using IntelliJ as your IDE, then also run
+   `flutter ide-config --overwrite` to create all of the IntelliJ configuration
+   files so you can open the main flutter directory as a project and run examples
+   from within the IDE.
 
 Running the examples
 --------------------
 
-To run an example with a prebuilt binary from the cloud, switch to that
-example's directory, run `pub get` to make sure its dependencies have been
-downloaded, and use `flutter run`. Make sure you have a device connected over
-USB and debugging enabled on that device.
+To run an example, switch to that example's directory, and use `flutter run`.
+Make sure you have an emulator running, or a device connected over USB and
+debugging enabled on that device.
 
  * `cd examples/hello_world`
  * `flutter run`
