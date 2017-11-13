@@ -288,7 +288,6 @@ void main() {
 
   testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    final TextEditingController controller = new TextEditingController();
 
     const String value1 = 'EditableText content';
 
