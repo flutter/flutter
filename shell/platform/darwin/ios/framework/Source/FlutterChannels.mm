@@ -261,10 +261,17 @@ NSObject const* FlutterEndOfEventStream = [NSObject new];
     [_messenger setMessageHandlerOnChannel:_name binaryMessageHandler:nil];
     return;
   }
+  __block FlutterEventSink currentSink = nil;
   FlutterBinaryMessageHandler messageHandler = ^(NSData* message, FlutterBinaryReply callback) {
     FlutterMethodCall* call = [_codec decodeMethodCall:message];
     if ([call.method isEqual:@"listen"]) {
-      FlutterEventSink eventSink = ^(id event) {
+      if (currentSink) {
+        FlutterError* error = [handler onCancelWithArguments:nil];
+        if (error)
+          NSLog(@"Failed to cancel existing stream: %@. %@ (%@)", error.code, error.message,
+                error.details);
+      }
+      currentSink = ^(id event) {
         if (event == FlutterEndOfEventStream)
           [_messenger sendOnChannel:_name message:nil];
         else if ([event isKindOfClass:[FlutterError class]])
@@ -273,12 +280,20 @@ NSObject const* FlutterEndOfEventStream = [NSObject new];
         else
           [_messenger sendOnChannel:_name message:[_codec encodeSuccessEnvelope:event]];
       };
-      FlutterError* error = [handler onListenWithArguments:call.arguments eventSink:eventSink];
+      FlutterError* error = [handler onListenWithArguments:call.arguments eventSink:currentSink];
       if (error)
         callback([_codec encodeErrorEnvelope:error]);
       else
         callback([_codec encodeSuccessEnvelope:nil]);
     } else if ([call.method isEqual:@"cancel"]) {
+      if (!currentSink) {
+        callback(
+            [_codec encodeErrorEnvelope:[FlutterError errorWithCode:@"error"
+                                                            message:@"No active stream to cancel"
+                                                            details:nil]]);
+        return;
+      }
+      currentSink = nil;
       FlutterError* error = [handler onCancelWithArguments:call.arguments];
       if (error)
         callback([_codec encodeErrorEnvelope:error]);
