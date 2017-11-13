@@ -314,12 +314,14 @@ Matcher hasSemantics(TestSemantics semantics, {
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
+    this.value,
     this.textDirection,
     this.actions,
     this.flags,
-}) : assert(label != null || actions != null || flags != null);
+}) : assert(label != null || value != null || actions != null || flags != null);
 
   final String label;
+  final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
   final List<SemanticsFlags> flags;
@@ -343,6 +345,8 @@ class _IncludesNodeWith extends Matcher {
 
   bool checkNode(SemanticsNode node) {
     if (label != null && node.label != label)
+      return false;
+    if (value != null && node.value != value)
       return false;
     if (textDirection != null && node.textDirection != textDirection)
       return false;
@@ -375,6 +379,8 @@ class _IncludesNodeWith extends Matcher {
     final List<String> strings = <String>[];
     if (label != null)
       strings.add('label "$label"');
+    if (value != null)
+      strings.add('value "$value"');
     if (textDirection != null)
       strings.add(' (${describeEnum(textDirection)})');
     if (actions != null)
@@ -391,12 +397,14 @@ class _IncludesNodeWith extends Matcher {
 /// If null is provided for an argument, it will match against any value.
 Matcher includesNodeWith({
   String label,
+  String value,
   TextDirection textDirection,
   List<SemanticsAction> actions,
   List<SemanticsFlags> flags,
 }) {
   return new _IncludesNodeWith(
     label: label,
+    value: value,
     textDirection: textDirection,
     actions: actions,
     flags: flags,

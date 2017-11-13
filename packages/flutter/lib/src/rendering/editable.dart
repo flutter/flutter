@@ -169,6 +169,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.text = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// How the text should be aligned horizontally.
@@ -203,6 +204,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.textDirection = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// The color to use when painting the cursor.
@@ -322,6 +324,8 @@ class RenderEditable extends RenderBox {
     super.describeSemanticsConfiguration(config);
 
     config
+      ..value = text.toPlainText()
+      ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
   }
