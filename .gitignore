@@ -21,6 +21,7 @@ pubspec.lock
 unlinked.ds
 unlinked_spec.ds
 
+*.pyc
 .history
 
 # macOS cached data
