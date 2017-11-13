@@ -255,7 +255,9 @@ public final class FlutterActivityDelegate
         if (flutterView != null) {
             boolean destroy = true;
             for (ViewDestroyListener listener : viewDestroyListeners) {
-                destroy = destroy && !listener.onViewDestroy(flutterView.getFlutterNativeView());
+                if (listener.onViewDestroy(flutterView.getFlutterNativeView())) {
+                    destroy = false;
+                }
             }
             if (destroy) {
                 flutterView.destroy();
