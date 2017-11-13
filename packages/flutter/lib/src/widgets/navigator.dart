@@ -437,7 +437,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Custom routes
 ///
-/// You can create your own subclass of one the widget library route classes
+/// You can create your own subclass of one of the widget library route classes
 /// like [PopupRoute], [ModalRoute], or [PageRoute], to control the animated
 /// transition employed to show the route, the color and behavior of the route's
 /// modal barrier, and other aspects of the route.
