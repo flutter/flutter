@@ -551,6 +551,80 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   }
 }
 
+/// Animated version of [Align] which automatically transitions the child's
+/// position over a given duration whenever the given [alignment] changes.
+///
+/// See also:
+///
+///  * [AnimatedContainer], which can transition more values at once.
+class AnimatedAlign extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that positions its child by an alignment that animates
+  /// implicitly.
+  ///
+  /// The [alignment], [curve], and [duration] arguments must not be null.
+  const AnimatedAlign({
+    Key key,
+    @required this.alignment,
+    this.child,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(alignment != null),
+       super(key: key, curve: curve, duration: duration);
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the [Alignment] control the horizontal and vertical
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.0 means that the center of the child is aligned
+  /// with the center of the parent.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], which has more details and some convenience constants for
+  ///    common positions.
+  ///  * [AlignmentDirectional], which has a horizontal coordinate orientation
+  ///    that depends on the [TextDirection].
+  final AlignmentGeometry alignment;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  _AnimatedAlignState createState() => new _AnimatedAlignState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+  }
+}
+
+class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
+  AlignmentGeometryTween _alignment;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new AlignmentGeometryTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Align(
+      alignment: _alignment.evaluate(animation),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
+  }
+}
+
 /// Animated version of [Positioned] which automatically transitions the child's
 /// position over a given duration whenever the given position changes.
 ///
