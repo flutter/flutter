@@ -115,6 +115,10 @@ public class FlutterView extends SurfaceView
     }
 
     public FlutterView(Context context, AttributeSet attrs) {
+        this(context, attrs, null);
+    }
+
+    public FlutterView(Context context, AttributeSet attrs, FlutterNativeView nativeView) {
         super(context, attrs);
 
         mIsSoftwareRenderingEnabled = nativeGetIsSoftwareRenderingEnabled();
@@ -124,7 +128,12 @@ public class FlutterView extends SurfaceView
         setFocusable(true);
         setFocusableInTouchMode(true);
 
-        mNativeView = new FlutterNativeView(this);
+        if (nativeView == null) {
+            mNativeView = new FlutterNativeView(this);
+        } else {
+            mNativeView = nativeView;
+            mNativeView.setFlutterView(this);
+        }
 
         int color = 0xFF000000;
         TypedValue typedValue = new TypedValue();
@@ -235,6 +244,10 @@ public class FlutterView extends SurfaceView
         return super.onKeyDown(keyCode, event);
     }
 
+    public FlutterNativeView getFlutterNativeView() {
+        return mNativeView;
+    }
+
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {
         mActivityLifecycleListeners.add(listener);
     }
@@ -308,6 +321,20 @@ public class FlutterView extends SurfaceView
 
     float getDevicePixelRatio() {
         return mMetrics.devicePixelRatio;
+    }
+
+    public FlutterNativeView detach() {
+        if (!isAttached())
+            return null;
+        if (mDiscoveryReceiver != null) {
+            getContext().unregisterReceiver(mDiscoveryReceiver);
+        }
+        getHolder().removeCallback(mSurfaceCallback);
+        mNativeView.detach();
+
+        FlutterNativeView view = mNativeView;
+        mNativeView = null;
+        return view;
     }
 
     public void destroy() {

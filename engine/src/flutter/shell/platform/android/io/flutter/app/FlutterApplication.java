@@ -4,6 +4,7 @@
 
 package io.flutter.app;
 
+import android.app.Activity;
 import android.app.Application;
 
 import io.flutter.view.FlutterMain;
@@ -17,5 +18,13 @@ public class FlutterApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FlutterMain.startInitialization(this);
+    }
+
+    private Activity mCurrentActivity = null;
+    public Activity getCurrentActivity() {
+        return mCurrentActivity;
+    }
+    public void setCurrentActivity(Activity mCurrentActivity) {
+        this.mCurrentActivity = mCurrentActivity;
     }
 }
