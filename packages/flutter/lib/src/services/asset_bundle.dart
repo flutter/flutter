@@ -223,12 +223,8 @@ class PlatformAssetBundle extends CachingAssetBundle {
     if (assetPath != null) {
       final File assetFile = new File(UTF8.decode(assetPath.buffer.asUint8List()));
       final List<int> bytes = await assetFile.readAsBytes();
-      Uint8List uInt8list;
-      if (bytes is Uint8List) {
-        uInt8list = bytes;
-      } else {
-        uInt8list = new Uint8List.fromList(bytes);
-      }
+      assert(bytes is Uint8List);
+      Uint8List uInt8list = bytes;
       data = uInt8list.buffer.asByteData();
     }
     if (data == null)
