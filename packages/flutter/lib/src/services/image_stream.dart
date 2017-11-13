@@ -365,6 +365,17 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
 
   void _handleCodecReady(ui.Codec codec){
     _codec = codec;
+    if (_codec == null) {
+      // This matches the behavior of OneFrameImageStreamCompleter in the case
+      // we failed to fetch the data.
+      // This can currently happen when loading image data in Image.network
+      // fails. We should probably assert that this doesn't happen once we
+      // manage the network loading state in Image.network, see:
+      // https://github.com/flutter/flutter/issues/5741
+      // https://github.com/flutter/flutter/issues/6229
+      setImage(null);
+      return;
+    }
     _decodeNextFrameAndSchedule();
   }
 
