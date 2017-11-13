@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.HashMap;
 import java.util.Map;
 
-class FlutterNativeView implements BinaryMessenger {
+public class FlutterNativeView implements BinaryMessenger {
     private static final String TAG = "FlutterNativeView";
 
     private final Map<String, BinaryMessageHandler> mMessageHandlers;
@@ -21,21 +21,30 @@ class FlutterNativeView implements BinaryMessenger {
     private long mNativePlatformView;
     private FlutterView mFlutterView;
 
-    FlutterNativeView(FlutterView flutterView) {
+    public FlutterNativeView(FlutterView flutterView) {
         mFlutterView = flutterView;
         attach(this);
         assertAttached();
         mMessageHandlers = new HashMap<>();
     }
 
-    FlutterNativeView() {
+    public FlutterNativeView() {
         this(null);
+    }
+
+    public void detach() {
+        mFlutterView = null;
+        nativeDetach(mNativePlatformView);
     }
 
     public void destroy() {
         mFlutterView = null;
         nativeDestroy(mNativePlatformView);
         mNativePlatformView = 0;
+    }
+
+    public void setFlutterView(FlutterView flutterView) {
+        mFlutterView = flutterView;
     }
 
     public boolean isAttached() {
@@ -168,6 +177,7 @@ class FlutterNativeView implements BinaryMessenger {
 
     private static native long nativeAttach(FlutterNativeView view);
     private static native void nativeDestroy(long nativePlatformViewAndroid);
+    private static native void nativeDetach(long nativePlatformViewAndroid);
 
     private static native void nativeRunBundleAndSnapshot(long nativePlatformViewAndroid,
         String bundlePath,

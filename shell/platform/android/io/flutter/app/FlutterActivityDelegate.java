@@ -7,6 +7,7 @@ package io.flutter.app;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -34,6 +35,7 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionResultListener;
 import io.flutter.plugin.platform.PlatformPlugin;
 import io.flutter.util.Preconditions;
 import io.flutter.view.FlutterMain;
+import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
@@ -75,9 +77,16 @@ public final class FlutterActivityDelegate
      * <p>A delegate's view factory will be consulted during
      * {@link #onCreate(Bundle)}. If it returns {@code null}, then the delegate
      * will fall back to instantiating a new full-screen {@code FlutterView}.</p>
+     *
+     * <p>A delegate's native view factory will be consulted during
+     * {@link #onCreate(Bundle)}. If it returns {@code null}, then the delegate
+     * will fall back to instantiating a new {@code FlutterNativeView}. This is
+     * useful for applications to override to reuse the FlutterNativeView held
+     * e.g. by a pre-existing background service.</p>
      */
     public interface ViewFactory {
         FlutterView createFlutterView(Context context);
+        FlutterNativeView createFlutterNativeView();
     }
 
     private final Activity activity;
@@ -87,6 +96,7 @@ public final class FlutterActivityDelegate
     private final List<ActivityResultListener> activityResultListeners = new ArrayList<>(0);
     private final List<NewIntentListener> newIntentListeners = new ArrayList<>(0);
     private final List<UserLeaveHintListener> userLeaveHintListeners = new ArrayList<>(0);
+    private final List<ViewDestroyListener> viewDestroyListeners = new ArrayList<>(0);
 
     private FlutterView flutterView;
     private View launchView;
@@ -156,7 +166,8 @@ public final class FlutterActivityDelegate
 
         flutterView = viewFactory.createFlutterView(activity);
         if (flutterView == null) {
-            flutterView = new FlutterView(activity);
+            FlutterNativeView nativeView = viewFactory.createFlutterNativeView();
+            flutterView = new FlutterView(activity, null, nativeView);
             flutterView.setLayoutParams(matchParent);
             activity.setContentView(flutterView);
             launchView = createLaunchView();
@@ -165,12 +176,18 @@ public final class FlutterActivityDelegate
             }
         }
 
-        if (loadIntent(activity.getIntent())) {
+        // When an activity is created for the first time, we direct the
+        // FlutterView to re-use a pre-existing Isolate rather than create a new
+        // one. This is so that an Isolate coming in from the ViewFactory is
+        // used.
+        final boolean reuseIsolate = true;
+
+        if (loadIntent(activity.getIntent(), reuseIsolate)) {
             return;
         }
         String appBundlePath = FlutterMain.findAppBundlePath(activity.getApplicationContext());
         if (appBundlePath != null) {
-            flutterView.runFromBundle(appBundlePath, null);
+            flutterView.runFromBundle(appBundlePath, null, "main", reuseIsolate);
         }
     }
 
@@ -193,6 +210,14 @@ public final class FlutterActivityDelegate
 
     @Override
     public void onPause() {
+        Application app = (Application) activity.getApplicationContext();
+        if (app instanceof FlutterApplication) {
+            FlutterApplication flutterApp = (FlutterApplication) app;
+            if (this.equals(flutterApp.getCurrentActivity())) {
+                Log.i(TAG, "onPause setting current activity to null");
+                flutterApp.setCurrentActivity(null);
+            }
+        }
         if (flutterView != null) {
             flutterView.onPause();
         }
@@ -200,6 +225,14 @@ public final class FlutterActivityDelegate
 
     @Override
     public void onResume() {
+        Application app = (Application) activity.getApplicationContext();
+        if (app instanceof FlutterApplication) {
+            FlutterApplication flutterApp = (FlutterApplication) app;
+            Log.i(TAG, "onResume setting current activity to this");
+            flutterApp.setCurrentActivity(activity);
+        } else {
+            Log.i(TAG, "onResume app wasn't a FlutterApplication!!");
+        }
     }
 
     @Override
@@ -211,8 +244,26 @@ public final class FlutterActivityDelegate
 
     @Override
     public void onDestroy() {
+        Application app = (Application) activity.getApplicationContext();
+        if (app instanceof FlutterApplication) {
+            FlutterApplication flutterApp = (FlutterApplication) app;
+            if (this.equals(flutterApp.getCurrentActivity())) {
+                Log.i(TAG, "onDestroy setting current activity to null");
+                flutterApp.setCurrentActivity(null);
+            }
+        }
         if (flutterView != null) {
-            flutterView.destroy();
+            boolean destroy = true;
+            for (ViewDestroyListener listener : viewDestroyListeners) {
+                destroy = destroy && !listener.onViewDestroy(flutterView.getFlutterNativeView());
+            }
+            if (destroy) {
+                flutterView.destroy();
+            } else {
+                // Detach, but do not destroy the FlutterView if a plugin
+                // expressed interest in its FlutterNativeView.
+                flutterView.detach();
+            }
         }
     }
 
@@ -278,6 +329,11 @@ public final class FlutterActivityDelegate
     }
 
     private boolean loadIntent(Intent intent) {
+        final boolean reuseIsolate = false;
+        return loadIntent(intent, reuseIsolate);
+    }
+
+    private boolean loadIntent(Intent intent, boolean reuseIsolate) {
         String action = intent.getAction();
         if (Intent.ACTION_RUN.equals(action)) {
             String route = intent.getStringExtra("route");
@@ -290,7 +346,7 @@ public final class FlutterActivityDelegate
             if (route != null) {
                 flutterView.setInitialRoute(route);
             }
-            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"));
+            flutterView.runFromBundle(appBundlePath, intent.getStringExtra("snapshot"), "main", reuseIsolate);
             return true;
         }
 
@@ -474,6 +530,12 @@ public final class FlutterActivityDelegate
         @Override
         public Registrar addUserLeaveHintListener(UserLeaveHintListener listener) {
             userLeaveHintListeners.add(listener);
+            return this;
+        }
+
+        @Override
+        public Registrar addViewDestroyListener(ViewDestroyListener listener) {
+            viewDestroyListeners.add(listener);
             return this;
         }
     }

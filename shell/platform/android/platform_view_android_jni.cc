@@ -109,6 +109,10 @@ static jlong Attach(JNIEnv* env, jclass clazz, jobject flutterView) {
   return reinterpret_cast<jlong>(storage);
 }
 
+static void Detach(JNIEnv* env, jobject jcaller, jlong platform_view) {
+  PLATFORM_VIEW->Detach();
+}
+
 static void Destroy(JNIEnv* env, jobject jcaller, jlong platform_view) {
   PLATFORM_VIEW->Detach();
   delete &PLATFORM_VIEW;
@@ -327,6 +331,16 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
           .signature =
               "(JLjava/lang/String;Ljava/lang/String;Ljava/lang/String;)V",
           .fnPtr = reinterpret_cast<void*>(&shell::RunBundleAndSource),
+      },
+      {
+          .name = "nativeDetach",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::Detach),
+      },
+      {
+          .name = "nativeDestroy",
+          .signature = "(J)V",
+          .fnPtr = reinterpret_cast<void*>(&shell::Destroy),
       },
       {
           .name = "nativeGetObservatoryUri",

@@ -6,6 +6,7 @@ package io.flutter.plugin.common;
 
 import android.app.Activity;
 import android.content.Intent;
+import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 import io.flutter.view.TextureRegistry;
 
@@ -140,6 +141,15 @@ public interface PluginRegistry {
          * @return this {@link Registrar}.
          */
         Registrar addUserLeaveHintListener(UserLeaveHintListener listener);
+
+        /**
+         * Adds a callback allowing the plugin to take part in handling incoming
+         * calls to {@link Activity#onDestroy()}.
+         *
+         * @param listener a {@link ViewDestroyListener} callback.
+         * @return this {@link Registrar}.
+         */
+        Registrar addViewDestroyListener(ViewDestroyListener listener);
     }
 
     /**
@@ -181,5 +191,14 @@ public interface PluginRegistry {
      */
     interface UserLeaveHintListener {
         void onUserLeaveHint();
+    }
+
+    /**
+     * Delegate interface for handling an {@link Activity}'s onDestroy
+     * method being called. A plugin that implements this interface can
+     * adopt the FlutterNativeView by retaining a reference and returning true.
+     */
+    interface ViewDestroyListener {
+        boolean onViewDestroy(FlutterNativeView view);
     }
 }
