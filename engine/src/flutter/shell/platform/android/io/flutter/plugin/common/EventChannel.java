@@ -100,10 +100,15 @@ public final class EventChannel {
         void onListen(Object arguments, EventSink events);
 
         /**
-         * Handles a request to tear down an event stream.
+         * Handles a request to tear down the most recently created event stream.
          *
          * <p>Any uncaught exception thrown by this method will be caught by the channel
          * implementation and logged. An error result message will be sent back to Flutter.</p>
+         *
+         * <p>The channel implementation may call this method with null arguments
+         * to separate a pair of two consecutive set up requests. Such request pairs
+         * may occur during Flutter hot restart. Any uncaught exception thrown
+         * in this situation will be logged without notifying Flutter.</p>
          *
          * @param arguments stream configuration arguments, possibly null.
          */
@@ -162,17 +167,23 @@ public final class EventChannel {
 
         private void onListen(Object arguments, BinaryReply callback) {
             final EventSink eventSink = new EventSinkImplementation();
-            if (activeSink.compareAndSet(null, eventSink)) {
-                try {
-                    handler.onListen(arguments, eventSink);
-                    callback.reply(codec.encodeSuccessEnvelope(null));
-                } catch (RuntimeException e) {
-                    activeSink.set(null);
-                    Log.e(TAG + name, "Failed to open event stream", e);
-                    callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
-                }
-            } else {
-                callback.reply(codec.encodeErrorEnvelope("error", "Stream already active", null));
+            final EventSink oldSink = activeSink.getAndSet(eventSink);
+            if (oldSink != null) {
+              // Repeated calls to onListen may happen during hot restart.
+              // We separate them with a call to onCancel.
+              try {
+                  handler.onCancel(null);
+              } catch (RuntimeException e) {
+                  Log.e(TAG + name, "Failed to close existing event stream", e);
+              }
+            }
+            try {
+                handler.onListen(arguments, eventSink);
+                callback.reply(codec.encodeSuccessEnvelope(null));
+            } catch (RuntimeException e) {
+                activeSink.set(null);
+                Log.e(TAG + name, "Failed to open event stream", e);
+                callback.reply(codec.encodeErrorEnvelope("error", e.getMessage(), null));
             }
         }
 
