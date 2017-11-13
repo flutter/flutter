@@ -291,6 +291,10 @@ FLUTTER_EXPORT
  Invoked when the last listener is deregistered from the Stream associated to
  this channel on the Flutter side.
 
+ The channel implementation may call this method with `nil` arguments
+ to separate a pair of two consecutive set up requests. Such request pairs
+ may occur during Flutter hot restart.
+
  - Parameter arguments: Arguments for the stream.
  - Returns: A FlutterError instance, if teardown fails.
  */
