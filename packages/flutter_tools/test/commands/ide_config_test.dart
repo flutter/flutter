@@ -234,7 +234,7 @@ void main() {
       );
     }, timeout: const Timeout.factor(2.0));
 
-    testUsingContext('removes delted imls with --overwrite', () async {
+    testUsingContext('removes deleted imls with --overwrite', () async {
       final Map<String, String> templateManifest = _getManifest(
         intellijDir,
         'template',
@@ -268,7 +268,7 @@ void main() {
       );
     }, timeout: const Timeout.factor(2.0));
 
-    testUsingContext('removes delted imls with --overwrite, including empty parent dirs', () async {
+    testUsingContext('removes deleted imls with --overwrite, including empty parent dirs', () async {
       final Map<String, String> templateManifest = _getManifest(
         intellijDir,
         'template',
