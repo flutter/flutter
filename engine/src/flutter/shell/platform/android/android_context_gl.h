@@ -35,15 +35,12 @@ class AndroidContextGL : public fxl::RefCountedThreadSafe<AndroidContextGL> {
 
   bool Resize(const SkISize& size);
 
-  bool SupportsSRGB() const;
-
  private:
   fxl::RefPtr<AndroidEnvironmentGL> environment_;
   fxl::RefPtr<AndroidNativeWindow> window_;
   EGLConfig config_;
   EGLSurface surface_;
   EGLContext context_;
-  bool srgb_support_;
   bool valid_;
 
   AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,

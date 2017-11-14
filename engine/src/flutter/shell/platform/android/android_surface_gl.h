@@ -47,8 +47,6 @@ class AndroidSurfaceGL : public GPUSurfaceGLDelegate, public AndroidSurface {
 
   intptr_t GLContextFBO() const override;
 
-  bool SurfaceSupportsSRGB() const override;
-
  private:
   fxl::RefPtr<AndroidContextGL> onscreen_context_;
   fxl::RefPtr<AndroidContextGL> offscreen_context_;

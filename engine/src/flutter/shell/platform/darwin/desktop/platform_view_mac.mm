@@ -77,10 +77,6 @@ intptr_t PlatformViewMac::GLContextFBO() const {
   return 0;
 }
 
-bool PlatformViewMac::SurfaceSupportsSRGB() const {
-  return false;
-}
-
 bool PlatformViewMac::GLContextMakeCurrent() {
   TRACE_EVENT0("flutter", "PlatformViewMac::GLContextMakeCurrent");
   if (!IsValid()) {

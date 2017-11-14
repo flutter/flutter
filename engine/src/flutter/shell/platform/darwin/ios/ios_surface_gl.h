@@ -36,8 +36,6 @@ class IOSSurfaceGL : public IOSSurface, public GPUSurfaceGLDelegate {
 
   intptr_t GLContextFBO() const override;
 
-  bool SurfaceSupportsSRGB() const override;
-
  private:
   IOSGLContext context_;
 

@@ -189,7 +189,6 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
   // other threads correctly, so the textures end up blank.  For now, suppress
   // that feature, which will cause texture uploads to do CPU YUV conversion.
   options.fDisableGpuYUVConversion = true;
-  options.fRequireDecodeDisableForSRGB = false;
 
   blink::ResourceContext::Set(GrContext::Create(
       GrBackend::kOpenGL_GrBackend,

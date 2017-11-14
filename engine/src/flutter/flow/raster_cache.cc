@@ -11,6 +11,7 @@
 #include "flutter/glue/trace_event.h"
 #include "lib/fxl/logging.h"
 #include "third_party/skia/include/core/SkCanvas.h"
+#include "third_party/skia/include/core/SkColorSpaceXformCanvas.h"
 #include "third_party/skia/include/core/SkImage.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkSurface.h"
@@ -95,9 +96,8 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
       std::fabs(logical_rect.height() * metrics_scale_y * scale.y()));
 
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(
-      std::ceil(physical_rect.width()),   // physical width
-      std::ceil(physical_rect.height()),  // physical height
-      sk_ref_sp(dst_color_space)          // colorspace
+      std::ceil(physical_rect.width()),  // physical width
+      std::ceil(physical_rect.height())  // physical height
   );
 
   sk_sp<SkSurface> surface =
@@ -110,6 +110,14 @@ RasterCacheResult RasterizePicture(SkPicture* picture,
   }
 
   SkCanvas* canvas = surface->getCanvas();
+  std::unique_ptr<SkCanvas> xformCanvas;
+  if (dst_color_space) {
+    xformCanvas = SkCreateColorSpaceXformCanvas(surface->getCanvas(),
+                                                sk_ref_sp(dst_color_space));
+    if (xformCanvas) {
+      canvas = xformCanvas.get();
+    }
+  }
 
   canvas->clear(SK_ColorTRANSPARENT);
   canvas->scale(std::abs(scale.x() * metrics_scale_x),
