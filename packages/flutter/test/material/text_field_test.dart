@@ -1690,4 +1690,56 @@ void main() {
     // Confirm that the selection was updated.
     expect(controller.selection.baseOffset, 0);
   });
+
+  testWidgets('TextField baseline alignment', (WidgetTester tester) async {
+    final TextEditingController controllerA = new TextEditingController(text: 'A');
+    final TextEditingController controllerB = new TextEditingController(text: 'B');
+    final Key keyA = new UniqueKey();
+    final Key keyB = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            new Expanded(
+              child: new TextField(
+                key: keyA,
+                decoration: null,
+                controller: controllerA,
+                style: const TextStyle(fontSize: 10.0),
+              )
+            ),
+            const Text(
+              'abc',
+              style: const TextStyle(fontSize: 20.0),
+            ),
+            new Expanded(
+              child: new TextField(
+                key: keyB,
+                decoration: null,
+                controller: controllerB,
+                style: const TextStyle(fontSize: 30.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
+
+    final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 4.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.0);
+    expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
+  });
+
 }

@@ -456,6 +456,12 @@ class RenderEditable extends RenderBox {
     return _textPainter.maxIntrinsicWidth;
   }
 
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    _layoutText(double.INFINITY);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
+  }
+
   /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
   /// This does not required the layout to be updated.
   double get preferredLineHeight => _textPainter.preferredLineHeight;
