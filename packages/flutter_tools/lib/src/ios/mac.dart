@@ -206,7 +206,8 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign: true,
   bool usesTerminalUi: true,
 }) async {
-  upgradePbxProjWithFlutterAssets(app.name);
+  if (!await upgradePbxProjWithFlutterAssets(app.name))
+    return new XcodeBuildResult(success: false);
 
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
@@ -494,11 +495,14 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
 }
 
-Future<Null> upgradePbxProjWithFlutterAssets(String app) async {
+Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   final File xcodeProjectFile = fs.file(fs.path.join('ios', 'Runner.xcodeproj',
                                                      'project.pbxproj'));
   assert(await xcodeProjectFile.exists());
   final List<String> lines = await xcodeProjectFile.readAsLines();
+
+  if (lines.any((String line) => line.contains('path = Flutter/flutter_assets')))
+    return true;
 
   final String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
   final String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
@@ -509,11 +513,25 @@ Future<Null> upgradePbxProjWithFlutterAssets(String app) async {
   final String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
   final String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
 
-  if (lines.contains(l2))
-    return;
 
   printStatus("Upgrading project.pbxproj of $app' to include the "
               "'flutter_assets' directory");
+
+  if (!lines.contains(l1) || !lines.contains(l3) ||
+      !lines.contains(l5) || !lines.contains(l7)) {
+    printError('Automatic upgrade of project.pbxproj failed.');
+    printError(' To manually upgrade, open ios/Runner.xcodeproj/project.pbxproj:');
+    printError(' Add the following line in the PBXBuildFile section');
+    printError(l2);
+    printError(' Add the following line in the PBXFileReference section');
+    printError(l4);
+    printError(' Add the following line in the PBXGroup section');
+    printError(l6);
+    printError(' Add the following line in the PBXResourcesBuildPhase section');
+    printError(l8);
+    return false;
+  }
+
   lines.insert(lines.indexOf(l1) + 1, l2);
   lines.insert(lines.indexOf(l3) + 1, l4);
   lines.insert(lines.indexOf(l5) + 1, l6);
@@ -523,5 +541,6 @@ Future<Null> upgradePbxProjWithFlutterAssets(String app) async {
 
   final StringBuffer buffer = new StringBuffer();
   lines.forEach(buffer.writeln);
-  xcodeProjectFile.writeAsString(buffer.toString());
+  await xcodeProjectFile.writeAsString(buffer.toString());
+  return true;
 }
