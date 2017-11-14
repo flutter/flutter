@@ -432,11 +432,11 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     final Uri resolved = Uri.base.resolve(key.url);
     final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
-      return null;
+      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}');
 
     final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw new Exception('NetworkImage is an empty file');
 
     return await ui.instantiateImageCodec(bytes);
   }
