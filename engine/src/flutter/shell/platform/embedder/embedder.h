@@ -51,36 +51,6 @@ typedef struct {
 } FlutterRendererConfig;
 
 typedef struct {
-  // The size of this struct. Must be sizeof(FlutterProjectArgs).
-  size_t struct_size;
-  // The path to the FLX file containing project assets. The string can be
-  // collected after the call to |FlutterEngineRun| returns. The string must be
-  // NULL terminated.
-  const char* assets_path;
-  // The path to the Dart file containing the |main| entry point. The string can
-  // be collected after the call to |FlutterEngineRun| returns. The string must
-  // be NULL terminated.
-  const char* main_path;
-  // The path to the |.packages| for the project. The string can be collected
-  // after the call to |FlutterEngineRun| returns. The string must be NULL
-  // terminated.
-  const char* packages_path;
-  // The path to the icudtl.dat file for the project. The string can be
-  // collected after the call to |FlutterEngineRun| returns. The string must
-  // be NULL terminated.
-  const char* icu_data_path;
-  // The command line argument count used to initialize the project. The string
-  // can be collected after the call to |FlutterEngineRun| returns. The string
-  // must be NULL terminated.
-  int command_line_argc;
-  // The command line arguments used to initialize the project. The strings can
-  // be collected after the call to |FlutterEngineRun| returns. The strings must
-  // be NULL terminated.
-  const char* const* command_line_argv;
-
-} FlutterProjectArgs;
-
-typedef struct {
   // The size of this struct. Must be sizeof(FlutterWindowMetricsEvent).
   size_t struct_size;
   // Physical width of the window.
@@ -107,13 +77,63 @@ typedef struct {
   double y;
 } FlutterPointerEvent;
 
+struct _FlutterPlatformMessageResponseHandle;
+typedef struct _FlutterPlatformMessageResponseHandle
+    FlutterPlatformMessageResponseHandle;
+
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterPlatformMessage).
   size_t struct_size;
   const char* channel;
   const uint8_t* message;
   const size_t message_size;
+  // The response handle on which to invoke
+  // |FlutterEngineSendPlatformMessageResponse| when the response is ready. This
+  // field is ignored for messages being sent from the embedder to the
+  // framework. If the embedder ever receives a message with a non-null response
+  // handle, that handle must always be used with a
+  // |FlutterEngineSendPlatformMessageResponse| call. If not, this is a memory
+  // leak. It is not safe to send multiple responses on a single response
+  // object.
+  const FlutterPlatformMessageResponseHandle* response_handle;
 } FlutterPlatformMessage;
+
+typedef void (*FlutterPlatformMessageCallback)(
+    const FlutterPlatformMessage* /* message*/,
+    void* /* user data */);
+
+typedef struct {
+  // The size of this struct. Must be sizeof(FlutterProjectArgs).
+  size_t struct_size;
+  // The path to the FLX file containing project assets. The string can be
+  // collected after the call to |FlutterEngineRun| returns. The string must be
+  // NULL terminated.
+  const char* assets_path;
+  // The path to the Dart file containing the |main| entry point. The string can
+  // be collected after the call to |FlutterEngineRun| returns. The string must
+  // be NULL terminated.
+  const char* main_path;
+  // The path to the |.packages| for the project. The string can be collected
+  // after the call to |FlutterEngineRun| returns. The string must be NULL
+  // terminated.
+  const char* packages_path;
+  // The path to the icudtl.dat file for the project. The string can be
+  // collected after the call to |FlutterEngineRun| returns. The string must
+  // be NULL terminated.
+  const char* icu_data_path;
+  // The command line argument count used to initialize the project. The string
+  // can be collected after the call to |FlutterEngineRun| returns. The string
+  // must be NULL terminated.
+  int command_line_argc;
+  // The command line arguments used to initialize the project. The strings can
+  // be collected after the call to |FlutterEngineRun| returns. The strings must
+  // be NULL terminated.
+  const char* const* command_line_argv;
+  // The callback invoked by the engine in order to give the embedder the chance
+  // to respond to platform messages from the Dart application. The callback
+  // will be invoked on the thread on which the |FlutterEngineRun| call is made.
+  FlutterPlatformMessageCallback platform_message_callback;
+} FlutterProjectArgs;
 
 FLUTTER_EXPORT
 FlutterResult FlutterEngineRun(size_t version,
@@ -139,6 +159,13 @@ FLUTTER_EXPORT
 FlutterResult FlutterEngineSendPlatformMessage(
     FlutterEngine engine,
     const FlutterPlatformMessage* message);
+
+FLUTTER_EXPORT
+FlutterResult FlutterEngineSendPlatformMessageResponse(
+    FlutterEngine engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    const uint8_t* data,
+    size_t data_length);
 
 #if defined(__cplusplus)
 }  // extern "C"

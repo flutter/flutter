@@ -55,6 +55,10 @@ class PlatformViewHolder {
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewHolder);
 };
 
+struct _FlutterPlatformMessageResponseHandle {
+  fxl::RefPtr<blink::PlatformMessage> message;
+};
+
 FlutterResult FlutterEngineRun(size_t version,
                                const FlutterRendererConfig* config,
                                const FlutterProjectArgs* args,
@@ -101,6 +105,25 @@ FlutterResult FlutterEngineRun(size_t version,
     return ptr(user_data);
   };
 
+  shell::PlatformViewEmbedder::PlatformMessageResponseCallback
+      platform_message_response_callback = nullptr;
+  if (SAFE_ACCESS(args, platform_message_callback, nullptr) != nullptr) {
+    platform_message_response_callback =
+        [ ptr = args->platform_message_callback,
+          user_data ](fxl::RefPtr<blink::PlatformMessage> message) {
+      auto handle = new FlutterPlatformMessageResponseHandle();
+      const FlutterPlatformMessage incoming_message = {
+          .struct_size = sizeof(FlutterPlatformMessage),
+          .channel = message->channel().c_str(),
+          .message = message->data().data(),
+          .message_size = message->data().size(),
+          .response_handle = handle,
+      };
+      handle->message = std::move(message);
+      return ptr(&incoming_message, user_data);
+    };
+  }
+
   std::string icu_data_path;
   if (SAFE_ACCESS(args, icu_data_path, nullptr) != nullptr) {
     icu_data_path = SAFE_ACCESS(args, icu_data_path, nullptr);
@@ -128,7 +151,9 @@ FlutterResult FlutterEngineRun(size_t version,
       .gl_make_current_callback = make_current,
       .gl_clear_current_callback = clear_current,
       .gl_present_callback = present,
-      .gl_fbo_callback = fbo_callback};
+      .gl_fbo_callback = fbo_callback,
+      .platform_message_response_callback = platform_message_response_callback,
+  };
 
   auto platform_view = std::make_shared<shell::PlatformViewEmbedder>(table);
   platform_view->Attach();
@@ -272,5 +297,27 @@ FlutterResult FlutterEngineSendPlatformMessage(
           engine->DispatchPlatformMessage(message);
         }
       });
+  return kSuccess;
+}
+
+FlutterResult FlutterEngineSendPlatformMessageResponse(
+    FlutterEngine engine,
+    const FlutterPlatformMessageResponseHandle* handle,
+    const uint8_t* data,
+    size_t data_length) {
+  if (data_length != 0 && data == nullptr) {
+    return kInvalidArguments;
+  }
+
+  auto response = handle->message->response();
+
+  if (data_length == 0) {
+    response->CompleteEmpty();
+  } else {
+    response->Complete({data, data + data_length});
+  }
+
+  delete handle;
+
   return kSuccess;
 }
