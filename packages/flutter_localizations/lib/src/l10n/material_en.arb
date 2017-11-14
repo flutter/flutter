@@ -51,7 +51,7 @@
 
   "aboutListTileTitle": "About $applicationName",
   "@aboutListTileTitle": {
-    "description": "The default title for AboutListTile",
+    "description": "The default title for AboutListTile. The value of $applicationName is the name of the application, like GMail or Chrome.",
     "parameters": "applicationName"
   },
 
@@ -62,13 +62,13 @@
 
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "@pageRowsInfoTitle": {
-    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is known",
+    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
   "@pageRowsInfoTitleApproximate": {
-    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is unknown",
+    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
@@ -81,7 +81,7 @@
   "selectedRowCountTitleOne": "1 item selected",
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "@selectedRowCountTitle": {
-    "description": "Title for the PaginatedDataTable's selected row count header",
+    "description": "Title for the PaginatedDataTable's selected row count header. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
     "plural": "selectedRowCount"
   },
 
@@ -132,11 +132,11 @@
 
   "anteMeridiemAbbreviation": "AM",
   "@anteMeridiemAbbreviation": {
-    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker."
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
   },
 
   "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {
-    "description": "The abbreviation for post meridiem (after noon) shown in the time picker."
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
   }
 }
