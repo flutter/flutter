@@ -2507,6 +2507,21 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element _parent;
 
+  // Custom implementation of `operator ==` optimized for the ".of" pattern
+  // used with `InheritedWidgets`.
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  // Custom implementation of hash code optimized for the ".of" pattern
+  // used with `InheritedWidgets`.
+  //
+  // `Element.inheritFromWidgetOfExactType` relies heavily on hash-based
+  // `Set` look-ups, putting this getter on the performance critical path.
+  @override
+  int get hashCode => _cachedHash;
+  final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
+  static int _nextHashCode = 1;
+
   /// Information set by parent to define where this child fits in its parent's
   /// child list.
   ///
