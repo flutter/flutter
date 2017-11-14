@@ -16,32 +16,37 @@ enum RenderAnimatedSizeState {
   /// The initial state, when we do not yet know what the starting and target
   /// sizes are to animate.
   ///
-  /// Next possible state is [stable].
+  /// The next state is [stable].
   start,
 
   /// At this state the child's size is assumed to be stable and we are either
   /// animating, or waiting for the child's size to change.
   ///
-  /// Next possible state is [changed].
+  /// If the child's size changes, the state will become [changed]. Otherwise,
+  /// it remains [stable].
   stable,
 
   /// At this state we know that the child has changed once after being assumed
   /// [stable].
   ///
-  /// Next possible states are:
+  /// The next state will be one of:
   ///
-  /// - [stable] - if the child's size stabilized immediately, this is a signal
-  /// for us to begin animating the size towards the child's new size.
-  /// - [unstable] - if the child's size continues to change, we assume it is
-  /// not stable and enter the [unstable] state.
+  /// * [stable] if the child's size stabilized immediately. This is a signal
+  ///   for the render object to begin animating the size towards the child's new
+  ///   size.
+  ///
+  /// * [unstable] if the child's size continues to change.
   changed,
 
-  /// At this state the child's size is assumed to be unstable.
+  /// At this state the child's size is assumed to be unstable (changing each
+  /// frame).
   ///
-  /// Instead of chasing the child's size in this state we tightly track the
-  /// child's size until it stabilizes.
+  /// Instead of chasing the child's size in this state, the render object
+  /// tightly tracks the child's size until it stabilizes.
   ///
-  /// Next possible state is [stable].
+  /// The render object remains in this state until a frame where the child's
+  /// size remains the same as the previous frame. At that time, the next state
+  /// is [stable].
   unstable,
 }
 
@@ -144,7 +149,6 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   @override
   void detach() {
     _controller.stop();
-    _state = RenderAnimatedSizeState.start;
     super.detach();
   }
 
@@ -212,12 +216,15 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
   /// animation.
   void _layoutStable() {
     if (_sizeTween.end != child.size) {
+      _sizeTween.begin = size;
       _sizeTween.end = debugAdoptSize(child.size);
       _restartAnimation();
       _state = RenderAnimatedSizeState.changed;
     } else if (_controller.value == _controller.upperBound) {
       // Animation finished. Reset target sizes.
       _sizeTween.begin = _sizeTween.end = debugAdoptSize(child.size);
+    } else if (!_controller.isAnimating) {
+      _controller.forward(); // resume the animation after being detached
     }
   }
 
@@ -236,6 +243,8 @@ class RenderAnimatedSize extends RenderAligningShiftedBox {
     } else {
       // Child size stabilized.
       _state = RenderAnimatedSizeState.stable;
+      if (!_controller.isAnimating)
+        _controller.forward(); // resume the animation after being detached
     }
   }
 

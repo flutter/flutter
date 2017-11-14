@@ -289,8 +289,8 @@ void main() {
     final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
-    expect((){ controller.repeat(); }, throwsFlutterError);
-    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
+    expect(() { controller.repeat(period: null); }, throwsFlutterError);
   });
 
   test('Do not animate if already at target', () {
