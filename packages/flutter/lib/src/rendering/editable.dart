@@ -491,6 +491,12 @@ class RenderEditable extends RenderBox {
   }
 
   @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    _layoutText(constraints.maxWidth);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
+  }
+
+  @override
   bool hitTestSelf(Offset position) => true;
 
   TapGestureRecognizer _tap;
