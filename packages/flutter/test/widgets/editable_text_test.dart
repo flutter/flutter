@@ -284,6 +284,43 @@ void main() {
     await tester.pump();
 
     expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField, SemanticsFlags.isFocused]));
+  });
 
+  testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    const String value1 = 'EditableText content';
+
+    controller.text = value1;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(
+      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      value: value1,
+    ));
+
+    const String value2 = 'Changed the EditableText content';
+    controller.text = value2;
+    await tester.idle();
+    await tester.pump();
+
+    expect(semantics, includesNodeWith(
+      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      value: value2,
+    ));
   });
 }
