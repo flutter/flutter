@@ -47,4 +47,22 @@ void PlatformViewEmbedder::RunFromSource(const std::string& assets_directory,
   FXL_LOG(INFO) << "Hot reloading is unsupported on this platform.";
 }
 
+void PlatformViewEmbedder::HandlePlatformMessage(
+    fxl::RefPtr<blink::PlatformMessage> message) {
+  if (!message) {
+    return;
+  }
+
+  if (!message->response()) {
+    return;
+  }
+
+  if (dispatch_table_.platform_message_response_callback == nullptr) {
+    message->response()->CompleteEmpty();
+    return;
+  }
+
+  dispatch_table_.platform_message_response_callback(std::move(message));
+}
+
 }  // namespace shell
