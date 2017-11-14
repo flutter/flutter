@@ -63,6 +63,7 @@ class Card extends StatelessWidget {
     Key key,
     this.color,
     this.elevation: 2.0,
+    this.borderRadius: const BorderRadius.all(const Radius.circular(2.0)),
     this.child,
   }) : super(key: key);
 
@@ -78,6 +79,11 @@ class Card extends StatelessWidget {
   /// Defaults to 2, the appropriate elevation for cards.
   final double elevation;
 
+  /// The border radii that are used for the card.
+  ///
+  /// Defaults to a 2.0 circular radius, the appropriate border radius for cards.
+  final BorderRadius borderRadius;
+
   @override
   Widget build(BuildContext context) {
     return new Semantics(
@@ -88,6 +94,7 @@ class Card extends StatelessWidget {
           color: color,
           type: MaterialType.card,
           elevation: elevation,
+          borderRadius: borderRadius,
           child: child
         )
       ),
