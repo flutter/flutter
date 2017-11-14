@@ -55,8 +55,8 @@ sk_sp<SkImage> DecodeImage(sk_sp<SkData> buffer, size_t trace_id) {
 
   GrContext* context = ResourceContext::Get();
   if (context) {
-    // This acts as a flag to indicate that we want a color space aware decode.
-    sk_sp<SkColorSpace> dstColorSpace = SkColorSpace::MakeSRGB();
+    // This indicates that we do not want a "linear blending" decode.
+    sk_sp<SkColorSpace> dstColorSpace = nullptr;
     return SkImage::MakeCrossContextFromEncoded(context, std::move(buffer),
                                                 false, dstColorSpace.get());
   } else {
@@ -241,8 +241,8 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage() {
   if (context) {
     SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                     bitmap.pixelRef()->rowBytes());
-    // This acts as a flag to indicate that we want a color space aware decode.
-    sk_sp<SkColorSpace> dstColorSpace = SkColorSpace::MakeSRGB();
+    // This indicates that we do not want a "linear blending" decode.
+    sk_sp<SkColorSpace> dstColorSpace = nullptr;
     return SkImage::MakeCrossContextFromPixmap(context, pixmap, false,
                                                dstColorSpace.get());
   } else {

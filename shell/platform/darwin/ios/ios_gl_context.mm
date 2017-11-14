@@ -122,7 +122,7 @@ IOSGLContext::IOSGLContext(PlatformView::SurfaceConfig config, CAEAGLLayer* laye
     }
   }
 
-  NSString* drawableColorFormat = kEAGLColorFormatSRGBA8;
+  NSString* drawableColorFormat = kEAGLColorFormatRGBA8;
   layer_.get().drawableProperties = @{
     kEAGLDrawablePropertyColorFormat : drawableColorFormat,
     kEAGLDrawablePropertyRetainedBacking : @(NO),

@@ -33,6 +33,7 @@ class SurfaceFrame {
  private:
   bool submitted_;
   sk_sp<SkSurface> surface_;
+  std::unique_ptr<SkCanvas> xform_canvas_;
   SubmitCallback submit_callback_;
 
   bool PerformSubmit();

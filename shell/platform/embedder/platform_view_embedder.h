@@ -36,9 +36,6 @@ class PlatformViewEmbedder : public PlatformView, public GPUSurfaceGLDelegate {
   // |shell::GPUSurfaceGLDelegate|
   intptr_t GLContextFBO() const override;
 
-  // |shell::GPUSurfaceGLDelegate|
-  bool SurfaceSupportsSRGB() const override;
-
   // |shell::PlatformView|
   void Attach() override;
 

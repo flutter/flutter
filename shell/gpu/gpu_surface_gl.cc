@@ -33,11 +33,8 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   auto backend_context =
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface());
 
-  GrContextOptions options;
-  options.fRequireDecodeDisableForSRGB = false;
-
-  auto context = sk_sp<GrContext>(
-      GrContext::Create(kOpenGL_GrBackend, backend_context, options));
+  auto context =
+      sk_sp<GrContext>(GrContext::Create(kOpenGL_GrBackend, backend_context));
 
   if (context == nullptr) {
     FXL_LOG(ERROR) << "Failed to setup Skia Gr context.";
@@ -65,7 +62,6 @@ GPUSurfaceGL::~GPUSurfaceGL() {
   }
 
   onscreen_surface_ = nullptr;
-  offscreen_surface_ = nullptr;
   context_->releaseResourcesAndAbandonContext();
   context_ = nullptr;
 
@@ -76,7 +72,7 @@ bool GPUSurfaceGL::IsValid() {
   return valid_;
 }
 
-static GrPixelConfig FirstSupportedNonSRGBConfig(GrContext* context) {
+static GrPixelConfig FirstSupportedConfig(GrContext* context) {
 #define RETURN_IF_RENDERABLE(x)                          \
   if (context->caps()->isConfigRenderable((x), false)) { \
     return (x);                                          \
@@ -90,15 +86,12 @@ static GrPixelConfig FirstSupportedNonSRGBConfig(GrContext* context) {
 
 static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
                                             const SkISize& size,
-                                            intptr_t fbo,
-                                            bool supports_srgb) {
+                                            intptr_t fbo) {
   const GrGLFramebufferInfo framebuffer_info = {
       .fFBOID = static_cast<GrGLuint>(fbo),
   };
 
-  const GrPixelConfig pixel_config = supports_srgb
-                                         ? kSRGBA_8888_GrPixelConfig
-                                         : FirstSupportedNonSRGBConfig(context);
+  const GrPixelConfig pixel_config = FirstSupportedConfig(context);
 
   GrBackendRenderTarget render_target(size.fWidth,      // width
                                       size.fHeight,     // height
@@ -108,8 +101,7 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
                                       framebuffer_info  // framebuffer info
   );
 
-  sk_sp<SkColorSpace> colorspace =
-      supports_srgb ? SkColorSpace::MakeSRGB() : nullptr;
+  sk_sp<SkColorSpace> colorspace = nullptr;
 
   SkSurfaceProps surface_props(
       SkSurfaceProps::InitType::kLegacyFontHost_InitType);
@@ -123,52 +115,29 @@ static sk_sp<SkSurface> WrapOnscreenSurface(GrContext* context,
   );
 }
 
-static sk_sp<SkSurface> CreateOffscreenSurface(GrContext* context,
-                                               const SkISize& size) {
-  const SkImageInfo image_info =
-      SkImageInfo::MakeS32(size.fWidth, size.fHeight, kOpaque_SkAlphaType);
-
-  const SkSurfaceProps surface_props(
-      SkSurfaceProps::InitType::kLegacyFontHost_InitType);
-
-  return SkSurface::MakeRenderTarget(
-      context,                      // context
-      SkBudgeted::kNo,              // budgeted
-      image_info,                   // image info
-      0,                            // sample count
-      kBottomLeft_GrSurfaceOrigin,  // surface origin
-      &surface_props                // surface props
-  );
-}
-
 bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   if (onscreen_surface_ != nullptr &&
       size == SkISize::Make(onscreen_surface_->width(),
                             onscreen_surface_->height())) {
-    // We know that if there is an offscreen surface, it will be sized to be
-    // equal to the size of the onscreen surface. And the onscreen surface size
-    // appears unchanged. So bail.
+    // Surface size appears unchanged. So bail.
     return true;
   }
 
   // We need to do some updates.
   TRACE_EVENT0("flutter", "UpdateSurfacesSize");
 
-  // Either way, we need to get rid of previous surfaces.
+  // Either way, we need to get rid of previous surface.
   onscreen_surface_ = nullptr;
-  offscreen_surface_ = nullptr;
 
   if (size.isEmpty()) {
     FXL_LOG(ERROR) << "Cannot create surfaces of empty size.";
     return false;
   }
 
-  sk_sp<SkSurface> onscreen_surface, offscreen_surface;
+  sk_sp<SkSurface> onscreen_surface;
 
-  const bool surface_supports_srgb = delegate_->SurfaceSupportsSRGB();
-
-  onscreen_surface = WrapOnscreenSurface(
-      context_.get(), size, delegate_->GLContextFBO(), surface_supports_srgb);
+  onscreen_surface =
+      WrapOnscreenSurface(context_.get(), size, delegate_->GLContextFBO());
 
   if (onscreen_surface == nullptr) {
     // If the onscreen surface could not be wrapped. There is absolutely no
@@ -177,27 +146,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
     return false;
   }
 
-  if (!surface_supports_srgb) {
-    offscreen_surface = CreateOffscreenSurface(context_.get(), size);
-    if (offscreen_surface == nullptr) {
-      // If the offscreen surface was needed but could not be wrapped. Render to
-      // the onscreen surface directly but warn the user that color correctness
-      // is not available.
-      static bool warned_once = false;
-      if (!warned_once) {
-        warned_once = true;
-        FXL_LOG(ERROR) << "WARNING: Could not create offscreen surface. This "
-                          "device or emulator does not support "
-                          "color correct rendering. Fallbacks are in effect. "
-                          "Colors on this device will differ from those "
-                          "displayed on most other devices. This warning will "
-                          "only be logged once.";
-      }
-    }
-  }
-
   onscreen_surface_ = std::move(onscreen_surface);
-  offscreen_surface_ = std::move(offscreen_surface);
 
   return true;
 }
@@ -234,23 +183,6 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
     return false;
   }
 
-  if (offscreen_surface_ != nullptr) {
-    // Because the surface did not support sRGB, we rendered to an offscreen
-    // surface. Now we must ensure that the texture is copied onscreen.
-    TRACE_EVENT0("flutter", "CopyTextureOnscreen");
-    SkPaint paint;
-    const GrCaps* caps = context_->caps();
-    if (caps->srgbSupport() && !caps->srgbDecodeDisableSupport()) {
-      paint.setColorFilter(SkColorFilter::MakeLinearToSRGBGamma());
-    }
-    onscreen_surface_->getCanvas()->drawImage(
-        offscreen_surface_->makeImageSnapshot(),  // image
-        0,                                        // left
-        0,                                        // top
-        &paint                                    // paint
-    );
-  }
-
   {
     TRACE_EVENT0("flutter", "SkCanvas::Flush");
     onscreen_surface_->getCanvas()->flush();
@@ -266,7 +198,7 @@ sk_sp<SkSurface> GPUSurfaceGL::AcquireRenderSurface(const SkISize& size) {
     return nullptr;
   }
 
-  return offscreen_surface_ != nullptr ? offscreen_surface_ : onscreen_surface_;
+  return onscreen_surface_;
 }
 
 GrContext* GPUSurfaceGL::GetContext() {

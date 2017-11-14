@@ -31,10 +31,6 @@ intptr_t PlatformViewEmbedder::GLContextFBO() const {
   return dispatch_table_.gl_fbo_callback();
 }
 
-bool PlatformViewEmbedder::SurfaceSupportsSRGB() const {
-  return true;
-}
-
 void PlatformViewEmbedder::Attach() {
   CreateEngine();
   NotifyCreated(std::make_unique<shell::GPUSurfaceGL>(this));

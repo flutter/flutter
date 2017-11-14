@@ -55,10 +55,6 @@ AndroidSurfaceGL::AndroidSurfaceGL(
 
 AndroidSurfaceGL::~AndroidSurfaceGL() = default;
 
-bool AndroidSurfaceGL::SurfaceSupportsSRGB() const {
-  return offscreen_context_->SupportsSRGB();
-}
-
 bool AndroidSurfaceGL::IsOffscreenContextValid() const {
   return offscreen_context_ && offscreen_context_->IsValid();
 }

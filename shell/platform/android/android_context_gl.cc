@@ -6,14 +6,6 @@
 #include <EGL/eglext.h>
 #include <utility>
 
-#ifndef EGL_GL_COLORSPACE_KHR
-#define EGL_GL_COLORSPACE_KHR 0x309D
-#endif
-
-#ifndef EGL_GL_COLORSPACE_SRGB_KHR
-#define EGL_GL_COLORSPACE_SRGB_KHR 0x3089
-#endif
-
 namespace shell {
 
 template <class T>
@@ -128,14 +120,7 @@ bool AndroidContextGL::CreateWindowSurface(
   window_ = std::move(window);
   EGLDisplay display = environment_->Display();
 
-  const EGLint srgb_attribs[] = {EGL_GL_COLORSPACE_KHR,
-                                 EGL_GL_COLORSPACE_SRGB_KHR, EGL_NONE};
-  const EGLint default_attribs[] = {EGL_NONE};
-
-  const EGLint* attribs = default_attribs;
-  if (srgb_support_) {
-    attribs = srgb_attribs;
-  }
+  const EGLint attribs[] = {EGL_NONE};
 
   surface_ = eglCreateWindowSurface(
       display, config_,
@@ -150,19 +135,7 @@ bool AndroidContextGL::CreatePBufferSurface() {
 
   EGLDisplay display = environment_->Display();
 
-  const EGLint srgb_attribs[] = {EGL_WIDTH,
-                                 1,
-                                 EGL_HEIGHT,
-                                 1,
-                                 EGL_GL_COLORSPACE_KHR,
-                                 EGL_GL_COLORSPACE_SRGB_KHR,
-                                 EGL_NONE};
-  const EGLint default_attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
-
-  const EGLint* attribs = default_attribs;
-  if (srgb_support_) {
-    attribs = srgb_attribs;
-  }
+  const EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE};
 
   surface_ = eglCreatePbufferSurface(display, config_, attribs);
   return surface_ != EGL_NO_SURFACE;
@@ -205,12 +178,6 @@ AndroidContextGL::AndroidContextGL(fxl::RefPtr<AndroidEnvironmentGL> env,
     LogLastEGLError();
     return;
   }
-
-  // On its own, this is not enough to guarantee that we will render in
-  // sRGB mode. We also need to query GL using the GrContext.
-
-  const char* exts = eglQueryString(environment_->Display(), EGL_EXTENSIONS);
-  srgb_support_ = strstr(exts, "EGL_KHR_gl_colorspace");
 
   if (!this->CreatePBufferSurface()) {
     FXL_LOG(ERROR) << "Could not create the EGL surface.";
@@ -300,10 +267,6 @@ bool AndroidContextGL::Resize(const SkISize& size) {
   MakeCurrent();
 
   return true;
-}
-
-bool AndroidContextGL::SupportsSRGB() const {
-  return srgb_support_;
 }
 
 }  // namespace shell
