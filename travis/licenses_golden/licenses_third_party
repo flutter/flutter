@@ -1,4 +1,4 @@
-Signature: d6eb20541eb41a3b453a20228d17c9ab
+Signature: dd9bc4d408553c66820f24c3dc8393c5
 
 UNUSED LICENSES:
 
@@ -17594,7 +17594,6 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-EMCC-wasm-Release.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
-FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-Mesa.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-NoGPU.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-PDFium.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Build-Debian9-GCC-x86_64-Release-PDFium_SkiaPaths.json
@@ -17697,7 +17696,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Debug-NoGPU.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Flutter_Android.json
-FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Mesa.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-PDFium.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-PDFium_SkiaPaths.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Debian9-GCC-x86_64-Release-Shared.json
@@ -17819,6 +17817,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Cla
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FDAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FSAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-NativeFonts.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-NativeFonts_GDI.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win8-MSVC-Golo-CPU-AVX-x86-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-iOS-Clang-iPadPro-GPU-GT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_dm.json
@@ -18484,8 +18483,6 @@ FILE: ../../../third_party/skia/src/core/SkVertState.cpp
 FILE: ../../../third_party/skia/src/core/SkVertState.h
 FILE: ../../../third_party/skia/src/fonts/SkFontMgr_indirect.cpp
 FILE: ../../../third_party/skia/src/fonts/SkRemotableFontMgr.cpp
-FILE: ../../../third_party/skia/src/fonts/SkTestScalerContext.cpp
-FILE: ../../../third_party/skia/src/fonts/SkTestScalerContext.h
 FILE: ../../../third_party/skia/src/gpu/GrDefaultGeoProcFactory.cpp
 FILE: ../../../third_party/skia/src/gpu/GrDefaultGeoProcFactory.h
 FILE: ../../../third_party/skia/src/gpu/GrFragmentProcessor.h
@@ -19102,8 +19099,6 @@ FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.cpp
 FILE: ../../../third_party/skia/src/core/SkYUVPlanesCache.h
 FILE: ../../../third_party/skia/src/effects/SkImageSource.cpp
 FILE: ../../../third_party/skia/src/effects/SkTableColorFilter.cpp
-FILE: ../../../third_party/skia/src/fonts/SkRandomScalerContext.cpp
-FILE: ../../../third_party/skia/src/fonts/SkRandomScalerContext.h
 FILE: ../../../third_party/skia/src/gpu/GrAutoLocaleSetter.h
 FILE: ../../../third_party/skia/src/gpu/GrBlend.cpp
 FILE: ../../../third_party/skia/src/gpu/GrBlurUtils.cpp
@@ -19277,7 +19272,6 @@ FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_directory_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_custom_embedded_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fontconfig_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_win_dw_factory.cpp
-FILE: ../../../third_party/skia/src/ports/SkFontMgr_win_gdi_factory.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSLibrary.h
 FILE: ../../../third_party/skia/src/ports/SkOSLibrary_posix.cpp
 FILE: ../../../third_party/skia/src/ports/SkOSLibrary_win.cpp
@@ -19511,7 +19505,6 @@ FILE: ../../../third_party/skia/src/gpu/gl/GrGLContext.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLExtensions.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVertexArray.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLVertexArray.h
-FILE: ../../../third_party/skia/src/gpu/gl/mesa/osmesa_wrapper.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLGeometryProcessor.h
 FILE: ../../../third_party/skia/src/gpu/glsl/GrGLSLPrimitiveProcessor.h
@@ -19643,6 +19636,7 @@ FILE: ../../../third_party/skia/include/gpu/GrBackendSemaphore.h
 FILE: ../../../third_party/skia/include/gpu/GrBackendSurface.h
 FILE: ../../../third_party/skia/include/gpu/mock/GrMockTypes.h
 FILE: ../../../third_party/skia/include/gpu/mtl/GrMtlTypes.h
+FILE: ../../../third_party/skia/include/private/GrSharedEnums.h
 FILE: ../../../third_party/skia/include/private/SkDeferredDisplayList.h
 FILE: ../../../third_party/skia/include/private/SkMalloc.h
 FILE: ../../../third_party/skia/include/private/SkShadowFlags.h
@@ -19684,6 +19678,8 @@ FILE: ../../../third_party/skia/src/core/SkDrawShadowInfo.h
 FILE: ../../../third_party/skia/src/core/SkDraw_vertices.cpp
 FILE: ../../../third_party/skia/src/core/SkExecutor.cpp
 FILE: ../../../third_party/skia/src/core/SkFDot6Constants.cpp
+FILE: ../../../third_party/skia/src/core/SkGaussFilter.cpp
+FILE: ../../../third_party/skia/src/core/SkGaussFilter.h
 FILE: ../../../third_party/skia/src/core/SkImageFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkImageInfoPriv.h
 FILE: ../../../third_party/skia/src/core/SkMaskBlurFilter.cpp
@@ -19846,8 +19842,10 @@ FILE: ../../../third_party/skia/src/sksl/SkSLSectionAndParameterHelper.h
 FILE: ../../../third_party/skia/src/sksl/SkSLString.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLString.h
 FILE: ../../../third_party/skia/src/sksl/SkSLStringStream.h
+FILE: ../../../third_party/skia/src/sksl/ast/SkSLASTEnum.h
 FILE: ../../../third_party/skia/src/sksl/ast/SkSLASTSwitchCase.h
 FILE: ../../../third_party/skia/src/sksl/ast/SkSLASTSwitchStatement.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLEnum.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSetting.cpp
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchCase.h
 FILE: ../../../third_party/skia/src/sksl/ir/SkSLSwitchStatement.h
@@ -19863,6 +19861,7 @@ FILE: ../../../third_party/skia/src/sksl/lex/RegexNode.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/RegexNode.h
 FILE: ../../../third_party/skia/src/sksl/lex/RegexParser.cpp
 FILE: ../../../third_party/skia/src/sksl/lex/RegexParser.h
+FILE: ../../../third_party/skia/src/sksl/sksl_enums.include
 FILE: ../../../third_party/skia/src/utils/SkInsetConvexPolygon.cpp
 FILE: ../../../third_party/skia/src/utils/SkInsetConvexPolygon.h
 FILE: ../../../third_party/skia/src/utils/SkJSONWriter.cpp
