@@ -167,6 +167,20 @@ class FlutterVersion {
     return _branch;
   }
 
+  /// Returns true if `tentativeDescendantRevision` is a direct descendant to
+  /// the `tentativeAncestorRevision` revision on the Flutter framework repo
+  /// tree.
+  bool checkRevisionAncestry({
+    String tentativeDescendantRevision,
+    String tentativeAncestorRevision,
+  }) {
+    final ProcessResult result = processManager.runSync(
+      <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
+      workingDirectory: Cache.flutterRoot,
+    );
+    return result.exitCode == 0;
+  }
+
   /// The amount of time we wait before pinging the server to check for the
   /// availability of a newer version of Flutter.
   @visibleForTesting
