@@ -29,14 +29,23 @@
     [FlutterBasicMessageChannel messageChannelWithName:@"std-msg"
                                        binaryMessenger:flutterController
                                                  codec:[FlutterStandardMessageCodec sharedInstance]]];
-  [self setupMethodCallSuccessHandshakeOnChannel:
+  [self setupBlockingMessagingHandshakeOnChannel:
+    [FlutterBasicMessageChannel messageChannelWithName:@"std-blocking-msg"
+                                       binaryMessenger:flutterController
+                                                 codec:[FlutterStandardMessageCodec sharedInstance]]];
+  [self setupMethodCallHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"json-method"
                                 binaryMessenger:flutterController
                                           codec:[FlutterJSONMethodCodec sharedInstance]]];
-  [self setupMethodCallSuccessHandshakeOnChannel:
+  [self setupMethodCallHandshakeOnChannel:
     [FlutterMethodChannel methodChannelWithName:@"std-method"
                                 binaryMessenger:flutterController
                                           codec:[FlutterStandardMethodCodec sharedInstance]]];
+  [self setupBlockingMethodCallHandshakeOnChannel:
+    [FlutterMethodChannel methodChannelWithName:@"std-blocking-method"
+                                binaryMessenger:flutterController
+                                          codec:[FlutterStandardMethodCodec sharedInstance]]];
+
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
@@ -49,7 +58,14 @@
   }];
 }
 
-- (void)setupMethodCallSuccessHandshakeOnChannel:(FlutterMethodChannel*)channel {
+- (void)setupBlockingMessagingHandshakeOnChannel:(FlutterBasicMessageChannel*)channel {
+  [channel setMessageHandler:^(id message, FlutterReply reply) {
+    [channel sendMessage:[channel sendBlockingMessage:message]];
+    reply(message);
+  }];
+}
+
+- (void)setupMethodCallHandshakeOnChannel:(FlutterMethodChannel*)channel {
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     if ([call.method isEqual:@"success"]) {
       [channel invokeMethod:call.method arguments:call.arguments result:^(id value) {
@@ -68,6 +84,25 @@
         [channel invokeMethod:call.method arguments:nil];
         result(FlutterMethodNotImplemented);
       }];
+    }
+  }];
+}
+
+- (void)setupBlockingMethodCallHandshakeOnChannel:(FlutterMethodChannel*)channel {
+  [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    if ([call.method isEqual:@"success"]) {
+      id value = [channel invokeBlockingMethod:call.method arguments:call.arguments];
+      [channel invokeMethod:call.method arguments:value];
+      result(call.arguments);
+    } else if ([call.method isEqual:@"error"]) {
+      FlutterError* error = [channel invokeBlockingMethod:call.method arguments:call.arguments];
+      [channel invokeMethod:call.method arguments:error.details];
+      result(error);
+    } else {
+      id value = [channel invokeBlockingMethod:call.method arguments:call.arguments];
+      NSAssert(value == FlutterMethodNotImplemented, @"Result must be not implemented");
+      [channel invokeMethod:call.method arguments:nil];
+      result(FlutterMethodNotImplemented);
     }
   }];
 }
