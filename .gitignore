@@ -36,6 +36,7 @@ Thumbs.db
 /third_party/harfbuzz/
 /third_party/icu/
 /third_party/libjpeg-turbo/
+/third_party/libwebp/
 /third_party/pkg/
 /third_party/rapidjson/
 /third_party/root_certificates/
