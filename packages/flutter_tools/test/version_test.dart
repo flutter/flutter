@@ -157,7 +157,7 @@ void main() {
       )).thenReturn(new ProcessResult(1, 0, '', ''));
 
       expect(
-        FlutterVersion.checkRevisionAncestry(
+        FlutterVersion.instance.checkRevisionAncestry(
           tentativeDescendantRevision: '123456',
           tentativeAncestorRevision: 'abcdef',
         ),
@@ -170,6 +170,7 @@ void main() {
       ));
     },
     overrides: <Type, Generator>{
+      FlutterVersion: () => new FlutterVersion(_testClock),
       ProcessManager: () => mockProcessManager,
     });
   });
