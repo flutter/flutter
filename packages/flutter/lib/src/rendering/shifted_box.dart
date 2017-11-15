@@ -607,10 +607,11 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   RenderUnconstrainedBox({
     @required AlignmentGeometry alignment,
     @required TextDirection textDirection,
-    this.constrainedAxis,
+    Axis constrainedAxis,
     RenderBox child,
   }) : assert(alignment != null),
-      super.mixin(alignment, textDirection, child);
+       _constrainedAxis = constrainedAxis,
+       super.mixin(alignment, textDirection, child);
 
   /// The axis to retain constraints on, if any.
   ///
@@ -618,7 +619,15 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   /// constraints.  If set to [Axis.vertical], then vertical constraints will
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
-  Axis constrainedAxis;
+  Axis get constrainedAxis => _constrainedAxis;
+  Axis _constrainedAxis;
+  set constrainedAxis(Axis value) {
+    assert(value != null);
+    if (_constrainedAxis == value)
+      return;
+    _constrainedAxis = value;
+    markNeedsLayout();
+  }
   
   Rect _overflowContainerRect = Rect.zero;
   Rect _overflowChildRect = Rect.zero;
