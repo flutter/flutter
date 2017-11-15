@@ -26,9 +26,15 @@ final DateTime _stampOutOfDate = _testClock.agoBy(FlutterVersion.kCheckAgeConsid
 
 void main() {
   group('$FlutterVersion', () {
+    ProcessManager mockProcessManager;
+
     setUpAll(() {
       Cache.disableLocking();
       FlutterVersion.kPauseToLetUserReadTheMessage = Duration.ZERO;
+    });
+
+    setUp(() {
+      mockProcessManager = new MockProcessManager();
     });
 
     testFlutterVersion('prints nothing when Flutter installation looks fresh', () async {
@@ -142,6 +148,30 @@ void main() {
 
       await version.checkFlutterVersionFreshness();
       _expectVersionMessage('');
+    });
+
+    testUsingContext('versions comparison', () async {
+      when(mockProcessManager.runSync(
+        <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
+        workingDirectory: any,
+      )).thenReturn(new ProcessResult(1, 0, '', ''));
+
+      expect(
+        FlutterVersion.instance.checkRevisionAncestry(
+          tentativeDescendantRevision: '123456',
+          tentativeAncestorRevision: 'abcdef',
+        ),
+        true
+      );
+
+      verify(mockProcessManager.runSync(
+        <String>['git', 'merge-base', '--is-ancestor', 'abcdef', '123456'],
+        workingDirectory: any,
+      ));
+    },
+    overrides: <Type, Generator>{
+      FlutterVersion: () => new FlutterVersion(_testClock),
+      ProcessManager: () => mockProcessManager,
     });
   });
 
