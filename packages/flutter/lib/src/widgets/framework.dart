@@ -2507,6 +2507,30 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
 
   Element _parent;
 
+  // Custom implementation of `operator ==` optimized for the ".of" pattern
+  // used with `InheritedWidgets`.
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  // Custom implementation of hash code optimized for the ".of" pattern used
+  // with `InheritedWidgets`.
+  //
+  // `Element.inheritFromWidgetOfExactType` relies heavily on hash-based
+  // `Set` look-ups, putting this getter on the performance critical path.
+  //
+  // The value is designed to fit within the SMI representation. This makes
+  // the cached value use less memory (one field and no extra heap objects) and
+  // cheap to compare (no indirection).
+  //
+  // See also:
+  //
+  //  * https://www.dartlang.org/articles/dart-vm/numeric-computation, which
+  //    explains how numbers are represented in Dart.
+  @override
+  int get hashCode => _cachedHash;
+  final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
+  static int _nextHashCode = 1;
+
   /// Information set by parent to define where this child fits in its parent's
   /// child list.
   ///
