@@ -19,10 +19,9 @@ Future<Null> main() async {
   assert(false); // don't run this in checked mode! Use --release.
   stock_data.StockData.actuallyFetchData = false;
 
-  // This allows us to call onBeginFrame even when the engine didn't request it,
-  // and have it actually do something:
+  // We control the framePolicy below to prevent us from scheduling frames in
+  // the engine, so that the engine does not interfere with our timings.
   final LiveTestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-  binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
   final Stopwatch watch = new Stopwatch();
   int iterations = 0;
@@ -36,6 +35,7 @@ Future<Null> main() async {
     await tester.pump(const Duration(seconds: 1)); // Complete drawer animation
 
     final Element appState = tester.element(find.byType(stocks.StocksApp));
+    binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.benchmark;
 
     watch.start();
     while (watch.elapsed < kBenchmarkTime) {
@@ -48,7 +48,7 @@ Future<Null> main() async {
       // the two calls below.
       Timer.run(() { ui.window.onBeginFrame(new Duration(milliseconds: iterations * 16)); });
       Timer.run(() { ui.window.onDrawFrame(); });
-      await tester.idle(); // wait until the frame has run
+      await tester.idle(); // wait until the frame has run (also uses Timer.run)
       iterations += 1;
     }
     watch.stop();
