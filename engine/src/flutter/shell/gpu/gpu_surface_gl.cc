@@ -33,8 +33,11 @@ GPUSurfaceGL::GPUSurfaceGL(GPUSurfaceGLDelegate* delegate)
   auto backend_context =
       reinterpret_cast<GrBackendContext>(GrGLCreateNativeInterface());
 
-  auto context =
-      sk_sp<GrContext>(GrContext::Create(kOpenGL_GrBackend, backend_context));
+  GrContextOptions options;
+  options.fAvoidStencilBuffers = true;
+
+  auto context = sk_sp<GrContext>(
+      GrContext::Create(kOpenGL_GrBackend, backend_context, options));
 
   if (context == nullptr) {
     FXL_LOG(ERROR) << "Failed to setup Skia Gr context.";
