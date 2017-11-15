@@ -21,6 +21,7 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "string-msg", StringCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "json-msg", JSONMessageCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
+    setupBlockingMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-blocking-msg", StandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
     setupBlockingMethodHandshake(new MethodChannel(getFlutterView(), "std-blocking-method", StandardMethodCodec.INSTANCE));
@@ -40,6 +41,20 @@ public class MainActivity extends FlutterActivity {
             reply.reply(messageEcho);
           }
         });
+      }
+    });
+  }
+
+  private <T> void setupBlockingMessageHandshake(final BasicMessageChannel<T> channel) {
+    // On message receipt, do a blocking send round-trip in the other direction,
+    // then reply to the first message.
+    channel.setMessageHandler(new BasicMessageChannel.MessageHandler<T>() {
+      @Override
+      public void onMessage(final T message, final BasicMessageChannel.Reply<T> reply) {
+        final T messageEcho = echo(message);
+        final T replyMessage = channel.sendBlocking(messageEcho);
+        channel.send(echo(replyMessage));
+        reply.reply(messageEcho);
       }
     });
   }

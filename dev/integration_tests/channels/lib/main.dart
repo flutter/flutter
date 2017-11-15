@@ -70,6 +70,10 @@ class _TestAppState extends State<TestApp> {
     double.INFINITY,
   ]);
   static final List<TestStep> steps = <TestStep>[
+    () => blockingBasicStandardHandshake('hello, world'),
+    () => blockingMethodCallStandardSuccessHandshake('hello, world'),
+    () => blockingMethodCallStandardErrorHandshake('hello, world'),
+    () => blockingMethodCallStandardNotImplementedHandshake(),
     () => methodCallJsonSuccessHandshake(null),
     () => methodCallJsonSuccessHandshake(true),
     () => methodCallJsonSuccessHandshake(7),
@@ -88,9 +92,6 @@ class _TestAppState extends State<TestApp> {
     () => methodCallStandardErrorHandshake(null),
     () => methodCallStandardErrorHandshake('world'),
     () => methodCallStandardNotImplementedHandshake(),
-    () => blockingMethodCallStandardSuccessHandshake('world'),
-    () => blockingMethodCallStandardErrorHandshake('world'),
-    () => blockingMethodCallStandardNotImplementedHandshake(),
     () => basicBinaryHandshake(null),
     () => basicBinaryHandshake(new ByteData(0)),
     () => basicBinaryHandshake(new ByteData(4)..setUint32(0, 0x12345678)),
