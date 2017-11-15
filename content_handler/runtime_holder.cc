@@ -291,6 +291,17 @@ Dart_Port RuntimeHolder::GetUIIsolateMainPort() {
   return runtime_->GetMainPort();
 }
 
+void RuntimeHolder::DidShutdownMainIsolate() {
+  if (main_isolate_shutdown_callback_) {
+    main_isolate_shutdown_callback_();
+  }
+}
+
+void RuntimeHolder::SetMainIsolateShutdownCallback(
+    std::function<void()> callback) {
+  main_isolate_shutdown_callback_ = callback;
+}
+
 std::string RuntimeHolder::GetUIIsolateName() {
   if (!runtime_) {
     return "";

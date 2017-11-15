@@ -39,17 +39,13 @@ class DartController {
 
   UIDartState* dart_state() const { return ui_dart_state_; }
 
-  void IsolateShuttingDown();
-
  private:
   bool SendStartMessage(Dart_Handle root_library,
                         const std::string& entrypoint = main_entrypoint_);
 
   static const std::string main_entrypoint_;
 
-  // The DartState associated with the main isolate.  This is not deleted
-  // during isolate shutdown, instead it is deleted when the controller
-  // object is deleted.
+  // The DartState associated with the main isolate.
   UIDartState* ui_dart_state_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(DartController);

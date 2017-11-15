@@ -142,6 +142,10 @@ void RuntimeController::DidCreateSecondaryIsolate(Dart_Isolate isolate) {
   client_->DidCreateSecondaryIsolate(isolate);
 }
 
+void RuntimeController::DidShutdownMainIsolate() {
+  client_->DidShutdownMainIsolate();
+}
+
 Dart_Port RuntimeController::GetMainPort() {
   if (!dart_controller_) {
     return ILLEGAL_PORT;

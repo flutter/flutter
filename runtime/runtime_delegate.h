@@ -25,6 +25,7 @@ class RuntimeDelegate {
 
   virtual void DidCreateMainIsolate(Dart_Isolate isolate);
   virtual void DidCreateSecondaryIsolate(Dart_Isolate isolate);
+  virtual void DidShutdownMainIsolate();
 
  protected:
   virtual ~RuntimeDelegate();

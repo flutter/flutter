@@ -66,6 +66,7 @@ ApplicationControllerImpl::ApplicationControllerImpl(
 
   url_ = startup_info->launch_info->url;
   runtime_holder_.reset(new RuntimeHolder());
+  runtime_holder_->SetMainIsolateShutdownCallback([this]() { Kill(); });
   runtime_holder_->Init(
       fdio_ns, app::ApplicationContext::CreateFrom(std::move(startup_info)),
       std::move(request), std::move(bundle));

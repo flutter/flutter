@@ -12,4 +12,6 @@ void RuntimeDelegate::DidCreateMainIsolate(Dart_Isolate isolate) {}
 
 void RuntimeDelegate::DidCreateSecondaryIsolate(Dart_Isolate isolate) {}
 
+void RuntimeDelegate::DidShutdownMainIsolate() {}
+
 }  // namespace blink

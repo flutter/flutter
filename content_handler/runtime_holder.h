@@ -56,6 +56,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
 
   int32_t return_code() { return return_code_; }
 
+  void SetMainIsolateShutdownCallback(std::function<void()> callback);
+
  private:
   // |blink::RuntimeDelegate| implementation:
   std::string DefaultRouteName() override;
@@ -65,6 +67,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
   void DidCreateMainIsolate(Dart_Isolate isolate) override;
+  void DidShutdownMainIsolate() override;
 
   // |mozart::NativesDelegate| implementation:
   mozart::View* GetMozartView() override;
@@ -127,6 +130,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   fxl::WeakPtrFactory<RuntimeHolder> weak_factory_;
 
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
+
+  std::function<void()> main_isolate_shutdown_callback_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
 };

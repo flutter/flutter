@@ -140,10 +140,22 @@ void IsolateShutdownCallback(void* callback_data) {
     Dart_Handle sticky_error = Dart_GetStickyError();
     FXL_CHECK(LogIfError(sticky_error));
   }
+
   UIDartState* dart_state = static_cast<UIDartState*>(callback_data);
-  if ((dart_state != NULL) && !dart_state->is_controller_state()) {
-    delete dart_state;
+  // If the isolate that's shutting down is the main one, tell the higher layers
+  // of the stack.
+  if ((dart_state != NULL) && dart_state->is_controller_state()) {
+    dart_state->set_shutting_down(true);
+    if (dart_state->isolate_client()) {
+      dart_state->isolate_client()->DidShutdownMainIsolate();
+    }
   }
+}
+
+// The cleanup callback frees the DartState object.
+void IsolateCleanupCallback(void* callback_data) {
+  UIDartState* dart_state = static_cast<UIDartState*>(callback_data);
+  delete dart_state;
 }
 
 bool DartFileModifiedCallback(const char* source_url, int64_t since_ms) {
@@ -581,6 +593,7 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
     params.vm_snapshot_instructions = vm_snapshot_instructions;
     params.create = IsolateCreateCallback;
     params.shutdown = IsolateShutdownCallback;
+    params.cleanup = IsolateCleanupCallback;
     params.thread_exit = ThreadExitCallback;
     params.get_service_assets = GetVMServiceAssetsArchiveCallback;
     params.entropy_source = DartIO::EntropySource;
