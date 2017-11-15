@@ -23,6 +23,7 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
+    setupSyncMethodHandshake(new MethodChannel(getFlutterView(), "std-sync-method", StandardMethodCodec.INSTANCE));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {
@@ -133,5 +134,60 @@ public class MainActivity extends FlutterActivity {
         result.notImplemented();
       }
     });
+  }
+
+  private void setupSyncMethodHandshake(final MethodChannel channel) {
+    channel.setMethodCallHandler(new MethodChannel.MethodCallHandler() {
+      @Override
+      public void onMethodCall(final MethodCall methodCall, final MethodChannel.Result result) {
+        switch (methodCall.method) {
+          case "success":
+            doSyncSuccessHandshake(channel, methodCall, result);
+            break;
+          case "error":
+            doSyncErrorHandshake(channel, methodCall, result);
+            break;
+          default:
+            doSyncNotImplementedHandshake(channel, methodCall, result);
+            break;
+        }
+      }
+    });
+  }
+
+  private void doSyncSuccessHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      final Object o = channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      channel.invokeMethod(methodCall.method, o);
+      result.success(methodCall.arguments);
+    } catch (FlutterException e) {
+      throw new AssertionError("Unexpected error", e);
+    } catch (UnsupportedOperationException e) {
+      throw new AssertionError("Unexpected missing implementation", e);
+    }
+  }
+
+  private void doSyncErrorHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      throw new AssertionError("Unexpected success");
+    } catch (FlutterException e) {
+      channel.invokeMethod(methodCall.method, e.details);
+      result.error(e.code, e.getMessage(), methodCall.arguments);
+    } catch (UnsupportedOperationException e) {
+      throw new AssertionError("Unexpected missing implementation", e);
+    }
+  }
+
+  private void doSyncNotImplementedHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      throw new AssertionError("Unexpected success");
+    } catch (FlutterException e) {
+      throw new AssertionError("Unexpected error", e);
+    } catch (UnsupportedOperationException e) {
+      channel.invokeMethod(methodCall.method, null);
+      result.notImplemented();
+    }
   }
 }
