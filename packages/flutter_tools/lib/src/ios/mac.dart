@@ -521,13 +521,13 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
       !lines.contains(l5) || !lines.contains(l7)) {
     printError('Automatic upgrade of project.pbxproj failed.');
     printError(' To manually upgrade, open ios/Runner.xcodeproj/project.pbxproj:');
-    printError(' Add the following line in the PBXBuildFile section');
+    printError(' Add the following line in the "PBXBuildFile" section');
     printError(l2);
-    printError(' Add the following line in the PBXFileReference section');
+    printError(' Add the following line in the "PBXFileReference" section');
     printError(l4);
-    printError(' Add the following line in the PBXGroup section');
+    printError(' Add the following line in the "children" list of the "Flutter" group in the "PBXGroup" section');
     printError(l6);
-    printError(' Add the following line in the PBXResourcesBuildPhase section');
+    printError(' Add the following line in the "files" list of "Resources" in the "PBXResourcesBuildPhase" section');
     printError(l8);
     return false;
   }
