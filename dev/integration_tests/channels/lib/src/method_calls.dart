@@ -47,25 +47,25 @@ Future<TestStepResult> methodCallStandardNotImplementedHandshake() async {
       'Standard notImplemented()', channel);
 }
 
-Future<TestStepResult> syncMethodCallStandardSuccessHandshake(dynamic payload) async {
+Future<TestStepResult> blockingMethodCallStandardSuccessHandshake(dynamic payload) async {
   const MethodChannel channel =
-      const MethodChannel('std-sync-method', const StandardMethodCodec());
+      const MethodChannel('std-blocking-method', const StandardMethodCodec());
   return _methodCallSuccessHandshake(
-      'Standard sync success($payload)', channel, payload);
+      'Standard blocking success($payload)', channel, payload);
 }
 
-Future<TestStepResult> syncMethodCallStandardErrorHandshake(dynamic payload) async {
+Future<TestStepResult> blockingMethodCallStandardErrorHandshake(dynamic payload) async {
   const MethodChannel channel =
-      const MethodChannel('std-sync-method', const StandardMethodCodec());
+      const MethodChannel('std-blocking-method', const StandardMethodCodec());
   return _methodCallErrorHandshake(
-      'Standard sync error($payload)', channel, payload);
+      'Standard blocking error($payload)', channel, payload);
 }
 
-Future<TestStepResult> syncMethodCallStandardNotImplementedHandshake() async {
+Future<TestStepResult> blockingMethodCallStandardNotImplementedHandshake() async {
   const MethodChannel channel =
-      const MethodChannel('std-sync-method', const StandardMethodCodec());
+      const MethodChannel('std-blocking-method', const StandardMethodCodec());
   return _methodCallNotImplementedHandshake(
-      'Standard sync notImplemented()', channel);
+      'Standard blocking notImplemented()', channel);
 }
 
 Future<TestStepResult> _methodCallSuccessHandshake(

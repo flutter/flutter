@@ -23,7 +23,7 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
-    setupSyncMethodHandshake(new MethodChannel(getFlutterView(), "std-sync-method", StandardMethodCodec.INSTANCE));
+    setupBlockingMethodHandshake(new MethodChannel(getFlutterView(), "std-blocking-method", StandardMethodCodec.INSTANCE));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {
@@ -136,28 +136,28 @@ public class MainActivity extends FlutterActivity {
     });
   }
 
-  private void setupSyncMethodHandshake(final MethodChannel channel) {
+  private void setupBlockingMethodHandshake(final MethodChannel channel) {
     channel.setMethodCallHandler(new MethodChannel.MethodCallHandler() {
       @Override
       public void onMethodCall(final MethodCall methodCall, final MethodChannel.Result result) {
         switch (methodCall.method) {
           case "success":
-            doSyncSuccessHandshake(channel, methodCall, result);
+            doBlockingSuccessHandshake(channel, methodCall, result);
             break;
           case "error":
-            doSyncErrorHandshake(channel, methodCall, result);
+            doBlockingErrorHandshake(channel, methodCall, result);
             break;
           default:
-            doSyncNotImplementedHandshake(channel, methodCall, result);
+            doBlockingNotImplementedHandshake(channel, methodCall, result);
             break;
         }
       }
     });
   }
 
-  private void doSyncSuccessHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+  private void doBlockingSuccessHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
     try {
-      final Object o = channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      final Object o = channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
       channel.invokeMethod(methodCall.method, o);
       result.success(methodCall.arguments);
     } catch (FlutterException e) {
@@ -167,9 +167,9 @@ public class MainActivity extends FlutterActivity {
     }
   }
 
-  private void doSyncErrorHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+  private void doBlockingErrorHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
     try {
-      channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
       throw new AssertionError("Unexpected success");
     } catch (FlutterException e) {
       channel.invokeMethod(methodCall.method, e.details);
@@ -179,9 +179,9 @@ public class MainActivity extends FlutterActivity {
     }
   }
 
-  private void doSyncNotImplementedHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+  private void doBlockingNotImplementedHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
     try {
-      channel.invokeMethodSync(methodCall.method, methodCall.arguments);
+      channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
       throw new AssertionError("Unexpected success");
     } catch (FlutterException e) {
       throw new AssertionError("Unexpected error", e);
