@@ -1,4 +1,4 @@
-Signature: e0ff08bb9e95d6da933f1f62ee5e6fa6
+Signature: 2825f6905f169b1cbf039c5a6d98594b
 
 UNUSED LICENSES:
 
@@ -15066,6 +15066,523 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ====================================================================================================
 
 ====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/.mailmap
+FILE: ../../../third_party/libwebp/Makefile.vc
+FILE: ../../../third_party/libwebp/cmake/config.h.in
+FILE: ../../../third_party/libwebp/doc/TODO
+FILE: ../../../third_party/libwebp/doc/template.html
+FILE: ../../../third_party/libwebp/extras/webp_quality.c
+FILE: ../../../third_party/libwebp/gradle.properties
+FILE: ../../../third_party/libwebp/makefile.unix
+FILE: ../../../third_party/libwebp/src/demux/libwebpdemux.pc.in
+FILE: ../../../third_party/libwebp/src/demux/libwebpdemux.rc
+FILE: ../../../third_party/libwebp/src/libwebp.pc.in
+FILE: ../../../third_party/libwebp/src/libwebp.rc
+FILE: ../../../third_party/libwebp/src/libwebpdecoder.pc.in
+FILE: ../../../third_party/libwebp/src/libwebpdecoder.rc
+FILE: ../../../third_party/libwebp/src/mux/libwebpmux.pc.in
+FILE: ../../../third_party/libwebp/src/mux/libwebpmux.rc
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2010, Google Inc. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/extras/extras.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/extras/extras.c
+FILE: ../../../third_party/libwebp/extras/extras.h
+FILE: ../../../third_party/libwebp/src/dec/common_dec.h
+FILE: ../../../third_party/libwebp/src/demux/anim_decode.c
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_sse41.c
+FILE: ../../../third_party/libwebp/src/dsp/cost_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_sse41.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_sse41.c
+FILE: ../../../third_party/libwebp/src/dsp/filters_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_sse41.c
+FILE: ../../../third_party/libwebp/src/dsp/rescaler_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/rescaler_sse2.c
+FILE: ../../../third_party/libwebp/src/enc/delta_palettization_enc.c
+FILE: ../../../third_party/libwebp/src/enc/delta_palettization_enc.h
+----------------------------------------------------------------------------------------------------
+Copyright 2015 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/extras/get_disto.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/extras/get_disto.c
+FILE: ../../../third_party/libwebp/extras/quality_estimate.c
+FILE: ../../../third_party/libwebp/imageio/image_dec.c
+FILE: ../../../third_party/libwebp/imageio/image_dec.h
+FILE: ../../../third_party/libwebp/imageio/image_enc.c
+FILE: ../../../third_party/libwebp/imageio/image_enc.h
+FILE: ../../../third_party/libwebp/imageio/imageio_util.c
+FILE: ../../../third_party/libwebp/imageio/imageio_util.h
+FILE: ../../../third_party/libwebp/src/dsp/common_sse2.h
+FILE: ../../../third_party/libwebp/src/dsp/dec_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/filters_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_enc_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/msa_macro.h
+FILE: ../../../third_party/libwebp/src/dsp/rescaler_msa.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling_msa.c
+FILE: ../../../third_party/libwebp/src/enc/predictor_enc.c
+FILE: ../../../third_party/libwebp/src/mux/animi.h
+----------------------------------------------------------------------------------------------------
+Copyright 2016 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/imageio/jpegdec.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/imageio/jpegdec.c
+FILE: ../../../third_party/libwebp/imageio/jpegdec.h
+FILE: ../../../third_party/libwebp/imageio/metadata.c
+FILE: ../../../third_party/libwebp/imageio/metadata.h
+FILE: ../../../third_party/libwebp/imageio/pngdec.c
+FILE: ../../../third_party/libwebp/imageio/pngdec.h
+FILE: ../../../third_party/libwebp/imageio/tiffdec.c
+FILE: ../../../third_party/libwebp/imageio/tiffdec.h
+FILE: ../../../third_party/libwebp/src/dec/vp8l_dec.c
+FILE: ../../../third_party/libwebp/src/dec/vp8li_dec.h
+FILE: ../../../third_party/libwebp/src/demux/demux.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless.h
+FILE: ../../../third_party/libwebp/src/dsp/lossless_common.h
+FILE: ../../../third_party/libwebp/src/enc/backward_references_enc.c
+FILE: ../../../third_party/libwebp/src/enc/backward_references_enc.h
+FILE: ../../../third_party/libwebp/src/enc/histogram_enc.c
+FILE: ../../../third_party/libwebp/src/enc/histogram_enc.h
+FILE: ../../../third_party/libwebp/src/enc/vp8l_enc.c
+FILE: ../../../third_party/libwebp/src/enc/vp8li_enc.h
+FILE: ../../../third_party/libwebp/src/utils/color_cache_utils.c
+FILE: ../../../third_party/libwebp/src/utils/color_cache_utils.h
+FILE: ../../../third_party/libwebp/src/utils/huffman_utils.c
+FILE: ../../../third_party/libwebp/src/utils/huffman_utils.h
+FILE: ../../../third_party/libwebp/src/utils/rescaler_utils.c
+FILE: ../../../third_party/libwebp/src/utils/rescaler_utils.h
+FILE: ../../../third_party/libwebp/src/utils/utils.c
+FILE: ../../../third_party/libwebp/src/utils/utils.h
+FILE: ../../../third_party/libwebp/src/webp/demux.h
+FILE: ../../../third_party/libwebp/src/webp/format_constants.h
+FILE: ../../../third_party/libwebp/src/webp/mux_types.h
+----------------------------------------------------------------------------------------------------
+Copyright 2012 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/imageio/webpdec.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/imageio/webpdec.c
+FILE: ../../../third_party/libwebp/imageio/webpdec.h
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/argb.c
+FILE: ../../../third_party/libwebp/src/dsp/argb_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/argb_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/cost.c
+FILE: ../../../third_party/libwebp/src/dsp/cost_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/cost_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_clip_tables.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_avx2.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/filters_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/lossless_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/mips_macro.h
+FILE: ../../../third_party/libwebp/src/dsp/neon.h
+FILE: ../../../third_party/libwebp/src/dsp/rescaler.c
+FILE: ../../../third_party/libwebp/src/dsp/rescaler_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/rescaler_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv_mips32.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv_mips_dsp_r2.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv_sse2.c
+FILE: ../../../third_party/libwebp/src/enc/near_lossless_enc.c
+FILE: ../../../third_party/libwebp/src/enc/picture_csp_enc.c
+FILE: ../../../third_party/libwebp/src/enc/picture_psnr_enc.c
+FILE: ../../../third_party/libwebp/src/enc/picture_rescale_enc.c
+FILE: ../../../third_party/libwebp/src/enc/picture_tools_enc.c
+FILE: ../../../third_party/libwebp/src/mux/anim_encode.c
+FILE: ../../../third_party/libwebp/src/utils/bit_reader_inl_utils.h
+FILE: ../../../third_party/libwebp/src/utils/endian_inl_utils.h
+----------------------------------------------------------------------------------------------------
+Copyright 2014 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/imageio/wicdec.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/imageio/wicdec.c
+FILE: ../../../third_party/libwebp/imageio/wicdec.h
+FILE: ../../../third_party/libwebp/src/dec/alphai_dec.h
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing.c
+FILE: ../../../third_party/libwebp/src/utils/quant_levels_dec_utils.c
+FILE: ../../../third_party/libwebp/src/utils/quant_levels_dec_utils.h
+FILE: ../../../third_party/libwebp/src/utils/random_utils.c
+FILE: ../../../third_party/libwebp/src/utils/random_utils.h
+----------------------------------------------------------------------------------------------------
+Copyright 2013 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/src/dec/alpha_dec.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/src/dec/alpha_dec.c
+FILE: ../../../third_party/libwebp/src/dec/buffer_dec.c
+FILE: ../../../third_party/libwebp/src/dec/idec_dec.c
+FILE: ../../../third_party/libwebp/src/dec/io_dec.c
+FILE: ../../../third_party/libwebp/src/dec/webpi_dec.h
+FILE: ../../../third_party/libwebp/src/dsp/cpu.c
+FILE: ../../../third_party/libwebp/src/dsp/dec_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/dsp.h
+FILE: ../../../third_party/libwebp/src/dsp/enc.c
+FILE: ../../../third_party/libwebp/src/dsp/enc_sse2.c
+FILE: ../../../third_party/libwebp/src/dsp/filters.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/upsampling_sse2.c
+FILE: ../../../third_party/libwebp/src/enc/alpha_enc.c
+FILE: ../../../third_party/libwebp/src/enc/analysis_enc.c
+FILE: ../../../third_party/libwebp/src/enc/config_enc.c
+FILE: ../../../third_party/libwebp/src/enc/cost_enc.c
+FILE: ../../../third_party/libwebp/src/enc/cost_enc.h
+FILE: ../../../third_party/libwebp/src/enc/filter_enc.c
+FILE: ../../../third_party/libwebp/src/enc/frame_enc.c
+FILE: ../../../third_party/libwebp/src/enc/iterator_enc.c
+FILE: ../../../third_party/libwebp/src/enc/picture_enc.c
+FILE: ../../../third_party/libwebp/src/enc/quant_enc.c
+FILE: ../../../third_party/libwebp/src/enc/syntax_enc.c
+FILE: ../../../third_party/libwebp/src/enc/token_enc.c
+FILE: ../../../third_party/libwebp/src/enc/tree_enc.c
+FILE: ../../../third_party/libwebp/src/enc/vp8i_enc.h
+FILE: ../../../third_party/libwebp/src/enc/webp_enc.c
+FILE: ../../../third_party/libwebp/src/mux/muxedit.c
+FILE: ../../../third_party/libwebp/src/mux/muxi.h
+FILE: ../../../third_party/libwebp/src/mux/muxinternal.c
+FILE: ../../../third_party/libwebp/src/mux/muxread.c
+FILE: ../../../third_party/libwebp/src/utils/bit_writer_utils.c
+FILE: ../../../third_party/libwebp/src/utils/bit_writer_utils.h
+FILE: ../../../third_party/libwebp/src/utils/filters_utils.c
+FILE: ../../../third_party/libwebp/src/utils/filters_utils.h
+FILE: ../../../third_party/libwebp/src/utils/huffman_encode_utils.c
+FILE: ../../../third_party/libwebp/src/utils/huffman_encode_utils.h
+FILE: ../../../third_party/libwebp/src/utils/quant_levels_utils.c
+FILE: ../../../third_party/libwebp/src/utils/quant_levels_utils.h
+FILE: ../../../third_party/libwebp/src/utils/thread_utils.c
+FILE: ../../../third_party/libwebp/src/utils/thread_utils.h
+FILE: ../../../third_party/libwebp/src/webp/encode.h
+FILE: ../../../third_party/libwebp/src/webp/mux.h
+----------------------------------------------------------------------------------------------------
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/src/dec/frame_dec.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/src/dec/frame_dec.c
+FILE: ../../../third_party/libwebp/src/dec/quant_dec.c
+FILE: ../../../third_party/libwebp/src/dec/tree_dec.c
+FILE: ../../../third_party/libwebp/src/dec/vp8_dec.c
+FILE: ../../../third_party/libwebp/src/dec/vp8_dec.h
+FILE: ../../../third_party/libwebp/src/dec/vp8i_dec.h
+FILE: ../../../third_party/libwebp/src/dec/webp_dec.c
+FILE: ../../../third_party/libwebp/src/dsp/dec.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv.c
+FILE: ../../../third_party/libwebp/src/dsp/yuv.h
+FILE: ../../../third_party/libwebp/src/utils/bit_reader_utils.c
+FILE: ../../../third_party/libwebp/src/utils/bit_reader_utils.h
+FILE: ../../../third_party/libwebp/src/webp/decode.h
+FILE: ../../../third_party/libwebp/src/webp/types.h
+----------------------------------------------------------------------------------------------------
+Copyright 2010 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: libwebp
+ORIGIN: ../../../third_party/libwebp/src/dsp/alpha_processing_neon.c + ../../../third_party/libwebp/COPYING
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/libwebp/src/dsp/alpha_processing_neon.c
+FILE: ../../../third_party/libwebp/src/dsp/filters_neon.c
+----------------------------------------------------------------------------------------------------
+Copyright 2017 Google Inc. All Rights Reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of Google nor the names of its contributors may
+    be used to endorse or promote products derived from this software
+    without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
 LIBRARY: observatory_pub_packages
 LIBRARY: pkg
 ORIGIN: ../../../third_party/dart/third_party/observatory_pub_packages/packages/analyzer/lib/instrumentation/file_instrumentation.dart + ../../../third_party/dart/third_party/observatory_pub_packages/packages/analyzer/LICENSE
@@ -22000,4 +22517,4 @@ freely, subject to the following restrictions:
    misrepresented as being the original software.
 3. This notice may not be removed or altered from any source distribution.
 ====================================================================================================
-Total license count: 313
+Total license count: 322

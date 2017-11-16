@@ -69,11 +69,13 @@ fxl::RefPtr<Codec> InitCodec(sk_sp<SkData> buffer, size_t trace_id) {
   TRACE_EVENT0("blink", "InitCodec");
 
   if (buffer == nullptr || buffer->isEmpty()) {
+    FXL_LOG(ERROR) << "InitCodec failed - buffer was empty ";
     return nullptr;
   }
 
   std::unique_ptr<SkCodec> skCodec = SkCodec::MakeFromData(buffer);
   if (!skCodec) {
+    FXL_LOG(ERROR) << "SkCodec::MakeFromData failed";
     return nullptr;
   }
   if (skCodec->getFrameCount() > 1) {
@@ -81,6 +83,7 @@ fxl::RefPtr<Codec> InitCodec(sk_sp<SkData> buffer, size_t trace_id) {
   }
   auto skImage = DecodeImage(buffer, trace_id);
   if (!skImage) {
+    FXL_LOG(ERROR) << "DecodeImage failed";
     return nullptr;
   }
   auto image = CanvasImage::Create();

@@ -1740,6 +1740,18 @@ class RepositoryLibPngDirectory extends RepositoryDirectory {
   }
 }
 
+class RepositoryLibWebpDirectory extends RepositoryDirectory {
+  RepositoryLibWebpDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'examples' // contains nothing that ends up in the binary executable
+      && entry.name != 'swig' // not included in our build
+      && entry.name != 'gradle' // not included in our build
+      && super.shouldRecurse(entry);
+  }
+}
+
 class RepositoryPkgDirectory extends RepositoryDirectory {
   RepositoryPkgDirectory(RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -1903,6 +1915,8 @@ class RepositoryRootThirdPartyDirectory extends RepositoryGenericThirdPartyDirec
       return new RepositoryLibJpegTurboDirectory(this, entry);
     if (entry.name == 'libpng')
       return new RepositoryLibPngDirectory(this, entry);
+    if (entry.name == 'libwebp')
+      return new RepositoryLibWebpDirectory(this, entry);
     if (entry.name == 'okhttp')
       return new RepositoryOkHttpDirectory(this, entry);
     if (entry.name == 'pkg')
