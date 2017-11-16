@@ -14,6 +14,9 @@ import 'semantics_event.dart' show AnnounceSemanticsEvent;
 ///
 /// Events sent by this service are handled by the platform-specific
 /// accessibility bridge in Flutter's engine.
+///
+/// When possible, prefer using mechanisms like [Semantics] to implicitly
+/// trigger announcements over using this event.
 class SemanticsService {
   SemanticsService._();
 

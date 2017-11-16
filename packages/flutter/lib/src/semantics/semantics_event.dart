@@ -14,9 +14,6 @@ abstract class SemanticsEvent {
   /// Initializes internal fields.
   ///
   /// [type] is a string that identifies this class of [SemanticsEvent]s.
-
-  /// Abstract const constructor. This constructor enables subclasses to provide
-  /// const constructors so that they can be used in const expressions.
   const SemanticsEvent(this.type);
 
   /// The type of this event.
@@ -132,6 +129,9 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
 ///
 /// For example a camera application can use this method to make accessibility
 /// announcements regarding objects in the viewfinder.
+///
+/// When possible, prefer using mechanisms like [Semantics] to implicitly
+/// trigger announcements over using this event.
 class AnnounceSemanticsEvent extends SemanticsEvent {
 
   /// Constructs an event that triggers an announcement by the platform.
@@ -140,10 +140,14 @@ class AnnounceSemanticsEvent extends SemanticsEvent {
     assert(textDirection != null),
     super('announce');
 
-  /// The message to announce. cannot be null.
+  /// The message to announce.
+  ///
+  /// This property must not be null.
   final String message;
 
-  /// Text direction for [message]. cannot be null.
+  /// Text direction for [message].
+  ///
+  /// This property must not be null.
   final TextDirection textDirection;
 
   @override
