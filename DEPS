@@ -21,8 +21,8 @@ vars = {
   'chromium_git': 'https://chromium.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
-  'skia_git': 'https://skia.googlesource.com',
   'github_git': 'https://github.com',
+  'skia_git': 'https://skia.googlesource.com',
   'skia_revision': '09b8c91b696925c6c6a25c35173f2da27abf0fbe',
 
   # When updating the Dart revision, ensure that all entries that are
@@ -114,7 +114,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd65893e469b3cdff75e0a157a5a219096ca6193a',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'b70195e5d3c8d075a4ab939ba27d167bd241122f',
 
    # Fuchsia compatibility
    #
@@ -354,6 +354,9 @@ deps = {
 
   'src/third_party/libjpeg-turbo':
    Var('skia_git') + '/third_party/libjpeg-turbo.git' + '@' + 'debddedc75850bcdeb8a57258572f48b802a4bb3',
+
+  'src/third_party/libwebp':
+   Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
 
   'src/third_party/gyp':
    Var('chromium_git') + '/external/gyp.git' + '@' + '4801a5331ae62da9769a327f11c4213d32fb0dad',
