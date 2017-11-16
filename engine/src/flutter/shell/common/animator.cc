@@ -152,7 +152,7 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   }
 
   if (!pending_frame_semaphore_.TryWait()) {
-    // Multiple calls to Animator::RequestDrawOnVSync will still result in a
+    // Multiple calls to Animator::RequestFrame will still result in a
     // single request to the VsyncWaiter.
     return;
   }
