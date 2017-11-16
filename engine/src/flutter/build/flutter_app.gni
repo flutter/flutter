@@ -257,7 +257,7 @@ template("flutter_aot_app") {
       "--url-mapping",
       "dart:mozart.internal," + rebase_path(mozart_dart_sdk_ext_lib),
       "--url-mapping",
-      "dart:vmservice_io," + rebase_path(
+      "dart:vmservice_sky," + rebase_path(
               "$dart_root_gen_dir/dart-pkg/sky_engine/sdk_ext/vmservice_io.dart"),
 
       "--entry-points-manifest",
