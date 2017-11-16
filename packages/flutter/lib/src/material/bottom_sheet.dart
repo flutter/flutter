@@ -252,6 +252,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// preventing the use from interacting with the app. Persistent bottom sheets
 /// can be created and displayed with the [ScaffoldState.showBottomSheet] function.
 ///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the bottom sheet. It is only used when the method is called. Its
+/// corresponding widget can be safely removed from the tree before the bottom
+/// sheet is closed.
+///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///

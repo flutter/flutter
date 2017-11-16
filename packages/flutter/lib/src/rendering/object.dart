@@ -3076,7 +3076,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   }
 }
 
-/// A [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
+/// An [_InterestingSemanticsFragment] that produces the root [SemanticsNode] of
 /// the semantics tree.
 ///
 /// The root node is available as only element in the Iterable returned by
@@ -3130,7 +3130,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }
 }
 
-/// A [_InterstingSemanticsFragment] that can be told to only add explicit
+/// An [_InterestingSemanticsFragment] that can be told to only add explicit
 /// [SemanticsNode]s to the parent.
 ///
 /// If [markAsExplicit] was not called before this fragment is added to

@@ -447,6 +447,10 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// This function typically receives a [Dialog] widget as its child argument.
 /// Content below the dialog is dimmed with a [ModalBarrier].
 ///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the dialog. It is only used when the method is called. Its corresponding
+/// widget can be safely removed from the tree before the dialog is closed.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
