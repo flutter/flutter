@@ -312,14 +312,14 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
 ///
 /// See the following timeline example:
 ///
-/// | Time | Event                                      | Comment                   |
-/// |------|--------------------------------------------|---------------------------|
-/// | t1   | App frame scheduled (image frame A posted) |                           |
-/// | t2   | App frame scheduled                        |                           |
-/// | t3   | App frame scheduled                        |                           |
-/// | t4   | Image frame B decoded                      |                           |
-/// | t5   | App frame scheduled                        | t5 - t1 < frameB_duration | 
-/// | t6   | App frame scheduled (image frame B posted) | t6 - t1 > frameB_duration |
+///   | Time | Event                                      | Comment                   |
+///   |------|--------------------------------------------|---------------------------|
+///   | t1   | App frame scheduled (image frame A posted) |                           |
+///   | t2   | App frame scheduled                        |                           |
+///   | t3   | App frame scheduled                        |                           |
+///   | t4   | Image frame B decoded                      |                           |
+///   | t5   | App frame scheduled                        | t5 - t1 < frameB_duration | 
+///   | t6   | App frame scheduled (image frame B posted) | t6 - t1 > frameB_duration |
 ///
 class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// Creates a image stream completer.
