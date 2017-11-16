@@ -21,8 +21,10 @@ public class MainActivity extends FlutterActivity {
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "string-msg", StringCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "json-msg", JSONMessageCodec.INSTANCE));
     setupMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-msg", StandardMessageCodec.INSTANCE));
+    setupBlockingMessageHandshake(new BasicMessageChannel<>(getFlutterView(), "std-blocking-msg", StandardMessageCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "json-method", JSONMethodCodec.INSTANCE));
     setupMethodHandshake(new MethodChannel(getFlutterView(), "std-method", StandardMethodCodec.INSTANCE));
+    setupBlockingMethodHandshake(new MethodChannel(getFlutterView(), "std-blocking-method", StandardMethodCodec.INSTANCE));
   }
 
   private <T> void setupMessageHandshake(final BasicMessageChannel<T> channel) {
@@ -39,6 +41,20 @@ public class MainActivity extends FlutterActivity {
             reply.reply(messageEcho);
           }
         });
+      }
+    });
+  }
+
+  private <T> void setupBlockingMessageHandshake(final BasicMessageChannel<T> channel) {
+    // On message receipt, do a blocking send round-trip in the other direction,
+    // then reply to the first message.
+    channel.setMessageHandler(new BasicMessageChannel.MessageHandler<T>() {
+      @Override
+      public void onMessage(final T message, final BasicMessageChannel.Reply<T> reply) {
+        final T messageEcho = echo(message);
+        final T replyMessage = channel.sendBlocking(messageEcho);
+        channel.send(echo(replyMessage));
+        reply.reply(messageEcho);
       }
     });
   }
@@ -133,5 +149,60 @@ public class MainActivity extends FlutterActivity {
         result.notImplemented();
       }
     });
+  }
+
+  private void setupBlockingMethodHandshake(final MethodChannel channel) {
+    channel.setMethodCallHandler(new MethodChannel.MethodCallHandler() {
+      @Override
+      public void onMethodCall(final MethodCall methodCall, final MethodChannel.Result result) {
+        switch (methodCall.method) {
+          case "success":
+            doBlockingSuccessHandshake(channel, methodCall, result);
+            break;
+          case "error":
+            doBlockingErrorHandshake(channel, methodCall, result);
+            break;
+          default:
+            doBlockingNotImplementedHandshake(channel, methodCall, result);
+            break;
+        }
+      }
+    });
+  }
+
+  private void doBlockingSuccessHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      final Object o = channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
+      channel.invokeMethod(methodCall.method, o);
+      result.success(methodCall.arguments);
+    } catch (FlutterException e) {
+      throw new AssertionError("Unexpected error", e);
+    } catch (UnsupportedOperationException e) {
+      throw new AssertionError("Unexpected missing implementation", e);
+    }
+  }
+
+  private void doBlockingErrorHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
+      throw new AssertionError("Unexpected success");
+    } catch (FlutterException e) {
+      channel.invokeMethod(methodCall.method, e.details);
+      result.error(e.code, e.getMessage(), methodCall.arguments);
+    } catch (UnsupportedOperationException e) {
+      throw new AssertionError("Unexpected missing implementation", e);
+    }
+  }
+
+  private void doBlockingNotImplementedHandshake(final MethodChannel channel, final MethodCall methodCall, final MethodChannel.Result result) {
+    try {
+      channel.invokeMethodBlocking(methodCall.method, methodCall.arguments);
+      throw new AssertionError("Unexpected success");
+    } catch (FlutterException e) {
+      throw new AssertionError("Unexpected error", e);
+    } catch (UnsupportedOperationException e) {
+      channel.invokeMethod(methodCall.method, null);
+      result.notImplemented();
+    }
   }
 }

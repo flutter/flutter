@@ -44,6 +44,16 @@ Future<TestStepResult> basicStandardHandshake(dynamic message) async {
       'Standard >${toString(message)}<', channel, message);
 }
 
+Future<TestStepResult> blockingBasicStandardHandshake(dynamic message) async {
+  const BasicMessageChannel<dynamic> channel =
+      const BasicMessageChannel<dynamic>(
+    'std-blocking-msg',
+    const StandardMessageCodec(),
+  );
+  return _basicMessageHandshake<dynamic>(
+      'Standard blocking >${toString(message)}<', channel, message);
+}
+
 Future<TestStepResult> basicBinaryMessageToUnknownChannel() async {
   const BasicMessageChannel<ByteData> channel =
       const BasicMessageChannel<ByteData>(
