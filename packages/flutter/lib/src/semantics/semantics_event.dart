@@ -14,7 +14,7 @@ abstract class SemanticsEvent {
   /// Initializes internal fields.
   ///
   /// [type] is a string that identifies this class of [SemanticsEvent]s.
-  SemanticsEvent(this.type);
+  const SemanticsEvent(this.type);
 
   /// The type of this event.
   ///
@@ -119,5 +119,42 @@ class ScrollCompletedSemanticsEvent extends SemanticsEvent {
     }
 
     return map;
+  }
+}
+
+/// An event for a semantic announcement.
+///
+/// This should be used for announcement that are not seamlessly announced by
+/// the system as a result of a UI state change.
+///
+/// For example a camera application can use this method to make accessibility
+/// announcements regarding objects in the viewfinder.
+///
+/// When possible, prefer using mechanisms like [Semantics] to implicitly
+/// trigger announcements over using this event.
+class AnnounceSemanticsEvent extends SemanticsEvent {
+
+  /// Constructs an event that triggers an announcement by the platform.
+  const AnnounceSemanticsEvent(this.message, this.textDirection) :
+    assert(message != null),
+    assert(textDirection != null),
+    super('announce');
+
+  /// The message to announce.
+  ///
+  /// This property must not be null.
+  final String message;
+
+  /// Text direction for [message].
+  ///
+  /// This property must not be null.
+  final TextDirection textDirection;
+
+  @override
+  Map<String, dynamic> getDataMap() {
+    return <String, dynamic>{
+      'message': message,
+      'textDirection': textDirection.index,
+    };
   }
 }
