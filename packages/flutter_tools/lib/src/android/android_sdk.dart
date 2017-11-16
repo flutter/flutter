@@ -148,7 +148,10 @@ class AndroidSdk {
       platforms = platformsDir
         .listSync()
         .where((FileSystemEntity entity) => entity is Directory)
-        .map<Directory>((FileSystemEntity e) {final Directory d = e; return d;});
+        .map<Directory>((FileSystemEntity entity) {
+          final Directory dir = entity;
+          return dir;
+        });
     }
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
@@ -221,7 +224,9 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
     this.sdkLevel,
     this.platformName,
     this.buildToolsVersion,
-  });
+  }) : assert(sdkLevel != null),
+       assert(platformName != null),
+       assert(buildToolsVersion != null);
 
   final AndroidSdk sdk;
   final int sdkLevel;
