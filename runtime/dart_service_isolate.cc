@@ -125,7 +125,7 @@ bool DartServiceIsolate::Startup(std::string server_ip,
     result = Dart_FinalizeLoading(false);
     SHUTDOWN_ON_ERROR(result);
   } else {
-    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_io");
+    Dart_Handle uri = Dart_NewStringFromCString("dart:vmservice_sky");
     Dart_Handle library = Dart_LookupLibrary(uri);
     SHUTDOWN_ON_ERROR(library);
     result = Dart_SetRootLibrary(library);
@@ -187,7 +187,7 @@ Dart_Handle DartServiceIsolate::GetSource(const char* name) {
 }
 
 Dart_Handle DartServiceIsolate::LoadScript(const char* name) {
-  Dart_Handle url = Dart_NewStringFromCString("dart:vmservice_io");
+  Dart_Handle url = Dart_NewStringFromCString("dart:vmservice_sky");
   Dart_Handle source = GetSource(name);
   return Dart_LoadScript(url, Dart_Null(), source, 0, 0);
 }
