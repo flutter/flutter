@@ -365,7 +365,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   @override
   ImageStreamCompleter load(AssetBundleImageKey key) {
     return new MultiFrameImageStreamCompleter(
-      codec: loadAsync(key),
+      codec: _loadAsync(key),
       scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
@@ -379,7 +379,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
@@ -432,11 +432,11 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     final Uri resolved = Uri.base.resolve(key.url);
     final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
-      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}');
+      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
-      throw new Exception('NetworkImage is an empty file');
+      throw new Exception('NetworkImage is an empty file: $resolved');
 
     return await ui.instantiateImageCodec(bytes);
   }
