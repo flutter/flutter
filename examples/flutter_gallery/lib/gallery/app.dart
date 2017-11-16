@@ -72,6 +72,17 @@ class GalleryAppState extends State<GalleryApp> {
     super.dispose();
   }
 
+  Widget _applyScaleFactor(Widget child) {
+    return new Builder(
+      builder: (BuildContext context) => new MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaleFactor: _textScaleFactor,
+        ),
+        child: child,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget home = new GalleryHome(
@@ -145,25 +156,10 @@ class GalleryAppState extends State<GalleryApp> {
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
       kAllGalleryItems,
       key: (GalleryItem item) => item.routeName,
-      value: (GalleryItem item) =>
-        (BuildContext context) {
-        if (_textScaleFactor != null) {
-          return new MediaQuery(
-            data: new MediaQueryData(textScaleFactor: _textScaleFactor),
-            child: item.buildRoute(context),
-          );
-        } else {
-          return item.buildRoute(context);
-        }
-      }
+      value: (GalleryItem item) {
+        return (BuildContext context) => _applyScaleFactor(item.buildRoute(context));
+      },
     );
-
-    if (_textScaleFactor != null) {
-      home = new MediaQuery(
-        data: new MediaQueryData(textScaleFactor: _textScaleFactor),
-        child: home,
-      );
-    }
 
     return new MaterialApp(
       title: 'Flutter Gallery',
@@ -173,7 +169,7 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
-      home: home,
+      home: _applyScaleFactor(home),
     );
   }
 }
