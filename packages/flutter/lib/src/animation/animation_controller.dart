@@ -218,6 +218,11 @@ class AnimationController extends Animation<double>
     notifyListeners();
     _checkStatusChanged();
   }
+  
+  /// Stops the animation and sets it back to its beginning
+  void reset() {
+    value = lowerBound;
+  }
 
   /// The rate of change of [value] per second.
   ///
