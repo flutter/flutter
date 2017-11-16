@@ -2,15 +2,59 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# This file is based on:
+# https://skia.googlesource.com/skia/+/master/third_party/libwebp/BUILD.gn
 config("libwebp_config") {
   include_dirs = [ "src" ]
 }
 
+config("libwebp_defines") {
+  defines = [
+    # WebP naturally decodes to RGB_565, Skia with BGR_565.
+    # This makes WebP decode to BGR_565 when we ask for RGB_565.
+    # (It also swaps the color order for 4444, but we don't care today.)
+    "WEBP_SWAP_16BIT_CSP",
+  ]
+}
+
+source_set("libwebp_sse41") {
+  include_dirs = [ "//third_party/libwebp/src" ]
+    configs += [ ":libwebp_defines" ]
+    sources = [
+      "//third_party/libwebp/src/dsp/alpha_processing_sse41.c",
+      "//third_party/libwebp/src/dsp/dec_sse41.c",
+      "//third_party/libwebp/src/dsp/enc_sse41.c",
+      "//third_party/libwebp/src/dsp/lossless_enc_sse41.c",
+    ]
+      if ((current_cpu == "x86" || current_cpu == "x64") &&
+        (!is_win || is_clang)) {
+        cflags_c = [ "-msse4.1" ]
+      }
+}
+
+source_set("libwebp_avx2") {
+  include_dirs = [ "//third_party/libwebp/src" ]
+  configs += [ ":libwebp_defines" ]
+  sources = [
+    "//third_party/libwebp/src/dsp/enc_avx2.c",
+  ]
+    if ((current_cpu == "x86" || current_cpu == "x64") &&
+      (!is_win || is_clang)) {
+      cflags_c = [ "-mavx2" ]
+    }
+}
+
 source_set("libwebp") {
   public_configs = [":libwebp_config"]
+  deps = [
+    ":libwebp_avx2",
+    ":libwebp_sse41",
+  ]
+
   if (is_android) {
-    deps = [ "//third_party/cpu-features" ]
+    deps += [ "//third_party/cpu-features" ]
   }
+
   sources = [
     "//third_party/libwebp/src/dec/alpha_dec.c",
     "//third_party/libwebp/src/dec/buffer_dec.c",
