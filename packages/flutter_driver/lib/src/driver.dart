@@ -183,9 +183,9 @@ class FlutterDriver {
     }
 
     final FlutterDriver driver = new FlutterDriver.connectedTo(
-        client, connection.peer, isolate,
-        printCommunication: printCommunication,
-        logCommunicationToFile: logCommunicationToFile
+      client, connection.peer, isolate,
+      printCommunication: printCommunication,
+      logCommunicationToFile: logCommunicationToFile,
     );
 
     // Attempts to resume the isolate, but does not crash if it fails because
@@ -328,13 +328,13 @@ class FlutterDriver {
       throw new DriverError(
         'Failed to fulfill ${command.runtimeType}: Flutter application not responding',
         error,
-        stackTrace
+        stackTrace,
       );
     } catch (error, stackTrace) {
       throw new DriverError(
         'Failed to fulfill ${command.runtimeType} due to remote error',
         error,
-        stackTrace
+        stackTrace,
       );
     }
     if (response['isError'])
@@ -518,7 +518,7 @@ class FlutterDriver {
       throw new DriverError(
         'Failed to start tracing due to remote error',
         error,
-        stackTrace
+        stackTrace,
       );
     }
   }
@@ -534,7 +534,7 @@ class FlutterDriver {
       throw new DriverError(
         'Failed to stop tracing due to remote error',
         error,
-        stackTrace
+        stackTrace,
       );
     }
   }
@@ -574,9 +574,9 @@ class FlutterDriver {
           .timeout(timeout);
     } catch(error, stackTrace) {
       throw new DriverError(
-          'Failed to clear event timeline due to remote error',
-          error,
-          stackTrace
+        'Failed to clear event timeline due to remote error',
+        error,
+        stackTrace,
       );
     }
   }
