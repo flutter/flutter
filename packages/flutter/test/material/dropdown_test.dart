@@ -13,7 +13,7 @@ import '../widgets/semantics_tester.dart';
 const List<String> menuItems = const <String>['one', 'two', 'three', 'four'];
 
 final Type dropdownButtonType = new DropdownButton<String>(
-  onChanged: (_){ },
+  onChanged: (_) { },
   items: const <DropdownMenuItem<String>>[]
 ).runtimeType;
 

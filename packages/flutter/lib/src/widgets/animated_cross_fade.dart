@@ -67,8 +67,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two
 /// children. The [firstCurve] is inverted, i.e. it fades out when providing a
 /// growing curve like [Curves.linear]. The [sizeCurve] is the curve used to
-/// animated between the size of the fading out child and the size of the fading
-/// in child.
+/// animate between the size of the fading-out child and the size of the
+/// fading-in child.
 ///
 /// This widget is intended to be used to fade a pair of widgets with the same
 /// width. In the case where the two children have different heights, the

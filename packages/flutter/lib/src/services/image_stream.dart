@@ -363,7 +363,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   int _framesEmitted;
   Timer _timer;
 
-  void _handleCodecReady(ui.Codec codec){
+  void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     _decodeNextFrameAndSchedule();
   }
