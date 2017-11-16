@@ -46,7 +46,6 @@ class Animator {
 
   bool CanReuseLastLayerTree();
   void DrawLastLayerTree();
-  void RequestDrawOnVSync();
 
   void AwaitVSync();
 
