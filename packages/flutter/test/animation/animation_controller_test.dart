@@ -435,7 +435,6 @@ void main() {
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
-    print("Travis test print");
   });
 
   test('setting value directly sets correct status', () {
