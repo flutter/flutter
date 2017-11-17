@@ -396,6 +396,45 @@ void main() {
     expect(controller.value, 1.0);
   });
 
+  test('resetting animation works at all phases', (){
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    statusLog.clear();
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.dismissed ]));
+    statusLog.clear();
+
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
+  });
+
   test('setting value directly sets correct status', () {
     final AnimationController controller = new AnimationController(
       value: 0.0,
