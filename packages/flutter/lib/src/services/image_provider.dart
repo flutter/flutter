@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +14,6 @@ import 'package:http/http.dart' as http;
 import 'asset_bundle.dart';
 import 'http_client.dart';
 import 'image_cache.dart';
-import 'image_decoder.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -365,8 +364,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// image using [loadAsync].
   @override
   ImageStreamCompleter load(AssetBundleImageKey key) {
-    return new OneFrameImageStreamCompleter(
-      loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -379,23 +379,11 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ImageInfo> loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    final ui.Image image = await decodeImage(data);
-    if (image == null)
-      throw 'Unable to decode image data';
-    return new ImageInfo(image: image, scale: key.scale);
-  }
-
-  /// Converts raw image data from a [ByteData] buffer into a decoded
-  /// [ui.Image] which can be passed to a [Canvas].
-  ///
-  /// By default, this just uses [decodeImageFromList]. This method could be
-  /// overridden in subclasses (e.g. for testing).
-  Future<ui.Image> decodeImage(ByteData data) {
-    return decodeImageFromList(data.buffer.asUint8List());
+    return await ui.instantiateImageCodec(data.buffer.asUint8List());
   }
 }
 
@@ -426,8 +414,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -437,26 +426,19 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   static final http.Client _httpClient = createHttpClient();
 
-  Future<ImageInfo> _loadAsync(NetworkImage key) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
     final http.Response response = await _httpClient.get(resolved);
     if (response == null || response.statusCode != 200)
-      return null;
+      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw new Exception('NetworkImage is an empty file: $resolved');
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -498,29 +480,23 @@ class FileImage extends ImageProvider<FileImage> {
 
   @override
   ImageStreamCompleter load(FileImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
       }
     );
   }
 
-  Future<ImageInfo> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -568,20 +544,16 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   @override
   ImageStreamCompleter load(MemoryImage key) {
-    return new OneFrameImageStreamCompleter(_loadAsync(key));
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale
+    );
   }
 
-  Future<ImageInfo> _loadAsync(MemoryImage key) async {
+  Future<ui.Codec> _loadAsync(MemoryImage key) {
     assert(key == this);
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return ui.instantiateImageCodec(bytes);
   }
 
   @override

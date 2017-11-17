@@ -3,12 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show createHttpClient;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lib/card_collection.dart' as card_collection;
+import 'mock_image_http.dart';
 
 void main() {
   testWidgets('Card Collection smoke test', (WidgetTester tester) async {
+    createHttpClient = createMockImageHttpClient;
     card_collection.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
