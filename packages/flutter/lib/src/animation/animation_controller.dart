@@ -219,7 +219,8 @@ class AnimationController extends Animation<double>
     _checkStatusChanged();
   }
   
-  /// Stops the animation and sets it back to its beginning
+  /// Sets the controller's value to [lowerBound], stopping the animation (if
+  /// in progress), and resetting to its beginning point, or dismissed state.
   void reset() {
     value = lowerBound;
   }
