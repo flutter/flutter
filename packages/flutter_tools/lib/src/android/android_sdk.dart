@@ -4,6 +4,8 @@
 
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -221,9 +223,9 @@ class AndroidSdk {
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   AndroidSdkVersion._(this.sdk, {
-    this.sdkLevel,
-    this.platformName,
-    this.buildToolsVersion,
+    @required this.sdkLevel,
+    @required this.platformName,
+    @required this.buildToolsVersion,
   }) : assert(sdkLevel != null),
        assert(platformName != null),
        assert(buildToolsVersion != null);
