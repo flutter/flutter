@@ -1,4 +1,4 @@
-Signature: 9a3bc541ecff71120c05366d013e0a66
+Signature: 81d843c63b1b3c56e86219402e32eb78
 
 UNUSED LICENSES:
 
@@ -18273,8 +18273,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clan
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Release-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win10-Clang-ShuttleC-GPU-GTX960-x86_64-Release-All-ANGLE.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win2k8-MSVC-GCE-CPU-AVX2-x86_64-Debug-All.json
-FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win2k8-MSVC-GCE-CPU-AVX2-x86_64-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win2016-MSVC-GCE-CPU-AVX2-x86_64-Debug-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-Win2016-MSVC-GCE-CPU-AVX2-x86_64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/Perf-iOS-Clang-iPadPro-GPU-GT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/failed_push.json
 FILE: ../../../third_party/skia/infra/bots/recipes/perf.expected/trybot.json
@@ -18323,6 +18323,8 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Ubuntu17-G
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-AlphaR2-GPU-RadeonR9M470X-x86_64-Debug-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-AlphaR2-GPU-RadeonR9M470X-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-Golo-GPU-QuadroP400-x86_64-Release-All-ReleaseAndAbandonGpuContext.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-NUC5i7RYH-CPU-AVX2-x86_64-Debug-All-NativeFonts.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-NUC5i7RYH-CPU-AVX2-x86_64-Debug-All-NativeFonts_GDI.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Debug-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-NUC6i5SYK-GPU-IntelIris540-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-NUCD34010WYKH-GPU-IntelHD4400-x86_64-Release-All-ANGLE.json
@@ -18330,11 +18332,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clan
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-ShuttleC-GPU-GTX960-x86_64-Debug-All-ANGLE.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-ZBOX-GPU-GTX1070-x86_64-Debug-All-Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win10-Clang-ZBOX-GPU-GTX1070-x86_64-Debug-All.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FAAA.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FDAA.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FSAA.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-NativeFonts.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2k8-Clang-GCE-CPU-AVX2-x86_64-Debug-All-NativeFonts_GDI.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FAAA.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FDAA.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win2016-Clang-GCE-CPU-AVX2-x86_64-Debug-All-FSAA.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Win8-MSVC-Golo-CPU-AVX-x86-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-iOS-Clang-iPadPro-GPU-GT7800-arm64-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_dm.json
@@ -18411,6 +18411,7 @@ FILE: ../../../third_party/skia/site/user/sample/transfer_fn.png
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/effects/GrAlphaThresholdFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/effects/GrCircleBlurFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrDitherEffect.fp
@@ -20256,6 +20257,8 @@ FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRTriangleShader.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPRTriangleShader.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.cpp
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/GrArithmeticFP.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
