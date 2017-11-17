@@ -88,7 +88,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
     @required this.context,
   });
 
-  // A description of a [Scrollable]'s contents, useful for modeling the state
+  /// A description of a [Scrollable]'s contents, useful for modeling the state
   /// of its viewport.
   final ScrollMetrics metrics;
 

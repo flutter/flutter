@@ -41,6 +41,9 @@ You can create a new Provisioning Profile for your project in Xcode for your
 team by:
 $fixWithDevelopmentTeamInstruction
 
+It's also possible that a previously installed app with the same Bundle Identifier was
+signed with a different certificate.
+
 For more information, please visit:
   https://flutter.io/setup/#deploy-to-ios-devices
 
@@ -65,8 +68,11 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected. You may need to add
-     your Apple ID first.
+  3- In the 'General' tab, make sure a 'Development Team' is selected. You may need to
+         - Log in with your Apple ID in Xcode first
+         - Ensure you have a valid unique Bundle ID
+         - Register your device with your Apple Developer Account
+         - Let Xcode automatically provision a profile for your app
   4- Build or run your project again''';
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =

@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:meta/meta.dart';
+
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -29,11 +33,8 @@ const String kAndroidHome = 'ANDROID_HOME';
 // $ANDROID_HOME/platforms/android-23/android.jar
 // $ANDROID_HOME/platforms/android-N/android.jar
 
-// Special case some version names in the sdk.
-const Map<String, int> _namedVersionMap = const <String, int> {
-  'android-N': 24,
-  'android-stable': 24,
-};
+final RegExp _numberedAndroidPlatformRe = new RegExp(r'^android-([0-9]+)$');
+final RegExp _sdkVersionRe = new RegExp(r'^ro.build.version.sdk=([0-9]+)$');
 
 /// The minimum Android SDK version we support.
 const int minimumAndroidSdkVersion = 25;
@@ -142,15 +143,17 @@ class AndroidSdk {
   }
 
   void _init() {
-    List<String> platforms = <String>[]; // android-22, ...
+    Iterable<Directory> platforms = <Directory>[]; // android-22, ...
 
     final Directory platformsDir = fs.directory(fs.path.join(directory, 'platforms'));
     if (platformsDir.existsSync()) {
       platforms = platformsDir
         .listSync()
-        .map<String>((FileSystemEntity entity) => fs.path.basename(entity.path))
-        .where((String name) => name.startsWith('android-'))
-        .toList();
+        .where((FileSystemEntity entity) => entity is Directory)
+        .map<Directory>((FileSystemEntity entity) {
+          final Directory dir = entity;
+          return dir;
+        });
     }
 
     List<Version> buildTools = <Version>[]; // 19.1.0, 22.0.1, ...
@@ -161,7 +164,7 @@ class AndroidSdk {
         .listSync()
         .map((FileSystemEntity entity) {
           try {
-            return new Version.parse(fs.path.basename(entity.path));
+            return new Version.parse(entity.basename);
           } catch (error) {
             return null;
           }
@@ -171,14 +174,23 @@ class AndroidSdk {
     }
 
     // Match up platforms with the best corresponding build-tools.
-    _sdkVersions = platforms.map((String platformName) {
+    _sdkVersions = platforms.map((Directory platformDir) {
+      final String platformName = platformDir.basename;
       int platformVersion;
 
       try {
-        if (_namedVersionMap.containsKey(platformName))
-          platformVersion = _namedVersionMap[platformName];
-        else
-          platformVersion = int.parse(platformName.substring('android-'.length));
+        final Match numberedVersion = _numberedAndroidPlatformRe.firstMatch(platformName);
+        if (numberedVersion != null) {
+          platformVersion = int.parse(numberedVersion.group(1));
+        } else {
+          final String buildProps = platformDir.childFile('build.prop').readAsStringSync();
+          final String versionString = const LineSplitter()
+              .convert(buildProps)
+              .map(_sdkVersionRe.firstMatch)
+              .firstWhere((Match match) => match != null)
+              .group(1);
+          platformVersion = int.parse(versionString);
+        }
       } catch (error) {
         return null;
       }
@@ -192,10 +204,11 @@ class AndroidSdk {
       if (buildToolsVersion == null)
         return null;
 
-      return new AndroidSdkVersion(
+      return new AndroidSdkVersion._(
         this,
-        platformVersionName: platformName,
-        buildToolsVersion: buildToolsVersion
+        sdkLevel: platformVersion,
+        platformName: platformName,
+        buildToolsVersion: buildToolsVersion,
       );
     }).where((AndroidSdkVersion version) => version != null).toList();
 
@@ -209,22 +222,20 @@ class AndroidSdk {
 }
 
 class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
-  AndroidSdkVersion(this.sdk, {
-    this.platformVersionName,
-    this.buildToolsVersion,
-  });
+  AndroidSdkVersion._(this.sdk, {
+    @required this.sdkLevel,
+    @required this.platformName,
+    @required this.buildToolsVersion,
+  }) : assert(sdkLevel != null),
+       assert(platformName != null),
+       assert(buildToolsVersion != null);
 
   final AndroidSdk sdk;
-  final String platformVersionName;
+  final int sdkLevel;
+  final String platformName;
   final Version buildToolsVersion;
-  String get buildToolsVersionName => buildToolsVersion.toString();
 
-  int get sdkLevel {
-    if (_namedVersionMap.containsKey(platformVersionName))
-      return _namedVersionMap[platformVersionName];
-    else
-      return int.parse(platformVersionName.substring('android-'.length));
-  }
+  String get buildToolsVersionName => buildToolsVersion.toString();
 
   String get androidJarPath => getPlatformsPath('android.jar');
 
@@ -241,7 +252,7 @@ class AndroidSdkVersion implements Comparable<AndroidSdkVersion> {
   }
 
   String getPlatformsPath(String itemName) {
-    return fs.path.join(sdk.directory, 'platforms', platformVersionName, itemName);
+    return fs.path.join(sdk.directory, 'platforms', platformName, itemName);
   }
 
   String getBuildToolsPath(String binaryName) {

@@ -13,4 +13,10 @@ void main() {
     expect(nearEqual(5.0, 6.0, 0.5), isFalse);
     expect(nearEqual(6.0, 5.0, 0.5), isFalse);
   });
+
+  test('test_null', () {
+    expect(nearEqual(5.0, null, 2.0), isFalse);
+    expect(nearEqual(null, 5.0, 2.0), isFalse);
+    expect(nearEqual(null, null, 2.0), isTrue);
+  });
 }

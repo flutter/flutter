@@ -1242,13 +1242,20 @@ class Align extends SingleChildRenderObjectWidget {
 
   /// How to align the child.
   ///
-  /// The x and y values of the alignment control the horizontal and vertical
+  /// The x and y values of the [Alignment] control the horizontal and vertical
   /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], which has more details and some convenience constants for
+  ///    common positions.
+  ///  * [AlignmentDirectional], which has a horizontal coordinate orientation
+  ///    that depends on the [TextDirection].
   final AlignmentGeometry alignment;
 
   /// If non-null, sets its width to the child's width multiplied by this factor.
@@ -1637,6 +1644,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
     Widget child,
     this.textDirection,
     this.alignment: Alignment.center,
+    this.constrainedAxis,
   }) : assert(alignment != null),
        super(key: key, child: child);
 
@@ -1655,23 +1663,34 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
   final AlignmentGeometry alignment;
 
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  final Axis constrainedAxis;
+  
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
       ..textDirection = textDirection ?? Directionality.of(context)
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..constrainedAxis = constrainedAxis;
   }
 
   @override
   RenderUnconstrainedBox createRenderObject(BuildContext context) => new RenderUnconstrainedBox(
     textDirection: textDirection ?? Directionality.of(context),
     alignment: alignment,
+    constrainedAxis: constrainedAxis,
   );
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Axis>('constrainedAxis', null));
     description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }

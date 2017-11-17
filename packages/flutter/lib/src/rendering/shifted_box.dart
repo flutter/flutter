@@ -604,13 +604,35 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
 ///    passes its original constraints through to its child, which it allows to
 ///    overflow.
 class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+  /// Create a render object that sizes itself to the child but does not
+  /// pass the [constraints] down to that child.
+  ///
+  /// The [alignment] must not be null.
   RenderUnconstrainedBox({
     @required AlignmentGeometry alignment,
     @required TextDirection textDirection,
+    Axis constrainedAxis,
     RenderBox child,
   }) : assert(alignment != null),
-      super.mixin(alignment, textDirection, child);
+       _constrainedAxis = constrainedAxis,
+       super.mixin(alignment, textDirection, child);
 
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  Axis get constrainedAxis => _constrainedAxis;
+  Axis _constrainedAxis;
+  set constrainedAxis(Axis value) {
+    assert(value != null);
+    if (_constrainedAxis == value)
+      return;
+    _constrainedAxis = value;
+    markNeedsLayout();
+  }
+  
   Rect _overflowContainerRect = Rect.zero;
   Rect _overflowChildRect = Rect.zero;
   bool _isOverflowing = false;
@@ -618,8 +640,26 @@ class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflow
   @override
   void performLayout() {
     if (child != null) {
-      // Let the child lay itself out at it's "natural" size.
-      child.layout(const BoxConstraints(), parentUsesSize: true);
+      // Let the child lay itself out at it's "natural" size, but if
+      // constrainedAxis is non-null, keep any constraints on that axis.
+      if (constrainedAxis != null) {
+        switch (constrainedAxis) {
+          case Axis.horizontal:
+            child.layout(new BoxConstraints(
+              maxWidth: constraints.maxWidth, minWidth: constraints.minWidth),
+              parentUsesSize: true,
+            );
+            break;
+          case Axis.vertical:
+            child.layout(new BoxConstraints(
+              maxHeight: constraints.maxHeight, minHeight: constraints.minHeight),
+              parentUsesSize: true,
+            );
+            break;
+        }
+      } else {
+        child.layout(const BoxConstraints(), parentUsesSize: true);
+      }
       size = constraints.constrain(child.size);
       alignChild();
       final BoxParentData childParentData = child.parentData;

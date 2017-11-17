@@ -8,10 +8,6 @@ import 'base/file_system.dart';
 import 'cache.dart';
 import 'globals.dart';
 
-const String _kTemplateExtension = '.tmpl';
-const String _kCopyTemplateExtension = '.copy.tmpl';
-final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
-
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All other
 /// files are ignored. In case the contents of entire directories must be copied
@@ -45,7 +41,7 @@ class Template {
       final String relativePath = fs.path.relative(entity.path,
           from: baseDir.absolute.path);
 
-      if (relativePath.contains(_kTemplateExtension)) {
+      if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
@@ -56,9 +52,13 @@ class Template {
 
   factory Template.fromName(String name) {
     // All named templates are placed in the 'templates' directory
-    final Directory templateDir = _templateDirectoryInPackage(name);
+    final Directory templateDir = templateDirectoryInPackage(name);
     return new Template(templateDir, templateDir);
   }
+
+  static const String templateExtension = '.tmpl';
+  static const String copyTemplateExtension = '.copy.tmpl';
+  final Pattern _kTemplateLanguageVariant = new RegExp(r'(\w+)-(\w+)\.tmpl.*');
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
@@ -91,8 +91,8 @@ class Template {
       final String pathSeparator = fs.path.separator;
       String finalDestinationPath = fs.path
         .join(destinationDirPath, relativeDestinationPath)
-        .replaceAll(_kCopyTemplateExtension, '')
-        .replaceAll(_kTemplateExtension, '');
+        .replaceAll(copyTemplateExtension, '')
+        .replaceAll(templateExtension, '');
 
       if (androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath
@@ -116,7 +116,7 @@ class Template {
 
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
-          finalDestinationFile.delete(recursive: true);
+          finalDestinationFile.deleteSync(recursive: true);
           printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
@@ -124,7 +124,7 @@ class Template {
           return;
         }
       } else {
-        printTrace('  $relativePathForLogging');
+        printStatus('  $relativePathForLogging (created)');
       }
 
       fileCount++;
@@ -132,11 +132,11 @@ class Template {
       finalDestinationFile.createSync(recursive: true);
       final File sourceFile = fs.file(absoluteSourcePath);
 
-      // Step 2: If the absolute paths ends with a 'copy.tmpl', this file does
+      // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
 
-      if (sourceFile.path.endsWith(_kCopyTemplateExtension)) {
-        finalDestinationFile.writeAsBytesSync(sourceFile.readAsBytesSync());
+      if (sourceFile.path.endsWith(copyTemplateExtension)) {
+        sourceFile.copySync(finalDestinationFile.path);
 
         return;
       }
@@ -144,7 +144,7 @@ class Template {
       // Step 3: If the absolute path ends with a '.tmpl', this file needs
       //         rendering via mustache.
 
-      if (sourceFile.path.endsWith(_kTemplateExtension)) {
+      if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
         final String renderedContents = new mustache.Template(templateContents).renderString(context);
 
@@ -163,7 +163,7 @@ class Template {
   }
 }
 
-Directory _templateDirectoryInPackage(String name) {
+Directory templateDirectoryInPackage(String name) {
   final String templatesDir = fs.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
   return fs.directory(fs.path.join(templatesDir, name));
