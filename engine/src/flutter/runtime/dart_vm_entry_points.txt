@@ -5,10 +5,10 @@ dart:isolate,::,_getIsolateScheduleImmediateClosure
 dart:isolate,::,_setupHooks
 dart:isolate,::,_startMainIsolate
 dart:ui,::,_beginFrame
-dart:ui,::,_drawFrame
 dart:ui,::,_dispatchPlatformMessage
 dart:ui,::,_dispatchPointerDataPacket
 dart:ui,::,_dispatchSemanticsAction
+dart:ui,::,_drawFrame
 dart:ui,::,_getGetBaseURLClosure
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
@@ -19,7 +19,9 @@ dart:ui,::,_updateSemanticsEnabled
 dart:ui,::,_updateUserSettingsData
 dart:ui,::,_updateWindowMetrics
 dart:ui,Canvas,Canvas.
+dart:ui,Codec,Codec.
 dart:ui,Color,Color.
+dart:ui,FrameInfo,FrameInfo.
 dart:ui,Image,Image.
 dart:ui,ImageShader,ImageShader.
 dart:ui,Paragraph,Paragraph.
