@@ -7,7 +7,6 @@
 
 #include "flutter/flow/texture.h"
 #include "flutter/fml/platform/darwin/cf_utils.h"
-#include "flutter/fml/platform/darwin/scoped_nsobject.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterTexture.h"
 
 namespace shell {
@@ -27,7 +26,7 @@ class IOSExternalTextureGL : public flow::Texture {
   virtual void OnGrContextDestroyed() override;
 
  private:
-  fml::scoped_nsobject<NSObject<FlutterTexture>> external_texture_;
+  NSObject<FlutterTexture>* external_texture_;
   fml::CFRef<CVOpenGLESTextureCacheRef> cache_ref_;
   fml::CFRef<CVOpenGLESTextureRef> texture_ref_;
   FXL_DISALLOW_COPY_AND_ASSIGN(IOSExternalTextureGL);
