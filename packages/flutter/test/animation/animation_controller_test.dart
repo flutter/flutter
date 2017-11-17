@@ -418,6 +418,7 @@ void main() {
     controller.forward();
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.forward);
     controller.reset();
 
     expect(controller.value, 0.0);
@@ -428,11 +429,13 @@ void main() {
     controller.forward();
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 150));
+    expect(controller.status, AnimationStatus.completed);
     controller.reset();
 
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
+    print("Travis test print");
   });
 
   test('setting value directly sets correct status', () {
