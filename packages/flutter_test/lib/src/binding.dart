@@ -103,7 +103,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This can be used to redirect console output from the framework, or to
   /// change the behavior of [debugPrint]. For example,
   /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
-  /// synchronous, disabling its normal throttling behaviour.
+  /// synchronous, disabling its normal throttling behavior.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
 
@@ -212,13 +212,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coodinate system (as used by
+  /// Convert the given point from the global coordinate system (as used by
   /// pointer events from the device) to the coordinate system used by the
   /// tests (an 800 by 600 window).
   Offset globalToLocal(Offset point) => point;
 
   /// Convert the given point from the coordinate system used by the tests (an
-  /// 800 by 600 window) to the global coodinate system (as used by pointer
+  /// 800 by 600 window) to the global coordinate system (as used by pointer
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
@@ -1008,7 +1008,7 @@ class TestViewConfiguration extends ViewConfiguration {
   /// Provides the transformation matrix that converts coordinates in the test
   /// coordinate space to coordinates in logical pixels on the real display.
   ///
-  /// This is essenitally the same as [toMatrix] but ignoring the device pixel
+  /// This is essentially the same as [toMatrix] but ignoring the device pixel
   /// ratio.
   ///
   /// This is useful because pointers are described in logical pixels, as

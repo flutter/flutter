@@ -153,7 +153,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   /// How the children within a run should be places in the main axis.
   ///
   /// For example, if [alignment] is [WrapAlignment.center], the children in
-  /// each run are grouped togeter in the center of their run in the main axis.
+  /// each run are grouped together in the center of their run in the main axis.
   ///
   /// Defaults to [WrapAlignment.start].
   ///
@@ -197,7 +197,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
   /// How the runs themselves should be placed in the cross axis.
   ///
   /// For example, if [runAlignment] is [WrapAlignment.center], the runs are
-  /// grouped togeter in the center of the overall [RenderWrap] in the cross
+  /// grouped together in the center of the overall [RenderWrap] in the cross
   /// axis.
   ///
   /// Defaults to [WrapAlignment.start].

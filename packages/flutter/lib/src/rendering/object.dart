@@ -320,7 +320,7 @@ class PaintingContext {
   ///   matches the value of [RenderObject.needsCompositing] for the caller.
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
-  /// * `clipRect` is rectangle (in the caller's coodinate system) to use to
+  /// * `clipRect` is rectangle (in the caller's coordinate system) to use to
   ///   clip the painting done by [painter].
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
@@ -344,9 +344,9 @@ class PaintingContext {
   ///   matches the value of [RenderObject.needsCompositing] for the caller.
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
-  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  /// * `bounds` is the region of the canvas (in the caller's coordinate system)
   ///   into which `painter` will paint in.
-  /// * `clipRRect` is the rounded-rectangle (in the caller's coodinate system)
+  /// * `clipRRect` is the rounded-rectangle (in the caller's coordinate system)
   ///   to use to clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
@@ -373,9 +373,9 @@ class PaintingContext {
   ///   matches the value of [RenderObject.needsCompositing] for the caller.
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
-  /// * `bounds` is the region of the canvas (in the caller's coodinate system)
+  /// * `bounds` is the region of the canvas (in the caller's coordinate system)
   ///   into which `painter` will paint in.
-  /// * `clipPath` is the path (in the coodinate system of the caller) to use to
+  /// * `clipPath` is the path (in the coordinate system of the caller) to use to
   ///   clip the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
@@ -402,7 +402,7 @@ class PaintingContext {
   ///   matches the value of [RenderObject.needsCompositing] for the caller.
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
-  /// * `transform` is the matrix to apply to the paiting done by `painter`.
+  /// * `transform` is the matrix to apply to the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `transform` applied. This
   ///   function calls the `painter` synchronously.
   void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
@@ -425,7 +425,7 @@ class PaintingContext {
     }
   }
 
-  /// Blend further paiting with an alpha value.
+  /// Blend further painting with an alpha value.
   ///
   /// * `offset` is the offset from the origin of the canvas' coordinate system
   ///   to the origin of the caller's coordinate system.
@@ -617,7 +617,7 @@ class SemanticsHandle {
 ///    clipping. If a render object has a composited child, its needs to use a
 ///    [Layer] to create the clip in order for the clip to apply to the
 ///    composited child (which will be painted into its own [Layer]).
-/// 3. [flushPaint] visites any render objects that need to paint. During this
+/// 3. [flushPaint] visits any render objects that need to paint. During this
 ///    phase, render objects get a chance to record painting commands into
 ///    [PictureLayer]s and construct other composited [Layer]s.
 /// 4. Finally, if semantics are enabled, [flushSemantics] will compile the
@@ -890,7 +890,7 @@ class PipelineOwner {
 ///
 /// The [RenderObject] class, however, does not define a child model (e.g.
 /// whether a node has zero, one, or more children). It also doesn't define a
-/// coordinate system (e.g. whether children are positioned in cartesian
+/// coordinate system (e.g. whether children are positioned in Cartesian
 /// coordinates, in polar coordinates, etc) or a specific layout protocol (e.g.
 /// whether the layout is width-in-height-out, or constraint-in-size-out, or
 /// whether the parent sets the size and position of the child before or after
@@ -898,13 +898,13 @@ class PipelineOwner {
 /// their parent's [parentData] slot).
 ///
 /// The [RenderBox] subclass introduces the opinion that the layout
-/// system uses cartesian coordinates.
+/// system uses Cartesian coordinates.
 ///
 /// ## Writing a RenderObject subclass
 ///
 /// In most cases, subclassing [RenderObject] itself is overkill, and
 /// [RenderBox] would be a better starting point. However, if a render object
-/// doesn't want to use a cartesian coordinate system, then it should indeed
+/// doesn't want to use a Cartesian coordinate system, then it should indeed
 /// inherit from [RenderObject] directly. This allows it to define its own
 /// layout protocol by using a new subclass of [Constraints] rather than using
 /// [BoxConstraints], and by potentially using an entirely new set of objects
@@ -1314,7 +1314,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// situations in which the parent needs to be notified if the child is
   /// dirtied. Such subclasses override markNeedsLayout and either call
   /// `super.markNeedsLayout()`, in the normal case, or call
-  /// [markParentNeedsLayout], in the case where the parent neds to be laid out
+  /// [markParentNeedsLayout], in the case where the parent needs to be laid out
   /// as well as the child.
   ///
   /// If [sizedByParent] has changed, called

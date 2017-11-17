@@ -432,7 +432,7 @@ abstract class InkFeature {
   /// Override this method to paint the ink feature.
   ///
   /// The transform argument gives the coordinate conversion from the coordinate
-  /// system of the canvas to the coodinate system of the [referenceBox].
+  /// system of the canvas to the coordinate system of the [referenceBox].
   @protected
   void paintFeature(Canvas canvas, Matrix4 transform);
 

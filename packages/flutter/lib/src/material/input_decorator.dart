@@ -352,7 +352,7 @@ class InputDecoration {
 ///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
 ///    around other widgets.
 class InputDecorator extends StatelessWidget {
-  /// Creates a widget that displayes labels and other visual elements similar
+  /// Creates a widget that displays labels and other visual elements similar
   /// to a [TextField].
   ///
   /// The [isFocused] and [isEmpty] arguments must not be null.

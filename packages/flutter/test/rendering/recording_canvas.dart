@@ -38,7 +38,7 @@ class RecordedInvocation {
 
 /// A [Canvas] for tests that records its method calls.
 ///
-/// This class can be used in conjuction with [TestRecordingPaintingContext]
+/// This class can be used in conjunction with [TestRecordingPaintingContext]
 /// to record the [Canvas] method calls made by a renderer. For example:
 ///
 /// ```dart

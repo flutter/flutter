@@ -50,7 +50,7 @@ class FlutterCommandResult {
   /// latency without measuring user interaction time.
   ///
   /// [FlutterCommand] will automatically measure and report the command's
-  /// complete time if not overriden.
+  /// complete time if not overridden.
   final DateTime endTimeOverride;
 }
 

@@ -157,7 +157,7 @@ abstract class Route<T> {
   /// This route's previous route has changed to the given new route. This is
   /// called on a route whenever the previous route changes for any reason, so
   /// long as it is in the history, except for immediately after the route has
-  /// been pushed (in which wase [didPush] or [didReplace] will be called
+  /// been pushed (in which case [didPush] or [didReplace] will be called
   /// instead). `previousRoute` will be null if there's no previous route.
   @protected
   @mustCallSuper
@@ -207,7 +207,7 @@ abstract class Route<T> {
   ///
   /// If a later route is entirely opaque, then the route will be active but not
   /// rendered. It is even possible for the route to be active but for the stateful
-  /// widgets within the route to not be instatiated. See [ModalRoute.maintainState].
+  /// widgets within the route to not be instantiated. See [ModalRoute.maintainState].
   bool get isActive {
     return _navigator != null && _navigator._history.contains(this);
   }

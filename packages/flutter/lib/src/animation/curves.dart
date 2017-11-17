@@ -247,7 +247,7 @@ class Cubic extends Curve {
 
 /// A curve that is the reversed inversion of its given curve.
 ///
-/// This curve evalutes the given curve in reverse (i.e., from 1.0 to 0.0 as t
+/// This curve evaluates the given curve in reverse (i.e., from 1.0 to 0.0 as t
 /// increases from 0.0 to 1.0) and returns the inverse of the given curve's value
 /// (i.e., 1.0 minus the given curve's value).
 ///
@@ -534,17 +534,17 @@ class Curves {
   /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_bounce_in_out.png)
   static const Curve bounceInOut = const _BounceInOutCurve._();
 
-  /// An oscillating curve that grows in magnitude while overshootings its bounds.
+  /// An oscillating curve that grows in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_in.png)
   static const ElasticInCurve elasticIn = const ElasticInCurve();
 
-  /// An oscillating curve that shrinks in magnitude while overshootings its bounds.
+  /// An oscillating curve that shrinks in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_out.png)
   static const ElasticOutCurve elasticOut = const ElasticOutCurve();
 
-  /// An oscillating curve that grows and then shrinks in magnitude while overshootings its bounds.
+  /// An oscillating curve that grows and then shrinks in magnitude while overshooting its bounds.
   ///
   /// ![](https://flutter.github.io/assets-for-api-docs/animation/curve_elastic_in_out.png)
   static const ElasticInOutCurve elasticInOut = const ElasticInOutCurve();

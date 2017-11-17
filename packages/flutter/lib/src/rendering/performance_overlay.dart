@@ -37,7 +37,7 @@ enum PerformanceOverlayOption {
 
   /// Display the engine frame times as they change over a set period of time
   /// in the form of a graph. The y axis of the graph denotes the total time
-  /// spent by the eninge as a fraction of the total frame slice. When the bar
+  /// spent by the engine as a fraction of the total frame slice. When the bar
   /// turns red, a frame is lost.
   visualizeEngineStatistics,
 }

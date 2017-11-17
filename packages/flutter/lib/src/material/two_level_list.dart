@@ -107,7 +107,7 @@ class TwoLevelListItem extends StatelessWidget {
 /// This class is deprecated. Please use [ExpansionTile] instead.
 @deprecated
 class TwoLevelSublist extends StatefulWidget {
-  /// Creates an item in a two-level list that can expland and collapse.
+  /// Creates an item in a two-level list that can expand and collapse.
   const TwoLevelSublist({
     Key key,
     this.leading,

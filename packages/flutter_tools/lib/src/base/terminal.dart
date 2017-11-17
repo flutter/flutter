@@ -89,7 +89,7 @@ class AnsiTerminal {
     return _broadcastStdInString;
   }
 
-  /// Prompts the user to input a chraracter within the accepted list.
+  /// Prompts the user to input a character within the accepted list.
   /// Reprompts if inputted character is not in the list.
   ///
   /// `prompt` is the text displayed prior to waiting for user input each time.

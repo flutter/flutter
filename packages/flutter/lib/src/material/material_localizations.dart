@@ -19,7 +19,7 @@ import 'typography.dart';
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
 abstract class MaterialLocalizations {
-  /// The tooltip for the leading [AppBar] menu (aka 'hamburger') button.
+  /// The tooltip for the leading [AppBar] menu (a.k.a. 'hamburger') button.
   String get openAppDrawerTooltip;
 
   /// The [BackButton]'s tooltip.
