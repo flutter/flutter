@@ -699,6 +699,20 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// additional frames being pumped beyond those that the test itself requests,
   /// which can cause differences in behavior.
   fullyLive,
+
+  /// Ignore any request to schedule a frame.
+  ///
+  /// This is intended to be used by benchmarks (hence the name) that drive the
+  /// pipeline directly. It tells the binding to entirely ignore requests for a
+  /// frame to be scheduled, while still allowing frames that are pumped
+  /// directly (invoking [Window.onBeginFrame] and [Window.onDrawFrame]) to run.
+  ///
+  /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
+  /// this mode. This can cause unexpected effects. For instance,
+  /// [WidgetTester.pumpAndSettle] does not function in this mode, as it relies
+  /// on the [SchedulerBinding.hasScheduledFrame] property to determine when the
+  /// application has "settled".
+  benchmark,
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
@@ -772,6 +786,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///   requests from the engine to be serviced, even those the test did not
   ///   explicitly pump.
   ///
+  /// * [LiveTestWidgetsFlutterBindingFramePolicy.benchmark] allows all frame
+  ///   requests from the engine to be serviced, and allows all frame requests
+  ///   that are artificially triggered to be serviced, but prevents the
+  ///   framework from requesting any frames from the engine itself. The
+  ///   [SchedulerBinding.hasScheduledFrame] property will never be true in this
+  ///   mode. This can cause unexpected effects. For instance,
+  ///   [WidgetTester.pumpAndSettle] does not function in this mode, as it
+  ///   relies on the [SchedulerBinding.hasScheduledFrame] property to determine
+  ///   when the application has "settled".
+  ///
   /// Setting this to anything other than
   /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
   /// frames, which might involve calling builders more, or calling paint
@@ -791,6 +815,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// ```
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
+  @override
+  void scheduleFrame() {
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
+      return; // In benchmark mode, don't actually schedule any engine frames.
+    super.scheduleFrame();
+  }
+
   bool _doDrawThisFrame;
 
   @override
@@ -798,6 +829,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
       _doDrawThisFrame = true;
       super.handleBeginFrame(rawTimeStamp);
@@ -819,6 +851,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else {
+      assert(framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark);
       ui.window.scheduleFrame();
     }
   }
