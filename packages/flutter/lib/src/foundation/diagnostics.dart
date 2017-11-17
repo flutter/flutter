@@ -363,7 +363,7 @@ final TextTreeConfiguration sparseTextConfiguration = new TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.offstage], uses this style for ascii art display.
+///  * [DiagnosticsTreeStyle.offstage], uses this style for ASCII art display.
 final TextTreeConfiguration dashedTextConfiguration = new TextTreeConfiguration(
   prefixLineOne:            '╎╌',
   prefixLastChildLineOne:   '└╌',

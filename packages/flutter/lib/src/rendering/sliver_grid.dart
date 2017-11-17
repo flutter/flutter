@@ -97,7 +97,7 @@ class SliverGridGeometry {
 ///  * [SliverGridGeometry], which represents the size and position of a single
 ///    tile in a grid.
 ///  * [SliverGridDelegate.getLayout], which returns this object to describe the
-///    delegates's layout.
+///    delegate's layout.
 ///  * [RenderSliverGrid], which uses this class during its
 ///    [RenderSliverGrid.performLayout] method.
 @immutable
@@ -133,11 +133,11 @@ abstract class SliverGridLayout {
 ///
 ///  * [SliverGridDelegateWithFixedCrossAxisCount], which uses this layout.
 ///  * [SliverGridDelegateWithMaxCrossAxisExtent], which uses this layout.
-///  * [SliverGridLayout], which represents an abitrary tile layout.
+///  * [SliverGridLayout], which represents an arbitrary tile layout.
 ///  * [SliverGridGeometry], which represents the size and position of a single
 ///    tile in a grid.
 ///  * [SliverGridDelegate.getLayout], which returns this object to describe the
-///    delegates's layout.
+///    delegate's layout.
 ///  * [RenderSliverGrid], which uses this class during its
 ///    [RenderSliverGrid.performLayout] method.
 class SliverGridRegularTileLayout extends SliverGridLayout {

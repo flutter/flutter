@@ -641,7 +641,7 @@ class SliverHitTestEntry extends HitTestEntry {
 /// Parent data structure used by parents of slivers that position their
 /// children using layout offsets.
 ///
-/// This data structure is optimised for fast layout. It is best used by parents
+/// This data structure is optimized for fast layout. It is best used by parents
 /// that expect to have many children whose relative positions don't change even
 /// when the scroll offset does.
 class SliverLogicalParentData extends ParentData {
@@ -667,7 +667,7 @@ class SliverLogicalContainerParentData extends SliverLogicalParentData with Cont
 ///
 /// For example, used by [RenderViewport].
 ///
-/// This data structure is optimised for fast painting, at the cost of requiring
+/// This data structure is optimized for fast painting, at the cost of requiring
 /// additional work during layout when the children change their offsets. It is
 /// best used by parents that expect to have few children, especially if those
 /// children will themselves be very tall relative to the parent.
@@ -852,7 +852,7 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// The geometry of a sliver should be set only during the sliver's
   /// [performLayout] or [performResize] functions. If you wish to change the
-  /// geometry of a sliver outside of those functins, call [markNeedsLayout]
+  /// geometry of a sliver outside of those functions, call [markNeedsLayout]
   /// instead to schedule a layout of the sliver.
   SliverGeometry get geometry => _geometry;
   SliverGeometry _geometry;
@@ -1300,7 +1300,7 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// [RenderBox] widgets.
   ///
   /// This function takes care of converting the position from the sliver
-  /// coordinate system to the cartesian coordinate system used by [RenderBox].
+  /// coordinate system to the Cartesian coordinate system used by [RenderBox].
   ///
   /// This function relies on [childMainAxisPosition] to determine the position of
   /// child in question.

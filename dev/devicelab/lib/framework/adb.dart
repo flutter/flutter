@@ -44,7 +44,7 @@ abstract class DeviceDiscovery {
   ///
   /// Returns the same device when called repeatedly (unlike
   /// [chooseWorkingDevice]). This is useful when you need to perform multiple
-  /// perations on one.
+  /// operations on one.
   Future<Device> get workingDevice;
 
   /// Lists all available devices' IDs.

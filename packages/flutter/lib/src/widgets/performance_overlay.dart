@@ -57,7 +57,7 @@ class PerformanceOverlay extends LeafRenderObjectWidget {
   /// is suitable for capturing an SkPicture trace for further analysis.
   ///
   /// For example, if you want a trace of all pictures that could not be
-  /// renderered by the rasterizer within the frame boundary (and hence caused
+  /// rendered by the rasterizer within the frame boundary (and hence caused
   /// jank), specify 1. Specifying 2 will trace all pictures that took more
   /// more than 2 frame intervals to render. Adjust this value to only capture
   /// the particularly expensive pictures while skipping the others. Specifying

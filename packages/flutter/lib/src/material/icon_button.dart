@@ -113,7 +113,7 @@ class IconButton extends StatelessWidget {
   /// The icon to display inside the button.
   ///
   /// The [Icon.size] and [Icon.color] of the icon is configured automatically
-  /// based on the [iconSize] nad [color] properties of _this_ widget using an
+  /// based on the [iconSize] and [color] properties of _this_ widget using an
   /// [IconTheme] and therefore should not be explicitly given in the icon
   /// widget.
   ///
@@ -149,7 +149,7 @@ class IconButton extends StatelessWidget {
   final Color splashColor;
 
   /// The secondary color of the button when the button is in the down (pressed)
-  /// state. The higlight color is represented as a solid color that is overlaid over the
+  /// state. The highlight color is represented as a solid color that is overlaid over the
   /// button color (if any). If the highlight color has transparency, the button color
   /// will show through. The highlight fades in quickly as the button is held down.
   ///

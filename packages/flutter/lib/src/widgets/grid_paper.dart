@@ -70,7 +70,7 @@ class GridPaper extends StatelessWidget {
 
   /// The color to draw the lines in the grid.
   ///
-  /// Defaults to a light blue commonly seen on traditional gridpaper.
+  /// Defaults to a light blue commonly seen on traditional grid paper.
   final Color color;
 
   /// The distance between the primary lines in the grid, in logical pixels.

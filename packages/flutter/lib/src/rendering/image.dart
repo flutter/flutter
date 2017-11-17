@@ -256,7 +256,7 @@ class RenderImage extends RenderBox {
   /// Find a size for the render image within the given constraints.
   ///
   ///  - The dimensions of the RenderImage must fit within the constraints.
-  ///  - The aspect ratio of the RenderImage matches the instrinsic aspect
+  ///  - The aspect ratio of the RenderImage matches the intrinsic aspect
   ///    ratio of the image.
   ///  - The RenderImage's dimension are maximal subject to being smaller than
   ///    the intrinsic size of the image.

@@ -144,7 +144,7 @@ class SemanticsData extends Diagnosticable {
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
   /// By default, the transform is null, which represents the identity
-  /// transformation (i.e., that this node has the same coorinate system as its
+  /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
   final Matrix4 transform;
 
@@ -270,7 +270,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
   /// By default, the transform is null, which represents the identity
-  /// transformation (i.e., that this node has the same coorinate system as its
+  /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
   Matrix4 get transform => _transform;
   Matrix4 _transform;
@@ -429,7 +429,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Visits the immediate children of this node.
   ///
-  /// This function calls visitor for each child in a pre-order travseral
+  /// This function calls visitor for each child in a pre-order traversal
   /// until visitor returns false. Returns true if all the visitor calls
   /// returned true, otherwise returns false.
   void visitChildren(SemanticsNodeVisitor visitor) {
@@ -443,7 +443,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   /// Visit all the descendants of this node.
   ///
-  /// This function calls visitor for each descendant in a pre-order travseral
+  /// This function calls visitor for each descendant in a pre-order traversal
   /// until visitor returns false. Returns true if all the visitor calls
   /// returned true, otherwise returns false.
   bool _visitDescendants(SemanticsNodeVisitor visitor) {
@@ -541,7 +541,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// The [SemanticsTag]s this node is tagged with.
   ///
   /// Tags are used during the construction of the semantics tree. They are not
-  /// transfered to the engine.
+  /// transferred to the engine.
   Set<SemanticsTag> tags;
 
   /// Whether this node is tagged with `tag`.

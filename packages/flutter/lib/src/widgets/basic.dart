@@ -293,7 +293,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// When asked to paint, [CustomPaint] first asks its [painter] to paint on the
 /// current canvas, then it paints its child, and then, after painting its
-/// child, it asks its [foregroundPainter] to paint. The coodinate system of the
+/// child, it asks its [foregroundPainter] to paint. The coordinate system of the
 /// canvas matches the coordinate system of the [CustomPaint] object. The
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
@@ -837,7 +837,7 @@ class Transform extends SingleChildRenderObjectWidget {
   }
 }
 
-/// A widget that can be targetted by a [CompositedTransformFollower].
+/// A widget that can be targeted by a [CompositedTransformFollower].
 ///
 /// When this widget is composited during the compositing phase (which comes
 /// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
@@ -1487,7 +1487,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///  * [FractionallySizedBox], a widget that sizes its child to a fraction of
 ///    the total available space.
 ///  * [AspectRatio], a widget that attempts to fit within the parent's
-///    constraints while also sizing its child to match a given sapect ratio.
+///    constraints while also sizing its child to match a given aspect ratio.
 ///  * [FittedBox], which sizes and positions its child widget to fit the parent
 ///    according to a given [BoxFit] discipline.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
@@ -1726,7 +1726,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.
+  /// incoming width constraint multiplied by this factor.
   ///
   /// If null, the incoming width constraints are passed to the child
   /// unmodified.
@@ -1735,7 +1735,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming height constraint multipled by this factor.
+  /// incoming height constraint multiplied by this factor.
   ///
   /// If null, the incoming height constraints are passed to the child
   /// unmodified.
@@ -3768,7 +3768,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// How the children within a run should be places in the main axis.
   ///
   /// For example, if [alignment] is [WrapAlignment.center], the children in
-  /// each run are grouped togeter in the center of their run in the main axis.
+  /// each run are grouped together in the center of their run in the main axis.
   ///
   /// Defaults to [WrapAlignment.start].
   ///
@@ -3796,7 +3796,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// How the runs themselves should be placed in the cross axis.
   ///
   /// For example, if [runAlignment] is [WrapAlignment.center], the runs are
-  /// grouped togeter in the center of the overall [Wrap] in the cross axis.
+  /// grouped together in the center of the overall [Wrap] in the cross axis.
   ///
   /// Defaults to [WrapAlignment.start].
   ///
@@ -4047,7 +4047,7 @@ class Flow extends MultiChildRenderObjectWidget {
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [textAlign], [softWrap], [overflow], nad [textScaleFactor]
+  /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
   /// arguments must not be null.
   ///
   /// The [maxLines] property may be null (and indeed defaults to null), but if
@@ -4087,7 +4087,7 @@ class RichText extends LeafRenderObjectWidget {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any. If there is no ambient

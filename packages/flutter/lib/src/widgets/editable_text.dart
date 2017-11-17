@@ -60,7 +60,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   TextEditingController({ String text })
     : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
 
-  /// Creates a controller for an editiable text field from an initial [TextEditingValue].
+  /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
@@ -221,7 +221,7 @@ class EditableText extends StatefulWidget {
   /// example, if the text is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.

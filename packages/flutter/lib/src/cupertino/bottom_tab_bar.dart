@@ -187,7 +187,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Create a clone of the current [CupertinoTabBar] but with provided
-  /// parameters overriden.
+  /// parameters overridden.
   CupertinoTabBar copyWith({
     Key key,
     List<BottomNavigationBarItem> items,

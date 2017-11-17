@@ -213,7 +213,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
 }
 
 /// Indicates that the subtree through which this notification bubbles must be
-/// kept alive even if it would normally be discarded as an optimisation.
+/// kept alive even if it would normally be discarded as an optimization.
 ///
 /// For example, a focused text field might fire this notification to indicate
 /// that it should not be disposed even if the user scrolls the field off

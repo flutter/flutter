@@ -72,7 +72,7 @@ class BouncingScrollSimulation extends Simulation {
     assert(_springTime != null);
   }
 
-  /// The maximum velocity that can be transfered from the inertia of a ballistic
+  /// The maximum velocity that can be transferred from the inertia of a ballistic
   /// scroll into overscroll.
   static const double maxSpringTransferVelocity = 5000.0;
 

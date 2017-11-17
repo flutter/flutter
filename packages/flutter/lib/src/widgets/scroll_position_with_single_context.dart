@@ -30,7 +30,7 @@ import 'scroll_position.dart';
 /// See also:
 ///
 ///  * [ScrollPosition], which defines the underlying model for a position
-///    within a [Scrollable] but is agnositic as to how that position is
+///    within a [Scrollable] but is agnostic as to how that position is
 ///    changed.
 ///  * [ScrollView] and its subclasses such as [ListView], which use
 ///    [ScrollPositionWithSingleContext] to manage their scroll position.

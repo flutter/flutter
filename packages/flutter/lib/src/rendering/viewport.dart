@@ -61,7 +61,7 @@ abstract class RenderAbstractViewport extends RenderObject {
 /// This render object provides the shared code for render objects that host
 /// [RenderSliver] render objects inside a [RenderBox]. The viewport establishes
 /// an [axisDirection], which orients the sliver's coordinate system, which is
-/// based on scroll offsets rather than cartesian coordinates.
+/// based on scroll offsets rather than Cartesian coordinates.
 ///
 /// The viewport also listens to an [offset], which determines the
 /// [SliverConstraints.scrollOffset] input to the sliver layout protocol.
@@ -242,7 +242,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// and stops once `advance` returns null.
   ///
   ///  * `scrollOffset` is the [SliverConstraints.scrollOffset] to pass the
-  ///    first child. The scroll offset is adjsted by
+  ///    first child. The scroll offset is adjusted by
   ///    [SliverGeometry.scrollExtent] for subsequent children.
   ///  * `overlap` is the [SliverConstraints.overlap] to pass the first child.
   ///    The overlay is adjusted by the [SliverGeometry.paintOrigin] and
@@ -613,12 +613,12 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @protected
   double scrollOffsetOf(RenderSliver child, double scrollOffsetWithinChild);
 
-  /// Returns the total scroll obstruction extent of all slivers in theild].
-  /// of the viewport before [child].
+  /// Returns the total scroll obstruction extent of all slivers in the viewport
+  /// before [child].
   ///
   /// This is the extent by which the actual area in which content can scroll
   /// is reduced. For example, an app bar that is pinned at the top will reduce
-  /// the are in which content can actually scroll by the height of the app bar.
+  /// the area in which content can actually scroll by the height of the app bar.
   @protected
   double maxScrollObstructionExtentBefore(RenderSliver child);
 
@@ -706,7 +706,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 /// example, if the [axisDirection] is [AxisDirection.down], the first sliver
 /// before [center] is placed above the [center]. The slivers that are later in
 /// the child list than [center] are placed in order in the [axisDirection]. For
-/// example, in the preceeding scenario, the first sliver after [center] is
+/// example, in the preceding scenario, the first sliver after [center] is
 /// placed below the [center].
 ///
 /// [RenderViewport] cannot contain [RenderBox] children directly. Instead, use

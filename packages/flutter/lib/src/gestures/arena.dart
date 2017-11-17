@@ -60,7 +60,7 @@ class _GestureArena {
   bool hasPendingSweep = false;
 
   /// If a gesture attempts to win while the arena is still open, it becomes the
-  /// "eager winnner". We look for an eager winner when closing the arena to new
+  /// "eager winner". We look for an eager winner when closing the arena to new
   /// participants, and if there is one, we resolve the arena in its favor at
   /// that time.
   GestureArenaMember eagerWinner;

@@ -130,7 +130,7 @@ class ScrollPhysics {
     return parent.applyBoundaryConditions(position, value);
   }
 
-  /// Returns a simulation for ballisitic scrolling starting from the given
+  /// Returns a simulation for ballistic scrolling starting from the given
   /// position with the given velocity.
   ///
   /// This is used by [ScrollPositionWithSingleContext] in the

@@ -131,7 +131,7 @@ class _AccountDetails extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [DrawerHeader], for a drawer header that doesn't show user acounts
+///  * [DrawerHeader], for a drawer header that doesn't show user accounts
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.

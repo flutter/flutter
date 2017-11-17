@@ -320,7 +320,7 @@ class WidgetController {
   /// To make tests more realistic, frames may be pumped during this time (using
   /// calls to [pump]). If the total duration is longer than `frameInterval`,
   /// then one frame is pumped each time that amount of time elapses while
-  /// sending events, or each time an event is synthesised, whichever is rarer.
+  /// sending events, or each time an event is synthesized, whichever is rarer.
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].

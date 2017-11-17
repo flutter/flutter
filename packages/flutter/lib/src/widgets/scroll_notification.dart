@@ -245,7 +245,7 @@ class ScrollEndNotification extends ScrollNotification {
   /// If a drag ends with some residual velocity, a typical [ScrollPhysics] will
   /// start a ballistic scroll, which delays the [ScrollEndNotification] until
   /// the ballistic simulation completes, at which time [dragDetails] will
-  /// be null. If the residtual velocity is too small to trigger ballistic
+  /// be null. If the residual velocity is too small to trigger ballistic
   /// scrolling, then the [ScrollEndNotification] will be dispatched immediately
   /// and [dragDetails] will be non-null.
   final DragEndDetails dragDetails;
@@ -288,7 +288,7 @@ class UserScrollNotification extends ScrollNotification {
 typedef bool ScrollNotificationPredicate(ScrollNotification notification);
 
 /// A [ScrollNotificationPredicate] that checks whether 
-/// `notification.depth == 0`, which means that the notification diid not bubble
+/// `notification.depth == 0`, which means that the notification did not bubble
 /// through any intervening scrolling widgets.
 bool defaultScrollNotificationPredicate(ScrollNotification notification) {
   return notification.depth == 0;
