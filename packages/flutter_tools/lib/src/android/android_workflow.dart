@@ -124,7 +124,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
 
       messages.add(new ValidationMessage(
-        'Platform ${androidSdk.latestVersion.platformVersionName}, '
+        'Platform ${androidSdk.latestVersion.platformName}, '
         'build-tools ${androidSdk.latestVersion.buildToolsVersionName}'
       ));
     }
