@@ -25,6 +25,7 @@ class AnsiTerminal {
   static const String _reset = '\u001B[0m';
   static const String _clear = '\u001B[2J\u001B[H';
 
+  static const int _EBADF = 9;
   static const int _ENXIO = 6;
   static const int _ENOTTY = 25;
   static const int _ENETRESET = 102;
@@ -33,6 +34,7 @@ class AnsiTerminal {
   /// Setting the line mode can throw for some terminals (with "Operation not
   /// supported on socket"), but the error can be safely ignored.
   static const List<int> _lineModeIgnorableErrors = const <int>[
+    _EBADF,
     _ENXIO,
     _ENOTTY,
     _ENETRESET,
