@@ -354,11 +354,9 @@ Future<XcodeBuildResult> buildXcodeProject({
 Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      ((result.stdout?.contains('BCEROR') == true &&
-          // May need updating if Xcode changes its outputs.
-          result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true)
-          // Error message from ios-deploy for missing provisioning profile.
-          || result.stdout?.contains('0xe8008015') == true)) {
+      result.stdout?.contains('BCEROR') == true &&
+      // May need updating if Xcode changes its outputs.
+      result.stdout?.contains('Xcode couldn\'t find a provisioning profile matching') == true) {
     printError(noProvisioningProfileInstruction, emphasis: true);
     return;
   }

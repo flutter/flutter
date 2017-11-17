@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
+import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
@@ -242,7 +243,11 @@ class IOSDevice extends Device {
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
-      installationResult = await runCommandAndStreamOutput(launchCommand, trace: true);
+      installationResult = await runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
+      );
     } else {
       // Debugging is enabled, look for the observatory server port post launch.
       printTrace('Debugging is enabled, connecting to observatory');
@@ -254,7 +259,11 @@ class IOSDevice extends Device {
 
       final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
 
-      final Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
+      final Future<int> launch = runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
+      );
 
       localObservatoryUri = await launch.then<Uri>((int result) async {
         installationResult = result;
@@ -331,6 +340,33 @@ class IOSDevice extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
+
+  // Maps stdout line stream. Must return original line.
+  String monitorInstallationFailure(String stdout) {
+    // Installation issues.
+    if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
+      printError(noProvisioningProfileInstruction, emphasis: true);
+
+    // Launch issues.
+    } else if (stdout.contains('e80000e2')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Your device is locked. Unlock your device first before running.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    } else if (stdout.contains('Error 0xe8000022')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Error launching app. Try launching from within Xcode via:
+    open ios/Runner.xcworkspace
+
+Your Xcode version may be too old for your iOS version.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    }
+
+    return stdout;
+  }
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {
