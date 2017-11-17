@@ -326,33 +326,6 @@ Error launching application on iPhone.''',
       );
     });
 
-    testUsingContext('No ios-deploy provisioning profile shows message', () async {
-      final XcodeBuildResult buildResult = new XcodeBuildResult(
-        success: false,
-        stdout: '''
-Launching lib/main.dart on iPhone in debug mode...
-Signing iOS app for device deployment using developer identity: "iPhone Developer: test@flutter.io (1122334455)"
-Running Xcode build...                                1.3s
-Installing on iPhone...
-
-ios-deploy[75050:1892997] [ !! ] Error 0xe8008015: A valid provisioning profile for this executable was not found. AMDeviceSecureInstallApplication(0, device, url, options, install_callback, 0)
-Could not install build/ios/iphoneos/Runner.app on 7233072bb988fb4c64429a4d9a092295f9423892.
-
-Error launching application on iPhone.''',
-        xcodeBuildExecution: new XcodeBuildExecution(
-          <String>['xcrun', 'xcodebuild', 'blah'],
-          '/blah/blah',
-          buildForPhysicalDevice: true
-        ),
-      );
-
-      await diagnoseXcodeBuildFailure(buildResult, app);
-      expect(
-        testLogger.errorText,
-        contains('No Provisioning Profile was found for your project\'s Bundle Identifier or your device.'),
-      );
-    });
-
     testUsingContext('No development team shows message', () async {
       final XcodeBuildResult buildResult = new XcodeBuildResult(
         success: false,
