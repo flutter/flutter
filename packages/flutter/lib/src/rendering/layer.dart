@@ -443,7 +443,7 @@ class ContainerLayer extends Layer {
   /// before any of the properties have been changed.
   ///
   /// The default implementation does nothing, since [ContainerLayer], by
-  /// default, composits its children at the origin of the [ContainerLayer]
+  /// default, composites its children at the origin of the [ContainerLayer]
   /// itself.
   ///
   /// The `child` argument should generally not be null, since in principle a
@@ -989,7 +989,7 @@ class FollowerLayer extends ContainerLayer {
   /// The transform that was used during the last composition phase.
   ///
   /// If the [link] was not linked to a [LeaderLayer], or if this layer has
-  /// a degerenate matrix applied, then this will be null.
+  /// a degenerate matrix applied, then this will be null.
   ///
   /// This method returns a new [Matrix4] instance each time it is invoked.
   Matrix4 getLastTransform() {

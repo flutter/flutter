@@ -374,7 +374,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called whenever the scroll position or the dimensions of the scroll view
   /// change to schedule an update of the available semantics actions. The
-  /// actual update will be performed in the nxt frame. If non is pending
+  /// actual update will be performed in the next frame. If non is pending
   /// a frame will be scheduled.
   ///
   /// For example: If the scroll view has been scrolled all the way to the top,

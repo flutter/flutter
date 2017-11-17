@@ -175,7 +175,7 @@ class TestSemantics {
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
   /// By default, the transform is null, which represents the identity
-  /// transformation (i.e., that this node has the same coorinate system as its
+  /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
   final Matrix4 transform;
 

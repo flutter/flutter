@@ -389,7 +389,7 @@ abstract class DeviceLogReader {
   @override
   String toString() => name;
 
-  /// Process ID of the app on the deivce.
+  /// Process ID of the app on the device.
   int appPid;
 }
 

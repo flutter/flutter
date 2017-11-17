@@ -140,7 +140,7 @@ Directory getReplaySource(String dirname, String basename) {
 
 /// Canonicalizes [path].
 ///
-/// This function implements the behaviour of `canonicalize` from
+/// This function implements the behavior of `canonicalize` from
 /// `package:path`. However, unlike the original, it does not change the ASCII
 /// case of the path. Changing the case can break hot reload in some situations,
 /// for an example see: https://github.com/flutter/flutter/issues/9539.

@@ -30,7 +30,7 @@ export 'package:flutter/services.dart' show
 ///
 /// If this is not called from a build method, then it should be reinvoked
 /// whenever the dependencies change, e.g. by calling it from
-/// [State.didChangeDependencies], so that any changes in the environement are
+/// [State.didChangeDependencies], so that any changes in the environment are
 /// picked up (e.g. if the device pixel ratio changes).
 ///
 /// See also:

@@ -160,7 +160,7 @@ class ScaleTransition extends AnimatedWidget {
   /// painted v times its normal size.
   Animation<double> get scale => listenable;
 
-  /// The alignment of the origin of the coordainte system in which the scale
+  /// The alignment of the origin of the coordinate system in which the scale
   /// takes place, relative to the size of the box.
   ///
   /// For example, to set the origin of the scale to bottom middle, you can use
@@ -498,7 +498,7 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// For simple cases without additional state, consider using
 /// [AnimatedWidget].
 ///
-/// ## Performance optimisations
+/// ## Performance optimizations
 ///
 /// If your [builder] function contains a subtree that does not depend on the
 /// animation, it's more efficient to build that subtree once instead of

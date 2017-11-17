@@ -15,7 +15,7 @@ import 'stack.dart' show RelativeRect;
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  /// Initializes the [child] property for sublasses.
+  /// Initializes the [child] property for subclasses.
   RenderShiftedBox(RenderBox child) {
     this.child = child;
   }
@@ -346,7 +346,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
        _heightFactor = heightFactor,
        super(child: child, alignment: alignment, textDirection: textDirection);
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get widthFactor => _widthFactor;
@@ -359,7 +359,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     markNeedsLayout();
   }
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get heightFactor => _heightFactor;
@@ -815,7 +815,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming width to use.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor.  If null, the child is
   /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
@@ -830,7 +830,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming height to use.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor.  If null, the child is
   /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
@@ -967,7 +967,7 @@ abstract class SingleChildLayoutDelegate {
 
   /// The size of this object given the incoming constraints.
   ///
-  /// Defaults to the biggest size that satifies the given constraints.
+  /// Defaults to the biggest size that satisfies the given constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   /// The constraints for the child given the incoming constraints.
@@ -1019,7 +1019,7 @@ abstract class SingleChildLayoutDelegate {
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
 class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
-  /// Creates a render box that defers its layout to a delgate.
+  /// Creates a render box that defers its layout to a delegate.
   ///
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
@@ -1118,7 +1118,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 ///
 /// If [baseline] is less than the distance from the top of the child
 /// to the baseline of the child, then the child will overflow the top
-/// of the box. This is typically not desireable, in particular, that
+/// of the box. This is typically not desirable, in particular, that
 /// part of the child will not be found when doing hit tests, so the
 /// user cannot interact with that part of the child.
 ///

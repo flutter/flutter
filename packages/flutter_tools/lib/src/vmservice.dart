@@ -533,7 +533,7 @@ class ServiceEvent extends ServiceObject {
 }
 
 /// A ServiceObjectOwner is either a [VM] or an [Isolate]. Owners can cache
-/// and/or canonicalize service objets received over the wire.
+/// and/or canonicalize service objects received over the wire.
 abstract class ServiceObjectOwner extends ServiceObject {
   ServiceObjectOwner._empty(ServiceObjectOwner owner) : super._empty(owner);
 

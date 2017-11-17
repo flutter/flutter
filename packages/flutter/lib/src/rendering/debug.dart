@@ -15,7 +15,7 @@ const HSVColor _kDebugDefaultRepaintColor = const HSVColor.fromAHSV(0.4, 60.0, 1
 /// Causes each RenderBox to paint a box around its bounds, and some extra
 /// boxes, such as [RenderPadding], to draw construction lines.
 ///
-/// The edges of boies are painted as a one-pixel-thick `const Color(0xFF00FFFF)` outline.
+/// The edges of the boxes are painted as a one-pixel-thick `const Color(0xFF00FFFF)` outline.
 ///
 /// Spacing is painted as a solid `const Color(0x90909090)` area.
 ///

@@ -156,7 +156,7 @@ abstract class AnimationWithParentMixin<T> {
 ///
 /// A proxy animation is useful because the parent animation can be mutated. For
 /// example, one object can create a proxy animation, hand the proxy to another
-/// object, and then later change the animation from which the proxy receieves
+/// object, and then later change the animation from which the proxy receives
 /// its value.
 class ProxyAnimation extends Animation<double>
   with AnimationLazyListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {

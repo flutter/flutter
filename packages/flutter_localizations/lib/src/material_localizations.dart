@@ -45,7 +45,7 @@ import 'widgets_localizations.dart';
 ///   * it - Italian
 ///   * ja - Japanese
 ///   * ps - Pashto
-///   * pt - Portugese
+///   * pt - Portuguese
 ///   * ru - Russian
 ///   * sd - Sindhi
 ///   * ur - Urdu
@@ -369,7 +369,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// A [LocalizationsDelegate] that uses [GlobalMaterialLocalizations.load]
   /// to create an instance of this class.
   ///
-  /// Most internationlized apps will use [GlobalMaterialLocalizations.delegates]
+  /// Most internationalized apps will use [GlobalMaterialLocalizations.delegates]
   /// as the value of [MaterialApp.localizationsDelegates] to include
   /// the localizations for both the material and widget libraries.
   static const LocalizationsDelegate<MaterialLocalizations> delegate = const _MaterialLocalizationsDelegate();

@@ -35,7 +35,7 @@ abstract class Listenable {
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// [ChangeNotifier] is optimised for small numbers (one or two) of listeners.
+/// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
 /// It is O(N) for adding and removing listeners and O(N²) for dispatching
 /// notifications (where N is the number of listeners).
 ///

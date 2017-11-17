@@ -136,7 +136,7 @@ class SliverMultiBoxAdaptorParentData extends SliverLogicalParentData with Conta
 /// * Children can be removed except during a layout pass if they have already
 ///   been laid out during that layout pass.
 /// * Children cannot be added except during a call to [childManager], and
-///   then only if there is no child correspending to that index (or the child
+///   then only if there is no child corresponding to that index (or the child
 ///   child corresponding to that index was first removed).
 ///
 /// See also:

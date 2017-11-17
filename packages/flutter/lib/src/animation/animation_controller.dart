@@ -85,7 +85,7 @@ const Tolerance _kFlingTolerance = const Tolerance(
 /// }
 /// ```
 ///
-/// ...which asynchnorously runs one animation, then runs another, then changes
+/// ...which asynchronously runs one animation, then runs another, then changes
 /// the state of the widget, without having to verify [State.mounted] is still
 /// true at each step, and without having to chain futures together explicitly.
 /// (This assumes that the controllers are created in [State.initState] and

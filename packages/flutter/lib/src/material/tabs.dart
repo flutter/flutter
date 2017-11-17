@@ -410,7 +410,7 @@ class _TabBarScrollController extends ScrollController {
 /// A material design widget that displays a horizontal row of tabs.
 ///
 /// Typically created as the [AppBar.bottom] part of an [AppBar] and in
-/// conjuction with a [TabBarView].
+/// conjunction with a [TabBarView].
 ///
 /// If a [TabController] is not provided, then there must be a
 /// [DefaultTabController] ancestor. The tab controller's [TabController.length]
@@ -1033,7 +1033,7 @@ class TabPageSelectorIndicator extends StatelessWidget {
 }
 
 /// Displays a row of small circular indicators, one per tab. The selected
-/// tab's indicator is highlighted. Often used in conjuction with a [TabBarView].
+/// tab's indicator is highlighted. Often used in conjunction with a [TabBarView].
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
@@ -1056,12 +1056,12 @@ class TabPageSelector extends StatelessWidget {
   /// The indicator circle's diameter (the default value is 12.0).
   final double indicatorSize;
 
-  /// The indicator cicle's fill color for unselected pages.
+  /// The indicator circle's fill color for unselected pages.
   ///
   /// If this parameter is null then the indicator is filled with [Colors.transparent].
   final Color color;
 
-  /// The indicator cicle's fill color for selected pages and border color
+  /// The indicator circle's fill color for selected pages and border color
   /// for all indicator circles.
   ///
   /// If this parameter is null then the indicator is filled with the theme's

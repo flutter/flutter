@@ -91,7 +91,7 @@ class TextTheme {
   /// Used for the default text style for [Material].
   final TextStyle body1;
 
-  /// Used for auxillary text associated with images.
+  /// Used for auxiliary text associated with images.
   final TextStyle caption;
 
   /// Used for text on [RaisedButton] and [FlatButton].

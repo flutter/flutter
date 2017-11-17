@@ -126,7 +126,7 @@ abstract class Decoration extends Diagnosticable {
   /// The decoration may be sensitive to the [TextDirection]. The
   /// `textDirection` argument should therefore be provided. If it is known that
   /// the decoration is not affected by the text direction, then the argument
-  /// may be ommitted or set to null.
+  /// may be omitted or set to null.
   bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.

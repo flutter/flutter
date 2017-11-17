@@ -52,7 +52,7 @@ import 'rounded_rectangle_border.dart';
 ///
 ///  * [DecoratedBox] and [Container], widgets that can be configured with
 ///    [ShapeDecoration] objects.
-///  * [BoxDecoration], a similar [Decoration] that is optimised for rectangles
+///  * [BoxDecoration], a similar [Decoration] that is optimized for rectangles
 ///    specifically.
 ///  * [ShapeBorder], the base class for the objects that are used in the
 ///    [shape] property.
