@@ -113,6 +113,10 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// Note that the `lib/` is implied, so it should not be included in the asset
 /// path.
 ///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by [AssetImage]
+///    when used without a scale.
 class AssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches an image from an asset bundle.
   ///
