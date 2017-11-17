@@ -3,12 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show createHttpClient;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lib/color_testing_demo.dart' as color_testing_demo;
+import 'mock_image_http.dart';
 
 void main() {
+
   testWidgets('Color testing demo smoke test', (WidgetTester tester) async {
+    createHttpClient = createMockImageHttpClient;
     color_testing_demo.main(); // builds the app and schedules a frame but doesn't trigger one
     await tester.pump(); // see https://github.com/flutter/flutter/issues/1865
     await tester.pump(); // triggers a frame
