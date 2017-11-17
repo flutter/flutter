@@ -56,7 +56,7 @@ class RenderDots extends RenderBox {
     size = constraints.biggest;
   }
 
-  /// Makes this render object hitable so that it receives pointer events.
+  /// Makes this render object hittable so that it receives pointer events.
   @override
   bool hitTestSelf(Offset position) => true;
 
