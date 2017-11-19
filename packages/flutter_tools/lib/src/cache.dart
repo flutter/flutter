@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' show ProcessResult;
 
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
@@ -105,19 +107,36 @@ class Cache {
     }
   }
 
-  static String _dartSdkVersion;
+  String _dartSdkVersion;
 
-  static String get dartSdkVersion => _dartSdkVersion ??= platform.version;
+  String get dartSdkVersion => _dartSdkVersion ??= platform.version;
 
-  static String _engineRevision;
+  String _engineRevision;
 
-  static String get engineRevision {
-    if (_engineRevision == null) {
-      final File revisionFile = fs.file(fs.path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
-      if (revisionFile.existsSync())
-        _engineRevision = revisionFile.readAsStringSync().trim();
-    }
+  String get engineRevision {
+    _engineRevision ??= getVersionFor('engine');
     return _engineRevision;
+  }
+
+  String _engineDartVersion;
+
+  String get engineDartVersion {
+    if (_engineDartVersion == null) {
+      final Directory engineDirectory = getArtifactDirectory('engine');
+      File dartSdkBin;
+      if (platform.isLinux) {
+        dartSdkBin = engineDirectory.childFile('linux-x64/dart-sdk/bin/dart');
+      } else if (platform.isMacOS) {
+        dartSdkBin = engineDirectory.childFile('darwin-x64/dart-sdk/bin/dart');
+      } else if (platform.isWindows) {
+        dartSdkBin = engineDirectory.childFile('windows-x64/dart-sdk/bin/dart.bat');
+      }
+      if (dartSdkBin != null) {
+        final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+        _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
+      }
+    }
+    return _engineDartVersion;
   }
 
   static Cache get instance => context[Cache];
