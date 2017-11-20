@@ -390,6 +390,10 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
+///
+/// See also:
+///
+///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
@@ -459,6 +463,10 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
+///
+/// See also:
+///
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
@@ -523,6 +531,10 @@ class FileImage extends ImageProvider<FileImage> {
 /// that changes over time, consider creating a new subclass of [ImageProvider]
 /// whose [load] method returns a subclass of [ImageStreamCompleter] that can
 /// handle providing multiple images.
+///
+/// See also:
+///
+///  * [Image.memory] for a shorthand of an [Image] widget backed by [MemoryImage].
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -638,6 +650,10 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// Note that the `lib/` is implied, so it should not be included in the asset
 /// path.
 ///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by
+///    [ExactAssetImage] when using a scale.
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///
