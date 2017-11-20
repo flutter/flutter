@@ -928,9 +928,19 @@ Future<Codec> instantiateImageCodec(Uint8List list) {
 String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback)
   native "instantiateImageCodec";
 
-/// Convert an image file from a byte array into an [Image] object.
-void decodeImageFromList(Uint8List list, ImageDecoderCallback callback)
-    native "decodeImageFromList";
+/// Loads a single image frame from a byte array into an [Image] object.
+///
+/// This is a convenience wrapper around [instantiateImageCodec].
+/// Prefer using [instantiateImageCodec] which also supports multi frame images.
+void decodeImageFromList(Uint8List list, ImageDecoderCallback callback) {
+  _decodeImageFromListAsync(list, callback);
+}
+
+Future<Null> _decodeImageFromListAsync(Uint8List list, ImageDecoderCallback callback) async {
+  final Codec codec = await instantiateImageCodec(list);
+  final FrameInfo frameInfo = await codec.getNextFrame();
+  callback(frameInfo.image);
+}
 
 /// Determines the winding rule that decides how the interior of a [Path] is
 /// calculated.
