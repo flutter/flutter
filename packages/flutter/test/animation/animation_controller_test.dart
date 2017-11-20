@@ -424,8 +424,20 @@ void main() {
     expect(controller.value, 0.0);
     expect(controller.status, AnimationStatus.dismissed);
     expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.dismissed ]));
-    statusLog.clear();
 
+    controller.value = 1.0;
+    statusLog.clear();
+    controller.reverse();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.reverse);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+
+    statusLog.clear();
     controller.forward();
     tick(const Duration(milliseconds: 0));
     tick(const Duration(milliseconds: 150));
