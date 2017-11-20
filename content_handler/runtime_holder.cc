@@ -134,14 +134,14 @@ void RuntimeHolder::Init(
       return;
     }
 
-    zx::vmo dylib_vmo;
+    fsl::SizedVmo dylib_vmo;
     if (!fsl::VmoFromVector(dylib_blob, &dylib_vmo)) {
       FXL_LOG(ERROR) << "Failed to load app dylib";
       return;
     }
 
     dlerror();
-    dylib_handle_ = dlopen_vmo(dylib_vmo.get(), RTLD_LAZY);
+    dylib_handle_ = dlopen_vmo(dylib_vmo.vmo().get(), RTLD_LAZY);
     if (dylib_handle_ == nullptr) {
       FXL_LOG(ERROR) << "dlopen failed: " << dlerror();
       return;
