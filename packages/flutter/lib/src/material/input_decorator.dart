@@ -56,7 +56,14 @@ class InputDecoration {
     this.suffixStyle,
     this.counterText,
     this.counterStyle,
-  }) : isCollapsed = false;
+    this.filled: false,
+    this.fillColor,
+    this.enabled: true,
+  }) : assert(isDense != null),
+       assert(hideDivider != null),
+       assert(filled != null),
+       assert(enabled != null),
+       isCollapsed = false;
 
   /// Creates a decoration that is the same size as the input field.
   ///
@@ -67,7 +74,12 @@ class InputDecoration {
   const InputDecoration.collapsed({
     @required this.hintText,
     this.hintStyle,
-  }) : icon = null,
+    this.filled: false,
+    this.fillColor,
+    this.enabled: true,
+  }) : assert(filled != null),
+       assert(enabled != null),
+       icon = null,
        labelText = null,
        labelStyle = null,
        helperText = null,
@@ -204,6 +216,12 @@ class InputDecoration {
   /// If null, defaults to the [helperStyle].
   final TextStyle counterStyle;
 
+  final bool filled;
+
+  final Color fillColor;
+
+  final bool enabled;
+
   /// Creates a copy of this input decoration but with the given fields replaced
   /// with the new values.
   ///
@@ -226,6 +244,9 @@ class InputDecoration {
     TextStyle suffixStyle,
     String counterText,
     TextStyle counterStyle,
+    bool filled,
+    Color fillColor,
+    bool enabled,
   }) {
     return new InputDecoration(
       icon: icon ?? this.icon,
@@ -245,6 +266,9 @@ class InputDecoration {
       suffixStyle: suffixStyle ?? this.suffixStyle,
       counterText: counterText ?? this.counterText,
       counterStyle: counterStyle ?? this.counterStyle,
+      filled: filled ?? this.filled,
+      fillColor: fillColor ?? this.fillColor,
+      enabled: enabled ?? this.enabled,
     );
   }
 
@@ -272,7 +296,10 @@ class InputDecoration {
         && typedOther.suffixText == suffixText
         && typedOther.suffixStyle == suffixStyle
         && typedOther.counterText == counterText
-        && typedOther.counterStyle == counterStyle;
+        && typedOther.counterStyle == counterStyle
+        && typedOther.filled == filled
+        && typedOther.fillColor == fillColor
+        && typedOther.enabled == enabled;
   }
 
   @override
@@ -296,6 +323,9 @@ class InputDecoration {
       suffixStyle,
       counterText,
       counterStyle,
+      filled,
+      fillColor,
+      //enabled, hashValues supports 20 parameters
     );
   }
 
@@ -330,6 +360,12 @@ class InputDecoration {
       description.add('counterText: $counterText');
     if (counterStyle != null)
       description.add('counterStyle: $counterStyle');
+    if (filled)
+      description.add('filled: true');
+    if (fillColor != null)
+      description.add('fillColor: $fillColor');
+    if (!enabled)
+      description.add('enabled: false');
     return 'InputDecoration(${description.join(', ')})';
   }
 }
@@ -400,12 +436,6 @@ class InputDecorator extends StatelessWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
-  static const double _kBottomBorderHeight = 1.0;
-  static const double _kDensePadding = 4.0;
-  static const double _kNormalPadding = 8.0;
-  static const double _kDenseTopPadding = 8.0;
-  static const double _kNormalTopPadding = 16.0;
-
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
@@ -427,28 +457,262 @@ class InputDecorator extends StatelessWidget {
     return themeData.hintColor;
   }
 
-  Widget _buildContent(Color borderColor, double topPadding, bool isDense, Widget inputChild) {
-    if (decoration.hideDivider) {
-      return new Container(
-        padding: new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding),
-        child: inputChild,
+  Color _getFillColor(ThemeData themeData) {
+    if (!decoration.filled)
+      return null;
+    if (decoration.fillColor != null)
+      return decoration.fillColor;
+
+    // dark theme: 10% white (enabled), 5% white (disabled)
+    // light theme: 4% black (enabled), 2% black (disabled)
+    const Color darkEnabled = const Color(0x1AFFFFFF);
+    const Color darkDisabled = const Color(0x0DFFFFFF);
+    const Color lightEnabled = const Color(0x0A000000);
+    const Color lightDisabled = const Color(0x05000000);
+
+    switch (themeData.brightness) {
+      case Brightness.dark:
+        return decoration.enabled ? darkEnabled : darkDisabled;
+      case Brightness.light:
+        return decoration.enabled ? lightEnabled : lightDisabled;
+    }
+    return lightEnabled;
+  }
+
+  // The style for the inline label or hint when they're displayed "inline", i.e.
+  // when they appear in place of the empty text field.
+  TextStyle _getInlineLabelStyle(ThemeData themeData) {
+    return themeData.textTheme.subhead.merge(baseStyle)
+      .copyWith(color: themeData.hintColor)
+      .merge(decoration.hintStyle);
+  }
+
+  // The style for the label when it's displayed above the text is the
+  // same as the inline label style except that the font's size is
+  // 75% of the inline size and its color depends on the value of errorText.
+  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
+    final Color color = decoration.errorText != null
+      ? decoration.errorStyle?.color ?? themeData.errorColor
+      : _getActiveColor(themeData);
+    final TextStyle style = themeData.textTheme.subhead.merge(baseStyle);
+    return style
+      .copyWith(color: color, fontSize: style.fontSize * 0.75)
+      .merge(decoration.labelStyle);
+  }
+
+  TextStyle _getHelperTextStyle(ThemeData themeData) {
+    return themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
+  }
+
+  TextStyle _getSubtextStyle(ThemeData themeData) {
+    final TextStyle helperStyle = _getHelperTextStyle(themeData);
+    return decoration.errorText != null
+      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
+      : helperStyle;
+  }
+
+  double get _dividerWeight {
+    if (decoration.hideDivider || !decoration.enabled)
+      return 0.0;
+    return isFocused ? 2.0 : 1.0;
+  }
+
+  // True if the label will be shown and the hint will not.
+  // If we're not focused, there's no value, and labelText was provided,
+  // then the label appears where the hint would.
+  bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
+
+  // Build a baseline-aligned row, [prefix input/hint suffix], within a container
+  // with the specified topPadding, decoration.fillColor in the background,
+  // and the divider at the bottom.
+  Widget _buildInput(BuildContext context, double topPadding, Widget inputChild) {
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle hintStyle = _getInlineLabelStyle(themeData);
+    final double dividerWeight = _dividerWeight;
+    final Color dividerColor = decoration.errorText == null
+      ? _getActiveColor(themeData)
+      : themeData.errorColor;
+
+    Widget content = inputChild;
+
+    // The hint is stacked on top of the inputChild (which may be "empty")
+    // because they both occupy the same location.
+    if (decoration.hintText != null) {
+      content = new Stack(
+        children: <Widget>[
+          inputChild,
+          new PositionedDirectional(
+            start: 0.0,
+            bottom: 0.0,
+            child: new AnimatedOpacity(
+              opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
+              duration: _kTransitionDuration,
+              curve: _kTransitionCurve,
+              child: new Text(
+                decoration.hintText,
+                style: hintStyle,
+                overflow: TextOverflow.ellipsis,
+                textAlign: textAlign,
+              ),
+            ),
+          ),
+        ],
       );
     }
 
-    return new AnimatedContainer(
-      padding: new EdgeInsets.only(top: topPadding, bottom: _kNormalPadding - _kBottomBorderHeight),
+    // Add the prefix and suffix widgets
+    if (!_hasInlineLabel && (!isEmpty || decoration.hintText == null)) {
+      final Widget prefix = decoration.prefixText == null ? null :
+        new Text(
+          decoration.prefixText,
+          style: decoration.prefixStyle ?? hintStyle
+        );
+      final Widget suffix = decoration.suffixText == null ? null :
+        new Text(
+          decoration.suffixText,
+          style: decoration.suffixStyle ?? hintStyle
+        );
+      if ((prefix ?? suffix) != null) {
+        final List<Widget> rowChildren = <Widget>[];
+        if (prefix != null)
+          rowChildren.add(prefix);
+        rowChildren.add(new Expanded(child: content));
+        if (suffix != null)
+          rowChildren.add(suffix);
+        content = new Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: rowChildren
+        );
+      }
+    }
+
+    // Wrap the content in an optionally filled container above the divider.
+    content = new AnimatedContainer(
+      padding: decoration.isCollapsed ? EdgeInsets.zero : new EdgeInsets.only(
+        top: topPadding,
+        bottom: (decoration.isDense ? 8.0 : 12.0) - dividerWeight,
+      ),
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       decoration: new BoxDecoration(
+        color: _getFillColor(themeData),
         border: new Border(
           bottom: new BorderSide(
-            color: borderColor,
-            width: _kBottomBorderHeight,
+            color: dividerColor,
+            width: dividerWeight,
           ),
         ),
       ),
-      child: inputChild,
+      child: content,
     );
+
+    return content;
+  }
+
+  List<Widget> _buildLabel(BuildContext context) {
+    if (decoration.labelText == null)
+      return const <Widget>[];
+
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle inlineLabelStyle = _getInlineLabelStyle(themeData);
+    final TextStyle floatingLabelStyle = _getFloatingLabelStyle(themeData);
+
+    final bool isDense = decoration.isDense;
+
+    // The top of the hint or input text, as well as the label when isFocused
+    // is false. There's always 12dps of top padding (8dps if isDense is true).
+    // If labelText is non-null there's an additional 4dps gap between the
+    // label and the top of the input text.
+    double inlineTop = 0.0;
+    if (!decoration.isCollapsed) {
+      inlineTop += isDense ? 8.0 : 12.0;
+      if (decoration.labelText != null) {
+        final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
+        inlineTop += floatingLabelStyle.fontSize * textScaleFactor + 4.0;
+      }
+    }
+
+    TextStyle labelStyle;
+    double top;
+    if (isEmpty && !isFocused) {
+      labelStyle = inlineLabelStyle;
+      top = inlineTop;
+    } else {
+      labelStyle = floatingLabelStyle;
+      top = isDense ? 8.0 : 12.0;
+    }
+
+    final Widget label = new AnimatedPositionedDirectional(
+      start: 0.0,
+      top: top,
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
+      child: new _AnimatedLabel(
+        text: decoration.labelText,
+        textAlign: textAlign,
+        style: labelStyle,
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+      ),
+    );
+
+    return <Widget>[label];
+  }
+
+  // Return widgets that display the error or helper text and the counterText.
+  // The tops of the returned widgets will be aligned with the bottom of
+  // the inputChild (typically a text field) which is also the top of the
+  // divider, if a divider is included.
+  List<Widget> _buildSubtextAndCounter(BuildContext context) {
+    final String helperText = decoration.helperText;
+    final String counterText = decoration.counterText;
+    final String errorText = decoration.errorText;
+    if (errorText == null && helperText == null && counterText == null)
+      return const <Widget>[];
+
+    assert(!decoration.isCollapsed, "Collapsed fields can't have errorText, helperText, or counterText set.");
+
+    final ThemeData themeData = Theme.of(context);
+
+    final Widget errorOrHelp = (errorText ?? helperText) == null ? null :
+      new AnimatedContainer(
+        padding: const EdgeInsets.only(top: 8.0),
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        child: new Text(
+          errorText ?? helperText,
+          style: _getSubtextStyle(themeData),
+          textAlign: textAlign,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+
+    final Widget counter = counterText == null ? null :
+      new AnimatedContainer(
+        padding: const EdgeInsets.only(top: 8.0),
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        child: new Text(
+          counterText,
+          style: _getHelperTextStyle(themeData).merge(decoration.counterStyle),
+          textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
+          overflow: TextOverflow.ellipsis,
+        ),
+      );
+
+    if (counter == null)
+      return <Widget>[errorOrHelp];
+    else if (errorOrHelp == null)
+      return <Widget>[counter];
+    return <Widget>[
+      new Row(
+        children: <Widget>[
+          new Expanded(child: errorOrHelp),
+          counter,
+        ],
+      ),
+    ];
   }
 
   @override
@@ -461,80 +725,16 @@ class InputDecorator extends StatelessWidget {
     final bool isCollapsed = decoration.isCollapsed;
     assert(!isDense || !isCollapsed);
 
-    final String labelText = decoration.labelText;
-    final String helperText = decoration.helperText;
-    final String counterText = decoration.counterText;
-    final String hintText = decoration.hintText;
-    final String errorText = decoration.errorText;
-
-    // If we're not focused, there's no value, and labelText was provided,
-    // then the label appears where the hint would. And we will not show
-    // the hintText.
-    final bool hasInlineLabel = !isFocused && labelText != null && isEmpty;
-
     final Color activeColor = _getActiveColor(themeData);
-
     final TextStyle baseStyle = themeData.textTheme.subhead.merge(this.baseStyle);
-    final TextStyle hintStyle = baseStyle.copyWith(color: themeData.hintColor).merge(decoration.hintStyle);
-    final TextStyle helperStyle = themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
-    final TextStyle counterStyle = helperStyle.merge(decoration.counterStyle);
-    final TextStyle subtextStyle = errorText != null
-      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
-      : helperStyle;
 
-    double topPadding = isCollapsed ? 0.0 : (isDense ?  _kDenseTopPadding : _kNormalTopPadding);
-
-    final List<Widget> stackChildren = <Widget>[];
-
-    if (labelText != null) {
-      assert(!isCollapsed);
-      final TextStyle floatingLabelStyle = themeData.textTheme.caption.copyWith(color: activeColor).merge(decoration.labelStyle);
-      final TextStyle labelStyle = hasInlineLabel ? hintStyle : floatingLabelStyle;
-      final double labelTextHeight = floatingLabelStyle.fontSize * textScaleFactor;
-
-      final double topPaddingIncrement = labelTextHeight + (isDense ? _kDensePadding : _kNormalPadding);
-      stackChildren.add(
-        new AnimatedPositionedDirectional(
-          start: 0.0,
-          top: topPadding + (hasInlineLabel ? topPaddingIncrement : 0.0),
-          duration: _kTransitionDuration,
-          curve: _kTransitionCurve,
-          child: new _AnimatedLabel(
-            text: labelText,
-            style: labelStyle,
-            duration: _kTransitionDuration,
-            curve: _kTransitionCurve,
-          ),
-        ),
-      );
-
-      topPadding += topPaddingIncrement;
+    double topPadding = isCollapsed ? 0.0 : (isDense ? 8.0 : 12.0);
+    if (decoration.labelText != null) {
+      final double floatingLabelHeight = _getFloatingLabelStyle(themeData).fontSize * textScaleFactor;
+      topPadding += floatingLabelHeight + 4.0; // 4.0 gap between label and text
     }
 
-    if (hintText != null) {
-      stackChildren.add(
-        new AnimatedPositionedDirectional(
-          start: 0.0,
-          end: 0.0,
-          top: topPadding,
-          duration: _kTransitionDuration,
-          curve: _kTransitionCurve,
-          child: new AnimatedOpacity(
-            opacity: (isEmpty && !hasInlineLabel) ? 1.0 : 0.0,
-            duration: _kTransitionDuration,
-            curve: _kTransitionCurve,
-            child: new Text(
-              hintText,
-              style: hintStyle,
-              overflow: TextOverflow.ellipsis,
-              textAlign: textAlign,
-            ),
-          ),
-        ),
-      );
-    }
-
-    Widget inputChild = new KeyedSubtree(
+    final Widget inputChild = new KeyedSubtree(
       // It's important that we maintain the state of our child subtree, as it
       // may be stateful (e.g. containing text selections). Since our build
       // function risks changing the depth of the tree, we preserve the subtree
@@ -547,99 +747,22 @@ class InputDecorator extends StatelessWidget {
       child: child,
     );
 
-    if (!hasInlineLabel && (!isEmpty || hintText == null) &&
-        (decoration?.prefixText != null || decoration?.suffixText != null)) {
-      final List<Widget> rowContents = <Widget>[];
-      if (decoration.prefixText != null) {
-        rowContents.add(
-            new Text(decoration.prefixText,
-            style: decoration.prefixStyle ?? hintStyle)
-        );
-      }
-      rowContents.add(new Expanded(child: inputChild));
-      if (decoration.suffixText != null) {
-        rowContents.add(
-            new Text(decoration.suffixText,
-            style: decoration.suffixStyle ?? hintStyle)
-        );
-      }
-      inputChild = new Row(children: rowContents);
-    }
-
-    // The inputChild and the helper/error text need to be in a column so that if the inputChild is
-    // a multiline input or a non-text widget, it lays out with the helper/error text below the
-    // inputChild.
-    final List<Widget> columnChildren = <Widget>[];
-    if (isCollapsed) {
-      columnChildren.add(inputChild);
-    } else {
-      final Color borderColor = errorText == null ? activeColor : themeData.errorColor;
-      columnChildren.add(_buildContent(borderColor, topPadding, isDense, inputChild));
-    }
-
-    if (errorText != null || helperText != null || counterText != null) {
-      assert(!isCollapsed, "Collapsed fields can't have errorText, helperText, or counterText set.");
-      final EdgeInsets topPadding = new EdgeInsets.only(
-        top: _kBottomBorderHeight + (isDense ? _kDensePadding : _kNormalPadding)
-      );
-
-      Widget buildSubText() {
-        return new AnimatedContainer(
-          padding: topPadding,
-          duration: _kTransitionDuration,
-          curve: _kTransitionCurve,
-          child: new Text(
-            errorText ?? helperText,
-            style: subtextStyle,
-            textAlign: textAlign,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }
-
-      Widget buildCounter() {
-        return new AnimatedContainer(
-          padding: topPadding,
-          duration: _kTransitionDuration,
-          curve: _kTransitionCurve,
-          child: new Text(
-            counterText,
-            style: counterStyle,
-            textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      }
-
-      final bool needSubTextField = errorText != null || helperText != null;
-      final bool needCounterField = counterText != null;
-      if (needCounterField && needSubTextField) {
-        columnChildren.add(
-          new Row(
-            children: <Widget>[
-              new Expanded(child: buildSubText()),
-              buildCounter(),
-            ],
-          ),
-        );
-      } else if (needSubTextField) {
-        columnChildren.add(buildSubText());
-      } else if (needCounterField) {
-        columnChildren.add(buildCounter());
-      }
-    }
-
-    stackChildren.add(
-      new Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: columnChildren,
-      ),
-    );
-
     final Widget stack = new Stack(
       fit: StackFit.passthrough,
-      children: stackChildren
+      children: <Widget>[]
+        ..add(
+          // The inputChild and the helper/error text need to be in a column
+          // so that if the inputChild is a multiline input or a non-text widget,
+          // it lays out with the helper/error text below the inputChild.
+          new Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[]
+              ..add(_buildInput(context, topPadding, inputChild))
+              ..addAll(_buildSubtextAndCounter(context))
+          )
+        )
+        ..addAll(_buildLabel(context))
     );
 
     if (decoration.icon != null) {
