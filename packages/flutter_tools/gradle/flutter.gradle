@@ -304,7 +304,7 @@ abstract class BaseFlutterTask extends DefaultTask {
     String targetPath
     @Optional @Input
     Boolean previewDart2
-    @Optional
+    @Optional @Input
     Boolean preferSharedLibrary
     File sourceDir
     File intermediateDir
@@ -346,10 +346,10 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--preview-dart-2"
                 }
                 if (extraFrontEndOptions != null) {
-                  args "--extra-front-end-options", "${extraFrontEndOptions}"
+                    args "--extra-front-end-options", "${extraFrontEndOptions}"
                 }
                 if (extraGenSnapshotOptions != null) {
-                  args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+                    args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
                 if (preferSharedLibrary) {
                     args "--prefer-shared-library"
@@ -403,19 +403,19 @@ class FlutterTask extends BaseFlutterTask {
 
     CopySpec getAssets() {
         return project.copySpec {
-	     from "${intermediateDir}/app.flx"
-	     from "${intermediateDir}/snapshot_blob.bin"
+            from "${intermediateDir}/app.flx"
+            from "${intermediateDir}/snapshot_blob.bin"
             if (buildMode != 'debug') {
-                // Although we have either the *.so file or the other files, we
-                // can still list all of them and only the existing ones will be
-                // copied :-/
+              if (preferSharedLibrary) {
                 from "${intermediateDir}/app.so"
+              } else {
                 from "${intermediateDir}/vm_snapshot_data"
                 from "${intermediateDir}/vm_snapshot_instr"
                 from "${intermediateDir}/isolate_snapshot_data"
                 from "${intermediateDir}/isolate_snapshot_instr"
+              }
             }
-        }
+      }
     }
 
     FileCollection readDependencies(File dependenciesFile) {

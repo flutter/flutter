@@ -114,6 +114,8 @@ class AndroidSdk {
         if (validSdkDirectory(dir))
           return dir;
       }
+
+      return null;
     }
 
     String findNdk(String androidHomeDir) {

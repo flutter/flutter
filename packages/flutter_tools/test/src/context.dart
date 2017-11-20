@@ -70,6 +70,21 @@ void testUsingContext(String description, dynamic testMethod(), {
   ContextInitializer initializeContext: _defaultInitializeContext,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
+
+  // Ensure we don't rely on the default [Config] constructor which will
+  // leak a sticky $HOME/.flutter_settings behind!
+  Directory configDir;
+  tearDown(() {
+    configDir?.deleteSync(recursive: true);
+    configDir = null;
+  });
+  Config buildConfig(FileSystem fs) {
+    configDir = fs.systemTempDirectory.createTempSync('config-dir');
+    final File settingsFile = fs.file(
+        fs.path.join(configDir.path, '.flutter_settings'));
+    return new Config(settingsFile);
+  }
+
   test(description, () async {
     final AppContext testContext = new AppContext();
 
@@ -80,7 +95,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       ..putIfAbsent(FileSystem, () => const LocalFileSystem())
       ..putIfAbsent(ProcessManager, () => const LocalProcessManager())
       ..putIfAbsent(Logger, () => new BufferLogger())
-      ..putIfAbsent(Config, () => new Config());
+      ..putIfAbsent(Config, () => buildConfig(testContext[FileSystem]));
 
     // Apply the initializer after seeding the base value above.
     initializeContext(testContext);
