@@ -12,7 +12,6 @@
 #include "flutter/lib/ui/painting/frame_info.h"
 #include "flutter/lib/ui/painting/gradient.h"
 #include "flutter/lib/ui/painting/image.h"
-#include "flutter/lib/ui/painting/image_decoding.h"
 #include "flutter/lib/ui/painting/image_filter.h"
 #include "flutter/lib/ui/painting/image_shader.h"
 #include "flutter/lib/ui/painting/mask_filter.h"
@@ -58,7 +57,6 @@ void DartUI::InitForGlobal() {
     Codec::RegisterNatives(g_natives);
     DartRuntimeHooks::RegisterNatives(g_natives);
     FrameInfo::RegisterNatives(g_natives);
-    ImageDecoding::RegisterNatives(g_natives);
     ImageFilter::RegisterNatives(g_natives);
     ImageShader::RegisterNatives(g_natives);
     MaskFilter::RegisterNatives(g_natives);

@@ -9387,8 +9387,6 @@ FILE: ../../../flutter/lib/ui/painting/canvas.cc
 FILE: ../../../flutter/lib/ui/painting/canvas.h
 FILE: ../../../flutter/lib/ui/painting/gradient.cc
 FILE: ../../../flutter/lib/ui/painting/gradient.h
-FILE: ../../../flutter/lib/ui/painting/image_decoding.cc
-FILE: ../../../flutter/lib/ui/painting/image_decoding.h
 FILE: ../../../flutter/lib/ui/painting/image_shader.cc
 FILE: ../../../flutter/lib/ui/painting/image_shader.h
 FILE: ../../../flutter/lib/ui/painting/mask_filter.cc
