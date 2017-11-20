@@ -128,18 +128,18 @@ void main() {
     {
       await tester.pump(const Duration(milliseconds: 50));
       final double labelY50ms = tester.getRect(find.text('label')).topLeft.dy;
-      expect(labelY50ms, inExclusiveRange(12.0, 28.0));
+      expect(labelY50ms, inExclusiveRange(12.0, 20.0));
       await tester.pump(const Duration(milliseconds: 50));
       final double labelY100ms = tester.getRect(find.text('label')).topLeft.dy;
-      expect(labelY100ms, inExclusiveRange(labelY50ms, 28.0));
+      expect(labelY100ms, inExclusiveRange(labelY50ms, 20.0));
     }
 
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
-    expect(tester.getTopLeft(find.text('label')).dy, 28.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
 
@@ -189,8 +189,8 @@ void main() {
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
-    expect(tester.getTopLeft(find.text('label')).dy, 28.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getDividerWeight(tester), 0.0);
   });
 
@@ -233,18 +233,28 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 56dps:
+    // Overall height for this InputDecorator is 56dps. When the
+    // label is "floating" (empty input or no focus) the layout is:
+    //
     //   12 - top padding
     //   12 - floating label (font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
     //   16 - input text (font size 16dps)
     //   12 - bottom padding
+    //
+    // When the label is not floating, it's vertically centered.
+    //
+    //   20 - top padding
+    //   16 - label (font size 16dps)
+    //   20 - bottom padding (empty input text still appears here)
 
+
+    // The label is not floating so it's vertically centered.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 44.0);
+    expect(tester.getRect(find.text('label')).topLeft.dy, 20.0);
+    expect(tester.getRect(find.text('label')).bottomLeft.dy, 36.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
@@ -333,18 +343,27 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 56dps:
+    // Overall height for this InputDecorator is 48dps. When the
+    // label is "floating" (empty input or no focus) the layout is:
+    //
     //    8 - top padding
     //   12 - floating label (font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
     //   16 - input text (font size 16dps)
     //    8 - bottom padding
+    //
+    // When the label is not floating, it's vertically centered.
+    //
+    //   16 - top padding
+    //   16 - label (font size 16dps)
+    //   16 - bottom padding (empty input text still appears here)
 
+    // The label is not floating so it's vertically centered.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
     expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 24.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 40.0);
+    expect(tester.getRect(find.text('label')).topLeft.dy, 16.0);
+    expect(tester.getRect(find.text('label')).bottomLeft.dy, 32.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
@@ -747,19 +766,27 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 45.5dps:
+    // Overall height for this InputDecorator is 45.5dps. When the label is
+    // floating the layout is:
+    //
     //    12  - top padding
     //    7.5 - floating label (font size 10dps * 0.75 = 7.5)
     //    4   - floating label / input text gap
     //   10   - input text (font size 10dps)
     //   12   - bottom padding
+    //
+    // When the label is not floating, it's vertically centered.
+    //
+    //   17.75 - top padding
+    //      10 - label (font size 10dps)
+    //   17.75 - bottom padding (empty input text still appears here)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 45.5));
     expect(tester.getSize(find.text('hint')).height, 10.0);
     expect(tester.getSize(find.text('label')).height, 10.0);
     expect(tester.getSize(find.text('text')).height, 10.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
-    expect(tester.getTopLeft(find.text('label')).dy, 23.5);
+    expect(tester.getTopLeft(find.text('label')).dy, 17.75);
     expect(tester.getTopLeft(find.text('text')).dy, 23.5);
   });
 
@@ -782,7 +809,8 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 76dps:
+    // Overall height for this InputDecorator is 76dps. When the label is
+    // floating the layout is:
     //   12 - top padding
     //   12 - floating label (font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
@@ -791,6 +819,7 @@ void main() {
     //    8 - below the divider line padding
     //   12 - help/error/counter text (font size 12dps)
 
+    // Label is floating because isEmpty is false.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
     expect(tester.getBottomLeft(find.text('text')).dy, 44.0);

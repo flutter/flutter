@@ -587,7 +587,8 @@ class InputDecorator extends StatelessWidget {
       }
     }
 
-    // Wrap the content in an optionally filled container above the divider.
+    // Wrap the content in an optionally filled container with the bottom
+    // border serving as the divider.
     content = new AnimatedContainer(
       padding: decoration.isCollapsed ? EdgeInsets.zero : new EdgeInsets.only(
         top: topPadding,
@@ -615,45 +616,28 @@ class InputDecorator extends StatelessWidget {
       return const <Widget>[];
 
     final ThemeData themeData = Theme.of(context);
-    final TextStyle inlineLabelStyle = _getInlineLabelStyle(themeData);
-    final TextStyle floatingLabelStyle = _getFloatingLabelStyle(themeData);
-
     final bool isDense = decoration.isDense;
+    final bool isFloating = !isEmpty || isFocused;
 
-    // The top of the hint or input text, as well as the label when isFocused
-    // is false. There's always 12dps of top padding (8dps if isDense is true).
-    // If labelText is non-null there's an additional 4dps gap between the
-    // label and the top of the input text.
-    double inlineTop = 0.0;
-    if (!decoration.isCollapsed) {
-      inlineTop += isDense ? 8.0 : 12.0;
-      if (decoration.labelText != null) {
-        final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
-        inlineTop += floatingLabelStyle.fontSize * textScaleFactor + 4.0;
-      }
-    }
-
-    TextStyle labelStyle;
-    double top;
-    if (isEmpty && !isFocused) {
-      labelStyle = inlineLabelStyle;
-      top = inlineTop;
-    } else {
-      labelStyle = floatingLabelStyle;
-      top = isDense ? 8.0 : 12.0;
-    }
-
-    final Widget label = new AnimatedPositionedDirectional(
-      start: 0.0,
-      top: top,
-      duration: _kTransitionDuration,
-      curve: _kTransitionCurve,
-      child: new _AnimatedLabel(
-        text: decoration.labelText,
-        textAlign: textAlign,
-        style: labelStyle,
+    final Widget label = new Positioned.fill(
+      child: new AnimatedContainer(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
+        alignment: isFloating
+          ? AlignmentDirectional.topStart
+          : AlignmentDirectional.centerStart,
+        padding: isFloating
+          ? (isDense ? const EdgeInsets.only(top: 8.0) : const EdgeInsets.only(top: 12.0))
+          : EdgeInsets.zero,
+        child: new _AnimatedLabel(
+          duration: _kTransitionDuration,
+          curve: _kTransitionCurve,
+          text: decoration.labelText,
+          textAlign: textAlign,
+          style: isFloating
+            ? _getFloatingLabelStyle(themeData)
+            : _getInlineLabelStyle(themeData),
+        ),
       ),
     );
 
