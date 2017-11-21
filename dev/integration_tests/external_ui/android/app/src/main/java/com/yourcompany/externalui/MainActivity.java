@@ -58,11 +58,13 @@ public class MainActivity extends FlutterActivity {
             }, 0, 1000 / fps);
             consumerTimer = new Timer();
             consumerTimer.scheduleAtFixedRate(new TimerTask() {
-              private long lastTimestamp;
+              private long lastTimestamp = -1L;
 
               @Override
               public void run() {
                 final long timestamp = texture.getTimestamp();
+                // The texture's timestamp is updated on consumption.
+                // We detect the change by asking very frequently.
                 if (timestamp != lastTimestamp) {
                   lastTimestamp = timestamp;
                   framesConsumed.incrementAndGet();
