@@ -62,10 +62,17 @@ class AndroidSdk {
     _init();
   }
 
+  /// The path to the Android SDK.
   final String directory;
-  final String ndkDirectory;  // Can be `null`.
-  final String ndkCompiler;  // Can be `null`.
-  final List<String> ndkCompilerArgs;  // Can be `null`.
+
+  /// The path to the NDK (can be `null`).
+  final String ndkDirectory;
+
+  /// The path to the NDK compiler (can be `null`).
+  final String ndkCompiler;
+
+  /// The mandatory arguments to the NDK compiler (can be `null`).
+  final List<String> ndkCompilerArgs;
 
   List<AndroidSdkVersion> _sdkVersions;
   AndroidSdkVersion _latestVersion;
@@ -119,7 +126,7 @@ class AndroidSdk {
     }
 
     String findNdk(String androidHomeDir) {
-      final ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
+      final String ndkDirectory = fs.path.join(androidHomeDir, 'ndk-bundle');
       if (fs.isDirectorySync(ndkDirectory)) {
         return ndkDirectory;
       }
@@ -134,7 +141,7 @@ class AndroidSdk {
         directory = 'darwin-x86_64';
       }
       if (directory != null) {
-        final ndkCompiler = fs.path.join(ndkDirectory,
+        final String ndkCompiler = fs.path.join(ndkDirectory,
             'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', directory,
             'bin', 'arm-linux-androideabi-gcc');
         if (fs.isFileSync(ndkCompiler)) {
@@ -145,10 +152,10 @@ class AndroidSdk {
     }
 
     List<String> computeNdkCompilerArgs(String ndkDirectory) {
-      final armPlatform = fs.path.join(ndkDirectory, 'platforms', 'android-9',
-          'arch-arm');
+      final String armPlatform = fs.path.join(ndkDirectory, 'platforms',
+          'android-9', 'arch-arm');
       if (fs.isDirectorySync(armPlatform)) {
-        return ['--sysroot', armPlatform];
+        return <String>['--sysroot', armPlatform];
       }
       return null;
     }
@@ -161,14 +168,16 @@ class AndroidSdk {
     }
 
     // Try to find the NDK compiler.  If we can't find it, it's also ok.
-    final ndkDir = findNdk(androidHomeDir);
+    final String ndkDir = findNdk(androidHomeDir);
     String ndkCompiler;
     List<String> ndkCompilerArgs;
     if (ndkDir != null) {
       ndkCompiler = findNdkCompiler(ndkDir);
       if (ndkCompiler != null) {
         ndkCompilerArgs = computeNdkCompilerArgs(ndkDir);
-        if (ndkCompilerArgs == null) ndkCompiler = null;
+        if (ndkCompilerArgs == null) {
+          ndkCompiler = null;
+        }
       }
     }
 
