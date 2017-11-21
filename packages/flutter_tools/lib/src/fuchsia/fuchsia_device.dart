@@ -68,6 +68,7 @@ class FuchsiaDevice extends Device {
     bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: false,
+    bool ipv6: false,
   }) => new Future<Null>.error('unimplemented');
 
   @override
