@@ -235,6 +235,10 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('extra-gen-snapshot-options')) {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
+        Boolean preferSharedLibraryValue = false
+        if (project.hasProperty('prefer-shared-library')) {
+            preferSharedLibraryValue = project.property('prefer-shared-library')
+        }
 
         project.android.applicationVariants.all { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
@@ -253,6 +257,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                preferSharedLibrary preferSharedLibraryValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
             }
@@ -266,6 +271,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 previewDart2 previewDart2Value
+                preferSharedLibrary preferSharedLibraryValue
                 sourceDir project.file(project.flutter.source)
                 intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}")
                 extraFrontEndOptions extraFrontEndOptionsValue
@@ -298,6 +304,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String targetPath
     @Optional @Input
     Boolean previewDart2
+    @Optional @Input
+    Boolean preferSharedLibrary
     File sourceDir
     File intermediateDir
     @Optional @Input
@@ -338,10 +346,13 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--preview-dart-2"
                 }
                 if (extraFrontEndOptions != null) {
-                  args "--extra-front-end-options", "${extraFrontEndOptions}"
+                    args "--extra-front-end-options", "${extraFrontEndOptions}"
                 }
                 if (extraGenSnapshotOptions != null) {
-                  args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+                    args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+                }
+                if (preferSharedLibrary) {
+                    args "--prefer-shared-library"
                 }
                 args "--${buildMode}"
             }
@@ -392,15 +403,19 @@ class FlutterTask extends BaseFlutterTask {
 
     CopySpec getAssets() {
         return project.copySpec {
-	     from "${intermediateDir}/app.flx"
-	     from "${intermediateDir}/snapshot_blob.bin"
+            from "${intermediateDir}/app.flx"
+            from "${intermediateDir}/snapshot_blob.bin"
             if (buildMode != 'debug') {
+              if (preferSharedLibrary) {
+                from "${intermediateDir}/app.so"
+              } else {
                 from "${intermediateDir}/vm_snapshot_data"
                 from "${intermediateDir}/vm_snapshot_instr"
                 from "${intermediateDir}/isolate_snapshot_data"
                 from "${intermediateDir}/isolate_snapshot_instr"
+              }
             }
-        }
+      }
     }
 
     FileCollection readDependencies(File dependenciesFile) {

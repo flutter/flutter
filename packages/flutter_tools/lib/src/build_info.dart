@@ -13,7 +13,8 @@ class BuildInfo {
   const BuildInfo(this.mode, this.flavor,
       {this.previewDart2,
       this.extraFrontEndOptions,
-      this.extraGenSnapshotOptions});
+      this.extraGenSnapshotOptions,
+      this.preferSharedLibrary});
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -32,6 +33,9 @@ class BuildInfo {
 
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
+
+  // Whether to prefer AOT compiling to a *so file.
+  final bool preferSharedLibrary;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
