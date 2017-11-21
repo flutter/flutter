@@ -30,7 +30,8 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///    <https://material.io/guidelines/components/lists-controls.html>.
 class ExpansionTile extends StatefulWidget {
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
-  /// the tile to reveal or hide the [children].
+  /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
+  /// be non-null.
   const ExpansionTile({
     Key key,
     this.leading,
@@ -39,7 +40,9 @@ class ExpansionTile extends StatefulWidget {
     this.onExpansionChanged,
     this.children: const <Widget>[],
     this.trailing,
-  }) : super(key: key);
+    this.initiallyExpanded: false,
+  }) : assert(initiallyExpanded != null),
+       super(key: key);
 
   /// A widget to display before the title.
   ///
@@ -69,6 +72,9 @@ class ExpansionTile extends StatefulWidget {
   /// A widget to display instead of a rotating arrow icon.
   final Widget trailing;
 
+  /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
+  final bool initiallyExpanded;
+
   @override
   _ExpansionTileState createState() => new _ExpansionTileState();
 }
@@ -97,7 +103,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
     _backgroundColor = new ColorTween();
 
-    _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
+    _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
     if (_isExpanded)
       _controller.value = 1.0;
   }
