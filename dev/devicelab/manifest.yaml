@@ -192,6 +192,13 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
 
+  external_ui_integration_test_ios:
+    description: >
+      Checks that external UIs work on iOS.
+    stage: devicelab
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
+
   channels_integration_test_ios:
     description: >
       Checks that platform channels work on iOS.

@@ -8,7 +8,10 @@ import 'package:test/test.dart';
 
 final RegExp statsRegExp = new RegExp('Produced: (.*)fps\nConsumed: (.*)fps\nWidget builds: (.*)');
 
-void main() {
+void main() async {
+  // TODO(mravn): the following pause appears necessary on iOS to avoid
+  // inflating elements too early (when there is no size).
+  await new Future<Null>.delayed(const Duration(seconds: 1));
   group('texture suite', () {
     FlutterDriver driver;
 
