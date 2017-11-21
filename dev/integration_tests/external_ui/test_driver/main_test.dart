@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:test/test.dart';
 
@@ -22,7 +21,7 @@ void main() {
       final SerializableFinder summary = find.byValueKey('summary');
 
       await driver.tap(fab);
-      await new Future.delayed(const Duration(seconds: 3));
+      await new Future<Null>.delayed(const Duration(seconds: 3));
       await driver.tap(fab);
 
       final String statsSlow = await driver.getText(summary);
@@ -33,7 +32,7 @@ void main() {
       expect(int.parse(matchSlow.group(3)), 1);
 
       await driver.tap(fab);
-      await new Future.delayed(const Duration(seconds: 3));
+      await new Future<Null>.delayed(const Duration(seconds: 3));
       await driver.tap(fab);
 
       final String statsFast = await driver.getText(summary);

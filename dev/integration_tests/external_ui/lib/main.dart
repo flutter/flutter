@@ -1,3 +1,7 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,7 +27,7 @@ class MyAppState extends State<MyApp> {
   String _summary = 'Press play to start producing frames';
   IconData _icon = Icons.play_arrow;
 
-  void _summarizeStats() async {
+  Future<Null> _summarizeStats() async {
     final double framesProduced = await channel.invokeMethod('getProducedFrameRate');
     final double framesConsumed = await channel.invokeMethod('getConsumedFrameRate');
     _summary = '''
@@ -32,7 +36,7 @@ Consumed: ${framesConsumed.toStringAsFixed(1)}fps
 Widget builds: $_widgetBuilds''';
   }
 
-  void _nextState() async {
+  Future<Null> _nextState() async {
     switch (_state) {
     case FrameState.initial:
       _widgetBuilds = 0;
@@ -81,7 +85,7 @@ Widget builds: $_widgetBuilds''';
               new Container(
                 width: 300.0,
                 height: 200.0,
-                child: new Texture(textureId: 0),
+                child: const Texture(textureId: 0),
               ),
               new Container(
                 width: 300.0,
