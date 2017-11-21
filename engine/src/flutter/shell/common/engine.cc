@@ -163,20 +163,40 @@ void Engine::Init(const std::string& bundle_path) {
       dlsym(library_handle, "kDartIsolateSnapshotInstructions"));
 #elif OS(ANDROID)
   const blink::Settings& settings = blink::Settings::Get();
+  const std::string& aot_shared_library_path = settings.aot_shared_library_path;
   const std::string& aot_snapshot_path = settings.aot_snapshot_path;
-  FXL_CHECK(!aot_snapshot_path.empty());
-  vm_snapshot_data =
-      MemMapSnapshot(aot_snapshot_path, "vm_snapshot_data",
-                     settings.aot_vm_snapshot_data_filename, false);
-  vm_snapshot_instr =
-      MemMapSnapshot(aot_snapshot_path, "vm_snapshot_instr",
-                     settings.aot_vm_snapshot_instr_filename, true);
-  default_isolate_snapshot_data =
-      MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_data",
-                     settings.aot_isolate_snapshot_data_filename, false);
-  default_isolate_snapshot_instr =
-      MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_instr",
-                     settings.aot_isolate_snapshot_instr_filename, true);
+
+  if (!aot_shared_library_path.empty()) {
+    FXL_CHECK(aot_snapshot_path.empty());
+    dlerror();  // clear previous errors on thread
+    void* library_handle = dlopen(aot_shared_library_path.c_str(), RTLD_NOW);
+    const char* err = dlerror();
+    if (err != nullptr) {
+      FXL_LOG(FATAL) << "dlopen failed: " << err;
+    }
+    vm_snapshot_data = reinterpret_cast<const uint8_t*>(
+        dlsym(library_handle, "_kDartVmSnapshotData"));
+    vm_snapshot_instr = reinterpret_cast<const uint8_t*>(
+        dlsym(library_handle, "_kDartVmSnapshotInstructions"));
+    default_isolate_snapshot_data = reinterpret_cast<const uint8_t*>(
+        dlsym(library_handle, "_kDartIsolateSnapshotData"));
+    default_isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
+        dlsym(library_handle, "_kDartIsolateSnapshotInstructions"));
+  } else {
+    FXL_CHECK(!aot_snapshot_path.empty());
+    vm_snapshot_data =
+        MemMapSnapshot(aot_snapshot_path, "vm_snapshot_data",
+                       settings.aot_vm_snapshot_data_filename, false);
+    vm_snapshot_instr =
+        MemMapSnapshot(aot_snapshot_path, "vm_snapshot_instr",
+                       settings.aot_vm_snapshot_instr_filename, true);
+    default_isolate_snapshot_data =
+        MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_data",
+                       settings.aot_isolate_snapshot_data_filename, false);
+    default_isolate_snapshot_instr =
+        MemMapSnapshot(aot_snapshot_path, "isolate_snapshot_instr",
+                       settings.aot_isolate_snapshot_instr_filename, true);
+  }
 #else
 #error Unknown OS
 #endif

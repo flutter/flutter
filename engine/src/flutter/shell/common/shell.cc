@@ -139,6 +139,9 @@ void Shell::InitStandalone(fxl::CommandLine command_line,
   command_line.GetOptionValue(FlagForSwitch(Switch::AotIsolateSnapshotData),
                               &settings.aot_isolate_snapshot_data_filename);
 
+  command_line.GetOptionValue(FlagForSwitch(Switch::AotSharedLibraryPath),
+                              &settings.aot_shared_library_path);
+
   command_line.GetOptionValue(
       FlagForSwitch(Switch::AotIsolateSnapshotInstructions),
       &settings.aot_isolate_snapshot_instr_filename);

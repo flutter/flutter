@@ -22,6 +22,7 @@ namespace shell {
 // clang-format on
 
 DEF_SWITCHES_START
+DEF_SWITCH(AotSharedLibraryPath, "aot-shared-library-path", "Path to the *.so.")
 DEF_SWITCH(AotSnapshotPath, "aot-snapshot-path", "Path to the AOT snapshot.")
 DEF_SWITCH(AotVmSnapshotData, "vm-snapshot-data", "")
 DEF_SWITCH(AotVmSnapshotInstructions, "vm-snapshot-instr", "")
