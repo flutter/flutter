@@ -32,7 +32,7 @@ abstract class RunCommandBase extends FlutterCommand {
         hide: true,
         negatable: false,
         defaultsTo: false,
-        help: 'Binds to IPv6 localhost instead of IPv4 when Flutter Tools\n'
+        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
               'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
