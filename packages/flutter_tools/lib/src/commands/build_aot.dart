@@ -251,7 +251,7 @@ Future<String> _buildAotSnapshot(
     '--isolate_snapshot_data=$isolateSnapshotData',
     '--packages=${packageMap.packagesPath}',
     '--url_mapping=dart:ui,$uiPath',
-    '--url_mapping=dart:vmservice_sky,$vmServicePath',
+    '--url_mapping=dart:vmservice_io,$vmServicePath',
     '--print_snapshot_sizes',
     '--dependencies=$dependencies',
     '--causal_async_stacks',
