@@ -21,7 +21,8 @@ void main() {
               request: request));
         });
     await tester.pumpWidget(new Image.network(
-        'https://www.example.com/images/frame.png',
-        headers: <String, String>{'flutter': 'flutter'}));
+      'https://www.example.com/images/frame.png',
+      headers: <String, String>{'flutter': 'flutter'},
+    ));
   });
 }
