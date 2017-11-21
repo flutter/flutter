@@ -2343,9 +2343,8 @@ class Progress {
       _lastUpdate ??= new Stopwatch();
       final String line = toString();
       system.stderr.write('\r$line');
-      if (_lastLength > line.length) {
-	system.stderr.write(' ' * (_lastLength - line.length));
-      }
+      if (_lastLength > line.length)
+        system.stderr.write(' ' * (_lastLength - line.length));
       _lastLength = line.length;
       _lastUpdate.reset();
       _lastUpdate.start();
