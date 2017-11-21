@@ -78,6 +78,7 @@ void main() {
           expect(sdk.ndkCompiler, realNdkCompiler);
           expect(sdk.ndkCompilerArgs, <String>['--sysroot', realNdkSysroot]);
         }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
           Platform: () => new FakePlatform(operatingSystem: os),
         });
       });
@@ -94,6 +95,7 @@ void main() {
           expect(sdk.ndkCompiler, null);
           expect(sdk.ndkCompilerArgs, null);
         }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
           Platform: () => new FakePlatform(operatingSystem: os),
         });
       }
