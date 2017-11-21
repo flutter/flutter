@@ -411,7 +411,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
 
-  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network
+  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
   final Map<String, String> headers;
 
   @override
