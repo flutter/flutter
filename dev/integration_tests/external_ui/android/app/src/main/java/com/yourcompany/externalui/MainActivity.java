@@ -1,6 +1,5 @@
 package com.yourcompany.externalui;
 
-import android.annotation.TargetApi;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.SurfaceTexture;
@@ -21,7 +20,6 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.view.TextureRegistry;
 import io.flutter.view.TextureRegistry.SurfaceTextureEntry;
 
-@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
 public class MainActivity extends FlutterActivity {
   private Surface surface;
   private SurfaceTexture texture;
