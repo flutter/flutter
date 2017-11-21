@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/build.dart';
 import '../base/common.dart';
@@ -48,7 +49,9 @@ class BuildAotCommand extends BuildSubCommand {
         allowMultiple: true,
         splitCommas: true,
         hide: true,
-      );
+      )
+      ..addFlag('prefer-shared-library', negatable: false,
+          help: 'Whether to prefer compiling to a *.so file (android only).');
   }
 
   @override
@@ -80,6 +83,7 @@ class BuildAotCommand extends BuildSubCommand {
       previewDart2: argResults['preview-dart-2'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+      preferSharedLibrary: argResults['prefer-shared-library'],
     );
     status?.stop();
 
@@ -110,6 +114,7 @@ Future<String> buildAotSnapshot(
   bool previewDart2: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
+  bool preferSharedLibrary: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   try {
@@ -122,6 +127,7 @@ Future<String> buildAotSnapshot(
       previewDart2: previewDart2,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
+      preferSharedLibrary: preferSharedLibrary,
     );
   } on String catch (error) {
     // Catch the String exceptions thrown from the `runCheckedSync` methods below.
@@ -140,6 +146,7 @@ Future<String> _buildAotSnapshot(
   bool previewDart2: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
+  bool preferSharedLibrary: false,
 }) async {
   outputPath ??= getAotBuildDirectory();
   if (!isAotBuildMode(buildMode) && !interpreter) {
@@ -161,6 +168,16 @@ Future<String> _buildAotSnapshot(
   final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
   final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
   final String dependencies = fs.path.join(outputDir.path, 'snapshot.d');
+  final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
+  final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
+  final String assemblySo = fs.path.join(outputDir.path, 'app.so');
+  final bool compileToSharedLibrary =
+      preferSharedLibrary && androidSdk.ndkCompiler != null;
+
+  if (preferSharedLibrary && !compileToSharedLibrary) {
+    printStatus(
+        'Could not find NDK compiler. Not building in shared library mode');
+  }
 
   final String vmEntryPoints = artifacts.getArtifactPath(
     Artifact.dartVmEntryPointsTxt,
@@ -192,20 +209,22 @@ Future<String> _buildAotSnapshot(
 
   // These paths are used only on iOS.
   String snapshotDartIOS;
-  String assembly;
 
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      outputPaths.addAll(<String>[
-        vmSnapshotData,
-        isolateSnapshotData,
-      ]);
+      if (compileToSharedLibrary) {
+        outputPaths.add(assemblySo);
+      } else {
+        outputPaths.addAll(<String>[
+          vmSnapshotData,
+          isolateSnapshotData,
+        ]);
+      }
       break;
     case TargetPlatform.ios:
       snapshotDartIOS = artifacts.getArtifactPath(Artifact.snapshotDart, platform, buildMode);
-      assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
       inputPaths.add(snapshotDartIOS);
       break;
     case TargetPlatform.darwin_x64:
@@ -260,16 +279,23 @@ Future<String> _buildAotSnapshot(
   final String kIsolateSnapshotDataC = fs.path.join(outputDir.path, '$kIsolateSnapshotData.c');
   final String kVmSnapshotDataO = fs.path.join(outputDir.path, '$kVmSnapshotData.o');
   final String kIsolateSnapshotDataO = fs.path.join(outputDir.path, '$kIsolateSnapshotData.o');
-  final String assemblyO = fs.path.join(outputDir.path, 'snapshot_assembly.o');
 
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
+      if (compileToSharedLibrary) {
+        genSnapshotCmd.add('--snapshot_kind=app-aot-assembly');
+        genSnapshotCmd.add('--assembly=$assembly');
+        outputPaths.add(assemblySo);
+      } else {
+        genSnapshotCmd.addAll(<String>[
+          '--snapshot_kind=app-aot-blobs',
+          '--vm_snapshot_instructions=$vmSnapshotInstructions',
+          '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
+        ]);
+      }
       genSnapshotCmd.addAll(<String>[
-        '--snapshot_kind=app-aot-blobs',
-        '--vm_snapshot_instructions=$vmSnapshotInstructions',
-        '--isolate_snapshot_instructions=$isolateSnapshotInstructions',
         '--no-sim-use-hardfp',  // Android uses the softfloat ABI.
         '--no-use-integer-division',  // Not supported by the Pixel in 32-bit mode.
       ]);
@@ -396,6 +422,19 @@ Future<String> _buildAotSnapshot(
       linkCommand.add(assemblyO);
     }
     await runCheckedAsync(linkCommand);
+  } else {
+    if (compileToSharedLibrary) {
+      // A word of warning: Instead of compiling via two steps, to a .o file and
+      // then to a .so file we use only one command.  When using two commands
+      // gcc will end up putting a .eh_frame and a .debug_frame into the shared
+      // library.  Without stripping .debug_frame afterwards, unwinding tools
+      // based upon libunwind use just one and ignore the contents of the other
+      // (which causes it to not look into the other section and therefore not
+      // find the correct unwinding information).
+      await runCheckedAsync(<String>[androidSdk.ndkCompiler]
+          ..addAll(androidSdk.ndkCompilerArgs)
+          ..addAll(<String>[ '-shared', '-nostdlib', '-o', assemblySo, assembly ]));
+    }
   }
 
   // Compute and record build fingerprint.

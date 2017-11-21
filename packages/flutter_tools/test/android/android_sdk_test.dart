@@ -5,6 +5,8 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/config.dart';
 import 'package:test/test.dart';
 
 import '../src/context.dart';
@@ -21,12 +23,14 @@ void main() {
 
     tearDown(() {
       sdkDir?.deleteSync(recursive: true);
+      sdkDir = null;
     });
 
     testUsingContext('parse sdk', () {
       sdkDir = _createSdkDirectory();
-      final AndroidSdk sdk = new AndroidSdk(sdkDir.path);
+      Config.instance.setValue('android-sdk', sdkDir.path);
 
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 23);
     }, overrides: <Type, Generator>{
@@ -35,17 +39,71 @@ void main() {
 
     testUsingContext('parse sdk N', () {
       sdkDir = _createSdkDirectory(withAndroidN: true);
-      final AndroidSdk sdk = new AndroidSdk(sdkDir.path);
+      Config.instance.setValue('android-sdk', sdkDir.path);
 
+      final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
+
+    group('ndk', () {
+      const <String, String>{
+        'linux': 'linux-x86_64',
+        'macos': 'darwin-x86_64',
+      }.forEach((String os, String osDir) {
+        testUsingContext('detection on $os', () {
+          sdkDir = _createSdkDirectory(
+              withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true);
+          Config.instance.setValue('android-sdk', sdkDir.path);
+
+          final String realSdkDir = sdkDir.path;
+          final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
+          final String realNdkCompiler = fs.path.join(
+              realNdkDir,
+              'toolchains',
+              'arm-linux-androideabi-4.9',
+              'prebuilt',
+              osDir,
+              'bin',
+              'arm-linux-androideabi-gcc');
+          final String realNdkSysroot =
+              fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
+
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+          expect(sdk.directory, realSdkDir);
+          expect(sdk.ndkDirectory, realNdkDir);
+          expect(sdk.ndkCompiler, realNdkCompiler);
+          expect(sdk.ndkCompilerArgs, <String>['--sysroot', realNdkSysroot]);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          Platform: () => new FakePlatform(operatingSystem: os),
+        });
+      });
+
+      for (String os in <String>['linux', 'macos']) {
+        testUsingContext('detection on $os (no ndk available)', () {
+          sdkDir = _createSdkDirectory(withAndroidN: true);
+          Config.instance.setValue('android-sdk', sdkDir.path);
+
+          final String realSdkDir = sdkDir.path;
+          final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
+          expect(sdk.directory, realSdkDir);
+          expect(sdk.ndkDirectory, null);
+          expect(sdk.ndkCompiler, null);
+          expect(sdk.ndkCompilerArgs, null);
+        }, overrides: <Type, Generator>{
+          FileSystem: () => fs,
+          Platform: () => new FakePlatform(operatingSystem: os),
+        });
+      }
+    });
   });
 }
 
-Directory _createSdkDirectory({ bool withAndroidN: false }) {
+Directory _createSdkDirectory(
+    {bool withAndroidN: false, String withNdkDir, bool withNdkSysroot: false}) {
   final Directory dir = fs.systemTempDirectory.createTempSync('android-sdk');
 
   _createSdkFile(dir, 'platform-tools/adb');
@@ -63,6 +121,23 @@ Directory _createSdkDirectory({ bool withAndroidN: false }) {
     _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
   }
 
+  if (withNdkDir != null) {
+    final String ndkCompiler = fs.path.join(
+        'ndk-bundle',
+        'toolchains',
+        'arm-linux-androideabi-4.9',
+        'prebuilt',
+        withNdkDir,
+        'bin',
+        'arm-linux-androideabi-gcc');
+    _createSdkFile(dir, ndkCompiler);
+  }
+  if (withNdkSysroot) {
+    final String armPlatform =
+        fs.path.join('ndk-bundle', 'platforms', 'android-9', 'arch-arm');
+    _createDir(dir, armPlatform);
+  }
+
   return dir;
 }
 
@@ -72,6 +147,11 @@ void _createSdkFile(Directory dir, String filePath, { String contents }) {
   if (contents != null) {
     file.writeAsStringSync(contents, flush: true);
   }
+}
+
+void _createDir(Directory dir, String path) {
+  final Directory directory = fs.directory(fs.path.join(dir.path, path));
+  directory.createSync(recursive: true);
 }
 
 const String _buildProp = r'''

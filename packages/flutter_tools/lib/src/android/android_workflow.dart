@@ -119,6 +119,14 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
+    messages.add(new ValidationMessage(androidSdk.ndkDirectory == null
+          ? 'Unable to locate Android NDK.\n'
+          : 'Android NDK at ${androidSdk.ndkDirectory}'));
+
+    messages.add(new ValidationMessage(androidSdk.ndkCompiler == null
+          ? 'Unable to locate compiler in Android NDK.\n'
+          : 'Compiler in Android NDK at ${androidSdk.ndkCompiler}'));
+
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
       sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
