@@ -2313,7 +2313,13 @@ class RepositoryRoot extends RepositoryDirectory {
 
 
 class Progress {
-  Progress(this.max);
+  Progress(this.max) {
+    // This may happen when a git client contains left-over empty component
+    // directories after DEPS file changes.
+    if (max <= 0)
+      throw new ArgumentError('Progress.max must be > 0 but was: $max');
+  }
+
   final int max;
   int get withLicense => _withLicense;
   int _withLicense = 0;
