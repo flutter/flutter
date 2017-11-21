@@ -2480,16 +2480,19 @@ typedef String _Callbacker<T>(_Callback<T> callback);
 /// }
 /// ```
 ///
-Future<T> _futurize<T>(_Callbacker<T> callbacker) async {
-  Completer<T> completer = new Completer<T>();
-  String err = callbacker(completer.complete);
-  if (err != null) {
+Future<T> _futurize<T>(_Callbacker<T> callbacker) {
+  final Completer<T> completer = new Completer<T>.sync();
+  final String err = callbacker((t) {
+    if (t == null) {
+      completer.completeError(new Exception('operation failed'));
+    } else {
+      completer.complete(t);
+    }
+  });
+
+  if (err != null)
     throw new Exception(err);
-  }
-  T result = await completer.future;
-  if (result == null) {
-    throw new Exception('operation failed');
-  }
-  return result;
+
+  return completer.future;
 }
 
