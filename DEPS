@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '4dd4fd745e588eef64b8d85811d847ab72633cb7',
+  'dart_revision': 'bb33ba10d6a4a52d164c5e3deb169232b07f0bf0',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.0',
@@ -56,7 +56,7 @@ vars = {
   'dart_http_parser_tag': '3.1.1',
   'dart_http_tag': '0.11.3+14',
   'dart_http_throttle_tag': '1.0.1',
-  'dart_intl_tag': '0.15.1',
+  'dart_intl_tag': '0.15.2',
   'dart_isolate_tag': '1.1.0',
   'dart_json_rpc_2_tag': '2.0.4',
   'dart_linter_tag': '0.1.39',

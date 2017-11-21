@@ -1,4 +1,4 @@
-Signature: 81d843c63b1b3c56e86219402e32eb78
+Signature: a4c565121c4fd07173a7e4985a3d989c
 
 UNUSED LICENSES:
 
@@ -4965,7 +4965,6 @@ FILE: ../../../third_party/dart/runtime/vm/virtual_memory_fuchsia.cc
 FILE: ../../../third_party/dart/sdk/lib/developer/service.dart
 FILE: ../../../third_party/dart/sdk/lib/js_util/dart2js/js_util_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/devfs.dart
-FILE: ../../../third_party/dart/utils/kernel-service/kernel-service.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
