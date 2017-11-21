@@ -19,7 +19,7 @@ import 'framework.dart';
 ///  * [BottomNavigationBar]
 ///  * <https://material.google.com/components/bottom-navigation.html>
 ///  * [CupertinoTabBar]
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-bars/tab-bars>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/bars/tab-bars>
 class BottomNavigationBarItem {
   /// Creates an item that is used with [BottomNavigationBar.items].
   ///
