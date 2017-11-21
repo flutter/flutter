@@ -522,6 +522,12 @@ class InputDecorator extends StatelessWidget {
   // then the label appears where the hint would.
   bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
 
+  bool get _hasSubtext {
+    return !decoration.isCollapsed &&
+      (decoration.errorText != null || decoration.helperText != null || decoration.counterText != null);
+  }
+
+
   // Build a baseline-aligned row, [prefix input/hint suffix], within a container
   // with the specified topPadding, decoration.fillColor in the background,
   // and the divider at the bottom.
@@ -616,8 +622,18 @@ class InputDecorator extends StatelessWidget {
       return const <Widget>[];
 
     final ThemeData themeData = Theme.of(context);
-    final bool isDense = decoration.isDense;
     final bool isFloating = !isEmpty || isFocused;
+
+    EdgeInsets padding;
+    if (isFloating) {
+      padding = decoration.isDense
+        ? const EdgeInsets.only(top: 8.0)
+        : const EdgeInsets.only(top: 12.0);
+    } else {
+      padding = _hasSubtext
+        ? new EdgeInsets.only(bottom: 8.0 + _getSubtextStyle(themeData).fontSize)
+        : EdgeInsets.zero;
+    }
 
     final Widget label = new Positioned.fill(
       child: new AnimatedContainer(
@@ -626,9 +642,7 @@ class InputDecorator extends StatelessWidget {
         alignment: isFloating
           ? AlignmentDirectional.topStart
           : AlignmentDirectional.centerStart,
-        padding: isFloating
-          ? (isDense ? const EdgeInsets.only(top: 8.0) : const EdgeInsets.only(top: 12.0))
-          : EdgeInsets.zero,
+        padding: padding,
         child: new _AnimatedLabel(
           duration: _kTransitionDuration,
           curve: _kTransitionCurve,

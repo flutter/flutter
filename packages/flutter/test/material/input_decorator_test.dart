@@ -409,7 +409,7 @@ void main() {
   testWidgets('InputDecorator error/helper/counter layout', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
-        // isEmpty: false (default)
+        isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
@@ -419,7 +419,9 @@ void main() {
       ),
     );
 
-    // Overall height for this InputDecorator is 76dps:
+    // Overall height for this InputDecorator is 76dps. When the label is
+    // floating the layout is:
+    //
     //   12 - top padding
     //   12 - floating label (font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
@@ -427,12 +429,22 @@ void main() {
     //   12 - bottom padding
     //    8 - below the divider line padding
     //   12 - help/error/counter text (font size 12dps)
+    //
+    // When the label is not floating, it's vertically centered in the space
+    // above the subtext:
+    //
+    //   20 - top padding
+    //   16 - label (font size 16dps)
+    //   20 - bottom padding (empty input text still appears here)
+    //    8 - below the divider line padding
+    //   12 - help/error/counter text (font size 12dps)
 
+    // isEmpty: true, the label is not floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    expect(tester.getRect(find.text('label')).topLeft.dy, 20.0);
+    expect(tester.getRect(find.text('label')).bottomLeft.dy, 36.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
     expect(tester.getRect(find.text('helper')).topLeft, const Offset(0.0, 64.0));
@@ -452,6 +464,8 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    // isEmpty: false, the label _is_ floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
@@ -463,7 +477,9 @@ void main() {
     expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 64.0));
     expect(find.text('helper'), findsNothing);
 
-    // Overall height for this dense layout InputDecorator is 68dps:
+    // Overall height for this dense layout InputDecorator is 68dps. When the
+    // label is floating the layout is:
+    //
     //    8 - top padding
     //   12 - floating label (font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
@@ -472,6 +488,14 @@ void main() {
     //    8 - below the divider line padding
     //   12 - help/error/counter text (font size 12dps)
     //
+    // When the label is not floating, it's vertically centered in the space
+    // above the subtext:
+    //
+    //   16 - top padding
+    //   16 - label (font size 16dps)
+    //   16 - bottom padding (empty input text still appears here)
+    //    8 - below the divider line padding
+    //   12 - help/error/counter text (font size 12dps)
     // The layout of the error/helper/counter subtext doesn't change for dense layout.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -486,13 +510,40 @@ void main() {
         ),
       ),
     );
-
     await tester.pumpAndSettle();
+
+    // isEmpty: false, the label _is_ floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
     expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 8.0);
     expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
+    expect(getDividerBottom(tester), 48.0);
+    expect(getDividerWeight(tester), 1.0);
+    expect(tester.getRect(find.text('error')).topLeft, const Offset(0.0, 56.0));
+    expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 56.0));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          isDense: true,
+          labelText: 'label',
+          errorText: 'error',
+          helperText: 'helper',
+          counterText: 'counter',
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // isEmpty: false, the label is not floating
+    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
+    expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
+    expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
+    expect(tester.getRect(find.text('label')).topLeft.dy, 16.0);
+    expect(tester.getRect(find.text('label')).bottomLeft.dy, 32.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
     expect(tester.getRect(find.text('error')).topLeft, const Offset(0.0, 56.0));
