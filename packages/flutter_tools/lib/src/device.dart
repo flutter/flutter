@@ -227,6 +227,7 @@ abstract class Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
