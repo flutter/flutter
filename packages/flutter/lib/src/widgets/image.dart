@@ -13,6 +13,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show
   ImageProvider,
@@ -445,10 +446,17 @@ class Image extends StatefulWidget {
 class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
+  bool _isListeningToStream = false;
 
   @override
   void didChangeDependencies() {
     _resolveImage();
+
+    if (TickerMode.of(context))
+      _listenToStream();
+    else
+      _stopListeningToStream();
+
     super.didChangeDependencies();
   }
 
@@ -466,18 +474,13 @@ class _ImageState extends State<Image> {
   }
 
   void _resolveImage() {
-    final ImageStream oldImageStream = _imageStream;
-    _imageStream = widget.image.resolve(createLocalImageConfiguration(
-      context,
-      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
-    ));
-    assert(_imageStream != null);
-    if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      if (!widget.gaplessPlayback)
-        setState(() { _imageInfo = null; });
-      _imageStream.addListener(_handleImageChanged);
-    }
+    final ImageStream newStream =
+      widget.image.resolve(createLocalImageConfiguration(
+          context,
+          size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+      ));
+    assert(newStream != null);
+    _updateSourceStream(newStream);
   }
 
   void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
@@ -486,10 +489,42 @@ class _ImageState extends State<Image> {
     });
   }
 
+  // Update _imageStream to newStream, and moves the stream listener
+  // registration from the old stream to the new stream (if a listener was
+  // registered).
+  void _updateSourceStream(ImageStream newStream) {
+    if (_imageStream?.key == newStream?.key)
+      return;
+
+    if (_isListeningToStream)
+      _imageStream.removeListener(_handleImageChanged);
+
+    _imageStream = newStream;
+    if (_isListeningToStream)
+      _imageStream.addListener(_handleImageChanged);
+
+    if (!widget.gaplessPlayback)
+      setState(() { _imageInfo = null; });
+  }
+
+  void _listenToStream() {
+    if (_isListeningToStream)
+      return;
+    _imageStream.addListener(_handleImageChanged);
+    _isListeningToStream = true;
+  }
+
+  void _stopListeningToStream() {
+    if (!_isListeningToStream)
+      return;
+    _imageStream.removeListener(_handleImageChanged);
+    _isListeningToStream = false;
+  }
+
   @override
   void dispose() {
     assert(_imageStream != null);
-    _imageStream.removeListener(_handleImageChanged);
+    _stopListeningToStream();
     super.dispose();
   }
 
