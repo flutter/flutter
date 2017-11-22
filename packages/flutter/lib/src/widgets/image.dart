@@ -129,6 +129,7 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
+  /// An optional [headers] argument can be used to use custom HTTP headers.
   ///
   /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
@@ -145,7 +146,8 @@ class Image extends StatefulWidget {
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
     this.package,
-  }) : image = new NetworkImage(src, scale: scale),
+    Map<String, String> headers,
+  }) : image = new NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
