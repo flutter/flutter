@@ -1,4 +1,4 @@
-Signature: a4c565121c4fd07173a7e4985a3d989c
+Signature: b108e763a65063b8c05f481815a71277
 
 UNUSED LICENSES:
 
@@ -4445,8 +4445,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_ia32_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/assembler_x64_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/assembler/disassembler_x86.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/constant_propagator.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_compiler.h
