@@ -710,7 +710,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// The second category is widgets that use [State.setState] or depend on
 /// [InheritedWidget]s. These will typically rebuild many times during the
-/// application's lifetime, and it is therefore important to minimise the impact
+/// application's lifetime, and it is therefore important to minimize the impact
 /// of rebuilding such a widget. (They may also use [State.initState] or
 /// [State.didChangeDependencies] and allocate resources, but the important part
 /// is that they rebuild.)
@@ -948,7 +948,7 @@ typedef void StateSetter(VoidCallback fn);
 ///    releasing most resources until the framework calls their [dispose]
 ///    method.
 ///  * If the framework does not reinsert this subtree by the end of the current
-///    animation frame, the framework will call [dispose], which indiciates that
+///    animation frame, the framework will call [dispose], which indicates that
 ///    this [State] object will never build again. Subclasses should override
 ///    this method to release any resources retained by this object (e.g.,
 ///    stop any active animations).
@@ -2682,7 +2682,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// or the child that was passed in, if it just had to update the child, or
   /// null, if it removed the child and did not replace it.
   ///
-  /// The following table summarises the above:
+  /// The following table summarizes the above:
   ///
   /// <table>
   /// <tr><th><th>`newWidget == null`<th>`newWidget != null`
@@ -3915,7 +3915,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   ///    descendant).
   ///
   ///  * Paint is currently under way, but the [ParentData] in question does not
-  ///    affect layour or paint, and the value to be applied could not be
+  ///    affect layout or paint, and the value to be applied could not be
   ///    determined before paint (e.g. it depends on the compositing phase).
   ///
   /// In either case, the next build is expected to cause this element to be
@@ -4251,7 +4251,7 @@ abstract class RenderObjectElement extends Element {
   /// checks whether the child is in `forgottenChildren`. If it is, the function
   /// acts as if the child was not in `oldChildren`.
   ///
-  /// This function is a convienence wrapper around [updateChild], which updates
+  /// This function is a convenience wrapper around [updateChild], which updates
   /// each individual child. When calling [updateChild], this function uses the
   /// previous element as the `newSlot` argument.
   @protected

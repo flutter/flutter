@@ -102,7 +102,7 @@ bool _isFlingGesture(Velocity velocity) {
 /// Recognizes a scale gesture.
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
-/// calculates their focal point and indiciated scale. When a focal pointer is
+/// calculates their focal point and indicated scale. When a focal pointer is
 /// established, the recognizer calls [onStart]. As the focal point and scale
 /// change, the recognizer calls [onUpdate]. When the pointers are no longer in
 /// contact with the screen, the recognizer calls [onEnd].

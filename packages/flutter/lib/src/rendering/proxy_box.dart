@@ -2223,7 +2223,7 @@ abstract class CustomPainter extends Listenable {
 ///
 /// When asked to paint, [RenderCustomPaint] first asks its [painter] to paint
 /// on the current canvas, then it paints its child, and then, after painting
-/// its child, it asks its [foregroundPainter] to paint. The coodinate system of
+/// its child, it asks its [foregroundPainter] to paint. The coordinate system of
 /// the canvas matches the coordinate system of the [CustomPaint] object. The
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
@@ -3789,7 +3789,7 @@ class RenderLeaderLayer extends RenderProxyBox {
   }
 }
 
-/// Transform the child so that its origin is [offset] from the orign of the
+/// Transform the child so that its origin is [offset] from the origin of the
 /// [RenderLeaderLayer] with the same [LayerLink].
 ///
 /// The [RenderLeaderLayer] in question must be earlier in the paint order.

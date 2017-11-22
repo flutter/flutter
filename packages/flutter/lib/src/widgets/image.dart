@@ -30,7 +30,7 @@ export 'package:flutter/services.dart' show
 ///
 /// If this is not called from a build method, then it should be reinvoked
 /// whenever the dependencies change, e.g. by calling it from
-/// [State.didChangeDependencies], so that any changes in the environement are
+/// [State.didChangeDependencies], so that any changes in the environment are
 /// picked up (e.g. if the device pixel ratio changes).
 ///
 /// See also:
@@ -128,6 +128,8 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
+  ///
+  /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
     Key key,
     double scale: 1.0,

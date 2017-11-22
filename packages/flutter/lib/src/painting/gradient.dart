@@ -172,7 +172,7 @@ abstract class Gradient {
 ///  * [BoxDecoration], which can take a [LinearGradient] in its
 ///    [BoxDecoration.gradient] property.
 class LinearGradient extends Gradient {
-  /// Creates a linear graident.
+  /// Creates a linear gradient.
   ///
   /// The [colors] argument must not be null. If [stops] is non-null, it must
   /// have the same length as [colors].

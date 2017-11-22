@@ -148,7 +148,7 @@ abstract class AlignmentGeometry {
 /// `Alignment(1.0, 1.0)` represents the bottom right of the rectangle.
 ///
 /// `Alignment(0.0, 3.0)` represents a point that is horizontally centered with
-/// respect to the rectangel and vertically below the bottom of the rectangle by
+/// respect to the rectangle and vertically below the bottom of the rectangle by
 /// the height of the rectangle.
 ///
 /// [Alignment] use visual coordinates, which means increasing [x] moves the

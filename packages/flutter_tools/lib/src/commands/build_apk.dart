@@ -11,9 +11,13 @@ class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand() {
     usesTargetOption();
     addBuildModeFlags();
-    argParser.addFlag('preview-dart-2', negatable: false);
     usesFlavorOption();
     usesPubOption();
+
+    argParser
+      ..addFlag('preview-dart-2', negatable: false)
+      ..addFlag('prefer-shared-library', negatable: false,
+          help: 'Whether to prefer compiling to a *.so file (android only).');
   }
 
   @override

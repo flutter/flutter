@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -289,12 +290,17 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.previewDart2)
+  if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
     command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+  }
+  if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
+    command.add('-Pprefer-shared-library=true');
+  }
+
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
       command,

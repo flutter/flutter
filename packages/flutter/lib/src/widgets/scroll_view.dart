@@ -27,7 +27,7 @@ import 'viewport.dart';
 ///     various scrolling effects, such as lists, grids, and expanding headers.
 ///
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
-/// the viewport and defering to its subclass to create the slivers.
+/// the viewport and deferring to its subclass to create the slivers.
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
@@ -171,7 +171,7 @@ abstract class ScrollView extends StatelessWidget {
   /// concrete [AxisDirection].
   ///
   /// If the [scrollDirection] is [Axis.horizontal], the ambient
-  /// [Directionality] is also consided when selecting the concrete
+  /// [Directionality] is also considered when selecting the concrete
   /// [AxisDirection]. For example, if the ambient [Directionality] is
   /// [TextDirection.rtl], then the non-reversed [AxisDirection] is
   /// [AxisDirection.left] and the reversed [AxisDirection] is

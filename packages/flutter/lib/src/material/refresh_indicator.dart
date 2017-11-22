@@ -73,7 +73,7 @@ enum _RefreshIndicatorMode {
 /// See also:
 ///
 ///  * <https://material.google.com/patterns/swipe-to-refresh.html>
-///  * [RefreshIndicatorState], can be used to programatically show the refresh indicator.
+///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator].
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.

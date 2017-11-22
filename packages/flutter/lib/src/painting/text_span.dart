@@ -178,7 +178,7 @@ class TextSpan extends DiagnosticableTree {
       builder.pop();
   }
 
-  /// Walks this text span and its decendants in pre-order and calls [visitor]
+  /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
   bool visitTextSpan(bool visitor(TextSpan span)) {
     if (text != null) {

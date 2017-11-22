@@ -312,6 +312,7 @@ class IOSSimulator extends Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
@@ -352,7 +353,8 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
+      observatoryDiscovery = new ProtocolDiscovery.observatory(
+          getLogReader(app: app), ipv6: ipv6);
 
     // Launch the updated application in the simulator.
     try {

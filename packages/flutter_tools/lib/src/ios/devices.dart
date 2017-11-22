@@ -163,6 +163,7 @@ class IOSDevice extends Device {
     bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
@@ -255,7 +256,11 @@ class IOSDevice extends Device {
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
       final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+        getLogReader(app: app),
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        ipv6: ipv6,
+      );
 
       final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
 

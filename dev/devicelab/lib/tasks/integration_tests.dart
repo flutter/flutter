@@ -31,6 +31,13 @@ TaskFunction createFlavorsTest() {
   );
 }
 
+TaskFunction createExternalUiIntegrationTest() {
+  return new DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/external_ui',
+    'lib/main.dart',
+  );
+}
+
 TaskFunction createPlatformChannelSampleTest() {
   return new DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',

@@ -66,7 +66,7 @@ Widget _defaultTransitionsBuilder(BuildContext context, Animation<double> animat
 /// Callers must define the [pageBuilder] function which creates the route's
 /// primary contents. To add transitions define the [transitionsBuilder] function.
 class PageRouteBuilder<T> extends PageRoute<T> {
-  /// Creates a route that deletates to builder callbacks.
+  /// Creates a route that delegates to builder callbacks.
   ///
   /// The [pageBuilder], [transitionsBuilder], [opaque], [barrierDismissible],
   /// and [maintainState] arguments must not be null.

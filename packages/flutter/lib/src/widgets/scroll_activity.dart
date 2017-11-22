@@ -19,7 +19,7 @@ import 'ticker_provider.dart';
 
 /// A backend for a [ScrollActivity].
 ///
-/// Used by subclases of [ScrollActivity] to manipulate the scroll view that
+/// Used by subclasses of [ScrollActivity] to manipulate the scroll view that
 /// they are acting upon.
 ///
 /// See also:

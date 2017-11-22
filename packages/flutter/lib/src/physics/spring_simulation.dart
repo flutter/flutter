@@ -22,7 +22,7 @@ class SpringDescription {
   });
 
   /// Creates a spring given the mass (m), stiffness (k), and damping ratio (ζ).
-  /// The damping ratio is especially useful trying to determing the type of
+  /// The damping ratio is especially useful trying to determining the type of
   /// spring to create. A ratio of 1.0 creates a critically damped spring, > 1.0
   /// creates an overdamped spring and < 1.0 an underdamped one.
   ///
