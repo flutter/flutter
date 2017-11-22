@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -258,7 +259,9 @@ class _StringFragment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Text(value, style: fragmentContext.inactiveStyle);
+    return new ExcludeSemantics(
+      child: new Text(value, style: fragmentContext.inactiveStyle),
+    );
   }
 }
 
@@ -691,6 +694,7 @@ class _DialPainter extends CustomPainter {
     @required this.accentColor,
     @required this.theta,
     @required this.activeRing,
+    @required this.textDirection,
   });
 
   final List<TextPainter> primaryOuterLabels;
@@ -701,6 +705,7 @@ class _DialPainter extends CustomPainter {
   final Color accentColor;
   final double theta;
   final _DialRing activeRing;
+  final TextDirection textDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -762,6 +767,79 @@ class _DialPainter extends CustomPainter {
     canvas.restore();
   }
 
+  static const double _kSemanticNodeSizeScale = 1.5;
+
+  /// Creates semantics nodes for the hour/minute labels painted on the dial.
+  ///
+  /// The nodes are positioned on top of the text and their size is
+  /// [_kSemanticNodeSizeScale] bigger than those of the text boxes to provide
+  /// bigger tap area.
+  List<SemanticsNode> graftSemantics(RenderBox renderBox) {
+    final Size size = renderBox.size;
+    final double radius = size.shortestSide / 2.0;
+    final Offset center = new Offset(size.width / 2.0, size.height / 2.0);
+    const double labelPadding = 24.0;
+    final double outerLabelRadius = radius - labelPadding;
+    final double innerLabelRadius = radius - labelPadding * 2.5;
+
+    Offset getOffsetForTheta(double theta, _DialRing ring) {
+      double labelRadius;
+      switch (ring) {
+        case _DialRing.outer:
+          labelRadius = outerLabelRadius;
+          break;
+        case _DialRing.inner:
+          labelRadius = innerLabelRadius;
+          break;
+      }
+      return center + new Offset(labelRadius * math.cos(theta),
+          -labelRadius * math.sin(theta));
+    }
+
+    final List<SemanticsNode> nodes = <SemanticsNode>[];
+
+    void paintLabels(List<TextPainter> labels, _DialRing ring) {
+      if (labels == null)
+        return;
+      final double labelThetaIncrement = -_kTwoPi / labels.length;
+      double labelTheta = math.PI / 2.0;
+
+      for (TextPainter label in labels) {
+        final double width = label.width * _kSemanticNodeSizeScale;
+        final double height = label.height * _kSemanticNodeSizeScale;
+        final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + new Offset(-width / 2.0, -height / 2.0);
+        final SemanticsNode node = new SemanticsNode(showOnScreen: renderBox.showOnScreen)
+          ..rect = new Rect.fromLTRB(
+            nodeOffset.dx,
+            nodeOffset.dy,
+            nodeOffset.dx + width,
+            nodeOffset.dy + height
+          )
+          ..updateWith(
+              config: new SemanticsConfiguration()
+                ..label = label.text.text
+                ..textDirection = textDirection
+                ..addAction(SemanticsAction.tap, () {
+                  // The action is sent to the gesture detector surrounding the
+                  // custom painter.
+                })
+          )
+          ..tags = new Set<SemanticsTag>.from(const <SemanticsTag>[
+            // Used by tests to find this node.
+            const SemanticsTag('dial-label'),
+          ]);
+
+        nodes.add(node);
+        labelTheta += labelThetaIncrement;
+      }
+    }
+
+    paintLabels(primaryOuterLabels, _DialRing.outer);
+    paintLabels(primaryInnerLabels, _DialRing.inner);
+
+    return nodes;
+  }
+
   @override
   bool shouldRepaint(_DialPainter oldPainter) {
     return oldPainter.primaryOuterLabels != primaryOuterLabels
@@ -796,6 +874,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _updateDialRingFromWidget();
     _thetaController = new AnimationController(
       duration: _kDialAnimateDuration,
       vsync: this,
@@ -827,8 +906,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       if (!_dragging)
         _animateTo(_getThetaForTime(widget.selectedTime));
     }
-    if (widget.mode == _TimePickerMode.hour && widget.use24HourDials && widget.selectedTime.period == DayPeriod.am) {
-      _activeRing = _DialRing.inner;
+    _updateDialRingFromWidget();
+  }
+
+  void _updateDialRingFromWidget() {
+    if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
+      _activeRing = widget.selectedTime.hour >= 1 && widget.selectedTime.hour <= 12
+          ? _DialRing.inner
+          : _DialRing.outer;
     } else {
       _activeRing = _DialRing.outer;
     }
@@ -942,6 +1027,18 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _position = null;
     _center = null;
     _animateTo(_getThetaForTime(widget.selectedTime));
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    final RenderBox box = context.findRenderObject();
+    _position = box.globalToLocal(details.globalPosition);
+    _center = box.size.center(Offset.zero);
+    _updateThetaForPan();
+    _notifyOnChangedIfNeeded();
+    _animateTo(_getThetaForTime(_getTimeForTheta(_theta.value)));
+    _dragging = false;
+    _position = null;
+    _center = null;
   }
 
   static const List<TimeOfDay> _amHours = const <TimeOfDay>[
@@ -1058,9 +1155,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       onPanStart: _handlePanStart,
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
-      child: new CustomPaint(
-        key: const ValueKey<String>('time-picker-dial'), // used for testing.
-        painter: new _DialPainter(
+      onTapUp: _handleTapUp,
+      child: new _DialPaint(
+        dialPainter: new _DialPainter(
           primaryOuterLabels: primaryOuterLabels,
           primaryInnerLabels: primaryInnerLabels,
           secondaryOuterLabels: secondaryOuterLabels,
@@ -1069,9 +1166,52 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
           accentColor: themeData.accentColor,
           theta: _theta.value,
           activeRing: _activeRing,
-        )
+          textDirection: Directionality.of(context),
+        ),
       )
     );
+  }
+}
+
+class _DialPaint extends CustomPaint {
+  const _DialPaint({
+    @required this.dialPainter,
+  }) : super(
+         key: const ValueKey<String>('time-picker-dial'), // used for testing.
+         painter: dialPainter,
+       );
+
+  final _DialPainter dialPainter;
+
+  @override
+  RenderCustomPaint createRenderObject(BuildContext context) {
+    return new _RenderDialPaint(
+      initialDialPainter: dialPainter,
+    );
+  }
+}
+
+class _RenderDialPaint extends RenderCustomPaint {
+  _RenderDialPaint({
+    _DialPainter initialDialPainter,
+  }) : super(painter: initialDialPainter);
+
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isSemanticBoundary = true;
+  }
+
+  @override
+  void assembleSemanticsNode(
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
+  ) {
+    assert(children.isEmpty);
+    final _DialPainter dialPainter = painter;
+    children = dialPainter.graftSemantics(this);
+    super.assembleSemanticsNode(node, config, children);
   }
 }
 
@@ -1105,9 +1245,19 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     _selectedTime = widget.initialTime;
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    localizations = MaterialLocalizations.of(context);
+    _announceInitialTimeOnce();
+    _announceModeOnce();
+  }
+
   _TimePickerMode _mode = _TimePickerMode.hour;
+  _TimePickerMode _lastModeAnnounced;
   TimeOfDay _selectedTime;
   Timer _vibrateTimer;
+  MaterialLocalizations localizations;
 
   void _vibrate() {
     switch (Theme.of(context).platform) {
@@ -1128,7 +1278,40 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     _vibrate();
     setState(() {
       _mode = mode;
+      _announceModeOnce();
     });
+  }
+
+  void _announceModeOnce() {
+    if (_lastModeAnnounced == _mode) {
+      // Already announced it.
+      return;
+    }
+
+    switch (_mode) {
+      case _TimePickerMode.hour:
+        _announceToAccessibility(context, localizations.timePickerHourModeAnnouncement);
+        break;
+      case _TimePickerMode.minute:
+        _announceToAccessibility(context, localizations.timePickerMinuteModeAnnouncement);
+        break;
+    }
+    _lastModeAnnounced = _mode;
+  }
+
+  bool _announcedInitialTime = false;
+
+  void _announceInitialTimeOnce() {
+    if (_announcedInitialTime)
+      return;
+
+    final MediaQueryData media = MediaQuery.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    _announceToAccessibility(
+      context,
+      localizations.formatTimeOfDay(widget.initialTime, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
+    );
+    _announcedInitialTime = true;
   }
 
   void _handleTimeChanged(TimeOfDay value) {
@@ -1149,7 +1332,6 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
 
@@ -1270,8 +1452,13 @@ Future<TimeOfDay> showTimePicker({
 }) async {
   assert(context != null);
   assert(initialTime != null);
+
   return await showDialog<TimeOfDay>(
     context: context,
     child: new _TimePickerDialog(initialTime: initialTime),
   );
+}
+
+void _announceToAccessibility(BuildContext context, String message) {
+  SemanticsService.announce(message, Directionality.of(context));
 }

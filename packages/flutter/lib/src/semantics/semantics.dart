@@ -869,7 +869,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
 
   /// Reconfigures the properties of this object to describe the configuration
-  /// provided in the `config` argument and the children listen in the
+  /// provided in the `config` argument and the children listed in the
   /// `childrenInInversePaintOrder` argument.
   ///
   /// The arguments may be null; this represents an empty configuration (all
@@ -879,7 +879,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// list is used as-is and should therefore not be changed after this call.
   void updateWith({
     @required SemanticsConfiguration config,
-    @required List<SemanticsNode> childrenInInversePaintOrder,
+    List<SemanticsNode> childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))
@@ -1318,7 +1318,7 @@ class SemanticsConfiguration {
   /// create semantic boundaries that are either writable or not for children.
   bool explicitChildNodes = false;
 
-  /// Whether the owning [RenderObject] makes other [RenderObjects] previously
+  /// Whether the owning [RenderObject] makes other [RenderObject]s previously
   /// painted within the same semantic boundary unreachable for accessibility
   /// purposes.
   ///

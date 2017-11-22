@@ -597,6 +597,7 @@ const Map<Type, DistanceFunction<dynamic>> _kStandardDistanceFunctions = const <
   Offset: _offsetDistance,
   int: _intDistance,
   double: _doubleDistance,
+  Rect: _rectDistance,
 };
 
 int _intDistance(int a, int b) => (b - a).abs();
@@ -608,6 +609,13 @@ double _maxComponentColorDistance(Color a, Color b) {
   delta = math.max<int>(delta, (a.blue - b.blue).abs());
   delta = math.max<int>(delta, (a.alpha - b.alpha).abs());
   return delta.toDouble();
+}
+
+double _rectDistance(Rect a, Rect b) {
+  double delta = math.max<double>((a.left - b.left).abs(), (a.top - b.top).abs());
+  delta = math.max<double>(delta, (a.right - b.right).abs());
+  delta = math.max<double>(delta, (a.bottom - b.bottom).abs());
+  return delta;
 }
 
 /// Asserts that two values are within a certain distance from each other.
@@ -669,11 +677,23 @@ class _IsWithinDistance<T> extends Matcher {
         'double value, but it returned $distance.'
       );
     }
+    matchState['distance'] = distance;
     return distance <= epsilon;
   }
 
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
+
+  @override
+  Description describeMismatch(
+    Object object,
+    Description mismatchDescription,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    mismatchDescription.add('was ${matchState['distance']} away from the desired value.');
+    return mismatchDescription;
+  }
 }
 
 class _MoreOrLessEquals extends Matcher {

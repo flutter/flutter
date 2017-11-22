@@ -282,8 +282,15 @@ abstract class PaintPattern {
   /// arguments that are passed to this method are compared to the actual
   /// [Canvas.drawParagraph] call's argument, and any mismatches result in failure.
   ///
+  /// The `offset` argument can be either an [Offset] or a [Matcher]. If it is
+  /// an [Offset] then the actual value must match the expected offset
+  /// precisely. If it is a [Matcher] then the comparison is made according to
+  /// the semantics of the [Matcher]. For example, [within] can be used to
+  /// assert that the actual offset is within a given distance from the expected
+  /// offset.
+  ///
   /// If no call to [Canvas.drawParagraph] was made, then this results in failure.
-  void paragraph({ ui.Paragraph paragraph, Offset offset });
+  void paragraph({ ui.Paragraph paragraph, dynamic offset });
 
   /// Indicates that an image is expected next.
   ///
@@ -626,7 +633,7 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void paragraph({ ui.Paragraph paragraph, Offset offset }) {
+  void paragraph({ ui.Paragraph paragraph, dynamic offset }) {
     _predicates.add(new _FunctionPaintPredicate(#drawParagraph, <dynamic>[paragraph, offset]));
   }
 
@@ -1140,8 +1147,12 @@ class _FunctionPaintPredicate extends _PaintPredicate {
     for (int index = 0; index < arguments.length; index += 1) {
       final dynamic actualArgument = call.current.invocation.positionalArguments[index];
       final dynamic desiredArgument = arguments[index];
-      if (desiredArgument != null && desiredArgument != actualArgument)
+
+      if (desiredArgument is Matcher) {
+        expect(actualArgument, desiredArgument);
+      } else if (desiredArgument != null && desiredArgument != actualArgument) {
         throw 'It called ${_symbolName(symbol)} with argument $index having value ${_valueName(actualArgument)} when ${_valueName(desiredArgument)} was expected.';
+      }
     }
     call.moveNext();
   }

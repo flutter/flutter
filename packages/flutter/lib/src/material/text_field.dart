@@ -147,7 +147,7 @@ class TextField extends StatefulWidget {
   ///
   /// This text style is also used as the base style for the [decoration].
   ///
-  /// If null, defaults to a text style from the current [Theme].
+  /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
 
   /// How the text being edited should be aligned horizontally.

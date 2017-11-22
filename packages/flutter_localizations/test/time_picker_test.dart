@@ -140,31 +140,40 @@ void main() {
         ],
         child: new MediaQuery(
           data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: new Directionality(
-            textDirection: TextDirection.ltr,
-            child: new Navigator(
-              onGenerateRoute: (RouteSettings settings) {
-                return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-                  showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
-                  return new Container();
-                });
-              },
+          child: new Material(
+            child: new Directionality(
+              textDirection: TextDirection.ltr,
+              child: new Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+                    return new FlatButton(
+                      onPressed: () {
+                        showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
+                      },
+                      child: const Text('X'),
+                    );
+                  });
+                },
+              ),
             ),
           ),
         ),
       ),
     );
-    // Pump once, because the dialog shows up asynchronously.
-    await tester.pump();
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
   }
+
+  final Finder findDialPaint = find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  );
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
     expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
@@ -178,10 +187,7 @@ void main() {
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
     final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
     expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
