@@ -24,9 +24,14 @@ class _MountainViewPageTransition extends StatelessWidget {
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn,
        )),
+       _opacityAnimation = new CurvedAnimation(
+         parent: routeAnimation,
+         curve: Curves.easeIn, // Eyeballed from other Material apps.
+       ),
        super(key: key);
 
   final Animation<Offset> _positionAnimation;
+  final Animation<double> _opacityAnimation;
   final Widget child;
 
   @override
@@ -34,7 +39,10 @@ class _MountainViewPageTransition extends StatelessWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
       position: _positionAnimation,
-      child: child,
+      child: new FadeTransition(
+        opacity: _opacityAnimation,
+        child: child,
+      ),
     );
   }
 }
