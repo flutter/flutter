@@ -346,6 +346,12 @@ deps = {
   'src/third_party/dart/third_party/pkg/yaml':
    Var('chromium_git') + '/external/github.com/dart-lang/yaml' + '@' + Var('dart_yaml_tag'),
 
+  'src/third_party/colorama/src':
+   Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
+
+  'src/third_party/freetype2':
+   Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'e23a030e9b43c648249477fdf7bf5305d2cc8f59',
+
   'src/third_party/root_certificates':
    Var('chromium_git') + '/external/github.com/dart-lang/root_certificates' + '@' + Var('dart_root_certificates_rev'),
 
@@ -372,17 +378,6 @@ deps = {
 recursedeps = [
   'src/buildtools',
 ]
-
-deps_os = {
-  'android': {
-    'src/third_party/colorama/src':
-     Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
-
-    'src/third_party/freetype2':
-       Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'e23a030e9b43c648249477fdf7bf5305d2cc8f59',
-  },
-}
-
 
 hooks = [
   {
