@@ -90,6 +90,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
 
   SurfaceConfig surface_config_;
   std::unique_ptr<Rasterizer> rasterizer_;
+  flow::TextureRegistry texture_registry_;
   std::unique_ptr<Engine> engine_;
   std::unique_ptr<VsyncWaiter> vsync_waiter_;
   SkISize size_;
