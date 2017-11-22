@@ -308,8 +308,8 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     // Media
     new GalleryItem(
-      title: 'Images',
-      subtitle: 'Static and animated images',
+      title: 'Animated Images',
+      subtitle: 'GIF and WebP animations',
       category: 'Media',
       routeName: ImagesDemo.routeName,
       buildRoute: (BuildContext context) => new ImagesDemo(),

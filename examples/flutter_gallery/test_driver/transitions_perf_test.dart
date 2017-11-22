@@ -74,6 +74,9 @@ const List<Demo> demos = const <Demo>[
   const Demo('Sliders'),
   const Demo('Switches'),
 
+  // Media
+  const Demo('Animated Images'),
+
   // Style
   const Demo('Colors'),
   const Demo('Typography'),
