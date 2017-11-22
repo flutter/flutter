@@ -53,7 +53,6 @@ solutions = [
     "safesync_url": "",
   },
 ]
-target_os = ["android"]
 ```
 
  * `cd engine` (Change to the directory in which you put the `.gclient` file.)
