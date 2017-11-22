@@ -359,6 +359,39 @@ void main() {
      ]));
    });
 
+   testWidgets('timer is canceled when listeners are removed', (WidgetTester tester) async {
+     final MockCodec mockCodec = new MockCodec();
+     mockCodec.frameCount = 2;
+     mockCodec.repetitionCount = -1;
+     final Completer<Codec> codecCompleter = new Completer<Codec>();
+
+     final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+       codec: codecCompleter.future,
+       scale: 1.0,
+     );
+
+     final ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+     imageStream.addListener(listener);
+
+     codecCompleter.complete(mockCodec);
+     await tester.idle();
+
+     final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+     final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+
+     mockCodec.completeNextFrame(frame1);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // first animation frame shows on first app frame.
+
+     mockCodec.completeNextFrame(frame2);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump();
+
+     imageStream.removeListener(listener);
+     // The test framework will fail this if there are pending timers at this
+     // point.
+   });
+
    testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
      final MockCodec mockCodec = new MockCodec();
      mockCodec.frameCount = 2;
