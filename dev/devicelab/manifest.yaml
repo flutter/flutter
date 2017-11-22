@@ -71,6 +71,13 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
 
+  external_ui_integration_test:
+    description: >
+      Checks that external UIs work on Android.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    flaky: true
+
   platform_interaction_test:
     description: >
       Checks platform interaction on Android.
@@ -184,6 +191,13 @@ tasks:
       Checks that flavored builds work on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+
+  external_ui_integration_test_ios:
+    description: >
+      Checks that external UIs work on iOS.
+    stage: devicelab
+    required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   channels_integration_test_ios:
     description: >
