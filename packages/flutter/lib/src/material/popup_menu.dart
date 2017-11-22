@@ -447,7 +447,7 @@ class _PopupMenu<T> extends StatelessWidget {
             type: MaterialType.card,
             elevation: route.elevation,
             child: new Align(
-              alignment: Alignment.topRight,
+              alignment: AlignmentDirectional.topEnd,
               widthFactor: width.evaluate(route.animation),
               heightFactor: height.evaluate(route.animation),
               child: child,
@@ -460,37 +460,76 @@ class _PopupMenu<T> extends StatelessWidget {
   }
 }
 
+// Positioning of the menu on the screen.
 class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
-  _PopupMenuRouteLayout(this.position, this.selectedItemOffset);
+  _PopupMenuRouteLayout(this.position, this.selectedItemOffset, this.textDirection);
 
+  // Rectangle of underlying button, relative to the overlay's dimensions.
   final RelativeRect position;
+
+  // The distance from the top of the menu to the middle of selected item.
+  //
+  // This will be null if there's no item to position in this way.
   final double selectedItemOffset;
+
+  // Whether to prefer going to the left or to the right.
+  final TextDirection textDirection;
+
+  // We put the child wherever position specifies, so long as it will fit within
+  // the specified parent size padded (inset) by 8. If necessary, we adjust the
+  // child's position so that it fits.
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.loosen();
+    // The menu can be at most the size of the overlay minus 8.0 pixels in each
+    // direction.
+    return new BoxConstraints.loose(constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0));
   }
 
-  // Put the child wherever position specifies, so long as it will fit within the
-  // specified parent size padded (inset) by 8. If necessary, adjust the child's
-  // position so that it fits.
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    double x = position?.left
-      ?? (position?.right != null ? size.width - (position.right + childSize.width) : _kMenuScreenPadding);
-    double y = position?.top
-      ?? (position?.bottom != null ? size.height - (position.bottom - childSize.height) : _kMenuScreenPadding);
+    // size: The size of the overlay.
+    // childSize: The size of the menu, when fully open, as determined by
+    // getConstraintsForChild.
 
-    if (selectedItemOffset != null)
-      y -= selectedItemOffset + _kMenuVerticalPadding;
+    // Find the ideal vertical position.
+    double y;
+    if (selectedItemOffset == null) {
+      y = position.top;
+    } else {
+      y = position.top + (size.height - position.top - position.bottom) / 2.0 - selectedItemOffset;
+    }
 
+    // Find the ideal horizontal position.
+    double x;
+    if (position.left > position.right) {
+      // Menu button is closer to the right edge, so grow to the left, aligned to the right edge.
+      x = size.width - position.right - childSize.width;
+    } else if (position.left < position.right) {
+      // Menu button is closer to the left edge, so grow to the right, aligned to the left edge.
+      x = position.left;
+    } else {
+      // Menu button is equidistant from both edges, so grow in reading direction.
+      assert(textDirection != null);
+      switch (textDirection) {
+        case TextDirection.rtl:
+          x = size.width - position.right - childSize.width;
+          break;
+        case TextDirection.ltr:
+          x = position.left;
+          break;
+      }
+    }
+
+    // Avoid going outside an area defined as the rectangle 8.0 pixels from the
+    // edge of the screen in every direction.
     if (x < _kMenuScreenPadding)
       x = _kMenuScreenPadding;
-    else if (x + childSize.width > size.width - 2 * _kMenuScreenPadding)
+    else if (x + childSize.width > size.width - _kMenuScreenPadding)
       x = size.width - childSize.width - _kMenuScreenPadding;
     if (y < _kMenuScreenPadding)
       y = _kMenuScreenPadding;
-    else if (y + childSize.height > size.height - 2 * _kMenuScreenPadding)
+    else if (y + childSize.height > size.height - _kMenuScreenPadding)
       y = size.height - childSize.height - _kMenuScreenPadding;
     return new Offset(x, y);
   }
@@ -538,13 +577,13 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
     double selectedItemOffset;
     if (initialValue != null) {
-      selectedItemOffset = 0.0;
+      double y = _kMenuVerticalPadding;
       for (PopupMenuEntry<T> entry in items) {
         if (entry.represents(initialValue)) {
-          selectedItemOffset += entry.height / 2.0;
+          selectedItemOffset = y + entry.height / 2.0;
           break;
         }
-        selectedItemOffset += entry.height;
+        y += entry.height;
       }
     }
 
@@ -552,31 +591,55 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
-    return new CustomSingleChildLayout(
-      delegate: new _PopupMenuRouteLayout(position, selectedItemOffset),
-      child: menu,
+    return new Builder(
+      builder: (BuildContext context) {
+        return new CustomSingleChildLayout(
+          delegate: new _PopupMenuRouteLayout(
+            position,
+            selectedItemOffset,
+            Directionality.of(context),
+          ),
+          child: menu,
+        );
+      },
     );
   }
 }
 
-/// Show a popup menu that contains the `items` at `position`. If `initialValue`
-/// is specified then the first item with a matching value will be highlighted
-/// and the value of `position` implies where the left, center point of the
-/// highlighted item should appear. If `initialValue` is not specified then
-/// `position` specifies the menu's origin.
+/// Show a popup menu that contains the `items` at `position`.
 ///
-/// The `context` argument is used to look up a [Navigator] to show the menu and
-/// a [Theme] to use for the menu.
+/// If `initialValue` is specified then the first item with a matching value
+/// will be highlighted and the value of `position` gives the rectangle whose
+/// vertical center will be aligned with the vertical center of the highlighted
+/// item (when possible).
 ///
-/// The `elevation` argument specifies the z-coordinate at which to place the
-/// menu. The elevation defaults to 8, the appropriate elevation for popup
-/// menus.
+/// If `initialValue` is not specified then the top of the menu will be aligned
+/// with the top of the `position` rectangle.
+///
+/// In both cases, the menu position will be adjusted if necessary to fit on the
+/// screen.
+///
+/// Horizontally, the menu is positioned so that it grows in the direction that
+/// has the most room. For example, if the `position` describes a rectangle on
+/// the left edge of the screen, then the left edge of the menu is aligned with
+/// the left edge of the `position`, and the menu grows to the right. If both
+/// edges of the `position` are equidistant from the opposite edge of the
+/// screen, then the ambient [Directionality] is used as a tie-breaker,
+/// preferring to grow in the reading direction.
 ///
 /// The positioning of the `initialValue` at the `position` is implemented by
 /// iterating over the `items` to find the first whose
 /// [PopupMenuEntry.represents] method returns true for `initialValue`, and then
 /// summing the values of [PopupMenuEntry.height] for all the preceding widgets
 /// in the list.
+///
+/// The `elevation` argument specifies the z-coordinate at which to place the
+/// menu. The elevation defaults to 8, the appropriate elevation for popup
+/// menus.
+///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the menu. It is only used when the method is called. Its corresponding
+/// widget can be safely removed from the tree before the popup menu is closed.
 ///
 /// See also:
 ///
@@ -590,7 +653,7 @@ Future<T> showMenu<T>({
   RelativeRect position,
   @required List<PopupMenuEntry<T>> items,
   T initialValue,
-  double elevation: 8.0
+  double elevation: 8.0,
 }) {
   assert(context != null);
   assert(items != null && items.isNotEmpty);
@@ -722,19 +785,21 @@ class PopupMenuButton<T> extends StatefulWidget {
 
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
-    final RenderBox renderBox = context.findRenderObject();
-    final Offset topLeft = renderBox.localToGlobal(Offset.zero);
+    final RenderBox button = context.findRenderObject();
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    final RelativeRect position = new RelativeRect.fromRect(
+      new Rect.fromPoints(
+        button.localToGlobal(Offset.zero, ancestor: overlay),
+        button.localToGlobal(button.size.bottomRight(Offset.zero), ancestor: overlay),
+      ),
+      Offset.zero & overlay.size,
+    );
     showMenu<T>(
       context: context,
       elevation: widget.elevation,
       items: widget.itemBuilder(context),
       initialValue: widget.initialValue,
-      position: new RelativeRect.fromLTRB(
-        topLeft.dx,
-        topLeft.dy + (widget.initialValue != null ? renderBox.size.height / 2.0 : 0.0),
-        0.0,
-        0.0,
-      )
+      position: position,
     )
     .then<Null>((T newValue) {
       if (!mounted || newValue == null)

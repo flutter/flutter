@@ -138,6 +138,9 @@ class AboutListTile extends StatelessWidget {
 ///
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
+///
+/// The `context` argument is passed to [showDialog], the documentation for
+/// which discusses how it is used.
 void showAboutDialog({
   @required BuildContext context,
   String applicationName,

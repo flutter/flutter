@@ -934,6 +934,9 @@ typedef bool SelectableDayPredicate(DateTime day);
 /// provided by [Directionality]. If both [locale] and [textDirection] are not
 /// null, [textDirection] overrides the direction chosen for the [locale].
 ///
+/// The `context` argument is passed to [showDialog], the documentation for
+/// which discusses how it is used.
+///
 /// See also:
 ///
 ///  * [showTimePicker]
