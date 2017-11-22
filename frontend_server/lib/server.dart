@@ -158,7 +158,8 @@ class _FrontendCompiler implements CompilerInterface {
       _generator = generator != null
         ? generator
         : await IncrementalKernelGenerator.newInstance(
-          compilerOptions, Uri.base.resolve(_filename)
+          compilerOptions, Uri.base.resolve(_filename),
+          useMinimalGenerator: true
         );
       final DeltaProgram deltaProgram = await _generator.computeDelta();
       program = deltaProgram.newProgram;
