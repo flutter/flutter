@@ -42,8 +42,6 @@ class GPURasterizer : public Rasterizer {
   // Set a callback to be called once when the next frame is drawn.
   void AddNextFrameCallback(fxl::Closure nextFrameCallback) override;
 
-  void SetTextureRegistry(flow::TextureRegistry* textureRegistry) override;
-
  private:
   std::unique_ptr<Surface> surface_;
   flow::CompositorContext compositor_context_;
