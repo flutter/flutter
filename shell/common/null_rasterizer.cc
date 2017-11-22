@@ -38,7 +38,7 @@ void NullRasterizer::DrawLastLayerTree() {
 }
 
 flow::TextureRegistry& NullRasterizer::GetTextureRegistry() {
-  return *texture_registry_;
+  return texture_registry_;
 }
 
 void NullRasterizer::Clear(SkColor color, const SkISize& size) {
@@ -57,11 +57,6 @@ void NullRasterizer::Draw(
 
 void NullRasterizer::AddNextFrameCallback(fxl::Closure nextFrameCallback) {
   // Null rasterizer. Nothing to do.
-}
-
-void NullRasterizer::SetTextureRegistry(
-    flow::TextureRegistry* textureRegistry) {
-  texture_registry_ = textureRegistry;
 }
 
 }  // namespace shell

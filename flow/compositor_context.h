@@ -62,7 +62,7 @@ class CompositorContext {
 
   RasterCache& raster_cache() { return raster_cache_; }
 
-  TextureRegistry& texture_registry() { return *texture_registry_; }
+  TextureRegistry& texture_registry() { return texture_registry_; }
 
   const Counter& frame_count() const { return frame_count_; }
 
@@ -72,13 +72,9 @@ class CompositorContext {
 
   const CounterValues& memory_usage() const { return memory_usage_; }
 
-  void SetTextureRegistry(TextureRegistry* textureRegistry) {
-    texture_registry_ = textureRegistry;
-  }
-
  private:
   RasterCache raster_cache_;
-  TextureRegistry* texture_registry_;
+  TextureRegistry texture_registry_;
   std::unique_ptr<ProcessInfo> process_info_;
   Counter frame_count_;
   Stopwatch frame_time_;

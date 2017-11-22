@@ -36,12 +36,10 @@ class NullRasterizer : public Rasterizer {
 
   void AddNextFrameCallback(fxl::Closure nextFrameCallback) override;
 
-  void SetTextureRegistry(flow::TextureRegistry* textureRegistry) override;
-
  private:
   std::unique_ptr<Surface> surface_;
   fml::WeakPtrFactory<NullRasterizer> weak_factory_;
-  flow::TextureRegistry* texture_registry_;
+  flow::TextureRegistry texture_registry_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(NullRasterizer);
 };
