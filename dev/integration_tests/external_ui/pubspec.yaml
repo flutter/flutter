@@ -1,0 +1,11 @@
+name: external_ui
+description: A test of Flutter integrating external UIs.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_driver:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

@@ -12,7 +12,7 @@ import 'colors.dart';
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/progress-indicators/#activity-indicators>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/progress-indicators/#activity-indicators>
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator.
   const CupertinoActivityIndicator({
