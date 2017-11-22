@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show window;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -92,7 +94,6 @@ void main() {
   });
 
   group('PopupMenuButton with Icon', () {
-
     // Helper function to create simple and valid popup menus.
     List<PopupMenuItem<int>> simplePopupMenuItemBuilder(BuildContext context) {
       return <PopupMenuItem<int>>[
@@ -132,4 +133,217 @@ void main() {
       expect(find.byIcon(Icons.view_carousel), findsOneWidget);
     });
   });
+
+  testWidgets('PopupMenu positioning', (WidgetTester tester) async {
+    final Widget testButton = new PopupMenuButton<int>(
+      itemBuilder: (BuildContext context) {
+        return <PopupMenuItem<int>>[
+          const PopupMenuItem<int>(value: 1, child: const Text('AAA')),
+          const PopupMenuItem<int>(value: 2, child: const Text('BBB')),
+          const PopupMenuItem<int>(value: 3, child: const Text('CCC')),
+        ];
+      },
+      child: const SizedBox(
+        height: 100.0,
+        width: 100.0,
+        child: const Text('XXX'),
+      ),
+    );
+    final WidgetPredicate popupMenu = (Widget widget) => widget.runtimeType.toString() == '_PopupMenu';
+
+    Future<Null> openMenu(TextDirection textDirection, Alignment alignment) async {
+      return TestAsyncUtils.guard(() async {
+        await tester.pumpWidget(new Container()); // reset in case we had a menu up already
+        await tester.pumpWidget(new TestApp(
+          textDirection: textDirection,
+          child: new Align(
+            alignment: alignment,
+            child: testButton,
+          ),
+        ));
+        await tester.tap(find.text('XXX'));
+        await tester.pump();
+      });
+    }
+
+    Future<Null> testPositioningDown(
+      WidgetTester tester,
+      TextDirection textDirection,
+      Alignment alignment,
+      TextDirection growthDirection,
+      Rect startRect,
+    ) {
+      return TestAsyncUtils.guard(() async {
+        await openMenu(textDirection, alignment);
+        Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
+        expect(rect, startRect);
+        bool doneVertically = false;
+        bool doneHorizontally = false;
+        do {
+          await tester.pump(const Duration(milliseconds: 20));
+          final Rect newRect = tester.getRect(find.byWidgetPredicate(popupMenu));
+          expect(newRect.top, rect.top);
+          if (doneVertically) {
+            expect(newRect.bottom, rect.bottom);
+          } else {
+            if (newRect.bottom == rect.bottom) {
+              doneVertically = true;
+            } else {
+              expect(newRect.bottom, greaterThan(rect.bottom));
+            }
+          }
+          switch (growthDirection) {
+            case TextDirection.rtl:
+              expect(newRect.right, rect.right);
+              if (doneHorizontally) {
+                expect(newRect.left, rect.left);
+              } else {
+                if (newRect.left == rect.left) {
+                  doneHorizontally = true;
+                } else {
+                  expect(newRect.left, lessThan(rect.left));
+                }
+              }
+              break;
+            case TextDirection.ltr:
+              expect(newRect.left, rect.left);
+              if (doneHorizontally) {
+                expect(newRect.right, rect.right);
+              } else {
+                if (newRect.right == rect.right) {
+                  doneHorizontally = true;
+                } else {
+                  expect(newRect.right, greaterThan(rect.right));
+                }
+              }
+              break;
+          }
+          rect = newRect;
+        } while (tester.binding.hasScheduledFrame);
+      });
+    }
+
+    Future<Null> testPositioningDownThenUp(
+      WidgetTester tester,
+      TextDirection textDirection,
+      Alignment alignment,
+      TextDirection growthDirection,
+      Rect startRect,
+    ) {
+      return TestAsyncUtils.guard(() async {
+        await openMenu(textDirection, alignment);
+        Rect rect = tester.getRect(find.byWidgetPredicate(popupMenu));
+        expect(rect, startRect);
+        int verticalStage = 0; // 0=down, 1=up, 2=done
+        bool doneHorizontally = false;
+        do {
+          await tester.pump(const Duration(milliseconds: 20));
+          final Rect newRect = tester.getRect(find.byWidgetPredicate(popupMenu));
+          switch (verticalStage) {
+            case 0:
+              if (newRect.top < rect.top) {
+                verticalStage = 1;
+                expect(newRect.bottom, greaterThanOrEqualTo(rect.bottom));
+                break;
+              }
+              expect(newRect.top, rect.top);
+              expect(newRect.bottom, greaterThan(rect.bottom));
+              break;
+            case 1:
+              if (newRect.top == rect.top) {
+                verticalStage = 2;
+                expect(newRect.bottom, rect.bottom);
+                break;
+              }
+              expect(newRect.top, lessThan(rect.top));
+              expect(newRect.bottom, rect.bottom);
+              break;
+            case 2:
+              expect(newRect.bottom, rect.bottom);
+              expect(newRect.top, rect.top);
+              break;
+            default:
+              assert(false);
+          }
+          switch (growthDirection) {
+            case TextDirection.rtl:
+              expect(newRect.right, rect.right);
+              if (doneHorizontally) {
+                expect(newRect.left, rect.left);
+              } else {
+                if (newRect.left == rect.left) {
+                  doneHorizontally = true;
+                } else {
+                  expect(newRect.left, lessThan(rect.left));
+                }
+              }
+              break;
+            case TextDirection.ltr:
+              expect(newRect.left, rect.left);
+              if (doneHorizontally) {
+                expect(newRect.right, rect.right);
+              } else {
+                if (newRect.right == rect.right) {
+                  doneHorizontally = true;
+                } else {
+                  expect(newRect.right, greaterThan(rect.right));
+                }
+              }
+              break;
+          }
+          rect = newRect;
+        } while (tester.binding.hasScheduledFrame);
+      });
+    }
+
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, new Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, new Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, new Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, new Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, new Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, new Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, new Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, new Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
+  });
+}
+
+class TestApp extends StatefulWidget {
+  const TestApp({ this.textDirection, this.child });
+  final TextDirection textDirection;
+  final Widget child;
+  @override
+  _TestAppState createState() => new _TestAppState();
+}
+
+class _TestAppState extends State<TestApp> {
+  @override
+  Widget build(BuildContext context) {
+    return new MediaQuery(
+      data: new MediaQueryData.fromWindow(window),
+      child: new Directionality(
+        textDirection: widget.textDirection,
+        child: new Navigator(
+          onGenerateRoute: (RouteSettings settings) {
+            assert(settings.name == '/');
+            return new MaterialPageRoute<dynamic>(
+              settings: settings,
+              builder: (BuildContext context) => new Material(
+                child: widget.child,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
 }

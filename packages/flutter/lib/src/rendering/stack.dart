@@ -103,8 +103,22 @@ class RelativeRect {
   }
 
   /// Convert this [RelativeRect] to a [Rect], in the coordinate space of the container.
+  ///
+  /// See also:
+  ///
+  ///  * [toSize], which returns the size part of the rect, based on the size of
+  ///    the container.
   Rect toRect(Rect container) {
     return new Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
+  }
+
+  /// Convert this [RelativeRect] to a [Size], assuming a container with the given size.
+  ///
+  /// See also:
+  ///
+  ///  * [toRect], which also computes the position relative to the container.
+  Size toSize(Size container) {
+    return new Size(container.width - left - right, container.height - top - bottom);
   }
 
   /// Linearly interpolate between two RelativeRects.

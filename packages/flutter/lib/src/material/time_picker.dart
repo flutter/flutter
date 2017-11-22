@@ -1249,12 +1249,16 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
 /// To show a dialog with [initialTime] equal to the current time:
+///
 /// ```dart
 /// showTimePicker(
 ///   initialTime: new TimeOfDay.now(),
-///   context: context
+///   context: context,
 /// );
 /// ```
+///
+/// The `context` argument is passed to [showDialog], the documentation for
+/// which discusses how it is used.
 ///
 /// See also:
 ///
