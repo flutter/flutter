@@ -129,7 +129,7 @@ class Image extends StatefulWidget {
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
   ///
-  /// By default, all network images are cached regardless of HTTP headers.
+  /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
     Key key,
     double scale: 1.0,
