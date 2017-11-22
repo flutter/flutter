@@ -42,6 +42,8 @@ class Rasterizer {
 
   // Set a callback to be called once when the next frame is drawn.
   virtual void AddNextFrameCallback(fxl::Closure nextFrameCallback) = 0;
+
+  virtual void SetTextureRegistry(flow::TextureRegistry* textureRegistry) = 0;
 };
 
 }  // namespace shell
