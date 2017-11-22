@@ -9,18 +9,18 @@ environment:
 
 dependencies:
   args: 0.13.7
-  file: 2.3.4
+  file: 2.3.5
   image: 1.1.29
   meta: 1.1.1
-  path: 1.4.2
+  path: 1.5.1
   platform: 2.1.1
   process: 2.0.6
-  stack_trace: 1.9.0
+  stack_trace: 1.9.1
   vm_service_client: 0.2.3
 
 dev_dependencies:
   # See packages/flutter_test/pubspec.yaml for why we're pinning this version.
-  test: 0.12.26
+  test: 0.12.28
 
   archive: 1.0.32 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
