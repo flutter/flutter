@@ -18,6 +18,7 @@ namespace shell {
 
 PlatformView::PlatformView(std::unique_ptr<Rasterizer> rasterizer)
     : rasterizer_(std::move(rasterizer)), size_(SkISize::Make(0, 0)) {
+  rasterizer_->SetTextureRegistry(&texture_registry_);
   Shell::Shared().AddPlatformView(this);
 }
 
@@ -35,6 +36,7 @@ void PlatformView::SetRasterizer(std::unique_ptr<Rasterizer> rasterizer) {
   Rasterizer* r = rasterizer_.release();
   blink::Threads::Gpu()->PostTask([r]() { delete r; });
   rasterizer_ = std::move(rasterizer);
+  rasterizer_->SetTextureRegistry(&texture_registry_);
   engine_->set_rasterizer(rasterizer_->GetWeakRasterizerPtr());
 }
 
