@@ -128,6 +128,8 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
+  ///
+  /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
     Key key,
     double scale: 1.0,
