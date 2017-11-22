@@ -401,7 +401,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 })
+  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
       : assert(url != null),
         assert(scale != null);
 
@@ -410,6 +410,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
+
+  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
+  final Map<String, String> headers;
 
   @override
   Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
@@ -434,7 +437,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await _httpClient.get(resolved);
+    final http.Response response = await _httpClient.get(resolved, headers: headers);
     if (response == null || response.statusCode != 200)
       throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
