@@ -312,6 +312,86 @@ void main() {
      expect(mockCodec.numFramesAsked, 3);
    });
 
+   testWidgets('multiple stream listeners', (WidgetTester tester) async {
+     final MockCodec mockCodec = new MockCodec();
+     mockCodec.frameCount = 2;
+     mockCodec.repetitionCount = -1;
+     final Completer<Codec> codecCompleter = new Completer<Codec>();
+
+     final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+       codec: codecCompleter.future,
+       scale: 1.0,
+     );
+
+     final List<ImageInfo> emittedImages1 = <ImageInfo>[];
+     final ImageListener listener1 = (ImageInfo image, bool synchronousCall) {
+       emittedImages1.add(image);
+     };
+     final List<ImageInfo> emittedImages2 = <ImageInfo>[];
+     final ImageListener listener2 = (ImageInfo image, bool synchronousCall) {
+       emittedImages2.add(image);
+     };
+     imageStream.addListener(listener1);
+     imageStream.addListener(listener2);
+
+     codecCompleter.complete(mockCodec);
+     await tester.idle();
+
+     final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+     final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+
+     mockCodec.completeNextFrame(frame1);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // first animation frame shows on first app frame.
+     expect(emittedImages1, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+     expect(emittedImages2, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+
+     mockCodec.completeNextFrame(frame2);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // next app frame will schedule a timer.
+     imageStream.removeListener(listener1);
+
+     await tester.pump(const Duration(milliseconds: 400)); // emit 2nd frame.
+     expect(emittedImages1, equals(<ImageInfo>[new ImageInfo(image: frame1.image)]));
+     expect(emittedImages2, equals(<ImageInfo>[
+       new ImageInfo(image: frame1.image),
+       new ImageInfo(image: frame2.image),
+     ]));
+   });
+
+   testWidgets('timer is canceled when listeners are removed', (WidgetTester tester) async {
+     final MockCodec mockCodec = new MockCodec();
+     mockCodec.frameCount = 2;
+     mockCodec.repetitionCount = -1;
+     final Completer<Codec> codecCompleter = new Completer<Codec>();
+
+     final ImageStreamCompleter imageStream = new MultiFrameImageStreamCompleter(
+       codec: codecCompleter.future,
+       scale: 1.0,
+     );
+
+     final ImageListener listener = (ImageInfo image, bool synchronousCall) {};
+     imageStream.addListener(listener);
+
+     codecCompleter.complete(mockCodec);
+     await tester.idle();
+
+     final FrameInfo frame1 = new FakeFrameInfo(20, 10, const Duration(milliseconds: 200));
+     final FrameInfo frame2 = new FakeFrameInfo(200, 100, const Duration(milliseconds: 400));
+
+     mockCodec.completeNextFrame(frame1);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump(); // first animation frame shows on first app frame.
+
+     mockCodec.completeNextFrame(frame2);
+     await tester.idle(); // let nextFrameFuture complete
+     await tester.pump();
+
+     imageStream.removeListener(listener);
+     // The test framework will fail this if there are pending timers at this
+     // point.
+   });
+
    testWidgets('timeDilation affects animation frame timers', (WidgetTester tester) async {
      final MockCodec mockCodec = new MockCodec();
      mockCodec.frameCount = 2;
