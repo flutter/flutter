@@ -60,20 +60,22 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
   }
 
   void handleDemoAction(LeaveBehindDemoAction action) {
-    switch (action) {
-      case LeaveBehindDemoAction.reset:
-        initListItems();
-        break;
-      case LeaveBehindDemoAction.horizontalSwipe:
-        _dismissDirection = DismissDirection.horizontal;
-        break;
-      case LeaveBehindDemoAction.leftSwipe:
-        _dismissDirection = DismissDirection.endToStart;
-        break;
-      case LeaveBehindDemoAction.rightSwipe:
-        _dismissDirection = DismissDirection.startToEnd;
-        break;
-    }
+    setState(() {
+      switch (action) {
+        case LeaveBehindDemoAction.reset:
+          initListItems();
+          break;
+        case LeaveBehindDemoAction.horizontalSwipe:
+          _dismissDirection = DismissDirection.horizontal;
+          break;
+        case LeaveBehindDemoAction.leftSwipe:
+          _dismissDirection = DismissDirection.endToStart;
+          break;
+        case LeaveBehindDemoAction.rightSwipe:
+          _dismissDirection = DismissDirection.startToEnd;
+          break;
+      }
+    });
   }
 
   void handleUndo(LeaveBehindItem item) {
@@ -161,9 +163,16 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
           )
         ]
       ),
-      body: new ListView(
-        children: leaveBehindItems.map(buildItem).toList()
-      )
+      body: leaveBehindItems.isEmpty
+          ? new Center(
+              child: new RaisedButton(
+                onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
+                child: const Text('Reset the list'),
+              ),
+            )
+          : new ListView(
+             children: leaveBehindItems.map(buildItem).toList()
+            ),
     );
   }
 }
