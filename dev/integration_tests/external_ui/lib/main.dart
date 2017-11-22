@@ -45,7 +45,7 @@ Widget builds: $_widgetBuilds''';
       _summary = 'Producing texture frames at .5x speed...';
       _state = FrameState.slow;
       _icon = Icons.stop;
-      channel.invokeMethod('start', (_flutterFrameRate / 2).toInt());
+      channel.invokeMethod('start', _flutterFrameRate ~/ 2);
       break;
     case FrameState.slow:
       await channel.invokeMethod('stop');
@@ -95,7 +95,7 @@ Widget builds: $_widgetBuilds''';
         ticker.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
-          _summary = "Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.\nPress play to produce texture frames.";
+          _summary = 'Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.\nPress play to produce texture frames.';
           _icon = Icons.play_arrow;
           _state = FrameState.initial;
         });
@@ -107,11 +107,6 @@ Widget builds: $_widgetBuilds''';
       _summary = 'Calibrating...';
       _icon = null;
     });
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
