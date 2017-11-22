@@ -4,6 +4,7 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Drag and drop - control test', (WidgetTester tester) async {
@@ -1331,6 +1332,109 @@ void main() {
     expect(events, isEmpty);
     await tester.tap(find.text('X'));
     expect(events, equals(<String>['tap']));
+  });
+
+  testWidgets('long-press draggable calls onDragCompleted called if dropped on accepting target', (WidgetTester tester) async {
+    final List<int> accepted = <int>[];
+    bool onDragCompletedCalled = false;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new Column(
+        children: <Widget>[
+          new LongPressDraggable<int>(
+            data: 1,
+            child: const Text('Source'),
+            feedback: const Text('Dragging'),
+            onDragCompleted: () {
+              onDragCompletedCalled = true;
+            },
+          ),
+          new DragTarget<int>(
+            builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
+              return new Container(height: 100.0, child: const Text('Target'));
+            },
+            onAccept: accepted.add,
+          ),
+        ],
+      ),
+    ));
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    final TestGesture gesture = await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    await tester.pump(kLongPressTimeout);
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+
+    final Offset secondLocation = tester.getCenter(find.text('Target'));
+    await gesture.moveTo(secondLocation);
+    await tester.pump();
+
+    expect(accepted, isEmpty);
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isFalse);
+
+    await gesture.up();
+    await tester.pump();
+
+    expect(accepted, equals(<int>[1]));
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(find.text('Target'), findsOneWidget);
+    expect(onDragCompletedCalled, isTrue);
+  });
+
+  testWidgets('long-press draggable calls onDragStartedCalled after long press', (WidgetTester tester) async {
+    bool onDragStartedCalled = false;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new LongPressDraggable<int>(
+        data: 1,
+        child: const Text('Source'),
+        feedback: const Text('Dragging'),
+        onDragStarted: () {
+          onDragStartedCalled = true;
+        },
+      ),
+    ));
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+
+    final Offset firstLocation = tester.getCenter(find.text('Source'));
+    await tester.startGesture(firstLocation, pointer: 7);
+    await tester.pump();
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsNothing);
+    expect(onDragStartedCalled, isFalse);
+
+    await tester.pump(kLongPressTimeout);
+
+    expect(find.text('Source'), findsOneWidget);
+    expect(find.text('Dragging'), findsOneWidget);
+    expect(onDragStartedCalled, isTrue);
   });
 
   testWidgets('Drag feedback with child anchor positions correctly', (WidgetTester tester) async {

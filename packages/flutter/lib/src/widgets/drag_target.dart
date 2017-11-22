@@ -228,7 +228,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
-    DraggableCanceledCallback onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled,
+    VoidCallback onDragCompleted
   }) : super(
     key: key,
     child: child,
@@ -239,7 +240,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
-    onDraggableCanceled: onDraggableCanceled
+    onDraggableCanceled: onDraggableCanceled,
+    onDragCompleted: onDragCompleted
   );
 
   @override
