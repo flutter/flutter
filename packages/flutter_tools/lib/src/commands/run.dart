@@ -28,6 +28,12 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: true,
         defaultsTo: false,
         help: 'Start tracing during startup.');
+    argParser.addFlag('ipv6',
+        hide: true,
+        negatable: false,
+        defaultsTo: false,
+        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
+              'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
     usesTargetOption();
@@ -36,6 +42,7 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
+  bool get ipv6 => argResults['ipv6'];
   String get route => argResults['route'];
 
   void usesPortOptions() {
@@ -304,6 +311,7 @@ class RunCommand extends RunCommandBase {
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
         stayResident: stayResident,
+        ipv6: ipv6,
       );
     } else {
       runner = new ColdRunner(
@@ -314,6 +322,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
         stayResident: stayResident,
+        ipv6: ipv6,
       );
     }
 

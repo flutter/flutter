@@ -22,11 +22,13 @@ class ColdRunner extends ResidentRunner {
     this.applicationBinary,
     this.previewDart2 : false,
     bool stayResident: true,
+    bool ipv6: false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
-             stayResident: stayResident);
+             stayResident: stayResident,
+             ipv6: ipv6);
 
   final bool traceStartup;
   final String applicationBinary;
