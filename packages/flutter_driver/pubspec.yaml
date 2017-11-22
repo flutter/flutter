@@ -10,7 +10,6 @@ environment:
 dependencies:
   file: 2.3.4
   json_rpc_2: 2.0.4
-  matcher: 0.12.1+4
   meta: 1.1.1
   path: 1.4.2
   web_socket_channel: 1.0.6
@@ -40,6 +39,7 @@ dev_dependencies:
   intl: 0.15.2 # TRANSITIVE DEPENDENCY
   io: 0.3.0 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
+  matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
   mime: 0.9.4 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
