@@ -195,7 +195,7 @@ tasks:
   external_ui_integration_test_ios:
     description: >
       Checks that external UIs work on iOS.
-    stage: devicelab
+    stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
     flaky: true
 
