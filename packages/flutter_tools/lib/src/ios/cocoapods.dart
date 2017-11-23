@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as IO;
 
 import 'package:meta/meta.dart';
 
@@ -64,12 +65,20 @@ class CocoaPods {
       if (!fs.file(fs.path.join(appIosDir.path, 'Podfile')).existsSync()) {
         await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
-
-      await _runPodInstall(appIosDir, iosEngineDir);
+      String podfileDir = IO.Directory.current.path+"/"+appIosDir.path;
+      ProcessResult needPodInstallRes = await _checkIfNeedPodInstall(podfileDir);
+      if(needPodInstallRes.exitCode !=0 ){
+        await _runPodInstall(appIosDir, iosEngineDir);
+      }
     } else {
       throwToolExit('CocoaPods not available for project using Flutter plugins');
     }
   }
+
+  Future<ProcessResult> _checkIfNeedPodInstall(String podfileDir){
+    return Process.run('diff', [podfileDir+"/Podfile.lock",podfileDir+"/Pods/Manifest.lock"]);
+  }
+
 
   Future<bool> _checkPodCondition() async {
     if (!await isCocoaPodsInstalledAndMeetsVersionCheck) {
