@@ -66,8 +66,7 @@ class CocoaPods {
         await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
       String podfileDir = IO.Directory.current.path+"/"+appIosDir.path;
-      ProcessResult needPodInstallRes = await _checkIfNeedPodInstall(podfileDir);
-      if(needPodInstallRes.exitCode !=0 ){
+      if(_checkIfNeedPodInstall(podfileDir)){
         await _runPodInstall(appIosDir, iosEngineDir);
       }
     } else {
@@ -75,8 +74,16 @@ class CocoaPods {
     }
   }
 
-  Future<ProcessResult> _checkIfNeedPodInstall(String podfileDir){
-    return Process.run('diff', [podfileDir+"/Podfile.lock",podfileDir+"/Pods/Manifest.lock"]);
+  bool _checkIfNeedPodInstall(String podfileDir){
+    String podfileLockPath = podfileDir+"/Podfile.lock";
+    String manifestLockPath = podfileDir+"/Pods/Manifest.lock";
+    //The two .lock exists.
+    if(fs.file(podfileLockPath).existsSync() && fs.file(manifestLockPath).existsSync()){
+      //When the two files have identity content, skip the pod install.
+      if(fs.file(podfileLockPath).readAsStringSync() == fs.file(manifestLockPath).readAsStringSync())
+        return false;
+    }
+    return true;
   }
 
 
