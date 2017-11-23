@@ -15,15 +15,15 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'error.dart';
-import 'find.dart';
-import 'frame_sync.dart';
-import 'gesture.dart';
-import 'health.dart';
-import 'message.dart';
-import 'render_tree.dart';
-import 'request_data.dart';
-import 'semantics.dart';
+import '../common/error.dart';
+import '../common/find.dart';
+import '../common/frame_sync.dart';
+import '../common/gesture.dart';
+import '../common/health.dart';
+import '../common/message.dart';
+import '../common/render_tree.dart';
+import '../common/request_data.dart';
+import '../common/semantics.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
