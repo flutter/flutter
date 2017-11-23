@@ -95,7 +95,9 @@ Widget builds: $_widgetBuilds''';
         ticker.dispose();
         setState(() {
           _flutterFrameRate = tickCount * 1000 / elapsed.inMilliseconds;
-          _summary = 'Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.\nPress play to produce texture frames.';
+          _summary = '''
+Flutter frame rate is ${_flutterFrameRate.toStringAsFixed(1)}fps.
+Press play to produce texture frames.''';
           _icon = Icons.play_arrow;
           _state = FrameState.initial;
         });

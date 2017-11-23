@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yourcompany.externalui">
+    package="io.flutter.externalui">
 
     <uses-permission android:name="android.permission.INTERNET"/>
 
