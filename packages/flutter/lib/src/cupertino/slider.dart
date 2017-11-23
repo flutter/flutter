@@ -343,13 +343,13 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
-        leftColor = _kTrackColor;
-        rightColor = _activeColor;
+        leftColor = _activeColor;
+        rightColor = _kTrackColor;
         break;
       case TextDirection.ltr:
         visualPosition = _position.value;
-        leftColor = _activeColor;
-        rightColor = _kTrackColor;
+        leftColor = _kTrackColor;
+        rightColor = _activeColor;
         break;
     }
 
