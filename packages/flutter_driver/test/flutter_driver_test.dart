@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_driver/src/driver.dart';
-import 'package:flutter_driver/src/error.dart';
-import 'package:flutter_driver/src/health.dart';
-import 'package:flutter_driver/src/timeline.dart';
+import 'package:flutter_driver/src/common/error.dart';
+import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/driver/driver.dart';
+import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';

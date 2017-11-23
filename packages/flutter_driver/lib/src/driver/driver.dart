@@ -14,16 +14,16 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/error.dart';
+import '../common/find.dart';
+import '../common/frame_sync.dart';
+import '../common/gesture.dart';
+import '../common/health.dart';
+import '../common/message.dart';
+import '../common/render_tree.dart';
+import '../common/request_data.dart';
+import '../common/semantics.dart';
 import 'common.dart';
-import 'error.dart';
-import 'find.dart';
-import 'frame_sync.dart';
-import 'gesture.dart';
-import 'health.dart';
-import 'message.dart';
-import 'render_tree.dart';
-import 'request_data.dart';
-import 'semantics.dart';
 import 'timeline.dart';
 
 /// Timeline stream identifier.
