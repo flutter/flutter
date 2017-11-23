@@ -309,13 +309,14 @@ class ScrollDragController implements Drag {
       if (motionStartDistanceThreshold != null &&
           _offsetSinceLastStop == null &&
           timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
+        // Enforce a new threshold.
         _offsetSinceLastStop = 0.0;
       }
       // Not moving can't break threshold.
       return false;
     } else {
       if (_offsetSinceLastStop == null) {
-        // Already in motion. Allow transparent offset.
+        // Already in motion. Allow transparent offset transmission.
         return true;
       } else {
         _offsetSinceLastStop += offset;
