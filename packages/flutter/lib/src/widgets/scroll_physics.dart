@@ -334,7 +334,7 @@ class BouncingScrollPhysics extends ScrollPhysics {
   }
 
   @override
-  double get dragStartDistanceMotionThreshold => 3.5; // Eyeballed value.
+  double get dragStartDistanceMotionThreshold => 3.5; // Eyeballed from observation.
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching

@@ -133,4 +133,79 @@ void main() {
     // After a hold longer than 2 frames, previous velocity is lost.
     expect(getScrollVelocity(tester), 0.0);
   });
+
+  testWidgets('Drags creeping unaffected on Android', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.android);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    await gesture.moveBy(const Offset(0.0, -0.5));
+    expect(getScrollOffset(tester), 0.5);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
+    expect(getScrollOffset(tester), 1.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
+    expect(getScrollOffset(tester), 1.5);
+  });
+
+  testWidgets('Drags creeping must break threshold on iOS', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    await gesture.moveBy(const Offset(0.0, -0.5));
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 10));
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 30));
+    // Now -2.5 in total.
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 40));
+    // Now -3.5, just reached threshold.
+    expect(getScrollOffset(tester), 0.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 50));
+    // -0.5 over threshold transferred.
+    expect(getScrollOffset(tester), 0.5);
+  });
+
+  testWidgets('Big drag over threshold magnitude preserved on iOS', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    await gesture.moveBy(const Offset(0.0, -20.0));
+    // No offset lost from threshold.
+    expect(getScrollOffset(tester), 20.0);
+  });
+
+  testWidgets('Small continuing motion preserved on iOS', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    await gesture.moveBy(const Offset(0.0, -20.0)); // Break threshold.
+    expect(getScrollOffset(tester), 20.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
+    expect(getScrollOffset(tester), 20.5);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 40));
+    expect(getScrollOffset(tester), 21.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 60));
+    expect(getScrollOffset(tester), 21.5);
+  });
+
+  testWidgets('Motion stop resets threshold on iOS', (WidgetTester tester) async {
+    await pumpTest(tester, TargetPlatform.iOS);
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(Viewport)));
+    await gesture.moveBy(const Offset(0.0, -20.0)); // Break threshold.
+    expect(getScrollOffset(tester), 20.0);
+    await gesture.moveBy(const Offset(0.0, -0.5), timeStamp: const Duration(milliseconds: 20));
+    expect(getScrollOffset(tester), 20.5);
+    await gesture.moveBy(Offset.zero);
+    // Stationary too long, threshold reset.
+    await gesture.moveBy(Offset.zero, timeStamp: const Duration(milliseconds: 120));
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 140));
+    expect(getScrollOffset(tester), 20.5);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 150));
+    expect(getScrollOffset(tester), 20.5);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 160));
+    expect(getScrollOffset(tester), 20.5);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 170));
+    // New threshold broken.
+    expect(getScrollOffset(tester), 21.5);
+    await gesture.moveBy(const Offset(0.0, -1.0), timeStamp: const Duration(milliseconds: 180));
+    expect(getScrollOffset(tester), 22.5);
+  });
 }

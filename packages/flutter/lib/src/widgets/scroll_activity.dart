@@ -230,7 +230,10 @@ class ScrollDragController implements Drag {
     this.motionStartDistanceThreshold
   }) : assert(delegate != null),
        assert(details != null),
-       assert(!(motionStartDistanceThreshold <= 0.0), 'Must be a positive number or null'),
+       assert(
+         motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
+         'Must be a positive number or null'
+       ),
        _delegate = delegate,
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
@@ -304,6 +307,7 @@ class ScrollDragController implements Drag {
 
     if (offset == 0.0) {
       if (motionStartDistanceThreshold != null &&
+          _offsetSinceLastStop == null &&
           timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
         _offsetSinceLastStop = 0.0;
       }
