@@ -16,11 +16,13 @@ Future<Null> main() async {
 
     setUpAll(() async {
       driver = await FlutterDriver.connect();
-      // TODO(mravn): the following pause appears necessary on iOS to avoid
-      // inflating elements too early (when there is no size).
-      await new Future<Null>.delayed(const Duration(seconds: 1));
     });
 
+    // This test verifies that we can consume texture frames at a rate
+    // close to the minimum of the rate at which they are produced
+    // and Flutter's frame rate. It also verifies that we do not rebuild the
+    // Widget tree during texture consumption. The test starts by measuring
+    // Flutter's frame rate.
     test('texture rendering', () async {
       final SerializableFinder fab = find.byValueKey('fab');
       final SerializableFinder summary = find.byValueKey('summary');

@@ -23,7 +23,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.yourcompany.externalui"
+        applicationId "io.flutter.externalui"
         minSdkVersion 16
         targetSdkVersion 25
         versionCode 1
