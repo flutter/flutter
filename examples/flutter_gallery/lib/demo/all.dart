@@ -12,3 +12,4 @@ export 'material/material.dart';
 export 'pesto_demo.dart';
 export 'shrine_demo.dart';
 export 'typography_demo.dart';
+export 'video_demo.dart';
