@@ -100,7 +100,7 @@ const List<Demo> demos = const <Demo>[
   const Demo('Sliders'),
   const Demo('Switches'),
 
-  //Media
+  // Media
   const Demo('Animated Images'),
 
   // Style
