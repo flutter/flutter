@@ -155,18 +155,20 @@ class _TabStyle extends AnimatedWidget {
   }
 }
 
+typedef void _LayoutCallback(List<double> xOffsets, TextDirection textDirection, double width);
+
 class _TabLabelBarRenderer extends RenderFlex {
   _TabLabelBarRenderer({
     List<RenderBox> children,
-    Axis direction,
-    MainAxisSize mainAxisSize,
-    MainAxisAlignment mainAxisAlignment,
-    CrossAxisAlignment crossAxisAlignment,
-    TextDirection textDirection,
-    VerticalDirection verticalDirection,
-    TextBaseline textBaseline,
+    @required Axis direction,
+    @required MainAxisSize mainAxisSize,
+    @required MainAxisAlignment mainAxisAlignment,
+    @required CrossAxisAlignment crossAxisAlignment,
+    @required TextDirection textDirection,
+    @required VerticalDirection verticalDirection,
     @required this.onPerformLayout,
   }) : assert(onPerformLayout != null),
+       assert(textDirection != null),
        super(
          children: children,
          direction: direction,
@@ -175,14 +177,17 @@ class _TabLabelBarRenderer extends RenderFlex {
          crossAxisAlignment: crossAxisAlignment,
          textDirection: textDirection,
          verticalDirection: verticalDirection,
-         textBaseline: textBaseline,
        );
 
-  ValueChanged<List<double>> onPerformLayout;
+  _LayoutCallback onPerformLayout;
 
   @override
   void performLayout() {
     super.performLayout();
+    // xOffsets will contain childCount+1 values, giving the offsets of the
+    // leading edge of the first tab as the first value, of the leading edge of
+    // the each subsequent tab as each subsequent value, and of the trailing
+    // edge of the last tab as the last value.
     RenderBox child = firstChild;
     final List<double> xOffsets = <double>[];
     while (child != null) {
@@ -191,8 +196,16 @@ class _TabLabelBarRenderer extends RenderFlex {
       assert(child.parentData == childParentData);
       child = childParentData.nextSibling;
     }
-    xOffsets.add(size.width); // So xOffsets[lastTabIndex + 1] is valid.
-    onPerformLayout(xOffsets);
+    assert(textDirection != null);
+    switch (textDirection) {
+      case TextDirection.rtl:
+        xOffsets.insert(0, size.width);
+        break;
+      case TextDirection.ltr:
+        xOffsets.add(size.width);
+        break;
+    }
+    onPerformLayout(xOffsets, textDirection, size.width);
   }
 }
 
@@ -202,10 +215,6 @@ class _TabLabelBarRenderer extends RenderFlex {
 class _TabLabelBar extends Flex {
   _TabLabelBar({
     Key key,
-    MainAxisAlignment mainAxisAlignment,
-    CrossAxisAlignment crossAxisAlignment,
-    TextDirection textDirection,
-    VerticalDirection verticalDirection: VerticalDirection.down,
     List<Widget> children: const <Widget>[],
     this.onPerformLayout,
   }) : super(
@@ -215,11 +224,10 @@ class _TabLabelBar extends Flex {
     mainAxisSize: MainAxisSize.max,
     mainAxisAlignment: MainAxisAlignment.start,
     crossAxisAlignment: CrossAxisAlignment.center,
-    textDirection: textDirection,
-    verticalDirection: verticalDirection,
+    verticalDirection: VerticalDirection.down,
   );
 
-  final ValueChanged<List<double>> onPerformLayout;
+  final _LayoutCallback onPerformLayout;
 
   @override
   RenderFlex createRenderObject(BuildContext context) {
@@ -230,7 +238,6 @@ class _TabLabelBar extends Flex {
       crossAxisAlignment: crossAxisAlignment,
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
-      textBaseline: textBaseline,
       onPerformLayout: onPerformLayout,
     );
   }
@@ -258,29 +265,66 @@ double _indexChangeProgress(TabController controller) {
 
 class _IndicatorPainter extends CustomPainter {
   _IndicatorPainter({
-    this.controller,
-    this.indicatorWeight,
-    this.indicatorPadding,
-    List<double> initialTabOffsets,
-  }) : _tabOffsets = initialTabOffsets, super(repaint: controller.animation);
+    @required this.controller,
+    @required this.indicatorWeight,
+    @required this.indicatorPadding,
+    _IndicatorPainter old,
+  }) : assert(controller != null),
+       assert(indicatorWeight != null),
+       assert(indicatorPadding != null),
+       super(repaint: controller.animation) {
+    if (old != null)
+      saveTabOffsets(old._currentTabOffsets, old._currentTextDirection);
+  }
 
   final TabController controller;
   final double indicatorWeight;
-  final EdgeInsets indicatorPadding;
-  List<double> _tabOffsets;
+  final EdgeInsetsGeometry indicatorPadding;
+
+  List<double> _currentTabOffsets;
+  TextDirection _currentTextDirection;
+  EdgeInsets _resolvedIndicatorPadding;
+
   Color _color;
   Rect _currentRect;
 
-  // _tabOffsets[index] is the offset of the left edge of the tab at index, and
-  // _tabOffsets[_tabOffsets.length] is the right edge of the last tab.
-  int get maxTabIndex => _tabOffsets.length - 2;
+  void saveTabOffsets(List<double> tabOffsets, TextDirection textDirection) {
+    _currentTabOffsets = tabOffsets;
+    _currentTextDirection = textDirection;
+    _resolvedIndicatorPadding = indicatorPadding.resolve(_currentTextDirection);
+  }
+
+  // _currentTabOffsets[index] is the offset of the start edge of the tab at index, and
+  // _currentTabOffsets[_currentTabOffsets.length] is the end edge of the last tab.
+  int get maxTabIndex => _currentTabOffsets.length - 2;
+
+  double centerOf(int tabIndex) {
+    assert(_currentTabOffsets != null);
+    assert(_currentTabOffsets.isNotEmpty);
+    assert(tabIndex >= 0);
+    assert(tabIndex <= maxTabIndex);
+    return (_currentTabOffsets[tabIndex] + _currentTabOffsets[tabIndex + 1]) / 2.0;
+  }
 
   Rect indicatorRect(Size tabBarSize, int tabIndex) {
-    assert(_tabOffsets != null && tabIndex >= 0 && tabIndex <= maxTabIndex);
-    double tabLeft = _tabOffsets[tabIndex];
-    double tabRight = _tabOffsets[tabIndex + 1];
-    tabLeft = math.min(tabLeft + indicatorPadding.left, tabRight);
-    tabRight = math.max(tabRight - indicatorPadding.right, tabLeft);
+    assert(_currentTabOffsets != null);
+    assert(_currentTextDirection != null);
+    assert(_currentTabOffsets.isNotEmpty);
+    assert(tabIndex >= 0);
+    assert(tabIndex <= maxTabIndex);
+    double tabLeft, tabRight;
+    switch (_currentTextDirection) {
+      case TextDirection.rtl:
+        tabLeft = _currentTabOffsets[tabIndex + 1];
+        tabRight = _currentTabOffsets[tabIndex];
+        break;
+      case TextDirection.ltr:
+        tabLeft = _currentTabOffsets[tabIndex];
+        tabRight = _currentTabOffsets[tabIndex + 1];
+        break;
+    }
+    tabLeft = math.min(tabLeft + _resolvedIndicatorPadding.left, tabRight);
+    tabRight = math.max(tabRight - _resolvedIndicatorPadding.right, tabLeft);
     final double tabTop = tabBarSize.height - indicatorWeight;
     return new Rect.fromLTWH(tabLeft, tabTop, tabRight - tabLeft, indicatorWeight);
   }
@@ -288,46 +332,49 @@ class _IndicatorPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (controller.indexIsChanging) {
+      // The user tapped on a tab, the tab controller's animation is running.
       final Rect targetRect = indicatorRect(size, controller.index);
       _currentRect = Rect.lerp(targetRect, _currentRect ?? targetRect, _indexChangeProgress(controller));
     } else {
+      // The user is dragging the TabBarView's PageView left or right.
       final int currentIndex = controller.index;
-      final Rect left = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
+      final Rect previous = currentIndex > 0 ? indicatorRect(size, currentIndex - 1) : null;
       final Rect middle = indicatorRect(size, currentIndex);
-      final Rect right = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
-
+      final Rect next = currentIndex < maxTabIndex ? indicatorRect(size, currentIndex + 1) : null;
       final double index = controller.index.toDouble();
       final double value = controller.animation.value;
       if (value == index - 1.0)
-        _currentRect = left ?? middle;
+        _currentRect = previous ?? middle;
       else if (value == index + 1.0)
-        _currentRect = right ?? middle;
+        _currentRect = next ?? middle;
       else if (value == index)
          _currentRect = middle;
       else if (value < index)
-        _currentRect = left == null ? middle : Rect.lerp(middle, left, index - value);
+        _currentRect = previous == null ? middle : Rect.lerp(middle, previous, index - value);
       else
-        _currentRect = right == null ? middle : Rect.lerp(middle, right, value - index);
+        _currentRect = next == null ? middle : Rect.lerp(middle, next, value - index);
     }
     assert(_currentRect != null);
     canvas.drawRect(_currentRect, new Paint()..color = _color);
   }
 
-  static bool _tabOffsetsNotEqual(List<double> a, List<double> b) {
-    assert(a != null && b != null && a.length == b.length);
+  static bool _tabOffsetsEqual(List<double> a, List<double> b) {
+    if (a?.length != b?.length)
+      return false;
     for (int i = 0; i < a.length; i += 1) {
       if (a[i] != b[i])
-        return true;
+        return false;
     }
-    return false;
+    return true;
   }
 
   @override
   bool shouldRepaint(_IndicatorPainter old) {
-    return controller != old.controller ||
-      _tabOffsets?.length != old._tabOffsets?.length ||
-      _tabOffsetsNotEqual(_tabOffsets, old._tabOffsets) ||
-      _currentRect != old._currentRect;
+    return controller != old.controller
+        || indicatorWeight != old.indicatorWeight
+        || indicatorPadding != old.indicatorPadding
+        || (!_tabOffsetsEqual(_currentTabOffsets, old._currentTabOffsets))
+        || _currentTextDirection != old._currentTextDirection;
   }
 }
 
@@ -488,7 +535,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// [indicatorPadding] are ignored.
   ///
   /// The default value of [indicatorPadding] is [EdgeInsets.zero].
-  final EdgeInsets indicatorPadding;
+  final EdgeInsetsGeometry indicatorPadding;
 
   /// The color of selected tab labels.
   ///
@@ -540,10 +587,10 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
 class _TabBarState extends State<TabBar> {
   ScrollController _scrollController;
-
   TabController _controller;
   _IndicatorPainter _indicatorPainter;
   int _currentIndex;
+  double _tabStripWidth;
 
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
@@ -571,12 +618,11 @@ class _TabBarState extends State<TabBar> {
       _controller.animation.addListener(_handleTabControllerAnimationTick);
       _controller.addListener(_handleTabControllerTick);
       _currentIndex = _controller.index;
-      final List<double> offsets = _indicatorPainter?._tabOffsets;
       _indicatorPainter = new _IndicatorPainter(
         controller: _controller,
         indicatorWeight: widget.indicatorWeight,
         indicatorPadding: widget.indicatorPadding,
-        initialTabOffsets: offsets,
+        old: _indicatorPainter,
       );
     }
   }
@@ -604,16 +650,19 @@ class _TabBarState extends State<TabBar> {
     super.dispose();
   }
 
-  // _tabOffsets[index] is the offset of the left edge of the tab at index, and
-  // _tabOffsets[_tabOffsets.length] is the right edge of the last tab.
-  int get maxTabIndex => _indicatorPainter._tabOffsets.length - 2;
+  int get maxTabIndex => _indicatorPainter.maxTabIndex;
 
   double _tabScrollOffset(int index, double viewportWidth, double minExtent, double maxExtent) {
     if (!widget.isScrollable)
       return 0.0;
-    final List<double> tabOffsets = _indicatorPainter._tabOffsets;
-    assert(tabOffsets != null && index >= 0 && index <= maxTabIndex);
-    final double tabCenter = (tabOffsets[index] + tabOffsets[index + 1]) / 2.0;
+    double tabCenter = _indicatorPainter.centerOf(index);
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        tabCenter = _tabStripWidth - tabCenter;
+        break;
+      case TextDirection.ltr:
+        break;
+    }
     return (tabCenter - viewportWidth / 2.0).clamp(minExtent, maxExtent);
   }
 
@@ -632,23 +681,23 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _scrollToControllerValue() {
-    final double left = _currentIndex > 0 ? _tabCenteredScrollOffset(_currentIndex - 1) : null;
-    final double middle = _tabCenteredScrollOffset(_currentIndex);
-    final double right = _currentIndex < maxTabIndex ? _tabCenteredScrollOffset(_currentIndex + 1) : null;
+    final double leadingPosition = _currentIndex > 0 ? _tabCenteredScrollOffset(_currentIndex - 1) : null;
+    final double middlePosition = _tabCenteredScrollOffset(_currentIndex);
+    final double trailingPosition = _currentIndex < maxTabIndex ? _tabCenteredScrollOffset(_currentIndex + 1) : null;
 
     final double index = _controller.index.toDouble();
     final double value = _controller.animation.value;
     double offset;
     if (value == index - 1.0)
-      offset = left ?? middle;
+      offset = leadingPosition ?? middlePosition;
     else if (value == index + 1.0)
-      offset = right ?? middle;
+      offset = trailingPosition ?? middlePosition;
     else if (value == index)
-       offset = middle;
+       offset = middlePosition;
     else if (value < index)
-      offset = left == null ? middle : lerpDouble(middle, left, index - value);
+      offset = leadingPosition == null ? middlePosition : lerpDouble(middlePosition, leadingPosition, index - value);
     else
-      offset = right == null ? middle : lerpDouble(middle, right, value - index);
+      offset = trailingPosition == null ? middlePosition : lerpDouble(middlePosition, trailingPosition, value - index);
 
     _scrollController.jumpTo(offset);
   }
@@ -663,6 +712,11 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _handleTabControllerTick() {
+    if (_controller.index != _currentIndex) {
+      _currentIndex = _controller.index;
+      if (widget.isScrollable)
+        _scrollToCurrentIndex();
+    }
     setState(() {
       // Rebuild the tabs after a (potentially animated) index change
       // has completed.
@@ -670,8 +724,9 @@ class _TabBarState extends State<TabBar> {
   }
 
   // Called each time layout completes.
-  void _saveTabOffsets(List<double> tabOffsets) {
-    _indicatorPainter?._tabOffsets = tabOffsets;
+  void _saveTabOffsets(List<double> tabOffsets, TextDirection textDirection, double width) {
+    _tabStripWidth = width;
+    _indicatorPainter?.saveTabOffsets(tabOffsets, textDirection);
   }
 
   void _handleTap(int index) {
@@ -717,12 +772,6 @@ class _TabBarState extends State<TabBar> {
         _indicatorPainter._color = Colors.white;
       }
 
-      if (_controller.index != _currentIndex) {
-        _currentIndex = _controller.index;
-        if (widget.isScrollable)
-          _scrollToCurrentIndex();
-      }
-
       final int previousIndex = _controller.previousIndex;
 
       if (_controller.indexIsChanging) {
@@ -738,13 +787,13 @@ class _TabBarState extends State<TabBar> {
         wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
-          final Animation<double> leftAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, leftAnimation);
+          final Animation<double> previousAnimation = new _DragAnimation(_controller, tabIndex);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, previousAnimation);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
-          final Animation<double> rightAnimation = new _DragAnimation(_controller, tabIndex);
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, rightAnimation);
+          final Animation<double> nextAnimation = new _DragAnimation(_controller, tabIndex);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, nextAnimation);
         }
       }
     }
@@ -753,7 +802,7 @@ class _TabBarState extends State<TabBar> {
     // then give all of the tabs equal flexibility so that their widths
     // reflect the intrinsic width of their labels.
     final int tabCount = widget.tabs.length;
-    for (int index = 0; index < tabCount; index++) {
+    for (int index = 0; index < tabCount; index += 1) {
       wrappedTabs[index] = new InkWell(
         onTap: () { _handleTap(index); },
         child: new Padding(
@@ -777,17 +826,17 @@ class _TabBarState extends State<TabBar> {
     Widget tabBar = new CustomPaint(
       painter: _indicatorPainter,
       child: new _TabStyle(
-          animation: kAlwaysDismissedAnimation,
-          selected: false,
-          labelColor: widget.labelColor,
-          unselectedLabelColor: widget.unselectedLabelColor,
-          labelStyle: widget.labelStyle,
-          unselectedLabelStyle: widget.unselectedLabelStyle,
-          child: new _TabLabelBar(
-            onPerformLayout: _saveTabOffsets,
-            children:  wrappedTabs,
-          ),
+        animation: kAlwaysDismissedAnimation,
+        selected: false,
+        labelColor: widget.labelColor,
+        unselectedLabelColor: widget.unselectedLabelColor,
+        labelStyle: widget.labelStyle,
+        unselectedLabelStyle: widget.unselectedLabelStyle,
+        child: new _TabLabelBar(
+          onPerformLayout: _saveTabOffsets,
+          children:  wrappedTabs,
         ),
+      ),
     );
 
     if (widget.isScrollable) {
@@ -1085,8 +1134,8 @@ class TabPageSelector extends StatelessWidget {
       else
         background = selectedColorTween.begin;
     } else {
-      // The selection's offset reflects how far the TabBarView has
-      /// been dragged to the left (-1.0 to 0.0) or the right (0.0 to 1.0).
+      // The selection's offset reflects how far the TabBarView has / been dragged
+      // to the previous page (-1.0 to 0.0) or the next page (0.0 to 1.0).
       final double offset = tabController.offset;
       if (tabController.index == tabIndex) {
         background = selectedColorTween.lerp(1.0 - offset.abs());
