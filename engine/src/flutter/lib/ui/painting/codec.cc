@@ -75,7 +75,8 @@ fxl::RefPtr<Codec> InitCodec(sk_sp<SkData> buffer, size_t trace_id) {
 
   std::unique_ptr<SkCodec> skCodec = SkCodec::MakeFromData(buffer);
   if (!skCodec) {
-    FXL_LOG(ERROR) << "SkCodec::MakeFromData failed";
+    FXL_LOG(ERROR) << "Failed decoding image. Data is either invalid, or it is "
+                      "encoded using an unsupported format.";
     return nullptr;
   }
   if (skCodec->getFrameCount() > 1) {
