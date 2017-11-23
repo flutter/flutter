@@ -338,7 +338,6 @@ tasks:
       Gallery under --preview-dart-2 that enables new Dart 2.0 frontend.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   flutter_gallery__start_up:
     description: >
