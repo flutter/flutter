@@ -61,7 +61,7 @@ config("config") {
 }
 
 if (is_fuchsia) {
-  import("//packages/package.gni")
+  import("//build/package.gni")
 
   package("package") {
     system_image = true
