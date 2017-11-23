@@ -226,11 +226,11 @@ class _BottomNavigationTile extends StatelessWidget {
         child: new FadeTransition(
           opacity: animation,
           child: DefaultTextStyle.merge(
-              style: const TextStyle(
-                fontSize: _kActiveFontSize,
-                color: Colors.white,
-              ),
-              child: item.title,
+            style: const TextStyle(
+              fontSize: _kActiveFontSize,
+              color: Colors.white,
+            ),
+            child: item.title,
           ),
         ),
       ),
@@ -399,7 +399,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 if (widget.onTap != null)
                   widget.onTap(i);
               },
-              colorTween: colorTween),
+              colorTween: colorTween,
+            ),
           );
         }
         break;
@@ -415,7 +416,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 if (widget.onTap != null)
                   widget.onTap(i);
               },
-              flex: _evaluateFlex(_animations[i])),
+              flex: _evaluateFlex(_animations[i]),
+            ),
           );
         }
         break;
@@ -435,6 +437,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     Color backgroundColor;
     switch (widget.type) {
       case BottomNavigationBarType.fixed:
@@ -459,6 +462,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
                 child: new CustomPaint(
                   painter: new _RadialPainter(
                     circles: _circles.toList(),
+                    textDirection: Directionality.of(context),
                   ),
                 ),
               ),
@@ -501,7 +505,7 @@ class _Circle {
   AnimationController controller;
   CurvedAnimation animation;
 
-  double get horizontalOffset {
+  double get horizontalLeadingOffset {
     double weightSum(Iterable<Animation<double>> animations) {
       // We're adding flex values instead of animation values to produce correct
       // ratios.
@@ -509,11 +513,11 @@ class _Circle {
     }
 
     final double allWeights = weightSum(state._animations);
-    // These weights sum to the left edge of the indexed item.
-    final double leftWeights = weightSum(state._animations.sublist(0, index));
+    // These weights sum to the start edge of the indexed item.
+    final double leadingWeights = weightSum(state._animations.sublist(0, index));
 
     // Add half of its flex value in order to get to the center.
-    return (leftWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
+    return (leadingWeights + state._evaluateFlex(state._animations[index]) / 2.0) / allWeights;
   }
 
   void dispose() {
@@ -524,10 +528,13 @@ class _Circle {
 // Paints the animating color splash circles.
 class _RadialPainter extends CustomPainter {
   _RadialPainter({
-    this.circles,
-  });
+    @required this.circles,
+    @required this.textDirection,
+  }) : assert(circles != null),
+       assert(textDirection != null);
 
   final List<_Circle> circles;
+  final TextDirection textDirection;
 
   // Computes the maximum radius attainable such that at least one of the
   // bounding rectangle's corners touches the edge of the circle. Drawing a
@@ -541,6 +548,8 @@ class _RadialPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_RadialPainter oldPainter) {
+    if (textDirection != oldPainter.textDirection)
+      return true;
     if (circles == oldPainter.circles)
       return false;
     if (circles.length != oldPainter.circles.length)
@@ -557,10 +566,16 @@ class _RadialPainter extends CustomPainter {
       final Paint paint = new Paint()..color = circle.color;
       final Rect rect = new Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);
-      final Offset center = new Offset(
-        circle.horizontalOffset * size.width,
-        size.height / 2.0,
-      );
+      double leftFraction;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          leftFraction = 1.0 - circle.horizontalLeadingOffset;
+          break;
+        case TextDirection.ltr:
+          leftFraction = circle.horizontalLeadingOffset;
+          break;
+      }
+      final Offset center = new Offset(leftFraction * size.width, size.height / 2.0);
       final Tween<double> radiusTween = new Tween<double>(
         begin: 0.0,
         end: _maxRadius(center, size),
