@@ -461,6 +461,28 @@ void main() {
     expect(buildCount, equals(2));
   });
 
+  testWidgets('InheritedElement.dispatchDidChangeDependencies is allowed to call outside build phase', (WidgetTester tester) async {
+    int buildCount = 0;
+    InheritedElement inheritedElement;
+
+    await tester.pumpWidget(new TestInherited(
+      shouldNotify: false,
+      child: new Builder(
+        builder: (BuildContext context) {
+          context.inheritFromWidgetOfExactType(TestInherited);
+          buildCount += 1;
+          inheritedElement = context.ancestorInheritedElementForWidgetOfExactType(TestInherited);
+          return new Container();
+        },
+      ),
+    ));
+    expect(buildCount, equals(1));
+
+    inheritedElement.dispatchDidChangeDependencies();
+    await tester.pump();
+    expect(buildCount, equals(2));
+  });
+
   testWidgets('initState() dependency on Inherited asserts', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/5491
     bool exceptionCaught = false;
