@@ -17,17 +17,19 @@ class LoopingController {
 
   LoopingController(this.uri);
 
+  Future<VideoPlayerController> _controllerFuture;
   VideoPlayerController _controller;
   VideoPlayerController get controller => _controller;
 
   Future<Null> init() async {
-    _controller = await VideoPlayerController.create(uri);
+    _controllerFuture = VideoPlayerController.create(uri);
+    _controller = await _controllerFuture;
     await _controller.setLooping(true);
     await _controller.play();
   }
 
   Future<Null> dispose() async {
-    await _controller.dispose();
+    (await _controllerFuture).dispose();
   }
 }
 
@@ -66,7 +68,9 @@ class LoopingVideoCard extends StatelessWidget {
           aspectRatio: 3 / 2,
           child: new Hero(
             tag: title,
-            child: new VideoPlayPause(controller),
+            child: (controller == null)
+                ? new Container()
+                : new VideoPlayPause(controller),
           ),
         ),
       ),
@@ -97,30 +101,17 @@ class LoopingVideoCard extends StatelessWidget {
   }
 }
 
-class VideoDemo extends StatefulWidget {
-  const VideoDemo({Key key}) : super(key: key);
-
-  static const String routeName = '/video';
-
-  @override
-  VideoDemoState createState() {
-    return new VideoDemoState();
-  }
-}
-
 class VideoPlayPause extends StatefulWidget {
   final VideoPlayerController controller;
 
   const VideoPlayPause(this.controller);
 
   @override
-  State createState() {
-    return new _VideoPlayPauseState();
-  }
+  State createState() => new _VideoPlayPauseState();
 }
 
 class _VideoPlayPauseState extends State<VideoPlayPause> {
-  FadeAnimation imageFadeAnim;
+  FadeAnimation imageFadeAnimation;
   VoidCallback listener;
 
   _VideoPlayPauseState() {
@@ -153,11 +144,12 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             return;
           }
           if (controller.value.isPlaying) {
-            imageFadeAnim =
-                new FadeAnimation(child: new Icon(Icons.pause, size: 100.0));
+            imageFadeAnimation = new FadeAnimation(
+              child: new Icon(Icons.pause, size: 100.0),
+            );
             controller.pause();
           } else {
-            imageFadeAnim = new FadeAnimation(
+            imageFadeAnimation = new FadeAnimation(
                 child: new Icon(Icons.play_arrow, size: 100.0));
             controller.play();
           }
@@ -169,7 +161,7 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
               height: 20.0,
               width: double.INFINITY,
               child: new VideoProgressBar(controller))),
-      new Center(child: imageFadeAnim),
+      new Center(child: imageFadeAnimation),
     ];
 
     if (!controller.value.initialized) {
@@ -236,14 +228,26 @@ class _FadeAnimationState extends State<FadeAnimation>
   Widget build(BuildContext context) {
     return animationController.isAnimating
         ? new Opacity(
-            opacity: 1.0 - animationController.value, child: widget.child)
+            opacity: 1.0 - animationController.value,
+            child: widget.child,
+          )
         : new Container();
   }
 }
 
-class VideoDemoState extends State<VideoDemo> {
-  LoopingController butterflyController = new LoopingController(butterflyUri);
-  LoopingController beeController = new LoopingController(beeUri);
+class VideoDemo extends StatefulWidget {
+  const VideoDemo({Key key}) : super(key: key);
+
+  static const String routeName = '/video';
+
+  @override
+  _VideoDemoState createState() => new _VideoDemoState();
+}
+
+class _VideoDemoState extends State<VideoDemo> {
+  final LoopingController butterflyController =
+      new LoopingController(butterflyUri);
+  final LoopingController beeController = new LoopingController(beeUri);
 
   @override
   void initState() {
@@ -269,22 +273,25 @@ class VideoDemoState extends State<VideoDemo> {
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
-      body: new ListView(children: <Widget>[
-        new LoopingVideoCard(
-          controller: butterflyController.controller,
-          title: 'Float',
-          subtitle: '… like a butterfly',
-        ),
-        new LoopingVideoCard(
-          controller: beeController.controller,
-          title: 'Sting',
-          subtitle: '… like a bee',
-        ),
-        const Card(
+      body: new ListView(
+        children: <Widget>[
+          new LoopingVideoCard(
+            controller: butterflyController.controller,
+            title: 'Float',
+            subtitle: '… like a butterfly',
+          ),
+          new LoopingVideoCard(
+            controller: beeController.controller,
+            title: 'Sting',
+            subtitle: '… like a bee',
+          ),
+          const Card(
             child: const ListTile(
-          title: const Text('– Muhammad Ali'),
-        ))
-      ]),
+              title: const Text('– Muhammad Ali'),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
