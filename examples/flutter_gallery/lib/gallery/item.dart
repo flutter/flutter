@@ -75,7 +75,7 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     new GalleryItem(
       title: 'Video',
-      subtitle: 'Demonstrating video playback',
+      subtitle: 'Video playback',
       category: 'Demos',
       routeName: VideoDemo.routeName,
       buildRoute: (BuildContext context) => const VideoDemo(),

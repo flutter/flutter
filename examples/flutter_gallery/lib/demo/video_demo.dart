@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:video_player/video_player.dart';
 
 const String butterflyUri =
@@ -37,32 +36,39 @@ class LoopingVideoCard extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  LoopingVideoCard({Key key, this.controller, this.title, this.subtitle})
+  const LoopingVideoCard({Key key, this.controller, this.title, this.subtitle})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     final Widget contents = new GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-              new MaterialPageRoute<Null>(builder: (BuildContext context) {
-            return new Scaffold(
-                appBar: new AppBar(
-                  title: new Text(title),
+      onTap: () {
+        Navigator
+            .of(context)
+            .push(new MaterialPageRoute<Null>(builder: (BuildContext context) {
+          return new Scaffold(
+            appBar: new AppBar(
+              title: new Text(title),
+            ),
+            body: new Center(
+              child: new AspectRatio(
+                aspectRatio: 3 / 2,
+                child: new Hero(
+                  tag: title,
+                  child: new VideoPlayPause(controller),
                 ),
-                body: new Center(
-                        child: new AspectRatio(
-                            aspectRatio: 3 / 2,
-                            child: new Hero(
-                                tag: title,
-                                child: new VideoPlayPause(controller)))));
-          }));
-        },
-        child: new Hero(
-            tag: title,
-            child: (controller == null)
-                ? new Container()
-                : new VideoPlayer(controller)));
+              ),
+            ),
+          );
+        }));
+      },
+      child: new Hero(
+        tag: title,
+        child: (controller == null)
+            ? new Container()
+            : new VideoPlayer(controller),
+      ),
+    );
     return new Card(
       child: new Column(
         children: <Widget>[
@@ -96,58 +102,10 @@ class VideoDemo extends StatefulWidget {
   }
 }
 
-class VideoDemoState extends State<VideoDemo> {
-  LoopingController butterflyController = new LoopingController(butterflyUri);
-  LoopingController beeController = new LoopingController(beeUri);
-
-  @override
-  void initState() {
-    super.initState();
-    butterflyController.init().then((_) {
-      setState(() {});
-    });
-    beeController.init().then((_) {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    butterflyController.dispose();
-    beeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('Videos'),
-      ),
-      body: new ListView(children: <Widget>[
-        new LoopingVideoCard(
-          controller: butterflyController.controller,
-          title: 'Float',
-          subtitle: '...like a butterfly',
-        ),
-        new LoopingVideoCard(
-          controller: beeController.controller,
-          title: 'Sting',
-          subtitle: '...like a bee',
-        ),
-        const Card(
-            child: const ListTile(
-          title: const Text('– Muhammad Ali'),
-        ))
-      ]),
-    );
-  }
-}
-
 class VideoPlayPause extends StatefulWidget {
   final VideoPlayerController controller;
 
-  VideoPlayPause(this.controller);
+  const VideoPlayPause(this.controller);
 
   @override
   State createState() {
@@ -274,5 +232,53 @@ class _FadeAnimationState extends State<FadeAnimation>
         ? new Opacity(
             opacity: 1.0 - animationController.value, child: widget.child)
         : new Container();
+  }
+}
+
+class VideoDemoState extends State<VideoDemo> {
+  LoopingController butterflyController = new LoopingController(butterflyUri);
+  LoopingController beeController = new LoopingController(beeUri);
+
+  @override
+  void initState() {
+    super.initState();
+    butterflyController.init().then((_) {
+      setState(() {});
+    });
+    beeController.init().then((_) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    butterflyController.dispose();
+    beeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('Videos'),
+      ),
+      body: new ListView(children: <Widget>[
+        new LoopingVideoCard(
+          controller: butterflyController.controller,
+          title: 'Float',
+          subtitle: '… like a butterfly',
+        ),
+        new LoopingVideoCard(
+          controller: beeController.controller,
+          title: 'Sting',
+          subtitle: '… like a bee',
+        ),
+        const Card(
+            child: const ListTile(
+          title: const Text('– Muhammad Ali'),
+        ))
+      ]),
+    );
   }
 }
