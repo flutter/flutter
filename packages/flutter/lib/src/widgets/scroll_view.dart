@@ -375,22 +375,27 @@ abstract class BoxScrollView extends ScrollView {
     Widget sliver = buildChildLayout(context);
     EdgeInsetsGeometry effectivePadding = padding;
     if (padding == null) {
-      final MediaQueryData mediaQuery = MediaQuery.of(context);
-      final EdgeInsets mediaQueryHorizontalPadding = mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
-      final EdgeInsets mediaQueryVerticalPadding = mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
-      // Consume the main axis padding with SliverPadding.
-      effectivePadding = scrollDirection == Axis.vertical
-          ? mediaQueryVerticalPadding
-          : mediaQueryHorizontalPadding;
-      // Leave behind the cross axis padding.
-      sliver = new MediaQuery(
-        data: mediaQuery.copyWith(
-          padding: scrollDirection == Axis.vertical
-              ? mediaQueryHorizontalPadding
-              : mediaQueryVerticalPadding,
-        ),
-        child: sliver,
-      );
+      final MediaQueryData mediaQuery = MediaQuery.of(context, nullOk: true);
+      if (mediaQuery != null) {
+        // Automatically pad sliver with padding from MediaQuery.
+        final EdgeInsets mediaQueryHorizontalPadding =
+            mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
+        final EdgeInsets mediaQueryVerticalPadding =
+            mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
+        // Consume the main axis padding with SliverPadding.
+        effectivePadding = scrollDirection == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
+        // Leave behind the cross axis padding.
+        sliver = new MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: scrollDirection == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
+          ),
+          child: sliver,
+        );
+      }
     }
 
     if (effectivePadding != null)
