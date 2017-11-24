@@ -39,36 +39,42 @@ class LoopingVideoCard extends StatelessWidget {
   const LoopingVideoCard({Key key, this.controller, this.title, this.subtitle})
       : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    final Widget contents = new GestureDetector(
-      onTap: () {
-        Navigator
-            .of(context)
-            .push(new MaterialPageRoute<Null>(builder: (BuildContext context) {
-          return new Scaffold(
-            appBar: new AppBar(
-              title: new Text(title),
-            ),
-            body: new Center(
-              child: new AspectRatio(
-                aspectRatio: 3 / 2,
-                child: new Hero(
-                  tag: title,
-                  child: new VideoPlayPause(controller),
-                ),
-              ),
-            ),
-          );
-        }));
-      },
-      child: new Hero(
-        tag: title,
-        child: (controller == null)
-            ? new Container()
-            : new VideoPlayer(controller),
+  Widget buildInlineVideo() {
+    return new Padding(
+      padding: const EdgeInsets.all(5.0),
+      child: new Center(
+        child: new AspectRatio(
+          aspectRatio: 3 / 2,
+          child: new Hero(
+            tag: title,
+            child: (controller == null)
+                ? new Container()
+                : new VideoPlayer(controller),
+          ),
+        ),
       ),
     );
+  }
+
+  Widget buildFullScreenVideo() {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: new Text(title),
+      ),
+      body: new Center(
+        child: new AspectRatio(
+          aspectRatio: 3 / 2,
+          child: new Hero(
+            tag: title,
+            child: new VideoPlayPause(controller),
+          ),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return new Card(
       child: new Column(
         children: <Widget>[
@@ -76,14 +82,14 @@ class LoopingVideoCard extends StatelessWidget {
             title: new Text(title),
             subtitle: new Text(subtitle),
           ),
-          new Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: new Center(
-              child: new AspectRatio(
-                aspectRatio: 3 / 2,
-                child: contents,
-              ),
-            ),
+          new GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                  new MaterialPageRoute<Null>(builder: (BuildContext context) {
+                return buildFullScreenVideo();
+              }));
+            },
+            child: buildInlineVideo(),
           ),
         ],
       ),
