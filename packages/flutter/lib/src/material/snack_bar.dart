@@ -15,8 +15,6 @@ import 'theme_data.dart';
 // https://material.google.com/components/snackbars-toasts.html#snackbars-toasts-specs
 const double _kSnackBarPadding = 24.0;
 const double _kSingleLineVerticalPadding = 14.0;
-const double _kMultiLineVerticalTopPadding = 24.0;
-const double _kMultiLineVerticalSpaceBetweenTextAndButtons = 10.0;
 const Color _kSnackBackground = const Color(0xFF323232);
 
 // TODO(ianh): We should check if the given text and actions are going to fit on

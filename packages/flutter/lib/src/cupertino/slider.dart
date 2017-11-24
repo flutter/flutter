@@ -179,7 +179,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const double _kTrackHeight = 2.0;
 const Color _kTrackColor = const Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.

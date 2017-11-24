@@ -22,7 +22,6 @@ import 'theme.dart';
 const double _kTabHeight = 46.0;
 const double _kTextAndIconTabHeight = 72.0;
 const double _kMinTabWidth = 72.0;
-const double _kMaxTabWidth = 264.0;
 
 /// A material design [TabBar] tab. If both [icon] and [text] are
 /// provided, the text is displayed below the icon.

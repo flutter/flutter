@@ -151,7 +151,6 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-const double _kMidpoint = 0.5;
 const double _kEdgeSize = Checkbox.width;
 const Radius _kEdgeRadius = const Radius.circular(1.0);
 const double _kStrokeWidth = 2.0;
