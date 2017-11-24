@@ -326,7 +326,9 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          widget.onRefresh().whenComplete(() {
+          final Future<Null> refreshResult = widget.onRefresh();
+          assert(refreshResult != null, 'RefreshIndicator.onRefresh must return a Future.');
+          refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
               completer.complete();
               _dismiss(_RefreshIndicatorMode.done);
