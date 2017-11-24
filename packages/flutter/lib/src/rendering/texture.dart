@@ -78,3 +78,33 @@ class TextureBox extends RenderBox {
     ));
   }
 }
+
+class HoleBox extends RenderBox {
+  HoleBox();
+
+  @override
+  bool get sizedByParent => true;
+
+  @override
+  bool get alwaysNeedsCompositing => true;
+
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  void performResize() {
+    size = constraints.biggest;
+  }
+
+  @override
+  bool hitTestSelf(Offset position) {
+    return true;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    context.addLayer(new HoleLayer(
+      rect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height)
+    ));
+  }
+}

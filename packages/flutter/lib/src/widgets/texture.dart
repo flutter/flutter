@@ -48,3 +48,10 @@ class Texture extends LeafRenderObjectWidget {
     renderObject.textureId = textureId;
   }
 }
+
+class Hole extends LeafRenderObjectWidget {
+  const Hole({ Key key }): super(key: key);
+
+  @override
+  HoleBox createRenderObject(BuildContext context) => new HoleBox();
+}

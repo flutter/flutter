@@ -217,6 +217,25 @@ class TextureLayer extends Layer {
   }
 }
 
+class HoleLayer extends Layer {
+  HoleLayer({
+    @required this.rect,
+  }): assert(rect != null);
+
+  /// Bounding rectangle of this layer.
+  final Rect rect;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    final Rect shiftedRect = rect.shift(layerOffset);
+    builder.addHole(
+      offset: shiftedRect.topLeft,
+      width: shiftedRect.width,
+      height: shiftedRect.height,
+    );
+  }
+}
+
 /// A layer that indicates to the compositor that it should display
 /// certain performance statistics within it.
 ///
