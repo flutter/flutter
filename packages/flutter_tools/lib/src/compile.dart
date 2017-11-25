@@ -56,7 +56,12 @@ class _StdoutHandler {
   }
 }
 
-Future<String> compile({String sdkRoot, String mainPath}) async {
+Future<String> compile(
+    {String sdkRoot,
+    String mainPath,
+    bool linkPlatformKernelIn : false,
+    List<String> extraFrontEndOptions,
+    String incrementalCompilerByteStorePath}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -64,13 +69,27 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
   // This is a URI, not a file path, so the forward slash is correct even on Windows.
   if (!sdkRoot.endsWith('/'))
     sdkRoot = '$sdkRoot/';
-  final Process server = await processManager.start(<String>[
+  final List<String> command = <String>[
     _dartExecutable(),
     frontendServer,
     '--sdk-root',
     sdkRoot,
-    mainPath
-  ]).catchError((dynamic error, StackTrace stack) {
+  ];
+  if (!linkPlatformKernelIn)
+    command.add('--no-link-platform');
+  if (incrementalCompilerByteStorePath != null) {
+    command.addAll(<String>[
+      '--incremental',
+      '--byte-store',
+      incrementalCompilerByteStorePath]);
+    fs.directory(incrementalCompilerByteStorePath).createSync(recursive: true);
+  }
+  if (extraFrontEndOptions != null)
+    command.addAll(extraFrontEndOptions);
+  command.add(mainPath);
+  final Process server = await processManager
+      .start(command)
+      .catchError((dynamic error, StackTrace stack) {
     printTrace('Failed to start frontend server $error, $stack');
   });
 
@@ -93,8 +112,8 @@ Future<String> compile({String sdkRoot, String mainPath}) async {
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot) {
-    assert(_sdkRoot != null);
+  ResidentCompiler(this._sdkRoot)
+    : assert(_sdkRoot != null) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';
@@ -120,8 +139,7 @@ class ResidentCompiler {
 
     final String inputKey = new Uuid().generateV4();
     _server.stdin.writeln('recompile $inputKey');
-    for (String invalidatedFile in invalidatedFiles)
-      _server.stdin.writeln(invalidatedFile);
+    invalidatedFiles.forEach(_server.stdin.writeln);
     _server.stdin.writeln(inputKey);
 
     return stdoutHandler.outputFilename.future;
@@ -165,5 +183,12 @@ class ResidentCompiler {
   /// Either [accept] or [reject] should be called after every [recompile] call.
   void reject() {
     _server.stdin.writeln('reject');
+  }
+
+  /// Should be invoked when frontend server compiler should forget what was
+  /// accepted previously so that next call to [recompile] produces complete
+  /// kernel file.
+  void reset() {
+    _server.stdin.writeln('reset');
   }
 }

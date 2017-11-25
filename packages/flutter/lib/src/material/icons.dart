@@ -6,7 +6,7 @@ import 'package:flutter/widgets.dart';
 
 /// Identifiers for the supported material design icons.
 ///
-/// Use with with the [Icon] class to show specific icons.
+/// Use with the [Icon] class to show specific icons.
 ///
 /// Icons are identified by their name as listed below.
 ///
@@ -202,10 +202,10 @@ class Icons {
   static const IconData archive = const IconData(0xe149, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">arrow_back</i> &#x2014; material icon named "arrow back".</p>
-  static const IconData arrow_back = const IconData(0xe5c4, fontFamily: 'MaterialIcons');
+  static const IconData arrow_back = const IconData(0xe5c4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_back_ios</i> &#x2014; material icon named "arrow back ios".</p>
-  static const IconData arrow_back_ios = const IconData(0xe5e0, fontFamily: 'MaterialIcons');
+  static const IconData arrow_back_ios = const IconData(0xe5e0, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_downward</i> &#x2014; material icon named "arrow downward".</p>
   static const IconData arrow_downward = const IconData(0xe5db, fontFamily: 'MaterialIcons');
@@ -220,16 +220,16 @@ class Icons {
   static const IconData arrow_drop_up = const IconData(0xe5c7, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">arrow_forward</i> &#x2014; material icon named "arrow forward".</p>
-  static const IconData arrow_forward = const IconData(0xe5c8, fontFamily: 'MaterialIcons');
+  static const IconData arrow_forward = const IconData(0xe5c8, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_forward_ios</i> &#x2014; material icon named "arrow forward ios".</p>
-  static const IconData arrow_forward_ios = const IconData(0xe5e1, fontFamily: 'MaterialIcons');
+  static const IconData arrow_forward_ios = const IconData(0xe5e1, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_left</i> &#x2014; material icon named "arrow left".</p>
-  static const IconData arrow_left = const IconData(0xe5de, fontFamily: 'MaterialIcons');
+  static const IconData arrow_left = const IconData(0xe5de, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_right</i> &#x2014; material icon named "arrow right".</p>
-  static const IconData arrow_right = const IconData(0xe5df, fontFamily: 'MaterialIcons');
+  static const IconData arrow_right = const IconData(0xe5df, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">arrow_upward</i> &#x2014; material icon named "arrow upward".</p>
   static const IconData arrow_upward = const IconData(0xe5d8, fontFamily: 'MaterialIcons');
@@ -244,7 +244,7 @@ class Icons {
   static const IconData assessment = const IconData(0xe85c, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">assignment</i> &#x2014; material icon named "assignment".</p>
-  static const IconData assignment = const IconData(0xe85d, fontFamily: 'MaterialIcons');
+  static const IconData assignment = const IconData(0xe85d, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">assignment_ind</i> &#x2014; material icon named "assignment ind".</p>
   static const IconData assignment_ind = const IconData(0xe85e, fontFamily: 'MaterialIcons');
@@ -253,7 +253,7 @@ class Icons {
   static const IconData assignment_late = const IconData(0xe85f, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">assignment_return</i> &#x2014; material icon named "assignment return".</p>
-  static const IconData assignment_return = const IconData(0xe860, fontFamily: 'MaterialIcons');
+  static const IconData assignment_return = const IconData(0xe860, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">assignment_returned</i> &#x2014; material icon named "assignment returned".</p>
   static const IconData assignment_returned = const IconData(0xe861, fontFamily: 'MaterialIcons');
@@ -289,7 +289,7 @@ class Icons {
   static const IconData av_timer = const IconData(0xe01b, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">backspace</i> &#x2014; material icon named "backspace".</p>
-  static const IconData backspace = const IconData(0xe14a, fontFamily: 'MaterialIcons');
+  static const IconData backspace = const IconData(0xe14a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">backup</i> &#x2014; material icon named "backup".</p>
   static const IconData backup = const IconData(0xe864, fontFamily: 'MaterialIcons');
@@ -307,7 +307,7 @@ class Icons {
   static const IconData battery_std = const IconData(0xe1a5, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">battery_unknown</i> &#x2014; material icon named "battery unknown".</p>
-  static const IconData battery_unknown = const IconData(0xe1a6, fontFamily: 'MaterialIcons');
+  static const IconData battery_unknown = const IconData(0xe1a6, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">beach_access</i> &#x2014; material icon named "beach access".</p>
   static const IconData beach_access = const IconData(0xeb3e, fontFamily: 'MaterialIcons');
@@ -469,22 +469,22 @@ class Icons {
   static const IconData call_end = const IconData(0xe0b1, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">call_made</i> &#x2014; material icon named "call made".</p>
-  static const IconData call_made = const IconData(0xe0b2, fontFamily: 'MaterialIcons');
+  static const IconData call_made = const IconData(0xe0b2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_merge</i> &#x2014; material icon named "call merge".</p>
-  static const IconData call_merge = const IconData(0xe0b3, fontFamily: 'MaterialIcons');
+  static const IconData call_merge = const IconData(0xe0b3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_missed</i> &#x2014; material icon named "call missed".</p>
-  static const IconData call_missed = const IconData(0xe0b4, fontFamily: 'MaterialIcons');
+  static const IconData call_missed = const IconData(0xe0b4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_missed_outgoing</i> &#x2014; material icon named "call missed outgoing".</p>
-  static const IconData call_missed_outgoing = const IconData(0xe0e4, fontFamily: 'MaterialIcons');
+  static const IconData call_missed_outgoing = const IconData(0xe0e4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_received</i> &#x2014; material icon named "call received".</p>
-  static const IconData call_received = const IconData(0xe0b5, fontFamily: 'MaterialIcons');
+  static const IconData call_received = const IconData(0xe0b5, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_split</i> &#x2014; material icon named "call split".</p>
-  static const IconData call_split = const IconData(0xe0b6, fontFamily: 'MaterialIcons');
+  static const IconData call_split = const IconData(0xe0b6, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">call_to_action</i> &#x2014; material icon named "call to action".</p>
   static const IconData call_to_action = const IconData(0xe06c, fontFamily: 'MaterialIcons');
@@ -565,10 +565,10 @@ class Icons {
   static const IconData check_circle_outline = const IconData(0xe92d, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">chevron_left</i> &#x2014; material icon named "chevron left".</p>
-  static const IconData chevron_left = const IconData(0xe5cb, fontFamily: 'MaterialIcons');
+  static const IconData chevron_left = const IconData(0xe5cb, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">chevron_right</i> &#x2014; material icon named "chevron right".</p>
-  static const IconData chevron_right = const IconData(0xe5cc, fontFamily: 'MaterialIcons');
+  static const IconData chevron_right = const IconData(0xe5cc, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">child_care</i> &#x2014; material icon named "child care".</p>
   static const IconData child_care = const IconData(0xeb41, fontFamily: 'MaterialIcons');
@@ -577,7 +577,7 @@ class Icons {
   static const IconData child_friendly = const IconData(0xeb42, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">chrome_reader_mode</i> &#x2014; material icon named "chrome reader mode".</p>
-  static const IconData chrome_reader_mode = const IconData(0xe86d, fontFamily: 'MaterialIcons');
+  static const IconData chrome_reader_mode = const IconData(0xe86d, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">class</i> &#x2014; material icon named "class".</p>
   static const IconData class_ = const IconData(0xe86e, fontFamily: 'MaterialIcons');
@@ -766,7 +766,7 @@ class Icons {
   static const IconData device_hub = const IconData(0xe335, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">device_unknown</i> &#x2014; material icon named "device unknown".</p>
-  static const IconData device_unknown = const IconData(0xe339, fontFamily: 'MaterialIcons');
+  static const IconData device_unknown = const IconData(0xe339, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">devices</i> &#x2014; material icon named "devices".</p>
   static const IconData devices = const IconData(0xe1b1, fontFamily: 'MaterialIcons');
@@ -859,7 +859,7 @@ class Icons {
   static const IconData drive_eta = const IconData(0xe613, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">dvr</i> &#x2014; material icon named "dvr".</p>
-  static const IconData dvr = const IconData(0xe1b2, fontFamily: 'MaterialIcons');
+  static const IconData dvr = const IconData(0xe1b2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">edit</i> &#x2014; material icon named "edit".</p>
   static const IconData edit = const IconData(0xe3c9, fontFamily: 'MaterialIcons');
@@ -904,7 +904,7 @@ class Icons {
   static const IconData event_busy = const IconData(0xe615, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">event_note</i> &#x2014; material icon named "event note".</p>
-  static const IconData event_note = const IconData(0xe616, fontFamily: 'MaterialIcons');
+  static const IconData event_note = const IconData(0xe616, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">event_seat</i> &#x2014; material icon named "event seat".</p>
   static const IconData event_seat = const IconData(0xe903, fontFamily: 'MaterialIcons');
@@ -964,10 +964,10 @@ class Icons {
   static const IconData favorite_border = const IconData(0xe87e, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">featured_play_list</i> &#x2014; material icon named "featured play list".</p>
-  static const IconData featured_play_list = const IconData(0xe06d, fontFamily: 'MaterialIcons');
+  static const IconData featured_play_list = const IconData(0xe06d, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">featured_video</i> &#x2014; material icon named "featured video".</p>
-  static const IconData featured_video = const IconData(0xe06e, fontFamily: 'MaterialIcons');
+  static const IconData featured_video = const IconData(0xe06e, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">feedback</i> &#x2014; material icon named "feedback".</p>
   static const IconData feedback = const IconData(0xe87f, fontFamily: 'MaterialIcons');
@@ -1063,7 +1063,7 @@ class Icons {
   static const IconData fingerprint = const IconData(0xe90d, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">first_page</i> &#x2014; material icon named "first page".</p>
-  static const IconData first_page = const IconData(0xe5dc, fontFamily: 'MaterialIcons');
+  static const IconData first_page = const IconData(0xe5dc, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">fitness_center</i> &#x2014; material icon named "fitness center".</p>
   static const IconData fitness_center = const IconData(0xeb43, fontFamily: 'MaterialIcons');
@@ -1087,10 +1087,10 @@ class Icons {
   static const IconData flight = const IconData(0xe539, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">flight_land</i> &#x2014; material icon named "flight land".</p>
-  static const IconData flight_land = const IconData(0xe904, fontFamily: 'MaterialIcons');
+  static const IconData flight_land = const IconData(0xe904, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">flight_takeoff</i> &#x2014; material icon named "flight takeoff".</p>
-  static const IconData flight_takeoff = const IconData(0xe905, fontFamily: 'MaterialIcons');
+  static const IconData flight_takeoff = const IconData(0xe905, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">flip</i> &#x2014; material icon named "flip".</p>
   static const IconData flip = const IconData(0xe3e8, fontFamily: 'MaterialIcons');
@@ -1144,10 +1144,10 @@ class Icons {
   static const IconData format_color_text = const IconData(0xe23c, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">format_indent_decrease</i> &#x2014; material icon named "format indent decrease".</p>
-  static const IconData format_indent_decrease = const IconData(0xe23d, fontFamily: 'MaterialIcons');
+  static const IconData format_indent_decrease = const IconData(0xe23d, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">format_indent_increase</i> &#x2014; material icon named "format indent increase".</p>
-  static const IconData format_indent_increase = const IconData(0xe23e, fontFamily: 'MaterialIcons');
+  static const IconData format_indent_increase = const IconData(0xe23e, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">format_italic</i> &#x2014; material icon named "format italic".</p>
   static const IconData format_italic = const IconData(0xe23f, fontFamily: 'MaterialIcons');
@@ -1156,7 +1156,7 @@ class Icons {
   static const IconData format_line_spacing = const IconData(0xe240, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">format_list_bulleted</i> &#x2014; material icon named "format list bulleted".</p>
-  static const IconData format_list_bulleted = const IconData(0xe241, fontFamily: 'MaterialIcons');
+  static const IconData format_list_bulleted = const IconData(0xe241, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">format_list_numbered</i> &#x2014; material icon named "format list numbered".</p>
   static const IconData format_list_numbered = const IconData(0xe242, fontFamily: 'MaterialIcons');
@@ -1192,7 +1192,7 @@ class Icons {
   static const IconData forum = const IconData(0xe0bf, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">forward</i> &#x2014; material icon named "forward".</p>
-  static const IconData forward = const IconData(0xe154, fontFamily: 'MaterialIcons');
+  static const IconData forward = const IconData(0xe154, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">forward_10</i> &#x2014; material icon named "forward 10".</p>
   static const IconData forward_10 = const IconData(0xe056, fontFamily: 'MaterialIcons');
@@ -1213,7 +1213,7 @@ class Icons {
   static const IconData fullscreen_exit = const IconData(0xe5d1, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">functions</i> &#x2014; material icon named "functions".</p>
-  static const IconData functions = const IconData(0xe24a, fontFamily: 'MaterialIcons');
+  static const IconData functions = const IconData(0xe24a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">g_translate</i> &#x2014; material icon named "g translate".</p>
   static const IconData g_translate = const IconData(0xe927, fontFamily: 'MaterialIcons');
@@ -1306,10 +1306,10 @@ class Icons {
   static const IconData hearing = const IconData(0xe023, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">help</i> &#x2014; material icon named "help".</p>
-  static const IconData help = const IconData(0xe887, fontFamily: 'MaterialIcons');
+  static const IconData help = const IconData(0xe887, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">help_outline</i> &#x2014; material icon named "help outline".</p>
-  static const IconData help_outline = const IconData(0xe8fd, fontFamily: 'MaterialIcons');
+  static const IconData help_outline = const IconData(0xe8fd, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">high_quality</i> &#x2014; material icon named "high quality".</p>
   static const IconData high_quality = const IconData(0xe024, fontFamily: 'MaterialIcons');
@@ -1372,7 +1372,7 @@ class Icons {
   static const IconData info_outline = const IconData(0xe88f, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">input</i> &#x2014; material icon named "input".</p>
-  static const IconData input = const IconData(0xe890, fontFamily: 'MaterialIcons');
+  static const IconData input = const IconData(0xe890, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">insert_chart</i> &#x2014; material icon named "insert chart".</p>
   static const IconData insert_chart = const IconData(0xe24b, fontFamily: 'MaterialIcons');
@@ -1420,7 +1420,7 @@ class Icons {
   static const IconData keyboard_arrow_up = const IconData(0xe316, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">keyboard_backspace</i> &#x2014; material icon named "keyboard backspace".</p>
-  static const IconData keyboard_backspace = const IconData(0xe317, fontFamily: 'MaterialIcons');
+  static const IconData keyboard_backspace = const IconData(0xe317, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">keyboard_capslock</i> &#x2014; material icon named "keyboard capslock".</p>
   static const IconData keyboard_capslock = const IconData(0xe318, fontFamily: 'MaterialIcons');
@@ -1432,7 +1432,7 @@ class Icons {
   static const IconData keyboard_return = const IconData(0xe31b, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">keyboard_tab</i> &#x2014; material icon named "keyboard tab".</p>
-  static const IconData keyboard_tab = const IconData(0xe31c, fontFamily: 'MaterialIcons');
+  static const IconData keyboard_tab = const IconData(0xe31c, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">keyboard_voice</i> &#x2014; material icon named "keyboard voice".</p>
   static const IconData keyboard_voice = const IconData(0xe31d, fontFamily: 'MaterialIcons');
@@ -1441,13 +1441,13 @@ class Icons {
   static const IconData kitchen = const IconData(0xeb47, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">label</i> &#x2014; material icon named "label".</p>
-  static const IconData label = const IconData(0xe892, fontFamily: 'MaterialIcons');
+  static const IconData label = const IconData(0xe892, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">label_important</i> &#x2014; material icon named "label important".</p>
-  static const IconData label_important = const IconData(0xe937, fontFamily: 'MaterialIcons');
+  static const IconData label_important = const IconData(0xe937, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">label_outline</i> &#x2014; material icon named "label outline".</p>
-  static const IconData label_outline = const IconData(0xe893, fontFamily: 'MaterialIcons');
+  static const IconData label_outline = const IconData(0xe893, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">landscape</i> &#x2014; material icon named "landscape".</p>
   static const IconData landscape = const IconData(0xe3f7, fontFamily: 'MaterialIcons');
@@ -1468,10 +1468,10 @@ class Icons {
   static const IconData laptop_windows = const IconData(0xe321, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">last_page</i> &#x2014; material icon named "last page".</p>
-  static const IconData last_page = const IconData(0xe5dd, fontFamily: 'MaterialIcons');
+  static const IconData last_page = const IconData(0xe5dd, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">launch</i> &#x2014; material icon named "launch".</p>
-  static const IconData launch = const IconData(0xe895, fontFamily: 'MaterialIcons');
+  static const IconData launch = const IconData(0xe895, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">layers</i> &#x2014; material icon named "layers".</p>
   static const IconData layers = const IconData(0xe53b, fontFamily: 'MaterialIcons');
@@ -1519,10 +1519,10 @@ class Icons {
   static const IconData linked_camera = const IconData(0xe438, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">list</i> &#x2014; material icon named "list".</p>
-  static const IconData list = const IconData(0xe896, fontFamily: 'MaterialIcons');
+  static const IconData list = const IconData(0xe896, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">live_help</i> &#x2014; material icon named "live help".</p>
-  static const IconData live_help = const IconData(0xe0c6, fontFamily: 'MaterialIcons');
+  static const IconData live_help = const IconData(0xe0c6, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">live_tv</i> &#x2014; material icon named "live tv".</p>
   static const IconData live_tv = const IconData(0xe639, fontFamily: 'MaterialIcons');
@@ -1720,7 +1720,7 @@ class Icons {
   static const IconData mms = const IconData(0xe618, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">mobile_screen_share</i> &#x2014; material icon named "mobile screen share".</p>
-  static const IconData mobile_screen_share = const IconData(0xe0e7, fontFamily: 'MaterialIcons');
+  static const IconData mobile_screen_share = const IconData(0xe0e7, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">mode_comment</i> &#x2014; material icon named "mode comment".</p>
   static const IconData mode_comment = const IconData(0xe253, fontFamily: 'MaterialIcons');
@@ -1771,7 +1771,7 @@ class Icons {
   static const IconData movie_filter = const IconData(0xe43a, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">multiline_chart</i> &#x2014; material icon named "multiline chart".</p>
-  static const IconData multiline_chart = const IconData(0xe6df, fontFamily: 'MaterialIcons');
+  static const IconData multiline_chart = const IconData(0xe6df, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">music_note</i> &#x2014; material icon named "music note".</p>
   static const IconData music_note = const IconData(0xe405, fontFamily: 'MaterialIcons');
@@ -1789,10 +1789,10 @@ class Icons {
   static const IconData nature_people = const IconData(0xe407, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">navigate_before</i> &#x2014; material icon named "navigate before".</p>
-  static const IconData navigate_before = const IconData(0xe408, fontFamily: 'MaterialIcons');
+  static const IconData navigate_before = const IconData(0xe408, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">navigate_next</i> &#x2014; material icon named "navigate next".</p>
-  static const IconData navigate_next = const IconData(0xe409, fontFamily: 'MaterialIcons');
+  static const IconData navigate_next = const IconData(0xe409, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">navigation</i> &#x2014; material icon named "navigation".</p>
   static const IconData navigation = const IconData(0xe55d, fontFamily: 'MaterialIcons');
@@ -1816,7 +1816,7 @@ class Icons {
   static const IconData new_releases = const IconData(0xe031, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">next_week</i> &#x2014; material icon named "next week".</p>
-  static const IconData next_week = const IconData(0xe16a, fontFamily: 'MaterialIcons');
+  static const IconData next_week = const IconData(0xe16a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">nfc</i> &#x2014; material icon named "nfc".</p>
   static const IconData nfc = const IconData(0xe1bb, fontFamily: 'MaterialIcons');
@@ -1834,7 +1834,7 @@ class Icons {
   static const IconData not_listed_location = const IconData(0xe575, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">note</i> &#x2014; material icon named "note".</p>
-  static const IconData note = const IconData(0xe06f, fontFamily: 'MaterialIcons');
+  static const IconData note = const IconData(0xe06f, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">note_add</i> &#x2014; material icon named "note add".</p>
   static const IconData note_add = const IconData(0xe89c, fontFamily: 'MaterialIcons');
@@ -1873,7 +1873,7 @@ class Icons {
   static const IconData open_in_browser = const IconData(0xe89d, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">open_in_new</i> &#x2014; material icon named "open in new".</p>
-  static const IconData open_in_new = const IconData(0xe89e, fontFamily: 'MaterialIcons');
+  static const IconData open_in_new = const IconData(0xe89e, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">open_with</i> &#x2014; material icon named "open with".</p>
   static const IconData open_with = const IconData(0xe89f, fontFamily: 'MaterialIcons');
@@ -2077,7 +2077,7 @@ class Icons {
   static const IconData play_for_work = const IconData(0xe906, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">playlist_add</i> &#x2014; material icon named "playlist add".</p>
-  static const IconData playlist_add = const IconData(0xe03b, fontFamily: 'MaterialIcons');
+  static const IconData playlist_add = const IconData(0xe03b, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">playlist_add_check</i> &#x2014; material icon named "playlist add check".</p>
   static const IconData playlist_add_check = const IconData(0xe065, fontFamily: 'MaterialIcons');
@@ -2140,7 +2140,7 @@ class Icons {
   static const IconData queue = const IconData(0xe03c, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">queue_music</i> &#x2014; material icon named "queue music".</p>
-  static const IconData queue_music = const IconData(0xe03d, fontFamily: 'MaterialIcons');
+  static const IconData queue_music = const IconData(0xe03d, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">queue_play_next</i> &#x2014; material icon named "queue play next".</p>
   static const IconData queue_play_next = const IconData(0xe066, fontFamily: 'MaterialIcons');
@@ -2170,7 +2170,7 @@ class Icons {
   static const IconData redeem = const IconData(0xe8b1, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">redo</i> &#x2014; material icon named "redo".</p>
-  static const IconData redo = const IconData(0xe15a, fontFamily: 'MaterialIcons');
+  static const IconData redo = const IconData(0xe15a, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">refresh</i> &#x2014; material icon named "refresh".</p>
   static const IconData refresh = const IconData(0xe5d5, fontFamily: 'MaterialIcons');
@@ -2215,10 +2215,10 @@ class Icons {
   static const IconData replay_5 = const IconData(0xe05b, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">reply</i> &#x2014; material icon named "reply".</p>
-  static const IconData reply = const IconData(0xe15e, fontFamily: 'MaterialIcons');
+  static const IconData reply = const IconData(0xe15e, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">reply_all</i> &#x2014; material icon named "reply all".</p>
-  static const IconData reply_all = const IconData(0xe15f, fontFamily: 'MaterialIcons');
+  static const IconData reply_all = const IconData(0xe15f, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">report</i> &#x2014; material icon named "report".</p>
   static const IconData report = const IconData(0xe160, fontFamily: 'MaterialIcons');
@@ -2314,7 +2314,7 @@ class Icons {
   static const IconData screen_rotation = const IconData(0xe1c1, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">screen_share</i> &#x2014; material icon named "screen share".</p>
-  static const IconData screen_share = const IconData(0xe0e2, fontFamily: 'MaterialIcons');
+  static const IconData screen_share = const IconData(0xe0e2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">sd_card</i> &#x2014; material icon named "sd card".</p>
   static const IconData sd_card = const IconData(0xe623, fontFamily: 'MaterialIcons');
@@ -2332,7 +2332,7 @@ class Icons {
   static const IconData select_all = const IconData(0xe162, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">send</i> &#x2014; material icon named "send".</p>
-  static const IconData send = const IconData(0xe163, fontFamily: 'MaterialIcons');
+  static const IconData send = const IconData(0xe163, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">sentiment_dissatisfied</i> &#x2014; material icon named "sentiment dissatisfied".</p>
   static const IconData sentiment_dissatisfied = const IconData(0xe811, fontFamily: 'MaterialIcons');
@@ -2419,10 +2419,10 @@ class Icons {
   static const IconData shopping_cart = const IconData(0xe8cc, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">short_text</i> &#x2014; material icon named "short text".</p>
-  static const IconData short_text = const IconData(0xe261, fontFamily: 'MaterialIcons');
+  static const IconData short_text = const IconData(0xe261, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">show_chart</i> &#x2014; material icon named "show chart".</p>
-  static const IconData show_chart = const IconData(0xe6e1, fontFamily: 'MaterialIcons');
+  static const IconData show_chart = const IconData(0xe6e1, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">shuffle</i> &#x2014; material icon named "shuffle".</p>
   static const IconData shuffle = const IconData(0xe043, fontFamily: 'MaterialIcons');
@@ -2491,7 +2491,7 @@ class Icons {
   static const IconData snooze = const IconData(0xe046, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">sort</i> &#x2014; material icon named "sort".</p>
-  static const IconData sort = const IconData(0xe164, fontFamily: 'MaterialIcons');
+  static const IconData sort = const IconData(0xe164, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">sort_by_alpha</i> &#x2014; material icon named "sort by alpha".</p>
   static const IconData sort_by_alpha = const IconData(0xe053, fontFamily: 'MaterialIcons');
@@ -2527,7 +2527,7 @@ class Icons {
   static const IconData star_border = const IconData(0xe83a, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">star_half</i> &#x2014; material icon named "star half".</p>
-  static const IconData star_half = const IconData(0xe839, fontFamily: 'MaterialIcons');
+  static const IconData star_half = const IconData(0xe839, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">stars</i> &#x2014; material icon named "stars".</p>
   static const IconData stars = const IconData(0xe8d0, fontFamily: 'MaterialIcons');
@@ -2578,7 +2578,7 @@ class Icons {
   static const IconData subdirectory_arrow_right = const IconData(0xe5da, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">subject</i> &#x2014; material icon named "subject".</p>
-  static const IconData subject = const IconData(0xe8d2, fontFamily: 'MaterialIcons');
+  static const IconData subject = const IconData(0xe8d2, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">subscriptions</i> &#x2014; material icon named "subscriptions".</p>
   static const IconData subscriptions = const IconData(0xe064, fontFamily: 'MaterialIcons');
@@ -2728,7 +2728,7 @@ class Icons {
   static const IconData title = const IconData(0xe264, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">toc</i> &#x2014; material icon named "toc".</p>
-  static const IconData toc = const IconData(0xe8de, fontFamily: 'MaterialIcons');
+  static const IconData toc = const IconData(0xe8de, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">today</i> &#x2014; material icon named "today".</p>
   static const IconData today = const IconData(0xe8df, fontFamily: 'MaterialIcons');
@@ -2770,13 +2770,13 @@ class Icons {
   static const IconData translate = const IconData(0xe8e2, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">trending_down</i> &#x2014; material icon named "trending down".</p>
-  static const IconData trending_down = const IconData(0xe8e3, fontFamily: 'MaterialIcons');
+  static const IconData trending_down = const IconData(0xe8e3, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">trending_flat</i> &#x2014; material icon named "trending flat".</p>
-  static const IconData trending_flat = const IconData(0xe8e4, fontFamily: 'MaterialIcons');
+  static const IconData trending_flat = const IconData(0xe8e4, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">trending_up</i> &#x2014; material icon named "trending up".</p>
-  static const IconData trending_up = const IconData(0xe8e5, fontFamily: 'MaterialIcons');
+  static const IconData trending_up = const IconData(0xe8e5, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">trip_origin</i> &#x2014; material icon named "trip origin".</p>
   static const IconData trip_origin = const IconData(0xe57b, fontFamily: 'MaterialIcons');
@@ -2797,7 +2797,7 @@ class Icons {
   static const IconData unarchive = const IconData(0xe169, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">undo</i> &#x2014; material icon named "undo".</p>
-  static const IconData undo = const IconData(0xe166, fontFamily: 'MaterialIcons');
+  static const IconData undo = const IconData(0xe166, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">unfold_less</i> &#x2014; material icon named "unfold less".</p>
   static const IconData unfold_less = const IconData(0xe5d6, fontFamily: 'MaterialIcons');
@@ -2869,13 +2869,13 @@ class Icons {
   static const IconData view_headline = const IconData(0xe8ee, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">view_list</i> &#x2014; material icon named "view list".</p>
-  static const IconData view_list = const IconData(0xe8ef, fontFamily: 'MaterialIcons');
+  static const IconData view_list = const IconData(0xe8ef, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">view_module</i> &#x2014; material icon named "view module".</p>
   static const IconData view_module = const IconData(0xe8f0, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">view_quilt</i> &#x2014; material icon named "view quilt".</p>
-  static const IconData view_quilt = const IconData(0xe8f1, fontFamily: 'MaterialIcons');
+  static const IconData view_quilt = const IconData(0xe8f1, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">view_stream</i> &#x2014; material icon named "view stream".</p>
   static const IconData view_stream = const IconData(0xe8f2, fontFamily: 'MaterialIcons');
@@ -2974,7 +2974,7 @@ class Icons {
   static const IconData work = const IconData(0xe8f9, fontFamily: 'MaterialIcons');
 
   /// <p><i class="material-icons md-36">wrap_text</i> &#x2014; material icon named "wrap text".</p>
-  static const IconData wrap_text = const IconData(0xe25b, fontFamily: 'MaterialIcons');
+  static const IconData wrap_text = const IconData(0xe25b, fontFamily: 'MaterialIcons', matchTextDirection: true);
 
   /// <p><i class="material-icons md-36">youtube_searched_for</i> &#x2014; material icon named "youtube searched for".</p>
   static const IconData youtube_searched_for = const IconData(0xe8fa, fontFamily: 'MaterialIcons');

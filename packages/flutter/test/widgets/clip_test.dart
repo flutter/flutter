@@ -107,7 +107,7 @@ void main() {
   testWidgets('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 100.0,
           height: 100.0,
@@ -131,7 +131,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 100.0,
           height: 100.0,
@@ -149,7 +149,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -167,7 +167,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -185,7 +185,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -203,7 +203,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,

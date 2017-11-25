@@ -17,6 +17,7 @@ import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
 import '../lib/src/base/terminal.dart';
 import '../lib/src/cache.dart';
+import '../lib/src/disabled_usage.dart';
 import '../lib/src/flx.dart';
 import '../lib/src/globals.dart';
 import '../lib/src/usage.dart';
@@ -44,16 +45,17 @@ Future<Null> main(List<String> args) async {
   executableContext.setVariable(Logger, new StdoutLogger());
   await executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    // This list must be kept in sync with lib/executable.dart.
     context.putIfAbsent(Stdio, () => const Stdio());
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
+    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Usage, () => new Usage());
-    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
+    context.putIfAbsent(Usage, () => new DisabledUsage());
     return run(args);
   });
 }

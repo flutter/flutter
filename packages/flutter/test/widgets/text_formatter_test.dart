@@ -33,7 +33,7 @@ void main() {
   group('test provided formatters', () {
     setUp(() {
       // a1b(2c3
-      // d4)e5f6 
+      // d4)e5f6
       // where the parentheses are the selection range.
       testNewValue = const TextEditingValue(
         text: 'a1b2c3\nd4e5f6',
@@ -51,7 +51,7 @@ void main() {
 
       // Expecting
       // 1(23
-      // 4)56 
+      // 4)56
       expect(actualValue, const TextEditingValue(
         text: '123\n456',
         selection: const TextSelection(
@@ -67,7 +67,7 @@ void main() {
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
-      // a1b(2c3d4)e5f6 
+      // a1b(2c3d4)e5f6
       expect(actualValue, const TextEditingValue(
         text: 'a1b2c3d4e5f6',
         selection: const TextSelection(
@@ -99,7 +99,7 @@ void main() {
               .formatEditUpdate(testOldValue, testNewValue);
 
       // Expecting
-      // 1(234)56 
+      // 1(234)56
       expect(actualValue, const TextEditingValue(
         text: '123456',
         selection: const TextSelection(
@@ -108,5 +108,141 @@ void main() {
         ),
       ));
     });
+
+    test('test length limiting formatter', () {
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(6)
+          .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // a1b(2c3)
+      expect(actualValue, const TextEditingValue(
+        text: 'a1b2c3',
+        selection: const TextSelection(
+          baseOffset: 3,
+          extentOffset: 6,
+        ),
+      ));
+    });
+
+    test('test length limiting formatter with zero-length string', () {
+      testNewValue = const TextEditingValue(
+        text: '',
+        selection: const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      );
+
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(1)
+        .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting the empty string.
+      expect(actualValue, const TextEditingValue(
+        text: '',
+        selection: const TextSelection(
+          baseOffset: 0,
+          extentOffset: 0,
+        ),
+      ));
+    });
+
+    test('test length limiting formatter with non-BMP Unicode scalar values', () {
+      testNewValue = const TextEditingValue(
+        text: '\u{1f984}\u{1f984}\u{1f984}\u{1f984}', // Unicode U+1f984 (UNICORN FACE)
+        selection: const TextSelection(
+          baseOffset: 4,
+          extentOffset: 4,
+        ),
+      );
+
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(2)
+        .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting two runes.
+      expect(actualValue, const TextEditingValue(
+        text: '\u{1f984}\u{1f984}',
+        selection: const TextSelection(
+          baseOffset: 2,
+          extentOffset: 2,
+        ),
+      ));
+    });
+
+
+    test('test length limiting formatter with complex Unicode characters', () {
+      // TODO(gspencer): Test additional strings.  We can do this once the
+      // formatter supports Unicode grapheme clusters.
+      //
+      // A formatter with max length 1 should accept:
+      //  - The '\u{1F3F3}\u{FE0F}\u{200D}\u{1F308}' sequence (flag followed by
+      //    a variation selector, a zero-width joiner, and a rainbow to make a rainbow
+      //    flag).
+      //  - The sequence '\u{0058}\u{0346}\u{0361}\u{035E}\u{032A}\u{031C}\u{0333}\u{0326}\u{031D}\u{0332}'
+      //    (Latin X with many composed characters).
+      //
+      // A formatter should not count as a character:
+      //   * The '\u{0000}\u{FEFF}' sequence. (NULL followed by zero-width no-break space).
+      //
+      // A formatter with max length 1 should truncate this to one character:
+      //   * The '\u{1F3F3}\u{FE0F}\u{1F308}' sequence (flag with ignored variation
+      //     selector followed by rainbow, should truncate to just flag).
+
+      // The U+1F984 U+0020 sequence: Unicorn face followed by a space should
+      // yield only the unicorn face.
+      testNewValue = const TextEditingValue(
+        text: '\u{1F984}\u{0020}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      );
+      TextEditingValue actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      expect(actualValue, const TextEditingValue(
+        text: '\u{1F984}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ));
+
+      // The U+0058 U+0059 sequence: Latin X followed by Latin Y, should yield
+      // Latin X.
+      testNewValue = const TextEditingValue(
+        text: '\u{0058}\u{0059}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      );
+      actualValue = new LengthLimitingTextInputFormatter(1).formatEditUpdate(testOldValue, testNewValue);
+      expect(actualValue, const TextEditingValue(
+        text: '\u{0058}',
+        selection: const TextSelection(
+          baseOffset: 1,
+          extentOffset: 1,
+        ),
+      ));
+    });
+
+
+    test('test length limiting formatter when selection is off the end', () {
+      final TextEditingValue actualValue =
+      new LengthLimitingTextInputFormatter(2)
+          .formatEditUpdate(testOldValue, testNewValue);
+
+      // Expecting
+      // a1()
+      expect(actualValue, const TextEditingValue(
+        text: 'a1',
+        selection: const TextSelection(
+          baseOffset: 2,
+          extentOffset: 2,
+        ),
+      ));
+    });
+
   });
 }

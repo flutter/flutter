@@ -42,11 +42,12 @@ Future<Map<Type, dynamic>> _loadAll(Locale locale, Iterable<LocalizationsDelegat
   final Map<Type, dynamic> output = <Type, dynamic>{};
   List<_Pending> pendingList;
 
-  // Only load the first delegate for each delgate type.
+  // Only load the first delegate for each delegate type that supports
+  // locale.languageCode.
   final Set<Type> types = new Set<Type>();
   final List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[];
   for (LocalizationsDelegate<dynamic> delegate in allDelegates) {
-    if (!types.contains(delegate.type)) {
+    if (!types.contains(delegate.type) && delegate.isSupported(locale)) {
       types.add(delegate.type);
       delegates.add(delegate);
     }
@@ -96,6 +97,12 @@ abstract class LocalizationsDelegate<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const LocalizationsDelegate();
+
+  /// Whether resources for the given locale can be loaded by this delegate.
+  ///
+  /// Return true if the instance of `T` loaded by this delegate's [load]
+  /// method supports the given `locale`'s language.
+  bool isSupported(Locale locale);
 
   /// Start loading the resources for `locale`. The returned future completes
   /// when the resources have finished loading.
@@ -161,68 +168,75 @@ abstract class WidgetsLocalizations {
   }
 }
 
-/// Localized values for widgets.
-class DefaultWidgetsLocalizations implements WidgetsLocalizations {
-  /// Construct an object that defines the localized values for the widgets
-  /// library for the given `locale`.
-  ///
-  /// [LocalizationsDelegate] implementations typically call the static [load]
-  /// function, rather than constructing this class directly.
-  DefaultWidgetsLocalizations(this.locale) {
-    final String language = locale.languageCode.toLowerCase();
-    _textDirection = _rtlLanguages.contains(language) ? TextDirection.rtl : TextDirection.ltr;
-  }
+class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  const _WidgetsLocalizationsDelegate();
 
-  // See http://en.wikipedia.org/wiki/Right-to-left
-  static const List<String> _rtlLanguages = const <String>[
-    'ar',  // Arabic
-    'fa',  // Farsi
-    'he',  // Hebrew
-    'ps',  // Pashto
-    'sd',  // Sindhi
-    'ur',  // Urdu
-  ];
-
-  /// The locale for which the values of this class's localized resources
-  /// have been translated.
-  final Locale locale;
+  // This is convenient simplification. It would be more correct test if the locale's
+  // text-direction is LTR.
+  @override
+  bool isSupported(Locale locale) => true;
 
   @override
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
+  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
-  /// Creates an object that provides localized resource values for the
-  /// lowest levels of the Flutter framework.
+  @override
+  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
+}
+
+/// US English localizations for the widgets library.
+///
+/// See also:
+///
+///  * [GlobalWidgetsLocalizations], which provides widgets localizations for
+///    many languages.
+///  * [WidgetsApp.delegates], which automatically includes
+///    [DefaultWidgetsLocalizations.delegate] by default.
+class DefaultWidgetsLocalizations implements WidgetsLocalizations {
+  /// Construct an object that defines the localized values for the widgets
+  /// library for US English (only).
+  ///
+  /// [LocalizationsDelegate] implementations typically call the static [load]
+  const DefaultWidgetsLocalizations();
+
+  @override
+  TextDirection get textDirection => TextDirection.ltr;
+
+  /// Creates an object that provides US English resource values for the
+  /// lowest levels of the widgets library.
+  ///
+  /// The [locale] parameter is ignored.
   ///
   /// This method is typically used to create a [LocalizationsDelegate].
   /// The [WidgetsApp] does so by default.
   static Future<WidgetsLocalizations> load(Locale locale) {
-    return new SynchronousFuture<WidgetsLocalizations>(new DefaultWidgetsLocalizations(locale));
+    return new SynchronousFuture<WidgetsLocalizations>(const DefaultWidgetsLocalizations());
   }
+
+  /// A [LocalizationsDelegate] that uses [DefaultWidgetsLocalizations.load]
+  /// to create an instance of this class.
+  ///
+  /// [WidgetsApp] automatically adds this value to [WidgetApp.localizationsDelegates].
+  static const LocalizationsDelegate<WidgetsLocalizations> delegate = const _WidgetsLocalizationsDelegate();
 }
 
 class _LocalizationsScope extends InheritedWidget {
-  _LocalizationsScope ({
+  const _LocalizationsScope ({
     Key key,
     @required this.locale,
     @required this.localizationsState,
-    @required this.loadGeneration,
+    @required this.typeToResources,
     Widget child,
-  }) : super(key: key, child: child) {
-    assert(localizationsState != null);
-  }
+  }) : assert(localizationsState != null),
+       assert(typeToResources != null),
+       super(key: key, child: child);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
-
-  /// A monotonically increasing number that changes after localizations
-  /// delegates have finished loading new data. When this number changes, it
-  /// triggers inherited widget notifications.
-  final int loadGeneration;
+  final Map<Type, dynamic> typeToResources;
 
   @override
   bool updateShouldNotify(_LocalizationsScope old) {
-    return loadGeneration != old.loadGeneration;
+    return typeToResources != old.typeToResources;
   }
 }
 
@@ -322,11 +336,10 @@ class Localizations extends StatefulWidget {
     @required this.locale,
     @required this.delegates,
     this.child,
-  }) : super(key: key) {
-    assert(locale != null);
-    assert(delegates != null);
-    assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
-  }
+  }) : assert(locale != null),
+       assert(delegates != null),
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
+       super(key: key);
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -445,11 +458,6 @@ class _LocalizationsState extends State<Localizations> {
   final GlobalKey _localizedResourcesScopeKey = new GlobalKey();
   Map<Type, dynamic> _typeToResources = <Type, dynamic>{};
 
-  /// A monotonically increasing number that increases after localizations
-  /// delegates have finished loading new data, triggering inherited widget
-  /// notifications.
-  int _loadGeneration = 0;
-
   Locale get locale => _locale;
   Locale _locale;
 
@@ -513,7 +521,6 @@ class _LocalizationsState extends State<Localizations> {
         setState(() {
           _typeToResources = value;
           _locale = locale;
-          _loadGeneration += 1;
         });
       });
     }
@@ -539,7 +546,7 @@ class _LocalizationsState extends State<Localizations> {
       key: _localizedResourcesScopeKey,
       locale: _locale,
       localizationsState: this,
-      loadGeneration: _loadGeneration,
+      typeToResources: _typeToResources,
       child: new Directionality(
         textDirection: _textDirection,
         child: widget.child,

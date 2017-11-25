@@ -39,9 +39,8 @@ class PageStorageKey<T> extends ValueKey<T> {
 }
 
 class _StorageEntryIdentifier {
-  _StorageEntryIdentifier(this.keys) {
-    assert(keys != null);
-  }
+  _StorageEntryIdentifier(this.keys)
+    : assert(keys != null);
 
   final List<PageStorageKey<dynamic>> keys;
 

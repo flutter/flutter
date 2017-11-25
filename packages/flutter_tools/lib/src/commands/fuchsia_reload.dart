@@ -155,11 +155,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
   // A cache of VMService connections.
   final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
 
-  VMService _getVMService(int port) {
+  Future<VMService> _getVMService(int port) async {
     if (!_vmServiceCache.containsKey(port)) {
       final String addr = 'http://$ipv4Loopback:$port';
       final Uri uri = Uri.parse(addr);
-      final VMService vmService = VMService.connect(uri);
+      final VMService vmService = await VMService.connect(uri);
       _vmServiceCache[port] = vmService;
     }
     return _vmServiceCache[port];
@@ -183,7 +183,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       if (!await _checkPort(port))
         continue;
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       views.addAll(vmService.vm.views);
@@ -256,9 +256,9 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
     // The Observatory requires somewhat non-standard URIs that the Uri class
     // can't build for us, so instead we build them by hand.
-    final String isolateIdQuery = "?isolateId=isolates%2F$number";
-    final String isolateAddr = "$vmServiceAddr/#/inspect$isolateIdQuery";
-    final String debuggerAddr = "$vmServiceAddr/#/debugger$isolateIdQuery";
+    final String isolateIdQuery = '?isolateId=isolates%2F$number';
+    final String isolateAddr = '$vmServiceAddr/#/inspect$isolateIdQuery';
+    final String debuggerAddr = '$vmServiceAddr/#/debugger$isolateIdQuery';
 
     final String newUsed = getSizeAsMB(isolate.newSpace.used);
     final String newCap = getSizeAsMB(isolate.newSpace.capacity);
@@ -283,7 +283,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   Future<Null> _listVMs(List<int> ports) async {
     for (int port in ports) {
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       printStatus(_vmServiceToString(vmService));
@@ -329,7 +329,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
     final String packagesFileName = '${_projectName}_dart_package.packages';
-    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/gen/$_projectRoot/$packagesFileName';
+    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/dartlang/gen/$_projectRoot/$packagesFileName';
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 
@@ -452,7 +452,7 @@ class _PortForwarder {
     final ProcessResult result = await processManager.run(command);
     printTrace(command.join(' '));
     if (result.exitCode != 0) {
-      printTrace("Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
+      printTrace('Command failed:\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
   }
 
@@ -487,7 +487,7 @@ class FuchsiaDeviceCommandRunner {
     printTrace(args.join(' '));
     final ProcessResult result = await processManager.run(args);
     if (result.exitCode != 0) {
-      printStatus("Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}");
+      printStatus('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
     printTrace(result.stdout);

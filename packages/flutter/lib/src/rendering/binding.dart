@@ -9,12 +9,12 @@ import 'dart:ui' as ui show window;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'semantics.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
@@ -36,6 +36,7 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
     );
     ui.window
       ..onMetricsChanged = handleMetricsChanged
+      ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
@@ -142,6 +143,11 @@ abstract class RendererBinding extends BindingBase with SchedulerBinding, Servic
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
   }
+
+  /// Called when the platform text scale factor changes.
+  ///
+  /// See [Window.onTextScaleFactorChanged].
+  void handleTextScaleFactorChanged() { }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.

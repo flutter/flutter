@@ -113,6 +113,10 @@ const String _kAssetManifestFileName = 'AssetManifest.json';
 /// Note that the `lib/` is implied, so it should not be included in the asset
 /// path.
 ///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by [AssetImage]
+///    when used without a scale.
 class AssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches an image from an asset bundle.
   ///
@@ -218,7 +222,7 @@ class AssetImage extends AssetBundleImageProvider {
   }
 
   String _chooseVariant(String main, ImageConfiguration config, List<String> candidates) {
-    if (candidates == null || candidates.isEmpty)
+    if (config.devicePixelRatio == null || candidates == null || candidates.isEmpty)
       return main;
     // TODO(ianh): Consider moving this parsing logic into _manifestParser.
     final SplayTreeMap<double, String> mapping = new SplayTreeMap<double, String>();
@@ -246,7 +250,7 @@ class AssetImage extends AssetBundleImageProvider {
       return candidates[lower];
   }
 
-  static final RegExp _extractRatioRegExp = new RegExp(r"/?(\d+(\.\d*)?)x/");
+  static final RegExp _extractRatioRegExp = new RegExp(r'/?(\d+(\.\d*)?)x/');
 
   double _parseScale(String key) {
     final Match match = _extractRatioRegExp.firstMatch(key);

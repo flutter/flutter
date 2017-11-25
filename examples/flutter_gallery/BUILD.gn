@@ -2,17 +2,17 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//flutter/build/flutter_app.gni")
+import("$flutter_root/build/flutter_app.gni")
 
 assert(is_fuchsia)
 
 flutter_app("flutter_gallery") {
   main_dart = "lib/main.dart"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
-    "//lib/flutter/packages/flutter",
+    "../../packages/flutter",
     "//third_party/dart-pkg/pub/url_launcher",
   ]
 

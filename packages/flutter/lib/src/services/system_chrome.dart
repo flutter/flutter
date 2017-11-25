@@ -106,7 +106,8 @@ class SystemChrome {
   /// be displayed in.
   ///
   /// The `orientation` argument is a list of [DeviceOrientation] enum values.
-  /// The empty list is synonymous with having all options enabled.
+  /// The empty list causes the application to defer to the operating system
+  /// default.
   static Future<Null> setPreferredOrientations(List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod(
       'SystemChrome.setPreferredOrientations',
@@ -152,7 +153,7 @@ class SystemChrome {
   /// overwrite the pending value, such that only the last specified value takes
   /// effect.
   ///
-  /// Call this API in code whose lifecyle matches that of the desired
+  /// Call this API in code whose lifecycle matches that of the desired
   /// system UI styles. For instance, to change the system UI style on a new
   /// page, consider calling when pushing/popping a new [PageRoute].
   ///

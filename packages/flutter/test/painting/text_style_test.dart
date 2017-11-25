@@ -125,23 +125,42 @@ void main() {
 
   test('TextStyle with text direction', () {
     final ui.ParagraphStyle ps6 = const TextStyle().getParagraphStyle(textDirection: TextDirection.ltr);
-    expect(ps6, equals(new ui.ParagraphStyle(textDirection: TextDirection.ltr)));
-    expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: unspecified, lineHeight: unspecified, ellipsis: unspecified)');
+    expect(ps6, equals(new ui.ParagraphStyle(textDirection: TextDirection.ltr, fontSize: 14.0)));
+    expect(ps6.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.ltr, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified)');
 
     final ui.ParagraphStyle ps7 = const TextStyle().getParagraphStyle(textDirection: TextDirection.rtl);
-    expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl)));
-    expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: unspecified, lineHeight: unspecified, ellipsis: unspecified)');
+    expect(ps7, equals(new ui.ParagraphStyle(textDirection: TextDirection.rtl, fontSize: 14.0)));
+    expect(ps7.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: TextDirection.rtl, fontWeight: unspecified, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 14.0, lineHeight: unspecified, ellipsis: unspecified)');
   });
 
   test('TextStyle using package font', () {
     final TextStyle s6 = const TextStyle(fontFamily: 'test');
     expect(s6.fontFamily, 'test');
-    expect(s6.package, isNull);
     expect(s6.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
 
     final TextStyle s7 = const TextStyle(fontFamily: 'test', package: 'p');
     expect(s7.fontFamily, 'packages/p/test');
-    expect(s7.package, 'p');
     expect(s7.getTextStyle().toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: packages/p/test, fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified)');
+  });
+
+  test('TextStyle.debugLabel', () {
+    const TextStyle unknown = const TextStyle();
+    const TextStyle foo = const TextStyle(debugLabel: 'foo', fontSize: 1.0);
+    const TextStyle bar = const TextStyle(debugLabel: 'bar', fontSize: 2.0);
+    const TextStyle baz = const TextStyle(debugLabel: 'baz', fontSize: 3.0);
+
+    expect(unknown.debugLabel, null);
+    expect(unknown.toString(), 'TextStyle(<all styles inherited>)');
+    expect(unknown.copyWith().debugLabel, null);
+    expect(unknown.apply().debugLabel, null);
+
+    expect(foo.debugLabel, 'foo');
+    expect(foo.toString(), 'TextStyle(debugLabel: foo, inherit: true, size: 1.0)');
+    expect(foo.merge(bar).debugLabel, 'bar < foo');
+    expect(foo.merge(bar).merge(baz).debugLabel, 'baz < bar < foo');
+    expect(foo.copyWith().debugLabel, 'copy of foo');
+    expect(foo.apply().debugLabel, 'modified foo');
+    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo, bar)');
+    expect(TextStyle.lerp(foo.merge(bar), baz, 0.5).copyWith().debugLabel, 'copy of lerp(bar < foo, baz)');
   });
 }

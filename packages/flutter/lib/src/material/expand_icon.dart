@@ -48,7 +48,7 @@ class ExpandIcon extends StatefulWidget {
   /// If this is set to null, the button will be disabled.
   final ValueChanged<bool> onPressed;
 
-  /// The padding around the icon. The entire padded icon will reactb to input
+  /// The padding around the icon. The entire padded icon will react to input
   /// gestures.
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.

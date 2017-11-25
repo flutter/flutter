@@ -73,12 +73,13 @@ enum _RefreshIndicatorMode {
 /// See also:
 ///
 ///  * <https://material.google.com/patterns/swipe-to-refresh.html>
-///  * [RefreshIndicatorState], can be used to programatically show the refresh indicator.
+///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator].
 class RefreshIndicator extends StatefulWidget {
   /// Creates a refresh indicator.
   ///
-  /// The [onRefresh] and [child] arguments must be non-null. The default
+  /// The [onRefresh], [child], and [notificationPredicate] arguments must be
+  /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   const RefreshIndicator({
     Key key,
@@ -86,9 +87,11 @@ class RefreshIndicator extends StatefulWidget {
     this.displacement: 40.0,
     @required this.onRefresh,
     this.color,
-    this.backgroundColor
+    this.backgroundColor,
+    this.notificationPredicate: defaultScrollNotificationPredicate,
   }) : assert(child != null),
        assert(onRefresh != null),
+       assert(notificationPredicate != null),
        super(key: key);
 
   /// The refresh indicator will be stacked on top of this child. The indicator
@@ -112,6 +115,13 @@ class RefreshIndicator extends StatefulWidget {
   /// The progress indicator's background color. The current theme's
   /// [ThemeData.canvasColor] by default.
   final Color backgroundColor;
+  
+  /// A check that specifies whether a [ScrollNotification] should be
+  /// handled by this widget.
+  ///
+  /// By default, checks whether `notification.depth == 0`. Set it to something
+  /// else for more complicated layouts.
+  final ScrollNotificationPredicate notificationPredicate;
 
   @override
   RefreshIndicatorState createState() => new RefreshIndicatorState();
@@ -174,7 +184,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification.depth != 0)
+    if (!widget.notificationPredicate(notification))
       return false;
     if (notification is ScrollStartNotification && notification.metrics.extentBefore == 0.0 &&
         _mode == null && _start(notification.metrics.axisDirection)) {
@@ -384,15 +394,15 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
           left: 0.0,
           right: 0.0,
           child: new SizeTransition(
-            axisAlignment: _isIndicatorAtTop ? 1.0 : 0.0,
+            axisAlignment: _isIndicatorAtTop ? 1.0 : -1.0,
             sizeFactor: _positionFactor, // this is what brings it down
             child: new Container(
               padding: _isIndicatorAtTop
                 ? new EdgeInsets.only(top: widget.displacement)
                 : new EdgeInsets.only(bottom: widget.displacement),
               alignment: _isIndicatorAtTop
-                ? FractionalOffset.topCenter
-                : FractionalOffset.bottomCenter,
+                ? Alignment.topCenter
+                : Alignment.bottomCenter,
               child: new ScaleTransition(
                 scale: _scaleFactor,
                 child: new AnimatedBuilder(

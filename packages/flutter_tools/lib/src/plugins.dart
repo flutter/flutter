@@ -12,19 +12,34 @@ import 'globals.dart';
 class Plugin {
   final String name;
   final String path;
-  final String pluginClass;
   final String androidPackage;
+  final String iosPrefix;
+  final String pluginClass;
 
-  Plugin(this.name, this.path, this.pluginClass, this.androidPackage);
+  Plugin({
+    this.name,
+    this.path,
+    this.androidPackage,
+    this.iosPrefix,
+    this.pluginClass,
+  });
 
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     String androidPackage;
+    String iosPrefix;
     String pluginClass;
     if (pluginYaml != null) {
       androidPackage = pluginYaml['androidPackage'];
+      iosPrefix = pluginYaml['iosPrefix'] ?? '';
       pluginClass = pluginYaml['pluginClass'];
     }
-    return new Plugin(name, path, pluginClass, androidPackage);
+    return new Plugin(
+      name: name,
+      path: path,
+      androidPackage: androidPackage,
+      iosPrefix: iosPrefix,
+      pluginClass: pluginClass,
+    );
   }
 }
 
@@ -146,7 +161,7 @@ const String _iosPluginRegistryImplementationTemplate = '''//
 
 + (void)registerWithRegistry:(NSObject<FlutterPluginRegistry>*)registry {
 {{#plugins}}
-  [{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{class}}"]];
+  [{{prefix}}{{class}} registerWithRegistrar:[registry registrarForPlugin:@"{{prefix}}{{class}}"]];
 {{/plugins}}
 }
 
@@ -158,6 +173,7 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
       .where((Plugin p) => p.pluginClass != null)
       .map((Plugin p) => <String, dynamic>{
     'name': p.name,
+    'prefix': p.iosPrefix,
     'class': p.pluginClass,
   }).
   toList();

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -14,6 +15,9 @@ class TestAssetBundle extends CachingAssetBundle {
 
   @override
   Future<ByteData> load(String key) async {
+    if (key == 'AssetManifest.json')
+      return new ByteData.view(new Uint8List.fromList(const Utf8Encoder().convert('{"one": ["one"]}')).buffer);
+
     loadCallCount[key] = loadCallCount[key] ?? 0 + 1;
     if (key == 'one')
       return new ByteData(1)..setInt8(0, 49);
@@ -42,5 +46,13 @@ void main() {
       loadException = e;
     }
     expect(loadException, isFlutterError);
+  });
+
+  test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/12392
+    final AssetImage assetImage = new AssetImage('one', bundle: new TestAssetBundle());
+    final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
+    expect(key.name, 'one');
+    expect(key.scale, 1.0);
   });
 }

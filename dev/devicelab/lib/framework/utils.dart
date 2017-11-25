@@ -98,6 +98,21 @@ void copy(File sourceFile, Directory targetDirectory, {String name}) {
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
 }
 
+void recursiveCopy(Directory source, Directory target) {
+  if (!target.existsSync())
+    target.createSync();
+
+  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
+    final String name = path.basename(entity.path);
+    if (entity is Directory)
+      recursiveCopy(entity, new Directory(path.join(target.path, name)));
+    else if (entity is File) {
+      final File dest = new File(path.join(target.path, name));
+      dest.writeAsBytesSync(entity.readAsBytesSync());
+    }
+  }
+}
+
 FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove

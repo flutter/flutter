@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,18 +33,25 @@ class TestSemantics {
   ///  * [TestSemantics.fullScreen] 800x600, the test screen's size in logical
   ///    pixels, useful for other full-screen widgets.
   TestSemantics({
-    @required this.id,
+    this.id,
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
+    this.hint: '',
     this.textDirection,
     this.rect,
     this.transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(id != null),
-       assert(flags != null),
+  }) : assert(flags != null),
        assert(label != null),
+       assert(value != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
+       assert(hint != null),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
 
@@ -52,6 +61,10 @@ class TestSemantics {
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
+    this.hint: '',
     this.textDirection,
     this.transform,
     this.children: const <TestSemantics>[],
@@ -59,6 +72,10 @@ class TestSemantics {
   }) : id = 0,
        assert(flags != null),
        assert(label != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
+       assert(value != null),
+       assert(hint != null),
        rect = TestSemantics.rootRect,
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -73,10 +90,14 @@ class TestSemantics {
   /// [TestSemantics.fullScreen] property may be useful as a value; it describes
   /// an 800x600 rectangle, which is the test screen's size in logical pixels.
   TestSemantics.rootChild({
-    @required this.id,
+    this.id,
     this.flags: 0,
     this.actions: 0,
     this.label: '',
+    this.hint: '',
+    this.value: '',
+    this.increasedValue: '',
+    this.decreasedValue: '',
     this.textDirection,
     this.rect,
     Matrix4 transform,
@@ -84,6 +105,10 @@ class TestSemantics {
     Iterable<SemanticsTag> tags,
   }) : assert(flags != null),
        assert(label != null),
+       assert(value != null),
+       assert(increasedValue != null),
+       assert(decreasedValue != null),
+       assert(hint != null),
        transform = _applyRootChildScale(transform),
        assert(children != null),
        tags = tags?.toSet() ?? new Set<SemanticsTag>();
@@ -102,6 +127,21 @@ class TestSemantics {
 
   /// A textual description of this node.
   final String label;
+
+  /// A textual description for the value of this node.
+  final String value;
+
+  /// What [value] will become after [SemanticsAction.increase] has been
+  /// performed.
+  final String increasedValue;
+
+  /// What [value] will become after [SemanticsAction.decrease] has been
+  /// performed.
+  final String decreasedValue;
+
+  /// A brief textual description of the result of the action that can be
+  /// performed on this node.
+  final String hint;
 
   /// The reading direction of the [label].
   ///
@@ -135,7 +175,7 @@ class TestSemantics {
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///
   /// By default, the transform is null, which represents the identity
-  /// transformation (i.e., that this node has the same coorinate system as its
+  /// transformation (i.e., that this node has the same coordinate system as its
   /// parent).
   final Matrix4 transform;
 
@@ -152,7 +192,7 @@ class TestSemantics {
   /// The tags of this node.
   final Set<SemanticsTag> tags;
 
-  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false }) {
+  bool _matches(SemanticsNode node, Map<dynamic, dynamic> matchState, { bool ignoreRect: false, bool ignoreTransform: false, bool ignoreId: false }) {
     final SemanticsData nodeData = node.getSemanticsData();
 
     bool fail(String message) {
@@ -162,7 +202,7 @@ class TestSemantics {
 
     if (node == null)
       return fail('could not find node with id $id.');
-    if (id != node.id)
+    if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
     if (flags != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
@@ -170,10 +210,18 @@ class TestSemantics {
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
     if (label != nodeData.label)
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
+    if (value != nodeData.value)
+      return fail('expected node id $id to have value "$value" but found value "${nodeData.value}".');
+    if (increasedValue != nodeData.increasedValue)
+      return fail('expected node id $id to have increasedValue "$increasedValue" but found value "${nodeData.increasedValue}".');
+    if (decreasedValue != nodeData.decreasedValue)
+      return fail('expected node id $id to have decreasedValue "$decreasedValue" but found value "${nodeData.decreasedValue}".');
+    if (hint != nodeData.hint)
+      return fail('expected node id $id to have hint "$hint" but found hint "${nodeData.hint}".');
     if (textDirection != null && textDirection != nodeData.textDirection)
       return fail('expected node id $id to have textDirection "$textDirection" but found "${nodeData.textDirection}".');
-    if (nodeData.label != '' && nodeData.textDirection == null)
-      return fail('expected node id $id, which has a label, to have a textDirection, but it did not.');
+    if ((nodeData.label != '' || nodeData.value != '' || nodeData.hint != '' || node.increasedValue != '' || node.decreasedValue != '') && nodeData.textDirection == null)
+      return fail('expected node id $id, which has a label, value, or hint, to have a textDirection, but it did not.');
     if (!ignoreRect && rect != nodeData.rect)
       return fail('expected node id $id to have rect $rect but found rect ${nodeData.rect}.');
     if (!ignoreTransform && transform != nodeData.transform)
@@ -188,7 +236,7 @@ class TestSemantics {
     final Iterator<TestSemantics> it = children.iterator;
     node.visitChildren((SemanticsNode node) {
       it.moveNext();
-      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform)) {
+      if (!it.current._matches(node, matchState, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId)) {
         result = false;
         return false;
       }
@@ -233,15 +281,16 @@ class SemanticsTester {
 }
 
 class _HasSemantics extends Matcher {
-  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreTransform != null);
+  const _HasSemantics(this._semantics, { this.ignoreRect: false, this.ignoreTransform: false, this.ignoreId: false }) : assert(_semantics != null), assert(ignoreRect != null), assert(ignoreId != null), assert(ignoreTransform != null);
 
   final TestSemantics _semantics;
   final bool ignoreRect;
   final bool ignoreTransform;
+  final bool ignoreId;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect);
+    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
   }
 
   @override
@@ -259,18 +308,23 @@ class _HasSemantics extends Matcher {
 Matcher hasSemantics(TestSemantics semantics, {
   bool ignoreRect: false,
   bool ignoreTransform: false,
-}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform);
+  bool ignoreId: false,
+}) => new _HasSemantics(semantics, ignoreRect: ignoreRect, ignoreTransform: ignoreTransform, ignoreId: ignoreId);
 
 class _IncludesNodeWith extends Matcher {
   const _IncludesNodeWith({
     this.label,
+    this.value,
     this.textDirection,
     this.actions,
-}) : assert(label != null || actions != null);
+    this.flags,
+}) : assert(label != null || value != null || actions != null || flags != null);
 
   final String label;
+  final String value;
   final TextDirection textDirection;
   final List<SemanticsAction> actions;
+  final List<SemanticsFlags> flags;
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
@@ -292,12 +346,20 @@ class _IncludesNodeWith extends Matcher {
   bool checkNode(SemanticsNode node) {
     if (label != null && node.label != label)
       return false;
+    if (value != null && node.value != value)
+      return false;
     if (textDirection != null && node.textDirection != textDirection)
       return false;
     if (actions != null) {
       final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
       final int actualActions = node.getSemanticsData().actions;
       if (expectedActions != actualActions)
+        return false;
+    }
+    if (flags != null) {
+      final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+      final int actualFlags = node.getSemanticsData().flags;
+      if (expectedFlags != actualFlags)
         return false;
     }
     return true;
@@ -314,22 +376,18 @@ class _IncludesNodeWith extends Matcher {
   }
 
   String get _configAsString {
-    String string = '';
-    if (label != null) {
-      string += 'label "$label"';
-      if (textDirection != null)
-        string += ' (${describeEnum(textDirection)})';
-      if (actions != null)
-        string += ' and ';
-    } else if (textDirection != null) {
-      string += 'direction ${describeEnum(textDirection)}';
-      if (actions != null)
-        string += ' and ';
-    }
-    if (actions != null) {
-      string += 'actions "${actions.join(', ')}"';
-    }
-    return string;
+    final List<String> strings = <String>[];
+    if (label != null)
+      strings.add('label "$label"');
+    if (value != null)
+      strings.add('value "$value"');
+    if (textDirection != null)
+      strings.add(' (${describeEnum(textDirection)})');
+    if (actions != null)
+      strings.add('actions "${actions.join(', ')}"');
+    if (flags != null)
+      strings.add('flags "${flags.join(', ')}"');
+    return strings.join(', ');
   }
 }
 
@@ -337,10 +395,18 @@ class _IncludesNodeWith extends Matcher {
 /// `textDirection`, and `actions`.
 ///
 /// If null is provided for an argument, it will match against any value.
-Matcher includesNodeWith({ String label, TextDirection textDirection, List<SemanticsAction> actions }) {
+Matcher includesNodeWith({
+  String label,
+  String value,
+  TextDirection textDirection,
+  List<SemanticsAction> actions,
+  List<SemanticsFlags> flags,
+}) {
   return new _IncludesNodeWith(
     label: label,
+    value: value,
     textDirection: textDirection,
     actions: actions,
+    flags: flags,
   );
 }

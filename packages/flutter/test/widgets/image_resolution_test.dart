@@ -88,24 +88,27 @@ class TestAssetBundle extends CachingAssetBundle {
   String toString() => '${describeIdentity(this)}()';
 }
 
+class FakeImageStreamCompleter extends ImageStreamCompleter {
+  FakeImageStreamCompleter(Future<ImageInfo> image) {
+    image.then<Null>(setImage);
+  }
+}
+
 class TestAssetImage extends AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
-  Future<ImageInfo> loadAsync(AssetBundleImageKey key) {
-    ImageInfo result;
+  ImageStreamCompleter load(AssetBundleImageKey key) {
+    ImageInfo imageInfo;
     key.bundle.load(key.name).then<Null>((ByteData data) {
-      decodeImage(data).then<Null>((ui.Image image) {
-        result = new ImageInfo(image: image, scale: key.scale);
-      });
+      final TestByteData testData = data;
+      final ui.Image image = new TestImage(testData.scale);
+      imageInfo = new ImageInfo(image: image, scale: key.scale);
     });
-    assert(result != null);
-    return new SynchronousFuture<ImageInfo>(result);
-  }
-
-  @override
-  Future<ui.Image> decodeImage(covariant TestByteData data) {
-    return new SynchronousFuture<ui.Image>(new TestImage(data.scale));
+    assert(imageInfo != null);
+    return new FakeImageStreamCompleter(
+      new SynchronousFuture<ImageInfo>(imageInfo)
+    );
   }
 }
 

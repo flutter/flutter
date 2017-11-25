@@ -49,7 +49,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffsetDirectional.topEnd,
+                alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
                 matchTextDirection: true,
               ),
@@ -88,7 +88,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffsetDirectional.topEnd,
+                alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
                 matchTextDirection: true,
               ),
@@ -124,7 +124,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffsetDirectional.topEnd,
+                alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
               ),
             ),
@@ -159,7 +159,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffsetDirectional.topEnd,
+                alignment: AlignmentDirectional.topEnd,
                 repeat: ImageRepeat.repeatX,
               ),
             ),
@@ -194,7 +194,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffset.centerRight,
+                alignment: Alignment.centerRight,
                 matchTextDirection: true,
               ),
             ),
@@ -226,7 +226,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffset.centerRight,
+                alignment: Alignment.centerRight,
               ),
             ),
           ),
@@ -253,7 +253,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffset.centerRight,
+                alignment: Alignment.centerRight,
                 matchTextDirection: true
               ),
             ),
@@ -281,7 +281,7 @@ void main() {
             decoration: new BoxDecoration(
               image: new DecorationImage(
                 image: new TestImageProvider(),
-                alignment: FractionalOffset.centerRight,
+                alignment: Alignment.centerRight,
                 matchTextDirection: true
               ),
             ),
@@ -308,7 +308,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffsetDirectional.topEnd,
+              alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
               matchTextDirection: true,
             ),
@@ -345,7 +345,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffsetDirectional.topEnd,
+              alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
               matchTextDirection: true,
             ),
@@ -379,7 +379,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffsetDirectional.topEnd,
+              alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
             ),
           ),
@@ -412,7 +412,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffsetDirectional.topEnd,
+              alignment: AlignmentDirectional.topEnd,
               repeat: ImageRepeat.repeatX,
             ),
           ),
@@ -445,7 +445,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffset.centerRight,
+              alignment: Alignment.centerRight,
               matchTextDirection: true,
             ),
           ),
@@ -475,7 +475,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffset.centerRight,
+              alignment: Alignment.centerRight,
             ),
           ),
         ),
@@ -500,7 +500,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffset.centerRight,
+              alignment: Alignment.centerRight,
               matchTextDirection: true
             ),
           ),
@@ -526,7 +526,7 @@ void main() {
             height: 50.0,
             child: new Image(
               image: new TestImageProvider(),
-              alignment: FractionalOffset.centerRight,
+              alignment: Alignment.centerRight,
               matchTextDirection: true
             ),
           ),
@@ -548,7 +548,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Image(
           image: new TestImageProvider(),
-          alignment: FractionalOffset.centerRight,
+          alignment: Alignment.centerRight,
           matchTextDirection: false,
         ),
       ),
@@ -560,7 +560,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Image(
           image: new TestImageProvider(),
-          alignment: FractionalOffsetDirectional.centerEnd,
+          alignment: AlignmentDirectional.centerEnd,
           matchTextDirection: true,
         ),
       ),
@@ -572,7 +572,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Image(
           image: new TestImageProvider(),
-          alignment: FractionalOffset.centerRight,
+          alignment: Alignment.centerRight,
           matchTextDirection: false,
         ),
       ),

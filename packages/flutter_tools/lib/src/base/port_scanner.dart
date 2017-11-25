@@ -28,13 +28,13 @@ abstract class PortScanner {
   /// Returns an available port as close to [defaultPort] as possible.
   ///
   /// If [defaultPort] is available, this will return it. Otherwise, it will
-  /// search for an avaiable port close to [defaultPort]. If it cannot find one,
+  /// search for an available port close to [defaultPort]. If it cannot find one,
   /// it will return any available port.
-  Future<int> findPreferredPort(int defaultPort, { int searchStep: 2 }) async {
+  Future<int> findPreferredPort(int defaultPort) async {
     int iterationCount = 0;
 
     while (iterationCount < _kMaxSearchIterations) {
-      final int port = defaultPort + iterationCount * searchStep;
+      final int port = defaultPort + iterationCount;
       if (await isPortAvailable(port))
         return port;
       iterationCount++;
@@ -61,7 +61,12 @@ class HostPortScanner extends PortScanner {
 
   @override
   Future<int> findAvailablePort() async {
-    final ServerSocket socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+    ServerSocket socket;
+    try {
+      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V4, 0);
+    } on SocketException {
+      socket = await ServerSocket.bind(InternetAddress.LOOPBACK_IP_V6, 0, v6Only: true);
+    }
     final int port = socket.port;
     await socket.close();
     return port;

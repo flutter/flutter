@@ -9,11 +9,11 @@ import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
+import 'alignment.dart';
 import 'basic_types.dart';
 import 'box_fit.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
-import 'fractional_offset.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';
@@ -123,6 +123,13 @@ class FlutterLogoDecoration extends Decoration {
   ///
   /// Interpolates both the color and the style in a continuous fashion.
   ///
+  /// If both values are null, this returns null. Otherwise, it returns a
+  /// non-null value. If one of the values is null, then the result is obtained
+  /// by scaling the other value's opacity and [margin]. If neither value is
+  /// null and `t == 0.0`, then `a` is returned unmodified; if `t == 1.0` then
+  /// `b` is returned unmodified. Otherwise, the values are computed by
+  /// interpolating the properties appropriately.
+  ///
   /// See also [Decoration.lerp].
   static FlutterLogoDecoration lerp(FlutterLogoDecoration a, FlutterLogoDecoration b, double t) {
     assert(a == null || a.debugAssertIsValid());
@@ -151,6 +158,10 @@ class FlutterLogoDecoration extends Decoration {
         a._opacity * (1.0 - t).clamp(0.0, 1.0),
       );
     }
+    if (t == 0.0)
+      return a;
+    if (t == 1.0)
+      return b;
     return new FlutterLogoDecoration._(
       Color.lerp(a.lightColor, b.lightColor, t),
       Color.lerp(a.darkColor, b.darkColor, t),
@@ -165,24 +176,26 @@ class FlutterLogoDecoration extends Decoration {
   @override
   FlutterLogoDecoration lerpFrom(Decoration a, double t) {
     assert(debugAssertIsValid());
-    if (a is! FlutterLogoDecoration)
-      return lerp(null, this, t);
-    assert(a.debugAssertIsValid());
-    return lerp(a, this, t);
+    if (a == null || a is FlutterLogoDecoration) {
+      assert(a == null || a.debugAssertIsValid());
+      return FlutterLogoDecoration.lerp(a, this, t);
+    }
+    return super.lerpFrom(a, t);
   }
 
   @override
   FlutterLogoDecoration lerpTo(Decoration b, double t) {
     assert(debugAssertIsValid());
-    if (b is! FlutterLogoDecoration)
-      return lerp(this, null, t);
-    assert(b.debugAssertIsValid());
-    return lerp(this, b, t);
+    if (b == null || b is FlutterLogoDecoration) {
+      assert(b == null || b.debugAssertIsValid());
+      return FlutterLogoDecoration.lerp(this, b, t);
+    }
+    return super.lerpTo(b, t);
   }
 
   @override
   // TODO(ianh): better hit testing
-  bool hitTest(Size size, Offset position) => true;
+  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   @override
   BoxPainter createBoxPainter([VoidCallback onChanged]) {
@@ -397,7 +410,7 @@ class _FlutterLogoPainter extends BoxPainter {
     }
     final FittedSizes fittedSize = applyBoxFit(BoxFit.contain, logoSize, canvasSize);
     assert(fittedSize.source == logoSize);
-    final Rect rect = FractionalOffset.center.inscribe(fittedSize.destination, offset & canvasSize);
+    final Rect rect = Alignment.center.inscribe(fittedSize.destination, offset & canvasSize);
     final double centerSquareHeight = canvasSize.shortestSide;
     final Rect centerSquare = new Rect.fromLTWH(
       offset.dx + (canvasSize.width - centerSquareHeight) / 2.0,

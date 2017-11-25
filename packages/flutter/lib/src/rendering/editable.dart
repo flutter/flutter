@@ -7,6 +7,7 @@ import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
@@ -16,8 +17,6 @@ import 'viewport_offset.dart';
 const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 const double _kCaretWidth = 1.0; // pixels
-
-final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
@@ -105,6 +104,7 @@ class RenderEditable extends RenderBox {
     TextAlign textAlign: TextAlign.start,
     Color cursorColor,
     ValueNotifier<bool> showCursor,
+    bool hasFocus,
     int maxLines: 1,
     Color selectionColor,
     double textScaleFactor: 1.0,
@@ -125,6 +125,7 @@ class RenderEditable extends RenderBox {
        ),
        _cursorColor = cursorColor,
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
+       _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
        _selection = selection,
        _offset = offset {
@@ -166,6 +167,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.text = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// How the text should be aligned horizontally.
@@ -189,7 +191,7 @@ class RenderEditable extends RenderBox {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// This must not be null.
@@ -200,6 +202,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.textDirection = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// The color to use when painting the cursor.
@@ -225,6 +228,17 @@ class RenderEditable extends RenderBox {
     if (attached)
       _showCursor.addListener(markNeedsPaint);
     markNeedsPaint();
+  }
+
+  /// Whether the editable is currently focused.
+  bool get hasFocus => _hasFocus;
+  bool _hasFocus;
+  set hasFocus(bool value) {
+    assert(value != null);
+    if (_hasFocus == value)
+      return;
+    _hasFocus = value;
+    markNeedsSemanticsUpdate();
   }
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
@@ -304,6 +318,17 @@ class RenderEditable extends RenderBox {
   }
 
   @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config
+      ..value = text.toPlainText()
+      ..textDirection = textDirection
+      ..isFocused = hasFocus
+      ..isTextField = true;
+  }
+
+  @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     _offset.addListener(markNeedsPaint);
@@ -362,6 +387,11 @@ class RenderEditable extends RenderBox {
   /// and the returned list is of length two. In this case, however, the two
   /// points might actually be co-located (e.g., because of a bidirectional
   /// selection that contains some text but whose ends meet in the middle).
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the equivalent but for
+  ///    a [TextPosition] rather than a [TextSelection].
   List<TextSelectionPoint> getEndpointsForSelection(TextSelection selection) {
     assert(constraints != null);
     _layoutText(constraints.maxWidth);
@@ -371,7 +401,7 @@ class RenderEditable extends RenderBox {
     if (selection.isCollapsed) {
       // TODO(mpcomplete): This doesn't work well at an RTL/LTR boundary.
       final Offset caretOffset = _textPainter.getOffsetForCaret(selection.extent, _caretPrototype);
-      final Offset start = new Offset(0.0, _preferredLineHeight) + caretOffset + paintOffset;
+      final Offset start = new Offset(0.0, preferredLineHeight) + caretOffset + paintOffset;
       return <TextSelectionPoint>[new TextSelectionPoint(start, null)];
     } else {
       final List<ui.TextBox> boxes = _textPainter.getBoxesForSelection(selection);
@@ -385,19 +415,35 @@ class RenderEditable extends RenderBox {
   }
 
   /// Returns the position in the text for the given global coordinate.
+  ///
+  /// See also:
+  ///
+  ///  * [getLocalRectForCaret], which is the reverse operation, taking
+  ///    a [TextPosition] and returning a [Rect].
+  ///  * [TextPainter.getPositionForOffset], which is the equivalent method
+  ///    for a [TextPainter] object.
   TextPosition getPositionForPoint(Offset globalPosition) {
     _layoutText(constraints.maxWidth);
     globalPosition += -_paintOffset;
     return _textPainter.getPositionForOffset(globalToLocal(globalPosition));
   }
 
-  /// Returns the Rect in local coordinates for the caret at the given text
+  /// Returns the [Rect] in local coordinates for the caret at the given text
   /// position.
+  ///
+  /// See also:
+  ///
+  ///  * [getPositionForPoint], which is the reverse operation, taking
+  ///    an [Offset] in global coordinates and returning a [TextPosition].
+  ///  * [getEndpointsForSelection], which is the equivalent but for
+  ///    a selection rather than a particular text position.
+  ///  * [TextPainter.getOffsetForCaret], the equivalent method for a
+  ///    [TextPainter] object.
   Rect getLocalRectForCaret(TextPosition caretPosition) {
     _layoutText(constraints.maxWidth);
     final Offset caretOffset = _textPainter.getOffsetForCaret(caretPosition, _caretPrototype);
     // This rect is the same as _caretPrototype but without the vertical padding.
-    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, _preferredLineHeight).shift(caretOffset + _paintOffset);
+    return new Rect.fromLTWH(0.0, 0.0, _kCaretWidth, preferredLineHeight).shift(caretOffset + _paintOffset);
   }
 
   @override
@@ -412,12 +458,13 @@ class RenderEditable extends RenderBox {
     return _textPainter.maxIntrinsicWidth;
   }
 
-  // This does not required the layout to be updated.
-  double get _preferredLineHeight => _textPainter.preferredLineHeight;
+  /// An estimate of the height of a line in the text. See [TextPainter.preferredLineHeight].
+  /// This does not required the layout to be updated.
+  double get preferredLineHeight => _textPainter.preferredLineHeight;
 
   double _preferredHeight(double width) {
     if (maxLines != null)
-      return _preferredLineHeight * maxLines;
+      return preferredLineHeight * maxLines;
     if (width == double.INFINITY) {
       final String text = _textPainter.text.toPlainText();
       int lines = 1;
@@ -425,10 +472,10 @@ class RenderEditable extends RenderBox {
         if (text.codeUnitAt(index) == 0x0A) // count explicit line breaks
           lines += 1;
       }
-      return _preferredLineHeight * lines;
+      return preferredLineHeight * lines;
     }
     _layoutText(width);
-    return math.max(_preferredLineHeight, _textPainter.height);
+    return math.max(preferredLineHeight, _textPainter.height);
   }
 
   @override
@@ -439,6 +486,12 @@ class RenderEditable extends RenderBox {
   @override
   double computeMaxIntrinsicHeight(double width) {
     return _preferredHeight(width);
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    _layoutText(constraints.maxWidth);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   @override
@@ -514,7 +567,7 @@ class RenderEditable extends RenderBox {
   @override
   void performLayout() {
     _layoutText(constraints.maxWidth);
-    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, _preferredLineHeight - 2.0 * _kCaretHeightOffset);
+    _caretPrototype = new Rect.fromLTWH(0.0, _kCaretHeightOffset, _kCaretWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     _selectionRects = null;
     // We grab _textPainter.size here because assigning to `size` on the next
     // line will trigger us to validate our intrinsic sizes, which will change

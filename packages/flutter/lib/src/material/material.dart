@@ -97,8 +97,8 @@ abstract class MaterialInkController {
 /// splashes and ink highlights) won't move to account for the new layout.
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color] or [type]). The one exception is
-/// the [elevation], changes to which will be animated.
+/// [Material] should not change its [color], [shadowColor] or [type]). The one
+/// exception is the [elevation], changes to which will be animated.
 ///
 /// See also:
 ///
@@ -108,17 +108,19 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type] and the [elevation] arguments must not be null.
+  /// The [type], [elevation] and [shadowColor] arguments must not be null.
   const Material({
     Key key,
     this.type: MaterialType.canvas,
     this.elevation: 0.0,
     this.color,
+    this.shadowColor: const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
+       assert(shadowColor != null),
        assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
        super(key: key);
 
@@ -147,6 +149,11 @@ class Material extends StatefulWidget {
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
+
+  /// The color to paint the shadow below the material.
+  ///
+  /// Defaults to fully opaque black.
+  final Color shadowColor;
 
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
@@ -178,8 +185,9 @@ class Material extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<MaterialType>('type', type));
-    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DoubleProperty('elevation', elevation, defaultValue: 0.0));
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
     textStyle?.debugFillProperties(description, prefix: 'textStyle.');
     description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
@@ -238,6 +246,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         shape: BoxShape.circle,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -258,6 +267,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: radius ?? BorderRadius.zero,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -266,8 +276,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     return contents;
   }
 }
-
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   _RenderInkFeatures({
@@ -422,7 +430,7 @@ abstract class InkFeature {
   /// Override this method to paint the ink feature.
   ///
   /// The transform argument gives the coordinate conversion from the coordinate
-  /// system of the canvas to the coodinate system of the [referenceBox].
+  /// system of the canvas to the coordinate system of the [referenceBox].
   @protected
   void paintFeature(Canvas canvas, Matrix4 transform);
 

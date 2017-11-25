@@ -23,9 +23,9 @@ void main() {
           onPaint: () {
             baseline1 = child.getDistanceToBaseline(TextBaseline.alphabetic);
             height1 = text.size.height;
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
     layout(root, phase: EnginePhase.paint);
 
@@ -37,15 +37,15 @@ void main() {
             textDirection: TextDirection.ltr,
           ),
           maxHeight: height1 / 2.0,
-          alignment: const FractionalOffset(0.0, 0.0)
+          alignment: Alignment.topLeft,
         ),
         painter: new TestCallbackPainter(
           onPaint: () {
             baseline2 = child.getDistanceToBaseline(TextBaseline.alphabetic);
             height2 = text.size.height;
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
     layout(root, phase: EnginePhase.paint);
 

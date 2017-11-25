@@ -192,7 +192,7 @@ class BuildTest {
   }
 
   static Future<Map<String, dynamic>> _buildAot(bool previewDart2) async {
-    await flutter('build', options: <String>['clean']);
+    await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
     final List<String> options = <String>[
       'aot',
@@ -218,7 +218,7 @@ class BuildTest {
   }
 
   static Future<Map<String, dynamic>> _buildDebug(bool previewDart2) async {
-    await flutter('build', options: <String>['clean']);
+    await flutter('clean');
 
     final Stopwatch watch = new Stopwatch();
     if (deviceOperatingSystem == DeviceOperatingSystem.ios) {

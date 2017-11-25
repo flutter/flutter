@@ -289,8 +289,8 @@ void main() {
     final AnimationController controller = new AnimationController(
       vsync: const TestVSync(),
     );
-    expect((){ controller.repeat(); }, throwsFlutterError);
-    expect((){ controller.repeat(period: null); }, throwsFlutterError);
+    expect(() { controller.repeat(); }, throwsFlutterError);
+    expect(() { controller.repeat(period: null); }, throwsFlutterError);
   });
 
   test('Do not animate if already at target', () {
@@ -394,6 +394,59 @@ void main() {
     controller.animateTo(1.0, duration: Duration.ZERO);
     expect(SchedulerBinding.instance.transientCallbackCount, equals(0), reason: 'Expected no animation.');
     expect(controller.value, 1.0);
+  });
+
+  test('resetting animation works at all phases', (){
+    final List<AnimationStatus> statusLog = <AnimationStatus>[];
+    final AnimationController controller = new AnimationController(
+      duration: const Duration(milliseconds: 100),
+      value: 0.0,
+      lowerBound: 0.0,
+      upperBound: 1.0,
+      vsync: const TestVSync(),
+    )..addStatusListener(statusLog.add);
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+
+    statusLog.clear();
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.forward);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.dismissed ]));
+
+    controller.value = 1.0;
+    statusLog.clear();
+    controller.reverse();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 50));
+    expect(controller.status, AnimationStatus.reverse);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.reverse, AnimationStatus.dismissed ]));
+
+    statusLog.clear();
+    controller.forward();
+    tick(const Duration(milliseconds: 0));
+    tick(const Duration(milliseconds: 150));
+    expect(controller.status, AnimationStatus.completed);
+    controller.reset();
+
+    expect(controller.value, 0.0);
+    expect(controller.status, AnimationStatus.dismissed);
+    expect(statusLog, equals(<AnimationStatus>[ AnimationStatus.forward, AnimationStatus.completed, AnimationStatus.dismissed ]));
   });
 
   test('setting value directly sets correct status', () {

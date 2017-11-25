@@ -13,11 +13,11 @@ class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
 void main() {
   final SchedulerBinding scheduler = new TestSchedulerBinding();
 
-  test("Check for a time dilation being in effect", () {
+  test('Check for a time dilation being in effect', () {
     expect(timeDilation, equals(1.0));
   });
 
-  test("Can cancel queued callback", () {
+  test('Can cancel queued callback', () {
     int secondId;
 
     bool firstCallbackRan = false;

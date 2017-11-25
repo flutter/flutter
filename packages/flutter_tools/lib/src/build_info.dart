@@ -10,7 +10,11 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, { this.previewDart2 });
+  const BuildInfo(this.mode, this.flavor,
+      {this.previewDart2,
+      this.extraFrontEndOptions,
+      this.extraGenSnapshotOptions,
+      this.preferSharedLibrary});
 
   final BuildMode mode;
   /// Represents a custom Android product flavor or an Xcode scheme, null for
@@ -23,6 +27,15 @@ class BuildInfo {
 
   // Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
+
+  /// Extra command-line options for front-end.
+  final String extraFrontEndOptions;
+
+  /// Extra command-line options for gen_snapshot.
+  final String extraGenSnapshotOptions;
+
+  // Whether to prefer AOT compiling to a *so file.
+  final bool preferSharedLibrary;
 
   static const BuildInfo debug = const BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = const BuildInfo(BuildMode.profile, null);
@@ -195,4 +208,10 @@ String getAssetBuildDirectory() {
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
+}
+
+/// Returns directory used by incremental compiler (IKG - incremental kernel
+/// generator) to store cached intermediate state.
+String getIncrementalCompilerByteStoreDirectory() {
+  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
 }

@@ -15,11 +15,11 @@ import 'system_channels.dart';
 ///
 /// See also:
 ///
-///  * [RawKeyEventDataAndroid]
- //  * [RawKeyEventDataFuchsia]
-///  * [RawKeyEvent]
-///  * [RawKeyDownEvent]
-///  * [RawKeyUpEvent]
+///  * [RawKeyEventDataAndroid], a specialization for Android.
+///  * [RawKeyEventDataFuchsia], a specialization for Fuchsia.
+///  * [RawKeyDownEvent] and [RawKeyUpEvent], the classes that hold the
+///    reference to [RawKeyEventData] subclasses.
+///  * [RawKeyboard], which uses these interfaces to expose key data.
 @immutable
 abstract class RawKeyEventData {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -31,6 +31,10 @@ abstract class RawKeyEventData {
 ///
 /// This object contains information about key events obtained from Android's
 /// `KeyEvent` interface.
+///
+/// See also:
+///
+///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataAndroid extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
@@ -68,6 +72,10 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 ///
 /// This object contains information about key events obtained from Fuchsia's
 /// `KeyData` interface.
+///
+/// See also:
+///
+///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyEventDataFuchsia extends RawKeyEventData {
   /// Creates a key event data structure specific for Android.
   ///
@@ -105,8 +113,9 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 ///
 /// See also:
 ///
-///  * [RawKeyDownEvent]
-///  * [RawKeyUpEvent]
+///  * [RawKeyDownEvent], a specialization for events representing the user pressing a key.
+///  * [RawKeyUpEvent], a specialization for events representing the user releasing a key.
+///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
 abstract class RawKeyEvent {
@@ -115,11 +124,55 @@ abstract class RawKeyEvent {
     @required this.data,
   });
 
+  /// Creates a concrete [RawKeyEvent] class from a message in the form received
+  /// on the [SystemChannels.keyEvent] channel.
+  factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
+    RawKeyEventData data;
+
+    final String keymap = message['keymap'];
+    switch (keymap) {
+      case 'android':
+        data = new RawKeyEventDataAndroid(
+          flags: message['flags'] ?? 0,
+          codePoint: message['codePoint'] ?? 0,
+          keyCode: message['keyCode'] ?? 0,
+          scanCode: message['scanCode'] ?? 0,
+          metaState: message['metaState'] ?? 0,
+        );
+        break;
+      case 'fuchsia':
+        data = new RawKeyEventDataFuchsia(
+          hidUsage: message['hidUsage'] ?? 0,
+          codePoint: message['codePoint'] ?? 0,
+          modifiers: message['modifiers'] ?? 0,
+        );
+        break;
+      default:
+        // We don't yet implement raw key events on iOS, but we don't hit this
+        // exception because the engine never sends us these messages.
+        throw new FlutterError('Unknown keymap for key events: $keymap');
+    }
+
+    final String type = message['type'];
+    switch (type) {
+      case 'keydown':
+        return new RawKeyDownEvent(data: data);
+      case 'keyup':
+        return new RawKeyUpEvent(data: data);
+      default:
+        throw new FlutterError('Unknown key event type: $type');
+    }
+  }
+
   /// Platform-specific information about the key event.
   final RawKeyEventData data;
 }
 
 /// The user has pressed a key on the keyboard.
+///
+/// See also:
+///
+///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyDownEvent extends RawKeyEvent {
   /// Creates a key event that represents the user pressing a key.
   const RawKeyDownEvent({
@@ -128,49 +181,15 @@ class RawKeyDownEvent extends RawKeyEvent {
 }
 
 /// The user has released a key on the keyboard.
+///
+/// See also:
+///
+///  * [RawKeyboard], which uses this interface to expose key data.
 class RawKeyUpEvent extends RawKeyEvent {
   /// Creates a key event that represents the user releasing a key.
   const RawKeyUpEvent({
     @required RawKeyEventData data,
   }) : super(data: data);
-}
-
-RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
-  RawKeyEventData data;
-
-  final String keymap = message['keymap'];
-  switch (keymap) {
-    case 'android':
-      data = new RawKeyEventDataAndroid(
-        flags: message['flags'] ?? 0,
-        codePoint: message['codePoint'] ?? 0,
-        keyCode: message['keyCode'] ?? 0,
-        scanCode: message['scanCode'] ?? 0,
-        metaState: message['metaState'] ?? 0,
-      );
-      break;
-    case 'fuchsia':
-      data = new RawKeyEventDataFuchsia(
-        hidUsage: message['hidUsage'] ?? 0,
-        codePoint: message['codePoint'] ?? 0,
-        modifiers: message['modifiers'] ?? 0,
-      );
-      break;
-    default:
-      // We don't yet implement raw key events on iOS, but we don't hit this
-      // exception because the engine never sends us these messages.
-      throw new FlutterError('Unknown keymap for key events: $keymap');
-  }
-
-  final String type = message['type'];
-  switch (type) {
-    case 'keydown':
-      return new RawKeyDownEvent(data: data);
-    case 'keyup':
-      return new RawKeyUpEvent(data: data);
-    default:
-      throw new FlutterError('Unknown key event type: $type');
-  }
 }
 
 /// An interface for listening to raw key events.
@@ -185,9 +204,11 @@ RawKeyEvent _toRawKeyEvent(Map<String, dynamic> message) {
 ///
 /// See also:
 ///
-///  * [RawKeyEvent]
-///  * [RawKeyDownEvent]
-///  * [RawKeyUpEvent]
+///  * [RawKeyDownEvent] and [RawKeyUpEvent], the classes used to describe
+///    specific raw key events.
+///  * [RawKeyboardListener], a widget that listens for raw key events.
+///  * [SystemChannels.keyEvent], the low-level channel used for receiving
+///    events from the system.
 class RawKeyboard {
   RawKeyboard._() {
     SystemChannels.keyEvent.setMessageHandler(_handleKeyEvent);
@@ -215,7 +236,7 @@ class RawKeyboard {
   Future<dynamic> _handleKeyEvent(dynamic message) async {
     if (_listeners.isEmpty)
       return;
-    final RawKeyEvent event = _toRawKeyEvent(message);
+    final RawKeyEvent event = new RawKeyEvent.fromMessage(message);
     if (event == null)
       return;
     for (ValueChanged<RawKeyEvent> listener in new List<ValueChanged<RawKeyEvent>>.from(_listeners))

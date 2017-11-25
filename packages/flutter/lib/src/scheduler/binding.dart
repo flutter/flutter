@@ -513,7 +513,7 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _lastRawTimeStamp = Duration.ZERO;
 
   /// Prepares the scheduler for a non-monotonic change to how time stamps are
-  /// calcuated.
+  /// calculated.
   ///
   /// Callbacks received from the scheduler assume that their time stamps are
   /// monotonically increasing. The raw time stamp passed to [handleBeginFrame]

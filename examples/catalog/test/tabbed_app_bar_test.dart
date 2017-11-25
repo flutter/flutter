@@ -19,7 +19,7 @@ Finder findTab(IconData icon) {
 }
 
 void main() {
-  testWidgets("tabbed_app_bar sample smoke test", (WidgetTester tester) async {
+  testWidgets('tabbed_app_bar sample smoke test', (WidgetTester tester) async {
     tabbed_app_bar_sample.main();
     await tester.pump();
 

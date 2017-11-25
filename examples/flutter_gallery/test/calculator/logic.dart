@@ -16,7 +16,7 @@ void main() {
     expression = expression.appendDigit(4);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("24"));
+    expect(expression.toString(), equals('24'));
   });
 
   test('Test floating point 0.1 + 0.2 = 0.3', () {
@@ -30,7 +30,7 @@ void main() {
     expression = expression.appendDigit(2);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("0.3"));
+    expect(expression.toString(), equals('0.3'));
   });
 
   test('Test floating point 1.0/10.0 = 0.1', () {
@@ -45,7 +45,7 @@ void main() {
     expression = expression.appendDigit(0);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("0.1"));
+    expect(expression.toString(), equals('0.1'));
   });
 
   test('Test 1/0 = Infinity', () {
@@ -55,7 +55,7 @@ void main() {
     expression = expression.appendDigit(0);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("Infinity"));
+    expect(expression.toString(), equals('Infinity'));
   });
 
   test('Test use result in next calculation: 1 + 1 = 2 + 1 = 3 + 1 = 4', () {
@@ -71,7 +71,7 @@ void main() {
     expression = expression.appendDigit(1);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("4"));
+    expect(expression.toString(), equals('4'));
   });
 
   test('Test minus -3 - -2 = -1', () {
@@ -83,6 +83,6 @@ void main() {
     expression = expression.appendDigit(2);
     expression = expression.computeResult();
     expect(expression.state, equals(ExpressionState.Result));
-    expect(expression.toString(), equals("-1"));
+    expect(expression.toString(), equals('-1'));
   });
 }

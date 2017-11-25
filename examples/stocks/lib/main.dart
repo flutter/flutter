@@ -13,6 +13,7 @@ import 'package:flutter/rendering.dart' show
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
   debugRepaintRainbowEnabled;
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'stock_data.dart';
 import 'stock_home.dart';
@@ -24,6 +25,9 @@ import 'stock_types.dart';
 class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
   @override
   Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
+
+  @override
+  bool isSupported(Locale locale) => locale.languageCode == 'es' || locale.languageCode == 'en';
 
   @override
   bool shouldReload(_StocksLocalizationsDelegate old) => false;
@@ -118,8 +122,10 @@ class StocksAppState extends State<StocksApp> {
     return new MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizationsDelegates: <_StocksLocalizationsDelegate>[
+      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
         new _StocksLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: const <Locale>[
         const Locale('en', 'US'),

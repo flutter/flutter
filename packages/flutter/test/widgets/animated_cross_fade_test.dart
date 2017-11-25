@@ -98,7 +98,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffset.bottomRight,
+            alignment: Alignment.bottomRight,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,
@@ -121,7 +121,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffset.bottomRight,
+            alignment: Alignment.bottomRight,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,
@@ -156,7 +156,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,
@@ -179,7 +179,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,
@@ -214,7 +214,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,
@@ -237,7 +237,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new Center(
           child: new AnimatedCrossFade(
-            alignment: FractionalOffsetDirectional.bottomEnd,
+            alignment: AlignmentDirectional.bottomEnd,
             firstChild: new SizedBox(
               key: firstKey,
               width: 100.0,

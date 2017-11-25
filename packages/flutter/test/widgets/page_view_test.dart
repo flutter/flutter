@@ -4,8 +4,10 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
 import 'states.dart';
 
 const Duration _frameDuration = const Duration(milliseconds: 100);
@@ -209,6 +211,38 @@ void main() {
     expect(find.text('Arizona'), findsOneWidget);
   });
 
+  testWidgets('PageController nextPage and previousPage return Futures that resolve', (WidgetTester tester) async {
+    final PageController controller = new PageController();
+    await tester.pumpWidget(new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+    ));
+
+    bool nextPageCompleted = false;
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+        .then((_) => nextPageCompleted = true);
+
+    expect(nextPageCompleted, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(nextPageCompleted, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(nextPageCompleted, true);
+
+
+    bool previousPageCompleted = false;
+    controller.previousPage(duration: const Duration(milliseconds: 150), curve: Curves.ease)
+        .then((_) => previousPageCompleted = true);
+
+    expect(previousPageCompleted, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(previousPageCompleted, false);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(previousPageCompleted, true);
+  });
+
   testWidgets('PageView in zero-size container', (WidgetTester tester) async {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -291,6 +325,60 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    final PageController controller = new PageController(viewportFraction: 0.9);
+
+    Widget build(PageController controller, {Size size}) {
+      final Widget pageView = new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          controller: controller,
+          onPageChanged: log.add,
+          physics: const BouncingScrollPhysics(),
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      );
+
+      if (size != null) {
+        return new OverflowBox(
+          child: pageView,
+          minWidth: size.width,
+          minHeight: size.height,
+          maxWidth: size.width,
+          maxHeight: size.height,
+        );
+      } else {
+        return pageView;
+      }
+    }
+
+    await tester.pumpWidget(build(controller));
+    expect(log, isEmpty);
+
+    // Fling right to move to a non-existent page at the beginning of the
+    // PageView, and confirm that the PageView settles back on the first page.
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
+
+    // Try again with a Cupertino "Plus" device size.
+    await tester.pumpWidget(build(controller, size: const Size(414.0, 736.0)));
+    expect(log, isEmpty);
+
+    await tester.fling(find.byType(PageView), const Offset(100.0, 0.0), 800.0);
+    await tester.pumpAndSettle();
+    expect(log, isEmpty);
+
+    expect(find.text('Alabama'), findsOneWidget);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsNothing);
+  });
+
   testWidgets('PageView viewportFraction', (WidgetTester tester) async {
     PageController controller = new PageController(viewportFraction: 7/8);
 
@@ -332,6 +420,69 @@ void main() {
     expect(tester.getTopLeft(find.text('Georgia')), const Offset(-770.0, 0.0));
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(10.0, 0.0));
     expect(tester.getTopLeft(find.text('Idaho')), const Offset(790.0, 0.0));
+  });
+
+  testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+
+    Widget build({ bool pageSnapping }) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageView(
+          pageSnapping: pageSnapping,
+          onPageChanged: log.add,
+          children:
+              kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(build(pageSnapping: true));
+    expect(log, isEmpty);
+
+    // Drag more than halfway to the next page, to confirm the default behavior.
+    TestGesture gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    // The page view is 800.0 wide, so this move is just beyond halfway.
+    await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    expect(log, equals(const <int>[1]));
+    log.clear();
+
+    // Release the gesture, confirm that the page settles on the next.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+
+    // Disable page snapping, and try moving halfway. Confirm it doesn't snap.
+    await tester.pumpWidget(build(pageSnapping: false));
+    gesture = await tester.startGesture(const Offset(100.0, 100.0));
+    // Move just beyond halfway, again.
+    await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    // Page notifications still get sent.
+    expect(log, equals(const <int>[2]));
+    log.clear();
+
+    // Release the gesture, confirm that both pages are visible.
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+    expect(find.text('Arizona'), findsOneWidget);
+    expect(find.text('Arkansas'), findsNothing);
+
+    // Now re-enable snapping, confirm that we've settled on a page.
+    await tester.pumpWidget(build(pageSnapping: true));
+    await tester.pumpAndSettle();
+
+    expect(log, isEmpty);
+
+    expect(find.text('Alaska'), findsNothing);
+    expect(find.text('Arizona'), findsOneWidget);
+    expect(find.text('Arkansas'), findsNothing);
   });
 
   testWidgets('PageView small viewportFraction', (WidgetTester tester) async {
@@ -504,5 +655,44 @@ void main() {
       ),
     ));
     expect(controller2.page, 0);
+  });
+
+  testWidgets('PageView exposes semantics of children', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final PageController controller = new PageController();
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
+          controller: controller,
+          children: new List<Widget>.generate(3, (int i) {
+            return new Semantics(
+              child: new Text('Page #$i'),
+              container: true,
+            );
+          })
+        ),
+    ));
+    expect(controller.page, 0);
+
+    expect(semantics, includesNodeWith(label: 'Page #0'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #1')));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2')));
+
+    controller.jumpToPage(1);
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0')));
+    expect(semantics, includesNodeWith(label: 'Page #1'));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2')));
+
+    controller.jumpToPage(2);
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0')));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #1')));
+    expect(semantics, includesNodeWith(label: 'Page #2'));
+
+    semantics.dispose();
   });
 }

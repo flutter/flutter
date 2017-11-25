@@ -38,10 +38,15 @@ import 'recording_canvas.dart';
 /// See [PaintPattern] for a discussion of the semantics of paint patterns.
 ///
 /// To match something which paints nothing, see [paintsNothing].
+///
+/// To match something which asserts instead of painting, see [paintsAssertion].
 PaintPattern get paints => new _TestRecordingCanvasPatternMatcher();
 
 /// Matches objects or functions that paint an empty display list.
 Matcher get paintsNothing => new _TestRecordingCanvasPaintsNothingMatcher();
+
+/// Matches objects or functions that assert when they try to paint.
+Matcher get paintsAssertion => new _TestRecordingCanvasPaintsAssertionMatcher();
 
 /// Signature for [PaintPattern.something] predicate argument.
 ///
@@ -218,8 +223,10 @@ abstract class PaintPattern {
   /// are compared to the actual [Canvas.drawPath] call's `paint` argument, and
   /// any mismatches result in failure.
   ///
-  /// There is currently no way to check the actual path itself.
-  // See https://github.com/flutter/flutter/issues/93 which tracks that issue.
+  /// To introspect the Path object (as it stands after the painting has
+  /// completed), the `includes` and `excludes` arguments can be provided to
+  /// specify points that should be considered inside or outside the path
+  /// (respectively).
   ///
   /// If no call to [Canvas.drawPath] was made, then this results in failure.
   ///
@@ -231,7 +238,7 @@ abstract class PaintPattern {
   /// painting has completed, not at the time of the call. If the same [Paint]
   /// object is reused multiple times, then this may not match the actual
   /// arguments as they were seen by the method.
-  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+  void path({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
 
   /// Indicates that a line is expected next.
   ///
@@ -280,6 +287,24 @@ abstract class PaintPattern {
 
   /// Indicates that an image is expected next.
   ///
+  /// The next call to [Canvas.drawImage] is examined, and its arguments
+  /// compared to those passed to _this_ method.
+  ///
+  /// If no call to [Canvas.drawImage] was made, then this results in
+  /// failure.
+  ///
+  /// Any calls made between the last matched call (if any) and the
+  /// [Canvas.drawImage] call are ignored.
+  ///
+  /// The [Paint]-related arguments (`color`, `strokeWidth`, `hasMaskFilter`,
+  /// `style`) are compared against the state of the [Paint] object after the
+  /// painting has completed, not at the time of the call. If the same [Paint]
+  /// object is reused multiple times, then this may not match the actual
+  /// arguments as they were seen by the method.
+  void image({ ui.Image image, double x, double y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style });
+
+  /// Indicates that an image subsection is expected next.
+  ///
   /// The next call to [Canvas.drawImageRect] is examined, and its arguments
   /// compared to those passed to _this_ method.
   ///
@@ -320,11 +345,93 @@ abstract class PaintPattern {
   void something(PaintPatternPredicate predicate);
 }
 
+/// Matches a [Path] that contains (as defined by [Path.contains]) the given
+/// `includes` points and does not contain the given `excludes` points.
+Matcher isPathThat({
+  Iterable<Offset> includes: const <Offset>[],
+  Iterable<Offset> excludes: const <Offset>[],
+}) {
+  return new _PathMatcher(includes.toList(), excludes.toList());
+}
+
+class _PathMatcher extends Matcher {
+  _PathMatcher(this.includes, this.excludes);
+
+  List<Offset> includes;
+  List<Offset> excludes;
+
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    if (object is! Path) {
+      matchState[this] = 'The given object ($object) was not a Path.';
+      return false;
+    }
+    final Path path = object;
+    final List<String> errors = <String>[];
+    for (Offset offset in includes) {
+      if (!path.contains(offset))
+        errors.add('Offset $offset should be inside the path, but is not.');
+    }
+    for (Offset offset in excludes) {
+      if (path.contains(offset))
+        errors.add('Offset $offset should be outside the path, but is not.');
+    }
+    if (errors.isEmpty)
+      return true;
+    matchState[this] = 'Not all the given points were inside or outside the path as expected:\n  ${errors.join("\n  ")}';
+    return false;
+  }
+
+  @override
+  Description describe(Description description) {
+    String points(List<Offset> list) {
+      final int count = list.length;
+      if (count == 1)
+        return 'one particular point';
+      return '$count particular points';
+    }
+    return description.add('A Path that contains ${points(includes)} but does not contain ${points(excludes)}.');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return description.add(matchState[this]);
+  }
+}
+
 class _MismatchedCall {
   const _MismatchedCall(this.message, this.callIntroduction, this.call) : assert(call != null);
   final String message;
   final String callIntroduction;
   final RecordedInvocation call;
+}
+
+bool _evaluatePainter(Object object, Canvas canvas, PaintingContext context) {
+  if (object is _ContextPainterFunction) {
+    final _ContextPainterFunction function = object;
+    function(context, Offset.zero);
+  } else if (object is _CanvasPainterFunction) {
+    final _CanvasPainterFunction function = object;
+    function(canvas);
+  } else {
+    if (object is Finder) {
+      TestAsyncUtils.guardSync();
+      final Finder finder = object;
+      object = finder.evaluate().single.renderObject;
+    }
+    if (object is RenderObject) {
+      final RenderObject renderObject = object;
+      renderObject.paint(context, Offset.zero);
+    } else {
+      return false;
+    }
+  }
+  return true;
 }
 
 abstract class _TestRecordingCanvasMatcher extends Matcher {
@@ -336,25 +443,9 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     String prefixMessage = 'unexpectedly failed.';
     bool result = false;
     try {
-      if (object is _ContextPainterFunction) {
-        final _ContextPainterFunction function = object;
-        function(context, Offset.zero);
-      } else if (object is _CanvasPainterFunction) {
-        final _CanvasPainterFunction function = object;
-        function(canvas);
-      } else {
-        if (object is Finder) {
-          TestAsyncUtils.guardSync();
-          final Finder finder = object;
-          object = finder.evaluate().single.renderObject;
-        }
-        if (object is RenderObject) {
-          final RenderObject renderObject = object;
-          renderObject.paint(context, Offset.zero);
-        } else {
-          matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
-          return false;
-        }
+      if (!_evaluatePainter(object, canvas, context)) {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
       }
       result = _evaluatePredicates(canvas.invocations, description);
       if (!result)
@@ -404,6 +495,55 @@ class _TestRecordingCanvasPaintsNothingMatcher extends _TestRecordingCanvasMatch
       '${calls.first.stackToString(indent: "  ")}\n'
     );
     return false;
+  }
+}
+
+class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
+  @override
+  bool matches(Object object, Map<dynamic, dynamic> matchState) {
+    final TestRecordingCanvas canvas = new TestRecordingCanvas();
+    final TestRecordingPaintingContext context = new TestRecordingPaintingContext(canvas);
+    final StringBuffer description = new StringBuffer();
+    String prefixMessage = 'unexpectedly failed.';
+    bool result = false;
+    try {
+      if (!_evaluatePainter(object, canvas, context)) {
+        matchState[this] = 'was not one of the supported objects for the "paints" matcher.';
+        return false;
+      }
+      prefixMessage = 'did not assert.';
+    } on AssertionError {
+      result = true;
+    } catch (error, stack) {
+      prefixMessage = 'threw the following exception:';
+      description.writeln(error.toString());
+      description.write(stack.toString());
+      result = false;
+    }
+    if (!result) {
+      if (canvas.invocations.isNotEmpty) {
+        description.write('The complete display list was:');
+        for (RecordedInvocation call in canvas.invocations)
+          description.write('\n  * $call');
+      }
+      matchState[this] = '$prefixMessage\n$description';
+    }
+    return result;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('An object or closure that asserts when it tries to paint.');
+  }
+
+  @override
+  Description describeMismatch(
+    dynamic item,
+    Description description,
+    Map<dynamic, dynamic> matchState,
+    bool verbose,
+  ) {
+    return description.add(matchState[this]);
   }
 }
 
@@ -471,8 +611,8 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   }
 
   @override
-  void path({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
-    _predicates.add(new _PathPaintPredicate(color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
+  void path({ Iterable<Offset> includes, Iterable<Offset> excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _PathPaintPredicate(includes: includes, excludes: excludes, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -488,6 +628,11 @@ class _TestRecordingCanvasPatternMatcher extends _TestRecordingCanvasMatcher imp
   @override
   void paragraph({ ui.Paragraph paragraph, Offset offset }) {
     _predicates.add(new _FunctionPaintPredicate(#drawParagraph, <dynamic>[paragraph, offset]));
+  }
+
+  @override
+  void image({ ui.Image image, double x, double y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) {
+    _predicates.add(new _DrawImagePaintPredicate(image: image, x: x, y: y, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style));
   }
 
   @override
@@ -805,9 +950,42 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
 }
 
 class _PathPaintPredicate extends _DrawCommandPaintPredicate {
-  _PathPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+  _PathPaintPredicate({ this.includes, this.excludes, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawPath, 'a path', 2, 1, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final Path pathArgument = arguments[0];
+    if (includes != null) {
+      for (Offset offset in includes) {
+        if (!pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly did not contain $offset.';
+      }
+    }
+    if (excludes != null) {
+      for (Offset offset in excludes) {
+        if (pathArgument.contains(offset))
+          throw 'It called $methodName with a path that unexpectedly contained $offset.';
+      }
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (includes != null && excludes != null) {
+      description.add('that contains $includes and does not contain $excludes');
+    } else if (includes != null) {
+      description.add('that contains $includes');
+    } else if (excludes != null) {
+      description.add('that does not contain $excludes');
+    }
+  }
 }
 
 // TODO(ianh): add arguments to test the points, length, angle, that kind of thing
@@ -821,6 +999,50 @@ class _ArcPaintPredicate extends _DrawCommandPaintPredicate {
   _ArcPaintPredicate({ Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
     #drawArc, 'an arc', 5, 4, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
   );
+}
+
+class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
+  _DrawImagePaintPredicate({ this.image, this.x, this.y, Color color, double strokeWidth, bool hasMaskFilter, PaintingStyle style }) : super(
+    #drawImage, 'an image', 3, 2, color: color, strokeWidth: strokeWidth, hasMaskFilter: hasMaskFilter, style: style
+  );
+
+  final ui.Image image;
+  final double x;
+  final double y;
+
+  @override
+  void verifyArguments(List<dynamic> arguments) {
+    super.verifyArguments(arguments);
+    final ui.Image imageArgument = arguments[0];
+    if (image != null && imageArgument != image)
+      throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
+    final Offset pointArgument = arguments[0];
+    if (x != null && y != null) {
+      final Offset point = new Offset(x, y);
+      if (point != pointArgument)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, which was not exactly the expected coordinate ($point).';
+    } else {
+      if (x != null && pointArgument.dx != x)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, whose x-coordinate not exactly the expected coordinate (${x.toStringAsFixed(1)}).';
+      if (y != null && pointArgument.dy != y)
+        throw 'It called $methodName with an offset coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
+    }
+  }
+
+  @override
+  void debugFillDescription(List<String> description) {
+    super.debugFillDescription(description);
+    if (image != null)
+      description.add('image $image');
+    if (x != null && y != null) {
+      description.add('point ${new Offset(x, y)}');
+    } else {
+      if (x != null)
+        description.add('x-coordinate ${x.toStringAsFixed(1)}');
+      if (y != null)
+        description.add('y-coordinate ${y.toStringAsFixed(1)}');
+    }
+  }
 }
 
 class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {

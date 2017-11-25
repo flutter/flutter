@@ -107,8 +107,8 @@ class _CardDataItem extends StatelessWidget {
           children: <Widget>[
             new Align(
               alignment: page.id == 'L'
-                ? FractionalOffset.centerLeft
-                : FractionalOffset.centerRight,
+                ? Alignment.centerLeft
+                : Alignment.centerRight,
               child: new CircleAvatar(child: new Text('${page.id}')),
             ),
             new SizedBox(

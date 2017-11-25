@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'debug.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
@@ -70,7 +69,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// left to right when [reverse] is false and from right to left when
   /// [reverse] is true.
   ///
-  /// Similarly, if [scrollDirection] is [Axis.vertical], then scroll view
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
   /// scrolls from top to bottom when [reverse] is false and from bottom to top
   /// when [reverse] is true.
   ///
@@ -116,16 +115,7 @@ class SingleChildScrollView extends StatelessWidget {
   final Widget child;
 
   AxisDirection _getDirection(BuildContext context) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
-      case Axis.vertical:
-        return reverse ? AxisDirection.up : AxisDirection.down;
-    }
-    return null;
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
   @override
@@ -215,11 +205,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (value == _offset)
       return;
     if (attached)
-      _offset.removeListener(markNeedsPaint);
+      _offset.removeListener(_hasScrolled);
     _offset = value;
     if (attached)
-      _offset.addListener(markNeedsPaint);
+      _offset.addListener(_hasScrolled);
     markNeedsLayout();
+  }
+
+  void _hasScrolled() {
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -233,12 +228,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _offset.addListener(markNeedsPaint);
+    _offset.addListener(_hasScrolled);
   }
 
   @override
   void detach() {
-    _offset.removeListener(markNeedsPaint);
+    _offset.removeListener(_hasScrolled);
     super.detach();
   }
 

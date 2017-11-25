@@ -103,7 +103,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// This can be used to redirect console output from the framework, or to
   /// change the behavior of [debugPrint]. For example,
   /// [AutomatedTestWidgetsFlutterBinding] uses it to make [debugPrint]
-  /// synchronous, disabling its normal throttling behaviour.
+  /// synchronous, disabling its normal throttling behavior.
   @protected
   DebugPrintCallback get debugPrintOverride => debugPrint;
 
@@ -142,7 +142,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     createHttpClient = () {
       return new http.MockClient((http.BaseRequest request) {
         return new Future<http.Response>.value(
-          new http.Response("Mocked: Unavailable.", 404, request: request)
+          new http.Response('Mocked: Unavailable.', 404, request: request)
         );
       });
     };
@@ -212,13 +212,13 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     });
   }
 
-  /// Convert the given point from the global coodinate system (as used by
+  /// Convert the given point from the global coordinate system (as used by
   /// pointer events from the device) to the coordinate system used by the
   /// tests (an 800 by 600 window).
   Offset globalToLocal(Offset point) => point;
 
   /// Convert the given point from the coordinate system used by the tests (an
-  /// 800 by 600 window) to the global coodinate system (as used by pointer
+  /// 800 by 600 window) to the global coordinate system (as used by pointer
   /// events from the device).
   Offset localToGlobal(Offset point) => point;
 
@@ -319,6 +319,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
   Zone _parentZone;
   Completer<Null> _currentTestCompleter;
+  String _currentTestDescription; // set from _runTest to _testCompletionHandler
 
   void _testCompletionHandler() {
     // This can get called twice, in the case of a Future without listeners failing, and then
@@ -333,15 +334,21 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // but the test package does, that's how the test package tracks errors. So really we could
       // get the same effect here by calling that error handler directly or indeed just throwing.
       // However, we call registerException because that's the semantically correct thing...
-      test_package.registerException('Test failed. See exception logs above.', _EmptyStack.instance);
+      String additional = '';
+      if (_currentTestDescription != '')
+        additional = '\nThe test description was: $_currentTestDescription';
+      test_package.registerException('Test failed. See exception logs above.$additional', _emptyStackTrace);
       _pendingExceptionDetails = null;
     }
+    _currentTestDescription = null;
     if (!_currentTestCompleter.isCompleted)
       _currentTestCompleter.complete(null);
   }
 
   Future<Null> _runTest(Future<Null> testBody(), VoidCallback invariantTester, String description) {
     assert(description != null);
+    assert(_currentTestDescription == null);
+    _currentTestDescription = description; // cleared by _testCompletionHandler
     assert(inTest);
     _oldExceptionHandler = FlutterError.onError;
     int _exceptionCount = 0; // number of un-taken exceptions
@@ -692,6 +699,20 @@ enum LiveTestWidgetsFlutterBindingFramePolicy {
   /// additional frames being pumped beyond those that the test itself requests,
   /// which can cause differences in behavior.
   fullyLive,
+
+  /// Ignore any request to schedule a frame.
+  ///
+  /// This is intended to be used by benchmarks (hence the name) that drive the
+  /// pipeline directly. It tells the binding to entirely ignore requests for a
+  /// frame to be scheduled, while still allowing frames that are pumped
+  /// directly (invoking [Window.onBeginFrame] and [Window.onDrawFrame]) to run.
+  ///
+  /// The [SchedulerBinding.hasScheduledFrame] property will never be true in
+  /// this mode. This can cause unexpected effects. For instance,
+  /// [WidgetTester.pumpAndSettle] does not function in this mode, as it relies
+  /// on the [SchedulerBinding.hasScheduledFrame] property to determine when the
+  /// application has "settled".
+  benchmark,
 }
 
 /// A variant of [TestWidgetsFlutterBinding] for executing tests in
@@ -765,6 +786,16 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   ///   requests from the engine to be serviced, even those the test did not
   ///   explicitly pump.
   ///
+  /// * [LiveTestWidgetsFlutterBindingFramePolicy.benchmark] allows all frame
+  ///   requests from the engine to be serviced, and allows all frame requests
+  ///   that are artificially triggered to be serviced, but prevents the
+  ///   framework from requesting any frames from the engine itself. The
+  ///   [SchedulerBinding.hasScheduledFrame] property will never be true in this
+  ///   mode. This can cause unexpected effects. For instance,
+  ///   [WidgetTester.pumpAndSettle] does not function in this mode, as it
+  ///   relies on the [SchedulerBinding.hasScheduledFrame] property to determine
+  ///   when the application has "settled".
+  ///
   /// Setting this to anything other than
   /// [LiveTestWidgetsFlutterBindingFramePolicy.onlyPumps] means pumping extra
   /// frames, which might involve calling builders more, or calling paint
@@ -784,6 +815,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   /// ```
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
+  @override
+  void scheduleFrame() {
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
+      return; // In benchmark mode, don't actually schedule any engine frames.
+    super.scheduleFrame();
+  }
+
   bool _doDrawThisFrame;
 
   @override
@@ -791,6 +829,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_doDrawThisFrame == null);
     if (_expectingFrame ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fullyLive) ||
+        (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) ||
         (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.fadePointers && _viewNeedsPaint)) {
       _doDrawThisFrame = true;
       super.handleBeginFrame(rawTimeStamp);
@@ -812,6 +851,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       _pendingFrame = null;
       _expectingFrame = false;
     } else {
+      assert(framePolicy != LiveTestWidgetsFlutterBindingFramePolicy.benchmark);
       ui.window.scheduleFrame();
     }
   }
@@ -968,7 +1008,7 @@ class TestViewConfiguration extends ViewConfiguration {
   /// Provides the transformation matrix that converts coordinates in the test
   /// coordinate space to coordinates in logical pixels on the real display.
   ///
-  /// This is essenitally the same as [toMatrix] but ignoring the device pixel
+  /// This is essentially the same as [toMatrix] but ignoring the device pixel
   /// ratio.
   ///
   /// This is useful because pointers are described in logical pixels, as
@@ -1075,12 +1115,7 @@ class _LiveTestRenderView extends RenderView {
   }
 }
 
-class _EmptyStack implements StackTrace {
-  const _EmptyStack._();
-  static const _EmptyStack instance = const _EmptyStack._();
-  @override
-  String toString() => '';
-}
+final StackTrace _emptyStackTrace = new stack_trace.Chain(const <stack_trace.Trace>[]);
 
 StackTrace _unmangle(StackTrace stack) {
   if (stack is stack_trace.Trace)

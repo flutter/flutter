@@ -5,9 +5,9 @@
 import 'package:flutter/material.dart';
 
 const String _introText =
-  "Tooltips are short identifying messages that briefly appear in response to "
-  "a long press. Tooltip messages are also used by services that make Flutter "
-  "apps accessible, like screen readers.";
+  'Tooltips are short identifying messages that briefly appear in response to '
+  'a long press. Tooltip messages are also used by services that make Flutter '
+  'apps accessible, like screen readers.';
 
 class TooltipDemo extends StatelessWidget {
 

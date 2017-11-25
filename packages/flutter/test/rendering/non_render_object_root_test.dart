@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
@@ -47,7 +48,7 @@ void main() {
     RenderPositionedBox child;
     final RealRoot root = new RealRoot(
       child = new RenderPositionedBox(
-        alignment: FractionalOffset.center,
+        alignment: Alignment.center,
         child: new RenderSizedBox(const Size(100.0, 100.0))
       )
     );

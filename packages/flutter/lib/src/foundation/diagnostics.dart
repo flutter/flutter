@@ -363,7 +363,7 @@ final TextTreeConfiguration sparseTextConfiguration = new TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.offstage], uses this style for ascii art display.
+///  * [DiagnosticsTreeStyle.offstage], uses this style for ASCII art display.
 final TextTreeConfiguration dashedTextConfiguration = new TextTreeConfiguration(
   prefixLineOne:            '╎╌',
   prefixLastChildLineOne:   '└╌',
@@ -642,12 +642,11 @@ abstract class DiagnosticsNode {
     this.showName: true,
     this.showSeparator: true,
   }) : assert(showName != null),
-       assert(showSeparator != null) {
-    // A name ending with ':' indicates that the user forgot that the ':' will
-    // be automatically added for them when generating descriptions of the
-    // property.
-    assert(name == null || !name.endsWith(':'), 'Names of diagnostic nodes must not end with colons.');
-  }
+       assert(showSeparator != null),
+       // A name ending with ':' indicates that the user forgot that the ':' will
+       // be automatically added for them when generating descriptions of the
+       // property.
+       assert(name == null || !name.endsWith(':'), 'Names of diagnostic nodes must not end with colons.');
 
   /// Diagnostics containing just a string `message` and not a concrete name or
   /// value.
@@ -1013,7 +1012,7 @@ class MessageProperty extends DiagnosticsProperty<Null> {
   ///
   /// The [name], `message`, and [level] arguments must not be null.
   MessageProperty(String name, String message, {
-    DiagnosticLevel level : DiagnosticLevel.info,
+    DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(name != null),
        assert(message != null),
        assert(level != null),
@@ -1032,11 +1031,12 @@ class StringProperty extends DiagnosticsProperty<String> {
   /// The [showName], [quoted], and [level] arguments must not be null.
   StringProperty(String name, String value, {
     String description,
+    String tooltip,
     bool showName: true,
     Object defaultValue: kNoDefaultValue,
     this.quoted: true,
     String ifEmpty,
-    DiagnosticLevel level : DiagnosticLevel. info,
+    DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(quoted != null),
        assert(level != null),
@@ -1045,12 +1045,13 @@ class StringProperty extends DiagnosticsProperty<String> {
     value,
     description: description,
     defaultValue: defaultValue,
+    tooltip: tooltip,
     showName: showName,
     ifEmpty: ifEmpty,
     level: level,
   );
 
-  /// Whether the description is enclosed in double quotes.
+  /// Whether the value is enclosed in double quotes.
   final bool quoted;
 
   @override
@@ -1144,7 +1145,7 @@ class DoubleProperty extends _NumProperty<double> {
     String unit,
     String tooltip,
     Object defaultValue: kNoDefaultValue,
-    bool showName : true,
+    bool showName: true,
     DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
@@ -1316,15 +1317,14 @@ class FlagProperty extends DiagnosticsProperty<bool> {
     DiagnosticLevel level: DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(level != null),
+       assert(ifTrue != null || ifFalse != null),
        super(
-    name,
-    value,
-    showName: showName,
-    defaultValue: defaultValue,
-    level: level,
-  ) {
-    assert(ifTrue != null || ifFalse != null);
-  }
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+       );
 
   /// Description to use if the property [value] is true.
   ///

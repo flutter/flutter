@@ -84,8 +84,12 @@ class TimeOfDay {
   ///
   /// This is a shortcut for [MaterialLocalizations.formatTimeOfDay].
   String format(BuildContext context) {
+    debugCheckHasMediaQuery(context);
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    return localizations.formatTimeOfDay(this);
+    return localizations.formatTimeOfDay(
+      this,
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
   }
 
   @override

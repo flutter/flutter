@@ -255,7 +255,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.animation,
     this.target,
     this.verticalOffset,
-    this.preferBelow
+    this.preferBelow,
   }) : super(key: key);
 
   final String message;
@@ -286,16 +286,19 @@ class _TooltipOverlay extends StatelessWidget {
             opacity: animation,
             child: new Opacity(
               opacity: 0.9,
-              child: new Container(
-                decoration: new BoxDecoration(
-                  color: darkTheme.backgroundColor,
-                  borderRadius: new BorderRadius.circular(2.0),
-                ),
-                height: height,
-                padding: padding,
-                child: new Center(
-                  widthFactor: 1.0,
-                  child: new Text(message, style: darkTheme.textTheme.body1),
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(minHeight: height),
+                child: new Container(
+                  decoration: new BoxDecoration(
+                    color: darkTheme.backgroundColor,
+                    borderRadius: new BorderRadius.circular(2.0),
+                  ),
+                  padding: padding,
+                  child: new Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: new Text(message, style: darkTheme.textTheme.body1),
+                  ),
                 ),
               ),
             ),

@@ -12,19 +12,19 @@ void main() {
   testWidgets('GlobalKey children of one node', (WidgetTester tester) async {
     // This is actually a test of the regular duplicate key logic, which
     // happens before the duplicate GlobalKey logic.
-    await tester.pumpWidget(new Row(children: <Widget>[
+    await tester.pumpWidget(new Stack(children: <Widget>[
       new Container(key: const GlobalObjectKey(0)),
       new Container(key: const GlobalObjectKey(0)),
     ]));
     final dynamic error = tester.takeException();
     expect(error, isFlutterError);
     expect(error.toString(), startsWith('Duplicate keys found.\n'));
-    expect(error.toString(), contains('Row'));
+    expect(error.toString(), contains('Stack'));
     expect(error.toString(), contains('[GlobalObjectKey ${describeIdentity(0)}]'));
   });
 
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Row(
+    await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(child: new Container(key: const GlobalObjectKey(0))),
@@ -41,7 +41,7 @@ void main() {
   });
 
   testWidgets('GlobalKey children of two different nodes', (WidgetTester tester) async {
-    await tester.pumpWidget(new Row(
+    await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(child: new Container(key: const GlobalObjectKey(0))),
@@ -61,7 +61,7 @@ void main() {
   testWidgets('GlobalKey children of two nodes', (WidgetTester tester) async {
     StateSetter nestedSetState;
     bool flag = false;
-    await tester.pumpWidget(new Row(
+    await tester.pumpWidget(new Stack(
       textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(child: new Container(key: const GlobalObjectKey(0))),

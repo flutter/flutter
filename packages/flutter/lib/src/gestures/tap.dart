@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
@@ -90,6 +92,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
       _checkUp();
+    } else if (event is PointerCancelEvent) {
+      _reset();
     }
   }
 
@@ -143,6 +147,14 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void _checkUp() {
     if (_wonArenaForPrimaryPointer && _finalPosition != null) {
       resolve(GestureDisposition.accepted);
+      if (!_wonArenaForPrimaryPointer || _finalPosition == null) {
+        // It is possible that resolve has just recursively called _checkUp
+        // (see https://github.com/flutter/flutter/issues/12470).
+        // In that case _wonArenaForPrimaryPointer will be false (as _checkUp
+        // calls _reset) and we return here to avoid double invocation of the
+        // tap callbacks.
+        return;
+      }
       if (onTapUp != null)
         invokeCallback<Null>('onTapUp', () { onTapUp(new TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)
@@ -159,4 +171,12 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   String get debugDescription => 'tap';
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
+    description.add(new DiagnosticsProperty<Offset>('finalPosition', _finalPosition, defaultValue: null));
+    description.add(new FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
+  }
 }

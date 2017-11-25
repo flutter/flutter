@@ -28,6 +28,12 @@ abstract class RunCommandBase extends FlutterCommand {
         negatable: true,
         defaultsTo: false,
         help: 'Start tracing during startup.');
+    argParser.addFlag('ipv6',
+        hide: true,
+        negatable: false,
+        defaultsTo: false,
+        help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
+              'forwards the host port to a device port.');
     argParser.addOption('route',
         help: 'Which route to load when running the app.');
     usesTargetOption();
@@ -36,6 +42,7 @@ abstract class RunCommandBase extends FlutterCommand {
   }
 
   bool get traceStartup => argResults['trace-startup'];
+  bool get ipv6 => argResults['ipv6'];
   String get route => argResults['route'];
 
   void usesPortOptions() {
@@ -43,11 +50,6 @@ abstract class RunCommandBase extends FlutterCommand {
         help: 'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 will find a random free port.\n'
               'Defaults to the first available port after $kDefaultObservatoryPort.'
-    );
-    argParser.addOption('diagnostic-port',
-        help: 'Listen to the given port for a diagnostic connection.\n'
-              'Specifying port 0 will find a random free port.\n'
-              'Defaults to the first available port after $kDefaultDiagnosticPort.'
     );
   }
 
@@ -57,17 +59,6 @@ abstract class RunCommandBase extends FlutterCommand {
         return int.parse(argResults['observatory-port']);
       } catch (error) {
         throwToolExit('Invalid port for `--observatory-port`: $error');
-      }
-    }
-    return null;
-  }
-
-  int get diagnosticPort {
-    if (argResults['diagnostic-port'] != null) {
-      try {
-        return int.parse(argResults['diagnostic-port']);
-      } catch (error) {
-        throwToolExit('Invalid port for `--diagnostic-port`: $error');
       }
     }
     return null;
@@ -155,6 +146,9 @@ class RunCommand extends RunCommandBase {
             'measure the startup time and the app restart time, write the\n'
             'results out to "refresh_benchmark.json", and exit. This flag is\n'
             'intended for use in generating automated flutter benchmarks.');
+
+    argParser.addOption(FlutterOptions.kExtraFrontEndOptions, hide: true);
+    argParser.addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true);
   }
 
   List<Device> devices;
@@ -241,7 +235,6 @@ class RunCommand extends RunCommandBase {
         enableSoftwareRendering: argResults['enable-software-rendering'],
         traceSkia: argResults['trace-skia'],
         observatoryPort: observatoryPort,
-        diagnosticPort: diagnosticPort,
       );
     }
   }
@@ -318,6 +311,7 @@ class RunCommand extends RunCommandBase {
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
         stayResident: stayResident,
+        ipv6: ipv6,
       );
     } else {
       runner = new ColdRunner(
@@ -328,6 +322,7 @@ class RunCommand extends RunCommandBase {
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
         stayResident: stayResident,
+        ipv6: ipv6,
       );
     }
 

@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'basic_types.dart';
@@ -167,5 +168,53 @@ class MatrixUtils {
       return rect;
     transform = new Matrix4.copy(transform)..invert();
     return transformRect(transform, rect);
+  }
+}
+
+/// Returns a list of strings representing the given transform in a format
+/// useful for [TransformProperty].
+///
+/// If the argument is null, returns a list with the single string "null".
+List<String> debugDescribeTransform(Matrix4 transform) {
+  if (transform == null)
+    return const <String>['null'];
+  final List<String> matrix = transform.toString().split('\n').map((String s) => '  $s').toList();
+  matrix.removeLast();
+  return matrix;
+}
+
+/// Property which handles [Matrix4] that represent transforms.
+class TransformProperty extends DiagnosticsProperty<Matrix4> {
+  /// Create a diagnostics property for [Matrix4] objects.
+  ///
+  /// The [showName] and [level] arguments must not be null.
+  TransformProperty(String name, Matrix4 value, {
+    bool showName: true,
+    Object defaultValue: kNoDefaultValue,
+    DiagnosticLevel level: DiagnosticLevel.info,
+  }) : assert(showName != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+       );
+
+  @override
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
+      // Format the value on a single line to be compatible with the parent's
+      // style.
+      final List<Vector4> rows = <Vector4>[
+        value.getRow(0),
+        value.getRow(1),
+        value.getRow(2),
+        value.getRow(3),
+      ];
+      return '[${rows.join("; ")}]';
+    }
+    return debugDescribeTransform(value).join('\n');
   }
 }

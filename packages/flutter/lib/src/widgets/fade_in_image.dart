@@ -73,7 +73,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.matchTextDirection: false,
   }) : assert(placeholder != null),
@@ -121,7 +121,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.matchTextDirection: false,
   }) : assert(placeholder != null),
@@ -177,7 +177,7 @@ class FadeInImage extends StatefulWidget {
     this.width,
     this.height,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.matchTextDirection: false,
   }) : assert(placeholder != null),
@@ -239,19 +239,19 @@ class FadeInImage extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// [AlignmentDirectional]), then an ambient [Directionality] widget
   /// must be in scope.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;

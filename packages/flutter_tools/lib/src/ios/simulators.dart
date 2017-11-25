@@ -24,9 +24,6 @@ import 'mac.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
-/// Test device created by Flutter when no other device is available.
-const String _kFlutterTestDeviceSuffix = '(Flutter)';
-
 class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('iOS simulators');
 
@@ -315,6 +312,7 @@ class IOSSimulator extends Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
@@ -351,13 +349,12 @@ class IOSSimulator extends Device {
 
       final int observatoryPort = await debuggingOptions.findBestObservatoryPort();
       args.add('--observatory-port=$observatoryPort');
-      final int diagnosticPort = await debuggingOptions.findBestDiagnosticPort();
-      args.add('--diagnostic-port=$diagnosticPort');
     }
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
+      observatoryDiscovery = new ProtocolDiscovery.observatory(
+          getLogReader(app: app), ipv6: ipv6);
 
     // Launch the updated application in the simulator.
     try {

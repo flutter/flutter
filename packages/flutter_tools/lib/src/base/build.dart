@@ -21,9 +21,8 @@ GenSnapshot get genSnapshot => context.putIfAbsent(GenSnapshot, () => const GenS
 
 /// A snapshot build configuration.
 class SnapshotType {
-  SnapshotType(this.platform, this.mode) {
-    assert(mode != null);
-  }
+  SnapshotType(this.platform, this.mode)
+    : assert(mode != null);
 
   final TargetPlatform platform;
   final BuildMode mode;
@@ -42,7 +41,6 @@ class GenSnapshot {
     final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
     final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
     final List<String> args = <String>[
-      '--assert_initializer',
       '--await_is_keyword',
       '--causal_async_stacks',
       '--vm_snapshot_data=$vmSnapshotData',
@@ -168,6 +166,7 @@ class Snapshotter {
     final List<String> args = <String>[
       '--snapshot_kind=script',
       '--script_snapshot=$snapshotPath',
+      '--enable-mirrors=false',
       mainPath,
     ];
 

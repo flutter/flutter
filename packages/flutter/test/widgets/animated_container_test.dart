@@ -183,7 +183,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          alignment: FractionalOffset.topRight,
+          alignment: Alignment.topRight,
           child: new SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),
@@ -197,7 +197,7 @@ void main() {
         textDirection: TextDirection.rtl,
         child: new AnimatedContainer(
           duration: const Duration(milliseconds: 200),
-          alignment: FractionalOffsetDirectional.bottomStart,
+          alignment: AlignmentDirectional.bottomStart,
           child: new SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),

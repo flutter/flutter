@@ -96,6 +96,7 @@ const List<Demo> demos = const <Demo>[
   const Demo('Activity Indicator', synchronized: false),
   const Demo('Buttons'),
   const Demo('Dialogs'),
+  const Demo('Navigation'),
   const Demo('Sliders'),
   const Demo('Switches'),
 

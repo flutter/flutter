@@ -17,12 +17,14 @@ import 'object.dart';
 /// width or height of the rectangle, convert it to a [Rect] using [toRect()]
 /// (passing the container's own Rect), and then examine that object.
 ///
-/// If you create the RelativeRect with null values, the methods on
-/// RelativeRect will not work usefully (or at all).
+/// The fields [left], [right], [bottom], and [top] must not be null.
 @immutable
 class RelativeRect {
   /// Creates a RelativeRect with the given values.
-  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom);
+  ///
+  /// The arguments must not be null.
+  const RelativeRect.fromLTRB(this.left, this.top, this.right, this.bottom)
+    : assert(left != null && top != null && right != null && bottom != null);
 
   /// Creates a RelativeRect from a Rect and a Size. The Rect (first argument)
   /// and the RelativeRect (the output) are in the coordinate space of the
@@ -56,15 +58,23 @@ class RelativeRect {
   static final RelativeRect fill = const RelativeRect.fromLTRB(0.0, 0.0, 0.0, 0.0);
 
   /// Distance from the left side of the container to the left side of this rectangle.
+  ///
+  /// May be negative if the left side of the rectangle is outside of the container.
   final double left;
 
   /// Distance from the top side of the container to the top side of this rectangle.
+  ///
+  /// May be negative if the top side of the rectangle is outside of the container.
   final double top;
 
   /// Distance from the right side of the container to the right side of this rectangle.
+  ///
+  /// May be negative if the right side of the rectangle is outside of the container.
   final double right;
 
   /// Distance from the bottom side of the container to the bottom side of this rectangle.
+  ///
+  /// May be negative if the bottom side of the rectangle is outside of the container.
   final double bottom;
 
   /// Returns a new rectangle object translated by the given offset.
@@ -93,8 +103,22 @@ class RelativeRect {
   }
 
   /// Convert this [RelativeRect] to a [Rect], in the coordinate space of the container.
+  ///
+  /// See also:
+  ///
+  ///  * [toSize], which returns the size part of the rect, based on the size of
+  ///    the container.
   Rect toRect(Rect container) {
     return new Rect.fromLTRB(left, top, container.width - right, container.height - bottom);
+  }
+
+  /// Convert this [RelativeRect] to a [Size], assuming a container with the given size.
+  ///
+  /// See also:
+  ///
+  ///  * [toRect], which also computes the position relative to the container.
+  Size toSize(Size container) {
+    return new Size(container.width - left - right, container.height - top - bottom);
   }
 
   /// Linearly interpolate between two RelativeRects.
@@ -134,7 +158,7 @@ class RelativeRect {
   int get hashCode => hashValues(left, top, right, bottom);
 
   @override
-  String toString() => "RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})";
+  String toString() => 'RelativeRect.fromLTRB(${left?.toStringAsFixed(1)}, ${top?.toStringAsFixed(1)}, ${right?.toStringAsFixed(1)}, ${bottom?.toStringAsFixed(1)})';
 }
 
 /// Parent data for use with [RenderStack].
@@ -297,7 +321,7 @@ class RenderStack extends RenderBox
   /// top left corners.
   RenderStack({
     List<RenderBox> children,
-    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
     TextDirection textDirection,
     StackFit fit: StackFit.loose,
     Overflow overflow: Overflow.clip,
@@ -319,7 +343,7 @@ class RenderStack extends RenderBox
       child.parentData = new StackParentData();
   }
 
-  FractionalOffset _resolvedAlignment;
+  Alignment _resolvedAlignment;
 
   void _resolve() {
     if (_resolvedAlignment != null)
@@ -332,18 +356,24 @@ class RenderStack extends RenderBox
     markNeedsLayout();
   }
 
-  /// How to align the non-positioned children in the stack.
+  /// How to align the non-positioned or partially-positioned children in the
+  /// stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
   ///
-  /// If this is set to a [FractionalOffsetDirectional] object, then
-  /// [textDirection] must not be null.
-  FractionalOffsetGeometry get alignment => _alignment;
-  FractionalOffsetGeometry _alignment;
-  set alignment(FractionalOffsetGeometry value) {
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
+  ///
+  /// If this is set to an [AlignmentDirectional] object, then [textDirection]
+  /// must not be null.
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     assert(value != null);
     if (_alignment == value)
       return;
@@ -504,20 +534,26 @@ class RenderStack extends RenderBox
 
         child.layout(childConstraints, parentUsesSize: true);
 
-        double x = 0.0;
-        if (childParentData.left != null)
+        double x;
+        if (childParentData.left != null) {
           x = childParentData.left;
-        else if (childParentData.right != null)
+        } else if (childParentData.right != null) {
           x = size.width - childParentData.right - child.size.width;
+        } else {
+          x = _resolvedAlignment.alongOffset(size - child.size).dx;
+        }
 
         if (x < 0.0 || x + child.size.width > size.width)
           _hasVisualOverflow = true;
 
-        double y = 0.0;
-        if (childParentData.top != null)
+        double y;
+        if (childParentData.top != null) {
           y = childParentData.top;
-        else if (childParentData.bottom != null)
+        } else if (childParentData.bottom != null) {
           y = size.height - childParentData.bottom - child.size.height;
+        } else {
+          y = _resolvedAlignment.alongOffset(size - child.size).dy;
+        }
 
         if (y < 0.0 || y + child.size.height > size.height)
           _hasVisualOverflow = true;
@@ -559,7 +595,7 @@ class RenderStack extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
     description.add(new EnumProperty<StackFit>('fit', fit));
     description.add(new EnumProperty<Overflow>('overflow', overflow));
@@ -577,7 +613,7 @@ class RenderIndexedStack extends RenderStack {
   /// If the [index] parameter is null, nothing is displayed.
   RenderIndexedStack({
     List<RenderBox> children,
-    FractionalOffsetGeometry alignment: FractionalOffsetDirectional.topStart,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
     TextDirection textDirection,
     int index: 0,
   }) : _index = index, super(

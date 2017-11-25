@@ -85,7 +85,7 @@ class TravelDestinationItem extends StatelessWidget {
                     right: 16.0,
                     child: new FittedBox(
                       fit: BoxFit.scaleDown,
-                      alignment: FractionalOffset.centerLeft,
+                      alignment: Alignment.centerLeft,
                       child: new Text(destination.title,
                         style: titleStyle,
                       ),

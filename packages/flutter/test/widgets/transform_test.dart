@@ -82,7 +82,7 @@ void main() {
                 height: 100.0,
                 child: new Transform(
                   transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
-                  alignment: const FractionalOffset(1.0, 0.5),
+                  alignment: const Alignment(1.0, 0.0),
                   child: new GestureDetector(
                     onTap: () {
                       didReceiveTap = true;
@@ -103,6 +103,77 @@ void main() {
     await tester.tapAt(const Offset(110.0, 110.0));
     expect(didReceiveTap, isFalse);
     await tester.tapAt(const Offset(190.0, 150.0));
+    expect(didReceiveTap, isTrue);
+  });
+
+  testWidgets('Transform AlignmentDirectional alignment', (WidgetTester tester) async {
+    bool didReceiveTap = false;
+
+    Widget buildFrame(TextDirection textDirection, AlignmentGeometry alignment) {
+      return new Directionality(
+        textDirection: textDirection,
+        child: new Stack(
+          children: <Widget>[
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                color: const Color(0xFF0000FF),
+              ),
+            ),
+            new Positioned(
+              top: 100.0,
+              left: 100.0,
+              child: new Container(
+                width: 100.0,
+                height: 100.0,
+                child: new Transform(
+                  transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
+                  alignment: alignment,
+                  child: new GestureDetector(
+                    onTap: () {
+                      didReceiveTap = true;
+                    },
+                    child: new Container(
+                      color: const Color(0xFF00FFFF),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, AlignmentDirectional.centerEnd));
+    didReceiveTap = false;
+    await tester.tapAt(const Offset(110.0, 110.0));
+    expect(didReceiveTap, isFalse);
+    await tester.tapAt(const Offset(190.0, 150.0));
+    expect(didReceiveTap, isTrue);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, AlignmentDirectional.centerStart));
+    didReceiveTap = false;
+    await tester.tapAt(const Offset(110.0, 110.0));
+    expect(didReceiveTap, isFalse);
+    await tester.tapAt(const Offset(190.0, 150.0));
+    expect(didReceiveTap, isTrue);
+
+    await tester.pumpWidget(buildFrame(TextDirection.ltr, AlignmentDirectional.centerStart));
+    didReceiveTap = false;
+    await tester.tapAt(const Offset(190.0, 150.0));
+    expect(didReceiveTap, isFalse);
+    await tester.tapAt(const Offset(110.0, 150.0));
+    expect(didReceiveTap, isTrue);
+
+    await tester.pumpWidget(buildFrame(TextDirection.rtl, AlignmentDirectional.centerEnd));
+    didReceiveTap = false;
+    await tester.tapAt(const Offset(190.0, 150.0));
+    expect(didReceiveTap, isFalse);
+    await tester.tapAt(const Offset(110.0, 150.0));
     expect(didReceiveTap, isTrue);
   });
 
@@ -131,7 +202,7 @@ void main() {
                 child: new Transform(
                   transform: new Matrix4.diagonal3Values(0.5, 0.5, 1.0),
                   origin: const Offset(100.0, 0.0),
-                  alignment: const FractionalOffset(0.0, 0.5),
+                  alignment: const Alignment(-1.0, 0.0),
                   child: new GestureDetector(
                     onTap: () {
                       didReceiveTap = true;

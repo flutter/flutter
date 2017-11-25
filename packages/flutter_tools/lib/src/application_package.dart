@@ -21,9 +21,8 @@ abstract class ApplicationPackage {
   /// Package ID from the Android Manifest or equivalent.
   final String id;
 
-  ApplicationPackage({ @required this.id }) {
-    assert(id != null);
-  }
+  ApplicationPackage({ @required this.id })
+    : assert(id != null);
 
   String get name;
 
@@ -46,10 +45,9 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.apkPath,
     @required this.launchActivity
-  }) : super(id: id) {
-    assert(apkPath != null);
-    assert(launchActivity != null);
-  }
+  }) : assert(apkPath != null),
+       assert(launchActivity != null),
+       super(id: id);
 
   /// Creates a new AndroidApk from an existing APK.
   factory AndroidApk.fromApk(String applicationBinary) {
@@ -116,7 +114,7 @@ class AndroidApk extends ApplicationPackage {
       if (category.getAttribute('android:name') == 'android.intent.category.LAUNCHER') {
         final xml.XmlElement activity = category.parent.parent;
         final String activityName = activity.getAttribute('android:name');
-        launchActivity = "$packageId/$activityName";
+        launchActivity = '$packageId/$activityName';
         break;
       }
     }

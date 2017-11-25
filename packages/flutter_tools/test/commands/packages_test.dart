@@ -55,7 +55,7 @@ void main() {
       final String projectPath = await runCommand('get');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    });
+    }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline', () async {
       final String projectPath = await runCommand('get', args: <String>['--offline']);
@@ -67,7 +67,7 @@ void main() {
       final String projectPath = await runCommand('upgrade');
       expectExists(projectPath, 'lib/main.dart');
       expectExists(projectPath, '.packages');
-    });
+    }, timeout: allowForRemotePubInvocation);
   });
 
   group('packages test/pub', () {
@@ -82,10 +82,11 @@ void main() {
     testUsingContext('test', () async {
       await createTestCommandRunner(new PackagesCommand()).run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
-      expect(commands, hasLength(3));
+      expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
-      expect(commands[1], 'run');
-      expect(commands[2], 'test');
+      expect(commands[1], '--trace');
+      expect(commands[2], 'run');
+      expect(commands[3], 'test');
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
       Stdio: () => mockStdio,
@@ -276,12 +277,12 @@ class MemoryIOSink implements IOSink {
   }
 
   @override
-  void writeln([Object obj = ""]) {
+  void writeln([Object obj = '']) {
     add(encoding.encode('$obj\n'));
   }
 
   @override
-  void writeAll(Iterable<dynamic> objects, [String separator = ""]) {
+  void writeAll(Iterable<dynamic> objects, [String separator = '']) {
     bool addSeparator = false;
     for (dynamic object in objects) {
       if (addSeparator) {

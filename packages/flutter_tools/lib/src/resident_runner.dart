@@ -53,14 +53,15 @@ class FlutterDevice {
   /// code of the running application (a.k.a. HotReload).
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  void connect({ReloadSources reloadSources}) {
+  Future<Null> _connect({ReloadSources reloadSources}) async {
     if (vmServices != null)
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
-      vmServices[i] = VMService.connect(observatoryUris[i],
+      printTrace('Connecting to service protocol: ${observatoryUris[i]}');
+      vmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources);
-      printTrace('Connected to service protocol: ${observatoryUris[i]}');
+      printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
   }
 
@@ -139,6 +140,24 @@ class FlutterDevice {
     return reports;
   }
 
+  // Lists program elements changed in the most recent reload that have not
+  // since executed.
+  Future<List<ProgramElement>> unusedChangesInLastReload() async {
+    final List<Future<List<ProgramElement>>> reports =
+      <Future<List<ProgramElement>>>[];
+    for (FlutterView view in views)
+      reports.add(view.uiIsolate.getUnusedChangesInLastReload());
+    final List<ProgramElement> elements = <ProgramElement>[];
+    for (Future<List<ProgramElement>> report in reports) {
+      for (ProgramElement element in await report)
+        elements.add(new ProgramElement(element.qualifiedName,
+                                        devFS.deviceUriToHostUri(element.uri),
+                                        element.line,
+                                        element.column));
+    }
+    return elements;
+  }
+
   Future<Null> debugDumpApp() async {
     for (FlutterView view in views)
       await view.uiIsolate.flutterDebugDumpApp();
@@ -199,8 +218,7 @@ class FlutterDevice {
     if (_loggingSubscription != null)
       return;
     _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
-      if (!line.contains('Observatory listening on http') &&
-          !line.contains('Diagnostic server listening on http'))
+      if (!line.contains('Observatory listening on http'))
         printStatus(line);
     });
   }
@@ -255,6 +273,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
+      ipv6: hotRunner.ipv6,
     );
 
     final LaunchResult result = await futureResult;
@@ -298,9 +317,9 @@ class FlutterDevice {
       return 1;
     }
 
-    Map<String, dynamic> platformArgs;
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
-      platformArgs = <String, dynamic>{ 'trace-startup': coldRunner.traceStartup };
+      platformArgs['trace-startup'] = coldRunner.traceStartup;
 
     startEchoingDeviceLog();
 
@@ -314,6 +333,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
+      ipv6: coldRunner.ipv6,
     );
 
     if (!result.started) {
@@ -331,7 +351,8 @@ class FlutterDevice {
     String target,
     AssetBundle bundle,
     bool bundleDirty: false,
-    Set<String> fileFilter
+    Set<String> fileFilter,
+    bool fullRestart: false
   }) async {
     final Status devFSStatus = logger.startProgress(
       'Syncing files to device ${device.name}...',
@@ -345,7 +366,8 @@ class FlutterDevice {
         bundle: bundle,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
-        generator: generator
+        generator: generator,
+        fullRestart: fullRestart
       );
     } on DevFSException {
       devFSStatus.cancel();
@@ -374,6 +396,7 @@ abstract class ResidentRunner {
     String packagesFilePath,
     String projectAssets,
     this.stayResident,
+    this.ipv6,
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
@@ -390,6 +413,7 @@ abstract class ResidentRunner {
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
   final bool stayResident;
+  final bool ipv6;
   final Completer<int> _finished = new Completer<int>();
   bool _stopped = false;
   String _packagesFilePath;
@@ -580,7 +604,7 @@ abstract class ResidentRunner {
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
       device.viewFilter = viewFilter;
-      device.connect(reloadSources: reloadSources);
+      await device._connect(reloadSources: reloadSources);
       await device.getVMs();
       await device.waitForViews();
       if (device.views == null)
@@ -805,14 +829,15 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  static final OperationResult ok = new OperationResult(0, '');
-
-  OperationResult(this.code, this.message);
+  OperationResult(this.code, this.message, { this.hint });
 
   final int code;
   final String message;
+  final String hint;
 
   bool get isOk => code == 0;
+
+  static final OperationResult ok = new OperationResult(0, '');
 }
 
 /// Given the value of the --target option, return the path of the Dart file

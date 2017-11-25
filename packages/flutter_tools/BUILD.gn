@@ -8,11 +8,11 @@ import("//build/dart/dart_tool.gni")
 dart_package("flutter_tools") {
   package_name = "flutter_tools"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
-    "//dart/pkg/analyzer",
-    "//dart/third_party/pkg/linter",
+    "//third_party/dart/pkg/analyzer",
+    "//third_party/dart/third_party/pkg/linter",
     "//third_party/dart-pkg/pub/archive",
     "//third_party/dart-pkg/pub/args",
     "//third_party/dart-pkg/pub/collection",
@@ -42,7 +42,7 @@ dart_package("flutter_tools") {
 dart_tool("fuchsia_builder") {
   main_dart = "bin/fuchsia_builder.dart"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
     ":flutter_tools",
@@ -52,13 +52,13 @@ dart_tool("fuchsia_builder") {
 dart_tool("fuchsia_tester") {
   main_dart = "bin/fuchsia_tester.dart"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
     ":flutter_tools",
   ]
 
   non_dart_deps = [
-    "//flutter/shell",
+    "$flutter_root/shell",
   ]
 }

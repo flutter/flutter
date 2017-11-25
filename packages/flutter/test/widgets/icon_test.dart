@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   testWidgets('Can set opacity for an Icon', (WidgetTester tester) async {
@@ -121,5 +124,72 @@ void main() {
 
     final RichText richText = tester.firstWidget(find.byType(RichText));
     expect(richText.text.style.fontFamily, equals('Roboto'));
+  });
+
+  testWidgets('Icon with semantic label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            Icons.title,
+            semanticLabel: 'a label',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'a label'));
+  });
+
+  testWidgets('Null icon with semantic label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            null,
+            semanticLabel: 'a label',
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'a label'));
+  });
+
+  testWidgets('Changing semantic label from null doesn\'t rebuild tree ', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(Icons.time_to_leave),
+        ),
+      ),
+    );
+
+    final Element richText1 = tester.element(find.byType(RichText));
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const Center(
+          child: const Icon(
+            Icons.time_to_leave,
+            semanticLabel: 'a label',
+          ),
+        ),
+      ),
+    );
+
+    final Element richText2 = tester.element(find.byType(RichText));
+
+    // Compare a leaf Element in the Icon subtree before and after changing the
+    // semanticLabel to make sure the subtree was not rebuilt.
+    expect(richText2, same(richText1));
   });
 }

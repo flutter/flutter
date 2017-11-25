@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../android/android_sdk.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -43,7 +44,7 @@ FlutterPluginVersion get flutterPluginVersion {
   final File plugin = fs.file('android/buildSrc/src/main/groovy/FlutterPlugin.groovy');
   if (plugin.existsSync()) {
     final String packageLine = plugin.readAsLinesSync().skip(4).first;
-    if (packageLine == "package io.flutter.gradle") {
+    if (packageLine == 'package io.flutter.gradle') {
       return FlutterPluginVersion.v2;
     }
     return FlutterPluginVersion.v1;
@@ -51,7 +52,7 @@ FlutterPluginVersion get flutterPluginVersion {
   final File appGradle = fs.file('android/app/build.gradle');
   if (appGradle.existsSync()) {
     for (String line in appGradle.readAsLinesSync()) {
-      if (line.contains(new RegExp(r"apply from: .*/flutter.gradle"))) {
+      if (line.contains(new RegExp(r'apply from: .*/flutter.gradle'))) {
         return FlutterPluginVersion.managed;
       }
     }
@@ -98,14 +99,37 @@ Future<GradleProject> _readGradleProject() async {
     return project;
   } catch (e) {
     if (flutterPluginVersion == FlutterPluginVersion.managed) {
-      printError('Error running Gradle:\n$e\n');
-      throwToolExit(
-        'Please review your Gradle project setup in the android/ folder.',
-      );
+      // Handle known exceptions. This will exit if handled.
+      handleKnownGradleExceptions(e);
+
+      // Print a general Gradle error and exit.
+      printError('* Error running Gradle:\n$e\n');
+      throwToolExit('Please review your Gradle project setup in the android/ folder.');
     }
   }
   // Fall back to the default
   return new GradleProject(<String>['debug', 'profile', 'release'], <String>[], gradleAppOutDirV1);
+}
+
+void handleKnownGradleExceptions(String exceptionString) {
+  // Handle Gradle error thrown when Gradle needs to download additional
+  // Android SDK components (e.g. Platform Tools), and the license
+  // for that component has not been accepted.
+  final String matcher =
+    r'You have not accepted the license agreements of the following SDK components:'
+    r'\s*\[(.+)\]';
+  final RegExp licenseFailure = new RegExp(matcher, multiLine: true);
+  final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
+  if (licenseMatch != null) {
+    final String missingLicenses = licenseMatch.group(1);
+    final String errorMessage =
+      '\n\n* Error running Gradle:\n'
+      'Unable to download needed Android SDK components, as the following licenses have not been accepted:\n'
+      '$missingLicenses\n\n'
+      'To resolve this, please run the following command in a Terminal:\n'
+      'flutter doctor --android-licenses';
+    throwToolExit(errorMessage);
+  }
 }
 
 String _locateProjectGradlew({ bool ensureExecutable: true }) {
@@ -266,8 +290,17 @@ Future<Null> _buildGradleProjectV2(String gradle, BuildInfo buildInfo, String ta
   if (target != null) {
     command.add('-Ptarget=$target');
   }
-  if (buildInfo.previewDart2)
+  if (buildInfo.previewDart2) {
     command.add('-Ppreview-dart-2=true');
+  if (buildInfo.extraFrontEndOptions != null)
+    command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
+  if (buildInfo.extraGenSnapshotOptions != null)
+    command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
+  }
+  if (buildInfo.preferSharedLibrary && androidSdk.ndkCompiler != null) {
+    command.add('-Pprefer-shared-library=true');
+  }
+
   command.add(assembleTask);
   final int exitCode = await runCommandAndStreamOutput(
       command,
@@ -328,14 +361,14 @@ class GradleProject {
 
     // Extract build types and product flavors.
     final Set<String> variants = new Set<String>();
-    properties.split('\n').forEach((String s) {
+    for (String s in properties.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(s);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();
         if (!variant.endsWith('test'))
           variants.add(variant);
       }
-    });
+    }
     final Set<String> buildTypes = new Set<String>();
     final Set<String> productFlavors = new Set<String>();
     for (final String variant1 in variants) {

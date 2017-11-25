@@ -41,111 +41,6 @@ enum GrowthDirection {
   reverse,
 }
 
-/// A direction along either the horizontal or vertical [Axis].
-enum AxisDirection {
-  /// Zero is at the bottom and positive values are above it: ⇈
-  ///
-  /// Alphabetical content with a [GrowthDirection.forward] would have the A at
-  /// the bottom and the Z at the top. This is an unusual configuration.
-  up,
-
-  /// Zero is on the left and positive values are to the right of it: ⇉
-  ///
-  /// Alphabetical content with a [GrowthDirection.forward] would have the A on
-  /// the left and the Z on the right. This is the ordinary reading order for a
-  /// horizontal set of tabs in an English application, for example.
-  right,
-
-  /// Zero is at the top and positive values are below it: ⇊
-  ///
-  /// Alphabetical content with a [GrowthDirection.forward] would have the A at
-  /// the top and the Z at the bottom. This is the ordinary reading order for a
-  /// vertical list.
-  down,
-
-  /// Zero is to the right and positive values are to the left of it: ⇇
-  ///
-  /// Alphabetical content with a [GrowthDirection.forward] would have the A at
-  /// the right and the Z at the left. This is the ordinary reading order for a
-  /// horizontal set of tabs in a Hebrew application, for example.
-  left,
-}
-
-/// Returns the [Axis] that contains the given [AxisDirection].
-///
-/// Specifically, returns [Axis.vertical] for [AxisDirection.up] and
-/// [AxisDirection.down] and returns [Axis.horizontal] for [AxisDirection.left]
-/// and [AxisDirection.right].
-Axis axisDirectionToAxis(AxisDirection axisDirection) {
-  assert(axisDirection != null);
-  switch (axisDirection) {
-    case AxisDirection.up:
-    case AxisDirection.down:
-      return Axis.vertical;
-    case AxisDirection.left:
-    case AxisDirection.right:
-      return Axis.horizontal;
-  }
-  return null;
-}
-
-/// Returns the [AxisDirection] in which reading occurs in the given [TextDirection].
-///
-/// Specifically, returns [AxisDirection.left] for [TextDirection.rtl] and
-/// [AxisDirection.right] for [TextDirection.ltr].
-AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
-  assert(textDirection != null);
-  switch (textDirection) {
-    case TextDirection.rtl:
-      return AxisDirection.left;
-    case TextDirection.ltr:
-      return AxisDirection.right;
-  }
-  return null;
-}
-
-/// Returns the opposite of the given [AxisDirection].
-///
-/// Specifically, returns [AxisDirection.up] for [AxisDirection.down] (and
-/// vice versa), as well as [AxisDirection.left] for [AxisDirection.right] (and
-/// vice versa).
-///
-/// See also:
-///
-///  * [flipAxis], which does the same thing for [Axis] values.
-AxisDirection flipAxisDirection(AxisDirection axisDirection) {
-  assert(axisDirection != null);
-  switch (axisDirection) {
-    case AxisDirection.up:
-      return AxisDirection.down;
-    case AxisDirection.right:
-      return AxisDirection.left;
-    case AxisDirection.down:
-      return AxisDirection.up;
-    case AxisDirection.left:
-      return AxisDirection.right;
-  }
-  return null;
-}
-
-/// Returns whether travelling along the given axis direction visits coordinates
-/// along that axis in numerically decreasing order.
-///
-/// Specifically, returns true for [AxisDirection.up] and [AxisDirection.left]
-/// and false for [AxisDirection.down] for [AxisDirection.right].
-bool axisDirectionIsReversed(AxisDirection axisDirection) {
-  assert(axisDirection != null);
-  switch (axisDirection) {
-    case AxisDirection.up:
-    case AxisDirection.left:
-      return true;
-    case AxisDirection.down:
-    case AxisDirection.right:
-      return false;
-  }
-  return null;
-}
-
 /// Flips the [AxisDirection] if the [GrowthDirection] is [GrowthDirection.reverse].
 ///
 /// Specifically, returns `axisDirection` if `growthDirection` is
@@ -746,7 +641,7 @@ class SliverHitTestEntry extends HitTestEntry {
 /// Parent data structure used by parents of slivers that position their
 /// children using layout offsets.
 ///
-/// This data structure is optimised for fast layout. It is best used by parents
+/// This data structure is optimized for fast layout. It is best used by parents
 /// that expect to have many children whose relative positions don't change even
 /// when the scroll offset does.
 class SliverLogicalParentData extends ParentData {
@@ -772,7 +667,7 @@ class SliverLogicalContainerParentData extends SliverLogicalParentData with Cont
 ///
 /// For example, used by [RenderViewport].
 ///
-/// This data structure is optimised for fast painting, at the cost of requiring
+/// This data structure is optimized for fast painting, at the cost of requiring
 /// additional work during layout when the children change their offsets. It is
 /// best used by parents that expect to have few children, especially if those
 /// children will themselves be very tall relative to the parent.
@@ -957,7 +852,7 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// The geometry of a sliver should be set only during the sliver's
   /// [performLayout] or [performResize] functions. If you wish to change the
-  /// geometry of a sliver outside of those functins, call [markNeedsLayout]
+  /// geometry of a sliver outside of those functions, call [markNeedsLayout]
   /// instead to schedule a layout of the sliver.
   SliverGeometry get geometry => _geometry;
   SliverGeometry _geometry;
@@ -1405,7 +1300,7 @@ abstract class RenderSliverHelpers implements RenderSliver {
   /// [RenderBox] widgets.
   ///
   /// This function takes care of converting the position from the sliver
-  /// coordinate system to the cartesian coordinate system used by [RenderBox].
+  /// coordinate system to the Cartesian coordinate system used by [RenderBox].
   ///
   /// This function relies on [childMainAxisPosition] to determine the position of
   /// child in question.

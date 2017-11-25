@@ -4,23 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/painting.dart';
 
 import 'colors.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'icons.dart';
 import 'tooltip.dart';
-
-const double _kChipHeight = 32.0;
-const double _kAvatarDiamater = _kChipHeight;
-
-const TextStyle _kLabelStyle = const TextStyle(
-  inherit: false,
-  fontSize: 13.0,
-  fontWeight: FontWeight.w400,
-  color: Colors.black87,
-  textBaseline: TextBaseline.alphabetic,
-);
 
 /// A material design chip.
 ///
@@ -29,7 +19,8 @@ const TextStyle _kLabelStyle = const TextStyle(
 /// Supplying a non-null [onDeleted] callback will cause the chip to include a
 /// button for deleting the chip.
 ///
-/// Requires one of its ancestors to be a [Material] widget.
+/// Requires one of its ancestors to be a [Material] widget. The [label]
+/// and [border] arguments must not be null.
 ///
 /// ## Sample code
 ///
@@ -57,11 +48,25 @@ class Chip extends StatelessWidget {
     this.avatar,
     @required this.label,
     this.onDeleted,
-    this.labelStyle,
+    TextStyle labelStyle,
     this.deleteButtonTooltipMessage,
     this.backgroundColor,
     this.deleteIconColor,
-  }) : super(key: key);
+    this.border: const StadiumBorder(),
+  }) : assert(label != null),
+       assert(border != null),
+       labelStyle = labelStyle ?? _defaultLabelStyle,
+       super(key: key);
+
+  static const TextStyle _defaultLabelStyle = const TextStyle(
+    inherit: false,
+    fontSize: 13.0,
+    fontWeight: FontWeight.w400,
+    color: Colors.black87,
+    textBaseline: TextBaseline.alphabetic,
+  );
+
+  static const double _chipHeight = 32.0;
 
   /// A widget to display prior to the chip's label.
   ///
@@ -90,6 +95,11 @@ class Chip extends StatelessWidget {
   /// widget's label.
   final Color backgroundColor;
 
+  /// The border to draw around the chip.
+  ///
+  /// Defaults to a [StadiumBorder].
+  final ShapeBorder border;
+
   /// Color for delete icon, the default being black.
   ///
   /// This has no effect when [onDelete] is null since no delete icon will be
@@ -116,8 +126,8 @@ class Chip extends StatelessWidget {
       children.add(new ExcludeSemantics(
         child: new Container(
           margin: const EdgeInsetsDirectional.only(end: 8.0),
-          width: _kAvatarDiamater,
-          height: _kAvatarDiamater,
+          width: _chipHeight,
+          height: _chipHeight,
           child: avatar,
         ),
       ));
@@ -125,7 +135,8 @@ class Chip extends StatelessWidget {
 
     children.add(new Flexible(
       child: new DefaultTextStyle(
-        style: labelStyle ?? _kLabelStyle,
+        overflow: TextOverflow.ellipsis,
+        style: labelStyle,
         child: label,
       ),
     ));
@@ -135,12 +146,14 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
+          // TODO(gspencer): Internationalize this text.
+          // https://github.com/flutter/flutter/issues/12378
           message: deleteButtonTooltipMessage ?? 'Delete "$label"',
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: new Icon(
               Icons.cancel,
-              size: 18.0,
+              size: 24.0,
               color: deleteIconColor ?? Colors.black54,
             ),
           ),
@@ -151,15 +164,19 @@ class Chip extends StatelessWidget {
     return new Semantics(
       container: true,
       child: new Container(
-        height: _kChipHeight,
+        constraints: const BoxConstraints(minHeight: _chipHeight),
         padding: new EdgeInsetsDirectional.only(start: startPadding, end: endPadding),
-        decoration: new BoxDecoration(
+        decoration: new ShapeDecoration(
           color: backgroundColor ?? Colors.grey.shade300,
-          borderRadius: new BorderRadius.circular(16.0),
+          shape: border,
         ),
-        child: new Row(
-          children: children,
-          mainAxisSize: MainAxisSize.min,
+        child: new Center(
+          widthFactor: 1.0,
+          heightFactor: 1.0,
+          child: new Row(
+            children: children,
+            mainAxisSize: MainAxisSize.min,
+          ),
         ),
       ),
     );

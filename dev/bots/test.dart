@@ -57,13 +57,11 @@ Future<Null> _verifyInternationalizations() async {
     dart,
     <String>[
       path.join('dev', 'tools', 'gen_localizations.dart'),
-      path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n'),
-      'material'
     ],
     workingDirectory: flutterRoot,
   );
 
-  final String localizationsFile = path.join('packages', 'flutter', 'lib', 'src', 'material', 'i18n', 'localizations.dart');
+  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'localizations.dart');
 
   final EvalResult sourceContents = await _evalCommand(
     'cat',
@@ -156,6 +154,7 @@ Future<Null> _runTests() async {
 
   // Run tests.
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'));
+  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
@@ -172,10 +171,8 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  if (Platform.environment['TRAVIS'] == null ||
-      Platform.environment['TRAVIS_PULL_REQUEST'] != 'false' ||
-      Platform.environment['TRAVIS_OS_NAME'] != 'linux') {
-    print('${bold}DONE: test.dart does not run coverage for Travis pull requests or not non-Linux environments');
+  if (Platform.environment['TRAVIS'] != null) {
+    print('${bold}DONE: test.dart does not run coverage in Travis$reset');
     return;
   }
 
@@ -207,7 +204,8 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  return _runCommand(pub, args, workingDirectory: workingDirectory);
+  return _runCommand(pub, args, workingDirectory: workingDirectory,
+      environment: <String, String>{'DART_VM_OPTIONS': '--assert-initializer'});
 }
 
 class EvalResult {

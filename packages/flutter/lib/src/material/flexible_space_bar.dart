@@ -92,16 +92,16 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
     return null;
   }
 
-  FractionalOffset _getTitleAlignment(bool effectiveCenterTitle) {
+  Alignment _getTitleAlignment(bool effectiveCenterTitle) {
     if (effectiveCenterTitle)
-      return FractionalOffset.bottomCenter;
+      return Alignment.bottomCenter;
     final TextDirection textDirection = Directionality.of(context);
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
-        return FractionalOffset.bottomRight;
+        return Alignment.bottomRight;
       case TextDirection.ltr:
-        return FractionalOffset.bottomLeft;
+        return Alignment.bottomLeft;
     }
     return null;
   }
@@ -152,7 +152,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
         final double scaleValue = new Tween<double>(begin: 1.5, end: 1.0).lerp(t);
         final Matrix4 scaleTransform = new Matrix4.identity()
           ..scale(scaleValue, scaleValue, 1.0);
-        final FractionalOffset titleAlignment = _getTitleAlignment(effectiveCenterTitle);
+        final Alignment titleAlignment = _getTitleAlignment(effectiveCenterTitle);
         children.add(new Container(
           padding: new EdgeInsetsDirectional.only(
             start: effectiveCenterTitle ? 0.0 : 72.0,

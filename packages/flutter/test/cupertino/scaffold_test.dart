@@ -124,7 +124,7 @@ void main() {
                                       child: new Center(
                                         child: new CupertinoButton(
                                           child: const Text('Back'),
-                                          onPressed: (){
+                                          onPressed: () {
                                             Navigator.of(context).pop();
                                           },
                                         ),

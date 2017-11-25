@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 
 Shader createShader(Rect bounds) {
   return new LinearGradient(
-    begin: FractionalOffset.topLeft,
-    end: FractionalOffset.bottomLeft,
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
     colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
     stops: <double>[0.1, 0.35]
   ).createShader(bounds);
@@ -31,7 +31,7 @@ void main() {
     }
 
     final Widget widget = new Align(
-      alignment: FractionalOffset.center,
+      alignment: Alignment.center,
       child: new SizedBox(
         width: 400.0,
         height: 400.0,

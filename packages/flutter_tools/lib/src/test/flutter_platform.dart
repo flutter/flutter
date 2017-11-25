@@ -22,7 +22,7 @@ import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
 /// once the process has entered its main method.
-const Duration _kTestStartupTimeout = const Duration(seconds: 5);
+const Duration _kTestStartupTimeout = const Duration(minutes: 1);
 
 /// The timeout we give the test process to start executing Dart code. When the
 /// CPU is under severe load, this can take a while, but it's not indicative of
@@ -49,7 +49,7 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
 ///
 /// On systems where each [_FlutterPlatform] is only used to run one test suite
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
-/// main()`), you can set an observatory port and a diagnostic port explicitly.
+/// main()`), you can set an observatory port explicitly.
 void installHook({
   @required String shellPath,
   TestWatcher watcher,
@@ -57,10 +57,9 @@ void installHook({
   bool machine: false,
   bool startPaused: false,
   int observatoryPort,
-  int diagnosticPort,
   InternetAddressType serverType: InternetAddressType.IP_V4,
 }) {
-  if (startPaused || observatoryPort != null || diagnosticPort != null)
+  if (startPaused || observatoryPort != null)
     assert(enableObservatory);
   hack.registerPlatformPlugin(
     <TestPlatform>[TestPlatform.vm],
@@ -71,7 +70,6 @@ void installHook({
       enableObservatory: enableObservatory,
       startPaused: startPaused,
       explicitObservatoryPort: observatoryPort,
-      explicitDiagnosticPort: diagnosticPort,
       host: _kHosts[serverType],
     ),
   );
@@ -89,11 +87,8 @@ class _FlutterPlatform extends PlatformPlugin {
     this.machine,
     this.startPaused,
     this.explicitObservatoryPort,
-    this.explicitDiagnosticPort,
     this.host,
-  }) {
-    assert(shellPath != null);
-  }
+  }) : assert(shellPath != null);
 
   final String shellPath;
   final TestWatcher watcher;
@@ -101,7 +96,6 @@ class _FlutterPlatform extends PlatformPlugin {
   final bool machine;
   final bool startPaused;
   final int explicitObservatoryPort;
-  final int explicitDiagnosticPort;
   final InternetAddress host;
 
   // Each time loadChannel() is called, we spin up a local WebSocket server,
@@ -116,9 +110,9 @@ class _FlutterPlatform extends PlatformPlugin {
   @override
   StreamChannel<dynamic> loadChannel(String testPath, TestPlatform platform) {
     // Fail if there will be a port conflict.
-    if (explicitObservatoryPort != null || explicitDiagnosticPort != null) {
+    if (explicitObservatoryPort != null) {
       if (_testCount > 0)
-        throwToolExit('installHook() was called with an observatory port, a diagnostic port, both, or debugger mode enabled, but then more than one test suite was run.');
+        throwToolExit('installHook() was called with an observatory port or debugger mode enabled, but then more than one test suite was run.');
     }
     final int ourTestCount = _testCount;
     _testCount += 1;
@@ -205,7 +199,6 @@ class _FlutterPlatform extends PlatformPlugin {
         enableObservatory: enableObservatory,
         startPaused: startPaused,
         observatoryPort: explicitObservatoryPort,
-        diagnosticPort: explicitDiagnosticPort,
       );
       subprocessActive = true;
       finalizers.add(() async {
@@ -279,6 +272,9 @@ class _FlutterPlatform extends PlatformPlugin {
           await controller.sink.done;
           break;
         case _InitialResult.timedOut:
+          // Could happen either if the process takes a long time starting
+          // (_kTestProcessTimeout), or if once Dart code starts running, it takes a
+          // long time to open the WebSocket connection (_kTestStartupTimeout).
           printTrace('test $ourTestCount: timed out waiting for process with pid ${process.pid} to connect to test harness');
           final String message = _getErrorMessage('Test never connected to test harness.', testPath, shellPath);
           controller.sink.addError(message);
@@ -408,8 +404,8 @@ class _FlutterPlatform extends PlatformPlugin {
 
   String _getWebSocketUrl(HttpServer server) {
     return host.type == InternetAddressType.IP_V4
-        ? "ws://${host.address}:${server.port}"
-        : "ws://[${host.address}]:${server.port}";
+        ? 'ws://${host.address}:${server.port}'
+        : 'ws://[${host.address}]:${server.port}';
   }
 
   String _generateTestMain({
@@ -473,7 +469,6 @@ void main() {
     bool enableObservatory: false,
     bool startPaused: false,
     int observatoryPort,
-    int diagnosticPort,
   }) {
     assert(executable != null); // Please provide the path to the shell in the SKY_SHELL environment variable.
     assert(!startPaused || enableObservatory);
@@ -490,12 +485,10 @@ void main() {
       // the obvious simplification to this code and remove this entire feature.
       if (observatoryPort != null)
         command.add('--observatory-port=$observatoryPort');
-      if (diagnosticPort != null)
-        command.add('--diagnostic-port=$diagnosticPort');
       if (startPaused)
         command.add('--start-paused');
     } else {
-      command.addAll(<String>['--disable-observatory', '--disable-diagnostic']);
+      command.add('--disable-observatory');
     }
     if (host.type == InternetAddressType.IP_V6)
       command.add('--ipv6');
@@ -504,6 +497,7 @@ void main() {
       '--non-interactive',
       '--enable-checked-mode',
       '--use-test-fonts',
+      // '--enable-txt', // enable this to test libtxt rendering
       '--packages=$packages',
       testPath,
     ]);
@@ -521,7 +515,6 @@ void main() {
     void reportObservatoryUri(Uri uri),
   }) {
     final String observatoryString = 'Observatory listening on ';
-    final String diagnosticServerString = 'Diagnostic server listening on ';
 
     for (Stream<List<int>> stream in
         <Stream<List<int>>>[process.stderr, process.stdout]) {
@@ -544,8 +537,6 @@ void main() {
               } catch (error) {
                 printError('Could not parse shell observatory port message: $error');
               }
-            } else if (line.startsWith(diagnosticServerString)) {
-              printTrace('Shell: $line');
             } else if (line != null) {
               printStatus('Shell: $line');
             }

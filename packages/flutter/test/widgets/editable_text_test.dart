@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
+
+import 'semantics_tester.dart';
 
 void main() {
   final TextEditingController controller = new TextEditingController();
@@ -238,55 +243,84 @@ void main() {
     });
     await tester.pump();
 
-    expect(log, <MethodCall>[
-      const MethodCall('TextInput.setEditingState', const <String, dynamic>{
-        'text': 'Wobble',
-        'selectionBase': -1,
-        'selectionExtent': -1,
-        'selectionAffinity': 'TextAffinity.downstream',
-        'selectionIsDirectional': false,
-        'composingBase': -1,
-        'composingExtent': -1,
-      }),
-    ]);
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall(
+          'TextInput.setEditingState',
+          arguments: const <String, dynamic>{
+            'text': 'Wobble',
+            'selectionBase': -1,
+            'selectionExtent': -1,
+            'selectionAffinity': 'TextAffinity.downstream',
+            'selectionIsDirectional': false,
+            'composingBase': -1,
+            'composingExtent': -1,
+          },
+    ));
   });
 
-  testWidgets('Fires onChanged when text changes via TextSelectionOverlay', (WidgetTester tester) async {
-    final GlobalKey<EditableTextState> editableTextKey = new GlobalKey<EditableTextState>();
+  testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
 
-    String changedValue;
-    final Widget widget = new MaterialApp(
-      home: new EditableText(
-        key: editableTextKey,
-        controller: new TextEditingController(),
-        focusNode: new FocusNode(),
-        style: new Typography(platform: TargetPlatform.android).black.subhead,
-        cursorColor: Colors.blue,
-        selectionControls: materialTextSelectionControls,
-        keyboardType: TextInputType.text,
-        onChanged: (String value) {
-          changedValue = value;
-        },
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          autofocus: true,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
       ),
     );
-    await tester.pumpWidget(widget);
 
-    // Populate a fake clipboard.
-    const String clipboardContent = 'Dobunezumi mitai ni utsukushiku naritai';
-    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
-      if (methodCall.method == 'Clipboard.getData')
-        return const <String, dynamic>{ 'text': clipboardContent };
-      return null;
-    });
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
 
-    // Long-press to bring up the text editing controls.
-    final Finder textFinder = find.byKey(editableTextKey);
-    await tester.longPress(textFinder);
+    await tester.tap(find.byType(EditableText));
+    await tester.idle();
     await tester.pump();
 
-    await tester.tap(find.text('PASTE'));
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField, SemanticsFlags.isFocused]));
+  });
+
+  testWidgets('EditableText includes text as value in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    const String value1 = 'EditableText content';
+
+    controller.text = value1;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new FocusScope(
+          node: focusScopeNode,
+          child: new EditableText(
+            controller: controller,
+            focusNode: focusNode,
+            style: textStyle,
+            cursorColor: cursorColor,
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(
+      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      value: value1,
+    ));
+
+    const String value2 = 'Changed the EditableText content';
+    controller.text = value2;
+    await tester.idle();
     await tester.pump();
 
-    expect(changedValue, clipboardContent);
+    expect(semantics, includesNodeWith(
+      flags: <SemanticsFlags>[SemanticsFlags.isTextField],
+      value: value2,
+    ));
   });
 }

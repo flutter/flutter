@@ -30,8 +30,10 @@ final TextStyle _kBackgroundButtonTextStyle = _kButtonTextStyle.copyWith(
 );
 
 const EdgeInsets _kButtonPadding = const EdgeInsets.all(16.0);
-const EdgeInsets _kBackgroundButtonPadding =
-    const EdgeInsets.symmetric(vertical: 16.0, horizontal: 64.0);
+const EdgeInsets _kBackgroundButtonPadding = const EdgeInsets.symmetric(
+  vertical: 16.0,
+  horizontal: 64.0,
+);
 
 /// An iOS-style button.
 ///
@@ -40,7 +42,7 @@ const EdgeInsets _kBackgroundButtonPadding =
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/buttons/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/buttons/>
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
@@ -80,7 +82,7 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// See also:
   ///
-  /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/layout/>
+  /// * <https://developer.apple.com/ios/human-interface-guidelines/visual-design/adaptivity-and-layout/>
   final double minSize;
 
   /// The opacity that the button will fade to when it is pressed.
@@ -190,43 +192,47 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
     final Color backgroundColor = widget.color;
 
     return new GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTapDown: enabled ? _handleTapDown : null,
       onTapUp: enabled ? _handleTapUp : null,
       onTapCancel: enabled ? _handleTapCancel : null,
       onTap: widget.onPressed,
-      child: new ConstrainedBox(
-        constraints: widget.minSize == null
+      child: new Semantics(
+        button: true,
+        child: new ConstrainedBox(
+          constraints: widget.minSize == null
             ? const BoxConstraints()
             : new BoxConstraints(
               minWidth: widget.minSize,
               minHeight: widget.minSize,
             ),
-        child: new FadeTransition(
-          opacity: _opacityTween.animate(new CurvedAnimation(
-            parent: _animationController,
-            curve: Curves.decelerate,
-          )),
-          child: new DecoratedBox(
-            decoration: new BoxDecoration(
-              borderRadius: widget.borderRadius,
-              color: backgroundColor != null && !enabled
+          child: new FadeTransition(
+            opacity: _opacityTween.animate(new CurvedAnimation(
+              parent: _animationController,
+              curve: Curves.decelerate,
+            )),
+            child: new DecoratedBox(
+              decoration: new BoxDecoration(
+                borderRadius: widget.borderRadius,
+                color: backgroundColor != null && !enabled
                   ? _kDisabledBackground
                   : backgroundColor,
-            ),
-            child: new Padding(
-              padding: widget.padding ?? (backgroundColor != null
-                ? _kBackgroundButtonPadding
-                : _kButtonPadding),
-              child: new Center(
-                widthFactor: 1.0,
-                heightFactor: 1.0,
-                child: new DefaultTextStyle(
-                  style: backgroundColor != null
+              ),
+              child: new Padding(
+                padding: widget.padding ?? (backgroundColor != null
+                  ? _kBackgroundButtonPadding
+                  : _kButtonPadding),
+                child: new Center(
+                  widthFactor: 1.0,
+                  heightFactor: 1.0,
+                  child: new DefaultTextStyle(
+                    style: backgroundColor != null
                       ? _kBackgroundButtonTextStyle
                       : enabled
-                          ? _kButtonTextStyle
-                          : _kDisabledButtonTextStyle,
-                  child: widget.child,
+                        ? _kButtonTextStyle
+                        : _kDisabledButtonTextStyle,
+                    child: widget.child,
+                  ),
                 ),
               ),
             ),

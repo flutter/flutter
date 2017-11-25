@@ -25,7 +25,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
 
   AnimationController _controller;
   Animation<double> _drawerContentsOpacity;
-  Animation<FractionalOffset> _drawerDetailsPosition;
+  Animation<Offset> _drawerDetailsPosition;
   bool _showDrawerContents = true;
 
   @override
@@ -39,9 +39,9 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       parent: new ReverseAnimation(_controller),
       curve: Curves.fastOutSlowIn,
     );
-    _drawerDetailsPosition = new FractionalOffsetTween(
-      begin: const FractionalOffset(0.0, -1.0),
-      end: const FractionalOffset(0.0, 0.0),
+    _drawerDetailsPosition = new Tween<Offset>(
+      begin: const Offset(0.0, -1.0),
+      end: Offset.zero,
     ).animate(new CurvedAnimation(
       parent: _controller,
       curve: Curves.fastOutSlowIn,
@@ -80,7 +80,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
       appBar: new AppBar(
         leading: new IconButton(
           icon: new Icon(_backIcon()),
-          alignment: FractionalOffset.centerLeft,
+          alignment: Alignment.centerLeft,
           tooltip: 'Back',
           onPressed: () {
             Navigator.pop(context);

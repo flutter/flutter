@@ -351,9 +351,19 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = tileTheme?.style == ListTileStyle.drawer
-      ? theme.textTheme.body2
-      : theme.textTheme.subhead;
+    TextStyle style;
+    if (tileTheme != null) {
+      switch (tileTheme.style) {
+        case ListTileStyle.drawer:
+          style = theme.textTheme.body2;
+          break;
+        case ListTileStyle.list:
+          style = theme.textTheme.subhead;
+          break;
+      }
+    } else {
+      style = theme.textTheme.subhead;
+    }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _denseLayout(tileTheme)
       ? style.copyWith(fontSize: 13.0, color: color)
@@ -397,7 +407,7 @@ class ListTile extends StatelessWidget {
         child: new Container(
           margin: const EdgeInsetsDirectional.only(end: 16.0),
           width: 40.0,
-          alignment: FractionalOffsetDirectional.centerStart,
+          alignment: AlignmentDirectional.centerStart,
           child: leading,
         ),
       ));
@@ -432,7 +442,7 @@ class ListTile extends StatelessWidget {
         data: iconThemeData,
         child: new Container(
           margin: const EdgeInsetsDirectional.only(start: 16.0),
-          alignment: FractionalOffsetDirectional.centerEnd,
+          alignment: AlignmentDirectional.centerEnd,
           child: trailing,
         ),
       ));
@@ -441,11 +451,16 @@ class ListTile extends StatelessWidget {
     return new InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      child: new Container(
-        height: tileHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: new Row(children: children),
-      )
+      child: new ConstrainedBox(
+        constraints: new BoxConstraints(minHeight: tileHeight),
+        child: new Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: new UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: new Row(children: children),
+          ),
+        )
+      ),
     );
   }
 }

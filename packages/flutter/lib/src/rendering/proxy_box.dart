@@ -7,15 +7,14 @@ import 'dart:ui' as ui show ImageFilter, Gradient;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
-import 'debug.dart';
 import 'layer.dart';
 import 'object.dart';
-import 'semantics.dart';
 
 export 'package:flutter/gestures.dart' show
   PointerEvent,
@@ -28,7 +27,7 @@ export 'package:flutter/gestures.dart' show
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
 /// child by calling through to the child for each function in the render box
-/// protocol. For example, a proxy box determines its size by askings its child
+/// protocol. For example, a proxy box determines its size by asking its child
 /// to layout with the same constraints and then matching the size.
 ///
 /// A proxy box isn't useful on its own because you might as well just replace
@@ -185,7 +184,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
 /// as well.
 ///
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
-/// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
+/// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [additionalConstraints].
 class RenderConstrainedBox extends RenderProxyBox {
   /// Creates a render box that constrains its child.
@@ -361,7 +360,7 @@ class RenderLimitedBox extends RenderProxyBox {
 
 /// Attempts to size the child to a specific aspect ratio.
 ///
-/// The render object first tries the largest width permited by the layout
+/// The render object first tries the largest width permitted by the layout
 /// constraints. The height of the render object is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -1299,20 +1298,23 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   ///
   /// The [color] is required.
   ///
-  /// The [shape], [elevation], and [color] must not be null.
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   RenderPhysicalModel({
     RenderBox child,
     BoxShape shape: BoxShape.rectangle,
     BorderRadius borderRadius,
     double elevation: 0.0,
     @required Color color,
+    Color shadowColor: const Color(0xFF000000),
   }) : assert(shape != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
        _elevation = elevation,
        _color = color,
+       _shadowColor = shadowColor,
        super(child: child);
 
   /// The shape of the layer.
@@ -1358,6 +1360,17 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     markNeedsPaint();
   }
 
+  /// The shadow color.
+  Color get shadowColor => _shadowColor;
+  Color _shadowColor;
+  set shadowColor(Color value) {
+    assert(value != null);
+    if (shadowColor == value)
+      return;
+    _shadowColor = value;
+    markNeedsPaint();
+  }
+
   /// The background color.
   Color get color => _color;
   Color _color;
@@ -1372,12 +1385,15 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   @override
   RRect get _defaultClip {
     assert(hasSize);
-    if (_shape == BoxShape.rectangle) {
-      return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
-    } else {
-      final Rect rect = Offset.zero & size;
-      return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    assert(_shape != null);
+    switch (_shape) {
+      case BoxShape.rectangle:
+        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+      case BoxShape.circle:
+        final Rect rect = Offset.zero & size;
+        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
     }
+    return null;
   }
 
   @override
@@ -1425,7 +1441,7 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
           );
           canvas.drawShadow(
             new Path()..addRRect(offsetClipRRect),
-            const Color(0xFF000000),
+            shadowColor,
             elevation,
             color.alpha != 0xFF,
           );
@@ -1482,7 +1498,7 @@ class RenderDecoratedBox extends RenderProxyBox {
     @required Decoration decoration,
     DecorationPosition position: DecorationPosition.background,
     ImageConfiguration configuration: ImageConfiguration.empty,
-    RenderBox child
+    RenderBox child,
   }) : assert(decoration != null),
        assert(position != null),
        assert(configuration != null),
@@ -1522,6 +1538,9 @@ class RenderDecoratedBox extends RenderProxyBox {
   /// The settings to pass to the decoration when painting, so that it can
   /// resolve images appropriately. See [ImageProvider.resolve] and
   /// [BoxPainter.paint].
+  ///
+  /// The [ImageConfiguration.textDirection] field is also used by
+  /// direction-sensitive [Decoration]s for painting and hit-testing.
   ImageConfiguration get configuration => _configuration;
   ImageConfiguration _configuration;
   set configuration(ImageConfiguration value) {
@@ -1541,7 +1560,7 @@ class RenderDecoratedBox extends RenderProxyBox {
 
   @override
   bool hitTestSelf(Offset position) {
-    return _decoration.hitTest(size, position);
+    return _decoration.hitTest(size, position, textDirection: configuration.textDirection);
   }
 
   @override
@@ -1599,14 +1618,15 @@ class RenderTransform extends RenderProxyBox {
   RenderTransform({
     @required Matrix4 transform,
     Offset origin,
-    FractionalOffset alignment,
+    AlignmentGeometry alignment,
+    TextDirection textDirection,
     this.transformHitTests: true,
     RenderBox child
   }) : assert(transform != null),
-       assert(alignment == null || (alignment.dx != null && alignment.dy != null)),
        super(child) {
     this.transform = transform;
     this.alignment = alignment;
+    this.textDirection = textDirection;
     this.origin = origin;
   }
 
@@ -1628,13 +1648,32 @@ class RenderTransform extends RenderProxyBox {
   ///
   /// This is equivalent to setting an origin based on the size of the box.
   /// If it is specified at the same time as an offset, both are applied.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
-    assert(value == null || (value.dx != null && value.dy != null));
+  ///
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
+  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// whose [Alignment.x] value is `1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
     if (_alignment == value)
       return;
     _alignment = value;
+    markNeedsPaint();
+  }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     markNeedsPaint();
   }
 
@@ -1695,18 +1734,19 @@ class RenderTransform extends RenderProxyBox {
   }
 
   Matrix4 get _effectiveTransform {
-    if (_origin == null && _alignment == null)
+    final Alignment resolvedAlignment = alignment?.resolve(textDirection);
+    if (_origin == null && resolvedAlignment == null)
       return _transform;
     final Matrix4 result = new Matrix4.identity();
     if (_origin != null)
       result.translate(_origin.dx, _origin.dy);
     Offset translation;
-    if (_alignment != null) {
-      translation = _alignment.alongSize(size);
+    if (resolvedAlignment != null) {
+      translation = resolvedAlignment.alongSize(size);
       result.translate(translation.dx, translation.dy);
     }
     result.multiply(_transform);
-    if (_alignment != null)
+    if (resolvedAlignment != null)
       result.translate(-translation.dx, -translation.dy);
     if (_origin != null)
       result.translate(-_origin.dx, -_origin.dy);
@@ -1751,7 +1791,8 @@ class RenderTransform extends RenderProxyBox {
     super.debugFillProperties(description);
     description.add(new TransformProperty('transform matrix', _transform));
     description.add(new DiagnosticsProperty<Offset>('origin', origin));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1762,14 +1803,29 @@ class RenderFittedBox extends RenderProxyBox {
   ///
   /// The [fit] and [alignment] arguments must not be null.
   RenderFittedBox({
-    RenderBox child,
     BoxFit fit: BoxFit.contain,
-    FractionalOffset alignment: FractionalOffset.center
+    AlignmentGeometry alignment: Alignment.center,
+    TextDirection textDirection,
+    RenderBox child,
   }) : assert(fit != null),
-       assert(alignment != null && alignment.dx != null && alignment.dy != null),
+       assert(alignment != null),
        _fit = fit,
        _alignment = alignment,
+       _textDirection = textDirection,
        super(child);
+
+  Alignment _resolvedAlignment;
+
+  void _resolve() {
+    if (_resolvedAlignment != null)
+      return;
+    _resolvedAlignment = alignment.resolve(textDirection);
+  }
+
+  void _markNeedResolution() {
+    _resolvedAlignment = null;
+    markNeedsPaint();
+  }
 
   /// How to inscribe the child into the space allocated during layout.
   BoxFit get fit => _fit;
@@ -1788,16 +1844,35 @@ class RenderFittedBox extends RenderProxyBox {
   /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  FractionalOffset get alignment => _alignment;
-  FractionalOffset _alignment;
-  set alignment(FractionalOffset value) {
-    assert(value != null && value.dx != null && value.dy != null);
+  ///
+  /// If this is set to an [AlignmentDirectional] object, then
+  /// [textDirection] must not be null.
+  AlignmentGeometry get alignment => _alignment;
+  AlignmentGeometry _alignment;
+  set alignment(AlignmentGeometry value) {
+    assert(value != null);
     if (_alignment == value)
       return;
     _alignment = value;
     _clearPaintData();
-    markNeedsPaint();
+    _markNeedResolution();
   }
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// This may be changed to null, but only after [alignment] has been changed
+  /// to a value that does not depend on the direction.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    _clearPaintData();
+    _markNeedResolution();
+  }
+
+  // TODO(ianh): The intrinsic dimensions of this box are wrong.
 
   @override
   void performLayout() {
@@ -1826,12 +1901,13 @@ class RenderFittedBox extends RenderProxyBox {
       _hasVisualOverflow = false;
       _transform = new Matrix4.identity();
     } else {
+      _resolve();
       final Size childSize = child.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
       final double scaleX = sizes.destination.width / sizes.source.width;
       final double scaleY = sizes.destination.height / sizes.source.height;
-      final Rect sourceRect = _alignment.inscribe(sizes.source, Offset.zero & childSize);
-      final Rect destinationRect = _alignment.inscribe(sizes.destination, Offset.zero & size);
+      final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
+      final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.width;
       _transform = new Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
@@ -1891,33 +1967,40 @@ class RenderFittedBox extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<BoxFit>('fit', fit));
-    description.add(new DiagnosticsProperty<FractionalOffset>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Alignment>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
 /// Applies a translation transformation before painting its child.
 ///
-/// The translation is expressed as a [FractionalOffset] relative to the
-/// RenderFractionalTranslation box's size. Hit tests will only be detected
-/// inside the bounds of the RenderFractionalTranslation, even if the contents
-/// are offset such that they overflow.
+/// The translation is expressed as an [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [RenderFractionalTranslation], even if the contents are offset such that
+/// they overflow.
 class RenderFractionalTranslation extends RenderProxyBox {
   /// Creates a render object that translates its child's painting.
   ///
   /// The [translation] argument must not be null.
   RenderFractionalTranslation({
-    FractionalOffset translation,
+    @required Offset translation,
     this.transformHitTests: true,
     RenderBox child
-  }) : assert(translation == null || (translation.dx != null && translation.dy != null)),
+  }) : assert(translation != null),
        _translation = translation,
        super(child);
 
-  /// The translation to apply to the child, as a multiple of the size.
-  FractionalOffset get translation => _translation;
-  FractionalOffset _translation;
-  set translation(FractionalOffset value) {
-    assert(value == null || (value.dx != null && value.dy != null));
+  /// The translation to apply to the child, scaled to the child's size.
+  ///
+  /// For example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+  /// translation of one quarter the width of the child.
+  Offset get translation => _translation;
+  Offset _translation;
+  set translation(Offset value) {
+    assert(value != null);
     if (_translation == value)
       return;
     _translation = value;
@@ -1935,27 +2018,38 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   bool hitTest(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
-    if (transformHitTests)
-      position = new Offset(position.dx - translation.dx * size.width, position.dy - translation.dy * size.height);
+    if (transformHitTests) {
+      position = new Offset(
+        position.dx - translation.dx * size.width,
+        position.dy - translation.dy * size.height,
+      );
+    }
     return super.hitTest(result, position: position);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(!debugNeedsLayout);
-    if (child != null)
-      super.paint(context, offset + translation.alongSize(size));
+    if (child != null) {
+      super.paint(context, new Offset(
+        offset.dx + translation.dx * size.width,
+        offset.dy + translation.dy * size.height,
+      ));
+    }
   }
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    transform.translate(translation.dx * size.width, translation.dy * size.height);
+    transform.translate(
+      translation.dx * size.width,
+      translation.dy * size.height,
+    );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<FractionalOffset>('translation', translation));
+    description.add(new DiagnosticsProperty<Offset>('translation', translation));
     description.add(new DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
 }
@@ -1997,7 +2091,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
 ///   void paint(Canvas canvas, Size size) {
 ///     var rect = Offset.zero & size;
 ///     var gradient = new RadialGradient(
-///       center: const FractionalOffset(0.7, 0.2),
+///       center: const Alignment(0.7, -0.6),
 ///       radius: 0.2,
 ///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
 ///       stops: [0.4, 1.0],
@@ -2129,7 +2223,7 @@ abstract class CustomPainter extends Listenable {
 ///
 /// When asked to paint, [RenderCustomPaint] first asks its [painter] to paint
 /// on the current canvas, then it paints its child, and then, after painting
-/// its child, it asks its [foregroundPainter] to paint. The coodinate system of
+/// its child, it asks its [foregroundPainter] to paint. The coordinate system of
 /// the canvas matches the coordinate system of the [CustomPaint] object. The
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
@@ -2841,7 +2935,7 @@ class RenderMetaData extends RenderProxyBoxWithHitTestBehavior {
 
 /// Listens for the specified gestures from the semantics server (e.g.
 /// an accessibility tool).
-class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsActionHandler {
+class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// Creates a render object that listens for specific semantic gestures.
   ///
   /// The [scrollFactor] argument must not be null.
@@ -2918,11 +3012,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -2931,11 +3025,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -2944,11 +3038,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// Called when the user scrolls up or down.
@@ -2957,11 +3051,11 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    final bool wasSemanticBoundary = isSemanticBoundary;
+    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: isSemanticBoundary == wasSemanticBoundary);
+      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -2971,8 +3065,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   /// leftwards drag.
   double scrollFactor;
 
-  @override
-  bool get isSemanticBoundary {
+  bool get _hasHandlers {
     return onTap != null
         || onLongPress != null
         || onHorizontalDragUpdate != null
@@ -2980,7 +3073,38 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => isSemanticBoundary ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    config.isSemanticBoundary = _hasHandlers;
+
+    // TODO(goderbauer): this needs to be set even when there is only potential
+    //    for this to become a scroll view.
+    config.explicitChildNodes = onHorizontalDragUpdate != null
+        || onVerticalDragUpdate != null;
+
+    final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
+    if (onTap != null)
+      actions[SemanticsAction.tap] = onTap;
+    if (onLongPress != null)
+      actions[SemanticsAction.longPress] = onLongPress;
+    if (onHorizontalDragUpdate != null) {
+      actions[SemanticsAction.scrollRight] = _performSemanticScrollRight;
+      actions[SemanticsAction.scrollLeft] = _performSemanticScrollLeft;
+    }
+    if (onVerticalDragUpdate != null) {
+      actions[SemanticsAction.scrollUp] = _performSemanticScrollUp;
+      actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
+    }
+
+    final Iterable<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
+
+    for (SemanticsAction action in actionsToAdd) {
+      final VoidCallback handler = actions[action];
+      if (handler != null)
+        config.addAction(action, handler);
+    }
+  }
 
   SemanticsNode _innerNode;
   SemanticsNode _annotatedNode;
@@ -2992,113 +3116,69 @@ class RenderSemanticsGestureHandler extends RenderProxyBox implements SemanticsA
   }
 
   @override
-  void assembleSemanticsNode(SemanticsNode node, Iterable<SemanticsNode> children) {
-    if (!node.hasTag(useTwoPaneSemantics)) {
-      super.assembleSemanticsNode(node, children);
+  void assembleSemanticsNode(SemanticsNode node, SemanticsConfiguration config, Iterable<SemanticsNode> children) {
+    if (children.isEmpty || !children.first.isTagged(useTwoPaneSemantics)) {
+      _annotatedNode = node;
+      super.assembleSemanticsNode(node, config, children);
       return;
     }
 
-    _innerNode ??= new SemanticsNode(handler: this, showOnScreen: showOnScreen);
+    _innerNode ??= new SemanticsNode(showOnScreen: showOnScreen);
     _innerNode
-      ..wasAffectedByClip = node.wasAffectedByClip
+      ..isMergedIntoParent = node.isPartOfNodeMerging
       ..rect = Offset.zero & node.rect.size;
-
-    semanticsAnnotator(_innerNode);
+    _annotatedNode = _innerNode;
 
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
     for (SemanticsNode child in children) {
-      if (child.hasTag(excludeFromScrolling))
+      assert(child.isTagged(useTwoPaneSemantics));
+      if (child.isTagged(excludeFromScrolling))
         excluded.add(child);
       else
         included.add(child);
     }
-    node.addChildren(excluded);
-    _innerNode.addChildren(included);
-    _innerNode.finalizeChildren();
-    node.finalizeChildren();
+    node.updateWith(config: null, childrenInInversePaintOrder: excluded);
+    _innerNode.updateWith(config: config, childrenInInversePaintOrder: included);
   }
 
-  @override
-  void resetSemantics() {
-    _innerNode?.reset();
-    super.resetSemantics();
-  }
-
-  void _annotate(SemanticsNode node) {
-    _annotatedNode = node;
-    List<SemanticsAction> actions = <SemanticsAction>[];
-    if (onTap != null)
-      actions.add(SemanticsAction.tap);
-    if (onLongPress != null)
-      actions.add(SemanticsAction.longPress);
+  void _performSemanticScrollLeft() {
     if (onHorizontalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollRight);
-      actions.add(SemanticsAction.scrollLeft);
+      final double primaryDelta = size.width * -scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
     }
-    if (onVerticalDragUpdate != null) {
-      actions.add(SemanticsAction.scrollUp);
-      actions.add(SemanticsAction.scrollDown);
-    }
-
-    // If a set of validActions has been provided only expose those.
-    if (validActions != null)
-      actions = actions.where((SemanticsAction action) => validActions.contains(action)).toList();
-
-    actions.forEach(node.addAction);
   }
 
-  @override
-  void performAction(SemanticsAction action) {
-    switch (action) {
-      case SemanticsAction.tap:
-        if (onTap != null)
-          onTap();
-        break;
-      case SemanticsAction.longPress:
-        if (onLongPress != null)
-          onLongPress();
-        break;
-      case SemanticsAction.scrollLeft:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * -scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollRight:
-        if (onHorizontalDragUpdate != null) {
-          final double primaryDelta = size.width * scrollFactor;
-          onHorizontalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollUp:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * -scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.scrollDown:
-        if (onVerticalDragUpdate != null) {
-          final double primaryDelta = size.height * scrollFactor;
-          onVerticalDragUpdate(new DragUpdateDetails(
-            delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
-            globalPosition: localToGlobal(size.center(Offset.zero)),
-          ));
-        }
-        break;
-      case SemanticsAction.increase:
-      case SemanticsAction.decrease:
-        assert(false);
-        break;
+  void _performSemanticScrollRight() {
+    if (onHorizontalDragUpdate != null) {
+      final double primaryDelta = size.width * scrollFactor;
+      onHorizontalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(primaryDelta, 0.0), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollUp() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * -scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
+    }
+  }
+
+  void _performSemanticScrollDown() {
+    if (onVerticalDragUpdate != null) {
+      final double primaryDelta = size.height * scrollFactor;
+      onVerticalDragUpdate(new DragUpdateDetails(
+        delta: new Offset(0.0, primaryDelta), primaryDelta: primaryDelta,
+        globalPosition: localToGlobal(size.center(Offset.zero)),
+      ));
     }
   }
 
@@ -3130,28 +3210,53 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   RenderSemanticsAnnotations({
     RenderBox child,
     bool container: false,
+    bool explicitChildNodes,
     bool checked,
     bool selected,
+    bool button,
     String label,
+    String value,
+    String increasedValue,
+    String decreasedValue,
+    String hint,
     TextDirection textDirection,
+    VoidCallback onTap,
+    VoidCallback onLongPress,
+    VoidCallback onScrollLeft,
+    VoidCallback onScrollRight,
+    VoidCallback onScrollUp,
+    VoidCallback onScrollDown,
+    VoidCallback onIncrease,
+    VoidCallback onDecrease,
   }) : assert(container != null),
        _container = container,
+       _explicitChildNodes = explicitChildNodes,
        _checked = checked,
        _selected = selected,
+       _button = button,
        _label = label,
+       _value = value,
+       _increasedValue = increasedValue,
+       _decreasedValue = decreasedValue,
+       _hint = hint,
        _textDirection = textDirection,
+       _onTap = onTap,
+       _onLongPress = onLongPress,
+       _onScrollLeft = onScrollLeft,
+       _onScrollRight = onScrollRight,
+       _onScrollUp = onScrollUp,
+       _onScrollDown = onScrollDown,
+       _onIncrease = onIncrease,
+       _onDecrease = onDecrease,
        super(child);
 
-  /// If 'container' is true, this RenderObject will introduce a new
+  /// If 'container' is true, this [RenderObject] will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors.
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
-  /// semantics-providing descendants of a node where multiple
-  /// children have semantics or have descendants providing semantics.
-  /// In other words, the semantics of siblings are not merged. To
-  /// merge the semantics of an entire subtree, including siblings,
-  /// you can use a [RenderMergeSemantics].
+  /// Whether descendants of this [RenderObject] can add their semantic information
+  /// to the [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
   bool get container => _container;
   bool _container;
   set container(bool value) {
@@ -3159,6 +3264,28 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (container == value)
       return;
     _container = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  /// Whether descendants of this [RenderObject] are allowed to add semantic
+  /// information to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  bool get explicitChildNodes => _explicitChildNodes;
+  bool _explicitChildNodes;
+  set explicitChildNodes(bool value) {
+    assert(value != null);
+    if (_explicitChildNodes == value)
+      return;
+    _explicitChildNodes = value;
     markNeedsSemanticsUpdate();
   }
 
@@ -3186,20 +3313,88 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
+  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  bool get button => _button;
+  bool _button;
+  set button(bool value) {
+    if (button == value)
+      return;
+    final bool hadValue = button != null;
+    _button = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
+  ///
+  /// The reading direction is given by [textDirection].
   String get label => _label;
   String _label;
   set label(String value) {
-    if (label == value)
+    if (_label == value)
       return;
-    final bool hadValue = label != null;
+    final bool hadValue = _label != null;
     _label = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get value => _value;
+  String _value;
+  set value(String value) {
+    if (_value == value)
+      return;
+    final bool hadValue = _value != null;
+    _value = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
+  /// value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get increasedValue => _increasedValue;
+  String _increasedValue;
+  set increasedValue(String value) {
+    if (_increasedValue == value)
+      return;
+    final bool hadValue = _increasedValue != null;
+    _increasedValue = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
+  /// value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get decreasedValue => _decreasedValue;
+  String _decreasedValue;
+  set decreasedValue(String value) {
+    if (_decreasedValue == value)
+      return;
+    final bool hadValue = _decreasedValue != null;
+    _decreasedValue = value;
+    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+  }
+
+  /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
+  ///
+  /// The reading direction is given by [textDirection].
+  String get hint => _hint;
+  String _hint;
+  set hint(String value) {
+    if (_hint == value)
+      return;
+    final bool hadValue = _hint != null;
+    _hint = value;
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
   ///
-  /// This must not be null if [label] is not null.
+  /// This must not be null if [label], [hint], [value], [increasedValue], or
+  /// [decreasedValue] are not null.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -3210,24 +3405,261 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
   }
 
-  @override
-  bool get isSemanticBoundary => container;
+  /// The handler for [SemanticsAction.tap].
+  ///
+  /// This is the semantic equivalent of a user briefly tapping the screen with
+  /// the finger without moving it. For example, a button should implement this
+  /// action.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen while an element is focused.
+  VoidCallback get onTap => _onTap;
+  VoidCallback _onTap;
+  set onTap(VoidCallback handler) {
+    if (_onTap == handler)
+      return;
+    final bool hadValue = _onTap != null;
+    _onTap = handler;
+    if ((handler != null) == hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.longPress].
+  ///
+  /// This is the semantic equivalent of a user pressing and holding the screen
+  /// with the finger for a few seconds without moving it.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen without lifting the finger after the
+  /// second tap.
+  VoidCallback get onLongPress => _onLongPress;
+  VoidCallback _onLongPress;
+  set onLongPress(VoidCallback handler) {
+    if (_onLongPress == handler)
+      return;
+    final bool hadValue = _onLongPress != null;
+    _onLongPress = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from right to left. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping left with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollLeft => _onScrollLeft;
+  VoidCallback _onScrollLeft;
+  set onScrollLeft(VoidCallback handler) {
+    if (_onScrollLeft == handler)
+      return;
+    final bool hadValue = _onScrollLeft != null;
+    _onScrollLeft = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollRight].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from left to right. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping right with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollRight => _onScrollRight;
+  VoidCallback _onScrollRight;
+  set onScrollRight(VoidCallback handler) {
+    if (_onScrollRight == handler)
+      return;
+    final bool hadValue = _onScrollRight != null;
+    _onScrollRight = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollUp].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from bottom to top. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollUp => _onScrollUp;
+  VoidCallback _onScrollUp;
+  set onScrollUp(VoidCallback handler) {
+    if (_onScrollUp == handler)
+      return;
+    final bool hadValue = _onScrollUp != null;
+    _onScrollUp = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.scrollDown].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from top to bottom. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollDown => _onScrollDown;
+  VoidCallback _onScrollDown;
+  set onScrollDown(VoidCallback handler) {
+    if (_onScrollDown == handler)
+      return;
+    final bool hadValue = _onScrollDown != null;
+    _onScrollDown = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.increase].
+  ///
+  /// This is a request to increase the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume up button.
+  VoidCallback get onIncrease => _onIncrease;
+  VoidCallback _onIncrease;
+  set onIncrease(VoidCallback handler) {
+    if (_onIncrease == handler)
+      return;
+    final bool hadValue = _onIncrease != null;
+    _onIncrease = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
+
+  /// The handler for [SemanticsAction.decrease].
+  ///
+  /// This is a request to decrease the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume down button.
+  VoidCallback get onDecrease => _onDecrease;
+  VoidCallback _onDecrease;
+  set onDecrease(VoidCallback handler) {
+    if (_onDecrease == handler)
+      return;
+    final bool hadValue = _onDecrease != null;
+    _onDecrease = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+  }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => checked != null || selected != null || label != null || textDirection != null ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    assert(
+      onIncrease == null || (value == null) == (increasedValue == null),
+      'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
+    );
+    assert(
+      onDecrease == null || (value == null) == (decreasedValue == null),
+      'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
+    );
 
-  void _annotate(SemanticsNode node) {
-    if (checked != null) {
-      node
-        ..hasCheckedState = true
-        ..isChecked = checked;
-    }
+    config.isSemanticBoundary = container;
+    config.explicitChildNodes = explicitChildNodes;
+
+    if (checked != null)
+      config.isChecked = checked;
     if (selected != null)
-      node.isSelected = selected;
+      config.isSelected = selected;
+    if (button != null)
+      config.isButton = button;
     if (label != null)
-      node.label = label;
+      config.label = label;
+    if (value != null)
+      config.value = value;
+    if (increasedValue != null)
+      config.increasedValue = increasedValue;
+    if (decreasedValue != null)
+      config.decreasedValue = decreasedValue;
+    if (hint != null)
+      config.hint = hint;
     if (textDirection != null)
-      node.textDirection = textDirection;
+      config.textDirection = textDirection;
+    // Registering _perform* as action handlers instead of the user provided
+    // ones to ensure that changing a user provided handler from a non-null to
+    // another non-null value doesn't require a semantics update.
+    if (onTap != null)
+      config.addAction(SemanticsAction.tap, _performTap);
+    if (onLongPress != null)
+      config.addAction(SemanticsAction.longPress, _performLongPress);
+    if (onScrollLeft != null)
+      config.addAction(SemanticsAction.scrollLeft, _performScrollLeft);
+    if (onScrollRight != null)
+      config.addAction(SemanticsAction.scrollRight, _performScrollRight);
+    if (onScrollUp != null)
+      config.addAction(SemanticsAction.scrollUp, _performScrollUp);
+    if (onScrollDown != null)
+      config.addAction(SemanticsAction.scrollDown, _performScrollDown);
+    if (onIncrease != null)
+      config.addAction(SemanticsAction.increase, _performIncrease);
+    if (onDecrease != null)
+      config.addAction(SemanticsAction.decrease, _performDecrease);
+  }
+
+  void _performTap() {
+    if (onTap != null)
+      onTap();
+  }
+
+  void _performLongPress() {
+    if (onLongPress != null)
+      onLongPress();
+  }
+
+  void _performScrollLeft() {
+    if (onScrollLeft != null)
+      onScrollLeft();
+  }
+
+  void _performScrollRight() {
+    if (onScrollRight != null)
+      onScrollRight();
+  }
+
+  void _performScrollUp() {
+    if (onScrollUp != null)
+      onScrollUp();
+  }
+
+  void _performScrollDown() {
+    if (onScrollDown != null)
+      onScrollDown();
+  }
+
+  void _performIncrease() {
+    if (onIncrease != null)
+      onIncrease();
+  }
+
+  void _performDecrease() {
+    if (onDecrease != null)
+      onDecrease();
   }
 }
 
@@ -3242,7 +3674,10 @@ class RenderBlockSemantics extends RenderProxyBox {
   RenderBlockSemantics({ RenderBox child }) : super(child);
 
   @override
-  bool get isBlockingSemanticsOfPreviouslyPaintedNodes => true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+  }
 }
 
 /// Causes the semantics of all descendants to be merged into this
@@ -3257,10 +3692,11 @@ class RenderMergeSemantics extends RenderProxyBox {
   RenderMergeSemantics({ RenderBox child }) : super(child);
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  void _annotate(SemanticsNode node) {
-    node.mergeAllDescendantsIntoThisNode = true;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..isSemanticBoundary = true
+      ..isMergingSemanticsOfDescendants = true;
   }
 }
 
@@ -3353,7 +3789,7 @@ class RenderLeaderLayer extends RenderProxyBox {
   }
 }
 
-/// Transform the child so that its origin is [offset] from the orign of the
+/// Transform the child so that its origin is [offset] from the origin of the
 /// [RenderLeaderLayer] with the same [LayerLink].
 ///
 /// The [RenderLeaderLayer] in question must be earlier in the paint order.

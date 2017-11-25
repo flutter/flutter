@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 
 import 'feedback_tester.dart';
 
@@ -115,6 +114,38 @@ void main() {
     await tester.pump(const Duration(seconds: 5));
   });
 
+  testWidgets('MonthPicker receives header taps', (WidgetTester tester) async {
+    DateTime currentValue;
+    bool headerTapped = false;
+
+    final Widget widget = new MaterialApp(
+      home: new Material(
+        child: new ListView(
+          children: <Widget>[
+            new MonthPicker(
+              selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
+              firstDate: new DateTime.utc(2013),
+              lastDate: new DateTime.utc(2018),
+              onChanged: (DateTime dateTime) {
+                currentValue = dateTime;
+              },
+              onMonthHeaderTap: () {
+                headerTapped = true;
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(widget);
+
+    expect(currentValue, isNull);
+    expect(headerTapped, false);
+    await tester.tap(find.text('June 2015'));
+    expect(headerTapped, true);
+  });
+
   Future<Null> preparePicker(WidgetTester tester, Future<Null> callback(Future<DateTime> date)) async {
     BuildContext buttonContext;
     await tester.pumpWidget(new MaterialApp(
@@ -207,7 +238,10 @@ void main() {
       await tester.pump();
       await tester.tap(find.text('2017'));
       await tester.pump();
-      final String dayLabel = new DateFormat('E, MMM\u00a0d').format(new DateTime(2017, DateTime.JANUARY, 15));
+      final MaterialLocalizations localizations = MaterialLocalizations.of(
+        tester.element(find.byType(DayPicker))
+      );
+      final String dayLabel = localizations.formatMediumDate(new DateTime(2017, DateTime.JANUARY, 15));
       await tester.tap(find.text(dayLabel));
       await tester.pump();
       await tester.tap(find.text('19'));

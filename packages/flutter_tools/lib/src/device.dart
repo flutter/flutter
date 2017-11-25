@@ -191,7 +191,7 @@ abstract class Device {
 
   // String meant to be displayed to the user indicating if the device is
   // supported by Flutter, and, if not, why.
-  String supportMessage() => isSupported() ? "Supported" : "Unsupported";
+  String supportMessage() => isSupported() ? 'Supported' : 'Unsupported';
 
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
@@ -205,22 +205,6 @@ abstract class Device {
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
-
-  Future<int> forwardPort(int devicePort, {int hostPort}) async {
-    try {
-      hostPort = await portForwarder
-          .forward(devicePort, hostPort: hostPort)
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-            throw new ToolExit(
-                'Timeout while atempting to foward device port $devicePort');
-          });
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
-      return hostPort;
-    } catch (e) {
-      throw new ToolExit(
-          'Unable to forward host port $hostPort to device port $devicePort: $e');
-    }
-  }
 
   /// Clear the device's logs.
   void clearLogs();
@@ -243,6 +227,7 @@ abstract class Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
@@ -320,7 +305,6 @@ class DebuggingOptions {
     this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
-    this.diagnosticPort
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo) :
@@ -329,8 +313,7 @@ class DebuggingOptions {
     startPaused = false,
     enableSoftwareRendering = false,
     traceSkia = false,
-    observatoryPort = null,
-    diagnosticPort = null;
+    observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -340,7 +323,6 @@ class DebuggingOptions {
   final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;
-  final int diagnosticPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
 
@@ -351,35 +333,22 @@ class DebuggingOptions {
       return new Future<int>.value(observatoryPort);
     return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
-
-  bool get hasDiagnosticPort => diagnosticPort != null;
-
-  /// Return the user specified diagnostic port. If that isn't available,
-  /// return [kDefaultDiagnosticPort], or a port close to that one.
-  Future<int> findBestDiagnosticPort() {
-    if (hasDiagnosticPort)
-      return new Future<int>.value(diagnosticPort);
-    return portScanner.findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
-  }
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri, this.diagnosticUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null, diagnosticUri = null;
+  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.failed() : started = false, observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
   final bool started;
   final Uri observatoryUri;
-  final Uri diagnosticUri;
 
   @override
   String toString() {
     final StringBuffer buf = new StringBuffer('started=$started');
     if (observatoryUri != null)
       buf.write(', observatory=$observatoryUri');
-    if (diagnosticUri != null)
-      buf.write(', diagnostic=$diagnosticUri');
     return buf.toString();
   }
 }
@@ -421,14 +390,13 @@ abstract class DeviceLogReader {
   @override
   String toString() => name;
 
-  /// Process ID of the app on the deivce.
+  /// Process ID of the app on the device.
   int appPid;
 }
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort, this.diagnosticPort);
+  DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
-  final int diagnosticPort;
 }

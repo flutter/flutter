@@ -585,7 +585,7 @@ void main() {
   testWidgets('Shrink-wrapping Wrap test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
@@ -609,7 +609,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new Wrap(
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
@@ -635,7 +635,7 @@ void main() {
   testWidgets('Wrap spacing test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new Wrap(
           runSpacing: 10.0,
           alignment: WrapAlignment.start,
@@ -662,7 +662,7 @@ void main() {
   testWidgets('Vertical Wrap test with spacing', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new Wrap(
           direction: Axis.vertical,
           spacing: 10.0,
@@ -693,7 +693,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new Wrap(
           direction: Axis.horizontal,
           spacing: 12.0,

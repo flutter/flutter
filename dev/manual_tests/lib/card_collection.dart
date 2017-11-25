@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree;
 
@@ -27,10 +29,15 @@ class CardCollectionState extends State<CardCollection> {
     const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   // TODO(hansmuller): need a local image asset
-  static const String _sunshineURL = "http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg";
+  static const String _sunshineURL = 'http://www.walltor.com/images/wallpaper/good-morning-sunshine-58540.jpg';
 
   static const double kCardMargins = 8.0;
   static const double kFixedCardHeight = 100.0;
+  static const List<double> _cardHeights = const <double>[
+    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+    48.0, 63.0, 85.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
+  ];
 
   MaterialColor _primaryColor = Colors.deepPurple;
   List<CardModel> _cardModels;
@@ -41,15 +48,22 @@ class CardCollectionState extends State<CardCollection> {
   bool _sunshine = false;
   bool _varyFontSizes = false;
 
-  void _initVariableSizedCardModels() {
-    final List<double> cardHeights = <double>[
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-      48.0, 63.0, 82.0, 146.0, 60.0, 55.0, 84.0, 96.0, 50.0,
-    ];
+  void _updateCardSizes() {
+    if (_fixedSizeCards)
+      return;
     _cardModels = new List<CardModel>.generate(
-      cardHeights.length,
-      (int i) => new CardModel(i, cardHeights[i])
+      _cardModels.length,
+      (int i) {
+        _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
+        return _cardModels[i];
+      }
+    );
+  }
+
+  void _initVariableSizedCardModels() {
+    _cardModels = new List<CardModel>.generate(
+      _cardHeights.length,
+      (int i) => new CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i])
     );
   }
 
@@ -89,23 +103,23 @@ class CardCollectionState extends State<CardCollection> {
         child: new ListView(
           children: <Widget>[
             const DrawerHeader(child: const Center(child: const Text('Options'))),
-            buildDrawerCheckbox("Make card labels editable", _editable, _toggleEditable),
-            buildDrawerCheckbox("Fixed size cards", _fixedSizeCards, _toggleFixedSizeCards),
-            buildDrawerCheckbox("Let the sun shine", _sunshine, _toggleSunshine),
-            buildDrawerCheckbox("Vary font sizes", _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
+            buildDrawerCheckbox('Make card labels editable', _editable, _toggleEditable),
+            buildDrawerCheckbox('Fixed size cards', _fixedSizeCards, _toggleFixedSizeCards),
+            buildDrawerCheckbox('Let the sun shine', _sunshine, _toggleSunshine),
+            buildDrawerCheckbox('Vary font sizes', _varyFontSizes, _toggleVaryFontSizes, enabled: !_editable),
             const Divider(),
-            buildDrawerColorRadioItem("Deep Purple", Colors.deepPurple, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Green", Colors.green, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Amber", Colors.amber, _primaryColor, _selectColor),
-            buildDrawerColorRadioItem("Teal", Colors.teal, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Deep Purple', Colors.deepPurple, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Green', Colors.green, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Amber', Colors.amber, _primaryColor, _selectColor),
+            buildDrawerColorRadioItem('Teal', Colors.teal, _primaryColor, _selectColor),
             const Divider(),
-            buildDrawerDirectionRadioItem("Dismiss horizontally", DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
-            buildDrawerDirectionRadioItem("Dismiss left", DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
-            buildDrawerDirectionRadioItem("Dismiss right", DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
+            buildDrawerDirectionRadioItem('Dismiss horizontally', DismissDirection.horizontal, _dismissDirection, _changeDismissDirection, icon: Icons.code),
+            buildDrawerDirectionRadioItem('Dismiss left', DismissDirection.endToStart, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_back),
+            buildDrawerDirectionRadioItem('Dismiss right', DismissDirection.startToEnd, _dismissDirection, _changeDismissDirection, icon: Icons.arrow_forward),
             const Divider(),
-            buildFontRadioItem("Left-align text", TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
-            buildFontRadioItem("Center-align text", TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
-            buildFontRadioItem("Right-align text", TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
+            buildFontRadioItem('Left-align text', TextAlign.left, _textAlign, _changeTextAlign, icon: Icons.format_align_left, enabled: !_editable),
+            buildFontRadioItem('Center-align text', TextAlign.center, _textAlign, _changeTextAlign, icon: Icons.format_align_center, enabled: !_editable),
+            buildFontRadioItem('Right-align text', TextAlign.right, _textAlign, _changeTextAlign, icon: Icons.format_align_right, enabled: !_editable),
             const Divider(),
             new ListTile(
               leading: const Icon(Icons.dvr),
@@ -126,6 +140,7 @@ class CardCollectionState extends State<CardCollection> {
   void _toggleEditable() {
     setState(() {
       _editable = !_editable;
+      _updateCardSizes();
     });
   }
 
@@ -224,7 +239,7 @@ class CardCollectionState extends State<CardCollection> {
       flexibleSpace: new Container(
         padding: const EdgeInsets.only(left: 72.0),
         height: 128.0,
-        alignment: const FractionalOffset(0.0, 0.75),
+        alignment: const Alignment(-1.0, 0.5),
         child: new Text('Swipe Away: ${_cardModels.length}', style: Theme.of(context).primaryTextTheme.title),
       ),
     );
@@ -267,16 +282,16 @@ class CardCollectionState extends State<CardCollection> {
     String backgroundMessage;
     switch (_dismissDirection) {
       case DismissDirection.horizontal:
-        backgroundMessage = "Swipe in either direction";
+        backgroundMessage = 'Swipe in either direction';
         break;
       case DismissDirection.endToStart:
-        backgroundMessage = "Swipe left to dismiss";
+        backgroundMessage = 'Swipe left to dismiss';
         break;
       case DismissDirection.startToEnd:
-        backgroundMessage = "Swipe right to dismiss";
+        backgroundMessage = 'Swipe right to dismiss';
         break;
       default:
-        backgroundMessage = "Unsupported dismissDirection";
+        backgroundMessage = 'Unsupported dismissDirection';
     }
 
     // TODO(abarth): This icon is wrong in RTL.
@@ -330,8 +345,8 @@ class CardCollectionState extends State<CardCollection> {
 
   Shader _createShader(Rect bounds) {
     return new LinearGradient(
-        begin: FractionalOffset.topLeft,
-        end: FractionalOffset.bottomLeft,
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
         colors: <Color>[const Color(0x00FFFFFF), const Color(0xFFFFFFFF)],
         stops: <double>[0.1, 0.35],
     )

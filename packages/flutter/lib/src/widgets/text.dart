@@ -230,7 +230,7 @@ class Text extends StatelessWidget {
   /// example, if the [data] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
@@ -249,7 +249,8 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
+  /// The value given to the constructor as textScaleFactor.  If null, will
+  /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
 
@@ -291,5 +292,11 @@ class Text extends StatelessWidget {
     super.debugFillProperties(description);
     description.add(new StringProperty('data', data, showName: false));
     style?.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }

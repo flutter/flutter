@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
-import 'debug.dart';
 import 'framework.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
@@ -28,7 +27,7 @@ import 'viewport.dart';
 ///     various scrolling effects, such as lists, grids, and expanding headers.
 ///
 /// [ScrollView] helps orchestrate these pieces by creating the [Scrollable] and
-/// the viewport and defering to its subclass to create the slivers.
+/// the viewport and deferring to its subclass to create the slivers.
 ///
 /// To control the initial scroll offset of the scroll view, provide a
 /// [controller] with its [ScrollController.initialScrollOffset] property set.
@@ -172,23 +171,14 @@ abstract class ScrollView extends StatelessWidget {
   /// concrete [AxisDirection].
   ///
   /// If the [scrollDirection] is [Axis.horizontal], the ambient
-  /// [Directionality] is also consided when selecting the concrete
+  /// [Directionality] is also considered when selecting the concrete
   /// [AxisDirection]. For example, if the ambient [Directionality] is
   /// [TextDirection.rtl], then the non-reversed [AxisDirection] is
   /// [AxisDirection.left] and the reversed [AxisDirection] is
   /// [AxisDirection.right].
   @protected
   AxisDirection getDirection(BuildContext context) {
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        assert(debugCheckHasDirectionality(context));
-        final TextDirection textDirection = Directionality.of(context);
-        final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
-        return reverse ? flipAxisDirection(axisDirection) : axisDirection;
-      case Axis.vertical:
-        return reverse ? AxisDirection.up : AxisDirection.down;
-    }
-    return null;
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
   /// Subclasses should override this method to build the slivers for the inside
@@ -279,7 +269,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       delegate: new SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
 ///           return new Container(
-///             alignment: FractionalOffset.center,
+///             alignment: Alignment.center,
 ///             color: Colors.teal[100 * (index % 9)],
 ///             child: new Text('grid item $index'),
 ///           );
@@ -292,7 +282,7 @@ abstract class ScrollView extends StatelessWidget {
 ///       delegate: new SliverChildBuilderDelegate(
 ///         (BuildContext context, int index) {
 ///           return new Container(
-///             alignment: FractionalOffset.center,
+///             alignment: Alignment.center,
 ///             color: Colors.lightBlue[100 * (index % 9)],
 ///             child: new Text('list item $index'),
 ///           );
@@ -345,7 +335,7 @@ class CustomScrollView extends ScrollView {
   List<Widget> buildSlivers(BuildContext context) => slivers;
 }
 
-/// A [ScrollView] uses a single child layout model.
+/// A [ScrollView] that uses a single child layout model.
 ///
 /// See also:
 ///
@@ -412,7 +402,7 @@ abstract class BoxScrollView extends ScrollView {
 ///
 /// There are three options for constructing a [ListView]:
 ///
-///  1. The default constuctor takes an explict [List<Widget>] of children. This
+///  1. The default constructor takes an explicit [List<Widget>] of children. This
 ///     constructor is appropriate for list views with a small number of
 ///     children because constructing the [List] requires doing work for every
 ///     child that could possibly be displayed in the list view instead of just

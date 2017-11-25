@@ -504,19 +504,18 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 
   @override
   void performLayout() {
-    if (child == null) {
+    if (child == null || (!constraints.hasBoundedWidth && !constraints.hasBoundedHeight)) {
       size = constraints.constrain(Size.zero);
-    } else {
-      assert(child is RenderSector);
-      assert(constraints.maxWidth < double.INFINITY || constraints.maxHeight < double.INFINITY);
-      final double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
-      assert(child.parentData is SectorParentData);
-      child.parentData.radius = innerRadius;
-      child.parentData.theta = 0.0;
-      child.layout(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), parentUsesSize: true);
-      final double dimension = (innerRadius + child.deltaRadius) * 2.0;
-      size = constraints.constrain(new Size(dimension, dimension));
+      return;
     }
+    assert(child is RenderSector);
+    assert(child.parentData is SectorParentData);
+    final double maxChildDeltaRadius = math.min(constraints.maxWidth, constraints.maxHeight) / 2.0 - innerRadius;
+    child.parentData.radius = innerRadius;
+    child.parentData.theta = 0.0;
+    child.layout(new SectorConstraints(maxDeltaRadius: maxChildDeltaRadius), parentUsesSize: true);
+    final double dimension = (innerRadius + child.deltaRadius) * 2.0;
+    size = constraints.constrain(new Size(dimension, dimension));
   }
 
   @override

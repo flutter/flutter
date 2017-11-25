@@ -213,7 +213,7 @@ class CommonFinders {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class Finder {
-  /// Initialises a Finder. Used by subclasses to initialize the [skipOffstage]
+  /// Initializes a Finder. Used by subclasses to initialize the [skipOffstage]
   /// property.
   Finder({ this.skipOffstage: true });
 
@@ -285,12 +285,16 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
+  /// Returns a variant of this finder that only matches the element at the
+  /// given index matched by this finder.
+  Finder at(int index) => new _IndexFinder(this, index);
+
   /// Returns a variant of this finder that only matches elements reachable by
   /// a hit test.
   ///
   /// The [at] parameter specifies the location relative to the size of the
   /// target element where the hit test is performed.
-  Finder hitTestable({ FractionalOffset at: FractionalOffset.center }) => new _HitTestableFinder(this, at);
+  Finder hitTestable({ Alignment at: Alignment.center }) => new _HitTestableFinder(this, at);
 
   @override
   String toString() {
@@ -335,11 +339,27 @@ class _LastFinder extends Finder {
   }
 }
 
-class _HitTestableFinder extends Finder {
-  _HitTestableFinder(this.parent, this.offset);
+class _IndexFinder extends Finder {
+  _IndexFinder(this.parent, this.index);
 
   final Finder parent;
-  final FractionalOffset offset;
+
+  final int index;
+
+  @override
+  String get description => '${parent.description} (ignoring all but index $index)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    yield parent.apply(candidates).elementAt(index);
+  }
+}
+
+class _HitTestableFinder extends Finder {
+  _HitTestableFinder(this.parent, this.alignment);
+
+  final Finder parent;
+  final Alignment alignment;
 
   @override
   String get description => '${parent.description} (considering only hit-testable ones)';
@@ -349,7 +369,7 @@ class _HitTestableFinder extends Finder {
     for (final Element candidate in parent.apply(candidates)) {
       final RenderBox box = candidate.renderObject;
       assert(box != null);
-      final Offset absoluteOffset = box.localToGlobal(offset.alongSize(box.size));
+      final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = new HitTestResult();
       WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
       for (final HitTestEntry entry in hitResult.path) {
@@ -365,7 +385,7 @@ class _HitTestableFinder extends Finder {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class MatchFinder extends Finder {
-  /// Initialises a predicate-based Finder. Used by subclasses to initialize the
+  /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// [skipOffstage] property.
   MatchFinder({ bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 

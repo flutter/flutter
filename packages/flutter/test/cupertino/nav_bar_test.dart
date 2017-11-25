@@ -275,6 +275,70 @@ void main() {
 
     expect(tester.getBottomLeft(find.text('Title')).dy, 44.0 - 8.0); // Extension gone, (static part - padding) left.
   });
+
+  testWidgets('Auto back/close button', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return const CupertinoNavigationBar(
+                middle: const Text('Home page'),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    expect(find.byType(CupertinoButton), findsNothing);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<Null>(
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: const Text('Page 2'),
+        );
+      },
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(CupertinoButton), findsOneWidget);
+    expect(find.byType(Icon), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(new CupertinoPageRoute<Null>(
+      fullscreenDialog: true,
+      builder: (BuildContext context) {
+        return const CupertinoNavigationBar(
+          middle: const Text('Dialog page'),
+        );
+      },
+    ));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(CupertinoButton), findsNWidgets(2));
+    expect(find.text('Close'), findsOneWidget);
+
+    // Test popping goes back correctly.
+    await tester.tap(find.text('Close'));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Page 2'), findsOneWidget);
+
+    await tester.tap(find.byType(Icon));
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Home page'), findsOneWidget);
+  });
 }
 
 class _ExpectStyles extends StatelessWidget {

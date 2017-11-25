@@ -6,6 +6,7 @@ import 'dart:ui' show SemanticsFlags;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
@@ -26,10 +27,12 @@ void main() {
         fit: StackFit.expand,
         children: <Widget>[
           const Semantics(
+            container: true,
             label: 'L1',
           ),
           new Semantics(
             label: 'L2',
+            container: true,
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
@@ -87,9 +90,11 @@ void main() {
         children: <Widget>[
           const Semantics(
             label: 'L1',
+            container: true,
           ),
           new Semantics(
             label: 'L2',
+            container: true,
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
@@ -134,6 +139,7 @@ void main() {
           const Semantics(),
           new Semantics(
             label: 'L2',
+            container: true,
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
@@ -150,8 +156,14 @@ void main() {
 
     expect(semantics, hasSemantics(
       new TestSemantics.root(
-        label: 'L2',
-        flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            id: 2,
+            label: 'L2',
+            flags: SemanticsFlags.hasCheckedState.index | SemanticsFlags.isChecked.index,
+            rect: TestSemantics.fullScreen,
+          ),
+        ],
       )
     ));
 

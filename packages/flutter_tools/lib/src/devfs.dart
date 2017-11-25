@@ -52,6 +52,13 @@ abstract class DevFSContent {
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
+  static DevFSFileContent clone(DevFSFileContent fsFileContent) {
+    final DevFSFileContent newFsFileContent = new DevFSFileContent(fsFileContent.file);
+    newFsFileContent._linkTarget = fsFileContent._linkTarget;
+    newFsFileContent._fileStat = fsFileContent._fileStat;
+    return newFsFileContent;
+  }
+
   final FileSystemEntity file;
   FileSystemEntity _linkTarget;
   FileStat _fileStat;
@@ -339,6 +346,16 @@ class DevFS {
   Uri _baseUri;
   Uri get baseUri => _baseUri;
 
+  Uri deviceUriToHostUri(Uri deviceUri) {
+    final String deviceUriString = deviceUri.toString();
+    final String baseUriString = baseUri.toString();
+    if (deviceUriString.startsWith(baseUriString)) {
+      final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
+      return rootDirectory.uri.resolve(deviceUriSuffix);
+    }
+    return deviceUri;
+  }
+
   Future<Uri> create() async {
     printTrace('DevFS: Creating new filesystem on the device ($_baseUri)');
     try {
@@ -369,6 +386,7 @@ class DevFS {
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
+    bool fullRestart: false,
   }) async {
     // Mark all entries as possibly deleted.
     for (DevFSContent content in _entries.values) {
@@ -423,6 +441,10 @@ class DevFS {
       String archivePath;
       if (deviceUri.path.startsWith(assetBuildDirPrefix))
         archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+      // When doing full restart in preview-dart-2 mode, copy content so
+      // that isModified does not reset last check timestamp because we
+      // want to report all modified files to incremental compiler next time
+      // user does hot reload.
       if (content.isModified || (bundleDirty && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
@@ -437,11 +459,26 @@ class DevFS {
       // Incremental run with no changes is supposed to be fast (considering
       // that it is initiated by user key press).
       final List<String> invalidatedFiles = <String>[];
-      for (DevFSContent content in dirtyEntries.values)
-        if (content is DevFSFileContent)
-          invalidatedFiles.add(content.file.uri.toString());
+      final Set<Uri> filesUris = new Set<Uri>();
+      for (Uri uri in dirtyEntries.keys) {
+        if (!uri.path.startsWith(assetBuildDirPrefix)) {
+          final DevFSContent content = dirtyEntries[uri];
+          if (content is DevFSFileContent) {
+            filesUris.add(uri);
+            invalidatedFiles.add(content.file.uri.toString());
+            numBytes -= content.size;
+          }
+        }
+      }
+      // No need to send source files because all compilation is done on the
+      // host and result of compilation is single kernel file.
+      filesUris.forEach(dirtyEntries.remove);
       printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
-      final String compiledBinary = await generator.recompile(mainPath, invalidatedFiles);
+      if (fullRestart) {
+        generator.reset();
+      }
+      final String compiledBinary =
+          await generator.recompile(mainPath, invalidatedFiles);
       if (compiledBinary != null && compiledBinary.isNotEmpty)
         dirtyEntries.putIfAbsent(
           Uri.parse(target + '.dill'),
@@ -454,10 +491,10 @@ class DevFS {
         try {
           await _httpWriter.write(dirtyEntries);
         } on SocketException catch (socketException, stackTrace) {
-          printTrace("DevFS sync failed. Lost connection to device: $socketException");
+          printTrace('DevFS sync failed. Lost connection to device: $socketException');
           throw new DevFSException('Lost connection to device.', socketException, stackTrace);
         } catch (exception, stackTrace) {
-          printError("Could not update files on device: $exception");
+          printError('Could not update files on device: $exception');
           throw new DevFSException('Sync failed', exception, stackTrace);
         }
       } else {

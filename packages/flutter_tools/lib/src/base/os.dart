@@ -118,13 +118,13 @@ class _PosixUtils extends OperatingSystemUtils {
     if (_name == null) {
       if (platform.isMacOS) {
         final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>["sw_vers", "-productName"]),
-          processManager.runSync(<String>["sw_vers", "-productVersion"]),
-          processManager.runSync(<String>["sw_vers", "-buildVersion"]),
+          processManager.runSync(<String>['sw_vers', '-productName']),
+          processManager.runSync(<String>['sw_vers', '-productVersion']),
+          processManager.runSync(<String>['sw_vers', '-buildVersion']),
         ];
         if (results.every((ProcessResult result) => result.exitCode == 0)) {
-          _name = "${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}";
+          _name = '${results[0].stdout.trim()} ${results[1].stdout
+              .trim()} ${results[2].stdout.trim()}';
         }
       }
       _name ??= super.name;

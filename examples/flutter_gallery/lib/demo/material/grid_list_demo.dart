@@ -54,7 +54,7 @@ class _GridTitleText extends StatelessWidget {
   Widget build(BuildContext context) {
     return new FittedBox(
       fit: BoxFit.scaleDown,
-      alignment: FractionalOffset.centerLeft,
+      alignment: Alignment.centerLeft,
       child: new Text(text),
     );
   }

@@ -72,23 +72,23 @@ void main() {
   });
 
   test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
-    SemanticsNode node = new SemanticsNode();
     final RenderSemanticsGestureHandler renderObj = new RenderSemanticsGestureHandler(
       onTap: () {},
       onHorizontalDragUpdate: (DragUpdateDetails details) {},
     );
 
-    renderObj.semanticsAnnotator(node);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isTrue);
+    SemanticsConfiguration config = new SemanticsConfiguration();
+    renderObj.describeSemanticsConfiguration(config);
+    expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
 
-    node = new SemanticsNode();
+    config = new SemanticsConfiguration();
     renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
 
-    renderObj.semanticsAnnotator(node);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.tap), isTrue);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollLeft), isTrue);
-    expect(node.getSemanticsData().hasAction(SemanticsAction.scrollRight), isFalse);
+    renderObj.describeSemanticsConfiguration(config);
+    expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollRight), isNull);
   });
 }

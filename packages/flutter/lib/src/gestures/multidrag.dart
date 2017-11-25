@@ -293,8 +293,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
 
   @override
   void dispose() {
-    for (int pointer in _pointers.keys.toList())
-      _removeState(pointer);
+    _pointers.keys.toList().forEach(_removeState);
     assert(_pointers.isEmpty);
     _pointers = null;
     super.dispose();
@@ -504,7 +503,7 @@ class _DelayedPointerState extends MultiDragPointerState {
 /// Recognizes movement both horizontally and vertically on a per-pointer basis
 /// after a delay.
 ///
-/// In constrast to [ImmediateMultiDragGestureRecognizer],
+/// In contrast to [ImmediateMultiDragGestureRecognizer],
 /// [DelayedMultiDragGestureRecognizer] waits for a [delay] before recognizing
 /// the drag. If the pointer moves more than [kTouchSlop] before the delay
 /// expires, the gesture is not recognized.

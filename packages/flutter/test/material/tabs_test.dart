@@ -14,9 +14,9 @@ import '../rendering/mock_canvas.dart';
 import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
-Widget boilerplate({ Widget child }) {
+Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.ltr }) {
   return new Directionality(
-    textDirection: TextDirection.ltr,
+    textDirection: textDirection,
     child: new Material(
       child: child,
     ),
@@ -444,7 +444,7 @@ void main() {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Align(
-          alignment: FractionalOffset.topLeft,
+          alignment: Alignment.topLeft,
           child: new SizedBox(
             width: 300.0,
             height: 200.0,
@@ -918,7 +918,7 @@ void main() {
     expect(tester.getTopRight(find.widgetWithText(Tab, 'TAB #19')).dx, 800.0);
   });
 
-  testWidgets('TabBar with indicatorWeight, indicatorPadding', (WidgetTester tester) async {
+  testWidgets('TabBar with indicatorWeight, indicatorPadding (LTR)', (WidgetTester tester) async {
     const Color color = const Color(0xFF00FF00);
     const double height = 100.0;
     const double weight = 8.0;
@@ -982,6 +982,196 @@ void main() {
     ));
   });
 
+  testWidgets('TabBar with indicatorWeight, indicatorPadding (RTL)', (WidgetTester tester) async {
+    const Color color = const Color(0xFF00FF00);
+    const double height = 100.0;
+    const double weight = 8.0;
+    const double padLeft = 8.0;
+    const double padRight = 4.0;
+
+    final List<Widget> tabs = new List<Widget>.generate(4, (int index) {
+      return new Container(
+        key: new ValueKey<int>(index),
+        height: height,
+      );
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        child: new Column(
+          children: <Widget>[
+            new TabBar(
+              indicatorWeight: 8.0,
+              indicatorColor: color,
+              indicatorPadding: const EdgeInsets.only(left: padLeft, right: padRight),
+              controller: controller,
+              tabs: tabs,
+            ),
+            new Flexible(child: new Container()),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox tabBarBox = tester.firstRenderObject<RenderBox>(find.byType(TabBar));
+
+    // Selected tab dimensions
+    double tabWidth = tester.getSize(find.byKey(const ValueKey<int>(0))).width;
+    double tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(0))).dx;
+    double tabRight = tabLeft + tabWidth;
+
+    expect(tabBarBox, paints..rect(
+      style: PaintingStyle.fill,
+      color: color,
+      rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
+    ));
+
+    // Select tab 3
+    controller.index = 3;
+    await tester.pumpAndSettle();
+
+    tabWidth = tester.getSize(find.byKey(const ValueKey<int>(3))).width;
+    tabLeft = tester.getTopLeft(find.byKey(const ValueKey<int>(3))).dx;
+    tabRight = tabLeft + tabWidth;
+
+    expect(tabBarBox, paints..rect(
+      style: PaintingStyle.fill,
+      color: color,
+      rect: new Rect.fromLTRB(tabLeft + padLeft, height, tabRight - padRight, height + weight)
+    ));
+  });
+
+  testWidgets('TabBar with directional indicatorPadding (LTR)', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[
+      new SizedBox(key: new UniqueKey(), width: 130.0, height: 30.0),
+      new SizedBox(key: new UniqueKey(), width: 140.0, height: 40.0),
+      new SizedBox(key: new UniqueKey(), width: 150.0, height: 50.0),
+    ];
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new Center(
+          child: new SizedBox(
+            width: 800.0,
+            child: new TabBar(
+              indicatorPadding: const EdgeInsetsDirectional.only(start: 100.0),
+              isScrollable: true,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byKey(tabs[0].key)), new Rect.fromLTRB(0.0, 284.0, 130.0, 314.0));
+    expect(tester.getRect(find.byKey(tabs[1].key)), new Rect.fromLTRB(130.0, 279.0, 270.0, 319.0));
+    expect(tester.getRect(find.byKey(tabs[2].key)), new Rect.fromLTRB(270.0, 274.0, 420.0, 324.0));
+
+    expect(tester.firstRenderObject<RenderBox>(find.byType(TabBar)), paints..rect(
+      style: PaintingStyle.fill,
+      rect: new Rect.fromLTRB(100.0, 50.0, 130.0, 52.0),
+    ));
+  });
+
+  testWidgets('TabBar with directional indicatorPadding (RTL)', (WidgetTester tester) async {
+    final List<Widget> tabs = <Widget>[
+      new SizedBox(key: new UniqueKey(), width: 130.0, height: 30.0),
+      new SizedBox(key: new UniqueKey(), width: 140.0, height: 40.0),
+      new SizedBox(key: new UniqueKey(), width: 150.0, height: 50.0),
+    ];
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        child: new Center(
+          child: new SizedBox(
+            width: 800.0,
+            child: new TabBar(
+              indicatorPadding: const EdgeInsetsDirectional.only(start: 100.0),
+              isScrollable: true,
+              controller: controller,
+              tabs: tabs,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getRect(find.byKey(tabs[0].key)), new Rect.fromLTRB(670.0, 284.0, 800.0, 314.0));
+    expect(tester.getRect(find.byKey(tabs[1].key)), new Rect.fromLTRB(530.0, 279.0, 670.0, 319.0));
+    expect(tester.getRect(find.byKey(tabs[2].key)), new Rect.fromLTRB(380.0, 274.0, 530.0, 324.0));
+
+    final RenderBox tabBar = tester.renderObject<RenderBox>(find.byType(CustomPaint).at(1));
+
+    expect(tabBar.size, const Size(420.0, 52.0));
+    expect(tabBar, paints..rect(
+      style: PaintingStyle.fill,
+      rect: new Rect.fromLTRB(tabBar.size.width - 130.0, 50.0, tabBar.size.width - 100.0, 52.0),
+    ));
+  });
+
+  testWidgets('Overflowing RTL tab bar', (WidgetTester tester) async {
+    final List<Widget> tabs = new List<Widget>.filled(100,
+      new SizedBox(key: new UniqueKey(), width: 30.0, height: 20.0),
+    );
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        child: new Center(
+          child: new TabBar(
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstRenderObject<RenderBox>(find.byType(TabBar)), paints..rect(
+      style: PaintingStyle.fill,
+      rect: new Rect.fromLTRB(2970.0, 20.0, 3000.0, 22.0),
+    ));
+
+    controller.animateTo(tabs.length - 1, duration: const Duration(seconds: 1), curve: Curves.linear);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(tester.firstRenderObject<RenderBox>(find.byType(TabBar)), paints..rect(
+      style: PaintingStyle.fill,
+      rect: new Rect.fromLTRB(742.5, 20.0, 772.5, 22.0), // (these values were derived empirically, not analytically)
+    ));
+
+    await tester.pump(const Duration(milliseconds: 501));
+
+    expect(tester.firstRenderObject<RenderBox>(find.byType(TabBar)), paints..rect(
+      style: PaintingStyle.fill,
+      rect: new Rect.fromLTRB(0.0, 20.0, 30.0, 22.0),
+    ));
+  });
+
   testWidgets('correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
@@ -1023,17 +1213,73 @@ void main() {
               transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
             ),
             new TestSemantics(
-              id: 5,
+              id: 3,
               actions: SemanticsAction.tap.index,
               label: 'TAB #1\nTab 2 of 2',
               rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
               transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
             ),
-          ]),
+          ],
+        ),
       ],
     );
 
     expect(semantics, hasSemantics(expectedSemantics));
+
+    semantics.dispose();
+  });
+
+  testWidgets('correct scrolling semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Tab> tabs = new List<Tab>.generate(20, (int index) {
+      return new Tab(text: 'This is a very wide tab #$index');
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new Semantics(
+          container: true,
+          child: new TabBar(
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    const String tab0title = 'This is a very wide tab #0\nTab 1 of 20';
+    const String tab10title = 'This is a very wide tab #10\nTab 11 of 20';
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
+
+    controller.index = 10;
+    await tester.pumpAndSettle();
+
+    expect(semantics, isNot(includesNodeWith(label: tab0title)));
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight]));
+    expect(semantics, includesNodeWith(label: tab10title));
+
+    controller.index = 19;
+    await tester.pumpAndSettle();
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollRight]));
+
+    controller.index = 0;
+    await tester.pumpAndSettle();
+
+    expect(semantics, includesNodeWith(actions: <SemanticsAction>[SemanticsAction.scrollLeft]));
+    expect(semantics, includesNodeWith(label: tab0title));
+    expect(semantics, isNot(includesNodeWith(label: tab10title)));
 
     semantics.dispose();
   });
@@ -1167,5 +1413,76 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.index, 1);
+  });
+
+  testWidgets('can override semantics of tabs', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    final List<Tab> tabs = new List<Tab>.generate(2, (int index) {
+      return new Tab(
+        child: new Semantics(
+          label: 'Semantics override $index',
+          child: new ExcludeSemantics(
+            child: new Text('TAB #$index'),
+          ),
+        ),
+      );
+    });
+
+    final TabController controller = new TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+      initialIndex: 0,
+    );
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: new Semantics(
+          container: true,
+          child: new TabBar(
+            isScrollable: true,
+            controller: controller,
+            tabs: tabs,
+          ),
+        ),
+      ),
+    );
+
+    final TestSemantics expectedSemantics = new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          id: 23,
+          rect: TestSemantics.fullScreen,
+          children: <TestSemantics>[
+            new TestSemantics(
+              id: 24,
+              actions: SemanticsAction.tap.index,
+              flags: SemanticsFlags.isSelected.index,
+              label: 'Semantics override 0\nTab 1 of 2',
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+              transform: new Matrix4.translationValues(0.0, 276.0, 0.0),
+            ),
+            new TestSemantics(
+              id: 25,
+              actions: SemanticsAction.tap.index,
+              label: 'Semantics override 1\nTab 2 of 2',
+              rect: new Rect.fromLTRB(0.0, 0.0, 108.0, kTextTabBarHeight),
+              transform: new Matrix4.translationValues(108.0, 276.0, 0.0),
+            ),
+          ],
+        ),
+      ],
+    );
+
+    expect(semantics, hasSemantics(expectedSemantics));
+
+    semantics.dispose();
+  });
+
+  test('illegal constructor combinations', () {
+    final Widget $null = null;
+    expect(() => new Tab(icon: $null), throwsAssertionError);
+    expect(() => new Tab(icon: new Container(), text: 'foo', child: new Container()), throwsAssertionError);
+    expect(() => new Tab(text: 'foo', child: new Container()), throwsAssertionError);
   });
 }

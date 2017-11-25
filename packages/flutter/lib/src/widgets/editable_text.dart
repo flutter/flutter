@@ -60,7 +60,7 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   TextEditingController({ String text })
     : super(text == null ? TextEditingValue.empty : new TextEditingValue(text: text));
 
-  /// Creates a controller for an editiable text field from an initial [TextEditingValue].
+  /// Creates a controller for an editable text field from an initial [TextEditingValue].
   ///
   /// This constructor treats a null [value] argument as if it were
   /// [TextEditingValue.empty].
@@ -221,7 +221,7 @@ class EditableText extends StatefulWidget {
   /// example, if the text is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// Defaults to the ambient [Directionality], if any.
@@ -638,6 +638,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
             style: widget.style,
             cursorColor: widget.cursorColor,
             showCursor: _showCursor,
+            hasFocus: _hasFocus,
             maxLines: widget.maxLines,
             selectionColor: widget.selectionColor,
             textScaleFactor: widget.textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
@@ -663,6 +664,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.style,
     this.cursorColor,
     this.showCursor,
+    this.hasFocus,
     this.maxLines,
     this.selectionColor,
     this.textScaleFactor,
@@ -681,6 +683,7 @@ class _Editable extends LeafRenderObjectWidget {
   final TextStyle style;
   final Color cursorColor;
   final ValueNotifier<bool> showCursor;
+  final bool hasFocus;
   final int maxLines;
   final Color selectionColor;
   final double textScaleFactor;
@@ -699,6 +702,7 @@ class _Editable extends LeafRenderObjectWidget {
       text: _styledTextSpan,
       cursorColor: cursorColor,
       showCursor: showCursor,
+      hasFocus: hasFocus,
       maxLines: maxLines,
       selectionColor: selectionColor,
       textScaleFactor: textScaleFactor,
@@ -717,6 +721,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..text = _styledTextSpan
       ..cursorColor = cursorColor
       ..showCursor = showCursor
+      ..hasFocus = hasFocus
       ..maxLines = maxLines
       ..selectionColor = selectionColor
       ..textScaleFactor = textScaleFactor

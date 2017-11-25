@@ -23,7 +23,7 @@ void main()  {
       // path separator.
       Cache.flutterRoot = getFlutterRoot();
 
-      fs.file("pubspec.yaml")
+      fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(
 '''
@@ -36,7 +36,7 @@ flutter:
     - a/b/c/foo
 '''
       );
-      fs.file(".packages")..createSync();
+      fs.file('.packages')..createSync();
 
       final List<String> assets = <String>[
         'a/b/c/foo',

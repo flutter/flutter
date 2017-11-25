@@ -12,15 +12,6 @@ import 'home.dart';
 import 'item.dart';
 import 'updates.dart';
 
-final Map<String, WidgetBuilder> _kRoutes = new Map<String, WidgetBuilder>.fromIterable(
-  // For a different example of how to set up an application routing table,
-  // consider the Stocks example:
-  // https://github.com/flutter/flutter/blob/master/examples/stocks/lib/main.dart
-  kAllGalleryItems,
-  key: (GalleryItem item) => item.routeName,
-  value: (GalleryItem item) => item.buildRoute,
-);
-
 final ThemeData _kGalleryLightTheme = new ThemeData(
   brightness: Brightness.light,
   primarySwatch: Colors.blue,
@@ -63,6 +54,9 @@ class GalleryAppState extends State<GalleryApp> {
   double _timeDilation = 1.0;
   TargetPlatform _platform;
 
+  // A null value indicates "use system default".
+  double _textScaleFactor;
+
   Timer _timeDilationTimer;
 
   @override
@@ -76,6 +70,17 @@ class GalleryAppState extends State<GalleryApp> {
     _timeDilationTimer?.cancel();
     _timeDilationTimer = null;
     super.dispose();
+  }
+
+  Widget _applyScaleFactor(Widget child) {
+    return new Builder(
+      builder: (BuildContext context) => new MediaQuery(
+        data: MediaQuery.of(context).copyWith(
+          textScaleFactor: _textScaleFactor,
+        ),
+        child: child,
+      ),
+    );
   }
 
   @override
@@ -128,6 +133,12 @@ class GalleryAppState extends State<GalleryApp> {
           }
         });
       },
+      textScaleFactor: _textScaleFactor,
+      onTextScaleFactorChanged: (double value) {
+        setState(() {
+          _textScaleFactor = value;
+        });
+      },
       onSendFeedback: widget.onSendFeedback,
     );
 
@@ -138,6 +149,18 @@ class GalleryAppState extends State<GalleryApp> {
       );
     }
 
+    final Map<String, WidgetBuilder> _kRoutes =
+        new Map<String, WidgetBuilder>.fromIterable(
+      // For a different example of how to set up an application routing table
+      // using named routes, consider the example in the Navigator class documentation:
+      // https://docs.flutter.io/flutter/widgets/Navigator-class.html
+      kAllGalleryItems,
+      key: (GalleryItem item) => item.routeName,
+      value: (GalleryItem item) {
+        return (BuildContext context) => _applyScaleFactor(item.buildRoute(context));
+      },
+    );
+
     return new MaterialApp(
       title: 'Flutter Gallery',
       color: Colors.grey,
@@ -146,7 +169,7 @@ class GalleryAppState extends State<GalleryApp> {
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
       routes: _kRoutes,
-      home: home,
+      home: _applyScaleFactor(home),
     );
   }
 }

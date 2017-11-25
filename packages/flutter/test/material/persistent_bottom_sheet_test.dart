@@ -30,7 +30,7 @@ void main() {
     await tester.pump();
     expect(buildCount, equals(1));
 
-    bottomSheet.setState((){ });
+    bottomSheet.setState(() { });
     await tester.pump();
     expect(buildCount, equals(2));
   });

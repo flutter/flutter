@@ -47,7 +47,7 @@ $fontsSection
   }
 
   void writePackagesFile(String packages) {
-    fs.file(".packages")
+    fs.file('.packages')
       ..createSync()
       ..writeAsStringSync(packages);
   }

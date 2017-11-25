@@ -44,7 +44,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.backgroundColor: _kDefaultTabBarBackgroundColor,
     this.activeColor: CupertinoColors.activeBlue,
     this.inactiveColor: CupertinoColors.inactiveGray,
-    this.iconSize: 24.0,
+    this.iconSize: 30.0,
   }) : assert(items != null),
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
@@ -111,10 +111,12 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
             color: inactiveColor,
             size: iconSize,
           ),
-          child: DefaultTextStyle.merge( // Default with the inactive state.
+          child: new DefaultTextStyle( // Default with the inactive state.
             style: new TextStyle(
+              fontFamily: '.SF UI Text',
               fontSize: 10.0,
-              letterSpacing: 0.12,
+              letterSpacing: -0.24,
+              fontWeight: FontWeight.w500,
               color: inactiveColor,
             ),
             child: new Row(
@@ -185,7 +187,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   /// Create a clone of the current [CupertinoTabBar] but with provided
-  /// parameters overriden.
+  /// parameters overridden.
   CupertinoTabBar copyWith({
     Key key,
     List<BottomNavigationBarItem> items,

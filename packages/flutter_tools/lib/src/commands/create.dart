@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
+import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
@@ -23,6 +24,7 @@ import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../version.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
@@ -83,7 +85,7 @@ class CreateCommand extends FlutterCommand {
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
-  String get invocation => "${runner.executableName} $name <output directory>";
+  String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
   Future<Null> runCommand() async {
@@ -165,7 +167,7 @@ class CreateCommand extends FlutterCommand {
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
       printStatus('');
-      printStatus('Your plugin code is in lib/$projectName.dart in the $relativePath directory.');
+      printStatus('Your package code is in lib/$projectName.dart in the $relativePath directory.');
       return;
     }
 
@@ -249,17 +251,17 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       }
     } else {
       printStatus("You'll need to install additional components before you can run "
-        "your Flutter app:");
+        'your Flutter app:');
       printStatus('');
 
       // Give the user more detailed analysis.
       await doctor.diagnose();
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
-        "re-validate your setup.");
+        're-validate your setup.');
       printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
-        "directory in order to launch your app.");
-      printStatus("Your main program file is: $relativeAppPath/lib/main.dart");
+        'directory in order to launch your app.');
+      printStatus('Your main program file is: $relativeAppPath/lib/main.dart');
     }
   }
 
@@ -290,13 +292,15 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
-      'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
+      'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'flutterRevision': FlutterVersion.instance.frameworkRevision,
+      'flutterChannel': FlutterVersion.instance.channel,
     };
   }
 
@@ -333,7 +337,7 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  final RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
+  final RegExp disallowed = new RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return '$organization.$name';
@@ -362,12 +366,12 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!package_names.isValidPackageName(projectName))
+  if (!linter_utils.isValidPackageName(projectName))
     return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
 
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
-      "package dependencies.";
+      'package dependencies.';
   }
   return null;
 }
@@ -376,7 +380,7 @@ String _validateProjectName(String projectName) {
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {
-    return "Cannot create a project within the Flutter SDK.\n"
+    return 'Cannot create a project within the Flutter SDK.\n'
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
 

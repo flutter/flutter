@@ -331,7 +331,7 @@ enum TableCellVerticalAlignment {
   /// used is specified by [RenderTable.textBaseline]. It is not valid to use
   /// the baseline value if [RenderTable.textBaseline] is not specified.
   ///
-  /// This vertial alignment is relatively expensive because it causes the table
+  /// This vertical alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.
   baseline,
 
@@ -384,10 +384,7 @@ class RenderTable extends RenderBox {
     _configuration = configuration;
     _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
-    if (children != null) {
-      for (List<RenderBox> row in children)
-        addRow(row);
-    }
+    children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
@@ -400,7 +397,7 @@ class RenderTable extends RenderBox {
   /// in the table.
   ///
   /// Changing the number of columns is an expensive operation because the table
-  /// needs to rearranage its internal representation.
+  /// needs to rearrange its internal representation.
   int get columns => _columns;
   int _columns;
   set columns(int value) {
@@ -628,8 +625,7 @@ class RenderTable extends RenderBox {
       y += 1;
     }
     // drop all the lost children
-    for (RenderBox oldChild in lostChildren)
-      dropChild(oldChild);
+    lostChildren.forEach(dropChild);
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
@@ -652,8 +648,7 @@ class RenderTable extends RenderBox {
     _children.clear();
     _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
-    for (List<RenderBox> row in cells)
-      addRow(row);
+    cells.forEach(addRow);
     assert(_children.length == rows * columns);
   }
 
@@ -1167,7 +1162,7 @@ class RenderTable extends RenderBox {
     description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
     description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: "unknown"));
+    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
   }
 
   @override

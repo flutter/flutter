@@ -169,7 +169,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
     this.selectedIndex,
   });
 
-  final FractionalOffset translation;
+  final Alignment translation;
   final double tColumnToRow;
   final double tCollapsed;
   final int cardCount;
@@ -349,7 +349,7 @@ class _AllSectionsView extends AnimatedWidget {
 
     return new CustomMultiChildLayout(
       delegate: new _AllSectionsLayout(
-        translation: new FractionalOffset(selectedIndex.value - sectionIndex, 0.0),
+        translation: new Alignment((selectedIndex.value - sectionIndex) * 2.0 - 1.0, -1.0),
         tColumnToRow: tColumnToRow,
         tCollapsed: tCollapsed,
         cardCount: sections.length,

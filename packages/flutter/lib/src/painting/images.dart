@@ -7,10 +7,10 @@ import 'dart:ui' as ui show Image;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
+import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_fit.dart';
-import 'fractional_offset.dart';
 
 /// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {
@@ -23,7 +23,7 @@ enum ImageRepeat {
   /// Repeat the image in the y direction until the box is filled vertically.
   repeatY,
 
-  /// Leave uncovered poritions of the box transparent.
+  /// Leave uncovered portions of the box transparent.
   noRepeat
 }
 
@@ -41,7 +41,7 @@ class DecorationImage {
     @required this.image,
     this.colorFilter,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.centerSlice,
     this.repeat: ImageRepeat.noRepeat,
     this.matchTextDirection: false,
@@ -70,22 +70,22 @@ class DecorationImage {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// To display a subpart of an image, consider using a [CustomPainter] and
   /// [Canvas.drawImageRect].
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then a [TextDirection] must be available
+  /// [AlignmentDirectional]), then a [TextDirection] must be available
   /// when the image is painted.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// The center slice for a nine-patch image.
   ///
@@ -116,6 +116,16 @@ class DecorationImage {
   /// a scaling factor of -1 in the horizontal direction so that the origin is
   /// in the top right.
   final bool matchTextDirection;
+
+  /// Creates a [DecorationImagePainter] for this [DecorationImage].
+  ///
+  /// The `onChanged` argument must not be null. It will be called whenever the
+  /// image needs to be repainted, e.g. because it is loading incrementally or
+  /// because it is animated.
+  DecorationImagePainter createPainter(VoidCallback onChanged) {
+    assert(onChanged != null);
+    return new DecorationImagePainter._(this, onChanged);
+  }
 
   @override
   bool operator ==(dynamic other) {
@@ -157,6 +167,120 @@ class DecorationImage {
   }
 }
 
+/// The painter for a [DecorationImage].
+///
+/// To obtain a painter, call [DecorationImage.createPainter].
+///
+/// To paint, call [paint]. The `onChanged` callback passed to
+/// [DecorationImage.createPainter] will be called if the image needs to paint
+/// again (e.g. because it is animated or because it had not yet loaded the
+/// first time the [paint] method was called).
+///
+/// This object should be disposed using the [dispose] method when it is no
+/// longer needed.
+class DecorationImagePainter {
+  DecorationImagePainter._(this._details, this._onChanged);
+
+  final DecorationImage _details;
+  final VoidCallback _onChanged;
+
+  ImageStream _imageStream;
+  ImageInfo _image;
+
+  /// Draw the image onto the given canvas.
+  ///
+  /// The image is drawn at the position and size given by the `rect` argument.
+  ///
+  /// The image is clipped to the given `clipPath`, if any.
+  ///
+  /// The `configuration` object is used to resolve the image (e.g. to pick
+  /// resolution-specific assets), and to implement the
+  /// [DecorationImage.matchTextDirection] feature.
+  ///
+  /// If the image needs to be painted again, e.g. because it is animated or
+  /// because it had not yet been loaded the first time this method was called,
+  /// then the `onChanged` callback passed to [DecorationImage.createPainter]
+  /// will be called.
+  void paint(Canvas canvas, Rect rect, Path clipPath, ImageConfiguration configuration) {
+    if (_details == null)
+      return;
+
+    assert(canvas != null);
+    assert(rect != null);
+    assert(configuration != null);
+
+    bool flipHorizontally = false;
+    if (_details.matchTextDirection) {
+      assert(() {
+        // We check this first so that the assert will fire immediately, not just
+        // when the image is ready.
+        if (configuration.textDirection == null) {
+          throw new FlutterError(
+            'ImageDecoration.matchTextDirection can only be used when a TextDirection is available.\n'
+            'When DecorationImagePainter.paint() was called, there was no text direction provided '
+            'in the ImageConfiguration object to match.\n'
+            'The DecorationImage was:\n'
+            '  $_details\n'
+            'The ImageConfiguration was:\n'
+            '  $configuration'
+          );
+        }
+        return true;
+      }());
+      if (configuration.textDirection == TextDirection.rtl)
+        flipHorizontally = true;
+    }
+
+    final ImageStream newImageStream = _details.image.resolve(configuration);
+    if (newImageStream.key != _imageStream?.key) {
+      _imageStream?.removeListener(_imageListener);
+      _imageStream = newImageStream;
+      _imageStream.addListener(_imageListener);
+    }
+    if (_image == null)
+      return;
+
+    if (clipPath != null) {
+      canvas.save();
+      canvas.clipPath(clipPath);
+    }
+
+    paintImage(
+      canvas: canvas,
+      rect: rect,
+      image: _image.image,
+      colorFilter: _details.colorFilter,
+      fit: _details.fit,
+      alignment: _details.alignment.resolve(configuration.textDirection),
+      centerSlice: _details.centerSlice,
+      repeat: _details.repeat,
+      flipHorizontally: flipHorizontally,
+    );
+
+    if (clipPath != null)
+      canvas.restore();
+  }
+
+  void _imageListener(ImageInfo value, bool synchronousCall) {
+    if (_image == value)
+      return;
+    _image = value;
+    assert(_onChanged != null);
+    if (!synchronousCall)
+      _onChanged();
+  }
+
+  /// Releases the resources used by this painter.
+  ///
+  /// This should be called whenever the painter is no longer needed.
+  ///
+  /// After this method has been called, the object is no longer usable.
+  @mustCallSuper
+  void dispose() {
+    _imageStream?.removeListener(_imageListener);
+  }
+}
+
 /// Paints an image into the given rectangle on the canvas.
 ///
 /// The arguments have the following meanings:
@@ -180,9 +304,9 @@ class DecorationImage {
 ///
 ///  * `alignment`: How the destination rectangle defined by applying `fit` is
 ///    aligned within `rect`. For example, if `fit` is [BoxFit.contain] and
-///    `alignment` is [FractionalOffset.bottomRight], the image will be as large
+///    `alignment` is [Alignment.bottomRight], the image will be as large
 ///    as possible within `rect` and placed with its bottom right corner at the
-///    bottom right corner of `rect`. Defaults to [FractionalOffset.center].
+///    bottom right corner of `rect`. Defaults to [Alignment.center].
 ///
 ///  * `centerSlice`: The image is drawn in nine portions described by splitting
 ///    the image by drawing two horizontal lines and two vertical lines, where
@@ -219,7 +343,7 @@ void paintImage({
   @required ui.Image image,
   ColorFilter colorFilter,
   BoxFit fit,
-  FractionalOffset alignment: FractionalOffset.center,
+  Alignment alignment: Alignment.center,
   Rect centerSlice,
   ImageRepeat repeat: ImageRepeat.noRepeat,
   bool flipHorizontally: false,
@@ -268,8 +392,10 @@ void paintImage({
     // to nearest-neighbor.
     paint.filterQuality = FilterQuality.low;
   }
-  final double dx = (outputSize.width - destinationSize.width) * (flipHorizontally ? 1.0 - alignment.dx : alignment.dx);
-  final double dy = (outputSize.height - destinationSize.height) * alignment.dy;
+  final double halfWidthDelta = (outputSize.width - destinationSize.width) / 2.0;
+  final double halfHeightDelta = (outputSize.height - destinationSize.height) / 2.0;
+  final double dx = halfWidthDelta + (flipHorizontally ? -alignment.x : alignment.x) * halfWidthDelta;
+  final double dy = halfHeightDelta + alignment.y * halfHeightDelta;
   final Offset destinationPosition = rect.topLeft.translate(dx, dy);
   final Rect destinationRect = destinationPosition & destinationSize;
   final bool needSave = repeat != ImageRepeat.noRepeat || flipHorizontally;

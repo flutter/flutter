@@ -37,7 +37,7 @@ Widget buildTest({ ScrollController controller, String title:'TTTTTTTT' }) {
                   pinned: true,
                   expandedHeight: 200.0,
                   forceElevated: innerBoxIsScrolled,
-                  bottom: new TabBar(
+                  bottom: const TabBar(
                     tabs: const <Tab>[
                       const Tab(text: 'AA'),
                       const Tab(text: 'BB'),

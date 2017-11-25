@@ -13,7 +13,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// The maximum amount of time a single microbenchmarks is allowed to take.
+/// The maximum amount of time a single microbenchmark is allowed to take.
 const Duration _kBenchmarkTimeout = const Duration(minutes: 6);
 
 /// Creates a device lab task that runs benchmarks in
@@ -33,8 +33,9 @@ TaskFunction createMicrobenchmarkTask() {
             await prepareProvisioningCertificates(appDir.path);
           return await _startFlutter(
             options: <String>[
-              '--profile',
+              '-v',
               // --release doesn't work on iOS due to code signing issues
+              '--profile',
               '-d',
               device.deviceId,
               benchmarkPath,
@@ -72,6 +73,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
   // IMPORTANT: keep these values in sync with dev/benchmarks/microbenchmarks/lib/common.dart
   const String jsonStart = '================ RESULTS ================';
   const String jsonEnd = '================ FORMATTED ==============';
+  const String jsonPrefix = ':::JSON:::';
   bool jsonStarted = false;
   final StringBuffer jsonBuf = new StringBuffer();
   final Completer<Map<String, double>> completer = new Completer<Map<String, double>>();
@@ -83,7 +85,6 @@ Future<Map<String, double>> _readJsonResults(Process process) {
         stderr.writeln('[STDERR] $line');
       });
 
-  int prefixLength = 0;
   bool processWasKilledIntentionally = false;
   final StreamSubscription<String> stdoutSub = process.stdout
       .transform(const Utf8Decoder())
@@ -93,7 +94,6 @@ Future<Map<String, double>> _readJsonResults(Process process) {
 
     if (line.contains(jsonStart)) {
       jsonStarted = true;
-      prefixLength = line.indexOf(jsonStart);
       return;
     }
 
@@ -106,7 +106,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
     }
 
     if (jsonStarted)
-      jsonBuf.writeln(line.substring(prefixLength));
+      jsonBuf.writeln(line.substring(line.indexOf(jsonPrefix) + jsonPrefix.length));
   });
 
   process.exitCode.then<int>((int code) {

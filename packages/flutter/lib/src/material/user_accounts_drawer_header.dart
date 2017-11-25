@@ -70,7 +70,7 @@ class _AccountDetails extends StatelessWidget {
   Widget addDropdownIcon(Widget line) {
     final Widget icon = new Expanded(
       child: new Align(
-        alignment: FractionalOffsetDirectional.centerEnd,
+        alignment: AlignmentDirectional.centerEnd,
         child: new Icon(
           isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
           color: Colors.white
@@ -131,7 +131,7 @@ class _AccountDetails extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [DrawerHeader], for a drawer header that doesn't show user acounts
+///  * [DrawerHeader], for a drawer header that doesn't show user accounts
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.

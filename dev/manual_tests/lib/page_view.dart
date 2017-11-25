@@ -112,7 +112,7 @@ class PageViewAppState extends State<PageViewApp> {
     return new AppBar(
       title: const Text('PageView'),
       actions: <Widget>[
-        new Text(scrollDirection == Axis.horizontal ? "horizontal" : "vertical"),
+        new Text(scrollDirection == Axis.horizontal ? 'horizontal' : 'vertical'),
       ],
     );
   }

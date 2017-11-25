@@ -139,7 +139,7 @@ void main () {
 
 class TestWidget extends StatelessWidget {
 
-  TestWidget({
+  const TestWidget({
     this.tapHandler: nullHandler,
     this.longPressHandler: nullHandler,
   });

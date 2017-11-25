@@ -15,39 +15,37 @@ void main() {
     bool _isNotWhitelisted(FileSystemEntity entity) => entity.path != whitelistedPath;
 
     for (String dirName in <String>['lib', 'bin']) {
-      fs.directory(fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotWhitelisted)
-        .map(_asFile)
-        .forEach((File file) {
-          for (String line in file.readAsLinesSync()) {
-            if (line.startsWith(new RegExp(r'import.*dart:io')) &&
-                !line.contains('ignore: dart_io_import')) {
-              final String relativePath = fs.path.relative(file.path, from:flutterTools);
-              fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
-            }
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(new RegExp(r'import.*dart:io')) &&
+              !line.contains('ignore: dart_io_import')) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
           }
         }
-      );
+      }
     }
   });
 
   test('no unauthorized imports of package:path', () {
     for (String dirName in <String>['lib', 'bin', 'test']) {
-      fs.directory(fs.path.join(flutterTools, dirName))
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
-        .map(_asFile)
-        .forEach((File file) {
-          for (String line in file.readAsLinesSync()) {
-            if (line.startsWith(new RegExp(r'import.*package:path/path.dart'))) {
-              final String relativePath = fs.path.relative(file.path, from:flutterTools);
-              fail("$relativePath imports 'package:path/path.dart'; use 'fs.path' instead");
-            }
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(new RegExp(r'import.*package:path/path.dart'))) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:path/path.dart'; use 'fs.path' instead");
           }
         }
-      );
+      }
     }
   });
 }

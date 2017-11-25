@@ -8,13 +8,13 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
-import 'semantics.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
@@ -221,10 +221,11 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   }
 
   @override
-  SemanticsAnnotator get semanticsAnnotator => _excludeFromSemanticsScrolling ? _annotate : null;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  void _annotate(SemanticsNode node) {
-    node.addTag(RenderSemanticsGestureHandler.excludeFromScrolling);
+    if (_excludeFromSemanticsScrolling)
+      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
   }
 
   @override

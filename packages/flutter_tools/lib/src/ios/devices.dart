@@ -16,6 +16,7 @@ import '../build_info.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
+import 'code_signing.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
 
@@ -162,6 +163,7 @@ class IOSDevice extends Device {
     bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
@@ -238,51 +240,49 @@ class IOSDevice extends Device {
 
     int installationResult = -1;
     Uri localObservatoryUri;
-    Uri localDiagnosticUri;
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
       printTrace('Debugging is not enabled');
-      installationResult = await runCommandAndStreamOutput(launchCommand, trace: true);
+      installationResult = await runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
+      );
     } else {
-      // Debugging is enabled, look for the observatory and diagnostic server
-      // ports post launch.
-      printTrace('Debugging is enabled, connecting to observatory and the diagnostic server');
+      // Debugging is enabled, look for the observatory server port post launch.
+      printTrace('Debugging is enabled, connecting to observatory');
 
       // TODO(danrubel): The Android device class does something similar to this code below.
       // The various Device subclasses should be refactored and common code moved into the superclass.
       final ProtocolDiscovery observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
-      final ProtocolDiscovery diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
-        getLogReader(app: app), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
+        getLogReader(app: app),
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        ipv6: ipv6,
+      );
 
       final Future<Uri> forwardObservatoryUri = observatoryDiscovery.uri;
-      Future<Uri> forwardDiagnosticUri;
-      if (debuggingOptions.buildInfo.isDebug) {
-        forwardDiagnosticUri = diagnosticDiscovery.uri;
-      } else {
-        forwardDiagnosticUri = new Future<Uri>.value(null);
-      }
 
-      final Future<int> launch = runCommandAndStreamOutput(launchCommand, trace: true);
+      final Future<int> launch = runCommandAndStreamOutput(
+        launchCommand,
+        mapFunction: monitorInstallationFailure,
+        trace: true,
+      );
 
-      final List<Uri> uris = await launch.then<List<Uri>>((int result) async {
+      localObservatoryUri = await launch.then<Uri>((int result) async {
         installationResult = result;
 
         if (result != 0) {
           printTrace('Failed to launch the application on device.');
-          return <Uri>[null, null];
+          return null;
         }
 
-        printTrace('Application launched on the device. Attempting to forward ports.');
-        return await Future.wait(<Future<Uri>>[forwardObservatoryUri, forwardDiagnosticUri]);
+        printTrace('Application launched on the device. Waiting for observatory port.');
+        return await forwardObservatoryUri;
       }).whenComplete(() {
         observatoryDiscovery.cancel();
-        diagnosticDiscovery.cancel();
       });
-
-      localObservatoryUri = uris[0];
-      localDiagnosticUri = uris[1];
     }
 
     if (installationResult != 0) {
@@ -293,7 +293,7 @@ class IOSDevice extends Device {
       return new LaunchResult.failed();
     }
 
-    return new LaunchResult.succeeded(observatoryUri: localObservatoryUri, diagnosticUri: localDiagnosticUri);
+    return new LaunchResult.succeeded(observatoryUri: localObservatoryUri);
   }
 
   @override
@@ -345,6 +345,33 @@ class IOSDevice extends Device {
 
   @override
   Future<Null> takeScreenshot(File outputFile) => iMobileDevice.takeScreenshot(outputFile);
+
+  // Maps stdout line stream. Must return original line.
+  String monitorInstallationFailure(String stdout) {
+    // Installation issues.
+    if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
+      printError(noProvisioningProfileInstruction, emphasis: true);
+
+    // Launch issues.
+    } else if (stdout.contains('e80000e2')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Your device is locked. Unlock your device first before running.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    } else if (stdout.contains('Error 0xe8000022')) {
+      printError('''
+═══════════════════════════════════════════════════════════════════════════════════
+Error launching app. Try launching from within Xcode via:
+    open ios/Runner.xcworkspace
+
+Your Xcode version may be too old for your iOS version.
+═══════════════════════════════════════════════════════════════════════════════════''',
+      emphasis: true);
+    }
+
+    return stdout;
+  }
 }
 
 class _IOSDeviceLogReader extends DeviceLogReader {

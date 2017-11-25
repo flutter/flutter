@@ -34,21 +34,26 @@ Future<int> runTests(
   if (!terminal.supportsColor)
     testArgs.addAll(<String>['--no-color', '-rexpanded']);
 
-  if (enableObservatory) {
-    // (In particular, for collecting code coverage.)
-    testArgs.add('--concurrency=1');
-  }
-
   if (machine) {
     testArgs.addAll(<String>['-r', 'json']);
   }
 
+  if (enableObservatory) {
+    // (In particular, for collecting code coverage.)
+
+    // Turn on concurrency, but just barely.  If we just go with full concurrency, then
+    // individual tests timeout.  If we turn it off (=1), then the overall tests timeout.
+    // This is a lit fuse... Eventually it won't matter what number we put here.
+    // TODO(gspencer): Fix this: https://github.com/flutter/flutter/issues/10694
+    testArgs.add('--concurrency=2');
+  }
+
   for (String name in names) {
-    testArgs..add("--name")..add(name);
+    testArgs..add('--name')..add(name);
   }
 
   for (String plainName in plainNames) {
-    testArgs..add("--plain-name")..add(plainName);
+    testArgs..add('--plain-name')..add(plainName);
   }
 
   testArgs.add('--');

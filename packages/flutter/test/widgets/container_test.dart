@@ -10,7 +10,7 @@ import '../rendering/mock_canvas.dart';
 void main() {
   testWidgets('Container control test', (WidgetTester tester) async {
     final Container container = new Container(
-      alignment: FractionalOffset.bottomRight,
+      alignment: Alignment.bottomRight,
       padding: const EdgeInsets.all(7.0),
       // uses color, not decoration:
       color: const Color(0xFF00FF00),
@@ -37,7 +37,7 @@ void main() {
     expect(container, hasOneLineDescription);
 
     await tester.pumpWidget(new Align(
-      alignment: FractionalOffset.topLeft,
+      alignment: Alignment.topLeft,
       child: container
     ));
 
@@ -96,7 +96,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: FractionalOffset.bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -173,7 +173,7 @@ void main() {
         '           │ parentData: offset=Offset(7.0, 7.0) (can use size)\n'
         '           │ constraints: BoxConstraints(w=39.0, h=64.0)\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: FractionalOffset.bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
         '           │\n'
@@ -281,7 +281,7 @@ void main() {
         '           │ layer: null\n'
         '           │ semantics node: null\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: FractionalOffset.bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'
@@ -412,7 +412,7 @@ void main() {
         '           │ isBlockingSemanticsOfPreviouslyPaintedNodes: false\n'
         '           │ isSemanticBoundary: false\n'
         '           │ size: Size(39.0, 64.0)\n'
-        '           │ alignment: FractionalOffset.bottomRight\n'
+        '           │ alignment: Alignment.bottomRight\n'
         '           │ textDirection: null\n'
         '           │ widthFactor: expand\n'
         '           │ heightFactor: expand\n'

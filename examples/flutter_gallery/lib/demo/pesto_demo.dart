@@ -162,14 +162,14 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
 
   void showFavoritesPage(BuildContext context) {
     Navigator.push(context, new MaterialPageRoute<Null>(
-      settings: const RouteSettings(name: "/pesto/favorites"),
+      settings: const RouteSettings(name: '/pesto/favorites'),
       builder: (BuildContext context) => new PestoFavorites(),
     ));
   }
 
   void showRecipePage(BuildContext context, Recipe recipe) {
     Navigator.push(context, new MaterialPageRoute<Null>(
-      settings: const RouteSettings(name: "/pesto/recipe"),
+      settings: const RouteSettings(name: '/pesto/recipe'),
       builder: (BuildContext context) {
         return new Theme(
           data: _kTheme.copyWith(platform: Theme.of(context).platform),
@@ -211,7 +211,7 @@ class _PestoLogoState extends State<PestoLogo> {
   Widget build(BuildContext context) {
     return new Transform(
       transform: new Matrix4.identity()..scale(widget.height / kLogoHeight),
-      alignment: FractionalOffset.topCenter,
+      alignment: Alignment.topCenter,
       child: new SizedBox(
         width: kLogoWidth,
         child: new Stack(
@@ -251,48 +251,46 @@ class RecipeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MergeSemantics(
-      child: new GestureDetector(
-        onTap: onTap,
-        child: new Card(
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              new Hero(
-                tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
-                child: new Image.asset(
-                  recipe.imagePath,
-                  package: recipe.imagePackage,
-                  fit: BoxFit.contain,
-                ),
+    return new GestureDetector(
+      onTap: onTap,
+      child: new Card(
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            new Hero(
+              tag: 'packages/$_kGalleryAssetsPackage/${recipe.imagePath}',
+              child: new Image.asset(
+                recipe.imagePath,
+                package: recipe.imagePackage,
+                fit: BoxFit.contain,
               ),
-              new Expanded(
-                child: new Row(
-                  children: <Widget>[
-                    new Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: new Image.asset(
-                        recipe.ingredientsImagePath,
-                        package: recipe.ingredientsImagePackage,
-                        width: 48.0,
-                        height: 48.0,
-                      ),
+            ),
+            new Expanded(
+              child: new Row(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Image.asset(
+                      recipe.ingredientsImagePath,
+                      package: recipe.ingredientsImagePackage,
+                      width: 48.0,
+                      height: 48.0,
                     ),
-                    new Expanded(
-                      child: new Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
-                          new Text(recipe.author, style: authorStyle),
-                        ],
-                      ),
+                  ),
+                  new Expanded(
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        new Text(recipe.name, style: titleStyle, softWrap: false, overflow: TextOverflow.ellipsis),
+                        new Text(recipe.author, style: authorStyle),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -362,8 +360,8 @@ class _RecipePageState extends State<RecipePage> {
                   background: new DecoratedBox(
                     decoration: new BoxDecoration(
                       gradient: new LinearGradient(
-                        begin: const FractionalOffset(0.5, 0.0),
-                        end: const FractionalOffset(0.5, 0.40),
+                        begin: const Alignment(0.0, -1.0),
+                        end: const Alignment(0.0, -0.2),
                         colors: <Color>[const Color(0x60000000), const Color(0x00000000)],
                       ),
                     ),
@@ -450,7 +448,7 @@ class RecipeSheet extends StatelessWidget {
                     package: recipe.ingredientsImagePackage,
                     width: 32.0,
                     height: 32.0,
-                    alignment: FractionalOffset.centerLeft,
+                    alignment: Alignment.centerLeft,
                     fit: BoxFit.scaleDown
                   )
                 ),

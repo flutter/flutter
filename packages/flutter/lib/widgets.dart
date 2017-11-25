@@ -87,6 +87,7 @@ export 'src/widgets/status_transitions.dart';
 export 'src/widgets/table.dart';
 export 'src/widgets/text.dart';
 export 'src/widgets/text_selection.dart';
+export 'src/widgets/texture.dart';
 export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';

@@ -75,6 +75,7 @@ Future<Map<String, String>> hasReassemble(Future<Map<String, String>> pendingRes
   await binding.flushMicrotasks();
   expect(binding.frameScheduled, isTrue);
   expect(completed, isFalse);
+  await binding.flushMicrotasks();
   await binding.doFrame();
   await binding.flushMicrotasks();
   expect(completed, isTrue);
@@ -411,6 +412,7 @@ void main() {
     await binding.flushMicrotasks();
     expect(binding.frameScheduled, isTrue);
     expect(completed, false);
+    await binding.flushMicrotasks();
     await binding.doFrame();
     await binding.flushMicrotasks();
     expect(completed, true);

@@ -23,7 +23,7 @@ import 'theme.dart';
 /// A material design data table that shows data using multiple pages.
 ///
 /// A paginated data table shows [rowsPerPage] rows of data per page and
-/// provies controls for showing other pages.
+/// provides controls for showing other pages.
 ///
 /// Data is read lazily from from a [DataTableSource]. The widget is presented
 /// as a [Card].

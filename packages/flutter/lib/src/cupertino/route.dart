@@ -10,22 +10,22 @@ import 'package:flutter/widgets.dart';
 const double _kBackGestureWidth = 20.0;
 const double _kMinFlingVelocity = 1.0; // Screen widths per second.
 
-// Fractional offset from offscreen to the right to fully on screen.
-final FractionalOffsetTween _kRightMiddleTween = new FractionalOffsetTween(
-  begin: FractionalOffset.topRight,
-  end: FractionalOffset.topLeft,
+// Offset from offscreen to the right to fully on screen.
+final Tween<Offset> _kRightMiddleTween = new Tween<Offset>(
+  begin: const Offset(1.0, 0.0),
+  end: Offset.zero,
 );
 
-// Fractional offset from fully on screen to 1/3 offscreen to the left.
-final FractionalOffsetTween _kMiddleLeftTween = new FractionalOffsetTween(
-  begin: FractionalOffset.topLeft,
-  end: const FractionalOffset(-1.0/3.0, 0.0),
+// Offset from fully on screen to 1/3 offscreen to the left.
+final Tween<Offset> _kMiddleLeftTween = new Tween<Offset>(
+  begin: Offset.zero,
+  end: const Offset(-1.0/3.0, 0.0),
 );
 
-// Fractional offset from offscreen below to fully on screen.
-final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-  begin: FractionalOffset.bottomLeft,
-  end: FractionalOffset.topLeft,
+// Offset from offscreen below to fully on screen.
+final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+  begin: const Offset(0.0, 1.0),
+  end: Offset.zero,
 );
 
 // Custom decoration from no shadow to page shadow mimicking iOS page
@@ -35,8 +35,8 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
   end: const _CupertinoEdgeShadowDecoration(
     edgeGradient: const LinearGradient(
       // Spans 5% of the page.
-      begin: const FractionalOffset(0.95, 0.0),
-      end: FractionalOffset.topRight,
+      begin: const Alignment(0.90, 0.0),
+      end: Alignment.centerRight,
       // Eyeballed gradient used to mimic a drop shadow on the left side only.
       colors: const <Color>[
         const Color(0x00000000),
@@ -88,8 +88,10 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(settings != null),
        assert(maintainState != null),
        assert(fullscreenDialog != null),
-       assert(opaque), // PageRoute makes it return true.
-       super(settings: settings, fullscreenDialog: fullscreenDialog);
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
+    assert(opaque); // PageRoute makes it return true.
+  }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
@@ -198,7 +200,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Begin dismissing this route from a horizontal swipe, if appropriate.
   ///
   /// Swiping will be disabled if the page is a fullscreen dialog or if
-  /// dismissals can be overriden because a [WillPopCallback] was
+  /// dismissals can be overridden because a [WillPopCallback] was
   /// defined for the route.
   ///
   /// When this method decides a pop gesture is appropriate, it returns a
@@ -318,9 +320,9 @@ class CupertinoPageTransition extends StatelessWidget {
       super(key: key);
 
   // When this page is coming in to cover another page.
-  final Animation<FractionalOffset> _primaryPositionAnimation;
+  final Animation<Offset> _primaryPositionAnimation;
   // When this page is becoming covered by another page.
-  final Animation<FractionalOffset> _secondaryPositionAnimation;
+  final Animation<Offset> _secondaryPositionAnimation;
   final Animation<Decoration> _primaryShadowAnimation;
 
   /// The widget below this widget in the tree.
@@ -361,7 +363,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
        ),
        super(key: key);
 
-  final Animation<FractionalOffset> _positionAnimation;
+  final Animation<Offset> _positionAnimation;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -562,7 +564,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
       const _CupertinoEdgeShadowDecoration();
 
   /// A gradient to draw to the left of the box being decorated.
-  /// FractionalOffsets are relative to the original box translated one box
+  /// Alignments are relative to the original box translated one box
   /// width to the left.
   final LinearGradient edgeGradient;
 

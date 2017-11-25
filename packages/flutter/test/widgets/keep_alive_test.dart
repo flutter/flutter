@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class Leaf extends StatefulWidget {
-  Leaf({ Key key, this.child }) : super(key: key);
+  const Leaf({ Key key, this.child }) : super(key: key);
   final Widget child;
   @override
   _LeafState createState() => new _LeafState();

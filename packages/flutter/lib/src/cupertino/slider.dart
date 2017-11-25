@@ -31,7 +31,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/sliders/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
 class CupertinoSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
   ///
@@ -179,7 +179,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const double _kTrackHeight = 2.0;
 const Color _kTrackColor = const Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
@@ -187,7 +186,7 @@ final Duration _kDiscreteTransitionDuration = const Duration(milliseconds: 500);
 
 const double _kAdjustmentUnit = 0.1; // Matches iOS implementation of material slider.
 
-class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsActionHandler {
+class _RenderCupertinoSlider extends RenderConstrainedBox {
   _RenderCupertinoSlider({
     @required double value,
     int divisions,
@@ -253,7 +252,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
     final bool wasInteractive = isInteractive;
     _onChanged = value;
     if (wasInteractive != isInteractive)
-      markNeedsSemanticsUpdate(noGeometry: true);
+      markNeedsSemanticsUpdate();
   }
 
   TextDirection get textDirection => _textDirection;
@@ -379,31 +378,25 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements SemanticsAc
   }
 
   @override
-  bool get isSemanticBoundary => isInteractive;
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
-
-  void _annotate(SemanticsNode semantics) {
-    if (isInteractive)
-      semantics.addAdjustmentActions();
+    config.isSemanticBoundary = isInteractive;
+    if (isInteractive) {
+      config.addAction(SemanticsAction.increase, _increaseAction);
+      config.addAction(SemanticsAction.decrease, _decreaseAction);
+    }
   }
 
-  @override
-  void performAction(SemanticsAction action) {
-    final double unit = divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
-    switch (action) {
-      case SemanticsAction.increase:
-        if (isInteractive)
-          onChanged((value + unit).clamp(0.0, 1.0));
-        break;
-      case SemanticsAction.decrease:
-        if (isInteractive)
-          onChanged((value - unit).clamp(0.0, 1.0));
-        break;
-      default:
-        assert(false);
-        break;
-    }
+  double get _semanticActionUnit => divisions != null ? 1.0 / divisions : _kAdjustmentUnit;
+
+  void _increaseAction() {
+    if (isInteractive)
+      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0));
+  }
+
+  void _decreaseAction() {
+    if (isInteractive)
+      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0));
   }
 }

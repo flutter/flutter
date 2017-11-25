@@ -254,6 +254,159 @@ void main() {
     expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byType(Icon)).dx));
   });
 
+  testWidgets('Chip responds to textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              const Chip(
+                avatar: const CircleAvatar(
+                    child: const Text('A')
+                ),
+                label: const Text('Chip A'),
+              ),
+              const Chip(
+                avatar: const CircleAvatar(
+                    child: const Text('B')
+                ),
+                label: const Text('Chip B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
+    // https://github.com/flutter/flutter/issues/12357
+    expect(
+      tester.getSize(find.text('Chip A')),
+      anyOf(const Size(79.0, 13.0), const Size(78.0, 13.0)),
+    );
+    expect(
+      tester.getSize(find.text('Chip B')),
+      anyOf(const Size(79.0, 13.0), const Size(78.0, 13.0)),
+    );
+    expect(
+      tester.getSize(find.byType(Chip).first),
+      anyOf(const Size(131.0, 32.0), const Size(130.0, 32.0))
+    );
+    expect(
+      tester.getSize(find.byType(Chip).last),
+      anyOf(const Size(131.0, 32.0), const Size(130.0, 32.0))
+    );
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(textScaleFactor: 3.0),
+          child: new Material(
+            child: new Column(
+              children: <Widget>[
+                const Chip(
+                  avatar: const CircleAvatar(
+                      child: const Text('A')
+                  ),
+                  label: const Text('Chip A'),
+                ),
+                const Chip(
+                  avatar: const CircleAvatar(
+                      child: const Text('B')
+                  ),
+                  label: const Text('Chip B'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
+    // https://github.com/flutter/flutter/issues/12357
+    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(39.0));
+    expect(tester.getSize(find.byType(Chip).last).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).last).height, equals(39.0));
+
+    // Check that individual text scales are taken into account.
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              const Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('A')
+                ),
+                label: const Text('Chip A', textScaleFactor: 3.0),
+              ),
+              const Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('B')
+                ),
+                label: const Text('Chip B'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
+    // https://github.com/flutter/flutter/issues/12357
+    expect(tester.getSize(find.text('Chip A')), anyOf(const Size(234.0, 39.0), const Size(235.0, 39.0)));
+    expect(tester.getSize(find.text('Chip B')), anyOf(const Size(78.0, 13.0), const Size(79.0, 13.0)));
+    expect(tester.getSize(find.byType(Chip).first).width, anyOf(286.0, 287.0));
+    expect(tester.getSize(find.byType(Chip).first).height, equals(39.0));
+    expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(130.0, 32.0), const Size(131.0, 32.0)));
+  });
+
+  testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
+    final Key keyA = new GlobalKey();
+    final Key keyB = new GlobalKey();
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new Column(
+            children: <Widget>[
+              new Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('A')
+                ),
+                label: new Text('Chip A', key: keyA),
+              ),
+              new Chip(
+                avatar: const CircleAvatar(
+                  child: const Text('B')
+                ),
+                label: new Container(key: keyB, width: 10.0, height: 10.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // TODO(gspencer): Update this test when the font metric bug is fixed to remove the anyOfs.
+    // https://github.com/flutter/flutter/issues/12357
+    expect(
+      tester.getSize(find.byKey(keyA)),
+      anyOf(const Size(79.0, 13.0), const Size(78.0, 13.0)),
+    );
+    expect(tester.getSize(find.byKey(keyB)), const Size(10.0, 10.0));
+    expect(
+      tester.getSize(find.byType(Chip).first),
+      anyOf(const Size(131.0, 32.0), const Size(130.0, 32.0)),
+    );
+    expect(tester.getSize(find.byType(Chip).last), const Size(62.0, 32.0));
+  });
+
+
+
   testWidgets('Chip padding - LTR', (WidgetTester tester) async {
     final GlobalKey keyA = new GlobalKey();
     final GlobalKey keyB = new GlobalKey();
@@ -281,10 +434,10 @@ void main() {
     );
     expect(tester.getTopLeft(find.byKey(keyA)), const Offset(0.0, 284.0));
     expect(tester.getBottomRight(find.byKey(keyA)), const Offset(32.0, 316.0));
-    expect(tester.getTopLeft(find.byKey(keyB)), const Offset(40.0, 284.0));
-    expect(tester.getBottomRight(find.byKey(keyB)), const Offset(774.0, 316.0));
-    expect(tester.getTopLeft(find.byType(Icon)), const Offset(778.0, 291.0));
-    expect(tester.getBottomRight(find.byType(Icon)), const Offset(796.0, 309.0));
+    expect(tester.getTopLeft(find.byKey(keyB)), const Offset(40.0, 0.0));
+    expect(tester.getBottomRight(find.byKey(keyB)), const Offset(768.0, 600.0));
+    expect(tester.getTopLeft(find.byType(Icon)), const Offset(772.0, 288.0));
+    expect(tester.getBottomRight(find.byType(Icon)), const Offset(796.0, 312.0));
   });
 
   testWidgets('Chip padding - RTL', (WidgetTester tester) async {
@@ -314,9 +467,9 @@ void main() {
     );
     expect(tester.getTopRight(find.byKey(keyA)), const Offset(800.0 - 0.0, 284.0));
     expect(tester.getBottomLeft(find.byKey(keyA)), const Offset(800.0 - 32.0, 316.0));
-    expect(tester.getTopRight(find.byKey(keyB)), const Offset(800.0 - 40.0, 284.0));
-    expect(tester.getBottomLeft(find.byKey(keyB)), const Offset(800.0 - 774.0, 316.0));
-    expect(tester.getTopRight(find.byType(Icon)), const Offset(800.0 - 778.0, 291.0));
-    expect(tester.getBottomLeft(find.byType(Icon)), const Offset(800.0 - 796.0, 309.0));
+    expect(tester.getTopRight(find.byKey(keyB)), const Offset(800.0 - 40.0, 0.0));
+    expect(tester.getBottomLeft(find.byKey(keyB)), const Offset(800.0 - 768.0, 600.0));
+    expect(tester.getTopRight(find.byType(Icon)), const Offset(800.0 - 772.0, 288.0));
+    expect(tester.getBottomLeft(find.byType(Icon)), const Offset(800.0 - 796.0, 312.0));
   });
 }

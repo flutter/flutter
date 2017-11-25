@@ -157,7 +157,7 @@ abstract class Route<T> {
   /// This route's previous route has changed to the given new route. This is
   /// called on a route whenever the previous route changes for any reason, so
   /// long as it is in the history, except for immediately after the route has
-  /// been pushed (in which wase [didPush] or [didReplace] will be called
+  /// been pushed (in which case [didPush] or [didReplace] will be called
   /// instead). `previousRoute` will be null if there's no previous route.
   @protected
   @mustCallSuper
@@ -207,7 +207,7 @@ abstract class Route<T> {
   ///
   /// If a later route is entirely opaque, then the route will be active but not
   /// rendered. It is even possible for the route to be active but for the stateful
-  /// widgets within the route to not be instatiated. See [ModalRoute.maintainState].
+  /// widgets within the route to not be instantiated. See [ModalRoute.maintainState].
   bool get isActive {
     return _navigator != null && _navigator._history.contains(this);
   }
@@ -437,7 +437,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Custom routes
 ///
-/// You can create your own subclass of one the widget library route classes
+/// You can create your own subclass of one of the widget library route classes
 /// like [PopupRoute], [ModalRoute], or [PageRoute], to control the animated
 /// transition employed to show the route, the color and behavior of the route's
 /// modal barrier, and other aspects of the route.
@@ -708,8 +708,17 @@ class Navigator extends StatefulWidget {
   ///   ..pop()
   ///   ..pushNamed('/settings');
   /// ```
-  static NavigatorState of(BuildContext context) {
-    final NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+  ///
+  /// If `rootNavigator` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for pushing contents above all subsequent
+  /// instances of [Navigator].
+  static NavigatorState of(
+    BuildContext context, {
+      bool rootNavigator: false
+    }) {
+    final NavigatorState navigator = rootNavigator
+        ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
+        : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null) {
         throw new FlutterError(
@@ -782,15 +791,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }());
         push(_routeNamed(Navigator.defaultRouteName));
       } else {
-        for (Route<dynamic> route in plannedInitialRoutes)
-          push(route);
+        plannedInitialRoutes.forEach(push);
       }
     } else {
       Route<dynamic> route;
       if (initialRouteName != Navigator.defaultRouteName)
         route = _routeNamed(initialRouteName, allowNull: true);
-      if (route == null)
-        route = _routeNamed(Navigator.defaultRouteName);
+      route ??= _routeNamed(Navigator.defaultRouteName);
       push(route);
     }
     for (Route<dynamic> route in _history)
@@ -1320,8 +1327,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         absorber?.absorbing = true;
       });
     }
-    for (int pointer in _activePointers.toList())
-      WidgetsBinding.instance.cancelPointer(pointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   @override

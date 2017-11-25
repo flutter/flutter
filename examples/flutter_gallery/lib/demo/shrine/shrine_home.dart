@@ -320,7 +320,7 @@ class _ProductItem extends StatelessWidget {
             new Column(
               children: <Widget>[
                 new Align(
-                  alignment: FractionalOffset.centerRight,
+                  alignment: Alignment.centerRight,
                   child: new _ProductPriceItem(product: product),
                 ),
                 new Container(

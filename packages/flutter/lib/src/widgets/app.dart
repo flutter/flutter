@@ -44,17 +44,6 @@ typedef Locale LocaleResolutionCallback(Locale locale, Iterable<Locale> supporte
 /// This function must not return null.
 typedef String GenerateAppTitle(BuildContext context);
 
-// Delegate that fetches the default (English) strings.
-class _WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const _WidgetsLocalizationsDelegate();
-
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
-
-  @override
-  bool shouldReload(_WidgetsLocalizationsDelegate old) => false;
-}
-
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.
 ///
@@ -128,6 +117,9 @@ class WidgetsApp extends StatefulWidget {
   /// localized title.
   ///
   /// This callback function must not return null.
+  ///
+  /// The [onGenerateTitle] callback is called each time the [WidgetsApp]
+  /// rebuilds.
   final GenerateAppTitle onGenerateTitle;
 
   /// The default text style for [Text] in the application.
@@ -399,6 +391,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   }
 
   @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of ui.window has changed. We reference
+      // ui.window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  @override
   void didChangeLocale(Locale locale) {
     if (locale == _locale)
       return;
@@ -414,11 +415,11 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   // by the localizationsDelegates parameter, if any. Only the first delegate
   // of a particular LocalizationsDelegate.type is loaded so the
   // localizationsDelegate parameter can be used to override
-  // _WidgetsLocalizationsDelegate.
+  // WidgetsLocalizations.delegate.
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
-    yield const _WidgetsLocalizationsDelegate();
+    yield DefaultWidgetsLocalizations.delegate;
   }
 
   @override

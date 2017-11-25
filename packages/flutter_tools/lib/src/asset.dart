@@ -194,9 +194,7 @@ class AssetBundle {
 
   void dump() {
     printTrace('Dumping AssetBundle:');
-    for (String archivePath in entries.keys.toList()..sort()) {
-      printTrace(archivePath);
-    }
+    (entries.keys.toList()..sort()).forEach(printTrace);
   }
 }
 
@@ -447,6 +445,9 @@ class _AssetDirectoryCache {
   List<String> variantsFor(String assetPath) {
     final String assetName = fs.path.basename(assetPath);
     final String directory = fs.path.dirname(assetPath);
+
+    if (!fs.directory(directory).existsSync())
+      return const <String>[];
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];

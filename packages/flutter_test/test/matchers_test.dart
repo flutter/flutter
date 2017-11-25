@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 
 /// Class that makes it easy to mock common toStringDeep behavior.
@@ -26,7 +28,7 @@ class _MockToStringDeep {
   /// line break.
   List<String> _lines;
 
-  String toStringDeep({ String prefixLineOne: "", String prefixOtherLines: "" }) {
+  String toStringDeep({ String prefixLineOne: '', String prefixOtherLines: '' }) {
     final StringBuffer sb = new StringBuffer();
     if (_lines.isNotEmpty)
       sb.write('$prefixLineOne${_lines.first}');
@@ -178,5 +180,33 @@ void main() {
 
     expect(11.0, moreOrLessEquals(-11.0, epsilon: 100.0));
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
+  });
+
+  test('within', () {
+    expect(0.0, within<double>(distance: 0.1, from: 0.05));
+    expect(0.0, isNot(within<double>(distance: 0.1, from: 0.2)));
+
+    expect(0, within<int>(distance: 1, from: 1));
+    expect(0, isNot(within<int>(distance: 1, from: 2)));
+
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x01000000)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00010000)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00000100)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x00000001)));
+    expect(const Color(0x00000000), within<Color>(distance: 1, from: const Color(0x01010101)));
+    expect(const Color(0x00000000), isNot(within<Color>(distance: 1, from: const Color(0x02000000))));
+
+    expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
+    expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
+
+    expect(
+      () => within<bool>(distance: 1, from: false),
+      throwsArgumentError,
+    );
+
+    expect(
+      () => within<int>(distance: 1, from: 2, distanceFunction: (int a, int b) => -1).matches(1, <dynamic, dynamic>{}),
+      throwsArgumentError,
+    );
   });
 }

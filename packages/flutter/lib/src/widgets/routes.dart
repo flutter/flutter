@@ -632,9 +632,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///    ) {
   ///     return new SlideTransition(
-  ///       position: new FractionalOffsetTween(
-  ///         begin: FractionalOffset.bottomLeft,
-  ///         end: FractionalOffset.topLeft
+  ///       position: new Tween<Offset>(
+  ///         begin: const Offset(0.0, 1.0),
+  ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: child, // child is the value returned by pageBuilder
   ///     );
@@ -669,14 +669,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///   ) {
   ///     return new SlideTransition(
-  ///       position: new FractionalOffsetTween(
-  ///         begin: FractionalOffset.bottomLeft,
-  ///         end: FractionalOffset.topLeft,
+  ///       position: new AlignmentTween(
+  ///         begin: const Offset(0.0, 1.0),
+  ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: new SlideTransition(
-  ///         position: new FractionalOffsetTween(
-  ///           begin: FractionalOffset.topLeft,
-  ///           end: FractionalOffset.bottomLeft,
+  ///         position: new TweenOffset(
+  ///           begin: Offset.zero,
+  ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
   ///         child: child,
   ///       ),

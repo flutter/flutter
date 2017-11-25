@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -14,7 +14,6 @@ import 'package:http/http.dart' as http;
 import 'asset_bundle.dart';
 import 'http_client.dart';
 import 'image_cache.dart';
-import 'image_decoder.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -159,7 +158,7 @@ class ImageConfiguration {
 /// To obtain an [ImageStream] from an [ImageProvider], call [resolve],
 /// passing it an [ImageConfiguration] object.
 ///
-/// ImageProvides uses the global [imageCache] to cache images.
+/// [ImageProvider] uses the global [imageCache] to cache images.
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
@@ -365,8 +364,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// image using [loadAsync].
   @override
   ImageStreamCompleter load(AssetBundleImageKey key) {
-    return new OneFrameImageStreamCompleter(
-      loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -379,29 +379,21 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ImageInfo> loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    final ui.Image image = await decodeImage(data);
-    if (image == null)
-      throw 'Unable to decode image data';
-    return new ImageInfo(image: image, scale: key.scale);
-  }
-
-  /// Converts raw image data from a [ByteData] buffer into a decoded
-  /// [ui.Image] which can be passed to a [Canvas].
-  ///
-  /// By default, this just uses [decodeImageFromList]. This method could be
-  /// overridden in subclasses (e.g. for testing).
-  Future<ui.Image> decodeImage(ByteData data) {
-    return decodeImageFromList(data.buffer.asUint8List());
+    return await ui.instantiateImageCodec(data.buffer.asUint8List());
   }
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
 /// The image will be cached regardless of cache headers from the server.
+///
+/// See also:
+///
+///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
@@ -409,7 +401,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 })
+  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
       : assert(url != null),
         assert(scale != null);
 
@@ -419,6 +411,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
 
+  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
+  final Map<String, String> headers;
+
   @override
   Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
     return new SynchronousFuture<NetworkImage>(this);
@@ -426,8 +421,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -437,26 +433,19 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   static final http.Client _httpClient = createHttpClient();
 
-  Future<ImageInfo> _loadAsync(NetworkImage key) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await _httpClient.get(resolved);
+    final http.Response response = await _httpClient.get(resolved, headers: headers);
     if (response == null || response.statusCode != 200)
-      return null;
+      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw new Exception('NetworkImage is an empty file: $resolved');
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -477,6 +466,10 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
+///
+/// See also:
+///
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
@@ -498,29 +491,23 @@ class FileImage extends ImageProvider<FileImage> {
 
   @override
   ImageStreamCompleter load(FileImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
       }
     );
   }
 
-  Future<ImageInfo> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -547,6 +534,10 @@ class FileImage extends ImageProvider<FileImage> {
 /// that changes over time, consider creating a new subclass of [ImageProvider]
 /// whose [load] method returns a subclass of [ImageStreamCompleter] that can
 /// handle providing multiple images.
+///
+/// See also:
+///
+///  * [Image.memory] for a shorthand of an [Image] widget backed by [MemoryImage].
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -568,20 +559,16 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   @override
   ImageStreamCompleter load(MemoryImage key) {
-    return new OneFrameImageStreamCompleter(_loadAsync(key));
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale
+    );
   }
 
-  Future<ImageInfo> _loadAsync(MemoryImage key) async {
+  Future<ui.Codec> _loadAsync(MemoryImage key) {
     assert(key == this);
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -666,6 +653,10 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 /// Note that the `lib/` is implied, so it should not be included in the asset
 /// path.
 ///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by
+///    [ExactAssetImage] when using a scale.
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///

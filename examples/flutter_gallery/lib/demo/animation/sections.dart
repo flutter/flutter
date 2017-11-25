@@ -10,7 +10,6 @@ const Color _mariner = const Color(0xFF3B5F8F);
 const Color _mediumPurple = const Color(0xFF8266D4);
 const Color _tomato = const Color(0xFFF95B57);
 const Color _mySin = const Color(0xFFF3A646);
-const Color _deepCerise = const Color(0xFFD93F9B);
 
 const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 

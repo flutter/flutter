@@ -67,8 +67,8 @@ typedef Widget AnimatedCrossFadeBuilder(Widget topChild, Key topChildKey, Widget
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two
 /// children. The [firstCurve] is inverted, i.e. it fades out when providing a
 /// growing curve like [Curves.linear]. The [sizeCurve] is the curve used to
-/// animated between the size of the fading out child and the size of the fading
-/// in child.
+/// animate between the size of the fading-out child and the size of the
+/// fading-in child.
 ///
 /// This widget is intended to be used to fade a pair of widgets with the same
 /// width. In the case where the two children have different heights, the
@@ -115,7 +115,7 @@ class AnimatedCrossFade extends StatefulWidget {
     this.firstCurve: Curves.linear,
     this.secondCurve: Curves.linear,
     this.sizeCurve: Curves.linear,
-    this.alignment: FractionalOffset.topCenter,
+    this.alignment: Alignment.topCenter,
     @required this.crossFadeState,
     @required this.duration,
     this.layoutBuilder: defaultLayoutBuilder,
@@ -165,8 +165,8 @@ class AnimatedCrossFade extends StatefulWidget {
 
   /// How the children should be aligned while the size is animating.
   ///
-  /// Defaults to [FractionalOffset.topCenter].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.topCenter].
+  final AlignmentGeometry alignment;
 
   /// A builder that positions the [firstChild] and [secondChild] widgets.
   ///
@@ -218,7 +218,7 @@ class AnimatedCrossFade extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', crossFadeState));
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: FractionalOffset.topCenter));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
   }
 }
 
@@ -356,6 +356,6 @@ class _AnimatedCrossFadeState extends State<AnimatedCrossFade> with TickerProvid
     super.debugFillProperties(description);
     description.add(new EnumProperty<CrossFadeState>('crossFadeState', widget.crossFadeState));
     description.add(new DiagnosticsProperty<AnimationController>('controller', _controller, showName: false));
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', widget.alignment, defaultValue: FractionalOffset.topCenter));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', widget.alignment, defaultValue: Alignment.topCenter));
   }
 }

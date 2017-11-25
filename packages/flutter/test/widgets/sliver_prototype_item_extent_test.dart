@@ -15,7 +15,7 @@ class TestItem extends StatelessWidget {
     return new Container(
       width: width,
       height: height,
-      alignment: FractionalOffset.center,
+      alignment: Alignment.center,
       child: new Text('Item $item', textDirection: TextDirection.ltr),
     );
   }

@@ -7,19 +7,19 @@ import("//build/dart/dart_package.gni")
 dart_package("flutter") {
   package_name = "flutter"
 
-  analysis_options = "//lib/flutter/analysis_options.yaml"
+  disable_analysis = true
 
   deps = [
+    "//third_party/dart/third_party/pkg/intl",
     "//third_party/dart-pkg/pub/async",
     "//third_party/dart-pkg/pub/collection",
     "//third_party/dart-pkg/pub/http",
     "//third_party/dart-pkg/pub/http_parser",
-    "//third_party/dart-pkg/pub/intl",
     "//third_party/dart-pkg/pub/meta",
     "//third_party/dart-pkg/pub/vector_math",
   ]
 
   if (is_fuchsia) {
-    deps += [ "//flutter/sky/packages/sky_engine:sky_engine_dart" ]
+    deps += [ "$flutter_root/sky/packages/sky_engine:sky_engine_dart" ]
   }
 }

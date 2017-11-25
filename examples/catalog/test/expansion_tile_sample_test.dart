@@ -9,7 +9,7 @@ import '../lib/expansion_tile_sample.dart' as expansion_tile_sample;
 import '../lib/expansion_tile_sample.dart' show Entry;
 
 void main() {
-  testWidgets("expansion_tile sample smoke test", (WidgetTester tester) async {
+  testWidgets('expansion_tile sample smoke test', (WidgetTester tester) async {
     expansion_tile_sample.main();
     await tester.pump();
 

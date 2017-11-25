@@ -83,7 +83,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key,]);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key, '--simple']);
       if (result.exitCode != 0)
         throw new ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout.trim();
@@ -95,7 +95,7 @@ class IMobileDevice {
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger() => runCommand(<String>['idevicesyslog']);
 
-  /// Captures a screenshot to the specified outputfile.
+  /// Captures a screenshot to the specified outputFile.
   Future<Null> takeScreenshot(File outputFile) {
     return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
   }
@@ -286,7 +286,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       commands.addAll(<String>[
         '-workspace', fs.path.basename(entity.path),
         '-scheme', scheme,
-        "BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}",
+        'BUILD_DIR=${fs.path.absolute(getIosBuildDirectory())}',
       ]);
       break;
     }
@@ -447,20 +447,20 @@ bool _checkXcodeVersion() {
 
 Future<Null> _addServicesToBundle(Directory bundle) async {
   final List<Map<String, String>> services = <Map<String, String>>[];
-  printTrace("Trying to resolve native pub services.");
+  printTrace('Trying to resolve native pub services.');
 
   // Step 1: Parse the service configuration yaml files present in the service
   //         pub packages.
   await parseServiceConfigs(services);
-  printTrace("Found ${services.length} service definition(s).");
+  printTrace('Found ${services.length} service definition(s).');
 
   // Step 2: Copy framework dylibs to the correct spot for xcodebuild to pick up.
-  final Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, "Frameworks"));
+  final Directory frameworksDirectory = fs.directory(fs.path.join(bundle.path, 'Frameworks'));
   await _copyServiceFrameworks(services, frameworksDirectory);
 
   // Step 3: Copy the service definitions manifest at the correct spot for
   //         xcodebuild to pick up.
-  final File manifestFile = fs.file(fs.path.join(bundle.path, "ServiceDefinitions.json"));
+  final File manifestFile = fs.file(fs.path.join(bundle.path, 'ServiceDefinitions.json'));
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
@@ -470,7 +470,7 @@ Future<Null> _copyServiceFrameworks(List<Map<String, String>> services, Director
   for (Map<String, String> service in services) {
     final String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
     final File dylib = fs.file(dylibPath);
-    printTrace("Copying ${dylib.path} into bundle.");
+    printTrace('Copying ${dylib.path} into bundle.');
     if (!dylib.existsSync()) {
       printError("The service dylib '${dylib.path}' does not exist.");
       continue;

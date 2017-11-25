@@ -29,7 +29,7 @@ void main() {
         )),
       );
       expect(find.byType(GestureDetector), findsNWidgets(2));
-      final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: const FractionalOffset(0.5, 0.5));
+      final Finder hitTestable = find.byType(GestureDetector).hitTestable(at: Alignment.center);
       expect(hitTestable, findsOneWidget);
       expect(tester.widget(hitTestable).key, const ValueKey<int>(0));
     });

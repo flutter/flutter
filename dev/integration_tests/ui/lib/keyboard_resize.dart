@@ -44,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return new Scaffold(
       body: new Stack(
         fit: StackFit.expand,
-        alignment: FractionalOffset.bottomCenter,
+        alignment: Alignment.bottomCenter,
         children: <Widget>[
           new LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {

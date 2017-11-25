@@ -36,7 +36,7 @@ class _CalculatorState extends State<Calculator> {
     }
   }
 
-  /// Set `resultExpression` to the currrent expression and clear the stack.
+  /// Set `resultExpression` to the current expression and clear the stack.
   void setResult(CalcExpression resultExpression) {
     _expressionStack.clear();
     _expression = resultExpression;

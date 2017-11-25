@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show SemanticsFlags;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class MockClipboard {
@@ -29,6 +31,9 @@ class MockClipboard {
 
 class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
   @override
+  bool isSupported(Locale locale) => true;
+
+  @override
   Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
 
   @override
@@ -36,6 +41,9 @@ class MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocali
 }
 
 class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
+  @override
+  bool isSupported(Locale locale) => true;
+
   @override
   Future<WidgetsLocalizations> load(Locale locale) => DefaultWidgetsLocalizations.load(locale);
 
@@ -789,13 +797,7 @@ void main() {
   });
 
   testWidgets('TextField with default helperStyle', (WidgetTester tester) async {
-    final ThemeData themeData = ThemeData.localize(
-      new ThemeData(
-        hintColor: Colors.blue[500],
-      ),
-      MaterialTextGeometry.forScriptCategory(MaterialTextGeometry.englishLikeCategory),
-    );
-
+    final ThemeData themeData = new ThemeData(hintColor: Colors.blue[500]);
     await tester.pumpWidget(
       overlay(
         child: new Theme(
@@ -810,11 +812,12 @@ void main() {
     );
     final Text helperText = tester.widget(find.text('helper text'));
     expect(helperText.style.color, themeData.hintColor);
-    expect(helperText.style.fontSize, themeData.textTheme.caption.fontSize);
+    expect(helperText.style.fontSize, MaterialTextGeometry.englishLike.caption.fontSize);
   });
 
   testWidgets('TextField with specified helperStyle', (WidgetTester tester) async {
     final TextStyle style = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -863,6 +866,7 @@ void main() {
 
   testWidgets('TextField with specified hintStyle', (WidgetTester tester) async {
     final TextStyle hintStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -884,6 +888,7 @@ void main() {
 
   testWidgets('TextField with specified prefixStyle', (WidgetTester tester) async {
     final TextStyle prefixStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -971,6 +976,7 @@ void main() {
   testWidgets('TextField prefix and suffix appear correctly with hint text',
           (WidgetTester tester) async {
     final TextStyle hintStyle = new TextStyle(
+      inherit: false,
       color: Colors.pink[500],
       fontSize: 10.0,
     );
@@ -1520,4 +1526,220 @@ void main() {
       controller.selection = const TextSelection.collapsed(offset: 10);
     }, throwsFlutterError);
   });
+
+  testWidgets('maxLength limits input.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789');
+  });
+
+  testWidgets('maxLength limits input length even if decoration is null.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        decoration: null,
+        maxLength: 10,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789');
+  });
+
+  testWidgets('maxLength still works with other formatters.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        inputFormatters: <TextInputFormatter> [
+          new BlacklistingTextInputFormatter(
+            new RegExp(r'[a-z]'),
+            replacementString: '#',
+          ),
+        ],
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), 'a一b二c三\nd四e五f六');
+    // The default single line formatter replaces \n with empty string.
+    expect(textController.text, '#一#二#三#四#五');
+  });
+
+  testWidgets("maxLength isn't enforced when maxLengthEnforced is false.", (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    expect(textController.text, '0123456789101112');
+  });
+
+  testWidgets('maxLength shows warning when maxLengthEnforced is false.', (WidgetTester tester) async {
+    final TextEditingController textController = new TextEditingController();
+    final TextStyle testStyle = const TextStyle(color: Colors.deepPurpleAccent);
+
+    await tester.pumpWidget(boilerplate(
+      child: new TextField(
+        decoration: new InputDecoration(errorStyle: testStyle),
+        controller: textController,
+        maxLength: 10,
+        maxLengthEnforced: false,
+      ),
+    ));
+
+    await tester.enterText(find.byType(TextField), '0123456789101112');
+    await tester.pump();
+
+    expect(textController.text, '0123456789101112');
+    expect(find.text('16 / 10'), findsOneWidget);
+    Text counterTextWidget = tester.widget(find.text('16 / 10'));
+    expect(counterTextWidget.style.color, equals(Colors.deepPurpleAccent));
+
+    await tester.enterText(find.byType(TextField), '0123456789');
+    await tester.pump();
+
+    expect(textController.text, '0123456789');
+    expect(find.text('10 / 10'), findsOneWidget);
+    counterTextWidget = tester.widget(find.text('10 / 10'));
+    expect(counterTextWidget.style.color, isNot(equals(Colors.deepPurpleAccent)));
+  });
+
+  testWidgets('setting maxLength shows counter', (WidgetTester tester) async {
+    await tester.pumpWidget(new MaterialApp(
+      home: const Material(
+        child: const DefaultTextStyle(
+          style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+          child: const Center(
+            child: const TextField(
+              maxLength: 10,
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    expect(find.text('0 / 10'), findsOneWidget);
+
+    await tester.enterText(find.byType(TextField), '01234');
+    await tester.pump();
+
+    expect(find.text('5 / 10'), findsOneWidget);
+  });
+
+  testWidgets('TextField identifies as text field in semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: const Material(
+          child: const DefaultTextStyle(
+            style: const TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
+            child: const Center(
+              child: const TextField(
+                maxLength: 10,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlags>[SemanticsFlags.isTextField]));
+  });
+
+  testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
+    final TextEditingController controller = new TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new TextField(
+          controller: controller,
+          maxLines: null,
+        ),
+      )
+    );
+
+    final String testValue = 'x';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+    expect(controller.selection.baseOffset, -1);
+
+    // Tap the selection handle to bring up the "paste / select all" menu.
+    await tester.tapAt(textOffsetToPosition(tester, 0));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is
+
+    // Confirm that the selection was updated.
+    expect(controller.selection.baseOffset, 0);
+  });
+
+  testWidgets('TextField baseline alignment', (WidgetTester tester) async {
+    final TextEditingController controllerA = new TextEditingController(text: 'A');
+    final TextEditingController controllerB = new TextEditingController(text: 'B');
+    final Key keyA = new UniqueKey();
+    final Key keyB = new UniqueKey();
+
+    await tester.pumpWidget(
+      overlay(
+        child: new Row(
+          crossAxisAlignment: CrossAxisAlignment.baseline,
+          textBaseline: TextBaseline.alphabetic,
+          children: <Widget>[
+            new Expanded(
+              child: new TextField(
+                key: keyA,
+                decoration: null,
+                controller: controllerA,
+                style: const TextStyle(fontSize: 10.0),
+              )
+            ),
+            const Text(
+              'abc',
+              style: const TextStyle(fontSize: 20.0),
+            ),
+            new Expanded(
+              child: new TextField(
+                key: keyB,
+                decoration: null,
+                controller: controllerB,
+                style: const TextStyle(fontSize: 30.0),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // The Ahem font extends 0.2 * fontSize below the baseline.
+    // So the three row elements line up like this:
+    //
+    //  A  abc  B
+    //  ---------   baseline
+    //  2  4    6   space below the baseline = 0.2 * fontSize
+    //  ---------   rowBottomY
+
+    final double rowBottomY = tester.getBottomLeft(find.byType(Row)).dy;
+    expect(tester.getBottomLeft(find.byKey(keyA)).dy, rowBottomY - 4.0);
+    expect(tester.getBottomLeft(find.text('abc')).dy, rowBottomY - 2.0);
+    expect(tester.getBottomLeft(find.byKey(keyB)).dy, rowBottomY);
+  });
+
 }

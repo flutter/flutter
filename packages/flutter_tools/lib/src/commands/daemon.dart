@@ -143,7 +143,8 @@ class Daemon {
 
   void shutdown({dynamic error}) {
     _commandSubscription?.cancel();
-    _domainMap.values.forEach((Domain domain) => domain.dispose());
+    for (Domain domain in _domainMap.values)
+      domain.dispose();
     if (!_onExitCompleter.isCompleted) {
       if (error == null)
         _onExitCompleter.complete(0);
@@ -196,28 +197,28 @@ abstract class Domain {
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! String)
-      throw "$name is not a String";
+      throw '$name is not a String';
     return val;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! bool)
-      throw "$name is not a bool";
+      throw '$name is not a bool';
     return val;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! int)
-      throw "$name is not an int";
+      throw '$name is not an int';
     return val;
   }
 
@@ -371,6 +372,7 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         projectAssets: projectAssets,
+        hostIsIde: true,
       );
     } else {
       runner = new ColdRunner(
@@ -507,7 +509,6 @@ class AppDomain extends Domain {
       return <String, dynamic>{
         'id': app.id,
         'observatoryDevicePort': app.observatoryPort,
-        'diagnosticDevicePort': app.diagnosticPort,
       };
     }).toList();
   }

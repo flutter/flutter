@@ -13,6 +13,7 @@ import 'basic.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'ticker_provider.dart';
 
 export 'package:flutter/services.dart' show
   ImageProvider,
@@ -30,7 +31,7 @@ export 'package:flutter/services.dart' show
 ///
 /// If this is not called from a build method, then it should be reinvoked
 /// whenever the dependencies change, e.g. by calling it from
-/// [State.didChangeDependencies], so that any changes in the environement are
+/// [State.didChangeDependencies], so that any changes in the environment are
 /// picked up (e.g. if the device pixel ratio changes).
 ///
 /// See also:
@@ -113,7 +114,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -128,6 +129,9 @@ class Image extends StatefulWidget {
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
   /// The [src], [scale], and [repeat] arguments must not be null.
+  /// An optional [headers] argument can be used to use custom HTTP headers.
+  ///
+  /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
     Key key,
     double scale: 1.0,
@@ -136,13 +140,14 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
     this.gaplessPlayback: false,
     this.package,
-  }) : image = new NetworkImage(src, scale: scale),
+    Map<String, String> headers,
+  }) : image = new NetworkImage(src, scale: scale, headers: headers),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -162,7 +167,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -293,7 +298,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -318,7 +323,7 @@ class Image extends StatefulWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
     this.centerSlice,
     this.matchTextDirection: false,
@@ -367,22 +372,22 @@ class Image extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [FractionalOffset] alignment of (0.0,
-  /// 0.0) aligns the image to the top-left corner of its layout bounds, while a
-  /// [FractionalOffset] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
-  /// alignment of (0.5, 1.0) aligns the bottom middle of the image with the
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
   /// middle of the bottom edge of its layout bounds.
   ///
   /// To display a subpart of an image, consider using a [CustomPainter] and
   /// [Canvas.drawImageRect].
   ///
   /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
-  /// [FractionalOffsetDirectional]), then an ambient [Directionality] widget
+  /// [AlignmentDirectional]), then an ambient [Directionality] widget
   /// must be in scope.
   ///
-  /// Defaults to [FractionalOffset.center].
-  final FractionalOffsetGeometry alignment;
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -433,7 +438,7 @@ class Image extends StatefulWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
-    description.add(new DiagnosticsProperty<FractionalOffsetGeometry>('alignment', alignment, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
     description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
@@ -443,10 +448,17 @@ class Image extends StatefulWidget {
 class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
+  bool _isListeningToStream = false;
 
   @override
   void didChangeDependencies() {
     _resolveImage();
+
+    if (TickerMode.of(context))
+      _listenToStream();
+    else
+      _stopListeningToStream();
+
     super.didChangeDependencies();
   }
 
@@ -464,18 +476,13 @@ class _ImageState extends State<Image> {
   }
 
   void _resolveImage() {
-    final ImageStream oldImageStream = _imageStream;
-    _imageStream = widget.image.resolve(createLocalImageConfiguration(
-      context,
-      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
-    ));
-    assert(_imageStream != null);
-    if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      if (!widget.gaplessPlayback)
-        setState(() { _imageInfo = null; });
-      _imageStream.addListener(_handleImageChanged);
-    }
+    final ImageStream newStream =
+      widget.image.resolve(createLocalImageConfiguration(
+          context,
+          size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+      ));
+    assert(newStream != null);
+    _updateSourceStream(newStream);
   }
 
   void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
@@ -484,10 +491,42 @@ class _ImageState extends State<Image> {
     });
   }
 
+  // Update _imageStream to newStream, and moves the stream listener
+  // registration from the old stream to the new stream (if a listener was
+  // registered).
+  void _updateSourceStream(ImageStream newStream) {
+    if (_imageStream?.key == newStream?.key)
+      return;
+
+    if (_isListeningToStream)
+      _imageStream.removeListener(_handleImageChanged);
+
+    _imageStream = newStream;
+    if (_isListeningToStream)
+      _imageStream.addListener(_handleImageChanged);
+
+    if (!widget.gaplessPlayback)
+      setState(() { _imageInfo = null; });
+  }
+
+  void _listenToStream() {
+    if (_isListeningToStream)
+      return;
+    _imageStream.addListener(_handleImageChanged);
+    _isListeningToStream = true;
+  }
+
+  void _stopListeningToStream() {
+    if (!_isListeningToStream)
+      return;
+    _imageStream.removeListener(_handleImageChanged);
+    _isListeningToStream = false;
+  }
+
   @override
   void dispose() {
     assert(_imageStream != null);
-    _imageStream.removeListener(_handleImageChanged);
+    _stopListeningToStream();
     super.dispose();
   }
 

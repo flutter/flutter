@@ -139,14 +139,17 @@ dependencies:
 }
 
 void createFooter(String footerPath) {
+  const int kGitRevisionLength = 10;
+
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  final String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  String gitRevision = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
   new File(footerPath).writeAsStringSync(
     '• </span class="no-break">$timestamp<span> '
-    '• </span class="no-break">$gitHead</span>'
+    '• </span class="no-break">$gitRevision</span>'
   );
 }
 

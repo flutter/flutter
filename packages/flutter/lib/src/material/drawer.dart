@@ -9,6 +9,21 @@ import 'colors.dart';
 import 'list_tile.dart';
 import 'material.dart';
 
+/// The possible alignments of a [Drawer].
+enum DrawerAlignment {
+  /// Denotes that the [Drawer] is at the start side of the [Scaffold].
+  ///
+  /// This corresponds to the left side when the text direction is left-to-right
+  /// and the right side when the text direction is right-to-left.
+  start,
+
+  /// Denotes that the [Drawer] is at the end side of the [Scaffold].
+  ///
+  /// This corresponds to the right side when the text direction is left-to-right
+  /// and the left side when the text direction is right-to-left.
+  end,
+}
+
 // TODO(eseidel): Draw width should vary based on device size:
 // http://material.google.com/layout/structure.html#structure-side-nav
 
@@ -107,8 +122,8 @@ class Drawer extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [Drawer]
-///  * [Scaffold.drawer]
+///  * [Drawer], a container with the default width of a drawer.
+///  * [Scaffold.drawer], the [Scaffold] slot for showing a drawer.
 class DrawerController extends StatefulWidget {
   /// Creates a controller for a [Drawer].
   ///
@@ -118,13 +133,21 @@ class DrawerController extends StatefulWidget {
   const DrawerController({
     GlobalKey key,
     @required this.child,
+    @required this.alignment,
   }) : assert(child != null),
+       assert(alignment != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   ///
   /// Typically a [Drawer].
   final Widget child;
+
+  /// The alignment of the [Drawer].
+  ///
+  /// This controls the direction in which the user should swipe to open and
+  /// close the drawer.
+  final DrawerAlignment alignment;
 
   @override
   DrawerControllerState createState() => new DrawerControllerState();
@@ -217,7 +240,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   }
 
   void _move(DragUpdateDetails details) {
-    final double delta = details.primaryDelta / _width;
+    double delta = details.primaryDelta / _width;
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        break;
+      case DrawerAlignment.end:
+        delta = -delta;
+        break;
+    }
     switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.value -= delta;
@@ -232,7 +262,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     if (_controller.isDismissed)
       return;
     if (details.velocity.pixelsPerSecond.dx.abs() >= _kMinFlingVelocity) {
-      final double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      double visualVelocity = details.velocity.pixelsPerSecond.dx / _width;
+      switch (widget.alignment) {
+        case DrawerAlignment.start:
+          break;
+        case DrawerAlignment.end:
+          visualVelocity = -visualVelocity;
+          break;
+      }
       switch (Directionality.of(context)) {
       case TextDirection.rtl:
         _controller.fling(velocity: -visualVelocity);
@@ -240,8 +277,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       case TextDirection.ltr:
         _controller.fling(velocity: visualVelocity);
         break;
-    }
-
+      }
     } else if (_controller.value < 0.5) {
       close();
     } else {
@@ -264,10 +300,32 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final ColorTween _color = new ColorTween(begin: Colors.transparent, end: Colors.black54);
   final GlobalKey _gestureDetectorKey = new GlobalKey();
 
+  AlignmentDirectional get _drawerOuterAlignment {
+    assert(widget.alignment != null);
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerStart;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerEnd;
+    }
+    return null;
+  }
+
+  AlignmentDirectional get _drawerInnerAlignment {
+    assert(widget.alignment != null);
+    switch (widget.alignment) {
+      case DrawerAlignment.start:
+        return AlignmentDirectional.centerEnd;
+      case DrawerAlignment.end:
+        return AlignmentDirectional.centerStart;
+    }
+    return null;
+  }
+
   Widget _buildDrawer(BuildContext context) {
     if (_controller.status == AnimationStatus.dismissed) {
       return new Align(
-        alignment: FractionalOffsetDirectional.centerStart,
+        alignment: _drawerOuterAlignment,
         child: new GestureDetector(
           key: _gestureDetectorKey,
           onHorizontalDragUpdate: _move,
@@ -299,9 +357,9 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                 ),
               ),
               new Align(
-                alignment: FractionalOffsetDirectional.centerStart,
+                alignment: _drawerOuterAlignment,
                 child: new Align(
-                  alignment: FractionalOffsetDirectional.centerEnd,
+                  alignment: _drawerInnerAlignment,
                   widthFactor: _controller.value,
                   child: new RepaintBoundary(
                     child: new FocusScope(

@@ -1,0 +1,142 @@
+{
+  "scriptCategory": "English-like",
+  "@scriptCategory": {
+    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)"
+  },
+
+  "timeOfDayFormat": "h:mm a",
+  "@timeOfDayFormat": {
+    "description": "The ICU 'Short Time' pattern, such as 'HH:mm', 'h:mm a', 'H:mm'. See: http://demo.icu-project.org/icu-bin/locexp?d_=en&_=en_US"
+  },
+
+  "openAppDrawerTooltip": "Open navigation menu",
+  "@openAppDrawerTooltip": {
+    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button"
+  },
+
+  "backButtonTooltip": "Back",
+  "@backButtonTooltip": {
+    "description": "The BackButton's tooltip"
+  },
+
+  "closeButtonTooltip": "Close",
+  "@closeButtonTooltip": {
+    "description": "The CloseButton's tooltip"
+  },
+
+  "nextMonthTooltip": "Next month",
+  "@nextMonthTooltip": {
+    "description": "The tooltip for the MonthPicker's 'next month' button."
+  },
+
+  "previousMonthTooltip": "Previous month",
+  "@previousMonthTooltip": {
+    "description": "The tooltip for the MonthPicker's 'previous month' button."
+  },
+
+  "nextPageTooltip": "Next page",
+  "@nextPageTooltip": {
+    "description": "The tooltip for the [PaginatedDataTables]'s 'next page' button."
+  },
+
+  "previousPageTooltip": "Previous page",
+  "@previousPageTooltip": {
+    "description": "The tooltip for the PaginatedDataTables's 'previous page' button."
+  },
+
+  "showMenuTooltip": "Show menu",
+  "@showMenuTooltip": {
+    "description": "The default PopupMenuButton tooltip"
+  },
+
+  "aboutListTileTitle": "About $applicationName",
+  "@aboutListTileTitle": {
+    "description": "The default title for AboutListTile. The value of $applicationName is the name of the application, like GMail or Chrome.",
+    "parameters": "applicationName"
+  },
+
+  "licensesPageTitle": "Licenses",
+  "@licensesPageTitle": {
+    "description": "The title for the Flutter licenses page."
+  },
+
+  "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
+  "@pageRowsInfoTitle": {
+    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+
+  "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
+  "@pageRowsInfoTitleApproximate": {
+    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "parameters": "firstRow, lastRow, rowCount"
+  },
+
+  "rowsPerPageTitle": "Rows per page:",
+  "@rowsPerPageTitle": {
+    "description": "Title for the [PaginatedDataTable]'s 'rows per page' footer."
+  },
+
+  "selectedRowCountTitleZero": "No items selected",
+  "selectedRowCountTitleOne": "1 item selected",
+  "selectedRowCountTitleOther": "$selectedRowCount items selected",
+  "@selectedRowCountTitle": {
+    "description": "Title for the PaginatedDataTable's selected row count header. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
+    "plural": "selectedRowCount"
+  },
+
+  "cancelButtonLabel": "CANCEL",
+  "@cancelButtonLabel": {
+    "description": "The label for cancel buttons and menu items."
+  },
+
+  "closeButtonLabel": "CLOSE",
+  "@closeButtonLabel": {
+    "description": "The label for close buttons and menu items."
+  },
+
+  "continueButtonLabel": "CONTINUE",
+  "@continueButtonLabel": {
+    "description": "The label for continue buttons and menu items."
+  },
+
+  "copyButtonLabel": "COPY",
+  "@copyButtonLabel": {
+    "description": "The label for copy buttons and menu items."
+  },
+
+  "cutButtonLabel": "CUT",
+  "@cutButtonLabel": {
+    "description": "The label for cut buttons and menu items."
+  },
+
+  "okButtonLabel": "OK",
+  "@okButtonLabel": {
+    "description": "The label for OK buttons and menu items."
+  },
+
+  "pasteButtonLabel": "PASTE",
+  "@pasteButtonLabel": {
+    "description": "The label for paste buttons and menu items."
+  },
+
+  "selectAllButtonLabel": "SELECT ALL",
+  "@selectAllButtonLabel": {
+    "description": "The label for select-all buttons and menu items."
+  },
+
+  "viewLicensesButtonLabel": "VIEW LICENSES",
+  "@viewLicensesButtonLabel": {
+    "description": "The label for the about box's view licenses button."
+  },
+
+  "anteMeridiemAbbreviation": "AM",
+  "@anteMeridiemAbbreviation": {
+    "description": "The abbreviation for ante meridiem (before noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+
+  "postMeridiemAbbreviation": "PM",
+  "@postMeridiemAbbreviation": {
+    "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  }
+}

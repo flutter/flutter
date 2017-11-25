@@ -81,12 +81,18 @@ typedef String MessageFilter(String message);
 /// Runs pub in 'batch' mode, forwarding complete lines written by pub to its
 /// stdout/stderr streams to the corresponding stream of this process, optionally
 /// applying filtering. The pub process will not receive anything on its stdin stream.
+///
+/// The `--trace` argument is passed to `pub` (by mutating the provided
+/// `arguments` list) unless `showTraceForErrors` is false.
 Future<Null> pub(List<String> arguments, {
   String directory,
   MessageFilter filter,
   String failureMessage: 'pub failed',
   @required bool retry,
+  bool showTraceForErrors: true,
 }) async {
+  if (showTraceForErrors)
+    arguments.insert(0, '--trace');
   int attempts = 0;
   int duration = 1;
   int code;

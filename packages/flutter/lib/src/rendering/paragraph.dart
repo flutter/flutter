@@ -6,13 +6,13 @@ import 'dart:ui' as ui show Gradient, Shader, TextBox;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'semantics.dart';
 
 /// How overflowing text should be handled.
 enum TextOverflow {
@@ -104,7 +104,7 @@ class RenderParagraph extends RenderBox {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// This must not be null.
@@ -403,12 +403,26 @@ class RenderParagraph extends RenderBox {
     return _textPainter.getWordBoundary(position);
   }
 
-  @override
-  SemanticsAnnotator get semanticsAnnotator => _annotate;
+  /// Returns the size of the text as laid out.
+  ///
+  /// This can differ from [size] if the text overflowed or if the [constraints]
+  /// provided by the parent [RenderObject] forced the layout to be bigger than
+  /// necessary for the given [text].
+  ///
+  /// This returns the [TextPainter.size] of the underlying [TextPainter].
+  ///
+  /// Valid only after [layout].
+  Size get textSize {
+    assert(!debugNeedsLayout);
+    return _textPainter.size;
+  }
 
-  void _annotate(SemanticsNode node) {
-    node.label = text.toPlainText();
-    node.textDirection = textDirection;
+  @override
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+    config
+      ..label = text.toPlainText()
+      ..textDirection = textDirection;
   }
 
   @override

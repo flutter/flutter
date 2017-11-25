@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:file/local.dart';
-import 'package:flutter_tools/executable.dart' as tools;
+import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;

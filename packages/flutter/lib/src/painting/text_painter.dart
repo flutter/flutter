@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, TextBox;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -10,6 +10,8 @@ import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'text_span.dart';
+
+export 'package:flutter/services.dart' show TextRange, TextSelection;
 
 final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
 
@@ -103,7 +105,7 @@ class TextPainter {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
@@ -134,6 +136,7 @@ class TextPainter {
       return;
     _textScaleFactor = value;
     _paragraph = null;
+    _layoutTemplate = null;
     _needsLayout = true;
   }
 
@@ -288,13 +291,13 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(!_needsLayout);
+    assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
         return _paragraph.alphabeticBaseline;
       case TextBaseline.ideographic:
         return _paragraph.ideographicBaseline;
     }
-    assert(baseline != null);
     return null;
   }
 
@@ -380,10 +383,10 @@ class TextPainter {
     if (prevCodeUnit == null)
       return null;
     final int prevRuneOffset = _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
-    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
     if (boxes.isEmpty)
       return null;
-    final ui.TextBox box = boxes[0];
+    final TextBox box = boxes[0];
     final double caretEnd = box.end;
     final double dx = box.direction == TextDirection.rtl ? caretEnd : caretEnd - caretPrototype.width;
     return new Offset(dx, box.top);
@@ -394,10 +397,10 @@ class TextPainter {
     if (nextCodeUnit == null)
       return null;
     final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
-    final List<ui.TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+    final List<TextBox> boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
     if (boxes.isEmpty)
       return null;
-    final ui.TextBox box = boxes[0];
+    final TextBox box = boxes[0];
     final double caretStart = box.start;
     final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
     return new Offset(dx, box.top);
@@ -442,6 +445,7 @@ class TextPainter {
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
     final int offset = position.offset;
+    assert(position.affinity != null);
     switch (position.affinity) {
       case TextAffinity.upstream:
         return _getOffsetFromUpstream(offset, caretPrototype)
@@ -452,7 +456,6 @@ class TextPainter {
             ?? _getOffsetFromUpstream(offset, caretPrototype)
             ?? _emptyOffset;
     }
-    assert(position.affinity != null);
     return null;
   }
 
@@ -461,7 +464,7 @@ class TextPainter {
   /// A given selection might have more than one rect if this text painter
   /// contains bidirectional text because logically contiguous text might not be
   /// visually contiguous.
-  List<ui.TextBox> getBoxesForSelection(TextSelection selection) {
+  List<TextBox> getBoxesForSelection(TextSelection selection) {
     assert(!_needsLayout);
     return _paragraph.getBoxesForRange(selection.start, selection.end);
   }

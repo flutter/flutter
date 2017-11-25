@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:test/test.dart';
-import 'package:flutter_driver/src/timeline.dart';
+import 'package:flutter_driver/src/driver/timeline.dart';
 
 void main() {
   group('Timeline', () {

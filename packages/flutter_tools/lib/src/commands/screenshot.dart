@@ -3,20 +3,18 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-
-import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart' hide IOSink;
 import '../base/utils.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
+import '../vmservice.dart';
 
 const String _kOut = 'out';
 const String _kSkia = 'skia';
-const String _kSkiaServe = 'skiaserve';
 
 class ScreenshotCommand extends FlutterCommand {
   ScreenshotCommand() {
@@ -29,14 +27,9 @@ class ScreenshotCommand extends FlutterCommand {
       _kSkia,
       valueHelp: 'port',
       help: 'Retrieve the last frame rendered by a Flutter app as a Skia picture\n'
-        'using the specified diagnostic server port.\n'
-        'To find the diagnostic server port number, use "flutter run --verbose"\n'
-        'and look for "Diagnostic server listening on" in the output.'
-    );
-    argParser.addOption(
-      _kSkiaServe,
-      valueHelp: 'url',
-      help: 'Post the picture to a skiaserve debugger at this URL.',
+        'using the specified observatory port.\n'
+        'To find the observatory port number, use "flutter run --verbose"\n'
+        'and look for "Forwarded host port ... for Observatory" in the output.'
     );
   }
 
@@ -53,18 +46,11 @@ class ScreenshotCommand extends FlutterCommand {
 
   @override
   Future<Null> verifyThenRunCommand() async {
-    if (argResults[_kSkia] != null) {
-      if (argResults[_kOut] != null && argResults[_kSkiaServe] != null)
-        throwToolExit('Cannot specify both --$_kOut and --$_kSkiaServe');
-    } else {
-      if (argResults[_kSkiaServe] != null)
-        throwToolExit('Must specify --$_kSkia with --$_kSkiaServe');
-      device = await findTargetDevice();
-      if (device == null)
-        throwToolExit('Must specify --$_kSkia or have a connected device');
-      if (!device.supportsScreenshot && argResults[_kSkia] == null)
-        throwToolExit('Screenshot not supported for ${device.name}.');
-    }
+    device = await findTargetDevice();
+    if (device == null)
+      throwToolExit('Must have a connected device');
+    if (!device.supportsScreenshot && argResults[_kSkia] == null)
+      throwToolExit('Screenshot not supported for ${device.name}.');
     return super.verifyThenRunCommand();
   }
 
@@ -92,47 +78,20 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Null> runSkia(File outputFile) async {
-    final Uri skpUri = new Uri(scheme: 'http', host: '127.0.0.1',
-        port: int.parse(argResults[_kSkia]),
-        path: '/skp');
+    final Uri observatoryUri = new Uri(scheme: 'http', host: '127.0.0.1',
+        port: int.parse(argResults[_kSkia]));
+    final VMService vmService = await VMService.connect(observatoryUri);
+    final Map<String, dynamic> skp = await vmService.vm.invokeRpcRaw('_flutter.screenshotSkp');
 
-    const String errorHelpText =
-        'Be sure the --$_kSkia= option specifies the diagnostic server port, not the observatory port.\n'
-        'To find the diagnostic server port number, use "flutter run --verbose"\n'
-        'and look for "Diagnostic server listening on" in the output.';
-
-    http.StreamedResponse skpResponse;
-    try {
-      skpResponse = await new http.Request('GET', skpUri).send();
-    } on SocketException catch (e) {
-      throwToolExit('Skia screenshot failed: $skpUri\n$e\n\n$errorHelpText');
-    }
-    if (skpResponse.statusCode != HttpStatus.OK) {
-      final String error = await skpResponse.stream.toStringStream().join();
-      throwToolExit('Error: $error\n\n$errorHelpText');
-    }
-
-    if (argResults[_kSkiaServe] != null) {
-      final Uri skiaserveUri = Uri.parse(argResults[_kSkiaServe]);
-      final Uri postUri = new Uri.http(skiaserveUri.authority, '/new');
-      final http.MultipartRequest postRequest = new http.MultipartRequest('POST', postUri);
-      postRequest.files.add(new http.MultipartFile(
-          'file', skpResponse.stream, skpResponse.contentLength));
-
-      final http.StreamedResponse postResponse = await postRequest.send();
-      if (postResponse.statusCode != HttpStatus.OK)
-        throwToolExit('Failed to post Skia picture to skiaserve.\n\n$errorHelpText');
-    } else {
-      outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
-      final IOSink sink = outputFile.openWrite();
-      await sink.addStream(skpResponse.stream);
-      await sink.close();
-      await showOutputFileInfo(outputFile);
-      if (await outputFile.length() < 1000) {
-        final String content = await outputFile.readAsString();
-        if (content.startsWith('{"jsonrpc":"2.0", "error"'))
-          throwToolExit('\nIt appears the output file contains an error message, not valid skia output.\n\n$errorHelpText');
-      }
+    outputFile ??= getUniqueFile(fs.currentDirectory, 'flutter', 'skp');
+    final IOSink sink = outputFile.openWrite();
+    sink.add(BASE64.decode(skp['skp']));
+    await sink.close();
+    await showOutputFileInfo(outputFile);
+    if (await outputFile.length() < 1000) {
+      final String content = await outputFile.readAsString();
+      if (content.startsWith('{"jsonrpc":"2.0", "error"'))
+        throwToolExit('\nIt appears the output file contains an error message, not valid skia output.');
     }
   }
 

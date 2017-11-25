@@ -5,9 +5,12 @@
 import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
+import 'icons.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
@@ -21,6 +24,11 @@ const double _kNavBarLargeTitleHeightExtension = 56.0;
 const double _kNavBarShowLargeTitleThreshold = 10.0;
 
 const double _kNavBarEdgePadding = 16.0;
+
+// The back chevron has a special padding in iOS.
+const double _kNavBarBackButtonPadding = 0.0;
+
+const double _kNavBarBackButtonTapWidth = 50.0;
 
 /// Title text transfer fade.
 const Duration _kNavBarTitleFadeDuration = const Duration(milliseconds: 150);
@@ -44,6 +52,10 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 /// It also supports a [leading] and [trailing] widget before and after the
 /// [middle] widget while keeping the [middle] widget centered.
 ///
+/// The [leading] widget will automatically be a back chevron icon button (or a
+/// close button in case of a fullscreen dialog) to pop the current route if none
+/// is provided and [automaticallyImplyLeading] is true (true by default).
+///
 /// It should be placed at top of the screen and automatically accounts for
 /// the OS's status bar.
 ///
@@ -56,24 +68,30 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-//
-// TODO(xster): document automatic addition of a CupertinoBackButton.
-// TODO(xster): add sample code using icons.
 class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
     this.leading,
-    @required this.middle,
+    this.automaticallyImplyLeading: true,
+    this.middle,
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
-  }) : assert(middle != null, 'There must be a middle widget, usually a title.'),
+  }) : assert(automaticallyImplyLeading != null),
        super(key: key);
 
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
   final Widget leading;
+
+  /// Controls whether we should try to imply the leading widget if null.
+  ///
+  /// If true and [leading] is null, automatically try to deduce what the [leading]
+  /// widget should be. If [leading] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
+  final bool automaticallyImplyLeading;
 
   /// Widget to place in the middle of the navigation bar. Normally a title or
   /// a segmented control.
@@ -111,6 +129,7 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
       backgroundColor: backgroundColor,
       child: new _CupertinoPersistentNavigationBar(
         leading: leading,
+        automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
         trailing: trailing,
         actionsForegroundColor: actionsForegroundColor,
@@ -137,6 +156,13 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
 /// For advanced uses, an optional [middle] widget can be supplied to show a
 /// different widget in the middle of the navigation bar when the sliver is collapsed.
 ///
+/// Like [CupertinoNavigationBar], it also supports a [leading] and [trailing]
+/// widget on the static section on top that remains while scrolling.
+///
+/// The [leading] widget will automatically be a back chevron icon button (or a
+/// close button in case of a fullscreen dialog) to pop the current route if none
+/// is provided and [automaticallyImplyLeading] is true (true by default).
+///
 /// See also:
 ///
 ///  * [CupertinoNavigationBar], an iOS navigation bar for use on non-scrolling
@@ -149,11 +175,13 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     Key key,
     @required this.largeTitle,
     this.leading,
+    this.automaticallyImplyLeading: true,
     this.middle,
     this.trailing,
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
+       assert(automaticallyImplyLeading != null),
        super(key: key);
 
   /// The navigation bar's title.
@@ -177,6 +205,14 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   ///
   /// This widget is visible in both collapsed and expanded states.
   final Widget leading;
+
+  /// Controls whether we should try to imply the leading widget if null.
+  ///
+  /// If true and [leading] is null, automatically try to deduce what the [leading]
+  /// widget should be. If [leading] widget is not null, this parameter has no effect.
+  ///
+  /// This value cannot be null.
+  final bool automaticallyImplyLeading;
 
   /// A widget to place in the middle of the static navigation bar instead of
   /// the [largeTitle].
@@ -215,6 +251,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
         persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
         title: largeTitle,
         leading: leading,
+        automaticallyImplyLeading: automaticallyImplyLeading,
         middle: middle,
         trailing: trailing,
         backgroundColor: backgroundColor,
@@ -241,6 +278,10 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
     child: child,
   );
 
+  final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+  SystemChrome.setSystemUIOverlayStyle(
+      darkBackground ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark);
+
   if (backgroundColor.alpha == 0xFF)
     return childWithBackground;
 
@@ -261,13 +302,16 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   const _CupertinoPersistentNavigationBar({
     Key key,
     this.leading,
-    @required this.middle,
+    this.automaticallyImplyLeading,
+    this.middle,
     this.trailing,
     this.actionsForegroundColor,
     this.middleVisible,
   }) : super(key: key);
 
   final Widget leading;
+
+  final bool automaticallyImplyLeading;
 
   final Widget middle;
 
@@ -291,19 +335,19 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
       color: actionsForegroundColor,
     );
 
-    final Widget styledLeading = leading == null ? null : DefaultTextStyle.merge(
+    final Widget styledLeading = leading == null ? null : new DefaultTextStyle(
       style: actionsStyle,
       child: leading,
     );
 
-    final Widget styledTrailing = trailing == null ? null : DefaultTextStyle.merge(
+    final Widget styledTrailing = trailing == null ? null : new DefaultTextStyle(
       style: actionsStyle,
       child: trailing,
     );
 
     // Let the middle be black rather than `actionsForegroundColor` in case
     // it's a plain text title.
-    final Widget styledMiddle = middle == null ? null : DefaultTextStyle.merge(
+    final Widget styledMiddle = middle == null ? null : new DefaultTextStyle(
       style: actionsStyle.copyWith(
         fontWeight: FontWeight.w600,
         letterSpacing: -0.72,
@@ -320,7 +364,27 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
         child: styledMiddle,
       );
 
-    // TODO(xster): automatically build a CupertinoBackButton.
+    // Auto add back button if leading not provided.
+    Widget backOrCloseButton;
+    bool useBackButton = false;
+    if (styledLeading == null && automaticallyImplyLeading) {
+      final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
+      if (currentRoute?.canPop == true) {
+        useBackButton = !(currentRoute is PageRoute && currentRoute?.fullscreenDialog == true);
+        backOrCloseButton = new CupertinoButton(
+          child: useBackButton
+              ? new Container(
+                height: _kNavBarPersistentHeight,
+                width: _kNavBarBackButtonTapWidth,
+                alignment: Alignment.centerLeft,
+                child: const Icon(CupertinoIcons.back, size: 34.0,)
+              )
+              : const Text('Close'),
+          padding: EdgeInsets.zero,
+          onPressed: () { Navigator.of(context).maybePop(); },
+        );
+      }
+    }
 
     return new SizedBox(
       height: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
@@ -332,16 +396,14 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
         child: new Padding(
           padding: new EdgeInsets.only(
             top: MediaQuery.of(context).padding.top,
-            // TODO(xster): dynamically reduce padding when an automatic
-            // CupertinoBackButton is present.
-            left: _kNavBarEdgePadding,
+            left: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
             right: _kNavBarEdgePadding,
           ),
           child: new MediaQuery.removePadding(
             context: context,
             removeTop: true,
             child: new NavigationToolbar(
-              leading: styledLeading,
+              leading: styledLeading ?? backOrCloseButton,
               middle: animatedStyledMiddle,
               trailing: styledTrailing,
               centerMiddle: true,
@@ -353,11 +415,13 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
   }
 }
 
-class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHeaderDelegate {
-  const _CupertinoLargeTitleNavigationBarSliverDelegate({
+class _CupertinoLargeTitleNavigationBarSliverDelegate
+    extends SliverPersistentHeaderDelegate with DiagnosticableTreeMixin {
+  _CupertinoLargeTitleNavigationBarSliverDelegate({
     @required this.persistentHeight,
     @required this.title,
     this.leading,
+    this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
     this.backgroundColor,
@@ -369,6 +433,8 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
   final Widget title;
 
   final Widget leading;
+
+  final bool automaticallyImplyLeading;
 
   final Widget middle;
 
@@ -391,6 +457,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
     final _CupertinoPersistentNavigationBar persistentNavigationBar =
         new _CupertinoPersistentNavigationBar(
       leading: leading,
+      automaticallyImplyLeading: automaticallyImplyLeading,
       middle: middle ?? title,
       trailing: trailing,
       // If middle widget exists, always show it. Otherwise, show title
@@ -416,7 +483,7 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate extends SliverPersistentHe
               child: new OverflowBox(
                 minHeight: 0.0,
                 maxHeight: double.INFINITY,
-                alignment: FractionalOffsetDirectional.bottomStart,
+                alignment: AlignmentDirectional.bottomStart,
                 child: new Padding(
                   padding: const EdgeInsetsDirectional.only(
                     start: _kNavBarEdgePadding,

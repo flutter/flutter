@@ -8,7 +8,7 @@ import 'package:flutter/painting.dart';
 const double kToolbarHeight = 56.0;
 
 /// The height of the bottom navigation bar.
-const double kBottomNavigationBarHeight = 60.0;
+const double kBottomNavigationBarHeight = 56.0;
 
 /// The height of a tab bar containing text.
 const double kTextTabBarHeight = 48.0;

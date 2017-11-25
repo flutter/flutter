@@ -120,12 +120,12 @@ Future<Null> saveCatalogScreenshots({
     String prefix, // Prefix for all file names.
   }) async {
   final List<String> screenshots = <String>[];
-  directory.listSync().forEach((FileSystemEntity entity) {
+  for (FileSystemEntity entity in directory.listSync()) {
     if (entity is File && entity.path.endsWith('.png')) {
       final File file = entity;
       screenshots.add(file.path);
     }
-  });
+  }
 
   final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
   final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.

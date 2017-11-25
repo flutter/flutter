@@ -57,6 +57,23 @@ void main() {
     expect(painter.size, const Size(123.0, 123.0));
   });
 
+  test('TextPainter textScaleFactor test', () {
+    final TextPainter painter = new TextPainter(
+      text: const TextSpan(
+        text: 'X',
+        style: const TextStyle(
+          inherit: false,
+          fontFamily: 'Ahem',
+          fontSize: 10.0,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textScaleFactor: 2.0,
+    );
+    painter.layout();
+    expect(painter.size, const Size(20.0, 20.0));
+  });
+
   test('TextPainter default text height is 14 pixels', () {
     final TextPainter painter = new TextPainter(
       text: const TextSpan(text: 'x'),

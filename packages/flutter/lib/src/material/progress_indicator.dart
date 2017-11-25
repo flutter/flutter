@@ -28,7 +28,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const ProgressIndicator({
     Key key,
@@ -156,7 +156,7 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const LinearProgressIndicator({
     Key key,
@@ -315,7 +315,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const CircularProgressIndicator({
     Key key,

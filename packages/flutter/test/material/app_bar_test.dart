@@ -971,9 +971,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
           ),
         ),
@@ -992,15 +992,15 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),
@@ -1022,15 +1022,15 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),
@@ -1063,9 +1063,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             bottom: new PreferredSize(
               preferredSize: const Size(0.0, kToolbarHeight),

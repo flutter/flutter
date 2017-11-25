@@ -312,7 +312,7 @@ void main() {
       routes: <String, WidgetBuilder>{
         '/next': (BuildContext context) {
           return new Align(
-            alignment: FractionalOffset.topLeft,
+            alignment: Alignment.topLeft,
             child: new Hero(
               tag: 'foo',
               child: new GestureDetector(
@@ -1104,17 +1104,17 @@ void main() {
     await tester.pump(duration * 0.25);
     Offset actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     Offset predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.25));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.5));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(secondKey));
     predictedHeroCenter = pushCenterTween.lerp(curve.transform(0.75));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0, 300.0));
@@ -1135,17 +1135,17 @@ void main() {
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.25));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.5));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pump(duration * 0.25);
     actualHeroCenter = tester.getCenter(find.byKey(firstKey));
     predictedHeroCenter = popCenterTween.lerp(curve.flipped.transform(0.75));
-    expect((actualHeroCenter - predictedHeroCenter).distance, closeTo(0.0, epsilon));
+    expect(actualHeroCenter, within<Offset>(distance: epsilon, from: predictedHeroCenter));
 
     await tester.pumpAndSettle();
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));

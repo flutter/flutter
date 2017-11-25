@@ -11,7 +11,6 @@ import 'icon_data.dart';
 import 'icon_theme.dart';
 import 'icon_theme_data.dart';
 
-
 /// A graphical icon widget drawn with a glyph from a font described in
 /// an [IconData] such as material's predefined [IconData]s in [Icons].
 ///
@@ -35,7 +34,9 @@ class Icon extends StatelessWidget {
   const Icon(this.icon, {
     Key key,
     this.size,
-    this.color
+    this.color,
+    this.semanticLabel,
+    this.textDirection,
   }) : super(key: key);
 
   /// The icon to display. The available icons are described in [Icons].
@@ -83,39 +84,90 @@ class Icon extends StatelessWidget {
   /// ```
   final Color color;
 
+  /// Semantic label for the icon.
+  ///
+  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// This label does not show in the UI.
+  ///
+  /// See also:
+  ///
+  ///  * [Semantics.label], which is set to [semanticLabel] in the underlying
+  ///    [Semantics] widget.
+  final String semanticLabel;
+
+  /// The text direction to use for rendering the icon.
+  ///
+  /// If this is null, the ambient [Directionality] is used instead.
+  ///
+  /// Some icons follow the reading direction. For example, "back" buttons point
+  /// left in left-to-right environments and right in right-to-left
+  /// environments. Such icons have their [IconData.matchTextDirection] field
+  /// set to true, and the [Icon] widget uses the [textDirection] to determine
+  /// the orientation in which to draw the icon.
+  ///
+  /// This property has no effect if the [icon]'s [IconData.matchTextDirection]
+  /// field is false, but for consistency a text direction value must always be
+  /// specified, either directly using this property or using [Directionality].
+  final TextDirection textDirection;
+
   @override
   Widget build(BuildContext context) {
-    assert(debugCheckHasDirectionality(context));
-    final TextDirection textDirection = Directionality.of(context);
+    assert(this.textDirection != null || debugCheckHasDirectionality(context));
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
 
     final IconThemeData iconTheme = IconTheme.of(context);
 
     final double iconSize = size ?? iconTheme.size;
 
-    if (icon == null)
-      return new SizedBox(width: iconSize, height: iconSize);
+    if (icon == null) {
+      return new Semantics(
+        label: semanticLabel,
+        child: new SizedBox(width: iconSize, height: iconSize)
+      );
+    }
 
     final double iconOpacity = iconTheme.opacity;
     Color iconColor = color ?? iconTheme.color;
     if (iconOpacity != 1.0)
       iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
 
-    return new ExcludeSemantics(
-      child: new SizedBox(
-        width: iconSize,
-        height: iconSize,
-        child: new Center(
-          child: new RichText(
-            textDirection: textDirection, // Since we already fetched it for the assert...
-            text: new TextSpan(
-              text: new String.fromCharCode(icon.codePoint),
-              style: new TextStyle(
-                inherit: false,
-                color: iconColor,
-                fontSize: iconSize,
-                fontFamily: icon.fontFamily,
-              ),
-            ),
+    Widget iconWidget = new RichText(
+      textDirection: textDirection, // Since we already fetched it for the assert...
+      text: new TextSpan(
+        text: new String.fromCharCode(icon.codePoint),
+        style: new TextStyle(
+          inherit: false,
+          color: iconColor,
+          fontSize: iconSize,
+          fontFamily: icon.fontFamily,
+          package: icon.fontPackage,
+        ),
+      ),
+    );
+
+    if (icon.matchTextDirection) {
+      switch (textDirection) {
+        case TextDirection.rtl:
+          iconWidget = new Transform(
+            transform: new Matrix4.identity()..scale(-1.0),
+            alignment: Alignment.center,
+            transformHitTests: false,
+            child: iconWidget,
+          );
+          break;
+        case TextDirection.ltr:
+          break;
+      }
+    }
+
+    return new Semantics(
+      label: semanticLabel,
+      child: new ExcludeSemantics(
+        child: new SizedBox(
+          width: iconSize,
+          height: iconSize,
+          child: new Center(
+            child: iconWidget,
           ),
         ),
       ),

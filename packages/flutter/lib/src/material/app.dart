@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -16,6 +14,13 @@ import 'material_localizations.dart';
 import 'page.dart';
 import 'theme.dart';
 
+/// [MaterialApp] uses this [TextStyle] as its [DefaultTextStyle] to encourage
+/// developers to be intentional about their [DefaultTextStyle].
+///
+/// In Material Design, most [Text] widgets are contained in [Material] widgets,
+/// which sets a specific [DefaultTextStyle]. If you're seeing text that uses
+/// this text style, consider putting your text in a [Material] widget (or
+/// another widget that sets a [DefaultTextStyle]).
 const TextStyle _errorTextStyle = const TextStyle(
   color: const Color(0xD0FF0000),
   fontFamily: 'monospace',
@@ -23,19 +28,9 @@ const TextStyle _errorTextStyle = const TextStyle(
   fontWeight: FontWeight.w900,
   decoration: TextDecoration.underline,
   decorationColor: const Color(0xFFFFFF00),
-  decorationStyle: TextDecorationStyle.double
+  decorationStyle: TextDecorationStyle.double,
+  debugLabel: 'fallback style; consider putting your text in a Material',
 );
-
-class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const _MaterialLocalizationsDelegate();
-
-  @override
-  Future<MaterialLocalizations> load(Locale locale) => DefaultMaterialLocalizations.load(locale);
-
-  @override
-  bool shouldReload(_MaterialLocalizationsDelegate old) => false;
-}
-
 
 /// An application that uses material design.
 ///
@@ -145,7 +140,7 @@ class MaterialApp extends StatefulWidget {
   /// This value is passed unmodified to [WidgetsApp.title].
   final String title;
 
-  /// If non-null this function is called to produce the app's
+  /// If non-null this callback is called to produce the app's
   /// title string, otherwise [title] is used.
   ///
   /// The [onGenerateTitle] `context` parameter includes the [WidgetsApp]'s
@@ -153,6 +148,9 @@ class MaterialApp extends StatefulWidget {
   /// localized title.
   ///
   /// This callback function must not return null.
+  ///
+  /// The [onGenerateTitle] callback is called each time the [MaterialApp]
+  /// rebuilds.
   ///
   /// This value is passed unmodified to [WidgetsApp.onGenerateTitle].
   final GenerateAppTitle onGenerateTitle;
@@ -463,7 +461,7 @@ class _MaterialAppState extends State<MaterialApp> {
   Iterable<LocalizationsDelegate<dynamic>> get _localizationsDelegates sync* {
     if (widget.localizationsDelegates != null)
       yield* widget.localizationsDelegates;
-    yield const _MaterialLocalizationsDelegate();
+    yield DefaultMaterialLocalizations.delegate;
   }
 
   RectTween _createRectTween(Rect begin, Rect end) {

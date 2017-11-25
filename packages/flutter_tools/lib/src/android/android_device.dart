@@ -7,6 +7,7 @@ import 'dart:convert';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
+import '../android/apk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -17,7 +18,6 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../commands/build_apk.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
@@ -25,8 +25,6 @@ import '../protocol_discovery.dart';
 import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
-
-const String _defaultAdbPath = 'adb';
 
 enum _HardwareType { emulator, physical }
 
@@ -347,6 +345,7 @@ class AndroidDevice extends Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
@@ -378,15 +377,16 @@ class AndroidDevice extends Device {
     printTrace('$this startApp');
 
     ProtocolDiscovery observatoryDiscovery;
-    ProtocolDiscovery diagnosticDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
       // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
-      diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
-        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
+        getLogReader(),
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        ipv6: ipv6,
+      );
     }
 
     List<String> cmd;
@@ -430,33 +430,20 @@ class AndroidDevice extends Device {
     // device has printed "Observatory is listening on...".
     printTrace('Waiting for observatory port to be available...');
 
-    // TODO(danrubel) Waiting for observatory and diagnostic services
-    // can be made common across all devices.
+    // TODO(danrubel) Waiting for observatory services can be made common across all devices.
     try {
-      Uri observatoryUri, diagnosticUri;
+      Uri observatoryUri;
 
-      if (debuggingOptions.buildInfo.isDebug) {
-        final List<Uri> deviceUris = await Future.wait(
-            <Future<Uri>>[observatoryDiscovery.uri, diagnosticDiscovery.uri]
-        );
-        observatoryUri = deviceUris[0];
-        diagnosticUri = deviceUris[1];
-      } else if (debuggingOptions.buildInfo.isProfile) {
+      if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
         observatoryUri = await observatoryDiscovery.uri;
       }
 
-      return new LaunchResult.succeeded(
-          observatoryUri: observatoryUri,
-          diagnosticUri: diagnosticUri,
-      );
+      return new LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      await waitGroup<Null>(<Future<Null>>[
-        observatoryDiscovery.cancel(),
-        diagnosticDiscovery.cancel(),
-      ]);
+      await observatoryDiscovery.cancel();
     }
   }
 
@@ -519,7 +506,7 @@ class AndroidDevice extends Device {
       final Match match = discoverExp.firstMatch(line);
       if (match != null) {
         final Map<String, dynamic> app = JSON.decode(match.group(1));
-        result.add(new DiscoveredApp(app['id'], app['observatoryPort'], app['diagnosticPort']));
+        result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
       }
     });
 
@@ -692,8 +679,22 @@ class _AdbLogReader extends DeviceLogReader {
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
+  // 'F/libc(pid): Fatal signal 11'
+  static final RegExp _fatalLog = new RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
+
+  // 'I/DEBUG(pid): ...'
+  static final RegExp _tombstoneLine = new RegExp(r'^[IF]\/DEBUG\s*\(\s*\d+\):\s(.+)$');
+
+  // 'I/DEBUG(pid): Tombstone written to: '
+  static final RegExp _tombstoneTerminator = new RegExp(r'^Tombstone written to:\s');
+
   // we default to true in case none of the log lines match
   bool _acceptedLastLine = true;
+
+  // Whether a fatal crash is happening or not.
+  // During a fatal crash only lines from the crash are accepted, the rest are
+  // dropped.
+  bool _fatalCrash = false;
 
   // The format of the line is controlled by the '-v' parameter passed to
   // adb logcat. We are currently passing 'time', which has the format:
@@ -719,12 +720,35 @@ class _AdbLogReader extends DeviceLogReader {
     final Match logMatch = _logFormat.firstMatch(line);
     if (logMatch != null) {
       bool acceptLine = false;
-      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+
+      if (_fatalCrash) {
+        // While a fatal crash is going on, only accept lines from the crash
+        // Otherwise the crash log in the console may get interrupted
+
+        final Match fatalMatch = _tombstoneLine.firstMatch(line);
+
+        if (fatalMatch != null) {
+          acceptLine = true;
+
+          line = fatalMatch[1];
+
+          if (_tombstoneTerminator.hasMatch(fatalMatch[1])) {
+            // Hit crash terminator, stop logging the crash info
+            _fatalCrash = false;
+          }
+        }
+      } else if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
         acceptLine = true;
+
+        if (_fatalLog.hasMatch(line)) {
+          // Hit fatal signal, app is now crashing
+          _fatalCrash = true;
+        }
       } else {
         // Filter on approved names and levels.
         acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
       }
+
       if (acceptLine) {
         _acceptedLastLine = true;
         _linesController.add(line);
@@ -772,7 +796,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {
       if (line.startsWith(device.id)) {
-        final List<String> splitLine = line.split("tcp:");
+        final List<String> splitLine = line.split('tcp:');
 
         // Sanity check splitLine.
         if (splitLine.length != 3)
