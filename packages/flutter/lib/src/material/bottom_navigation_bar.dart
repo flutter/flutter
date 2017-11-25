@@ -16,8 +16,6 @@ import 'material.dart';
 import 'theme.dart';
 import 'typography.dart';
 
-const double _kActiveMaxWidth = 168.0;
-const double _kInactiveMaxWidth = 96.0;
 const double _kActiveFontSize = 14.0;
 const double _kInactiveFontSize = 12.0;
 const double _kTopMargin = 6.0;
