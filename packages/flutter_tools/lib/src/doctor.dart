@@ -35,12 +35,14 @@ class Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(new _FlutterValidator());
 
-      if (androidWorkflow.appliesToHostPlatform && !runOnlyFuchsia)
-        _validators.add(androidWorkflow);
+      if (!runOnlyFuchsia){
+        if (androidWorkflow.appliesToHostPlatform)
+          _validators.add(androidWorkflow);
 
-      if (iosWorkflow.appliesToHostPlatform && !runOnlyFuchsia)
-        _validators.add(iosWorkflow);
-
+        if (iosWorkflow.appliesToHostPlatform)
+          _validators.add(iosWorkflow);
+      }
+      
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
       ideValidators.addAll(IntelliJValidator.installedValidators);
