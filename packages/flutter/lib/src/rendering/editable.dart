@@ -18,8 +18,6 @@ const double _kCaretGap = 1.0; // pixels
 const double _kCaretHeightOffset = 2.0; // pixels
 const double _kCaretWidth = 1.0; // pixels
 
-final String _kZeroWidthSpace = new String.fromCharCode(0x200B);
-
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
 ///

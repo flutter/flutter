@@ -277,8 +277,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 }
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
-
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   _RenderInkFeatures({
     RenderBox child,
