@@ -179,7 +179,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
       if (isPrintTransitiveClosure) {
         tree._dependencyTree.forEach((String from, Set<String> to) {
-          print('$from -> $to');
+          printStatus('$from -> $to');
         });
         return;
       }
@@ -256,7 +256,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (path != null)
           buf.write(' <- ');
       }
-      print(buf);
+      printStatus(buf.toString());
     }
 
     if (paths.isEmpty) {
