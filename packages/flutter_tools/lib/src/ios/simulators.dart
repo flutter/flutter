@@ -211,17 +211,6 @@ class IOSSimulator extends Device {
 
   String get xcrunPath => fs.path.join('/usr', 'bin', 'xcrun');
 
-  String _getSimulatorPath() {
-    return fs.path.join(homeDirPath, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
-  }
-
-  String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
-    final String simulatorPath = _getSimulatorPath();
-    if (simulatorPath == null)
-      return null;
-    return fs.path.join(simulatorPath, 'data');
-  }
-
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
     return SimControl.instance.isInstalled(id, app.id);
@@ -422,16 +411,6 @@ class IOSSimulator extends Device {
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
     // Currently we don't have a way to stop an app running on iOS.
-    return false;
-  }
-
-  Future<bool> pushFile(
-      ApplicationPackage app, String localFile, String targetFile) async {
-    if (platform.isMacOS) {
-      final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      await runCheckedAsync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
-      return true;
-    }
     return false;
   }
 
