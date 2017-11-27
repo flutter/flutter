@@ -14,8 +14,6 @@ class ColorTestingDemo extends StatelessWidget {
   Widget build(BuildContext context) => new ColorDemoHome();
 }
 
-const double _kPageMaxWidth = 500.0;
-
 class ColorDemoHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {

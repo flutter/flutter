@@ -440,7 +440,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   @override
   void removeListener(ImageListener listener) {
     super.removeListener(listener);
-    if (_hasActiveListeners) {
+    if (!_hasActiveListeners) {
       _timer?.cancel();
       _timer = null;
     }

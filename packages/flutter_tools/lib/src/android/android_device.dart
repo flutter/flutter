@@ -679,8 +679,22 @@ class _AdbLogReader extends DeviceLogReader {
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
+  // 'F/libc(pid): Fatal signal 11'
+  static final RegExp _fatalLog = new RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
+
+  // 'I/DEBUG(pid): ...'
+  static final RegExp _tombstoneLine = new RegExp(r'^[IF]\/DEBUG\s*\(\s*\d+\):\s(.+)$');
+
+  // 'I/DEBUG(pid): Tombstone written to: '
+  static final RegExp _tombstoneTerminator = new RegExp(r'^Tombstone written to:\s');
+
   // we default to true in case none of the log lines match
   bool _acceptedLastLine = true;
+
+  // Whether a fatal crash is happening or not.
+  // During a fatal crash only lines from the crash are accepted, the rest are
+  // dropped.
+  bool _fatalCrash = false;
 
   // The format of the line is controlled by the '-v' parameter passed to
   // adb logcat. We are currently passing 'time', which has the format:
@@ -706,12 +720,35 @@ class _AdbLogReader extends DeviceLogReader {
     final Match logMatch = _logFormat.firstMatch(line);
     if (logMatch != null) {
       bool acceptLine = false;
-      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+
+      if (_fatalCrash) {
+        // While a fatal crash is going on, only accept lines from the crash
+        // Otherwise the crash log in the console may get interrupted
+
+        final Match fatalMatch = _tombstoneLine.firstMatch(line);
+
+        if (fatalMatch != null) {
+          acceptLine = true;
+
+          line = fatalMatch[1];
+
+          if (_tombstoneTerminator.hasMatch(fatalMatch[1])) {
+            // Hit crash terminator, stop logging the crash info
+            _fatalCrash = false;
+          }
+        }
+      } else if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
         acceptLine = true;
+
+        if (_fatalLog.hasMatch(line)) {
+          // Hit fatal signal, app is now crashing
+          _fatalCrash = true;
+        }
       } else {
         // Filter on approved names and levels.
         acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
       }
+
       if (acceptLine) {
         _acceptedLastLine = true;
         _linesController.add(line);

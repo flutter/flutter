@@ -14,8 +14,6 @@ import 'theme.dart';
 const Duration _kBottomSheetDuration = const Duration(milliseconds: 200);
 const double _kMinFlingVelocity = 700.0;
 const double _kCloseProgressThreshold = 0.5;
-const Color _kTransparent = const Color(0x00000000);
-const Color _kBarrierColor = Colors.black54;
 
 /// A material design bottom sheet.
 ///
@@ -251,6 +249,11 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// information that supplements the primary content of the app without
 /// preventing the use from interacting with the app. Persistent bottom sheets
 /// can be created and displayed with the [ScaffoldState.showBottomSheet] function.
+///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the bottom sheet. It is only used when the method is called. Its
+/// corresponding widget can be safely removed from the tree before the bottom
+/// sheet is closed.
 ///
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.

@@ -14,9 +14,6 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType;
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
-
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
