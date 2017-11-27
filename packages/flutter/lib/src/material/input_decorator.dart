@@ -596,7 +596,9 @@ class InputDecorator extends StatelessWidget {
     // Wrap the content in an optionally filled container with the bottom
     // border serving as the divider.
     content = new AnimatedContainer(
-      padding: decoration.isCollapsed ? EdgeInsets.zero : new EdgeInsets.only(
+      padding: decoration.isCollapsed ? EdgeInsets.zero : new EdgeInsetsDirectional.only(
+        start: 12.0,
+        end: 12.0,
         top: topPadding,
         bottom: (decoration.isDense ? 8.0 : 12.0) - dividerWeight,
       ),
@@ -635,7 +637,11 @@ class InputDecorator extends StatelessWidget {
         : EdgeInsets.zero;
     }
 
-    final Widget label = new Positioned.fill(
+    final Widget label = new PositionedDirectional(
+      start: 12.0,
+      end: 0.0,
+      top: 0.0,
+      bottom: 0.0,
       child: new AnimatedContainer(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
@@ -675,7 +681,7 @@ class InputDecorator extends StatelessWidget {
 
     final Widget errorOrHelp = (errorText ?? helperText) == null ? null :
       new AnimatedContainer(
-        padding: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsetsDirectional.only(start: 12.0, top: 8.0),
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         child: new Text(
@@ -688,7 +694,7 @@ class InputDecorator extends StatelessWidget {
 
     final Widget counter = counterText == null ? null :
       new AnimatedContainer(
-        padding: const EdgeInsets.only(top: 8.0),
+        padding: const EdgeInsetsDirectional.only(end: 0.0, top: 8.0),
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
         child: new Text(

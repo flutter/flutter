@@ -447,7 +447,7 @@ void main() {
     expect(tester.getRect(find.text('label')).bottomLeft.dy, 36.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('helper')).topLeft, const Offset(0.0, 64.0));
+    expect(tester.getRect(find.text('helper')).topLeft, const Offset(12.0, 64.0));
     expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 64.0));
 
     // If errorText is specified then the helperText isn't shown
@@ -473,7 +473,7 @@ void main() {
     expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(0.0, 64.0));
+    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 64.0));
     expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 64.0));
     expect(find.text('helper'), findsNothing);
 
@@ -520,7 +520,7 @@ void main() {
     expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(0.0, 56.0));
+    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 56.0));
     expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 56.0));
 
     await tester.pumpWidget(
@@ -546,7 +546,7 @@ void main() {
     expect(tester.getRect(find.text('label')).bottomLeft.dy, 32.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(0.0, 56.0));
+    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 56.0));
     expect(tester.getRect(find.text('counter')).topRight, const Offset(800.0, 56.0));
   });
 
@@ -576,10 +576,12 @@ void main() {
     expect(tester.getSize(find.text('s')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
     expect(tester.getTopLeft(find.text('p')).dy, 12.0);
+    expect(tester.getTopLeft(find.text('p')).dx, 12.0);
     expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopRight(find.text('s')).dx, 788.0);
 
     // layout is a row: [p text s]
-    expect(tester.getTopLeft(find.text('p')).dx, 0.0);
+    expect(tester.getTopLeft(find.text('p')).dx, 12.0);
     expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
@@ -609,6 +611,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
     expect(tester.getTopLeft(find.text('p')).dy, 12.0);
     expect(tester.getTopLeft(find.text('s')).dy, 12.0);
+    expect(tester.getTopRight(find.text('s')).dx, 788.0);
     expect(tester.getSize(find.byType(Icon)).height, 24.0);
 
     // The 24dps high icon is centered on the 16dps high input line
@@ -642,7 +645,7 @@ void main() {
     //   16 - input text (font size 16dps)
     //   12 - bottom padding
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - [counter helper/error] (font size 12dps)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -652,7 +655,7 @@ void main() {
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('counter')), const Offset(0.0, 64.0));
-    expect(tester.getTopRight(find.text('helper')), const Offset(800.0, 64.0));
+    expect(tester.getTopRight(find.text('helper')), const Offset(788.0, 64.0));
 
     // If both error and helper are specified, show the error
     await tester.pumpWidget(
@@ -670,7 +673,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('counter')), const Offset(0.0, 64.0));
-    expect(tester.getTopRight(find.text('error')), const Offset(800.0, 64.0));
+    expect(tester.getTopRight(find.text('error')), const Offset(788.0, 64.0));
     expect(find.text('helper'), findsNothing);
   });
 
@@ -701,7 +704,7 @@ void main() {
     expect(tester.getTopLeft(find.text('s')).dy, 12.0);
 
     // layout is a row: [s text p]
-    expect(tester.getTopLeft(find.text('s')).dx, 0.0);
+    expect(tester.getTopLeft(find.text('s')).dx, 12.0);
     expect(tester.getTopRight(find.text('s')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
   });
@@ -733,10 +736,12 @@ void main() {
     expect(tester.getSize(find.text('s')).height, 16.0);
     expect(tester.getTopLeft(find.text('text')).dy, 8.0);
     expect(tester.getTopLeft(find.text('p')).dy, 8.0);
+    expect(tester.getTopLeft(find.text('p')).dx, 12.0);
     expect(tester.getTopLeft(find.text('s')).dy, 8.0);
+    expect(tester.getTopRight(find.text('s')).dx, 788.0);
 
     // layout is a row: [p text s]
-    expect(tester.getTopLeft(find.text('p')).dx, 0.0);
+    expect(tester.getTopLeft(find.text('p')).dx, 12.0);
     expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
 
@@ -878,7 +883,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getTopLeft(find.text('helper')), const Offset(0.0, 64.0));
+    expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(800.0, 64.0));
   });
 
