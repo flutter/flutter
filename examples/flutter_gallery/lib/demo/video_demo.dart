@@ -12,33 +12,12 @@ const String butterflyUri =
 const String beeUri =
     'https://flutter.github.io/assets-for-api-docs/videos/bee.mp4';
 
-class LoopingController {
-  final String uri;
-
-  LoopingController(this.uri);
-
-  Future<VideoPlayerController> _controllerFuture;
-  VideoPlayerController _controller;
-  VideoPlayerController get controller => _controller;
-
-  Future<Null> init() async {
-    _controllerFuture = VideoPlayerController.create(uri);
-    _controller = await _controllerFuture;
-    await _controller.setLooping(true);
-    await _controller.play();
-  }
-
-  Future<Null> dispose() async {
-    (await _controllerFuture).dispose();
-  }
-}
-
-class LoopingVideoCard extends StatelessWidget {
+class VideoCard extends StatelessWidget {
   final VideoPlayerController controller;
   final String title;
   final String subtitle;
 
-  const LoopingVideoCard({Key key, this.controller, this.title, this.subtitle})
+  const VideoCard({Key key, this.controller, this.title, this.subtitle})
       : super(key: key);
 
   Widget buildInlineVideo() {
@@ -88,10 +67,14 @@ class LoopingVideoCard extends StatelessWidget {
           ),
           new GestureDetector(
             onTap: () {
+              final double oldVolume = controller.value.volume;
+              controller.setVolume(1.0);
               Navigator.of(context).push(
                   new MaterialPageRoute<Null>(builder: (BuildContext context) {
                 return buildFullScreenVideo();
-              }));
+              })).then((dynamic _) {
+                controller.setVolume(oldVolume);
+              });
             },
             child: buildInlineVideo(),
           ),
@@ -245,19 +228,24 @@ class VideoDemo extends StatefulWidget {
 }
 
 class _VideoDemoState extends State<VideoDemo> {
-  final LoopingController butterflyController =
-      new LoopingController(butterflyUri);
-  final LoopingController beeController = new LoopingController(beeUri);
+  final VideoPlayerController butterflyController =
+      new VideoPlayerController(butterflyUri);
+  final VideoPlayerController beeController = new VideoPlayerController(beeUri);
 
   @override
   void initState() {
     super.initState();
-    butterflyController.init().then((_) {
+
+    Future<Null> initController(VideoPlayerController controller) async {
+      controller.setLooping(true);
+      controller.setVolume(0.0);
+      controller.play();
+      await controller.initialize();
       setState(() {});
-    });
-    beeController.init().then((_) {
-      setState(() {});
-    });
+    }
+
+    initController(butterflyController);
+    initController(beeController);
   }
 
   @override
@@ -275,13 +263,13 @@ class _VideoDemoState extends State<VideoDemo> {
       ),
       body: new ListView(
         children: <Widget>[
-          new LoopingVideoCard(
-            controller: butterflyController.controller,
+          new VideoCard(
+            controller: butterflyController,
             title: 'Float',
             subtitle: '… like a butterfly',
           ),
-          new LoopingVideoCard(
-            controller: beeController.controller,
+          new VideoCard(
+            controller: beeController,
             title: 'Sting',
             subtitle: '… like a bee',
           ),
