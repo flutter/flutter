@@ -103,8 +103,6 @@ class HoleBox extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    context.addLayer(new HoleLayer(
-      rect: new Rect.fromLTWH(offset.dx, offset.dy, size.width, size.height)
-    ));
+    context.addLayer(new HoleLayer(rect: offset & size));
   }
 }
