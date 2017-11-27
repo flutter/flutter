@@ -144,7 +144,7 @@ public class PlatformPlugin implements MethodCallHandler, ActivityLifecycleListe
             case 0x0e: // portraitDown, landscapeLeft, and landscapeRight
                 // Android can't describe these cases, so just default to whatever the first
                 // specified value was.
-                switch (requestedOrientation) {
+                switch (firstRequestedOrientation) {
                     case 0x01:
                         mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
                         break;
