@@ -1,51 +1,36 @@
 import 'dart:math' as math show PI;
 
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 
-class _ImageDemo {
-  final String description;
-  final String assetPath;
-
-  const _ImageDemo({
-    @required this.description,
-    @required this.assetPath,
-  });
-}
+import '../gallery/demo.dart';
 
 class ImagesDemo extends StatelessWidget {
   static const String routeName = '/images';
 
-  static const List<_ImageDemo> _demos = const <_ImageDemo> [
-    const _ImageDemo(
-      description: 'ANIMATED GIF',
-      // TODO(amirh): replace this with the final asset.
-      assetPath: 'https://flutter.io/images/intellij/hot-reload.gif'
-    ),
-    const _ImageDemo(
-      description: 'ANIMATED WEBP',
-      // TODO(amirh): replace this with the final asset.
-      assetPath:
-      'https://camo.githubusercontent.com/47fb2facc57a6fe832964fc77b01f881291d04c8/687474703a2f2f692e696d6775722e636f6d2f74537156516b782e676966'
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    return new DefaultTabController(
-      length: _demos.length,
-      child: new Scaffold(
-        appBar: new AppBar(
-          title: const Text('Images'),
-          bottom: new TabBar(
-            isScrollable: true,
-            tabs: _demos.map((_ImageDemo d) => new Tab(text: d.description)).toList(),
+    return new TabbedComponentDemoScaffold(
+      title: 'Images',
+      demos: <ComponentDemoTabData>[
+        new ComponentDemoTabData(
+          tabName: 'ANIMATED GIF',
+          description: '',
+          exampleCodeTag: 'animated_image',
+          demoWidget: const _ImageDemoWidget(
+            // TODO(amirh): replace this with the final asset.
+            'https://flutter.io/images/intellij/hot-reload.gif'
           ),
         ),
-        body: new TabBarView(
-          children: _demos.map(_ImageDemoWidget.fromImageDemo).toList(),
+        new ComponentDemoTabData(
+          tabName: 'ANIMATED WEBP',
+          description: '',
+          exampleCodeTag: 'animated_image',
+          demoWidget: const _ImageDemoWidget(
+            // TODO(amirh): replace this with the final asset.
+            'https://camo.githubusercontent.com/47fb2facc57a6fe832964fc77b01f881291d04c8/687474703a2f2f692e696d6775722e636f6d2f74537156516b782e676966'
+          ),
         ),
-      )
+      ]
     );
   }
 }
@@ -54,10 +39,6 @@ class _ImageDemoWidget extends StatelessWidget {
   final String _assetPath;
 
   const _ImageDemoWidget(this._assetPath) : assert(_assetPath != null);
-
-  static _ImageDemoWidget fromImageDemo(_ImageDemo demo) {
-    return new _ImageDemoWidget(demo.assetPath);
-  }
 
   @override
   Widget build(BuildContext context) {
