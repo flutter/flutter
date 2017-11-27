@@ -25,13 +25,11 @@ abstract class RunCommandBase extends FlutterCommand {
     addBuildModeFlags(defaultToRelease: false);
     usesFlavorOption();
     argParser.addFlag('trace-startup',
-        negatable: true,
-        defaultsTo: false,
+        negatable: false,
         help: 'Start tracing during startup.');
     argParser.addFlag('ipv6',
         hide: true,
         negatable: false,
-        defaultsTo: false,
         help: 'Binds to IPv6 localhost instead of IPv4 when the flutter tool\n'
               'forwards the host port to a device port.');
     argParser.addOption('route',
@@ -79,24 +77,20 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'Stop any currently running application process before running the app.');
     argParser.addFlag('start-paused',
-        defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.');
     argParser.addFlag('enable-software-rendering',
-        defaultsTo: false,
         negatable: false,
         help: 'Enable rendering using the Skia software backend. This is useful\n'
               'when testing Flutter on emulators. By default, Flutter will\n'
               'attempt to either use OpenGL or Vulkan and fall back to software\n'
               'when neither is available.');
     argParser.addFlag('trace-skia',
-        defaultsTo: false,
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging\n'
               'the GPU thread. By default, Flutter will not log skia code.');
     argParser.addFlag('use-test-fonts',
         negatable: true,
-        defaultsTo: false,
         help: 'Enable (and default to) the "Ahem" font. This is a special font\n'
               'used in tests to remove any dependencies on the font metrics. It\n'
               'is enabled when you use "flutter test". Set this flag when running\n'
@@ -110,10 +104,10 @@ class RunCommand extends RunCommandBase {
         help: 'Specify a pre-built application binary to use when running.');
     argParser.addFlag('preview-dart-2',
         hide: !verboseHelp,
-        defaultsTo: false,
         help: 'Preview Dart 2.0 functionality.');
     argParser.addOption('packages',
         hide: !verboseHelp,
+        valueHelp: 'path',
         help: 'Specify the path to the .packages file.');
     argParser.addOption('project-root',
         hide: !verboseHelp,
@@ -123,8 +117,9 @@ class RunCommand extends RunCommandBase {
         help: 'Specify the project assets relative to the root directory.');
     argParser.addFlag('machine',
         hide: !verboseHelp,
-        help: 'Handle machine structured JSON command input\n'
-              'and provide output and progress in machine friendly format.');
+        negatable: false,
+        help: 'Handle machine structured JSON command input and provide output\n'
+              'and progress in machine friendly format.');
     argParser.addFlag('hot',
         negatable: true,
         defaultsTo: kHotReloadDefault,
