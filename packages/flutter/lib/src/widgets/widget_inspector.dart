@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:developer' as developer;
 import 'dart:math' as math;
 import 'dart:ui' as ui show window, Picture, SceneBuilder, PictureRecorder;
@@ -20,6 +21,383 @@ import 'gesture_detector.dart';
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
 typedef Widget InspectorSelectButtonBuilder(BuildContext context, VoidCallback onPressed);
+
+/// A class describing a step along a path through a tree of [DiagnosticsNode]
+/// objects.
+///
+/// This class is used to bundle all data required to display the tree with just
+/// the nodes along a path expanded into a single JSON payload.
+class _DiagnosticsPathNode {
+  /// Creates a full description of a step in a path through a tree of
+  /// [DiagnosticsNode] objects.
+  ///
+  /// The [node] and [child] arguments must not be null.
+  _DiagnosticsPathNode({ @required this.node, @required this.children, this.childIndex }) : assert(node != null), assert(children != null);
+
+  /// Node at the point in the path this [_DiagnosticsPathNode] is describing.
+  final DiagnosticsNode node;
+
+  /// Children of the [node] being described.
+  ///
+  /// This value is cached instead of relying on `node.getChildren()` as that
+  /// method call might create new [DiagnosticsNode] objects for each child
+  /// and we would prefer to use the identical [DiagnosticsNode] for each time
+  /// a node exists in the path.
+  final List<DiagnosticsNode> children;
+
+  /// Index of the child that the path continues on.
+  ///
+  /// Equal to `null` if the path does not continue.
+  final int childIndex;
+}
+
+List<_DiagnosticsPathNode> _followDiagnosticableChain(List<Diagnosticable> chain, {
+  String name,
+  DiagnosticsTreeStyle style,
+}) {
+  final List<_DiagnosticsPathNode> path = <_DiagnosticsPathNode>[];
+  if (chain.isEmpty)
+    return path;
+  DiagnosticsNode diagnostic = chain.first.toDiagnosticsNode(name: name, style: style);
+  for (int i = 1; i < chain.length; i += 1) {
+    final Diagnosticable target = chain[i];
+    bool foundMatch = false;
+    final List<DiagnosticsNode> children = diagnostic.getChildren();
+    for (int j = 0; j < children.length; j += 1) {
+      final DiagnosticsNode child = children[j];
+      if (child.value == target) {
+        foundMatch = true;
+        path.add(new _DiagnosticsPathNode(
+          node: diagnostic,
+          children: children,
+          childIndex: j,
+        ));
+        diagnostic = child;
+        break;
+      }
+    }
+    assert(foundMatch);
+  }
+  path.add(new _DiagnosticsPathNode(node: diagnostic, children: diagnostic.getChildren()));
+  return path;
+}
+
+/// Signature for the selection change callback used by
+/// [WidgetInspectorService.selectionChangedCallback].
+typedef void InspectorSelectionChangedCallback();
+
+/// Structure to help reference count Dart objects referenced by a GUI tool
+/// using [WidgetInspectorService].
+class _InspectorReferenceData {
+  _InspectorReferenceData(this.object);
+
+  final Object object;
+  int count = 1;
+}
+
+/// Service used by GUI tools to interact with the [WidgetInspector].
+///
+/// Calls to this object are typically made from GUI tools such as the [Flutter
+/// IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
+/// using the [Dart VM Service protocol](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md).
+/// This class uses its own object id and manages object lifecycles itself
+/// instead of depending on the [object ids](https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getobject)
+/// specified by the VM Service Protocol because the VM Service Protocol ids
+/// expire unpredictably. Object references are tracked in groups so that tools
+/// that clients can use dereference all objects in a group with a single
+/// operation making it easier to avoid memory leaks.
+///
+/// All methods in this class are appropriate to invoke from debugging tools
+/// using the Observatory service protocol to evaluate Dart expressions of the
+/// form `WidgetInspectorService.instance.methodName(arg1, arg2, ...)`. If you
+/// make changes to any instance method of this class you need to verify that
+/// the [Flutter IntelliJ Plugin](https://github.com/flutter/flutter-intellij/blob/master/README.md)
+/// widget inspector support still works with the changes.
+///
+/// All methods returning String values return JSON.
+class WidgetInspectorService {
+  WidgetInspectorService._();
+
+  /// The current [WidgetInspectorService].
+  static WidgetInspectorService get instance => _instance;
+  static final WidgetInspectorService _instance = new WidgetInspectorService._();
+
+  /// Ground truth tracking what object(s) are currently selected used by both
+  /// GUI tools such as the Flutter IntelliJ Plugin and the [WidgetInspector]
+  /// displayed on the device.
+  final InspectorSelection selection = new InspectorSelection();
+
+  /// Callback typically registered by the [WidgetInspector] to receive
+  /// notifications when [selection] changes.
+  ///
+  /// The Flutter IntelliJ Plugin does not need to listen for this event as it
+  /// instead listens for `dart:developer` `inspect` events which also trigger
+  /// when the inspection target changes on device.
+  InspectorSelectionChangedCallback selectionChangedCallback;
+
+  /// The Observatory protocol does not keep alive object references so this
+  /// class needs to manually manage groups of objects that should be kept
+  /// alive.
+  final Map<String, Set<_InspectorReferenceData>> _groups = <String, Set<_InspectorReferenceData>>{};
+  final Map<String, _InspectorReferenceData> _idToReferenceData = <String, _InspectorReferenceData>{};
+  final Map<Object, String> _objectToId = new Map<Object, String>.identity();
+  int _nextId = 0;
+
+  /// Clear all InspectorService object references.
+  ///
+  /// Use this method only for testing to ensure that object references from one
+  /// test case do not impact other test cases.
+  void disposeAllGroups() {
+    _groups.clear();
+    _idToReferenceData.clear();
+    _objectToId.clear();
+    _nextId = 0;
+  }
+
+  /// Free all references to objects in a group.
+  ///
+  /// Objects and their associated ids in the group may be kept alive by
+  /// references from a different group.
+  void disposeGroup(String name) {
+    final Set<_InspectorReferenceData> references = _groups.remove(name);
+    if (references == null)
+      return;
+    references.forEach(_decrementReferenceCount);
+  }
+
+  void _decrementReferenceCount(_InspectorReferenceData reference) {
+    reference.count -= 1;
+    assert(reference.count >= 0);
+    if (reference.count == 0) {
+      final String id = _objectToId.remove(reference.object);
+      assert(id != null);
+      _idToReferenceData.remove(id);
+    }
+  }
+
+  /// Returns a unique id for [object] that will remain live at least until
+  /// [disposeGroup] is called on [groupName] or [dispose] is called on the id
+  /// returned by this method.
+  String toId(Object object, String groupName) {
+    if (object == null)
+      return null;
+
+    final Set<_InspectorReferenceData> group = _groups.putIfAbsent(groupName, () => new Set<_InspectorReferenceData>.identity());
+    String id = _objectToId[object];
+    _InspectorReferenceData referenceData;
+    if (id == null) {
+      id = 'inspector-$_nextId';
+      _nextId += 1;
+      _objectToId[object] = id;
+      referenceData =  new _InspectorReferenceData(object);
+      _idToReferenceData[id] = referenceData;
+      group.add(referenceData);
+    } else {
+      referenceData = _idToReferenceData[id];
+      if (group.add(referenceData))
+        referenceData.count += 1;
+    }
+    return id;
+  }
+
+  /// Returns the Dart object associated with a reference id.
+  ///
+  /// The `groupName` parameter is not required by is added to regularize the
+  /// API surface of the methods in this class called from the Flutter IntelliJ
+  /// Plugin.
+  Object toObject(String id, [String groupName]) {
+    if (id == null)
+      return null;
+
+    final _InspectorReferenceData data = _idToReferenceData[id];
+    if (data == null)
+      throw new FlutterError('Id does not exist');
+    return data.object;
+  }
+
+  /// Returns the object to introspect to determine the source location of an
+  /// object's class.
+  ///
+  /// The Dart object for the id is returned for all cases but [Element] objects
+  /// where the [Widget] configuring the [Element] is returned instead as the
+  /// class of the [Widget] is more relevant than the class of the [Element].
+  ///
+  /// The `groupName` parameter is not required by is added to regularize the
+  /// API surface of methods called from the Flutter IntelliJ Plugin.
+  Object toObjectForSourceLocation(String id, [String groupName]) {
+    final Object object = toObject(id);
+    if (object is Element) {
+      return object.widget;
+    }
+    return object;
+  }
+
+  /// Remove the object with the specified `id` from the specified object
+  /// group.
+  ///
+  /// If the object exists in other groups it will remain alive and the object
+  /// id will remain valid.
+  void disposeId(String id, String groupName) {
+    if (id == null)
+      return;
+
+    final _InspectorReferenceData referenceData = _idToReferenceData[id];
+    if (referenceData == null)
+      throw new FlutterError('Id does not exist');
+    if (_groups[groupName]?.remove(referenceData) != true)
+      throw new FlutterError('Id is not in group');
+    _decrementReferenceCount(referenceData);
+  }
+
+  /// Set the [WidgetInspector] selection to the object matching the specified
+  /// id if the object is valid object to set as the inspector selection.
+  ///
+  /// Returns `true` if the selection was changed.
+  ///
+  /// The `groupName` parameter is not required by is added to regularize the
+  /// API surface of methods called from the Flutter IntelliJ Plugin.
+  bool setSelectionById(String id, [String groupName]) {
+    return setSelection(toObject(id), groupName);
+  }
+
+  /// Set the [WidgetInspector] selection to the specified `object` if it is
+  /// a valid object to set as the inspector selection.
+  ///
+  /// Returns `true` if the selection was changed.
+  ///
+  /// The `groupName` parameter is not needed but is specified to regularize the
+  /// API surface of methods called from the Flutter IntelliJ Plugin.
+  bool setSelection(Object object, [String groupName]) {
+    if (object is Element || object is RenderObject) {
+      if (object is Element) {
+        if (object == selection.currentElement) {
+          return false;
+        }
+        selection.currentElement = object;
+      } else {
+        if (object == selection.current) {
+          return false;
+        }
+        selection.current = object;
+      }
+      if (selectionChangedCallback != null) {
+        selectionChangedCallback();
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /// Returns JSON representing the chain of [DiagnosticsNode] instances from
+  /// root of thee tree to the [Element] or [RenderObject] matching `id`.
+  ///
+  /// The JSON contains all information required to display a tree view with
+  /// all nodes other than nodes along the path collapsed.
+  String getParentChain(String id, String groupName) {
+    final Object value = toObject(id);
+    List<_DiagnosticsPathNode> path;
+    if (value is RenderObject)
+      path = _getRenderObjectParentChain(value, groupName);
+    else if (value is Element)
+      path = _getElementParentChain(value, groupName);
+    else
+      throw new FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
+
+    return JSON.encode(path.map((_DiagnosticsPathNode node) => _pathNodeToJson(node, groupName)).toList());
+  }
+
+  Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, String groupName) {
+    if (pathNode == null)
+      return null;
+    return <String, Object>{
+      'node': _nodeToJson(pathNode.node, groupName),
+      'children': _nodesToJson(pathNode.children, groupName),
+      'childIndex': pathNode.childIndex,
+    };
+  }
+
+  List<_DiagnosticsPathNode> _getElementParentChain(Element element, String groupName) {
+    return _followDiagnosticableChain(element?.debugGetDiagnosticChain()?.reversed?.toList()) ?? const <_DiagnosticsPathNode>[];
+  }
+
+  List<_DiagnosticsPathNode> _getRenderObjectParentChain(RenderObject renderObject, String groupName) {
+    final List<RenderObject> chain = <RenderObject>[];
+    while(renderObject != null) {
+      chain.add(renderObject);
+      renderObject = renderObject.parent;
+    }
+    return _followDiagnosticableChain(chain.reversed.toList());
+  }
+
+  Map<String, Object> _nodeToJson(DiagnosticsNode node, String groupName) {
+    if (node == null)
+      return null;
+    final Map<String, Object> json = node.toJsonMap();
+
+    json['objectId'] = toId(node, groupName);
+    json['valueId'] = toId(node.value, groupName);
+    return json;
+  }
+
+  String _serialize(DiagnosticsNode node, String groupName) {
+    return JSON.encode(_nodeToJson(node, groupName));
+  }
+
+  List<Map<String, Object>> _nodesToJson(Iterable<DiagnosticsNode> nodes, String groupName) {
+    if (nodes == null)
+      return <Map<String, Object>>[];
+    return nodes.map<Map<String, Object>>((DiagnosticsNode node) => _nodeToJson(node, groupName)).toList();
+  }
+
+  /// Returns a JSON representation of the properties of the [DiagnosticsNode]
+  /// object that `diagnosticsNodeId` references.
+  String getProperties(String diagnosticsNodeId, String groupName) {
+    final DiagnosticsNode node = toObject(diagnosticsNodeId);
+    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), groupName));
+  }
+
+  /// Returns a JSON representation of the children of the [DiagnosticsNode]
+  /// object that `diagnosticsNodeId` references.
+  String getChildren(String diagnosticsNodeId, String groupName) {
+    final DiagnosticsNode node = toObject(diagnosticsNodeId);
+    return JSON.encode(_nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getChildren(), groupName));
+  }
+
+  /// Returns a JSON representation of the [DiagnosticsNode] for the root
+  /// [Element].
+  String getRootWidget(String groupName) {
+    return _serialize(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), groupName);
+  }
+
+  /// Returns a JSON representation of the [DiagnosticsNode] for the root
+  /// [RenderObject].
+  String getRootRenderObject(String groupName) {
+    return _serialize(RendererBinding.instance?.renderView?.toDiagnosticsNode(), groupName);
+  }
+
+  /// Returns a [DiagnosticsNode] representing the currently selected
+  /// [RenderObject].
+  ///
+  /// If the currently selected [RenderObject] is identical to the
+  /// [RenderObject] referenced by `previousSelectionId` then the previous
+  /// [DiagnosticNode] is reused.
+  String getSelectedRenderObject(String previousSelectionId, String groupName) {
+    final DiagnosticsNode previousSelection = toObject(previousSelectionId);
+    final RenderObject current = selection?.current;
+    return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
+  }
+
+  /// Returns a [DiagnosticsNode] representing the currently selected [Element].
+  ///
+  /// If the currently selected [Element] is identical to the [Element]
+  /// referenced by `previousSelectionId` then the previous [DiagnosticNode] is
+  /// reused.
+  String getSelectedWidget(String previousSelectionId, String groupName) {
+    final DiagnosticsNode previousSelection = toObject(previousSelectionId);
+    final Element current = selection?.currentElement;
+    return _serialize(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), groupName);
+  }
+}
 
 /// A widget that enables inspecting the child widget's structure.
 ///
@@ -70,9 +448,11 @@ class WidgetInspector extends StatefulWidget {
 class _WidgetInspectorState extends State<WidgetInspector>
     with WidgetsBindingObserver {
 
+  _WidgetInspectorState() : selection = WidgetInspectorService.instance.selection;
+
   Offset _lastPointerLocation;
 
-  final InspectorSelection selection = new InspectorSelection();
+  final InspectorSelection selection;
 
   /// Whether the inspector is in select mode.
   ///
@@ -86,6 +466,17 @@ class _WidgetInspectorState extends State<WidgetInspector>
   /// Distance from the edge of of the bounding box for an element to consider
   /// as selecting the edge of the bounding box.
   static const double _kEdgeHitMargin = 2.0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetInspectorService.instance.selectionChangedCallback = () {
+      setState(() {
+        // The [selection] property which the build method depends on has
+        // changed.
+      });
+    };
+  }
 
   bool _hitTestHelper(
     List<RenderObject> hits,
@@ -252,30 +643,66 @@ class InspectorSelection {
   List<RenderObject> _candidates = <RenderObject>[];
   set candidates(List<RenderObject> value) {
     _candidates = value;
-    index = 0;
+    _index = 0;
+    _computeCurrent();
   }
 
   /// Index within the list of candidates that is currently selected.
-  int index = 0;
+  int get index => _index;
+  int _index = 0;
+  set index(int value) {
+    _index = value;
+    _computeCurrent();
+  }
 
   /// Set the selection to empty.
   void clear() {
     _candidates = <RenderObject>[];
-    index = 0;
+    _index = 0;
+    _computeCurrent();
   }
 
-  /// Selected render object from the [candidates] list.
+  /// Selected render object typically from the [candidates] list.
   ///
   /// Setting [candidates] or calling [clear] resets the selection.
   ///
   /// Returns null if the selection is invalid.
-  RenderObject get current {
-    return candidates != null && index < candidates.length ? candidates[index] : null;
+  RenderObject get current => _current;
+  RenderObject _current;
+  set current(RenderObject value) {
+    if (_current != value) {
+      _current = value;
+      _currentElement = value.debugCreator.element;
+    }
+  }
+
+  /// Selected [Element] consistent with the [current] selected [RenderObject].
+  ///
+  /// Setting [candidates] or calling [clear] resets the selection.
+  ///
+  /// Returns null if the selection is invalid.
+  Element get currentElement => _currentElement;
+  Element _currentElement;
+  set currentElement(Element element) {
+    if (currentElement != element) {
+      _currentElement = element;
+      _current = element.findRenderObject();
+    }
+  }
+
+  void _computeCurrent() {
+    if (_index < candidates.length) {
+      _current = candidates[index];
+      _currentElement = _current.debugCreator.element;
+    } else {
+      _current = null;
+      _currentElement = null;
+    }
   }
 
   /// Whether the selected render object is attached to the tree or has gone
   /// out of scope.
-  bool get active => current != null && current.attached;
+  bool get active => _current != null && _current.attached;
 }
 
 class _InspectorOverlay extends LeafRenderObjectWidget {
@@ -448,7 +875,7 @@ class _InspectorOverlayLayer extends Layer {
     final _InspectorOverlayRenderState state = new _InspectorOverlayRenderState(
       overlayRect: overlayRect,
       selected: new _TransformedRect(selected),
-      tooltip: selected.toString(),
+      tooltip:  selection.currentElement.toStringShort(),
       textDirection: TextDirection.ltr,
       candidates: candidates,
     );
