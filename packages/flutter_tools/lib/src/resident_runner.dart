@@ -144,9 +144,7 @@ class FlutterDevice {
   Future<Null> resetAssetDirectory() async {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
-    for (FlutterView view in views) {
-      await view.setAssetDirectory(deviceAssetsDirectoryUri);
-    }
+    await Future.wait(views.map((view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
   }
 
   // Lists program elements changed in the most recent reload that have not
