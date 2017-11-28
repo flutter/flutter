@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
 import 'dart:ui';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -46,6 +48,136 @@ enum ExampleEnum {
   deferToChild,
 }
 
+/// Encode and decode to JSON to make sure all objects in the JSON for the
+/// [DiagnosticsNode] are valid JSON.
+Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
+  return JSON.decode(JSON.encode(node.toJsonMap()));
+}
+
+void validateNodeJsonSerialization(DiagnosticsNode node) {
+  validateNodeJsonSerializationHelper(simulateJsonSerialization(node), node);
+}
+
+void validateNodeJsonSerializationHelper(Map<String, Object> json, DiagnosticsNode node) {
+  expect(json['name'], equals(node.name));
+  expect(json['showSeparator'], equals(node.showSeparator));
+  expect(json['description'], equals(node.toDescription()));
+  expect(json['level'], equals(describeEnum(node.level)));
+  expect(json['showName'], equals(node.showName));
+  expect(json['emptyBodyDescription'], equals(node.emptyBodyDescription));
+  expect(json['style'], equals(describeEnum(node.style)));
+  final String valueToString = node is DiagnosticsProperty ? node.valueToString() : node.value.toString();
+  expect(json['valueToString'], equals(valueToString));
+  expect(json['type'], equals(node.runtimeType.toString()));
+  expect(json['hasChildren'], equals(node.getChildren().isNotEmpty));
+}
+
+void validatePropertyJsonSerialization(DiagnosticsProperty<Object> property) {
+  validatePropertyJsonSerializationHelper(simulateJsonSerialization(property), property);
+}
+
+void validateStringPropertyJsonSerialization(StringProperty property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  expect(json['quoted'], equals(property.quoted));
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateFlagPropertyJsonSerialization(FlagProperty property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  expect(json['ifTrue'], equals(property.ifTrue));
+
+  if (property.ifTrue != null) {
+    expect(json['ifTrue'], equals(property.ifTrue));
+  } else {
+    expect(json.containsKey('ifTrue'), isFalse);
+  }
+
+  if (property.ifFalse != null) {
+    expect(json['ifFalse'], property.ifFalse);
+  } else {
+    expect(json.containsKey('isFalse'), isFalse);
+  }
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateDoublePropertyJsonSerialization(DoubleProperty property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  if (property.unit != null) {
+    expect(json['unit'], equals(property.unit));
+  } else {
+    expect(json.containsKey('unit'), isFalse);
+  }
+
+  expect(json['numberToString'], equals(property.numberToString()));
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateObjectFlagPropertyJsonSerialization(ObjectFlagProperty<Object> property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  if (property.ifPresent != null) {
+    expect(json['ifPresent'], equals(property.ifPresent));
+  } else {
+    expect(json.containsKey('ifPresent'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
+  final Map<String, Object> json = simulateJsonSerialization(property);
+  if (property.value != null) {
+    final List<Object> valuesJson = json['values'];
+    final List<String> expectedValues = property.value.map<String>((Object value) => value.toString()).toList();
+    expect(listEquals(valuesJson, expectedValues), isTrue);
+  } else {
+    expect(json.containsKey('values'), isFalse);
+  }
+
+  validatePropertyJsonSerializationHelper(json, property);
+}
+
+void validatePropertyJsonSerializationHelper(final Map<String, Object> json, DiagnosticsProperty<Object> property) {
+  if (property.defaultValue != kNoDefaultValue) {
+    expect(json['defaultValue'], equals(property.defaultValue.toString()));
+  } else {
+    expect(json.containsKey('defaultValue'), isFalse);
+  }
+
+  if (property.ifEmpty != null) {
+    expect(json['ifEmpty'], equals(property.ifEmpty));
+  } else {
+    expect(json.containsKey('ifEmpty'), isFalse);
+  }
+  if (property.ifNull != null) {
+    expect(json['ifNull'], equals(property.ifNull));
+  } else {
+    expect(json.containsKey('ifNull'), isFalse);
+  }
+
+  if (property.tooltip != null) {
+    expect(json['tooltip'], equals(property.tooltip));
+  } else {
+    expect(json.containsKey('tooltip'), isFalse);
+  }
+
+  expect(json['missingIfNull'], equals(property.missingIfNull));
+  if (property.exception != null) {
+    expect(json['exception'], equals(property.exception.toString()));
+  } else {
+    expect(json.containsKey('exception'), isFalse);
+  }
+  expect(json['propertyType'], equals(property.propertyType.toString()));
+  expect(json['valueToString'], equals(property.valueToString()));
+  expect(json.containsKey('defaultLevel'), isTrue);
+  if (property.value is Diagnosticable) {
+    expect(json['isDiagnosticableValue'], isTrue);
+  } else {
+    expect(json.containsKey('isDiagnosticableValue'), isFalse);
+  }
+  validateNodeJsonSerializationHelper(json, property);
+}
+
 void main() {
   test('TreeDiagnosticsMixin control test', () async {
     void goldenStyleTest(String description,
@@ -72,6 +204,7 @@ void main() {
         equalsIgnoringHashCodes(golden),
         reason: description,
       );
+      validateNodeJsonSerialization(tree.toDiagnosticsNode());
     }
 
     goldenStyleTest(
@@ -242,6 +375,7 @@ void main() {
         equalsIgnoringHashCodes(golden),
         reason: description,
       );
+      validateNodeJsonSerialization(tree.toDiagnosticsNode());
     }
 
     goldenStyleTest(
@@ -552,16 +686,15 @@ void main() {
       equals('name: value'),
     );
 
-    expect(
-      new StringProperty(
-        'name',
-        'value',
-        description: 'VALUE',
-        ifEmpty: '<hidden>',
-        quoted: false,
-      ).toString(),
-      equals('name: VALUE'),
+    final StringProperty stringProperty = new StringProperty(
+      'name',
+      'value',
+      description: 'VALUE',
+      ifEmpty: '<hidden>',
+      quoted: false,
     );
+    expect(stringProperty.toString(), equals('name: VALUE'));
+    validateStringPropertyJsonSerialization(stringProperty);
 
     expect(
       new StringProperty(
@@ -592,14 +725,13 @@ void main() {
     expect(new StringProperty('name', null).isFiltered(DiagnosticLevel.info), isFalse);
     expect(new StringProperty('name', 'value', level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info), isTrue);
     expect(new StringProperty('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info), isTrue);
-    expect(
-      new StringProperty(
-        'name',
-        'value',
-        quoted: true,
-      ).toString(),
-      equals('name: "value"'),
+    final StringProperty quoted = new StringProperty(
+      'name',
+      'value',
+      quoted: true,
     );
+    expect(quoted.toString(), equals('name: "value"'));
+    validateStringPropertyJsonSerialization(quoted);
 
     expect(
       new StringProperty('name', 'value', showName: false).toString(),
@@ -626,14 +758,18 @@ void main() {
     expect(falseProperty.toString(), equals('name: false'));
     expect(falseProperty.value, isFalse);
     expect(falseProperty.isFiltered(DiagnosticLevel.info), isFalse);
+    validatePropertyJsonSerialization(trueProperty);
+    validatePropertyJsonSerialization(falseProperty);
+    final DiagnosticsProperty<bool> truthyProperty = new DiagnosticsProperty<bool>(
+      'name',
+      true,
+      description: 'truthy',
+    );
     expect(
-      new DiagnosticsProperty<bool>(
-        'name',
-        true,
-        description: 'truthy',
-      ).toString(),
+      truthyProperty.toString(),
       equals('name: truthy'),
     );
+    validatePropertyJsonSerialization(truthyProperty);
     expect(
       new DiagnosticsProperty<bool>('name', true, showName: false).toString(),
       equals('true'),
@@ -642,10 +778,12 @@ void main() {
     expect(new DiagnosticsProperty<bool>('name', null).isFiltered(DiagnosticLevel.info), isFalse);
     expect(new DiagnosticsProperty<bool>('name', true, level: DiagnosticLevel.hidden).isFiltered(DiagnosticLevel.info), isTrue);
     expect(new DiagnosticsProperty<bool>('name', null, defaultValue: null).isFiltered(DiagnosticLevel.info), isTrue);
+    final DiagnosticsProperty<bool> missingBool = new DiagnosticsProperty<bool>('name', null, ifNull: 'missing');
     expect(
-      new DiagnosticsProperty<bool>('name', null, ifNull: 'missing').toString(),
+      missingBool.toString(),
       equals('name: missing'),
     );
+    validatePropertyJsonSerialization(missingBool);
   });
 
   test('flag property test', () {
@@ -660,6 +798,8 @@ void main() {
       ifTrue: 'myFlag',
     );
     expect(trueFlag.toString(), equals('myFlag'));
+    validateFlagPropertyJsonSerialization(trueFlag);
+    validateFlagPropertyJsonSerialization(falseFlag);
 
     expect(trueFlag.value, isTrue);
     expect(falseFlag.value, isFalse);
@@ -680,6 +820,7 @@ void main() {
     );
     expect(withTooltip.value, equals('value'));
     expect(withTooltip.isFiltered(DiagnosticLevel.fine), isFalse);
+    validatePropertyJsonSerialization(withTooltip);
   });
 
   test('double property test', () {
@@ -690,6 +831,7 @@ void main() {
     expect(doubleProperty.toString(), equals('name: 42.0'));
     expect(doubleProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(doubleProperty.value, equals(42.0));
+    validateDoublePropertyJsonSerialization(doubleProperty);
 
     expect(new DoubleProperty('name', 1.3333).toString(), equals('name: 1.3'));
 
@@ -701,11 +843,9 @@ void main() {
       equals('name: missing'),
     );
 
-    expect(
-      new DoubleProperty('name', 42.0, unit: 'px',
-      ).toString(),
-      equals('name: 42.0px'),
-    );
+    final DoubleProperty doubleWithUnit = new DoubleProperty('name', 42.0, unit: 'px');
+    expect(doubleWithUnit.toString(), equals('name: 42.0px'));
+    validateDoublePropertyJsonSerialization(doubleWithUnit);
   });
 
 
@@ -717,7 +857,7 @@ void main() {
     expect(safe.toString(), equals('name: 42.0'));
     expect(safe.isFiltered(DiagnosticLevel.info), isFalse);
     expect(safe.value, equals(42.0));
-
+    validateDoublePropertyJsonSerialization(safe);
     expect(
       new DoubleProperty.lazy('name', () => 1.3333).toString(),
       equals('name: 1.3'),
@@ -745,6 +885,7 @@ void main() {
       equals('name: EXCEPTION (FlutterError)'),
     );
     expect(throwingProperty.level, equals(DiagnosticLevel.error));
+    validateDoublePropertyJsonSerialization(throwingProperty);
   });
 
   test('percent property', () {
@@ -753,10 +894,12 @@ void main() {
       equals('name: 40.0%'),
     );
 
+    final PercentProperty complexPercentProperty = new PercentProperty('name', 0.99, unit: 'invisible', tooltip: 'almost transparent');
     expect(
-      new PercentProperty('name', 0.99, unit: 'invisible', tooltip: 'almost transparent').toString(),
+      complexPercentProperty.toString(),
       equals('name: 99.0% invisible (almost transparent)'),
     );
+    validateDoublePropertyJsonSerialization(complexPercentProperty);
 
     expect(
       new PercentProperty('name', null, unit: 'invisible', tooltip: '!').toString(),
@@ -830,8 +973,10 @@ void main() {
     expect(present.toString(), equals('clickable'));
     expect(present.isFiltered(DiagnosticLevel.info), isFalse);
     expect(present.value, equals(onClick));
+    validateObjectFlagPropertyJsonSerialization(present);
     expect(missing.toString(), equals('onClick: null'));
     expect(missing.isFiltered(DiagnosticLevel.fine), isTrue);
+    validateObjectFlagPropertyJsonSerialization(missing);
   });
 
   test('missing callback property test', () {
@@ -852,6 +997,8 @@ void main() {
     expect(present.value, equals(onClick));
     expect(missing.toString(), equals('disabled'));
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
+    validateObjectFlagPropertyJsonSerialization(present);
+    validateObjectFlagPropertyJsonSerialization(missing);
   });
 
   test('describe bool property', () {
@@ -872,9 +1019,11 @@ void main() {
     expect(yes.toString(), equals('name: YES'));
     expect(yes.level, equals(DiagnosticLevel.info));
     expect(yes.value, isTrue);
+    validateFlagPropertyJsonSerialization(yes);
     expect(no.toString(), equals('name: NO'));
     expect(no.level, equals(DiagnosticLevel.info));
     expect(no.value, isFalse);
+    validateFlagPropertyJsonSerialization(no);
 
     expect(
       new FlagProperty(
@@ -929,18 +1078,22 @@ void main() {
     expect(hello.level, equals(DiagnosticLevel.info));
     expect(hello.value, equals(ExampleEnum.hello));
     expect(hello.toString(), equals('name: hello'));
+    validatePropertyJsonSerialization(hello);
 
     expect(world.level, equals(DiagnosticLevel.info));
     expect(world.value, equals(ExampleEnum.world));
     expect(world.toString(), equals('name: world'));
+    validatePropertyJsonSerialization(world);
 
     expect(deferToChild.level, equals(DiagnosticLevel.info));
     expect(deferToChild.value, equals(ExampleEnum.deferToChild));
     expect(deferToChild.toString(), equals('name: defer-to-child'));
+    validatePropertyJsonSerialization(deferToChild);
 
     expect(nullEnum.level, equals(DiagnosticLevel.info));
     expect(nullEnum.value, isNull);
     expect(nullEnum.toString(), equals('name: null'));
+    validatePropertyJsonSerialization(nullEnum);
 
     final EnumProperty<ExampleEnum> matchesDefault = new EnumProperty<ExampleEnum>(
       'name',
@@ -950,7 +1103,7 @@ void main() {
     expect(matchesDefault.toString(), equals('name: hello'));
     expect(matchesDefault.value, equals(ExampleEnum.hello));
     expect(matchesDefault.isFiltered(DiagnosticLevel.info), isTrue);
-
+    validatePropertyJsonSerialization(matchesDefault);
 
     expect(
       new EnumProperty<ExampleEnum>(
@@ -1052,6 +1205,7 @@ void main() {
     expect(simple.value, equals(rect));
     expect(simple.level, equals(DiagnosticLevel.info));
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
+    validatePropertyJsonSerialization(simple);
 
     final DiagnosticsNode withDescription = new DiagnosticsProperty<Rect>(
       'name',
@@ -1061,6 +1215,7 @@ void main() {
     expect(withDescription.value, equals(rect));
     expect(withDescription.level, equals(DiagnosticLevel.info));
     expect(withDescription.toString(), equals('name: small rect'));
+    validatePropertyJsonSerialization(withDescription);
 
     final DiagnosticsProperty<Object> nullProperty = new DiagnosticsProperty<Object>(
       'name',
@@ -1069,6 +1224,7 @@ void main() {
     expect(nullProperty.value, isNull);
     expect(nullProperty.level, equals(DiagnosticLevel.info));
     expect(nullProperty.toString(), equals('name: null'));
+    validatePropertyJsonSerialization(nullProperty);
 
     final DiagnosticsProperty<Object> hideNullProperty = new DiagnosticsProperty<Object>(
       'name',
@@ -1078,6 +1234,7 @@ void main() {
     expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.isFiltered(DiagnosticLevel.info), isTrue);
     expect(hideNullProperty.toString(), equals('name: null'));
+    validatePropertyJsonSerialization(hideNullProperty);
 
     final DiagnosticsNode nullDescription = new DiagnosticsProperty<Object>(
       'name',
@@ -1087,6 +1244,7 @@ void main() {
     expect(nullDescription.value, isNull);
     expect(nullDescription.level, equals(DiagnosticLevel.info));
     expect(nullDescription.toString(), equals('name: missing'));
+    validatePropertyJsonSerialization(nullDescription);
 
     final DiagnosticsProperty<Rect> hideName = new DiagnosticsProperty<Rect>(
       'name',
@@ -1097,6 +1255,7 @@ void main() {
     expect(hideName.value, equals(rect));
     expect(hideName.level, equals(DiagnosticLevel.warning));
     expect(hideName.toString(), equals('Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
+    validatePropertyJsonSerialization(hideName);
 
     final DiagnosticsProperty<Rect> hideSeparator = new DiagnosticsProperty<Rect>(
       'Creator',
@@ -1109,6 +1268,7 @@ void main() {
       hideSeparator.toString(),
       equals('Creator Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'),
     );
+    validatePropertyJsonSerialization(hideSeparator);
   });
 
   test('lazy object property test', () {
@@ -1121,8 +1281,9 @@ void main() {
     expect(simple.value, equals(rect));
     expect(simple.level, equals(DiagnosticLevel.info));
     expect(simple.toString(), equals('name: small rect'));
+    validatePropertyJsonSerialization(simple);
 
-    final DiagnosticsNode nullProperty = new DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> nullProperty = new DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1130,6 +1291,7 @@ void main() {
     expect(nullProperty.value, isNull);
     expect(nullProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(nullProperty.toString(), equals('name: missing'));
+    validatePropertyJsonSerialization(nullProperty);
 
     final DiagnosticsNode hideNullProperty = new DiagnosticsProperty<Object>.lazy(
       'name',
@@ -1140,6 +1302,7 @@ void main() {
     expect(hideNullProperty.value, isNull);
     expect(hideNullProperty.isFiltered(DiagnosticLevel.info), isTrue);
     expect(hideNullProperty.toString(), equals('name: missing'));
+    validatePropertyJsonSerialization(hideNullProperty);
 
     final DiagnosticsNode hideName = new DiagnosticsProperty<Rect>.lazy(
       'name',
@@ -1150,6 +1313,7 @@ void main() {
     expect(hideName.value, equals(rect));
     expect(hideName.isFiltered(DiagnosticLevel.info), isFalse);
     expect(hideName.toString(), equals('small rect'));
+    validatePropertyJsonSerialization(hideName);
 
     final DiagnosticsProperty<Object> throwingWithDescription = new DiagnosticsProperty<Object>.lazy(
       'name',
@@ -1161,6 +1325,7 @@ void main() {
     expect(throwingWithDescription.exception, isFlutterError);
     expect(throwingWithDescription.isFiltered(DiagnosticLevel.info), false);
     expect(throwingWithDescription.toString(), equals('name: missing'));
+    validatePropertyJsonSerialization(throwingWithDescription);
 
     final DiagnosticsProperty<Object> throwingProperty = new DiagnosticsProperty<Object>.lazy(
       'name',
@@ -1171,7 +1336,7 @@ void main() {
     expect(throwingProperty.exception, isFlutterError);
     expect(throwingProperty.isFiltered(DiagnosticLevel.info), false);
     expect(throwingProperty.toString(), equals('name: EXCEPTION (FlutterError)'));
-
+    validatePropertyJsonSerialization(throwingProperty);
   });
 
   test('color property test', () {
@@ -1182,9 +1347,12 @@ void main() {
       'name',
       color,
     );
+    validatePropertyJsonSerialization(simple);
     expect(simple.isFiltered(DiagnosticLevel.info), isFalse);
     expect(simple.value, equals(color));
+    expect(simple.propertyType, equals(Color));
     expect(simple.toString(), equals('name: Color(0xffffffff)'));
+    validatePropertyJsonSerialization(simple);
   });
 
   test('flag property test', () {
@@ -1197,6 +1365,7 @@ void main() {
     expect(show.value, isTrue);
     expect(show.isFiltered(DiagnosticLevel.info), isFalse);
     expect(show.toString(), equals('layout computed'));
+    validateFlagPropertyJsonSerialization(show);
 
     final FlagProperty hide = new FlagProperty(
       'wasLayout',
@@ -1207,6 +1376,7 @@ void main() {
     expect(hide.value, isFalse);
     expect(hide.level, equals(DiagnosticLevel.hidden));
     expect(hide.toString(), equals('wasLayout: false'));
+    validateFlagPropertyJsonSerialization(hide);
 
     final FlagProperty hideTrue = new FlagProperty(
       'wasLayout',
@@ -1217,6 +1387,7 @@ void main() {
     expect(hideTrue.value, isTrue);
     expect(hideTrue.level, equals(DiagnosticLevel.hidden));
     expect(hideTrue.toString(), equals('wasLayout: true'));
+    validateFlagPropertyJsonSerialization(hideTrue);
   });
 
   test('has property test', () {
@@ -1229,6 +1400,7 @@ void main() {
     expect(has.value, equals(onClick));
     expect(has.isFiltered(DiagnosticLevel.info), isFalse);
     expect(has.toString(), equals('has onClick'));
+    validateObjectFlagPropertyJsonSerialization(has);
 
     final ObjectFlagProperty<Function> missing = new ObjectFlagProperty<Function>.has(
       'onClick',
@@ -1238,6 +1410,7 @@ void main() {
     expect(missing.value, isNull);
     expect(missing.isFiltered(DiagnosticLevel.info), isTrue);
     expect(missing.toString(), equals('onClick: null'));
+    validateObjectFlagPropertyJsonSerialization(missing);
   });
 
   test('iterable property test', () {
@@ -1257,6 +1430,7 @@ void main() {
     expect(emptyProperty.value, isEmpty);
     expect(emptyProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(emptyProperty.toString(), equals('name: []'));
+    validateIterablePropertyJsonSerialization(emptyProperty);
 
     final IterableProperty<Object> nullProperty = new IterableProperty<Object>(
       'list',
@@ -1265,6 +1439,7 @@ void main() {
     expect(nullProperty.value, isNull);
     expect(nullProperty.isFiltered(DiagnosticLevel.info), isFalse);
     expect(nullProperty.toString(), equals('list: null'));
+    validateIterablePropertyJsonSerialization(nullProperty);
 
     final IterableProperty<Object> hideNullProperty = new IterableProperty<Object>(
       'list',
@@ -1275,6 +1450,7 @@ void main() {
     expect(hideNullProperty.isFiltered(DiagnosticLevel.info), isTrue);
     expect(hideNullProperty.level, equals(DiagnosticLevel.fine));
     expect(hideNullProperty.toString(), equals('list: null'));
+    validateIterablePropertyJsonSerialization(hideNullProperty);
 
     final List<Object> objects = <Object>[
       new Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
@@ -1290,6 +1466,7 @@ void main() {
       objectsProperty.toString(),
       equals('objects: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0), Color(0xffffffff)'),
     );
+    validateIterablePropertyJsonSerialization(objectsProperty);
 
     final IterableProperty<Object> multiLineProperty = new IterableProperty<Object>(
       'objects',
@@ -1314,6 +1491,7 @@ void main() {
         '  Color(0xffffffff)\n',
       ),
     );
+    validateIterablePropertyJsonSerialization(multiLineProperty);
 
     expect(
       new TestTree(
@@ -1356,6 +1534,7 @@ void main() {
       objectProperty.toStringDeep(),
       equals('object: Color(0xffffffff)\n'),
     );
+    validateIterablePropertyJsonSerialization(objectProperty);
     expect(
       new TestTree(
         name: 'root',
@@ -1374,12 +1553,13 @@ void main() {
     expect(message.name, isEmpty);
     expect(message.value, isNull);
     expect(message.showName, isFalse);
+    validateNodeJsonSerialization(message);
 
     final DiagnosticsNode messageProperty = new MessageProperty('diagnostics', 'hello world');
     expect(messageProperty.toString(), equals('diagnostics: hello world'));
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-
+    validatePropertyJsonSerialization(messageProperty);
   });
 }
