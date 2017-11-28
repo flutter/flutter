@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:test/test.dart';
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show ListEquality, MapEquality;
 
 import 'package:flutter_devicelab/framework/adb.dart';
 
@@ -148,7 +148,7 @@ class CommandArgs {
 }
 
 class FakeDevice extends AndroidDevice {
-  FakeDevice({String deviceId: null}) : super(deviceId: deviceId);
+  FakeDevice({String deviceId}) : super(deviceId: deviceId);
 
   static String output = '';
   static ExitErrorFactory exitErrorFactory = () => null;

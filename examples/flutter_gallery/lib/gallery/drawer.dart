@@ -11,6 +11,20 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LinkTextSpan extends TextSpan {
+
+  // Beware!
+  //
+  // This class is only safe because the TapGestureRecognizer is not
+  // given a deadline and therefore never allocates any resources.
+  //
+  // In any other situation -- setting a deadline, using any of the less trivial
+  // recognizers, etc -- you would have to manage the gesture recognizer's
+  // lifetime and call dispose() when the TextSpan was no longer being rendered.
+  //
+  // Since TextSpan itself is @immutable, this means that you would have to
+  // manage the recognizer from outside the TextSpan, e.g. in the State of a
+  // stateful widget that then hands the recognizer to the TextSpan.
+
   LinkTextSpan({ TextStyle style, String url, String text }) : super(
     style: style,
     text: text ?? url,
@@ -88,12 +102,14 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  GalleryDrawer({
+  const GalleryDrawer({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
     this.timeDilation,
     @required this.onTimeDilationChanged,
+    this.textScaleFactor,
+    this.onTextScaleFactorChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
@@ -102,16 +118,18 @@ class GalleryDrawer extends StatelessWidget {
     this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
-  }) : super(key: key) {
-    assert(onThemeChanged != null);
-    assert(onTimeDilationChanged != null);
-  }
+  }) : assert(onThemeChanged != null),
+       assert(onTimeDilationChanged != null),
+       super(key: key);
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
+
+  final double textScaleFactor;
+  final ValueChanged<double> onTextScaleFactorChanged;
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
@@ -153,7 +171,7 @@ class GalleryDrawer extends StatelessWidget {
     final Widget mountainViewItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show an Android phone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star : Icons.phone_android),
-      title: const Text('Android'),
+      title: new Text(defaultTargetPlatform == TargetPlatform.iOS ? 'Mountain View' : 'Android'),
       value: TargetPlatform.android,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
@@ -163,12 +181,31 @@ class GalleryDrawer extends StatelessWidget {
     final Widget cupertinoItem = new RadioListTile<TargetPlatform>(
       // on iOS, we don't want to show the iPhone icon
       secondary: new Icon(defaultTargetPlatform == TargetPlatform.iOS ? Icons.star_border : Icons.phone_iphone),
-      title: const Text('iOS'),
+      title: new Text(defaultTargetPlatform == TargetPlatform.iOS ? 'Cupertino' : 'iOS'),
       value: TargetPlatform.iOS,
       groupValue: Theme.of(context).platform,
       onChanged: onPlatformChanged,
       selected: Theme.of(context).platform == TargetPlatform.iOS,
     );
+
+    final List<Widget> textSizeItems = <Widget>[];
+    final Map<double, String> textSizes = <double, String>{
+      null: 'System Default',
+      0.8: 'Small',
+      1.0: 'Normal',
+      1.3: 'Large',
+      2.0: 'Huge',
+    };
+    for (double size in textSizes.keys) {
+      textSizeItems.add(new RadioListTile<double>(
+        secondary: const Icon(Icons.text_fields),
+        title: new Text(textSizes[size]),
+        value: size,
+        groupValue: textScaleFactor,
+        onChanged: onTextScaleFactorChanged,
+        selected: textScaleFactor == size,
+      ));
+    }
 
     final Widget animateSlowlyItem = new CheckboxListTile(
       title: const Text('Animate Slowly'),
@@ -201,11 +238,12 @@ class GalleryDrawer extends StatelessWidget {
               children: <TextSpan>[
                 new TextSpan(
                   style: aboutTextStyle,
-                  text: "Flutter is an early-stage, open-source project to help "
-                  "developers build high-performance, high-fidelity, mobile "
-                  "apps for iOS and Android from a single codebase. This "
-                  "gallery is a preview of Flutter's many widgets, behaviors, "
-                  "animations, layouts, and more. Learn more about Flutter at "
+                  text: 'Flutter is an early-stage, open-source project to help developers'
+                        'build high-performance, high-fidelity, mobile apps for '
+                        '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
+                        'from a single codebase. This gallery is a preview of '
+                        "Flutter's many widgets, behaviors, animations, layouts, "
+                        'and more. Learn more about Flutter at '
                 ),
                 new LinkTextSpan(
                   style: linkStyle,
@@ -213,7 +251,7 @@ class GalleryDrawer extends StatelessWidget {
                 ),
                 new TextSpan(
                   style: aboutTextStyle,
-                  text: ".\n\nTo see the source code for this app, please visit the "
+                  text: '.\n\nTo see the source code for this app, please visit the '
                 ),
                 new LinkTextSpan(
                   style: linkStyle,
@@ -222,7 +260,7 @@ class GalleryDrawer extends StatelessWidget {
                 ),
                 new TextSpan(
                   style: aboutTextStyle,
-                  text: "."
+                  text: '.'
                 )
               ]
             )
@@ -239,41 +277,57 @@ class GalleryDrawer extends StatelessWidget {
       mountainViewItem,
       cupertinoItem,
       const Divider(),
-      animateSlowlyItem,
-      // index 8, optional: Performance Overlay
-      sendFeedbackItem,
-      aboutItem
     ];
 
-    if (onShowPerformanceOverlayChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
-        title: const Text('Performance Overlay'),
-        value: showPerformanceOverlay,
-        onChanged: onShowPerformanceOverlayChanged,
-        secondary: const Icon(Icons.assessment),
-        selected: showPerformanceOverlay,
-      ));
-    }
+    allDrawerItems.addAll(textSizeItems);
 
-    if (onCheckerboardRasterCacheImagesChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
-        title: const Text('Checkerboard Raster Cache Images'),
-        value: checkerboardRasterCacheImages,
-        onChanged: onCheckerboardRasterCacheImagesChanged,
-        secondary: const Icon(Icons.assessment),
-        selected: checkerboardRasterCacheImages,
-      ));
-    }
+    allDrawerItems..addAll(<Widget>[
+      const Divider(),
+      animateSlowlyItem,
+      const Divider(),
+    ]);
 
+    bool addedOptionalItem = false;
     if (onCheckerboardOffscreenLayersChanged != null) {
-      allDrawerItems.insert(8, new CheckboxListTile(
+      allDrawerItems.add(new CheckboxListTile(
         title: const Text('Checkerboard Offscreen Layers'),
         value: checkerboardOffscreenLayers,
         onChanged: onCheckerboardOffscreenLayersChanged,
         secondary: const Icon(Icons.assessment),
         selected: checkerboardOffscreenLayers,
       ));
+      addedOptionalItem = true;
     }
+
+    if (onCheckerboardRasterCacheImagesChanged != null) {
+      allDrawerItems.add(new CheckboxListTile(
+        title: const Text('Checkerboard Raster Cache Images'),
+        value: checkerboardRasterCacheImages,
+        onChanged: onCheckerboardRasterCacheImagesChanged,
+        secondary: const Icon(Icons.assessment),
+        selected: checkerboardRasterCacheImages,
+      ));
+      addedOptionalItem = true;
+    }
+
+    if (onShowPerformanceOverlayChanged != null) {
+      allDrawerItems.add(new CheckboxListTile(
+        title: const Text('Performance Overlay'),
+        value: showPerformanceOverlay,
+        onChanged: onShowPerformanceOverlayChanged,
+        secondary: const Icon(Icons.assessment),
+        selected: showPerformanceOverlay,
+      ));
+      addedOptionalItem = true;
+    }
+
+    if (addedOptionalItem)
+      allDrawerItems.add(const Divider());
+
+    allDrawerItems.addAll(<Widget>[
+      sendFeedbackItem,
+      aboutItem,
+    ]);
 
     return new Drawer(child: new ListView(primary: false, children: allDrawerItems));
   }

@@ -11,7 +11,7 @@ void main() {
     final Builder inner = new Builder(
       builder: (BuildContext context) {
         log.add('inner');
-        return const Text('inner');
+        return const Text('inner', textDirection: TextDirection.ltr);
       }
     );
     int value = 0;

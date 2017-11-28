@@ -91,7 +91,7 @@ void _createEntry(File mainFile, int copies) {
 
   for (int i = 1; i < copies; i++) {
     imports.writeln("import 'gallery_$i/main.dart' as main_$i;");
-    importRefs.writeln("  main_$i.main;");
+    importRefs.writeln('  main_$i.main;');
   }
 
   final String contents = '''

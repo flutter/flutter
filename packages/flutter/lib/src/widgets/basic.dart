@@ -12,9 +12,15 @@ import 'debug.dart';
 import 'framework.dart';
 
 export 'package:flutter/animation.dart';
-export 'package:flutter/foundation.dart' show TargetPlatform;
+export 'package:flutter/foundation.dart' show
+  ChangeNotifier,
+  Listenable,
+  TargetPlatform,
+  ValueNotifier;
 export 'package:flutter/painting.dart';
 export 'package:flutter/rendering.dart' show
+  AlignmentTween,
+  AlignmentGeometryTween,
   Axis,
   BoxConstraints,
   CrossAxisAlignment,
@@ -26,6 +32,7 @@ export 'package:flutter/rendering.dart' show
   FlowPaintingContext,
   FractionalOffsetTween,
   HitTestBehavior,
+  LayerLink,
   MainAxisAlignment,
   MainAxisSize,
   MultiChildLayoutDelegate,
@@ -50,6 +57,56 @@ export 'package:flutter/rendering.dart' show
   WrapAlignment,
   WrapCrossAlignment;
 
+// BIDIRECTIONAL TEXT SUPPORT
+
+/// A widget that determines the ambient directionality of text and
+/// text-direction-sensitive render objects.
+///
+/// For example, [Padding] depends on the [Directionality] to resolve
+/// [EdgeInsetsDirectional] objects into absolute [EdgeInsets] objects.
+class Directionality extends InheritedWidget {
+  /// Creates a widget that determines the directionality of text and
+  /// text-direction-sensitive render objects.
+  ///
+  /// The [textDirection] and [child] arguments must not be null.
+  const Directionality({
+    Key key,
+    @required this.textDirection,
+    @required Widget child
+  }) : assert(textDirection != null),
+       assert(child != null),
+       super(key: key, child: child);
+
+  /// The text direction for this subtree.
+  final TextDirection textDirection;
+
+  /// The text direction from the closest instance of this class that encloses
+  /// the given context.
+  ///
+  /// If there is no [Directionality] ancestor widget in the tree at the given
+  /// context, then this will return null.
+  ///
+  /// Typical usage is as follows:
+  ///
+  /// ```dart
+  /// TextDirection textDirection = Directionality.of(context);
+  /// ```
+  static TextDirection of(BuildContext context) {
+    final Directionality widget = context.inheritFromWidgetOfExactType(Directionality);
+    return widget?.textDirection;
+  }
+
+  @override
+  bool updateShouldNotify(Directionality old) => textDirection != old.textDirection;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection));
+  }
+}
+
+
 // PAINTING NODES
 
 /// A widget that makes its child partially transparent.
@@ -61,6 +118,27 @@ export 'package:flutter/rendering.dart' show
 /// expensive because it requires painting the child into an intermediate
 /// buffer. For the value 0.0, the child is simply not painted at all. For the
 /// value 1.0, the child is painted immediately without an intermediate buffer.
+///
+/// ## Sample code
+///
+/// This example shows some [Text] when the `_visible` member field is true, and
+/// hides it when it is false:
+///
+/// ```dart
+/// new Opacity(
+///   opacity: _visible ? 1.0 : 0.0,
+///   child: const Text('Now you see me, now you don\'t!'),
+/// )
+/// ```
+///
+/// This is more efficient than adding and removing the child widget from the
+/// tree on demand.
+///
+/// See also:
+///
+///  * [ShaderMask], which can apply more elaborate effects to its child.
+///  * [Transform], which applies an arbitrary transform to its child widget at
+///    paint time.
 class Opacity extends SingleChildRenderObjectWidget {
   /// Creates a widget that makes its child partially transparent.
   ///
@@ -69,7 +147,7 @@ class Opacity extends SingleChildRenderObjectWidget {
   const Opacity({
     Key key,
     @required this.opacity,
-    Widget child
+    Widget child,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
        super(key: key, child: child);
 
@@ -94,9 +172,9 @@ class Opacity extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('opacity: $opacity');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('opacity', opacity));
   }
 }
 
@@ -104,6 +182,31 @@ class Opacity extends SingleChildRenderObjectWidget {
 ///
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
+///
+/// ## Sample code
+///
+/// This example makes the text look like it is on fire:
+///
+/// ```dart
+/// new ShaderMask(
+///   shaderCallback: (Rect bounds) {
+///     return new RadialGradient(
+///       center: Alignment.topLeft,
+///       radius: 1.0,
+///       colors: <Color>[Colors.yellow, Colors.deepOrange.shade900],
+///       tileMode: TileMode.mirror,
+///     ).createShader(bounds);
+///   },
+///   child: const Text('I’m burning the memories'),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [Opacity], which can apply a uniform alpha effect to its child.
+///  * [CustomPaint], which lets you draw directly on the canvas.
+///  * [DecoratedBox], for another approach at decorating child widgets.
+///  * [BackdropFilter], which applies an image filter to the background.
 class ShaderMask extends SingleChildRenderObjectWidget {
   /// Creates a widget that applies a mask generated by a [Shader] to its child.
   ///
@@ -117,10 +220,14 @@ class ShaderMask extends SingleChildRenderObjectWidget {
        assert(blendMode != null),
        super(key: key, child: child);
 
-  /// Called to creates the [Shader] that generates the mask.
+  /// Called to create the [dart:ui.Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
+  ///
+  /// Typically this will use a [LinearGradient] or [RadialGradient] to create
+  /// the [dart:ui.Shader], though the [dart:ui.ImageShader] class could also be
+  /// used.
   final ShaderCallback shaderCallback;
 
   /// The [BlendMode] to use when applying the shader to the child.
@@ -133,7 +240,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
   RenderShaderMask createRenderObject(BuildContext context) {
     return new RenderShaderMask(
       shaderCallback: shaderCallback,
-      blendMode: blendMode
+      blendMode: blendMode,
     );
   }
 
@@ -149,6 +256,11 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// This effect is relatively expensive, especially if the filter is non-local,
 /// such as a blur.
+///
+/// See also:
+///
+///  * [DecoratedBox], which draws a background under (or over) a widget.
+///  * [Opacity], which changes the opacity of the widget itself.
 class BackdropFilter extends SingleChildRenderObjectWidget {
   /// Creates a backdrop filter.
   ///
@@ -181,7 +293,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// When asked to paint, [CustomPaint] first asks its [painter] to paint on the
 /// current canvas, then it paints its child, and then, after painting its
-/// child, it asks its [foregroundPainter] to paint. The coodinate system of the
+/// child, it asks its [foregroundPainter] to paint. The coordinate system of the
 /// canvas matches the coordinate system of the [CustomPaint] object. The
 /// painters are expected to paint within a rectangle starting at the origin and
 /// encompassing a region of the given size. (If the painters paint outside
@@ -196,7 +308,10 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///
 /// Custom painters normally size themselves to their child. If they do not have
 /// a child, they attempt to size themselves to the [size], which defaults to
-/// [Size.zero].
+/// [Size.zero].  [size] must not be null.
+///
+/// [isComplex] and [willChange] are hints to the compositor's raster cache
+/// and must not be null.
 ///
 /// ## Sample code
 ///
@@ -226,9 +341,18 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 ///  * [Canvas], the class that a custom painter uses to paint.
 class CustomPaint extends SingleChildRenderObjectWidget {
   /// Creates a widget that delegates its painting.
-  const CustomPaint({ Key key, this.painter, this.foregroundPainter, this.size: Size.zero, Widget child })
-    : assert(size != null),
-      super(key: key, child: child);
+  const CustomPaint({
+    Key key,
+    this.painter,
+    this.foregroundPainter,
+    this.size: Size.zero,
+    this.isComplex: false,
+    this.willChange: false,
+    Widget child
+  }) : assert(size != null),
+       assert(isComplex != null),
+       assert(willChange != null),
+       super(key: key, child: child);
 
   /// The painter that paints before the children.
   final CustomPainter painter;
@@ -245,19 +369,38 @@ class CustomPaint extends SingleChildRenderObjectWidget {
   /// instead.
   final Size size;
 
+  /// Whether the painting is complex enough to benefit from caching.
+  ///
+  /// The compositor contains a raster cache that holds bitmaps of layers in
+  /// order to avoid the cost of repeatedly rendering those layers on each
+  /// frame.  If this flag is not set, then the compositor will apply its own
+  /// heuristics to decide whether the this layer is complex enough to benefit
+  /// from caching.
+  final bool isComplex;
+
+  /// Whether the raster cache should be told that this painting is likely
+  /// to change in the next frame.
+  final bool willChange;
+
   @override
-  RenderCustomPaint createRenderObject(BuildContext context) => new RenderCustomPaint(
-    painter: painter,
-    foregroundPainter: foregroundPainter,
-    preferredSize: size,
-  );
+  RenderCustomPaint createRenderObject(BuildContext context) {
+    return new RenderCustomPaint(
+      painter: painter,
+      foregroundPainter: foregroundPainter,
+      preferredSize: size,
+      isComplex: isComplex,
+      willChange: willChange,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomPaint renderObject) {
     renderObject
       ..painter = painter
       ..foregroundPainter = foregroundPainter
-      ..preferredSize = size;
+      ..preferredSize = size
+      ..isComplex = isComplex
+      ..willChange = willChange;
   }
 
   @override
@@ -275,7 +418,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 /// custom [clipper].
 ///
 /// [ClipRect] is commonly used with these widgets, which commonly paint outside
-/// their bounds.
+/// their bounds:
 ///
 ///  * [CustomPaint]
 ///  * [CustomSingleChildLayout]
@@ -287,15 +430,15 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///
 /// ## Sample code
 ///
-/// For example, use a clip to show the top half of an [Image], you can use a
-/// [ClipRect] combined with an [Align]:
+/// For example, by combining a [ClipRect] with an [Align], one can show just
+/// the top half of an [Image]:
 ///
 /// ```dart
 /// new ClipRect(
 ///   child: new Align(
-///     alignment: FractionalOffset.topCenter,
+///     alignment: Alignment.topCenter,
 ///     heightFactor: 0.5,
-///     child: new Image(...),
+///     child: new Image.network(userAvatarUrl),
 ///   ),
 /// )
 /// ```
@@ -330,10 +473,9 @@ class ClipRect extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Rect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -386,12 +528,10 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (borderRadius != null)
-      description.add('$borderRadius');
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<CustomClipper<RRect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -440,10 +580,9 @@ class ClipOval extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Rect>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -489,10 +628,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (clipper != null)
-      description.add('clipper: $clipper');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper, defaultValue: null));
   }
 }
 
@@ -500,22 +638,29 @@ class ClipPath extends SingleChildRenderObjectWidget {
 ///
 /// Physical layers cast shadows based on an [elevation] which is nominally in
 /// logical pixels, coming vertically out of the rendering surface.
+///
+/// See also:
+///
+///  * [DecoratedBox], which can apply more arbitrary shadow effects.
+///  * [ClipRect], which applies a clip to its child.
 class PhysicalModel extends SingleChildRenderObjectWidget {
   /// Creates a physical model with a rounded-rectangular clip.
   ///
   /// The [color] is required; physical things have a color.
   ///
-  /// The [shape], [elevation], and [color] must not be null.
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   const PhysicalModel({
     Key key,
     this.shape: BoxShape.rectangle,
     this.borderRadius,
     this.elevation: 0.0,
     @required this.color,
+    this.shadowColor: const Color(0xFF000000),
     Widget child,
   }) : assert(shape != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
        super(key: key, child: child);
 
   /// The type of shape.
@@ -535,8 +680,18 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   /// The background color.
   final Color color;
 
+  /// The shadow color.
+  final Color shadowColor;
+
   @override
-  RenderPhysicalModel createRenderObject(BuildContext context) => new RenderPhysicalModel(shape: shape, borderRadius: borderRadius, elevation: elevation, color: color);
+  RenderPhysicalModel createRenderObject(BuildContext context) {
+    return new RenderPhysicalModel(
+      shape: shape,
+      borderRadius: borderRadius,
+      elevation: elevation, color: color,
+      shadowColor: shadowColor,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
@@ -544,22 +699,51 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
       ..shape = shape
       ..borderRadius = borderRadius
       ..elevation = elevation
-      ..color = color;
+      ..color = color
+      ..shadowColor = shadowColor;
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shape: $shape');
-    description.add('borderRadius: $borderRadius');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    description.add('color: $color');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxShape>('shape', shape));
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
   }
 }
 
 // POSITIONING AND SIZING NODES
 
 /// A widget that applies a transformation before painting its child.
+///
+/// ## Sample code
+///
+/// This example rotates and skews an orange box containing text, keeping the
+/// top right corner pinned to its original position.
+///
+/// ```dart
+/// new Container(
+///   color: Colors.black,
+///   child: new Transform(
+///     alignment: Alignment.topRight,
+///     transform: new Matrix4.skewY(0.3)..rotateZ(-math.PI / 12.0),
+///     child: new Container(
+///       padding: const EdgeInsets.all(8.0),
+///       color: const Color(0xFFE8581C),
+///       child: const Text('Apartment for rent!'),
+///     ),
+///   ),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [RotatedBox], which rotates the child widget during layout, not just
+///    during painting.
+///  * [FittedBox], which sizes and positions its child widget to fit the parent
+///    according to a given [BoxFit] discipline.
 class Transform extends SingleChildRenderObjectWidget {
   /// Creates a widget that transforms its child.
   ///
@@ -570,8 +754,39 @@ class Transform extends SingleChildRenderObjectWidget {
     this.origin,
     this.alignment,
     this.transformHitTests: true,
-    Widget child
+    Widget child,
   }) : assert(transform != null),
+       super(key: key, child: child);
+
+  /// Creates a widget that transforms its child using a rotation around the
+  /// center.
+  ///
+  /// The `angle` argument must not be null. It gives the rotation in clockwise
+  /// radians.
+  ///
+  /// ## Sample code
+  ///
+  /// This example rotates an orange box containing text around its center by
+  /// fifteen degrees.
+  ///
+  /// ```dart
+  /// new Transform.rotate(
+  ///   angle: -math.PI / 12.0,
+  ///   child: new Container(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     color: const Color(0xFFE8581C),
+  ///     child: const Text('Apartment for rent!'),
+  ///   ),
+  /// )
+  /// ```
+  Transform.rotate({
+    Key key,
+    @required double angle,
+    this.origin,
+    this.alignment: Alignment.center,
+    this.transformHitTests: true,
+    Widget child,
+  }) : transform = new Matrix4.rotationZ(angle),
        super(key: key, child: child);
 
   /// The matrix to transform the child by during painting.
@@ -587,19 +802,29 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The alignment of the origin, relative to the size of the box.
   ///
   /// This is equivalent to setting an origin based on the size of the box.
-  /// If it is specified at the same time as an offset, both are applied.
-  final FractionalOffset alignment;
+  /// If it is specified at the same time as the [origin], both are applied.
+  ///
+  /// An [AlignmentDirectional.start] value is the same as an [Alignment]
+  /// whose [Alignment.x] value is `-1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `1.0` if [textDirection] is [TextDirection.rtl].
+  /// Similarly [AlignmentDirectional.end] is the same as an [Alignment]
+  /// whose [Alignment.x] value is `1.0` if [textDirection] is
+  /// [TextDirection.ltr], and `-1.0` if [textDirection] is [TextDirection.rtl].
+  final AlignmentGeometry alignment;
 
-  /// Whether to apply the translation when performing hit tests.
+  /// Whether to apply the transformation when performing hit tests.
   final bool transformHitTests;
 
   @override
-  RenderTransform createRenderObject(BuildContext context) => new RenderTransform(
-    transform: transform,
-    origin: origin,
-    alignment: alignment,
-    transformHitTests: transformHitTests
-  );
+  RenderTransform createRenderObject(BuildContext context) {
+    return new RenderTransform(
+      transform: transform,
+      origin: origin,
+      alignment: alignment,
+      textDirection: Directionality.of(context),
+      transformHitTests: transformHitTests
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderTransform renderObject) {
@@ -607,11 +832,152 @@ class Transform extends SingleChildRenderObjectWidget {
       ..transform = transform
       ..origin = origin
       ..alignment = alignment
+      ..textDirection = Directionality.of(context)
       ..transformHitTests = transformHitTests;
   }
 }
 
+/// A widget that can be targeted by a [CompositedTransformFollower].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// updates the [link] object so that any [CompositedTransformFollower] widgets
+/// that are subsequently composited in the same frame and were given the same
+/// [LayerLink] can position themselves at the same screen location.
+///
+/// A single [CompositedTransformTarget] can be followed by multiple
+/// [CompositedTransformFollower] widgets.
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// any linked [CompositedTransformFollower]s.
+///
+/// See also:
+///
+///  * [CompositedTransformFollower], the widget that can target this one.
+///  * [LeaderLayer], the layer that implements this widget's logic.
+class CompositedTransformTarget extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null, and must not be currently being used
+  /// by any other [CompositedTransformTarget] object that is in the tree.
+  const CompositedTransformTarget({
+    Key key,
+    @required this.link,
+    Widget child,
+  }) : assert(link != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformTarget] with one or
+  /// more [CompositedTransformFollower]s.
+  ///
+  /// This property must not be null. The object must not be associated with
+  /// another [CompositedTransformTarget] that is also being painted.
+  final LayerLink link;
+
+  @override
+  RenderLeaderLayer createRenderObject(BuildContext context) {
+    return new RenderLeaderLayer(
+      link: link,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderLeaderLayer renderObject) {
+    renderObject
+      ..link = link;
+  }
+}
+
+/// A widget that follows a [CompositedTransformTarget].
+///
+/// When this widget is composited during the compositing phase (which comes
+/// after the paint phase, as described in [WidgetsBinding.drawFrame]), it
+/// applies a transformation that causes it to provide its child with a
+/// coordinate space that matches that of the linked [CompositedTransformTarget]
+/// widget, offset by [offset].
+///
+/// The [LayerLink] object used as the [link] must be the same object as that
+/// provided to the matching [CompositedTransformTarget].
+///
+/// The [CompositedTransformTarget] must come earlier in the paint order than
+/// this [CompositedTransformFollower].
+///
+/// Hit testing on descendants of this widget will only work if the target
+/// position is within the box that this widget's parent considers to be
+/// hitable. If the parent covers the screen, this is trivially achievable, so
+/// this widget is usually used as the root of an [OverlayEntry] in an app-wide
+/// [Overlay] (e.g. as created by the [MaterialApp] widget's [Navigator]).
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the widget that this widget can target.
+///  * [FollowerLayer], the layer that implements this widget's logic.
+///  * [Transform], which applies an arbitrary transform to a child.
+class CompositedTransformFollower extends SingleChildRenderObjectWidget {
+  /// Creates a composited transform target widget.
+  ///
+  /// The [link] property must not be null. If it was also provided to a
+  /// [CompositedTransformTarget], that widget must come earlier in the paint
+  /// order.
+  ///
+  /// The [showWhenUnlinked] and [offset] properties must also not be null.
+  const CompositedTransformFollower({
+    Key key,
+    @required this.link,
+    this.showWhenUnlinked: true,
+    this.offset: Offset.zero,
+    Widget child,
+  }) : assert(link != null),
+       assert(showWhenUnlinked != null),
+       assert(offset != null),
+       super(key: key, child: child);
+
+  /// The link object that connects this [CompositedTransformFollower] with a
+  /// [CompositedTransformTarget].
+  ///
+  /// This property must not be null.
+  final LayerLink link;
+
+  /// Whether to show the widget's contents when there is no corresponding
+  /// [CompositedTransformTarget] with the same [link].
+  ///
+  /// When the widget is linked, the child is positioned such that it has the
+  /// same global position as the linked [CompositedTransformTarget].
+  ///
+  /// When the widget is not linked, then: if [showWhenUnlinked] is true, the
+  /// child is visible and not repositioned; if it is false, then child is
+  /// hidden.
+  final bool showWhenUnlinked;
+
+  /// The offset to apply to the origin of the linked
+  /// [CompositedTransformTarget] to obtain this widget's origin.
+  final Offset offset;
+
+  @override
+  RenderFollowerLayer createRenderObject(BuildContext context) {
+    return new RenderFollowerLayer(
+      link: link,
+      showWhenUnlinked: showWhenUnlinked,
+      offset: offset,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderFollowerLayer renderObject) {
+    renderObject
+      ..link = link
+      ..showWhenUnlinked = showWhenUnlinked
+      ..offset = offset;
+  }
+}
+
 /// Scales and positions its child within itself according to [fit].
+///
+/// See also:
+///
+///  * [Transform], which applies an arbitrary transform to its child widget at
+///    paint time.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FittedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that scales and positions its child within itself according to [fit].
   ///
@@ -619,8 +985,8 @@ class FittedBox extends SingleChildRenderObjectWidget {
   const FittedBox({
     Key key,
     this.fit: BoxFit.contain,
-    this.alignment: FractionalOffset.center,
-    Widget child
+    this.alignment: Alignment.center,
+    Widget child,
   }) : assert(fit != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -630,24 +996,49 @@ class FittedBox extends SingleChildRenderObjectWidget {
 
   /// How to align the child within its parent's bounds.
   ///
-  /// An alignment of (0.0, 0.0) aligns the child to the top-left corner of its
-  /// parent's bounds.  An alignment of (1.0, 0.5) aligns the child to the middle
+  /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
+  /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
-  final FractionalOffset alignment;
+  final AlignmentGeometry alignment;
 
   @override
-  RenderFittedBox createRenderObject(BuildContext context) => new RenderFittedBox(fit: fit, alignment: alignment);
+  RenderFittedBox createRenderObject(BuildContext context) {
+    return new RenderFittedBox(
+      fit: fit,
+      alignment: alignment,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFittedBox renderObject) {
     renderObject
       ..fit = fit
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<BoxFit>('fit', fit));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
   }
 }
 
-/// A widget that applies a translation expressed as a fraction of the box's
-/// size before painting its child.
+/// Applies a translation transformation before painting its child.
+///
+/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
+///
+/// Hit tests will only be detected inside the bounds of the
+/// [FractionalTranslation], even if the contents are offset such that
+/// they overflow.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FractionalTranslation extends SingleChildRenderObjectWidget {
   /// Creates a widget that translates its child's painting.
   ///
@@ -660,14 +1051,22 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
   }) : assert(translation != null),
        super(key: key, child: child);
 
-  /// The offset by which to translate the child, as a multiple of its size.
-  final FractionalOffset translation;
+  /// The translation to apply to the child, scaled to the child's size.
+  ///
+  /// For example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+  /// translation of one quarter the width of the child.
+  final Offset translation;
 
   /// Whether to apply the translation when performing hit tests.
   final bool transformHitTests;
 
   @override
-  RenderFractionalTranslation createRenderObject(BuildContext context) => new RenderFractionalTranslation(translation: translation, transformHitTests: transformHitTests);
+  RenderFractionalTranslation createRenderObject(BuildContext context) {
+    return new RenderFractionalTranslation(
+      translation: translation,
+      transformHitTests: transformHitTests,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionalTranslation renderObject) {
@@ -682,6 +1081,24 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// Unlike [Transform], which applies a transform just prior to painting,
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
+///
+/// ## Sample code
+///
+/// This snippet rotates the child (some [Text]) so that it renders from bottom
+/// to top, like an axis label on a graph:
+///
+/// ```dart
+/// new RotatedBox(
+///   quarterTurns: 3,
+///   child: const Text('Hello World!'),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [Transform], which is a paint effect that allows you to apply an
+///    arbitrary transform to a child.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class RotatedBox extends SingleChildRenderObjectWidget {
   /// A widget that rotates its child.
   ///
@@ -689,7 +1106,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
   const RotatedBox({
     Key key,
     @required this.quarterTurns,
-    Widget child
+    Widget child,
   }) : assert(quarterTurns != null),
        super(key: key, child: child);
 
@@ -712,6 +1129,18 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
 ///
+/// ## Sample code
+///
+/// This snippet indents the child (a [Card] with some [Text]) by eight pixels
+/// in each direction:
+///
+/// ```dart
+/// new Padding(
+///   padding: new EdgeInsets.all(8.0),
+///   child: const Card(child: const Text('Hello World!')),
+/// )
+/// ```
+///
 /// ## Design discussion
 ///
 /// ### Why use a [Padding] widget rather than a [Container] with a [Container.padding] property?
@@ -730,7 +1159,12 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 ///
 /// In fact, the majority of widgets in Flutter are simply combinations of other
 /// simpler widgets. Composition, rather than inheritance, is the primary
-/// mechansim for building up widgets.
+/// mechanism for building up widgets.
+///
+/// See also:
+///
+///  * [EdgeInsets], the class that is used to describe the padding dimensions.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Padding extends SingleChildRenderObjectWidget {
   /// Creates a widget that insets its child.
   ///
@@ -738,25 +1172,32 @@ class Padding extends SingleChildRenderObjectWidget {
   const Padding({
     Key key,
     @required this.padding,
-    Widget child
+    Widget child,
   }) : assert(padding != null),
        super(key: key, child: child);
 
   /// The amount of space by which to inset the child.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderPadding createRenderObject(BuildContext context) => new RenderPadding(padding: padding);
-
-  @override
-  void updateRenderObject(BuildContext context, RenderPadding renderObject) {
-    renderObject.padding = padding;
+  RenderPadding createRenderObject(BuildContext context) {
+    return new RenderPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('padding: $padding');
+  void updateRenderObject(BuildContext context, RenderPadding renderObject) {
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 
@@ -765,7 +1206,7 @@ class Padding extends SingleChildRenderObjectWidget {
 ///
 /// For example, to align a box at the bottom right, you would pass this box a
 /// tight constraint that is bigger than the child's natural size,
-/// with an alignment of [FractionalOffset.bottomRight].
+/// with an alignment of [Alignment.bottomRight].
 ///
 /// This widget will be as big as possible if its dimensions are constrained and
 /// [widthFactor] and [heightFactor] are null. If a dimension is unconstrained
@@ -780,16 +1221,17 @@ class Padding extends SingleChildRenderObjectWidget {
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [Center], which is the same as [Align] but with the [alignment] always
-///    set to [FractionalOffset.center].
-///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value.
+///    set to [Alignment.center].
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its
+///    own size and positions the child according to an [Alignment] value.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Align extends SingleChildRenderObjectWidget {
   /// Creates an alignment widget.
   ///
-  /// The alignment defaults to [FractionalOffset.center].
+  /// The alignment defaults to [Alignment.center].
   const Align({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.widthFactor,
     this.heightFactor,
     Widget child
@@ -800,44 +1242,57 @@ class Align extends SingleChildRenderObjectWidget {
 
   /// How to align the child.
   ///
-  /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// The x and y values of the [Alignment] control the horizontal and vertical
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], which has more details and some convenience constants for
+  ///    common positions.
+  ///  * [AlignmentDirectional], which has a horizontal coordinate orientation
+  ///    that depends on the [TextDirection].
+  final AlignmentGeometry alignment;
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double widthFactor;
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   final double heightFactor;
 
   @override
-  RenderPositionedBox createRenderObject(BuildContext context) => new RenderPositionedBox(alignment: alignment, widthFactor: widthFactor, heightFactor: heightFactor);
+  RenderPositionedBox createRenderObject(BuildContext context) {
+    return new RenderPositionedBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPositionedBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (widthFactor != null)
-      description.add('widthFactor: $widthFactor');
-    if (heightFactor != null)
-      description.add('heightFactor: $heightFactor');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
+    description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
 }
 
@@ -855,6 +1310,11 @@ class Align extends SingleChildRenderObjectWidget {
 ///
 ///  * [Align], which lets you arbitrarily position a child within itself,
 ///    rather than just centering it.
+///  * [Row], a widget that displays its children in a horizontal array.
+///  * [Column], a widget that displays its children in a vertical array.
+///  * [Container], a convenience widget that combines common painting,
+///    positioning, and sizing widgets.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Center extends Align {
   /// Creates a widget that centers its child.
   const Center({ Key key, double widthFactor, double heightFactor, Widget child })
@@ -872,9 +1332,9 @@ class Center extends Align {
 ///
 ///  * [SingleChildLayoutDelegate], which controls the layout of the child.
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value.
+///    the child according to an [Alignment] value.
 ///  * [FractionallySizedBox], which sizes its child based on a fraction of its own
-///    size and positions the child according to a [FractionalOffset] value.
+///    size and positions the child according to an [Alignment] value.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
 class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
@@ -892,7 +1352,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
   final SingleChildLayoutDelegate delegate;
 
   @override
-  RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) => new RenderCustomSingleChildLayoutBox(delegate: delegate);
+  RenderCustomSingleChildLayoutBox createRenderObject(BuildContext context) {
+    return new RenderCustomSingleChildLayoutBox(delegate: delegate);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderCustomSingleChildLayoutBox renderObject) {
@@ -902,8 +1364,9 @@ class CustomSingleChildLayout extends SingleChildRenderObjectWidget {
 
 /// Meta data for identifying children in a [CustomMultiChildLayout].
 ///
-/// The [MultiChildLayoutDelegate] hasChild, layoutChild, and positionChild
-/// methods use these identifiers.
+/// The [MultiChildLayoutDelegate.hasChild],
+/// [MultiChildLayoutDelegate.layoutChild], and
+/// [MultiChildLayoutDelegate.positionChild] methods use these identifiers.
 class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   /// Marks a child with a layout identifier.
   ///
@@ -932,9 +1395,9 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('id: $id');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Object>('id', id));
   }
 }
 
@@ -1001,6 +1464,33 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.INFINITY].
+///
+/// ## Sample code
+///
+/// This snippet makes the child widget (a [Card] with some [Text]) have the
+/// exact size 200x300, parental constraints permitting:
+///
+/// ```dart
+/// new SizedBox(
+///   width: 200.0,
+///   height: 300.0,
+///   child: const Card(child: const Text('Hello World!')),
+/// )
+/// ```
+///
+/// See also:
+///
+///  * [ConstrainedBox], a more generic version of this class that takes
+///    arbitrary [BoxConstraints] instead of an explicit width and height.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * [FractionallySizedBox], a widget that sizes its child to a fraction of
+///    the total available space.
+///  * [AspectRatio], a widget that attempts to fit within the parent's
+///    constraints while also sizing its child to match a given aspect ratio.
+///  * [FittedBox], which sizes and positions its child widget to fit the parent
+///    according to a given [BoxFit] discipline.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class SizedBox extends SingleChildRenderObjectWidget {
   /// Creates a fixed size box. The [width] and [height] parameters can be null
   /// to indicate that the size of the box should not be constrained in
@@ -1027,9 +1517,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
   final double height;
 
   @override
-  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(
-    additionalConstraints: _additionalConstraints
-  );
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedBox(
+      additionalConstraints: _additionalConstraints,
+    );
+  }
 
   BoxConstraints get _additionalConstraints {
     return new BoxConstraints.tightFor(width: width, height: height);
@@ -1048,22 +1540,48 @@ class SizedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (width != double.INFINITY || height != double.INFINITY) {
-      if (width != null)
-        description.add('width: $width');
-      if (height != null)
-        description.add('height: $height');
-    }
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    final DiagnosticLevel level = (width == double.INFINITY && height == double.INFINITY)
+        ? DiagnosticLevel.hidden
+        : DiagnosticLevel.info;
+    description.add(new DoubleProperty('width', width, defaultValue: null, level: level));
+    description.add(new DoubleProperty('height', height, defaultValue: null, level: level));
   }
 }
 
 /// A widget that imposes additional constraints on its child.
 ///
 /// For example, if you wanted [child] to have a minimum height of 50.0 logical
-/// pixels, you could use `const BoxConstraints(minHeight: 50.0)`` as the
+/// pixels, you could use `const BoxConstraints(minHeight: 50.0)` as the
 /// [constraints].
+///
+/// ## Sample code
+///
+/// This snippet makes the child widget (a [Card] with some [Text]) fill the
+/// parent, by applying [BoxConstraints.expand] constraints:
+///
+/// ```dart
+/// new ConstrainedBox(
+///   constraints: const BoxConstraints.expand(),
+///   child: const Card(child: const Text('Hello World!')),
+/// )
+/// ```
+///
+/// The same behavior can be obtained using the [new SizedBox.expand] widget.
+///
+/// See also:
+///
+///  * [BoxConstraints], the class that describes constraints.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * [SizedBox], which lets you specify tight constraints by explicitly
+///    specifying the height or width.
+///  * [FractionallySizedBox], which sizes its child based on a fraction of its
+///    own size and positions the child according to an [Alignment] value.
+///  * [AspectRatio], a widget that attempts to fit within the parent's
+///    constraints while also sizing its child to match a given aspect ratio.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class ConstrainedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that imposes additional constraints on its child.
   ///
@@ -1073,15 +1591,16 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
     @required this.constraints,
     Widget child
   }) : assert(constraints != null),
-       super(key: key, child: child) {
-    assert(constraints.debugAssertIsValid());
-  }
+       assert(constraints.debugAssertIsValid()),
+       super(key: key, child: child);
 
   /// The additional constraints to impose on the child.
   final BoxConstraints constraints;
 
   @override
-  RenderConstrainedBox createRenderObject(BuildContext context) => new RenderConstrainedBox(additionalConstraints: constraints);
+  RenderConstrainedBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedBox(additionalConstraints: constraints);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderConstrainedBox renderObject) {
@@ -1089,9 +1608,90 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$constraints');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, showName: false));
+  }
+}
+
+/// A widget that imposes no constraints on its child, allowing it to render
+/// at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This container will then expand
+/// as much as it can within its own constraints and align the child based on
+/// [alignment].  If the container cannot expand enough to accommodate the
+/// entire child, the child will be clipped.
+///
+/// In debug mode, if the child overflows the container, a warning will be
+/// printed on the console, and black and yellow striped areas will appear where
+/// the overflow occurs.
+///
+/// See also:
+///
+///  * [ConstrainedBox] for a box which imposes constraints on its child.
+///  * [Container], a convenience widget that combines common painting,
+///    positioning, and sizing widgets.
+///  * [OverflowBox], a widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow
+///    the parent.
+class UnconstrainedBox extends SingleChildRenderObjectWidget {
+  /// Creates a widget that imposes no constraints on its child, allowing it to
+  /// render at its "natural" size. If the child overflows the parents
+  /// constraints, a warning will be given in debug mode.
+  const UnconstrainedBox({
+    Key key,
+    Widget child,
+    this.textDirection,
+    this.alignment: Alignment.center,
+    this.constrainedAxis,
+  }) : assert(alignment != null),
+       super(key: key, child: child);
+
+  /// The text direction to use when interpreting the [alignment] if it is an
+  /// [AlignmentDirectional].
+  final TextDirection textDirection;
+
+  /// The alignment to use when laying out the child.
+  ///
+  /// If this is an [AlignmentDirectional], then [textDirection] must not be
+  /// null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment] for non-[Directionality]-aware alignments.
+  ///  * [AlignmentDirectional] for [Directionality]-aware alignments.
+  final AlignmentGeometry alignment;
+
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  final Axis constrainedAxis;
+  
+  @override
+  void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
+    renderObject
+      ..textDirection = textDirection ?? Directionality.of(context)
+      ..alignment = alignment
+      ..constrainedAxis = constrainedAxis;
+  }
+
+  @override
+  RenderUnconstrainedBox createRenderObject(BuildContext context) => new RenderUnconstrainedBox(
+    textDirection: textDirection ?? Directionality.of(context),
+    alignment: alignment,
+    constrainedAxis: constrainedAxis,
+  );
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Axis>('constrainedAxis', null));
+    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -1101,9 +1701,12 @@ class ConstrainedBox extends SingleChildRenderObjectWidget {
 ///
 /// See also:
 ///
-/// * [Align] (which sizes itself based on its child's size and positions
-///   the child according to a [FractionalOffset] value)
-/// * [OverflowBox]
+///  * [Align], which sizes itself based on its child's size and positions
+///    the child according to an [Alignment] value.
+///  * [OverflowBox], a widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow the
+///    parent.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to a fraction of the total available space.
   ///
@@ -1111,10 +1714,10 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// non-negative.
   const FractionallySizedBox({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.widthFactor,
     this.heightFactor,
-    Widget child
+    Widget child,
   }) : assert(alignment != null),
        assert(widthFactor == null || widthFactor >= 0.0),
        assert(heightFactor == null || heightFactor >= 0.0),
@@ -1123,7 +1726,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// If non-null, the fraction of the incoming width given to the child.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.
+  /// incoming width constraint multiplied by this factor.
   ///
   /// If null, the incoming width constraints are passed to the child
   /// unmodified.
@@ -1132,7 +1735,7 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// If non-null, the fraction of the incoming height given to the child.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming height constraint multipled by this factor.
+  /// incoming height constraint multiplied by this factor.
   ///
   /// If null, the incoming height constraints are passed to the child
   /// unmodified.
@@ -1141,37 +1744,39 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final AlignmentGeometry alignment;
 
   @override
-  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) => new RenderFractionallySizedOverflowBox(
-    alignment: alignment,
-    widthFactor: widthFactor,
-    heightFactor: heightFactor
-  );
+  RenderFractionallySizedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderFractionallySizedOverflowBox(
+      alignment: alignment,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderFractionallySizedOverflowBox renderObject) {
     renderObject
       ..alignment = alignment
       ..widthFactor = widthFactor
-      ..heightFactor = heightFactor;
+      ..heightFactor = heightFactor
+      ..textDirection = Directionality.of(context);
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (widthFactor != null)
-      description.add('widthFactor: $widthFactor');
-    if (heightFactor != null)
-      description.add('heightFactor: $heightFactor');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DoubleProperty('widthFactor', widthFactor, defaultValue: null));
+    description.add(new DoubleProperty('heightFactor', heightFactor, defaultValue: null));
   }
 }
 
@@ -1190,6 +1795,14 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
 /// This is useful when composing widgets that normally try to match their
 /// parents' size, so that they behave reasonably in lists (which are
 /// unbounded).
+///
+/// See also:
+///
+///  * [ConstrainedBox], which applies its constraints in all cases, not just
+///    when the incoming constraints are unbounded.
+///  * [SizedBox], which lets you specify tight constraints by explicitly
+///    specifying the height or width.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class LimitedBox extends SingleChildRenderObjectWidget {
   /// Creates a box that limits its size only when it's unconstrained.
   ///
@@ -1199,7 +1812,7 @@ class LimitedBox extends SingleChildRenderObjectWidget {
     Key key,
     this.maxWidth: double.INFINITY,
     this.maxHeight: double.INFINITY,
-    Widget child
+    Widget child,
   }) : assert(maxWidth != null && maxWidth >= 0.0),
        assert(maxHeight != null && maxHeight >= 0.0),
        super(key: key, child: child);
@@ -1213,10 +1826,12 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderLimitedBox createRenderObject(BuildContext context) => new RenderLimitedBox(
-    maxWidth: maxWidth,
-    maxHeight: maxHeight
-  );
+  RenderLimitedBox createRenderObject(BuildContext context) {
+    return new RenderLimitedBox(
+      maxWidth: maxWidth,
+      maxHeight: maxHeight
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderLimitedBox renderObject) {
@@ -1226,41 +1841,50 @@ class LimitedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (maxWidth != double.INFINITY)
-      description.add('maxWidth: $maxWidth');
-    if (maxHeight != double.INFINITY)
-      description.add('maxHeight: $maxHeight');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: double.INFINITY));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: double.INFINITY));
   }
 }
 
 /// A widget that imposes different constraints on its child than it gets
 /// from its parent, possibly allowing the child to overflow the parent.
 ///
-/// See [RenderConstrainedOverflowBox] for details.
+/// See also:
+///
+///  * [RenderConstrainedOverflowBox] for details about how [OverflowBox] is
+///    rendered.
+///  * [SizedOverflowBox], a widget that is a specific size but passes its
+///    original constraints through to its child, which may then overflow.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * [SizedBox], a box with a specified size.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class OverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget that lets its child overflow itself.
   const OverflowBox({
     Key key,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.minWidth,
     this.maxWidth,
     this.minHeight,
     this.maxHeight,
-    Widget child
+    Widget child,
   }) : super(key: key, child: child);
 
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
   /// default) to use the constraint from the parent instead.
@@ -1279,13 +1903,16 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   final double maxHeight;
 
   @override
-  RenderConstrainedOverflowBox createRenderObject(BuildContext context) => new RenderConstrainedOverflowBox(
-    alignment: alignment,
-    minWidth: minWidth,
-    maxWidth: maxWidth,
-    minHeight: minHeight,
-    maxHeight: maxHeight
-  );
+  RenderConstrainedOverflowBox createRenderObject(BuildContext context) {
+    return new RenderConstrainedOverflowBox(
+      alignment: alignment,
+      minWidth: minWidth,
+      maxWidth: maxWidth,
+      minHeight: minHeight,
+      maxHeight: maxHeight,
+      textDirection: Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderConstrainedOverflowBox renderObject) {
@@ -1294,26 +1921,34 @@ class OverflowBox extends SingleChildRenderObjectWidget {
       ..minWidth = minWidth
       ..maxWidth = maxWidth
       ..minHeight = minHeight
-      ..maxHeight = maxHeight;
+      ..maxHeight = maxHeight
+      ..textDirection = Directionality.of(context);
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (minWidth != null)
-      description.add('minWidth: $minWidth');
-    if (maxWidth != null)
-      description.add('maxWidth: $maxWidth');
-    if (minHeight != null)
-      description.add('minHeight: $minHeight');
-    if (maxHeight != null)
-      description.add('maxHeight: $maxHeight');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DoubleProperty('minWidth', minWidth, defaultValue: null));
+    description.add(new DoubleProperty('maxWidth', maxWidth, defaultValue: null));
+    description.add(new DoubleProperty('minHeight', minHeight, defaultValue: null));
+    description.add(new DoubleProperty('maxHeight', maxHeight, defaultValue: null));
   }
 }
 
 /// A widget that is a specific size but passes its original constraints
-/// through to its child, which will probably overflow.
+/// through to its child, which may then overflow.
+///
+/// See also:
+///
+///  * [OverflowBox], A widget that imposes different constraints on its child
+///    than it gets from its parent, possibly allowing the child to overflow the
+///    parent.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// Creates a widget of a given size that lets its child overflow.
   ///
@@ -1321,8 +1956,8 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   const SizedOverflowBox({
     Key key,
     @required this.size,
-    this.alignment: FractionalOffset.center,
-    Widget child
+    this.alignment: Alignment.center,
+    Widget child,
   }) : assert(size != null),
        assert(alignment != null),
        super(key: key, child: child);
@@ -1330,13 +1965,13 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// How to align the child.
   ///
   /// The x and y values of the alignment control the horizontal and vertical
-  /// alignment, respectively.  An x value of 0.0 means that the left edge of
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
   /// the child is aligned with the left edge of the parent whereas an x value
   /// of 1.0 means that the right edge of the child is aligned with the right
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
-  /// For example, a value of 0.5 means that the center of the child is aligned
+  /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
-  final FractionalOffset alignment;
+  final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
   final Size size;
@@ -1345,7 +1980,8 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   RenderSizedOverflowBox createRenderObject(BuildContext context) {
     return new RenderSizedOverflowBox(
       alignment: alignment,
-      requestedSize: size
+      requestedSize: size,
+      textDirection: Directionality.of(context),
     );
   }
 
@@ -1353,21 +1989,25 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderSizedOverflowBox renderObject) {
     renderObject
       ..alignment = alignment
-      ..requestedSize = size;
+      ..requestedSize = size
+      ..textDirection = Directionality.of(context);
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    if (size != null)
-      description.add('size: $size');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new DiagnosticsProperty<Size>('size', size, defaultValue: null));
   }
 }
 
 /// A widget that lays the child out as if it was in the tree, but without painting anything,
 /// without making the child available for hit testing, and without taking any
 /// room in the parent.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Offstage extends SingleChildRenderObjectWidget {
   /// Creates a widget that visually hides its child.
   const Offstage({ Key key, this.offstage: true, Widget child })
@@ -1392,9 +2032,9 @@ class Offstage extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('offstage: $offstage');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('offstage', offstage));
   }
 
   @override
@@ -1408,15 +2048,15 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   Offstage get widget => super.widget;
 
   @override
-  void visitChildrenForSemantics(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
     if (!widget.offstage)
-      super.visitChildrenForSemantics(visitor);
+      super.debugVisitOnstageChildren(visitor);
   }
 }
 
 /// A widget that attempts to size the child to a specific aspect ratio.
 ///
-/// The widget first tries the largest width permited by the layout
+/// The widget first tries the largest width permitted by the layout
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
 ///
@@ -1440,6 +2080,16 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// find a feasible size after consulting each constraint, the widget
 /// will eventually select a size for the child that meets the layout
 /// constraints but fails to meet the aspect ratio constraints.
+///
+/// See also:
+///
+///  * [Align], a widget that aligns its child within itself and optionally
+///    sizes itself based on the child's size.
+///  * [ConstrainedBox], a widget that imposes additional constraints on its
+///    child.
+///  * [UnconstrainedBox], a container that tries to let its child draw without
+///    constraints.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class AspectRatio extends SingleChildRenderObjectWidget {
   /// Creates a widget with a specific aspect ratio.
   ///
@@ -1466,9 +2116,9 @@ class AspectRatio extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('aspectRatio: $aspectRatio');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('aspectRatio', aspectRatio));
   }
 }
 
@@ -1483,7 +2133,14 @@ class AspectRatio extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable width.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicWidth extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic width.
   ///
@@ -1498,7 +2155,9 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
   final double stepHeight;
 
   @override
-  RenderIntrinsicWidth createRenderObject(BuildContext context) => new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  RenderIntrinsicWidth createRenderObject(BuildContext context) {
+    return new RenderIntrinsicWidth(stepWidth: stepWidth, stepHeight: stepHeight);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIntrinsicWidth renderObject) {
@@ -1514,7 +2173,14 @@ class IntrinsicWidth extends SingleChildRenderObjectWidget {
 /// you would like a child that would otherwise attempt to expand infinitely to
 /// instead size itself to a more reasonable height.
 ///
-/// This class is relatively expensive. Avoid using it where possible.
+/// This class is relatively expensive, because it adds a speculative layout
+/// pass before the final layout phase. Avoid using it where possible. In the
+/// worst case, this widget can result in a layout that is O(N²) in the depth of
+/// the tree.
+///
+/// See also:
+///
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IntrinsicHeight extends SingleChildRenderObjectWidget {
   /// Creates a widget that sizes its child to the child's intrinsic height.
   ///
@@ -1533,6 +2199,13 @@ class IntrinsicHeight extends SingleChildRenderObjectWidget {
 /// contain the child. If [baseline] is less than the distance from
 /// the top of the child to the baseline of the child, then the child
 /// is top-aligned instead.
+///
+/// See also:
+///
+///  * [Align], a widget that aligns its child within itself and optionally
+///    sizes itself based on the child's size.
+///  * [Center], a widget that centers its child within itself.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Baseline extends SingleChildRenderObjectWidget {
   /// Creates a widget that positions its child according to the child's baseline.
   ///
@@ -1554,7 +2227,9 @@ class Baseline extends SingleChildRenderObjectWidget {
   final TextBaseline baselineType;
 
   @override
-  RenderBaseline createRenderObject(BuildContext context) => new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  RenderBaseline createRenderObject(BuildContext context) {
+    return new RenderBaseline(baseline: baseline, baselineType: baselineType);
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderBaseline renderObject) {
@@ -1628,25 +2303,68 @@ class SliverPadding extends SingleChildRenderObjectWidget {
        super(key: key, child: sliver);
 
   /// The amount of space by which to inset the child sliver.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
-  RenderSliverPadding createRenderObject(BuildContext context) => new RenderSliverPadding(padding: padding);
-
-  @override
-  void updateRenderObject(BuildContext context, RenderSliverPadding renderObject) {
-    renderObject.padding = padding;
+  RenderSliverPadding createRenderObject(BuildContext context) {
+    return new RenderSliverPadding(
+      padding: padding,
+      textDirection: Directionality.of(context),
+    );
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('padding: $padding');
+  void updateRenderObject(BuildContext context, RenderSliverPadding renderObject) {
+    renderObject
+      ..padding = padding
+      ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding));
   }
 }
 
 
 // LAYOUT NODES
+
+/// Returns the [AxisDirection] in the given [Axis] in the current
+/// [Directionality] (or the reverse if `reverse` is true).
+///
+/// If `axis` is [Axis.vertical], this function returns [AxisDirection.down]
+/// unless `reverse` is true, in which case this function returns
+/// [AxisDirection.up].
+///
+/// If `axis` is [Axis.horizontal], this function checks the current
+/// [Directionality]. If the current [Directionality] is right-to-left, then
+/// this function returns [AxisDirection.left] (unless `reverse` is true, in
+/// which case it returns [AxisDirection.right]). Similarly, if the current
+/// [Directionality] is left-to-right, then this function returns
+/// [AxisDirection.right] (unless `reverse` is true, in which case it returns
+/// [AxisDirection.left]).
+///
+/// This function is used by a number of scrolling widgets (e.g., [ListView],
+/// [GridView], [PageView], and [SingleChildScrollView]) as well as [ListBody]
+/// to translate their [Axis] and `reverse` properties into a concrete
+/// [AxisDirection].
+AxisDirection getAxisDirectionFromAxisReverseAndDirectionality(
+  BuildContext context,
+  Axis axis,
+  bool reverse,
+) {
+  switch (axis) {
+    case Axis.horizontal:
+      assert(debugCheckHasDirectionality(context));
+      final TextDirection textDirection = Directionality.of(context);
+      final AxisDirection axisDirection = textDirectionToAxisDirection(textDirection);
+      return reverse ? flipAxisDirection(axisDirection) : axisDirection;
+    case Axis.vertical:
+      return reverse ? AxisDirection.up : AxisDirection.down;
+  }
+  return null;
+}
 
 /// A widget that arranges its children sequentially along a given axis, forcing
 /// them to the dimension of the parent in the other axis.
@@ -1674,6 +2392,7 @@ class ListBody extends MultiChildRenderObjectWidget {
   ListBody({
     Key key,
     this.mainAxis: Axis.vertical,
+    this.reverse: false,
     List<Widget> children: const <Widget>[],
   }) : assert(mainAxis != null),
        super(key: key, children: children);
@@ -1681,12 +2400,32 @@ class ListBody extends MultiChildRenderObjectWidget {
   /// The direction to use as the main axis.
   final Axis mainAxis;
 
+  /// Whether the list body positions children in the reading direction.
+  ///
+  /// For example, if the reading direction is left-to-right and
+  /// [mainAxis] is [Axis.horizontal], then the list body positions children
+  /// from left to right when [reverse] is false and from right to left when
+  /// [reverse] is true.
+  ///
+  /// Similarly, if [mainAxis] is [Axis.vertical], then the list body positions
+  /// from top to bottom when [reverse] is false and from bottom to top when
+  /// [reverse] is true.
+  ///
+  /// Defaults to false.
+  final bool reverse;
+
+  AxisDirection _getDirection(BuildContext context) {
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, mainAxis, reverse);
+  }
+
   @override
-  RenderListBody createRenderObject(BuildContext context) => new RenderListBody(mainAxis: mainAxis);
+  RenderListBody createRenderObject(BuildContext context) {
+    return new RenderListBody(axisDirection: _getDirection(context));
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderListBody renderObject) {
-    renderObject.mainAxis = mainAxis;
+    renderObject.axisDirection = _getDirection(context);
   }
 }
 
@@ -1700,16 +2439,18 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// Positioned children are those wrapped in a [Positioned] widget that has at
 /// least one non-null property. The stack sizes itself to contain all the
 /// non-positioned children, which are positioned according to [alignment]
-/// (which defaults to the top-left corner). The positioned children are then
-/// placed relative to the stack according to their top, right, bottom, and left
-/// properties.
+/// (which defaults to the top-left corner in left-to-right environments and the
+/// top-right corner in right-to-left environments). The positioned children are
+/// then placed relative to the stack according to their top, right, bottom, and
+/// left properties.
 ///
-/// The stack paints its children in order. If you want to change the order in
-/// which the children paint, you can rebuild the stack with the children in
-/// the new order. If you reorder the children in this way, consider giving the
-/// children non-null keys. These keys will cause the framework to move the
-/// underlying objects for the children to their new locations rather than
-/// recreate them at their new location.
+/// The stack paints its children in order with the first child being at the
+/// bottom. If you want to change the order in which the children paint, you
+/// can rebuild the stack with the children in the new order. If you reorder
+/// the children in this way, consider giving the children non-null keys.
+/// These keys will cause the framework to move the underlying objects for
+/// the children to their new locations rather than recreate them at their
+/// new location.
 ///
 /// For more details about the stack layout algorithm, see [RenderStack].
 ///
@@ -1721,13 +2462,14 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// See also:
 ///
 ///  * [Align], which sizes itself based on its child's size and positions
-///    the child according to a [FractionalOffset] value.
+///    the child according to an [Alignment] value.
 ///  * [CustomSingleChildLayout], which uses a delegate to control the layout of
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
 ///  * [Flow], which provides paint-time control of its children using transform
 ///    matrices.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Stack extends MultiChildRenderObjectWidget {
   /// Creates a stack layout widget.
   ///
@@ -1735,19 +2477,31 @@ class Stack extends MultiChildRenderObjectWidget {
   /// top left corners.
   Stack({
     Key key,
-    this.alignment: FractionalOffset.topLeft,
+    this.alignment: AlignmentDirectional.topStart,
+    this.textDirection,
     this.fit: StackFit.loose,
     this.overflow: Overflow.clip,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
-  /// How to align the non-positioned children in the stack.
+  /// How to align the non-positioned and partially-positioned children in the
+  /// stack.
   ///
   /// The non-positioned children are placed relative to each other such that
   /// the points determined by [alignment] are co-located. For example, if the
-  /// [alignment] is [FractionalOffset.topLeft], then the top left corner of
+  /// [alignment] is [Alignment.topLeft], then the top left corner of
   /// each non-positioned child will be located at the same global coordinate.
-  final FractionalOffset alignment;
+  ///
+  /// Partially-positioned children, those that do not specify an alignment in a
+  /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
+  /// alignment to determine how they should be positioned in that
+  /// under-specified axis.
+  final AlignmentGeometry alignment;
+
+  /// The text direction with which to resolve [alignment].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
 
   /// How to size the non-positioned children in the stack.
   ///
@@ -1766,6 +2520,7 @@ class Stack extends MultiChildRenderObjectWidget {
   RenderStack createRenderObject(BuildContext context) {
     return new RenderStack(
       alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
       fit: fit,
       overflow: overflow,
     );
@@ -1775,16 +2530,18 @@ class Stack extends MultiChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderStack renderObject) {
     renderObject
       ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..fit = fit
       ..overflow = overflow;
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alignment: $alignment');
-    description.add('fit: $fit');
-    description.add('overflow: $overflow');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<StackFit>('fit', fit));
+    description.add(new EnumProperty<Overflow>('overflow', overflow));
   }
 }
 
@@ -1795,30 +2552,41 @@ class Stack extends MultiChildRenderObjectWidget {
 ///
 /// If value is null, then nothing is displayed.
 ///
-/// For more details, see [Stack].
+/// See also:
+///
+///  * [Stack], for more details about stacks.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class IndexedStack extends Stack {
   /// Creates a [Stack] widget that paints a single child.
   ///
   /// The [index] argument must not be null.
   IndexedStack({
     Key key,
-    FractionalOffset alignment: FractionalOffset.topLeft,
+    AlignmentGeometry alignment: AlignmentDirectional.topStart,
+    TextDirection textDirection,
     StackFit sizing: StackFit.loose,
     this.index: 0,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, alignment: alignment, fit: sizing, children: children);
+  }) : super(key: key, alignment: alignment, textDirection: textDirection, fit: sizing, children: children);
 
   /// The index of the child to show.
   final int index;
 
   @override
-  RenderIndexedStack createRenderObject(BuildContext context) => new RenderIndexedStack(index: index, alignment: alignment);
+  RenderIndexedStack createRenderObject(BuildContext context) {
+    return new RenderIndexedStack(
+      index: index,
+      alignment: alignment,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIndexedStack renderObject) {
     renderObject
       ..index = index
-      ..alignment = alignment;
+      ..alignment = alignment
+      ..textDirection = textDirection ?? Directionality.of(context);
   }
 }
 
@@ -1840,6 +2608,16 @@ class IndexedStack extends Stack {
 /// force the child to have a particular width. Alternatively the [width] and
 /// [height] properties can be used to give the dimensions, with one
 /// corresponding position property (e.g. [top] and [height]).
+///
+/// If all three values on a particular axis are null, then the
+/// [Stack.alignment] property is used to position the child.
+///
+/// If all six values are null, the child is a non-positioned child. The [Stack]
+/// uses only the non-positioned children to size itself.
+///
+/// See also:
+///
+///  * [PositionedDirectional], which adapts to the ambient [Directionality].
 class Positioned extends ParentDataWidget<Stack> {
   /// Creates a widget that controls where a child of a [Stack] is positioned.
   ///
@@ -1847,6 +2625,13 @@ class Positioned extends ParentDataWidget<Stack> {
   /// [width]), and only two out of the three vertical values ([top],
   /// [bottom], [height]), can be set. In each case, at least one of
   /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which specifies the widget's horizontal
+  ///    position using `start` and `end` rather than `left` and `right`.
+  ///  * [PositionedDirectional], which is similar to [Positioned.directional]
+  ///    but adapts to the ambient [Directionality].
   const Positioned({
     Key key,
     this.left,
@@ -1855,7 +2640,7 @@ class Positioned extends ParentDataWidget<Stack> {
     this.bottom,
     this.width,
     this.height,
-    @required Widget child
+    @required Widget child,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
        super(key: key, child: child);
@@ -1906,40 +2691,112 @@ class Positioned extends ParentDataWidget<Stack> {
        height = null,
        super(key: key, child: child);
 
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// If `textDirection` is [TextDirection.rtl], then the `start` argument is
+  /// used for the [right] property and the `end` argument is used for the
+  /// [left] property. Otherwise, if `textDirection` is [TextDirection.ltr],
+  /// then the `start` argument is used for the [left] property and the `end`
+  /// argument is used for the [right] property.
+  ///
+  /// The `textDirection` argument must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [PositionedDirectional], which adapts to the ambient [Directionality].
+  factory Positioned.directional({
+    Key key,
+    @required TextDirection textDirection,
+    double start,
+    double top,
+    double end,
+    double bottom,
+    double width,
+    double height,
+    @required Widget child,
+  }) {
+    assert(textDirection != null);
+    double left;
+    double right;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = end;
+        right = start;
+        break;
+      case TextDirection.ltr:
+        left = start;
+        right = end;
+        break;
+    }
+    return new Positioned(
+      key: key,
+      left: left,
+      top: top,
+      right: right,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
+  }
+
   /// The distance that the child's left edge is inset from the left of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double left;
 
   /// The distance that the child's top edge is inset from the top of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double top;
 
   /// The distance that the child's right edge is inset from the right of the stack.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double right;
 
   /// The distance that the child's bottom edge is inset from the bottom of the stack.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double bottom;
 
   /// The child's width.
   ///
   /// Only two out of the three horizontal values ([left], [right], [width]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// horizontally.
   final double width;
 
   /// The child's height.
   ///
   /// Only two out of the three vertical values ([top], [bottom], [height]) can be
   /// set. The third must be null.
+  ///
+  /// If all three are null, the [Stack.alignment] is used to position the child
+  /// vertically.
   final double height;
 
   @override
@@ -1986,20 +2843,122 @@ class Positioned extends ParentDataWidget<Stack> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (left != null)
-      description.add('left: $left');
-    if (top != null)
-      description.add('top: $top');
-    if (right != null)
-      description.add('right: $right');
-    if (bottom != null)
-      description.add('bottom: $bottom');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('left', left, defaultValue: null));
+    description.add(new DoubleProperty('top', top, defaultValue: null));
+    description.add(new DoubleProperty('right', right, defaultValue: null));
+    description.add(new DoubleProperty('bottom', bottom, defaultValue: null));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
+  }
+}
+
+/// A widget that controls where a child of a [Stack] is positioned without
+/// committing to a specific [TextDirection].
+///
+/// The ambient [Directionality] is used to determine whether [start] is to the
+/// left or to the right.
+///
+/// A [PositionedDirectional] widget must be a descendant of a [Stack], and the
+/// path from the [PositionedDirectional] widget to its enclosing [Stack] must
+/// contain only [StatelessWidget]s or [StatefulWidget]s (not other kinds of
+/// widgets, like [RenderObjectWidget]s).
+///
+/// If a widget is wrapped in a [PositionedDirectional], then it is a
+/// _positioned_ widget in its [Stack]. If the [top] property is non-null, the
+/// top edge of this child/ will be positioned [top] layout units from the top
+/// of the stack widget. The [start], [bottom], and [end] properties work
+/// analogously.
+///
+/// If both the [top] and [bottom] properties are non-null, then the child will
+/// be forced to have exactly the height required to satisfy both constraints.
+/// Similarly, setting the [start] and [end] properties to non-null values will
+/// force the child to have a particular width. Alternatively the [width] and
+/// [height] properties can be used to give the dimensions, with one
+/// corresponding position property (e.g. [top] and [height]).
+///
+/// See also:
+///
+///  * [Positioned], which specifies the widget's position visually.
+///  * [Positioned.directional], which also specifies the widget's horizontal
+///    position using [start] and [end] but has an explicit [TextDirection].
+class PositionedDirectional extends StatelessWidget {
+  /// Creates a widget that controls where a child of a [Stack] is positioned.
+  ///
+  /// Only two out of the three horizontal values (`start`, `end`,
+  /// [width]), and only two out of the three vertical values ([top],
+  /// [bottom], [height]), can be set. In each case, at least one of
+  /// the three must be null.
+  ///
+  /// See also:
+  ///
+  ///  * [Positioned.directional], which also specifies the widget's horizontal
+  ///    position using [start] and [end] but has an explicit [TextDirection].
+  const PositionedDirectional({
+    Key key,
+    this.start,
+    this.top,
+    this.end,
+    this.bottom,
+    this.width,
+    this.height,
+    @required this.child,
+  }) : super(key: key);
+
+  /// The distance that the child's leading edge is inset from the leading edge
+  /// of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double start;
+
+  /// The distance that the child's top edge is inset from the top of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double top;
+
+  /// The distance that the child's trailing edge is inset from the trailing
+  /// edge of the stack.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double end;
+
+  /// The distance that the child's bottom edge is inset from the bottom of the stack.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double bottom;
+
+  /// The child's width.
+  ///
+  /// Only two out of the three horizontal values ([start], [end], [width]) can be
+  /// set. The third must be null.
+  final double width;
+
+  /// The child's height.
+  ///
+  /// Only two out of the three vertical values ([top], [bottom], [height]) can be
+  /// set. The third must be null.
+  final double height;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Positioned.directional(
+      textDirection: Directionality.of(context),
+      start: start,
+      top: top,
+      end: end,
+      bottom: bottom,
+      width: width,
+      height: height,
+      child: child,
+    );
   }
 }
 
@@ -2025,6 +2984,7 @@ class Positioned extends ParentDataWidget<Stack> {
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Flex] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Flex] proceeds in six steps:
 ///
@@ -2066,29 +3026,38 @@ class Positioned extends ParentDataWidget<Stack> {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may be sized smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flex extends MultiChildRenderObjectWidget {
   /// Creates a flex layout.
   ///
   /// The [direction] is required.
   ///
-  /// The [direction], [mainAxisAlignment], and [crossAxisAlignment] arguments
-  /// must not be null. If [crossAxisAlignment] is
+  /// The [direction], [mainAxisAlignment], [crossAxisAlignment], and
+  /// [verticalDirection] arguments must not be null. If [crossAxisAlignment] is
   /// [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to decide which direction to lay the children in or to
+  /// disambiguate `start` or `end` values for the main or cross axis
+  /// directions, the [textDirection] must not be null.
   Flex({
     Key key,
     @required this.direction,
     this.mainAxisAlignment: MainAxisAlignment.start,
     this.mainAxisSize: MainAxisSize.max,
     this.crossAxisAlignment: CrossAxisAlignment.center,
+    this.textDirection,
+    this.verticalDirection: VerticalDirection.down,
     this.textBaseline,
     List<Widget> children: const <Widget>[],
   }) : assert(direction != null),
        assert(mainAxisAlignment != null),
        assert(mainAxisSize != null),
        assert(crossAxisAlignment != null),
-       super(key: key, children: children) {
-    assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null); // https://github.com/dart-lang/sdk/issues/29278
-  }
+       assert(verticalDirection != null),
+       assert(crossAxisAlignment != CrossAxisAlignment.baseline || textBaseline != null),
+       super(key: key, children: children);
 
   /// The direction to use as the main axis.
   ///
@@ -2123,8 +3092,87 @@ class Flex extends MultiChildRenderObjectWidget {
   /// children in the cross axis (e.g., horizontally for a [Column]).
   final CrossAxisAlignment crossAxisAlignment;
 
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// Defaults to the ambient [Directionality].
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// the children are positioned (left-to-right or right-to-left), and the
+  /// meaning of the [mainAxisAlignment] property's [MainAxisAlignment.start] and
+  /// [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [mainAxisAlignment] is either [MainAxisAlignment.start] or
+  /// [MainAxisAlignment.end], or there's more than one child, then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  final TextDirection textDirection;
+
+  /// Determines the order to lay children out vertically and how to interpret
+  /// `start` and `end` in the vertical direction.
+  ///
+  /// Defaults to [VerticalDirection.down].
+  ///
+  /// If the [direction] is [Axis.vertical], this controls which order children
+  /// are painted in (down or up), the meaning of the [mainAxisAlignment]
+  /// property's [MainAxisAlignment.start] and [MainAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the [mainAxisAlignment]
+  /// is either [MainAxisAlignment.start] or [MainAxisAlignment.end], or there's
+  /// more than one child, then the [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the meaning of the
+  /// [crossAxisAlignment] property's [CrossAxisAlignment.start] and
+  /// [CrossAxisAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and the [crossAxisAlignment] is
+  /// either [CrossAxisAlignment.start] or [CrossAxisAlignment.end], then the
+  /// [verticalDirection] must not be null.
+  final VerticalDirection verticalDirection;
+
   /// If aligning items according to their baseline, which baseline to use.
   final TextBaseline textBaseline;
+
+  bool get _needTextDirection {
+    assert(direction != null);
+    switch (direction) {
+      case Axis.horizontal:
+        return true; // because it affects the layout order.
+      case Axis.vertical:
+        assert(crossAxisAlignment != null);
+        return crossAxisAlignment == CrossAxisAlignment.start
+            || crossAxisAlignment == CrossAxisAlignment.end;
+    }
+    return null;
+  }
+
+  /// The value to pass to [RenderFlex.textDirection].
+  ///
+  /// This value is derived from the [textDirection] property and the ambient
+  /// [Directionality]. The value is null if there is no need to specify the
+  /// text direction. In practice there's always a need to specify the direction
+  /// except for vertical flexes (e.g. [Column]s) whose [crossAxisAlignment] is
+  /// not dependent on the text direction (not `start` or `end`). In particular,
+  /// a [Row] always needs a text direction because the text direction controls
+  /// its layout order. (For [Column]s, the layout order is controlled by
+  /// [verticalDirection], which is always specified as it does not depend on an
+  /// inherited widget and defaults to [VerticalDirection.down].)
+  ///
+  /// This method exists so that subclasses of [Flex] that create their own
+  /// render objects that are derived from [RenderFlex] can do so and still use
+  /// the logic for providing a text direction only when it is necessary.
+  @protected
+  TextDirection getEffectiveTextDirection(BuildContext context) {
+    return textDirection ?? (_needTextDirection ? Directionality.of(context) : null);
+  }
 
   @override
   RenderFlex createRenderObject(BuildContext context) {
@@ -2133,7 +3181,9 @@ class Flex extends MultiChildRenderObjectWidget {
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
       crossAxisAlignment: crossAxisAlignment,
-      textBaseline: textBaseline
+      textDirection: getEffectiveTextDirection(context),
+      verticalDirection: verticalDirection,
+      textBaseline: textBaseline,
     );
   }
 
@@ -2144,7 +3194,21 @@ class Flex extends MultiChildRenderObjectWidget {
       ..mainAxisAlignment = mainAxisAlignment
       ..mainAxisSize = mainAxisSize
       ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = getEffectiveTextDirection(context)
+      ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
+    description.add(new EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize, defaultValue: MainAxisSize.max));
+    description.add(new EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
+    description.add(new EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
   }
 }
 
@@ -2188,9 +3252,71 @@ class Flex extends MultiChildRenderObjectWidget {
 /// )
 /// ```
 ///
+/// ## Troubleshooting
+///
+/// ### Why does my row have a yellow and black warning stripe?
+///
+/// If the non-flexible contents of the row (those that are not wrapped in
+/// [Expanded] or [Flexible] widgets) are together wider than the row itself,
+/// then the row is said to have overflowed. When a row overflows, the row does
+/// not have any remaining space to share between its [Expanded] and [Flexible]
+/// children. The row reports this by drawing a yellow and black striped
+/// warning box on the edge that is overflowing. If there is room on the outside
+/// of the row, the amount of overflow is printed in red lettering.
+///
+/// #### Story time
+///
+/// Suppose, for instance, that you had this code:
+///
+/// ```dart
+/// new Row(
+///   children: <Widget>[
+///     const FlutterLogo(),
+///     const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     const Icon(Icons.sentiment_very_satisfied),
+///   ],
+/// )
+/// ```
+///
+/// The row first asks its first child, the [FlutterLogo], to lay out, at
+/// whatever size the logo would like. The logo is friendly and happily decides
+/// to be 24 pixels to a side. This leaves lots of room for the next child. The
+/// row then asks that next child, the text, to lay out, at whatever size it
+/// thinks is best.
+///
+/// At this point, the text, not knowing how wide is too wide, says "Ok, I will
+/// be thiiiiiiiiiiiiiiiiiiiis wide.", and goes well beyond the space that the
+/// row has available, not wrapping. The row responds, "That's not fair, now I
+/// have no more room available for my other children!", and gets angry and
+/// sprouts a yellow and black strip.
+///
+/// The fix is to wrap the second child in an [Expanded] widget, which tells the
+/// row that the child should be given the remaining room:
+///
+/// ```dart
+/// new Row(
+///   children: <Widget>[
+///     const FlutterLogo(),
+///     const Expanded(
+///       child: const Text('Flutter\'s hot reload helps you quickly and easily experiment, build UIs, add features, and fix bug faster. Experience sub-second reload times, without losing state, on emulators, simulators, and hardware for iOS and Android.'),
+///     ),
+///     const Icon(Icons.sentiment_very_satisfied),
+///   ],
+/// )
+/// ```
+///
+/// Now, the row first asks the logo to lay out, and then asks the _icon_ to lay
+/// out. The [Icon], like the logo, is happy to take on a reasonable size (also
+/// 24 pixels, not coincidentally, since both [FlutterLogo] and [Icon] honor the
+/// ambient [IconTheme]). This leaves some room left over, and now the row tells
+/// the text exactly how wide to be: the exact width of the remaining space. The
+/// text, now happy to comply to a reasonable request, wraps the text within
+/// that width, and you end up with a paragraph split over several lines.
+///
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Row] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Row] proceeds in six steps:
 ///
@@ -2231,17 +3357,28 @@ class Flex extends MultiChildRenderObjectWidget {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may by sized smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Row extends Flex {
   /// Creates a horizontal array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
-  /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
-  /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  /// The [direction], [mainAxisAlignment], [mainAxisSize],
+  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
+  /// [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to determine the layout order (which is always the case
+  /// unless the row has no children or only one child) or to disambiguate
+  /// `start` or `end` values for the [mainAxisAlignment], the [textDirection]
+  /// must not be null.
   Row({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
     TextBaseline textBaseline,
     List<Widget> children: const <Widget>[],
   }) : super(
@@ -2251,7 +3388,9 @@ class Row extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
-    textBaseline: textBaseline
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
   );
 }
 
@@ -2282,7 +3421,7 @@ class Row extends Flex {
 ///     new Text('Craft beautiful UIs'),
 ///     new Expanded(
 ///       child: new FittedBox(
-///         fit: BoxFit.contain,
+///         fit: BoxFit.contain, // otherwise the logo will be tiny
 ///         child: const FlutterLogo(),
 ///       ),
 ///     ),
@@ -2312,9 +3451,62 @@ class Row extends Flex {
 /// )
 /// ```
 ///
+/// ## Troubleshooting
+///
+/// ### When the incoming vertical constraints are unbounded
+///
+/// When a [Column] has one or more [Expanded] or [Flexible] children, and is
+/// placed in another [Column], or in a [ListView], or in some other context
+/// that does not provide a maximum height constraint for the [Column], you will
+/// get an exception at runtime saying that there are children with non-zero
+/// flex but the vertical constraints are unbounded.
+///
+/// The problem, as described in the details that accompany that exception, is
+/// that using [Flexible] or [Expanded] means that the remaining space after
+/// laying out all the other children must be shared equally, but if the
+/// incoming vertical constraints are unbounded, there is infinite remaining
+/// space.
+///
+/// The key to solving this problem is usually to determine why the [Column] is
+/// receiving unbounded vertical constraints.
+///
+/// One common reason for this to happen is that the [Column] has been placed in
+/// another [Column] (without using [Expanded] or [Flexible] around the inner
+/// nested [Column]). When a [Column] lays out its non-flex children (those that
+/// have neither [Expanded] or [Flexible] around them), it gives them unbounded
+/// constraints so that they can determine their own dimensions (passing
+/// unbounded constraints usually signals to the child that it should
+/// shrink-wrap its contents). The solution in this case is typically to just
+/// wrap the inner column in an [Expanded] to indicate that it should take the
+/// remaining space of the outer column, rather than being allowed to take any
+/// amount of room it desires.
+///
+/// Another reason for this message to be displayed is nesting a [Column] inside
+/// a [ListView] or other vertical scrollable. In that scenario, there really is
+/// infinite vertical space (the whole point of a vertical scrolling list is to
+/// allow infinite space vertically). In such scenarios, it is usually worth
+/// examining why the inner [Column] should have an [Expanded] or [Flexible]
+/// child: what size should the inner children really be? The solution in this
+/// case is typically to remove the [Expanded] or [Flexible] widgets from around
+/// the inner children.
+///
+/// For more discussion about constraints, see [BoxConstraints].
+///
+/// ### The yellow and black striped banner
+///
+/// When the contents of a [Column] exceed the amount of space available, the
+/// [Column] overflows, and the contents are clipped. In debug mode, a yellow
+/// and black striped bar is rendered at the overflowing edge to indicate the
+/// problem, and a message is printed below the [Column] saying how much
+/// overflow was detected.
+///
+/// The usual solution is to use a [ListView] rather than a [Column], to enable
+/// the contents to scroll when vertical space is limited.
+///
 /// ## Layout algorithm
 ///
 /// _This section describes how a [Column] is rendered by the framework._
+/// _See [BoxConstraints] for an introduction to box layout models._
 ///
 /// Layout for a [Column] proceeds in six steps:
 ///
@@ -2357,17 +3549,26 @@ class Row extends Flex {
 ///  * [Expanded], to indicate children that should take all the remaining room.
 ///  * [Flexible], to indicate children that should share the remaining room but
 ///    that may size smaller (leaving some remaining room unused).
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Column extends Flex {
   /// Creates a vertical array of children.
   ///
-  /// The [direction], [mainAxisAlignment], [mainAxisSize], and
-  /// [crossAxisAlignment] arguments must not be null. If [crossAxisAlignment]
-  /// is [CrossAxisAlignment.baseline], then [textBaseline] must not be null.
+  /// The [direction], [mainAxisAlignment], [mainAxisSize],
+  /// [crossAxisAlignment], and [verticalDirection] arguments must not be null.
+  /// If [crossAxisAlignment] is [CrossAxisAlignment.baseline], then
+  /// [textBaseline] must not be null.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to disambiguate `start` or `end` values for the
+  /// [crossAxisAlignment], the [textDirection] must not be null.
   Column({
     Key key,
     MainAxisAlignment mainAxisAlignment: MainAxisAlignment.start,
     MainAxisSize mainAxisSize: MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment: CrossAxisAlignment.center,
+    TextDirection textDirection,
+    VerticalDirection verticalDirection: VerticalDirection.down,
     TextBaseline textBaseline,
     List<Widget> children: const <Widget>[],
   }) : super(
@@ -2377,7 +3578,9 @@ class Column extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
-    textBaseline: textBaseline
+    textDirection: textDirection,
+    verticalDirection: verticalDirection,
+    textBaseline: textBaseline,
   );
 }
 
@@ -2397,6 +3600,7 @@ class Column extends Flex {
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flexible extends ParentDataWidget<Flex> {
   /// Creates a widget that controls how a child of a [Row], [Column], or [Flex]
   /// flexes.
@@ -2448,9 +3652,9 @@ class Flexible extends ParentDataWidget<Flex> {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('flex: $flex');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new IntProperty('flex', flex));
   }
 }
 
@@ -2459,7 +3663,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// Using an [Expanded] widget makes a child of a [Row], [Column], or [Flex]
 /// expand to fill the available space in the main axis (e.g., horizontally for
 /// a [Row] or vertically for a [Column]). If multiple children are expanded,
-/// the available space is divided amoung them according to the [flex] factor.
+/// the available space is divided among them according to the [flex] factor.
 ///
 /// An [Expanded] widget must be a descendant of a [Row], [Column], or [Flex],
 /// and the path from the [Expanded] widget to its enclosing [Row], [Column], or
@@ -2469,6 +3673,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// See also:
 ///
 ///  * [Flexible], which does not force the child to fill the available space.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Expanded extends Flexible {
   /// Creates a widget that expands a child of a [Row], [Column], or [Flex]
   /// expand to fill the available space in the main axis.
@@ -2527,11 +3732,18 @@ class Expanded extends Flexible {
 ///
 ///  * [Row], which places children in one line, and gives control over their
 ///    alignment and spacing.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Wrap extends MultiChildRenderObjectWidget {
   /// Creates a wrap layout.
   ///
   /// By default, the wrap layout is horizontal and both the children and the
   /// runs are aligned to the start.
+  ///
+  /// The [textDirection] argument defaults to the ambient [Directionality], if
+  /// any. If there is no ambient directionality, and a text direction is going
+  /// to be necessary to decide which direction to lay the children in or to
+  /// disambiguate `start` or `end` values for the main or cross axis
+  /// directions, the [textDirection] must not be null.
   Wrap({
     Key key,
     this.direction: Axis.horizontal,
@@ -2540,6 +3752,8 @@ class Wrap extends MultiChildRenderObjectWidget {
     this.runAlignment: WrapAlignment.start,
     this.runSpacing: 0.0,
     this.crossAxisAlignment: WrapCrossAlignment.start,
+    this.textDirection,
+    this.verticalDirection: VerticalDirection.down,
     List<Widget> children: const <Widget>[],
   }) : super(key: key, children: children);
 
@@ -2554,7 +3768,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// How the children within a run should be places in the main axis.
   ///
   /// For example, if [alignment] is [WrapAlignment.center], the children in
-  /// each run are grouped togeter in the center of their run in the main axis.
+  /// each run are grouped together in the center of their run in the main axis.
   ///
   /// Defaults to [WrapAlignment.start].
   ///
@@ -2582,7 +3796,7 @@ class Wrap extends MultiChildRenderObjectWidget {
   /// How the runs themselves should be placed in the cross axis.
   ///
   /// For example, if [runAlignment] is [WrapAlignment.center], the runs are
-  /// grouped togeter in the center of the overall [Wrap] in the cross axis.
+  /// grouped together in the center of the overall [Wrap] in the cross axis.
   ///
   /// Defaults to [WrapAlignment.start].
   ///
@@ -2623,6 +3837,58 @@ class Wrap extends MultiChildRenderObjectWidget {
   ///    other in the cross axis.
   final WrapCrossAlignment crossAxisAlignment;
 
+  /// Determines the order to lay children out horizontally and how to interpret
+  /// `start` and `end` in the horizontal direction.
+  ///
+  /// Defaults to the ambient [Directionality].
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls order in which the
+  /// children are positioned (left-to-right or right-to-left), and the meaning
+  /// of the [alignment] property's [WrapAlignment.start] and
+  /// [WrapAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [alignment] is either [WrapAlignment.start] or [WrapAlignment.end], or
+  /// there's more than one child, then the [textDirection] (or the ambient
+  /// [Directionality]) must not be null.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls the order in which
+  /// runs are positioned, the meaning of the [runAlignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
+  /// [WrapCrossAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the
+  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
+  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
+  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [textDirection] (or the ambient [Directionality]) must not be null.
+  final TextDirection textDirection;
+
+  /// Determines the order to lay children out vertically and how to interpret
+  /// `start` and `end` in the vertical direction.
+  ///
+  /// If the [direction] is [Axis.vertical], this controls which order children
+  /// are painted in (down or up), the meaning of the [alignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.vertical], and either the [alignment]
+  /// is either [WrapAlignment.start] or [WrapAlignment.end], or there's
+  /// more than one child, then the [verticalDirection] must not be null.
+  ///
+  /// If the [direction] is [Axis.horizontal], this controls the order in which
+  /// runs are positioned, the meaning of the [runAlignment] property's
+  /// [WrapAlignment.start] and [WrapAlignment.end] values, as well as the
+  /// [crossAxisAlignment] property's [WrapCrossAlignment.start] and
+  /// [WrapCrossAlignment.end] values.
+  ///
+  /// If the [direction] is [Axis.horizontal], and either the
+  /// [runAlignment] is either [WrapAlignment.start] or [WrapAlignment.end], the
+  /// [crossAxisAlignment] is either [WrapCrossAlignment.start] or
+  /// [WrapCrossAlignment.end], or there's more than one child, then the
+  /// [verticalDirection] must not be null.
+  final VerticalDirection verticalDirection;
+
   @override
   RenderWrap createRenderObject(BuildContext context) {
     return new RenderWrap(
@@ -2632,6 +3898,8 @@ class Wrap extends MultiChildRenderObjectWidget {
       runAlignment: runAlignment,
       runSpacing: runSpacing,
       crossAxisAlignment: crossAxisAlignment,
+      textDirection: textDirection ?? Directionality.of(context),
+      verticalDirection: verticalDirection,
     );
   }
 
@@ -2643,7 +3911,22 @@ class Wrap extends MultiChildRenderObjectWidget {
       ..spacing = spacing
       ..runAlignment = runAlignment
       ..runSpacing = runSpacing
-      ..crossAxisAlignment = crossAxisAlignment;
+      ..crossAxisAlignment = crossAxisAlignment
+      ..textDirection = textDirection ?? Directionality.of(context)
+      ..verticalDirection = verticalDirection;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<Axis>('direction', direction));
+    description.add(new EnumProperty<WrapAlignment>('alignment', alignment));
+    description.add(new DoubleProperty('spacing', spacing));
+    description.add(new EnumProperty<WrapAlignment>('runAlignment', runAlignment));
+    description.add(new DoubleProperty('runSpacing', runSpacing));
+    description.add(new DoubleProperty('crossAxisAlignment', runSpacing));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
   }
 }
 
@@ -2680,6 +3963,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///    a single child.
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
@@ -2706,9 +3990,8 @@ class Flow extends MultiChildRenderObjectWidget {
     Key key,
     @required this.delegate,
     List<Widget> children: const <Widget>[],
-  }) : super(key: key, children: children) {
-    assert(delegate != null);
-  }
+  }) : assert(delegate != null),
+       super(key: key, children: children);
 
   /// The delegate that controls the transformation matrices of the children.
   final FlowDelegate delegate;
@@ -2733,13 +4016,14 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// Text displayed in a [RichText] widget must be explicitly styled. When
 /// picking which style to use, consider using [DefaultTextStyle.of] the current
-/// [BuildContext] to provide defaults.
+/// [BuildContext] to provide defaults. For more details on how to style text in
+/// a [RichText] widget, see the documentation for [TextStyle].
 ///
 /// When all the text uses the same style, consider using the [Text] widget,
 /// which is less verbose and integrates with [DefaultTextStyle] for default
 /// styling.
 ///
-/// Example:
+/// ## Sample code
 ///
 /// ```dart
 /// new RichText(
@@ -2756,25 +4040,36 @@ class Flow extends MultiChildRenderObjectWidget {
 ///
 /// See also:
 ///
-///  * [Text]
-///  * [TextSpan]
-///  * [DefaultTextStyle]
+///  * [TextStyle], which discusses how to style text.
+///  * [TextSpan], which is used to describe the text in a paragraph.
+///  * [Text], which automatically applies the ambient styles described by a
+///    [DefaultTextStyle] to a single string.
 class RichText extends LeafRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
-  /// The [text], [softWrap], and [overflow] arguments must not be null.
+  /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
+  /// arguments must not be null.
+  ///
+  /// The [maxLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than zero.
+  ///
+  /// The [textDirection], if null, defaults to the ambient [Directionality],
+  /// which in that case must not be null.
   const RichText({
     Key key,
     @required this.text,
-    this.textAlign,
+    this.textAlign: TextAlign.start,
+    this.textDirection,
     this.softWrap: true,
     this.overflow: TextOverflow.clip,
     this.textScaleFactor: 1.0,
     this.maxLines,
   }) : assert(text != null),
+       assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
+       assert(maxLines == null || maxLines > 0),
        super(key: key);
 
   /// The text to display in this widget.
@@ -2782,6 +4077,22 @@ class RichText extends LeafRenderObjectWidget {
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
+
+  /// The directionality of the text.
+  ///
+  /// This decides how [textAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [text] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrew phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any. If there is no ambient
+  /// [Directionality], then this must not be null.
+  final TextDirection textDirection;
 
   /// Whether the text should break at soft line breaks.
   ///
@@ -2800,12 +4111,17 @@ class RichText extends LeafRenderObjectWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
+  /// edge of the box.
   final int maxLines;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
+    assert(textDirection != null || debugCheckHasDirectionality(context));
     return new RenderParagraph(text,
       textAlign: textAlign,
+      textDirection: textDirection ?? Directionality.of(context),
       softWrap: softWrap,
       overflow: overflow,
       textScaleFactor: textScaleFactor,
@@ -2815,13 +4131,27 @@ class RichText extends LeafRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderParagraph renderObject) {
+    assert(textDirection != null || debugCheckHasDirectionality(context));
     renderObject
       ..text = text
       ..textAlign = textAlign
+      ..textDirection = textDirection ?? Directionality.of(context)
       ..softWrap = softWrap
       ..overflow = overflow
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
+    description.add(new IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    description.add(new StringProperty('text', text.toPlainText()));
   }
 }
 
@@ -2834,7 +4164,8 @@ class RichText extends LeafRenderObjectWidget {
 class RawImage extends LeafRenderObjectWidget {
   /// Creates a widget that displays an image.
   ///
-  /// The [scale] and [repeat] arguments must not be null.
+  /// The [scale], [alignment], [repeat], and [matchTextDirection] arguments must
+  /// not be null.
   const RawImage({
     Key key,
     this.image,
@@ -2844,11 +4175,14 @@ class RawImage extends LeafRenderObjectWidget {
     this.color,
     this.colorBlendMode,
     this.fit,
-    this.alignment,
+    this.alignment: Alignment.center,
     this.repeat: ImageRepeat.noRepeat,
-    this.centerSlice
+    this.centerSlice,
+    this.matchTextDirection: false,
   }) : assert(scale != null),
+       assert(alignment != null),
        assert(repeat != null),
+       assert(matchTextDirection != null),
        super(key: key);
 
   /// The image to display.
@@ -2892,10 +4226,23 @@ class RawImage extends LeafRenderObjectWidget {
 
   /// How to align the image within its bounds.
   ///
-  /// An alignment of (0.0, 0.0) aligns the image to the top-left corner of its
-  /// layout bounds.  An alignment of (1.0, 0.5) aligns the image to the middle
-  /// of the right edge of its layout bounds.
-  final FractionalOffset alignment;
+  /// The alignment aligns the given position in the image to the given position
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
+  /// image with the bottom right corner of its layout bounds. Similarly, an
+  /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
+  /// middle of the bottom edge of its layout bounds.
+  ///
+  /// To display a subpart of an image, consider using a [CustomPainter] and
+  /// [Canvas.drawImageRect].
+  ///
+  /// If the [alignment] is [TextDirection]-dependent (i.e. if it is a
+  /// [AlignmentDirectional]), then an ambient [Directionality] widget
+  /// must be in scope.
+  ///
+  /// Defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
   final ImageRepeat repeat;
@@ -2909,19 +4256,41 @@ class RawImage extends LeafRenderObjectWidget {
   /// the center slice will be stretched only vertically.
   final Rect centerSlice;
 
+  /// Whether to paint the image in the direction of the [TextDirection].
+  ///
+  /// If this is true, then in [TextDirection.ltr] contexts, the image will be
+  /// drawn with its origin in the top left (the "normal" painting direction for
+  /// images); and in [TextDirection.rtl] contexts, the image will be drawn with
+  /// a scaling factor of -1 in the horizontal direction so that the origin is
+  /// in the top right.
+  ///
+  /// This is occasionally used with images in right-to-left environments, for
+  /// images that were designed for left-to-right locales. Be careful, when
+  /// using this, to not flip images with integral shadows, text, or other
+  /// effects that will look incorrect when flipped.
+  ///
+  /// If this is true, there must be an ambient [Directionality] widget in
+  /// scope.
+  final bool matchTextDirection;
+
   @override
-  RenderImage createRenderObject(BuildContext context) => new RenderImage(
-    image: image,
-    width: width,
-    height: height,
-    scale: scale,
-    color: color,
-    colorBlendMode: colorBlendMode,
-    fit: fit,
-    alignment: alignment,
-    repeat: repeat,
-    centerSlice: centerSlice
-  );
+  RenderImage createRenderObject(BuildContext context) {
+    assert((!matchTextDirection && alignment is Alignment) || debugCheckHasDirectionality(context));
+    return new RenderImage(
+      image: image,
+      width: width,
+      height: height,
+      scale: scale,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      fit: fit,
+      alignment: alignment,
+      repeat: repeat,
+      centerSlice: centerSlice,
+      matchTextDirection: matchTextDirection,
+      textDirection: matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderImage renderObject) {
@@ -2935,31 +4304,25 @@ class RawImage extends LeafRenderObjectWidget {
       ..alignment = alignment
       ..fit = fit
       ..repeat = repeat
-      ..centerSlice = centerSlice;
+      ..centerSlice = centerSlice
+      ..matchTextDirection = matchTextDirection
+      ..textDirection = matchTextDirection || alignment is! Alignment ? Directionality.of(context) : null;
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('image: $image');
-    if (width != null)
-      description.add('width: $width');
-    if (height != null)
-      description.add('height: $height');
-    if (scale != 1.0)
-      description.add('scale: $scale');
-    if (color != null)
-      description.add('color: $color');
-    if (colorBlendMode != null)
-      description.add('colorBlendMode: $colorBlendMode');
-    if (fit != null)
-      description.add('fit: $fit');
-    if (alignment != null)
-      description.add('alignment: $alignment');
-    if (repeat != ImageRepeat.noRepeat)
-      description.add('repeat: $repeat');
-    if (centerSlice != null)
-      description.add('centerSlice: $centerSlice');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ui.Image>('image', image));
+    description.add(new DoubleProperty('width', width, defaultValue: null));
+    description.add(new DoubleProperty('height', height, defaultValue: null));
+    description.add(new DoubleProperty('scale', scale, defaultValue: 1.0));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
+    description.add(new EnumProperty<BoxFit>('fit', fit, defaultValue: null));
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
+    description.add(new EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
+    description.add(new DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
+    description.add(new FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
   }
 }
 
@@ -3048,6 +4411,10 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// Rather than listening for raw pointer events, consider listening for
 /// higher-level gestures using [GestureDetector].
 ///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 class Listener extends SingleChildRenderObjectWidget {
@@ -3081,13 +4448,15 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderPointerListener createRenderObject(BuildContext context) => new RenderPointerListener(
-    onPointerDown: onPointerDown,
-    onPointerMove: onPointerMove,
-    onPointerUp: onPointerUp,
-    onPointerCancel: onPointerCancel,
-    behavior: behavior
-  );
+  RenderPointerListener createRenderObject(BuildContext context) {
+    return new RenderPointerListener(
+      onPointerDown: onPointerDown,
+      onPointerMove: onPointerMove,
+      onPointerUp: onPointerUp,
+      onPointerCancel: onPointerCancel,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderPointerListener renderObject) {
@@ -3100,8 +4469,8 @@ class Listener extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
     final List<String> listeners = <String>[];
     if (onPointerDown != null)
       listeners.add('down');
@@ -3111,20 +4480,8 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('up');
     if (onPointerCancel != null)
       listeners.add('cancel');
-    if (listeners.isEmpty)
-      listeners.add('<none>');
-    description.add('listeners: ${listeners.join(", ")}');
-    switch (behavior) {
-      case HitTestBehavior.translucent:
-        description.add('behavior: translucent');
-        break;
-      case HitTestBehavior.opaque:
-        description.add('behavior: opaque');
-        break;
-      case HitTestBehavior.deferToChild:
-        description.add('behavior: defer-to-child');
-        break;
-    }
+    description.add(new IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
+    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior));
   }
 }
 
@@ -3209,10 +4566,12 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   final bool ignoringSemantics;
 
   @override
-  RenderIgnorePointer createRenderObject(BuildContext context) => new RenderIgnorePointer(
-    ignoring: ignoring,
-    ignoringSemantics: ignoringSemantics
-  );
+  RenderIgnorePointer createRenderObject(BuildContext context) {
+    return new RenderIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderIgnorePointer renderObject) {
@@ -3222,11 +4581,10 @@ class IgnorePointer extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('ignoring: $ignoring');
-    if (ignoringSemantics != null)
-      description.add('ignoringSemantics: $ignoringSemantics');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('ignoring', ignoring));
+    description.add(new DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
   }
 }
 
@@ -3293,10 +4651,12 @@ class MetaData extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
-  RenderMetaData createRenderObject(BuildContext context) => new RenderMetaData(
-    metaData: metaData,
-    behavior: behavior
-  );
+  RenderMetaData createRenderObject(BuildContext context) {
+    return new RenderMetaData(
+      metaData: metaData,
+      behavior: behavior
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderMetaData renderObject) {
@@ -3306,10 +4666,10 @@ class MetaData extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('behavior: $behavior');
-    description.add('metaData: $metaData');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<HitTestBehavior>('behavior', behavior));
+    description.add(new DiagnosticsProperty<dynamic>('metaData', metaData));
   }
 }
 
@@ -3344,54 +4704,294 @@ class Semantics extends SingleChildRenderObjectWidget {
     Key key,
     Widget child,
     this.container: false,
+    this.explicitChildNodes: false,
     this.checked,
-    this.label
+    this.selected,
+    this.button,
+    this.label,
+    this.value,
+    this.increasedValue,
+    this.decreasedValue,
+    this.hint,
+    this.textDirection,
+    this.onTap,
+    this.onLongPress,
+    this.onScrollLeft,
+    this.onScrollRight,
+    this.onScrollUp,
+    this.onScrollDown,
+    this.onIncrease,
+    this.onDecrease,
   }) : assert(container != null),
        super(key: key, child: child);
 
-  /// If 'container' is true, this Widget will introduce a new node in
-  /// the semantics tree. Otherwise, the semantics will be merged with
-  /// the semantics of any ancestors.
+  /// If 'container' is true, this widget will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
-  /// The 'container' flag is implicitly set to true on the immediate
-  /// semantics-providing descendants of a node where multiple
-  /// children have semantics or have descendants providing semantics.
-  /// In other words, the semantics of siblings are not merged. To
-  /// merge the semantics of an entire subtree, including siblings,
-  /// you can use a [MergeSemantics] widget.
+  /// Whether descendants of this widget can add their semantic information to the
+  /// [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
   final bool container;
+
+  /// Whether descendants of this widget are allowed to add semantic information
+  /// to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  final bool explicitChildNodes;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
   /// state is.
   final bool checked;
 
+  /// If non-null indicates that this subtree represents something that can be
+  /// in a selected or unselected state, and what its current state is.
+  ///
+  /// The active tab in a tab bar for example is considered "selected", whereas
+  /// all other tabs are unselected.
+  final bool selected;
+
+  /// If non-null, indicates that this subtree represents a button.
+  ///
+  /// TalkBack/VoiceOver provides users with the hint "button" when a button
+  /// is focused.
+  final bool button;
+
   /// Provides a textual description of the widget.
+  ///
+  /// If a label is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.label] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
   final String label;
 
+  /// Provides a textual description of the value of the widget.
+  ///
+  /// If a value is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.value] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String value;
+
+  /// The value that [value] will become after a [SemanticsAction.increase]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onIncrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.increasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String increasedValue;
+
+  /// The value that [value] will become after a [SemanticsAction.decrease]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onDecrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String decreasedValue;
+
+  /// Provides a brief textual description of the result of an action performed
+  /// on the widget.
+  ///
+  /// If a hint is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String hint;
+
+  /// The reading direction of the [label], [value], [hint], [increasedValue],
+  /// and [decreasedValue].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
+
+  TextDirection _getTextDirection(BuildContext context) {
+    return textDirection ?? (label != null || value != null || hint != null ? Directionality.of(context) : null);
+  }
+
+  /// The handler for [SemanticsAction.tap].
+  ///
+  /// This is the semantic equivalent of a user briefly tapping the screen with
+  /// the finger without moving it. For example, a button should implement this
+  /// action.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen while an element is focused.
+  final VoidCallback onTap;
+
+  /// The handler for [SemanticsAction.longPress].
+  ///
+  /// This is the semantic equivalent of a user pressing and holding the screen
+  /// with the finger for a few seconds without moving it.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen without lifting the finger after the
+  /// second tap.
+  final VoidCallback onLongPress;
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from right to left. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping left with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollLeft;
+
+  /// The handler for [SemanticsAction.scrollRight].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from left to right. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping right with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollRight;
+
+  /// The handler for [SemanticsAction.scrollUp].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from bottom to top. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollUp;
+
+  /// The handler for [SemanticsAction.scrollDown].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from top to bottom. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollDown;
+
+  /// The handler for [SemanticsAction.increase].
+  ///
+  /// This is a request to increase the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume up button.
+  final VoidCallback onIncrease;
+
+  /// The handler for [SemanticsAction.decrease].
+  ///
+  /// This is a request to decrease the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume down button.
+  final VoidCallback onDecrease;
+
   @override
-  RenderSemanticsAnnotations createRenderObject(BuildContext context) => new RenderSemanticsAnnotations(
-    container: container,
-    checked: checked,
-    label: label
-  );
+  RenderSemanticsAnnotations createRenderObject(BuildContext context) {
+    return new RenderSemanticsAnnotations(
+      container: container,
+      explicitChildNodes: explicitChildNodes,
+      checked: checked,
+      selected: selected,
+      button: button,
+      label: label,
+      value: value,
+      increasedValue: increasedValue,
+      decreasedValue: decreasedValue,
+      hint: hint,
+      textDirection: _getTextDirection(context),
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onScrollLeft: onScrollLeft,
+      onScrollRight: onScrollRight,
+      onScrollUp: onScrollUp,
+      onScrollDown: onScrollDown,
+      onIncrease: onIncrease,
+      onDecrease: onDecrease,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
       ..container = container
+      ..explicitChildNodes = explicitChildNodes
       ..checked = checked
-      ..label = label;
+      ..selected = selected
+      ..label = label
+      ..value = value
+      ..increasedValue = increasedValue
+      ..decreasedValue = decreasedValue
+      ..hint = hint
+      ..textDirection = _getTextDirection(context)
+      ..onTap = onTap
+      ..onLongPress = onLongPress
+      ..onScrollLeft = onScrollLeft
+      ..onScrollRight = onScrollRight
+      ..onScrollUp = onScrollUp
+      ..onScrollDown = onScrollDown
+      ..onIncrease = onIncrease
+      ..onDecrease = onDecrease;
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('container: $container');
-    if (checked != null)
-      description.add('checked: $checked');
-    if (label != null)
-      description.add('label: "$label"');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('container', container));
+    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new StringProperty('value', value));
+    description.add(new StringProperty('hint', hint));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
 
@@ -3422,18 +5022,65 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
   RenderMergeSemantics createRenderObject(BuildContext context) => new RenderMergeSemantics();
 }
 
+/// A widget that drops the semantics of all widget that were painted before it
+/// in the same semantic container.
+///
+/// This is useful to hide widgets from accessibility tools that are painted
+/// behind a certain widget, e.g. an alert should usually disallow interaction
+/// with any widget located "behind" the alert (even when they are still
+/// partially visible). Similarly, an open [Drawer] blocks interactions with
+/// any widget outside the drawer.
+///
+/// See also:
+///
+/// * [ExcludeSemantics] which drops all semantics of its descendants.
+class BlockSemantics extends SingleChildRenderObjectWidget {
+  /// Creates a widget that excludes the semantics of all widgets painted before
+  /// it in the same semantic container.
+  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+
+  @override
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+}
+
 /// A widget that drops all the semantics of its descendants.
+///
+/// When [excluding] is true, this widget (and its subtree) is excluded from
+/// the semantics tree.
 ///
 /// This can be used to hide subwidgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
+///
+/// See also:
+///
+/// * [BlockSemantics] which drops semantics of widgets earlier in the tree.
 class ExcludeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that drops all the semantics of its descendants.
-  const ExcludeSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const ExcludeSemantics({
+    Key key,
+    this.excluding: true,
+    Widget child,
+  }) : assert(excluding != null),
+        super(key: key, child: child);
+
+  /// Whether this widget is excluded in the semantics tree.
+  final bool excluding;
 
   @override
-  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics();
+  RenderExcludeSemantics createRenderObject(BuildContext context) => new RenderExcludeSemantics(excluding: excluding);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderExcludeSemantics renderObject) {
+    renderObject.excluding = excluding;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('excluding', excluding));
+  }
 }
 
 /// A widget that builds its child.

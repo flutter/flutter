@@ -49,15 +49,15 @@ class GridTile extends StatelessWidget {
 
     final List<Widget> children = <Widget>[
       new Positioned.fill(
-        child: child
-      )
+        child: child,
+      ),
     ];
     if (header != null) {
       children.add(new Positioned(
         top: 0.0,
         left: 0.0,
         right: 0.0,
-        child: header
+        child: header,
       ));
     }
     if (footer != null) {
@@ -65,7 +65,7 @@ class GridTile extends StatelessWidget {
         left: 0.0,
         bottom: 0.0,
         right: 0.0,
-        child: footer
+        child: footer,
       ));
     }
     return new Stack(children: children);

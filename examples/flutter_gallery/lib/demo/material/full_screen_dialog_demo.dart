@@ -19,11 +19,10 @@ enum DismissDialogAction {
 
 class DateTimeItem extends StatelessWidget {
   DateTimeItem({ Key key, DateTime dateTime, @required this.onChanged })
-    : date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
+    : assert(onChanged != null),
+      date = new DateTime(dateTime.year, dateTime.month, dateTime.day),
       time = new TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
-      super(key: key) {
-    assert(onChanged != null);
-  }
+      super(key: key);
 
   final DateTime date;
   final TimeOfDay time;
@@ -52,7 +51,8 @@ class DateTimeItem extends StatelessWidget {
                     lastDate: date.add(const Duration(days: 30))
                   )
                   .then<Null>((DateTime value) {
-                    onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
+                    if (value != null)
+                      onChanged(new DateTime(value.year, value.month, value.day, time.hour, time.minute));
                   });
                 },
                 child: new Row(
@@ -78,12 +78,13 @@ class DateTimeItem extends StatelessWidget {
                   initialTime: time
                 )
                 .then<Null>((TimeOfDay value) {
-                  onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
+                  if (value != null)
+                    onChanged(new DateTime(date.year, date.month, date.day, value.hour, value.minute));
                 });
               },
               child: new Row(
                 children: <Widget>[
-                  new Text('$time'),
+                  new Text('${time.format(context)}'),
                   const Icon(Icons.arrow_drop_down, color: Colors.black54),
                 ]
               )
@@ -164,7 +165,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               decoration: new BoxDecoration(
                 border: new Border(bottom: new BorderSide(color: theme.dividerColor))
               ),
-              alignment: FractionalOffset.bottomLeft,
+              alignment: Alignment.bottomLeft,
               child: new Text('Event name', style: theme.textTheme.display2)
             ),
             new Container(
@@ -172,7 +173,7 @@ class FullScreenDialogDemoState extends State<FullScreenDialogDemo> {
               decoration: new BoxDecoration(
                 border: new Border(bottom: new BorderSide(color: theme.dividerColor))
               ),
-              alignment: FractionalOffset.bottomLeft,
+              alignment: Alignment.bottomLeft,
               child: new Text('Location', style: theme.textTheme.title.copyWith(color: Colors.black54))
             ),
             new Column(

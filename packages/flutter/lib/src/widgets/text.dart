@@ -14,6 +14,14 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
   /// from the current default text style for a given [BuildContext].
+  ///
+  /// The [style] and [child] arguments are required and must not be null.
+  ///
+  /// The [softWrap] and [overflow] arguments must not be null (though they do
+  /// have default values).
+  ///
+  /// The [maxLines] property may be null (and indeed defaults to null), but if
+  /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
     Key key,
     @required this.style,
@@ -25,6 +33,7 @@ class DefaultTextStyle extends InheritedWidget {
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
+       assert(maxLines == null || maxLines > 0),
        assert(child != null),
        super(key: key, child: child);
 
@@ -48,6 +57,15 @@ class DefaultTextStyle extends InheritedWidget {
   /// for the [BuildContext] where the widget is inserted, and any of the other
   /// arguments that are not null replace the corresponding properties on that
   /// same default text style.
+  ///
+  /// This constructor cannot be used to override the [maxLines] property of the
+  /// ancestor with the value null, since null here is used to mean "defer to
+  /// ancestor". To replace a non-null [maxLines] from an ancestor with the null
+  /// value (to remove the restriction on number of lines), manually obtain the
+  /// ambient [DefaultTextStyle] using [DefaultTextStyle.of], then create a new
+  /// [DefaultTextStyle] using the [new DefaultTextStyle] constructor directly.
+  /// See the source below for an example of how to do this (since that's
+  /// essentially what this constructor does).
   static Widget merge({
     Key key,
     TextStyle style,
@@ -91,6 +109,12 @@ class DefaultTextStyle extends InheritedWidget {
   /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
+  /// edge of the box.
+  ///
+  /// If this is non-null, it will override even explicit null values of
+  /// [Text.maxLines].
   final int maxLines;
 
   /// The closest instance of this class that encloses the given context.
@@ -117,9 +141,9 @@ class DefaultTextStyle extends InheritedWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    style?.debugFillProperties(description);
   }
 }
 
@@ -139,10 +163,34 @@ class DefaultTextStyle extends InheritedWidget {
 /// To display text that uses multiple styles (e.g., a paragraph with some bold
 /// words), use [RichText].
 ///
+/// ## Sample code
+///
+/// ```dart
+/// new Text(
+///   'Hello, $_name! How are you?',
+///   textAlign: TextAlign.center,
+///   overflow: TextOverflow.ellipsis,
+///   style: new TextStyle(fontWeight: FontWeight.bold),
+/// )
+/// ```
+///
+/// ## Interactivity
+///
+/// To make [Text] react to touch events, wrap it in a [GestureDetector] widget
+/// with a [GestureDetector.onTap] handler.
+///
+/// In a material design application, consider using a [FlatButton] instead, or
+/// if that isn't appropriate, at least using an [InkWell] instead of
+/// [GestureDetector].
+///
+/// To make sections of the text interactive, use [RichText] and specify a
+/// [TapGestureRecognizer] as the [TextSpan.recognizer] of the relevant part of
+/// the text.
+///
 /// See also:
 ///
-///  * [RichText]
-///  * [DefaultTextStyle]
+///  * [RichText], which gives you more control over the text styles.
+///  * [DefaultTextStyle], which sets default styles for [Text] widgets.
 class Text extends StatelessWidget {
   /// Creates a text widget.
   ///
@@ -152,6 +200,7 @@ class Text extends StatelessWidget {
     Key key,
     this.style,
     this.textAlign,
+    this.textDirection,
     this.softWrap,
     this.overflow,
     this.textScaleFactor,
@@ -172,6 +221,21 @@ class Text extends StatelessWidget {
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
 
+  /// The directionality of the text.
+  ///
+  /// This decides how [textAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the [data] is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrew phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any.
+  final TextDirection textDirection;
+
   /// Whether the text should break at soft line breaks.
   ///
   /// If false, the glyphs in the text will be positioned as if there was unlimited horizontal space.
@@ -185,13 +249,22 @@ class Text extends StatelessWidget {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   ///
-  /// Defaults to the [MediaQueryData.textScaleFactor] obtained from the ambient
+  /// The value given to the constructor as textScaleFactor.  If null, will
+  /// use the [MediaQueryData.textScaleFactor] obtained from the ambient
   /// [MediaQuery], or 1.0 if there is no [MediaQuery] in scope.
   final double textScaleFactor;
 
-  /// An optional maximum number of lines the text is allowed to take up.
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
   /// If the text exceeds the given number of lines, it will be truncated according
   /// to [overflow].
+  ///
+  /// If this is 1, text will not wrap. Otherwise, text will be wrapped at the
+  /// edge of the box.
+  ///
+  /// If this is null, but there is an ambient [DefaultTextStyle] that specifies
+  /// an explicit number for its [DefaultTextStyle.maxLines], then the
+  /// [DefaultTextStyle] value will take precedence. You can use a [RichText]
+  /// widget directly to entirely override the [DefaultTextStyle].
   final int maxLines;
 
   @override
@@ -201,23 +274,29 @@ class Text extends StatelessWidget {
     if (style == null || style.inherit)
       effectiveTextStyle = defaultTextStyle.style.merge(style);
     return new RichText(
-      textAlign: textAlign ?? defaultTextStyle.textAlign,
+      textAlign: textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
+      textDirection: textDirection, // RichText uses Directionality.of to obtain a default if this is null.
       softWrap: softWrap ?? defaultTextStyle.softWrap,
       overflow: overflow ?? defaultTextStyle.overflow,
       textScaleFactor: textScaleFactor ?? MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0,
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       text: new TextSpan(
         style: effectiveTextStyle,
-        text: data
+        text: data,
       )
     );
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$data"');
-    if (style != null)
-      '$style'.split('\n').forEach(description.add);
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('data', data, showName: false));
+    style?.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    description.add(new DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }

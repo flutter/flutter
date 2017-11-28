@@ -3,16 +3,16 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const double _kScreenEdgeMargin = 10.0;
 const Duration _kFadeDuration = const Duration(milliseconds: 200);
 const Duration _kShowDuration = const Duration(milliseconds: 1500);
 
@@ -40,7 +40,7 @@ class Tooltip extends StatefulWidget {
   /// By default, tooltips prefer to appear below the [child] widget when the
   /// user long presses on the widget.
   ///
-  /// The [message] argument cannot be null.
+  /// The [message] argument must not be null.
   const Tooltip({
     Key key,
     @required this.message,
@@ -48,13 +48,12 @@ class Tooltip extends StatefulWidget {
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     this.verticalOffset: 24.0,
     this.preferBelow: true,
-    @required this.child,
+    this.child,
   }) : assert(message != null),
        assert(height != null),
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
-       assert(child != null),
        super(key: key);
 
   /// The text to display in the tooltip.
@@ -66,7 +65,7 @@ class Tooltip extends StatefulWidget {
   /// The amount of space by which to inset the child.
   ///
   /// Defaults to 16.0 logical pixels in each direction.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The amount of vertical distance between the widget and the displayed tooltip.
   final double verticalOffset;
@@ -85,11 +84,11 @@ class Tooltip extends StatefulWidget {
   _TooltipState createState() => new _TooltipState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('"$message"');
-    description.add('vertical offset: $verticalOffset');
-    description.add('position: ${preferBelow ? "below" : "above"}');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('message', message, showName: false));
+    description.add(new DoubleProperty('vertical offset', verticalOffset));
+    description.add(new FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
   }
 }
 
@@ -110,12 +109,15 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       _removeEntry();
   }
 
-  void ensureTooltipVisible() {
+  /// Shows the tooltip if it is not already visible.
+  ///
+  /// Returns `false` when the tooltip was already visible.
+  bool ensureTooltipVisible() {
     if (_entry != null) {
       _timer?.cancel();
       _timer = null;
       _controller.forward();
-      return;  // Already visible.
+      return false; // Already visible.
     }
     final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
@@ -138,6 +140,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);
     GestureBinding.instance.pointerRouter.addGlobalRoute(_handlePointerEvent);
     _controller.forward();
+    return true;
   }
 
   void _removeEntry() {
@@ -172,30 +175,53 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
+  void _handleLongPress() {
+    final bool tooltipCreated = ensureTooltipVisible();
+    if (tooltipCreated)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(Overlay.of(context, debugRequiredFor: widget) != null);
     return new GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onLongPress: ensureTooltipVisible,
+      onLongPress: _handleLongPress,
       excludeFromSemantics: true,
       child: new Semantics(
         label: widget.message,
         child: widget.child,
-      )
+      ),
     );
   }
 }
 
+/// A delegate for computing the layout of a tooltip to be displayed above or
+/// bellow a target specified in the global coordinate system.
 class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
+  /// Creates a delegate for computing the layout of a tooltip.
+  ///
+  /// The arguments must not be null.
   _TooltipPositionDelegate({
-    this.target,
-    this.verticalOffset,
-    this.preferBelow
-  });
+    @required this.target,
+    @required this.verticalOffset,
+    @required this.preferBelow,
+  }) : assert(target != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null);
 
+  /// The offset of the target the tooltip is positioned near in the global
+  /// coordinate system.
   final Offset target;
+
+  /// The amount of vertical distance between the target and the displayed
+  /// tooltip.
   final double verticalOffset;
+
+  /// Whether the tooltip defaults to being displayed below the widget.
+  ///
+  /// If there is insufficient space to display the tooltip in the preferred
+  /// direction, the tooltip will be displayed in the opposite direction.
   final bool preferBelow;
 
   @override
@@ -203,26 +229,13 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
   @override
   Offset getPositionForChild(Size size, Size childSize) {
-    // VERTICAL DIRECTION
-    final bool fitsBelow = target.dy + verticalOffset + childSize.height <= size.height - _kScreenEdgeMargin;
-    final bool fitsAbove = target.dy - verticalOffset - childSize.height >= _kScreenEdgeMargin;
-    final bool tooltipBelow = preferBelow ? fitsBelow || !fitsAbove : !(fitsAbove || !fitsBelow);
-    double y;
-    if (tooltipBelow)
-      y = math.min(target.dy + verticalOffset, size.height - _kScreenEdgeMargin);
-    else
-      y = math.max(target.dy - verticalOffset - childSize.height, _kScreenEdgeMargin);
-    // HORIZONTAL DIRECTION
-    final double normalizedTargetX = target.dx.clamp(_kScreenEdgeMargin, size.width - _kScreenEdgeMargin);
-    double x;
-    if (normalizedTargetX < _kScreenEdgeMargin + childSize.width / 2.0) {
-      x = _kScreenEdgeMargin;
-    } else if (normalizedTargetX > size.width - _kScreenEdgeMargin - childSize.width / 2.0) {
-      x = size.width - _kScreenEdgeMargin - childSize.width;
-    } else {
-      x = normalizedTargetX - childSize.width / 2.0;
-    }
-    return new Offset(x, y);
+    return positionDependentBox(
+      size: size,
+      childSize: childSize,
+      target: target,
+      verticalOffset: verticalOffset,
+      preferBelow: preferBelow,
+    );
   }
 
   @override
@@ -242,12 +255,12 @@ class _TooltipOverlay extends StatelessWidget {
     this.animation,
     this.target,
     this.verticalOffset,
-    this.preferBelow
+    this.preferBelow,
   }) : super(key: key);
 
   final String message;
   final double height;
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
   final Animation<double> animation;
   final Offset target;
   final double verticalOffset;
@@ -267,28 +280,31 @@ class _TooltipOverlay extends StatelessWidget {
           delegate: new _TooltipPositionDelegate(
             target: target,
             verticalOffset: verticalOffset,
-            preferBelow: preferBelow
+            preferBelow: preferBelow,
           ),
           child: new FadeTransition(
             opacity: animation,
             child: new Opacity(
               opacity: 0.9,
-              child: new Container(
-                decoration: new BoxDecoration(
-                  color: darkTheme.backgroundColor,
-                  borderRadius: new BorderRadius.circular(2.0)
+              child: new ConstrainedBox(
+                constraints: new BoxConstraints(minHeight: height),
+                child: new Container(
+                  decoration: new BoxDecoration(
+                    color: darkTheme.backgroundColor,
+                    borderRadius: new BorderRadius.circular(2.0),
+                  ),
+                  padding: padding,
+                  child: new Center(
+                    widthFactor: 1.0,
+                    heightFactor: 1.0,
+                    child: new Text(message, style: darkTheme.textTheme.body1),
+                  ),
                 ),
-                height: height,
-                padding: padding,
-                child: new Center(
-                  widthFactor: 1.0,
-                  child: new Text(message, style: darkTheme.textTheme.body1)
-                )
-              )
-            )
-          )
-        )
-      )
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -18,13 +18,18 @@ Future<TaskResult> runEndToEndTests() async {
   await inDirectory(testDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios)
       await prepareProvisioningCertificates(testDirectory.path);
-      // This causes an Xcode project to be created.
-      await flutter('build', options: <String>['ios', 'lib/keyboard_resize.dart']);
-    }
 
-    await flutter('drive', options: <String>['-d', deviceId, '-t', 'lib/keyboard_resize.dart']);
+    const List<String> entryPoints = const <String>[
+      'lib/keyboard_resize.dart',
+      'lib/driver.dart',
+      'lib/screenshot.dart',
+    ];
+
+    for (final String entryPoint in entryPoints) {
+      await flutter('drive', options: <String>['--verbose', '-d', deviceId, entryPoint]);
+    }
   });
 
   return new TaskResult.success(<String, dynamic>{});

@@ -9,8 +9,6 @@ import 'package:flutter/services.dart';
 
 import 'widget_tester.dart';
 
-const String _kTextInputClientChannel = 'flutter/textinputclient';
-
 /// A testing stub for the system's onscreen keyboard.
 ///
 /// Typical app tests will not need to use this class directly.
@@ -27,12 +25,23 @@ class TestTextInput {
   }
 
   int _client = 0;
+
+  /// Arguments supplied to the TextInput.setClient method call.
+  Map<String, dynamic> setClientArgs;
+
+  /// The last set of arguments that [TextInputConnection.setEditingState] sent
+  /// to the embedder.
+  ///
+  /// This is a map representation of a [TextEditingValue] object. For example,
+  /// it will have a `text` entry whose value matches the most recent
+  /// [TextEditingValue.text] that was sent to the embedder.
   Map<String, dynamic> editingState;
 
   Future<dynamic> _handleTextInputCall(MethodCall methodCall) async {
     switch (methodCall.method) {
       case 'TextInput.setClient':
         _client = methodCall.arguments[0];
+        setClientArgs = methodCall.arguments[1];
         break;
       case 'TextInput.clearClient':
         _client = 0;

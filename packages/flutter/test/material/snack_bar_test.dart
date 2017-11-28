@@ -62,7 +62,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },
@@ -139,7 +139,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 lastController = Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: new Duration(seconds: time)
                 ));
               },
@@ -223,7 +223,7 @@ void main() {
               onTap: () {
                 snackBarCount += 1;
                 Scaffold.of(context).showSnackBar(new SnackBar(
-                  content: new Text("bar$snackBarCount"),
+                  content: new Text('bar$snackBarCount'),
                   duration: const Duration(seconds: 2)
                 ));
               },
@@ -374,7 +374,11 @@ void main() {
     expect(actionPressed, isFalse);
     await tester.tap(find.text('ACTION'));
     expect(actionPressed, isTrue);
-    await tester.pump(const Duration(seconds: 1));
+    // Closed reason is only set when the animation is complete.
+    await tester.pump(const Duration(milliseconds:250));
+    expect(closedReason, isNull);
+    // Wait for animation to complete.
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.action));
 
     // Pop up the snack bar and then swipe downwards to dismiss it.
@@ -382,21 +386,21 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
     await tester.pump(const Duration(milliseconds: 750));
     await tester.drag(find.text('snack'), const Offset(0.0, 50.0));
-    await tester.pump();
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.swipe));
 
     // Pop up the snack bar and then remove it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
     scaffoldKey.currentState.removeCurrentSnackBar();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.remove));
 
     // Pop up the snack bar and then hide it.
     await tester.tap(find.text('X'));
     await tester.pump(const Duration(milliseconds: 750));
     scaffoldKey.currentState.hideCurrentSnackBar();
-    await tester.pump(const Duration(seconds: 1));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.hide));
 
     // Pop up the snack bar and then let it time out.
@@ -405,7 +409,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 750));
     await tester.pump(const Duration(milliseconds: 1500));
     await tester.pump(); // begin animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(closedReason, equals(SnackBarClosedReason.timeout));
   });
 

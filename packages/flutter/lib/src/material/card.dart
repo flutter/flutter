@@ -80,14 +80,17 @@ class Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Container(
-      margin: const EdgeInsets.all(4.0),
-      child: new Material(
-        color: color,
-        type: MaterialType.card,
-        elevation: elevation,
-        child: child
-      )
+    return new Semantics(
+      container: true,
+      child: new Container(
+        margin: const EdgeInsets.all(4.0),
+        child: new Material(
+          color: color,
+          type: MaterialType.card,
+          elevation: elevation,
+          child: child
+        )
+      ),
     );
   }
 }

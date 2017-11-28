@@ -16,7 +16,12 @@ int countSemanticsChildren(RenderObject object) {
     
 void main() {
   test('RenderOpacity and children and semantics', () {
-    final RenderOpacity box = new RenderOpacity(child: new RenderParagraph(const TextSpan()));
+    final RenderOpacity box = new RenderOpacity(
+      child: new RenderParagraph(
+        const TextSpan(),
+        textDirection: TextDirection.ltr,
+      ),
+    );
     expect(countSemanticsChildren(box), 1);
     box.opacity = 0.5;
     expect(countSemanticsChildren(box), 1);

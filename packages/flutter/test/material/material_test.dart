@@ -14,13 +14,14 @@ class NotifyMaterial extends StatelessWidget {
   }
 }
 
-Widget buildMaterial(double elevation) {
+Widget buildMaterial(
+    {double elevation: 0.0, Color shadowColor: const Color(0xFF00FF00)}) {
   return new Center(
     child: new SizedBox(
       height: 100.0,
       width: 100.0,
       child: new Material(
-        color: const Color(0xFF00FF00),
+        shadowColor: shadowColor,
         elevation: elevation,
       ),
     ),
@@ -48,7 +49,7 @@ class PaintRecorder extends CustomPainter {
 }
 
 void main() {
-  testWidgets('LayoutChangedNotificaion test', (WidgetTester tester) async {
+  testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Material(
         child: new NotifyMaterial(),
@@ -60,41 +61,44 @@ void main() {
     final List<Size> log = <Size>[];
 
     await tester.pumpWidget(
-      new Column(
-        children: <Widget>[
-          new SizedBox(
-            width: 150.0,
-            height: 150.0,
-            child: new CustomPaint(
-              painter: new PaintRecorder(log),
-            ),
-          ),
-          new Expanded(
-            child: new Material(
-              child: new Column(
-                children: <Widget>[
-                  new Expanded(
-                    child: new ListView(
-                      children: <Widget>[
-                        new Container(
-                          height: 2000.0,
-                          color: const Color(0xFF00FF00),
-                        ),
-                      ],
-                    ),
-                  ),
-                  new SizedBox(
-                    width: 100.0,
-                    height: 100.0,
-                    child: new CustomPaint(
-                      painter: new PaintRecorder(log),
-                    ),
-                  ),
-                ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Column(
+          children: <Widget>[
+            new SizedBox(
+              width: 150.0,
+              height: 150.0,
+              child: new CustomPaint(
+                painter: new PaintRecorder(log),
               ),
             ),
-          ),
-        ],
+            new Expanded(
+              child: new Material(
+                child: new Column(
+                  children: <Widget>[
+                    new Expanded(
+                      child: new ListView(
+                        children: <Widget>[
+                          new Container(
+                            height: 2000.0,
+                            color: const Color(0xFF00FF00),
+                          ),
+                        ],
+                      ),
+                    ),
+                    new SizedBox(
+                      width: 100.0,
+                      height: 100.0,
+                      child: new CustomPaint(
+                        painter: new PaintRecorder(log),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -116,11 +120,11 @@ void main() {
     // This code verifies that the PhysicalModel's elevation animates over
     // a kThemeChangeDuration time interval.
 
-    await tester.pumpWidget(buildMaterial(0.0));
+    await tester.pumpWidget(buildMaterial(elevation: 0.0));
     final RenderPhysicalModel modelA = getShadow(tester);
     expect(modelA.elevation, equals(0.0));
 
-    await tester.pumpWidget(buildMaterial(9.0));
+    await tester.pumpWidget(buildMaterial(elevation: 9.0));
     final RenderPhysicalModel modelB = getShadow(tester);
     expect(modelB.elevation, equals(0.0));
 
@@ -135,5 +139,30 @@ void main() {
     await tester.pump(kThemeChangeDuration);
     final RenderPhysicalModel modelE = getShadow(tester);
     expect(modelE.elevation, equals(9.0));
+  });
+
+  testWidgets('Shadow colors animate smoothly', (WidgetTester tester) async {
+    // This code verifies that the PhysicalModel's shadowColor animates over
+    // a kThemeChangeDuration time interval.
+
+    await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFF00FF00)));
+    final RenderPhysicalModel modelA = getShadow(tester);
+    expect(modelA.shadowColor, equals(const Color(0xFF00FF00)));
+
+    await tester.pumpWidget(buildMaterial(shadowColor: const Color(0xFFFF0000)));
+    final RenderPhysicalModel modelB = getShadow(tester);
+    expect(modelB.shadowColor, equals(const Color(0xFF00FF00)));
+
+    await tester.pump(const Duration(milliseconds: 1));
+    final RenderPhysicalModel modelC = getShadow(tester);
+    expect(modelC.shadowColor, within<Color>(distance: 1, from: const Color(0xFF00FF00)));
+
+    await tester.pump(kThemeChangeDuration ~/ 2);
+    final RenderPhysicalModel modelD = getShadow(tester);
+    expect(modelD.shadowColor, isNot(within<Color>(distance: 1, from: const Color(0xFF00FF00))));
+
+    await tester.pump(kThemeChangeDuration);
+    final RenderPhysicalModel modelE = getShadow(tester);
+    expect(modelE.shadowColor, equals(const Color(0xFFFF0000)));
   });
 }

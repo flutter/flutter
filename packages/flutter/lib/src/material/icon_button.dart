@@ -73,9 +73,11 @@ class IconButton extends StatelessWidget {
     Key key,
     this.iconSize: 24.0,
     this.padding: const EdgeInsets.all(8.0),
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     @required this.icon,
     this.color,
+    this.highlightColor,
+    this.splashColor,
     this.disabledColor,
     @required this.onPressed,
     this.tooltip
@@ -101,17 +103,17 @@ class IconButton extends StatelessWidget {
   /// to input gestures.
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// Defines how the icon is positioned within the IconButton.
   ///
-  /// This property must not be null. It defaults to [FractionalOffset.center].
-  final FractionalOffset alignment;
+  /// This property must not be null. It defaults to [Alignment.center].
+  final AlignmentGeometry alignment;
 
   /// The icon to display inside the button.
   ///
   /// The [Icon.size] and [Icon.color] of the icon is configured automatically
-  /// based on the [iconSize] nad [color] properties of _this_ widget using an
+  /// based on the [iconSize] and [color] properties of _this_ widget using an
   /// [IconTheme] and therefore should not be explicitly given in the icon
   /// widget.
   ///
@@ -135,6 +137,24 @@ class IconButton extends StatelessWidget {
   ///  ),
   /// ```
   final Color color;
+
+  /// The primary color of the button when the button is in the down (pressed) state.
+  /// The splash is represented as a circular overlay that appears above the
+  /// [highlightColor] overlay. The splash overlay has a center point that matches
+  /// the hit point of the user touch event. The splash overlay will expand to
+  /// fill the button area if the touch is held for long enough time. If the splash
+  /// color has transparency then the highlight and button color will show through.
+  ///
+  /// Defaults to the Theme's splash color, [ThemeData.splashColor].
+  final Color splashColor;
+
+  /// The secondary color of the button when the button is in the down (pressed)
+  /// state. The highlight color is represented as a solid color that is overlaid over the
+  /// button color (if any). If the highlight color has transparency, the button color
+  /// will show through. The highlight fades in quickly as the button is held down.
+  ///
+  /// Defaults to the Theme's highlight color, [ThemeData.highlightColor].
+  final Color highlightColor;
 
   /// The color to use for the icon inside the button, if the icon is disabled.
   /// Defaults to the [ThemeData.disabledColor] of the current [Theme].
@@ -194,6 +214,8 @@ class IconButton extends StatelessWidget {
     return new InkResponse(
       onTap: onPressed,
       child: result,
+      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+      splashColor: splashColor ?? Theme.of(context).splashColor,
       radius: math.max(
         Material.defaultSplashRadius,
         (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
@@ -203,12 +225,10 @@ class IconButton extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$icon');
-    if (onPressed == null)
-      description.add('disabled');
-    if (tooltip != null)
-      description.add('tooltip: "$tooltip"');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Widget>('icon', icon, showName: false));
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
   }
 }

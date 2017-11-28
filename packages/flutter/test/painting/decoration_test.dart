@@ -75,7 +75,7 @@ class DelayedImageProvider extends ImageProvider<DelayedImageProvider> {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode()';
+  String toString() => '${describeIdentity(this)}}()';
 }
 
 class TestImage extends ui.Image {
@@ -147,7 +147,8 @@ void main() {
   // Regression test for https://github.com/flutter/flutter/issues/7289.
   // A reference test would be better.
   test('BoxDecoration backgroundImage clip', () {
-    void testDecoration({ BoxShape shape, BorderRadius borderRadius, bool expectClip}) {
+    void testDecoration({ BoxShape shape: BoxShape.rectangle, BorderRadius borderRadius, bool expectClip}) {
+      assert(shape != null);
       new FakeAsync().run((FakeAsync async) {
         final DelayedImageProvider imageProvider = new DelayedImageProvider();
         final DecorationImage backgroundImage = new DecorationImage(image: imageProvider);
@@ -205,7 +206,7 @@ void main() {
       image: new SynchronousTestImageProvider(),
       colorFilter: colorFilter,
       fit: BoxFit.contain,
-      alignment: FractionalOffset.bottomLeft,
+      alignment: Alignment.bottomLeft,
       centerSlice: new Rect.fromLTWH(10.0, 20.0, 30.0, 40.0),
       repeat: ImageRepeat.repeatY,
     );
@@ -213,17 +214,129 @@ void main() {
     final BoxDecoration boxDecoration = new BoxDecoration(image: backgroundImage);
     final BoxPainter boxPainter = boxDecoration.createBoxPainter(() { assert(false); });
     final TestCanvas canvas = new TestCanvas(<Invocation>[]);
-    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(10.0, 10.0)));
+    boxPainter.paint(canvas, Offset.zero, const ImageConfiguration(size: const Size(100.0, 100.0)));
 
     final Invocation call = canvas.invocations.singleWhere((Invocation call) => call.memberName == #drawImageNine);
     expect(call.isMethod, isTrue);
     expect(call.positionalArguments, hasLength(4));
     expect(call.positionalArguments[0], const isInstanceOf<TestImage>());
     expect(call.positionalArguments[1], new Rect.fromLTRB(10.0, 20.0, 40.0, 60.0));
-    expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 32.5, 10.0));
+    expect(call.positionalArguments[2], new Rect.fromLTRB(0.0, 0.0, 100.0, 100.0));
     expect(call.positionalArguments[3], const isInstanceOf<Paint>());
     expect(call.positionalArguments[3].isAntiAlias, false);
     expect(call.positionalArguments[3].colorFilter, colorFilter);
     expect(call.positionalArguments[3].filterQuality, FilterQuality.low);
+  });
+
+  test('BoxDecoration.lerp - shapes', () {
+    // We don't lerp the shape, we just switch from one to the other at t=0.5.
+    // (Use a ShapeDecoration and ShapeBorder if you want to lerp the shapes...)
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        -1.0,
+      ),
+      const BoxDecoration(shape: BoxShape.rectangle)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        0.0,
+      ),
+      const BoxDecoration(shape: BoxShape.rectangle)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        0.25,
+      ),
+      const BoxDecoration(shape: BoxShape.rectangle)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        0.75,
+      ),
+      const BoxDecoration(shape: BoxShape.circle)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        1.0,
+      ),
+      const BoxDecoration(shape: BoxShape.circle)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(shape: BoxShape.rectangle),
+        const BoxDecoration(shape: BoxShape.circle),
+        2.0,
+      ),
+      const BoxDecoration(shape: BoxShape.circle)
+    );
+  });
+
+  test('BoxDecoration.lerp - gradients', () {
+    final Gradient gradient = const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xFFFFFFFF) ]);
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        -1.0,
+      ),
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x00FFFFFF) ]))
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        0.0,
+      ),
+      const BoxDecoration()
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        0.25,
+      ),
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0x40FFFFFF) ]))
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        0.75,
+      ),
+      const BoxDecoration(gradient: const LinearGradient(colors: const <Color>[ const Color(0x00000000), const Color(0xBFFFFFFF) ]))
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        1.0,
+      ),
+      new BoxDecoration(gradient: gradient)
+    );
+    expect(
+      BoxDecoration.lerp(
+        const BoxDecoration(),
+        new BoxDecoration(gradient: gradient),
+        2.0,
+      ),
+      new BoxDecoration(gradient: gradient)
+    );
+  });
+
+  test('Decoration.lerp with unrelated decorations', () {
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.0), const isInstanceOf<FlutterLogoDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.25), const isInstanceOf<FlutterLogoDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 0.75), const isInstanceOf<BoxDecoration>());
+    expect(Decoration.lerp(new FlutterLogoDecoration(), const BoxDecoration(), 1.0), const isInstanceOf<BoxDecoration>());
   });
 }

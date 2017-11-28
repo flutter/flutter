@@ -10,8 +10,8 @@ void main() {
   Config config;
 
   setUp(() {
-    final Directory tempDiretory = fs.systemTempDirectory.createTempSync('flutter_test');
-    final File file = fs.file(fs.path.join(tempDiretory.path, '.settings'));
+    final Directory tempDirectory = fs.systemTempDirectory.createTempSync('flutter_test');
+    final File file = fs.file(fs.path.join(tempDirectory.path, '.settings'));
     config = new Config(file);
   });
 
@@ -21,6 +21,12 @@ void main() {
       config.setValue('foo', 'bar');
       expect(config.getValue('foo'), 'bar');
       expect(config.keys, contains('foo'));
+    });
+
+    test('containsKey', () async {
+      expect(config.containsKey('foo'), false);
+      config.setValue('foo', 'bar');
+      expect(config.containsKey('foo'), true);
     });
 
     test('removeValue', () async {

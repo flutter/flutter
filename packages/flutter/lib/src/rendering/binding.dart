@@ -9,18 +9,22 @@ import 'dart:ui' as ui show window;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
 import 'box.dart';
 import 'debug.dart';
 import 'object.dart';
-import 'semantics.dart';
 import 'view.dart';
 
 export 'package:flutter/gestures.dart' show HitTestResult;
 
 /// The glue between the render tree and the Flutter engine.
-abstract class RendererBinding extends BindingBase implements SchedulerBinding, ServicesBinding, HitTestable {
+abstract class RendererBinding extends BindingBase with SchedulerBinding, ServicesBinding, HitTestable {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RendererBinding._() => null;
+
   @override
   void initInstances() {
     super.initInstances();
@@ -32,6 +36,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     );
     ui.window
       ..onMetricsChanged = handleMetricsChanged
+      ..onTextScaleFactorChanged = handleTextScaleFactorChanged
       ..onSemanticsEnabledChanged = _handleSemanticsEnabledChanged
       ..onSemanticsAction = _handleSemanticsAction;
     initRenderView();
@@ -82,7 +87,7 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
           }
       );
       return true;
-    });
+    }());
 
     registerSignalServiceExtension(
       name: 'debugDumpRenderTree',
@@ -95,8 +100,13 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     );
 
     registerSignalServiceExtension(
-      name: 'debugDumpSemanticsTree',
-      callback: () { debugDumpSemanticsTree(); return debugPrintDone; }
+      name: 'debugDumpSemanticsTreeInTraversalOrder',
+      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal); return debugPrintDone; }
+    );
+
+    registerSignalServiceExtension(
+        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+        callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
     );
   }
 
@@ -133,6 +143,11 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
   }
+
+  /// Called when the platform text scale factor changes.
+  ///
+  /// See [Window.onTextScaleFactorChanged].
+  void handleTextScaleFactorChanged() { }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
   /// current environment.
@@ -258,14 +273,23 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
   /// likely to be quite expensive) gets a few extra milliseconds to run.
   void scheduleWarmUpFrame() {
     // We use timers here to ensure that microtasks flush in between.
+    //
+    // We call resetEpoch after this frame so that, in the hot reload case, the
+    // very next frame pretends to have occurred immediately after this warm-up
+    // frame. The warm-up frame's timestamp will typically be far in the past
+    // (the time of the last real frame), so if we didn't reset the epoch we
+    // would see a sudden jump from the old time in the warm-up frame to the new
+    // time in the "real" frame. The biggest problem with this is that implicit
+    // animations end up being triggered at the old time and then skipping every
+    // frame and finishing in the new time.
     Timer.run(() { handleBeginFrame(null); });
-    Timer.run(() { handleDrawFrame(); });
+    Timer.run(() { handleDrawFrame(); resetEpoch(); });
   }
 
   @override
-  Future<Null> reassembleApplication() async {
-    await super.reassembleApplication();
-    Timeline.startSync('Dirty Render Tree');
+  Future<Null> performReassemble() async {
+    await super.performReassemble();
+    Timeline.startSync('Dirty Render Tree', arguments: timelineWhitelistArguments);
     try {
       renderView.reassemble();
     } finally {
@@ -296,19 +320,22 @@ abstract class RendererBinding extends BindingBase implements SchedulerBinding, 
 
 /// Prints a textual representation of the entire render tree.
 void debugDumpRenderTree() {
-  debugPrint(RendererBinding.instance?.renderView?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.toStringDeep() ?? 'Render tree unavailable.');
 }
 
 /// Prints a textual representation of the entire layer tree.
 void debugDumpLayerTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+  debugPrint(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep() ?? 'Layer tree unavailable.');
 }
 
 /// Prints a textual representation of the entire semantics tree.
 /// This will only work if there is a semantics client attached.
-/// Otherwise, the tree is empty and this will print "null".
-void debugDumpSemanticsTree() {
-  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep() ?? 'Semantics not collected.');
+/// Otherwise, a notice that no semantics are available will be printed.
+///
+/// The order in which the children of a [SemanticsNode] will be printed is
+/// controlled by the [childOrder] parameter.
+void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
+  debugPrint(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder) ?? 'Semantics not collected.');
 }
 
 /// A concrete binding for applications that use the Rendering framework

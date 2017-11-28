@@ -73,7 +73,7 @@ class LogsCommand extends FlutterCommand {
 
     // Wait for the log reader to be finished.
     final int result = await exitCompleter.future;
-    subscription.cancel();
+    await subscription.cancel();
     if (result != 0)
       throwToolExit('Error listening to $logReader logs.');
   }

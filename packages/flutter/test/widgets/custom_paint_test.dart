@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestCustomPainter extends CustomPainter {
@@ -76,5 +77,28 @@ void main() {
     ));
     expect(target.currentContext.size, Size.zero);
 
+  });
+
+  testWidgets('Raster cache hints', (WidgetTester tester) async {
+    final GlobalKey target = new GlobalKey();
+
+    final List<String> log = <String>[];
+    await tester.pumpWidget(new CustomPaint(
+      key: target,
+      isComplex: true,
+      painter: new TestCustomPainter(log: log),
+    ));
+    RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
+    expect(renderCustom.isComplex, true);
+    expect(renderCustom.willChange, false);
+
+    await tester.pumpWidget(new CustomPaint(
+      key: target,
+      willChange: true,
+      foregroundPainter: new TestCustomPainter(log: log),
+    ));
+    renderCustom = target.currentContext.findRenderObject();
+    expect(renderCustom.isComplex, false);
+    expect(renderCustom.willChange, true);
   });
 }

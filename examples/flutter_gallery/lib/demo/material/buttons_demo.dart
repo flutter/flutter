@@ -90,7 +90,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildRaisedButton() {
     return new Align(
-      alignment: const FractionalOffset(0.5, 0.4),
+      alignment: const Alignment(0.0, -0.2),
       child: new ButtonBar(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -111,7 +111,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildFlatButton() {
     return new Align(
-      alignment: const FractionalOffset(0.5, 0.4),
+      alignment: const Alignment(0.0, -0.2),
       child: new ButtonBar(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -213,7 +213,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildIconButton() {
     return new Align(
-      alignment: const FractionalOffset(0.5, 0.4),
+      alignment: const Alignment(0.0, -0.2),
       child: new Row(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -237,7 +237,7 @@ class _ButtonsDemoState extends State<ButtonsDemo> {
 
   Widget buildActionButton() {
     return new Align(
-      alignment: const FractionalOffset(0.5, 0.4),
+      alignment: const Alignment(0.0, -0.2),
       child: new FloatingActionButton(
         child: const Icon(Icons.add),
         onPressed: () {

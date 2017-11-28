@@ -47,6 +47,7 @@ void main() {
   testWidgets('GlobalKey duplication 1 - double appearance', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(
           key: const ValueKey<int>(1),
@@ -65,6 +66,7 @@ void main() {
     final Key key = new GlobalKey(debugLabel: 'problematic');
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(
           key: const ValueKey<int>(1),
@@ -79,6 +81,7 @@ void main() {
     ));
 
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(
           key: const ValueKey<int>(1),
@@ -97,11 +100,13 @@ void main() {
   testWidgets('GlobalKey duplication 3 - splitting and changing type', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new SizedBox(key: key),
         new Placeholder(key: key),
@@ -113,11 +118,13 @@ void main() {
   testWidgets('GlobalKey duplication 4 - splitting and half changing type', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Placeholder(key: key),
@@ -129,11 +136,13 @@ void main() {
   testWidgets('GlobalKey duplication 5 - splitting and half changing type', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Placeholder(key: key),
         new Container(key: key),
@@ -145,11 +154,13 @@ void main() {
   testWidgets('GlobalKey duplication 6 - splitting and not changing type', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Container(key: key),
@@ -161,12 +172,14 @@ void main() {
   testWidgets('GlobalKey duplication 7 - appearing later', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
         new Container(key: const ValueKey<int>(2)),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
         new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
@@ -178,12 +191,14 @@ void main() {
   testWidgets('GlobalKey duplication 8 - appearing earlier', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1)),
         new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
         new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
@@ -195,6 +210,7 @@ void main() {
   testWidgets('GlobalKey duplication 9 - moving and appearing later', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0), child: new Container(key: key)),
         new Container(key: const ValueKey<int>(1)),
@@ -202,6 +218,7 @@ void main() {
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
@@ -214,6 +231,7 @@ void main() {
   testWidgets('GlobalKey duplication 10 - moving and appearing earlier', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1)),
         new Container(key: const ValueKey<int>(2)),
@@ -221,6 +239,7 @@ void main() {
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
         new Container(key: const ValueKey<int>(2), child: new Container(key: key)),
@@ -233,6 +252,7 @@ void main() {
   testWidgets('GlobalKey duplication 11 - double sibling appearance', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Container(key: key),
@@ -246,6 +266,7 @@ void main() {
     final Key key2 = new GlobalKey(debugLabel: 'problematic'); // intentionally the same label
     final Key key3 = new GlobalKey(debugLabel: 'also problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key1),
         new Container(key: key1),
@@ -284,6 +305,7 @@ void main() {
     final Key key2 = new GlobalKey(debugLabel: 'problematic'); // intentionally the same label
     final Key key3 = new GlobalKey(debugLabel: 'also problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key1),
         new Container(key: key2),
@@ -291,6 +313,7 @@ void main() {
       ]),
     );
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key1),
         new Container(key: key1),
@@ -327,6 +350,7 @@ void main() {
   testWidgets('GlobalKey duplication 14 - moving during build - before', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Container(key: const ValueKey<int>(0)),
@@ -334,6 +358,7 @@ void main() {
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
@@ -344,6 +369,7 @@ void main() {
   testWidgets('GlobalKey duplication 15 - duplicating during build - before', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Container(key: const ValueKey<int>(0)),
@@ -351,6 +377,7 @@ void main() {
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: key),
         new Container(key: const ValueKey<int>(0)),
@@ -363,6 +390,7 @@ void main() {
   testWidgets('GlobalKey duplication 16 - moving during build - after', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1)),
@@ -370,6 +398,7 @@ void main() {
       ],
     ));
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
@@ -380,6 +409,7 @@ void main() {
   testWidgets('GlobalKey duplication 17 - duplicating during build - after', (WidgetTester tester) async {
     final Key key = new GlobalKey(debugLabel: 'problematic');
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1)),
@@ -393,6 +423,7 @@ void main() {
       count += 1;
     };
     await tester.pumpWidget(new Stack(
+      textDirection: TextDirection.ltr,
       children: <Widget>[
         new Container(key: const ValueKey<int>(0)),
         new Container(key: const ValueKey<int>(1), child: new Container(key: key)),
@@ -482,25 +513,66 @@ void main() {
     ));
     final MultiChildRenderObjectElement element = key0.currentContext;
 
-    final String dump =
-        element.toStringDeep().replaceAll(new RegExp(r'#\d+'), '#000');
-    expect(dump, equals('''Column([GlobalKey#000]; renderObject: RenderFlex#000)
-├Container()
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
-├Container([GlobalKey#000])
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
-├Container()
-│└Container()
-│ └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
-│  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
-├Container([GlobalKey#000])
-│└LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
-│ └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
-└Container()
- └LimitedBox(maxWidth: 0.0; maxHeight: 0.0; renderObject: RenderLimitedBox#000 relayoutBoundary=up1)
-  └ConstrainedBox(BoxConstraints(biggest); renderObject: RenderConstrainedBox#000 relayoutBoundary=up2)
-'''));
+    expect(element, hasAGoodToStringDeep);
+    expect(
+      element.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'Column-[GlobalKey#00000](direction: vertical, mainAxisAlignment: start, crossAxisAlignment: center, renderObject: RenderFlex#00000)\n'
+        '├Container\n'
+        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '├Container-[GlobalKey#00000]\n'
+        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '├Container\n'
+        '│└Container\n'
+        '│ └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '│  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '├Container-[GlobalKey#00000]\n'
+        '│└LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '│ └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n'
+        '└Container\n'
+        ' └LimitedBox(maxWidth: 0.0, maxHeight: 0.0, renderObject: RenderLimitedBox#00000 relayoutBoundary=up1)\n'
+        '  └ConstrainedBox(BoxConstraints(biggest), renderObject: RenderConstrainedBox#00000 relayoutBoundary=up2)\n',
+      ),
+    );
   });
+
+  testWidgets('Element diagnostics with null child', (WidgetTester tester) async {
+    await tester.pumpWidget(new NullChildTest());
+    final NullChildElement test = tester.element<NullChildElement>(find.byType(NullChildTest));
+    test.includeChild = true;
+    expect(
+      tester.binding.renderViewElement.toStringDeep(),
+      equalsIgnoringHashCodes(
+        '[root](renderObject: RenderView#4a0f0)\n'
+        '└NullChildTest(dirty)\n'
+        ' └<null child>\n',
+      ),
+    );
+    test.includeChild = false;
+  });
+}
+
+class NullChildTest extends Widget {
+  @override
+  Element createElement() => new NullChildElement(this);
+}
+
+class NullChildElement extends Element {
+  NullChildElement(Widget widget) : super(widget);
+
+  bool includeChild = false;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    if (includeChild)
+      visitor(null);
+  }
+
+  @override
+  void forgetChild(Element child) { }
+
+  @override
+  void performRebuild() { }
 }

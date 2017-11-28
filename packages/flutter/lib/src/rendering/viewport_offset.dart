@@ -86,7 +86,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// For example, if the axis direction is down, then the pixel value
   /// represents the number of logical pixels to move the children _up_ the
   /// screen. Similarly, if the axis direction is left, then the pixels value
-  /// represents the number of logical pixesl to move the children to _right_.
+  /// represents the number of logical pixels to move the children to _right_.
   ///
   /// This object notifies its listeners when this value changes (except when
   /// the value changes due to [correctBy]).
@@ -108,7 +108,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// contents, then this will only be called when the viewport recomputes its
   /// size (i.e. when its parent lays out), and not during normal scrolling.
   ///
-  /// If applying the viewport dimentions changes the scroll offset, return
+  /// If applying the viewport dimensions changes the scroll offset, return
   /// false. Otherwise, return true. If you return false, the [RenderViewport]
   /// will be laid out again with the new scroll offset. This is expensive. (The
   /// return value is answering the question "did you accept these viewport
@@ -152,6 +152,10 @@ abstract class ViewportOffset extends ChangeNotifier {
   /// being called again, though this should be very rare.
   void correctBy(double correction);
 
+  /// Jumps the scroll position from its current value to the given value,
+  /// without animation, and without checking if the new value is in range.
+  void jumpTo(double pixels);
+
   /// The direction in which the user is trying to change [pixels], relative to
   /// the viewport's [RenderViewport.axisDirection].
   ///
@@ -170,7 +174,7 @@ abstract class ViewportOffset extends ChangeNotifier {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType#$hashCode(${description.join(", ")})';
+    return '${describeIdentity(this)}(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -206,6 +210,11 @@ class _FixedViewportOffset extends ViewportOffset {
   @override
   void correctBy(double correction) {
     _pixels += correction;
+  }
+
+  @override
+  void jumpTo(double pixels) {
+    // Do nothing, viewport is fixed.
   }
 
   @override

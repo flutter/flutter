@@ -10,10 +10,13 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
-      return new ListView.builder(
-        itemExtent: 200.0,
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index) => new Text('item $index'),
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.builder(
+          itemExtent: 200.0,
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) => new Text('item $index'),
+        ),
       );
     }
 
@@ -34,14 +37,17 @@ void main() {
     // Regression test for https://github.com/flutter/flutter/issues/9506
 
     Widget buildFrame(int itemCount) {
-      return new ListView.builder(
-        itemCount: itemCount,
-        itemBuilder: (BuildContext context, int index) {
-          return new SizedBox(
-            height: 200.0,
-            child: new Text('item $index'),
-          );
-        },
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView.builder(
+          itemCount: itemCount,
+          itemBuilder: (BuildContext context, int index) {
+            return new SizedBox(
+              height: 200.0,
+              child: new Text('item $index'),
+            );
+          },
+        ),
       );
     }
 

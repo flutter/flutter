@@ -139,22 +139,31 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
   await tester.pump(); // Start opening drawer.
   await tester.pump(const Duration(seconds: 1)); // Wait until it's really opened.
 
-  // switch theme
+  // Switch theme.
   await tester.tap(find.text('Dark'));
   await tester.pump();
   await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
 
-  // switch theme
+  // Switch theme.
   await tester.tap(find.text('Light'));
   await tester.pump();
   await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
 
-  // scroll the 'Send feedback' item into view
-  await tester.drag(find.text('Light'), const Offset(0.0, -200.0));
+  // Switch font scale.
+  await tester.tap(find.text('Small'));
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+  // Switch font scale back to default.
+  await tester.tap(find.text('System Default'));
   await tester.pump();
   await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
 
-  // send feedback
+  // Scroll the 'Send feedback' item into view.
+  await tester.drag(find.text('Small'), const Offset(0.0, -450.0));
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1)); // Wait until it's changed.
+
+  // Send feedback.
   expect(hasFeedback, false);
   await tester.tap(find.text('Send feedback'));
   await tester.pump();
@@ -164,7 +173,7 @@ Future<Null> runSmokeTest(WidgetTester tester) async {
 void main() {
   testWidgets('Flutter Gallery app smoke test', runSmokeTest);
 
-  testWidgets('Flutter Gallery app smoke test', (WidgetTester tester) async {
+  testWidgets('Flutter Gallery app smoke test with semantics', (WidgetTester tester) async {
     RendererBinding.instance.setSemanticsEnabled(true);
     await runSmokeTest(tester);
     RendererBinding.instance.setSemanticsEnabled(false);

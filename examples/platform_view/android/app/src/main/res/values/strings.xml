@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">Platform View</string>
+  <string name="title">Flutter Application</string>
+  <string name="button_tap">Button tapped 0 times. </string>
+  <string name="switch_view">"Continue in Flutter view"</string>
+  <string name="android">Android</string>
+</resources>

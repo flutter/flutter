@@ -51,7 +51,7 @@ class DualHeaderWithHint extends StatelessWidget {
             margin: const EdgeInsets.only(left: 24.0),
             child: new FittedBox(
               fit: BoxFit.scaleDown,
-              alignment: FractionalOffset.centerLeft,
+              alignment: Alignment.centerLeft,
               child: new Text(
                 name,
                 style: textTheme.body1.copyWith(fontSize: 15.0),
@@ -225,7 +225,7 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
         name: 'Location',
         value: _Location.Bahamas,
         hint: 'Select location',
-        valueToString: (_Location location) => location.toString().split(".")[1],
+        valueToString: (_Location location) => location.toString().split('.')[1],
         builder: (DemoItem<_Location> item) {
           void close() {
             setState(() {

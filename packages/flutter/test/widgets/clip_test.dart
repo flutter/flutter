@@ -4,6 +4,9 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+
+import '../rendering/mock_canvas.dart';
 
 final List<String> log = <String>[];
 
@@ -104,7 +107,7 @@ void main() {
   testWidgets('ClipRect', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 100.0,
           height: 100.0,
@@ -128,7 +131,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 100.0,
           height: 100.0,
@@ -146,7 +149,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -164,7 +167,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -182,7 +185,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -200,7 +203,7 @@ void main() {
 
     await tester.pumpWidget(
       new Align(
-        alignment: FractionalOffset.topLeft,
+        alignment: Alignment.topLeft,
         child: new SizedBox(
           width: 200.0,
           height: 200.0,
@@ -223,4 +226,25 @@ void main() {
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c', 'tap']));
   });
 
+  testWidgets('debugPaintSizeEnabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ClipRect(
+        child: const Placeholder(),
+      ),
+    );
+    expect(tester.renderObject(find.byType(ClipRect)).paint, paints
+      ..save()
+      ..clipRect(rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..save()
+      ..path() // Placeholder
+      ..restore()
+      ..restore()
+    );
+    debugPaintSizeEnabled = true;
+    expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints // ignore: INVALID_USE_OF_PROTECTED_MEMBER
+      ..rect(rect: new Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..paragraph()
+    );
+    debugPaintSizeEnabled = false;
+  });
 }

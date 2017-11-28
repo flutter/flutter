@@ -9,11 +9,14 @@ void main() {
   testWidgets('SliverFillRemaining - no siblings', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
     await tester.pumpWidget(
-      new CustomScrollView(
-        controller: controller,
-        slivers: <Widget>[
-          new SliverFillRemaining(child: new Container()),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            new SliverFillRemaining(child: new Container()),
+          ],
+        ),
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(600.0));
@@ -34,12 +37,15 @@ void main() {
   testWidgets('SliverFillRemaining - one sibling', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
     await tester.pumpWidget(
-      new CustomScrollView(
-        controller: controller,
-        slivers: <Widget>[
-          const SliverToBoxAdapter(child: const SizedBox(height: 100.0)),
-          new SliverFillRemaining(child: new Container()),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            const SliverToBoxAdapter(child: const SizedBox(height: 100.0)),
+            new SliverFillRemaining(child: new Container()),
+          ],
+        ),
       ),
     );
     expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));

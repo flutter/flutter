@@ -20,9 +20,9 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoAnalysisEntryPoints) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoPackages) : super(argResults);
 
-  final List<Directory> repoAnalysisEntryPoints;
+  final List<Directory> repoPackages;
 
   String analysisTarget;
   bool firstAnalysis = true;
@@ -40,7 +40,9 @@ class AnalyzeContinuously extends AnalyzeBase {
       throwToolExit('The --dartdocs option is currently not supported when using --watch.');
 
     if (argResults['flutter-repo']) {
-      directories = repoAnalysisEntryPoints.map((Directory dir) => dir.path).toList();
+      final PackageDependencyTracker dependencies = new PackageDependencyTracker();
+      dependencies.checkForConflictingDependencies(repoPackages, dependencies);
+      directories = repoPackages.map((Directory dir) => dir.path).toList();
       analysisTarget = 'Flutter repository';
       printTrace('Analyzing Flutter repository:');
       for (String projectPath in directories)
@@ -170,7 +172,8 @@ class AnalysisServer {
 
     printTrace('dart ${command.skip(1).join(' ')}');
     _process = await processManager.start(command);
-    _process.exitCode.whenComplete(() => _process = null);
+    // This callback hookup can't throw.
+    _process.exitCode.whenComplete(() => _process = null); // ignore: unawaited_futures
 
     final Stream<String> errorStream = _process.stderr.transform(UTF8.decoder).transform(const LineSplitter());
     errorStream.listen(printError);

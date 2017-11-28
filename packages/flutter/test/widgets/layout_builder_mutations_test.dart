@@ -9,12 +9,11 @@ import 'package:flutter/src/widgets/layout_builder.dart';
 import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 
 class Wrapper extends StatelessWidget {
-  Wrapper({
+  const Wrapper({
     Key key,
     @required this.child
-  }) : super(key: key) {
-    assert(child != null);
-  }
+  }) : assert(child != null),
+       super(key: key);
 
   final Widget child;
 
@@ -26,38 +25,44 @@ void main() {
   testWidgets('Moving a global key from another LayoutBuilder at layout time', (WidgetTester tester) async {
     final GlobalKey victimKey = new GlobalKey();
 
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Wrapper(
-        child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return const SizedBox();
-        }),
-      ),
-      new Wrapper(
-        child: new Wrapper(
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Wrapper(
+          child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+            return const SizedBox();
+          }),
+        ),
+        new Wrapper(
+          child: new Wrapper(
+            child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              return new Wrapper(
+                child: new SizedBox(key: victimKey)
+              );
+            })
+          )
+        ),
+      ],
+    ));
+
+    await tester.pumpWidget(new Row(
+      textDirection: TextDirection.ltr,
+      children: <Widget>[
+        new Wrapper(
           child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return new Wrapper(
               child: new SizedBox(key: victimKey)
             );
           })
-        )
-      ),
-    ]));
-
-    await tester.pumpWidget(new Row(children: <Widget>[
-      new Wrapper(
-        child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-          return new Wrapper(
-            child: new SizedBox(key: victimKey)
-          );
-        })
-      ),
-      new Wrapper(
-        child: new Wrapper(
-          child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
-            return const SizedBox();
-          })
-        )
-      ),
-    ]));
+        ),
+        new Wrapper(
+          child: new Wrapper(
+            child: new LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
+              return const SizedBox();
+            })
+          )
+        ),
+      ],
+    ));
   });
 }

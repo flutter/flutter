@@ -37,7 +37,7 @@ enum PerformanceOverlayOption {
 
   /// Display the engine frame times as they change over a set period of time
   /// in the form of a graph. The y axis of the graph denotes the total time
-  /// spent by the eninge as a fraction of the total frame slice. When the bar
+  /// spent by the engine as a fraction of the total frame slice. When the bar
   /// turns red, a frame is lost.
   visualizeEngineStatistics,
 }
@@ -66,15 +66,14 @@ class RenderPerformanceOverlay extends RenderBox {
     int rasterizerThreshold: 0,
     bool checkerboardRasterCacheImages: false,
     bool checkerboardOffscreenLayers: false,
-  }) : _optionsMask = optionsMask,
-      _rasterizerThreshold = rasterizerThreshold,
-      _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
-      _checkerboardOffscreenLayers = checkerboardOffscreenLayers {
-    assert(optionsMask != null);
-    assert(rasterizerThreshold != null);
-    assert(checkerboardRasterCacheImages != null);
-    assert(checkerboardOffscreenLayers != null);
-  }
+  }) : assert(optionsMask != null),
+       assert(rasterizerThreshold != null),
+       assert(checkerboardRasterCacheImages != null),
+       assert(checkerboardOffscreenLayers != null),
+       _optionsMask = optionsMask,
+       _rasterizerThreshold = rasterizerThreshold,
+       _checkerboardRasterCacheImages = checkerboardRasterCacheImages,
+       _checkerboardOffscreenLayers = checkerboardOffscreenLayers;
 
   /// The mask is created by shifting 1 by the index of the specific
   /// [PerformanceOverlayOption] to enable.

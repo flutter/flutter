@@ -8,14 +8,220 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 
+const String _kDefaultDebugLabel = 'unknown';
+
 /// An immutable style in which paint text.
+///
+/// ## Sample code
+///
+/// ### Bold
+///
+/// Here, a single line of text in a [Text] widget is given a specific style
+/// override. The style is mixed with the ambient [DefaultTextStyle] by the
+/// [Text] widget.
+///
+/// ```dart
+/// new Text(
+///   'No, we need bold strokes. We need this plan.',
+///   style: new TextStyle(fontWeight: FontWeight.bold),
+/// )
+/// ```
+///
+/// ### Italics
+///
+/// As in the previous example, the [Text] widget is given a specific style
+/// override which is implicitly mixed with the ambient [DefaultTextStyle].
+///
+/// ```dart
+/// new Text(
+///   'Welcome to the present, we\'re running a real nation.',
+///   style: new TextStyle(fontStyle: FontStyle.italic),
+/// )
+/// ```
+///
+/// ### Opacity
+///
+/// Each line here is progressively more opaque. The base color is
+/// [material.Colors.black], and [Color.withOpacity] is used to create a
+/// derivative color with the desired opacity. The root [TextSpan] for this
+/// [RichText] widget is explicitly given the ambient [DefaultTextStyle], since
+/// [RichText] does not do that automatically. The inner [TextStyle] objects are
+/// implicitly mixed with the parent [TextSpan]'s [TextSpan.style].
+///
+/// ```dart
+/// new RichText(
+///   text: new TextSpan(
+///     style: DefaultTextStyle.of(context).style,
+///     children: <TextSpan>[
+///       new TextSpan(
+///         text: 'You don\'t have the votes.\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(0.6)),
+///       ),
+///       new TextSpan(
+///         text: 'You don\'t have the votes!\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(0.8)),
+///       ),
+///       new TextSpan(
+///         text: 'You\'re gonna need congressional approval and you don\'t have the votes!\n',
+///         style: new TextStyle(color: Colors.black.withOpacity(1.0)),
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+///
+/// ### Size
+///
+/// In this example, the ambient [DefaultTextStyle] is explicitly manipulated to
+/// obtain a [TextStyle] that doubles the default font size.
+///
+/// ```dart
+/// new Text(
+///   'These are wise words, enterprising men quote \'em.',
+///   style: DefaultTextStyle.of(context).style.apply(fontSizeFactor: 2.0),
+/// )
+/// ```
+///
+/// ### Line height
+///
+/// The [height] property can be used to change the line height. Here, the line
+/// height is set to 100 logical pixels, so that the text is very spaced out.
+///
+/// ```dart
+/// new Text(
+///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
+///   style: new TextStyle(height: 100.0),
+/// )
+/// ```
+///
+/// ### Wavy red underline with black text
+///
+/// Styles can be combined. In this example, the misspelt word is drawn in black
+/// text and underlined with a wavy red line to indicate a spelling error. (The
+/// remainder is styled according to the Flutter default text styles, not the
+/// ambient [DefaultTextStyle], since no explicit style is given and [RichText]
+/// does not automatically use the ambient [DefaultTextStyle].)
+///
+/// ```dart
+/// new RichText(
+///   text: new TextSpan(
+///     text: 'Don\'t tax the South ',
+///     children: <TextSpan>[
+///       new TextSpan(
+///         text: 'cuz',
+///         style: new TextStyle(
+///           color: Colors.black,
+///           decoration: TextDecoration.underline,
+///           decorationColor: Colors.red,
+///           decorationStyle: TextDecorationStyle.wavy,
+///         ),
+///       ),
+///       new TextSpan(
+///         text: ' we got it made in the shade',
+///       ),
+///     ],
+///   ),
+/// )
+/// ```
+///
+/// ### Custom Fonts
+///
+/// Custom fonts can be declared in the `pubspec.yaml` file as shown below:
+///
+///```yaml
+/// flutter:
+///   fonts:
+///     - family: Raleway
+///       fonts:
+///         - asset: fonts/Raleway-Regular.ttf
+///         - asset: fonts/Raleway-Medium.ttf
+///           weight: 500
+///         - asset: assets/fonts/Raleway-SemiBold.ttf
+///           weight: 600
+///      - family: Schyler
+///        fonts:
+///          - asset: fonts/Schyler-Regular.ttf
+///          - asset: fonts/Schyler-Italic.ttf
+///            style: italic
+///```
+///
+/// The `family` property determines the name of the font, which you can use in
+/// the [fontFamily] argument. The `asset` property is a path to the font file,
+/// relative to the `pubspec.yaml` file. The `weight` property specifies the
+/// weight of the glyph outlines in the file as an integer multiple of 100
+/// between 100 and 900. This corresponds to the [FontWeight] class and can be
+/// used in the [fontWeight] argument. The `style` property specifies whether the
+/// outlines in the file are `italic` or `normal`. These values correspond to
+/// the [FontStyle] class and can be used in the [fontStyle] argument.
+///
+/// To select a custom font, create [TextStyle] using the [fontFamily]
+/// argument as shown in the example below:
+///
+/// ```dart
+/// const TextStyle(fontFamily: 'Raleway')
+/// ```
+///
+/// To use a font family defined in a package, the [package] argument must be
+/// provided. For instance, suppose the font declaration above is in the
+/// `pubspec.yaml` of a package named `my_package` which the app depends on.
+/// Then creating the TextStyle is done as follows:
+///
+/// ```dart
+/// const TextStyle(fontFamily: 'Raleway', package: 'my_package')
+/// ```
+///
+/// If the package internally uses the font it defines, it should still specify
+/// the `package` argument when creating the text style as in the example above.
+///
+/// A package can also provide font files without declaring a font in its
+/// `pubspec.yaml`. These files should then be in the `lib/` folder of the
+/// package. The font files will not automatically be bundled in the app, instead
+/// the app can use these selectively when declaring a font. Suppose a package
+/// named `my_package` has:
+///
+/// ```
+/// lib/fonts/Raleway-Medium.ttf
+/// ```
+///
+/// Then the app can declare a font like in the example below:
+///
+///```yaml
+/// flutter:
+///   fonts:
+///     - family: Raleway
+///       fonts:
+///         - asset: assets/fonts/Raleway-Regular.ttf
+///         - asset: packages/my_package/fonts/Raleway-Medium.ttf
+///           weight: 500
+///```
+///
+/// The `lib/` is implied, so it should not be included in the asset path.
+///
+/// In this case, since the app locally defines the font, the TextStyle is
+/// created without the `package` argument:
+///
+///```dart
+/// const TextStyle(fontFamily: 'Raleway')
+/// ```
+///
+/// See also:
+///
+///  * [Text], the widget for showing text in a single style.
+///  * [DefaultTextStyle], the widget that specifies the default text styles for
+///    [Text] widgets, configured using a [TextStyle].
+///  * [RichText], the widget for showing a paragraph of mix-style text.
+///  * [TextSpan], the class that wraps a [TextStyle] for the purposes of
+///    passing it to a [RichText].
 @immutable
-class TextStyle {
+class TextStyle extends Diagnosticable {
   /// Creates a text style.
+  ///
+  /// The `package` argument must be non-null if the font family is defined in a
+  /// package. It is combined with the `fontFamily` argument to set the
+  /// [fontFamily] property.
   const TextStyle({
     this.inherit: true,
     this.color,
-    this.fontFamily,
     this.fontSize,
     this.fontWeight,
     this.fontStyle,
@@ -25,16 +231,30 @@ class TextStyle {
     this.height,
     this.decoration,
     this.decorationColor,
-    this.decorationStyle
-  }) : assert(inherit != null);
+    this.decorationStyle,
+    this.debugLabel,
+    String fontFamily,
+    String package,
+  }) : fontFamily = package == null ? fontFamily : 'packages/$package/$fontFamily',
+       assert(inherit != null);
 
-  /// Whether null values are replaced with their value in an ancestor text style (e.g., in a [TextSpan] tree).
+
+  /// Whether null values are replaced with their value in an ancestor text
+  /// style (e.g., in a [TextSpan] tree).
+  ///
+  /// If this is false, properties that don't have explicit values will revert
+  /// to the defaults: white in color, a font size of 10 pixels, in a sans-serif
+  /// font face.
   final bool inherit;
 
   /// The color to use when painting the text.
   final Color color;
 
-  /// The name of the font to use when painting the text (e.g., Roboto).
+  /// The name of the font to use when painting the text (e.g., Roboto). If the
+  /// font is defined in a package, this will be prefixed with
+  /// 'packages/package_name/' (e.g. 'packages/cool_fonts/Roboto'). The
+  /// prefixing is done by the constructor when the `package` argument is
+  /// provided.
   final String fontFamily;
 
   /// The size of glyphs (in logical pixels) to use when painting the text.
@@ -42,7 +262,13 @@ class TextStyle {
   /// During painting, the [fontSize] is multiplied by the current
   /// `textScaleFactor` to let users make it easier to read text by increasing
   /// its size.
+  ///
+  /// [getParagraphStyle] will default to 14 logical pixels if the font size
+  /// isn't specified here.
   final double fontSize;
+
+  // The default font size if none is specified.
+  static const double _defaultFontSize = 14.0;
 
   /// The typeface thickness to use when painting the text (e.g., bold).
   final FontWeight fontWeight;
@@ -54,11 +280,13 @@ class TextStyle {
   /// A negative value can be used to bring the letters closer.
   final double letterSpacing;
 
-  /// The amount of space (in logical pixels) to add at each sequence of white-space (i.e. between each word).
-  /// A negative value can be used to bring the words closer.
+  /// The amount of space (in logical pixels) to add at each sequence of
+  /// white-space (i.e. between each word). A negative value can be used to
+  /// bring the words closer.
   final double wordSpacing;
 
-  /// The common baseline that should be aligned between this text span and its parent text span, or, for the root text spans, with the line box.
+  /// The common baseline that should be aligned between this text span and its
+  /// parent text span, or, for the root text spans, with the line box.
   final TextBaseline textBaseline;
 
   /// The height of this text span, as a multiple of the font size.
@@ -77,7 +305,21 @@ class TextStyle {
   /// The style in which to paint the text decorations (e.g., dashed).
   final TextDecorationStyle decorationStyle;
 
-  /// Creates a copy of this text style but with the given fields replaced with the new values.
+  /// A human-readable description of this text style.
+  ///
+  /// This property is maintained only in debug builds.
+  ///
+  /// When merging ([merge]), copying ([copyWith]), modifying using [apply], or
+  /// interpolating ([lerp]), the label of the resulting style is marked with
+  /// the debug labels of the original styles. This helps figuring out where a
+  /// particular text style came from.
+  ///
+  /// This property is not considered when comparing text styles using `==` or
+  /// [compareTo], and it does not affect [hashCode].
+  final String debugLabel;
+
+  /// Creates a copy of this text style but with the given fields replaced with
+  /// the new values.
   TextStyle copyWith({
     Color color,
     String fontFamily,
@@ -90,8 +332,15 @@ class TextStyle {
     double height,
     TextDecoration decoration,
     Color decorationColor,
-    TextDecorationStyle decorationStyle
+    TextDecorationStyle decorationStyle,
+    String debugLabel,
   }) {
+    String newDebugLabel;
+    assert(() {
+      if (this.debugLabel != null)
+        newDebugLabel = debugLabel ?? 'copy of ${this.debugLabel}';
+      return true;
+    }());
     return new TextStyle(
       inherit: inherit,
       color: color ?? this.color,
@@ -105,12 +354,19 @@ class TextStyle {
       height: height ?? this.height,
       decoration: decoration ?? this.decoration,
       decorationColor: decorationColor ?? this.decorationColor,
-      decorationStyle: decorationStyle ?? this.decorationStyle
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      debugLabel: newDebugLabel,
     );
   }
 
-  /// Creates a copy of this text style but with the numeric fields multiplied
-  /// by the given factors and then incremented by the given deltas.
+  /// Creates a copy of this text style replacing or altering the specified
+  /// properties.
+  ///
+  /// The non-numeric properties [color], [fontFamily], [decoration],
+  /// [decorationColor] and [decorationStyle] are replaced with the new values.
+  ///
+  /// The numeric properties are multiplied by the given factors and then
+  /// incremented by the given deltas.
   ///
   /// For example, `style.apply(fontSizeFactor: 2.0, fontSizeDelta: 1.0)` would
   /// return a [TextStyle] whose [fontSize] is `style.fontSize * 2.0 + 1.0`.
@@ -120,14 +376,15 @@ class TextStyle {
   /// applied to a `style` whose [fontWeight] is [FontWeight.w500] will return a
   /// [TextStyle] with a [FontWeight.w300].
   ///
-  /// The arguments must not be null.
+  /// The numeric arguments must not be null.
   ///
   /// If the underlying values are null, then the corresponding factors and/or
   /// deltas must not be specified.
-  ///
-  /// The non-numeric fields can be controlled using the corresponding arguments.
   TextStyle apply({
     Color color,
+    TextDecoration decoration,
+    Color decorationColor,
+    TextDecorationStyle decorationStyle,
     String fontFamily,
     double fontSizeFactor: 1.0,
     double fontSizeDelta: 0.0,
@@ -153,6 +410,14 @@ class TextStyle {
     assert(heightFactor != null);
     assert(heightDelta != null);
     assert(heightFactor != null || (heightFactor == 1.0 && heightDelta == 0.0));
+
+    String modifiedDebugLabel;
+    assert(() {
+      if (debugLabel != null)
+        modifiedDebugLabel = 'modified $debugLabel';
+      return true;
+    }());
+
     return new TextStyle(
       inherit: inherit,
       color: color ?? this.color,
@@ -164,19 +429,40 @@ class TextStyle {
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
       textBaseline: textBaseline,
       height: height == null ? null : height * heightFactor + heightDelta,
-      decoration: decoration,
-      decorationColor: decorationColor,
-      decorationStyle: decorationStyle,
+      decoration: decoration ?? this.decoration,
+      decorationColor: decorationColor ?? this.decorationColor,
+      decorationStyle: decorationStyle ?? this.decorationStyle,
+      debugLabel: modifiedDebugLabel,
     );
   }
 
-  /// Returns a new text style that matches this text style but with some values
-  /// replaced by the non-null parameters of the given text style. If the given
-  /// text style is null, simply returns this text style.
+  /// Returns a new text style that is a combination of this style and the given
+  /// [other] style.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to true,
+  /// its null properties are replaced with the non-null properties of this text
+  /// style. The [other] style _inherits_ the properties of this style. Another
+  /// way to think of it is that the "missing" properties of the [other] style
+  /// are _filled_ by the properties of this style.
+  ///
+  /// If the given [other] text style has its [TextStyle.inherit] set to false,
+  /// returns the given [other] style unchanged. The [other] style does not
+  /// inherit properties of this style.
+  ///
+  /// If the given text style is null, returns this text style.
   TextStyle merge(TextStyle other) {
     if (other == null)
       return this;
-    assert(other.inherit);
+    if (!other.inherit)
+      return other;
+
+    String mergedDebugLabel;
+    assert(() {
+      if (other.debugLabel != null || debugLabel != null)
+        mergedDebugLabel = '${other.debugLabel ?? _kDefaultDebugLabel} < ${debugLabel ?? _kDefaultDebugLabel}';
+      return true;
+    }());
+
     return copyWith(
       color: other.color,
       fontFamily: other.fontFamily,
@@ -189,7 +475,8 @@ class TextStyle {
       height: other.height,
       decoration: other.decoration,
       decorationColor: other.decorationColor,
-      decorationStyle: other.decorationStyle
+      decorationStyle: other.decorationStyle,
+      debugLabel: mergedDebugLabel,
     );
   }
 
@@ -198,6 +485,13 @@ class TextStyle {
   /// This will not work well if the styles don't set the same fields.
   static TextStyle lerp(TextStyle begin, TextStyle end, double t) {
     assert(begin.inherit == end.inherit);
+
+    String lerpDebugLabel;
+    assert(() {
+      lerpDebugLabel = 'lerp(${begin.debugLabel ?? _kDefaultDebugLabel}, ${end.debugLabel ?? _kDefaultDebugLabel})';
+      return true;
+    }());
+
     return new TextStyle(
       inherit: end.inherit,
       color: Color.lerp(begin.color, end.color, t),
@@ -211,7 +505,8 @@ class TextStyle {
       height: ui.lerpDouble(begin.height ?? end.height, end.height ?? begin.height, t),
       decoration: t < 0.5 ? begin.decoration : end.decoration,
       decorationColor: Color.lerp(begin.decorationColor, end.decorationColor, t),
-      decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle
+      decorationStyle: t < 0.5 ? begin.decorationStyle : end.decorationStyle,
+      debugLabel: lerpDebugLabel,
     );
   }
 
@@ -234,29 +529,67 @@ class TextStyle {
   }
 
   /// The style information for paragraphs, encoded for use by `dart:ui`.
+  ///
+  /// The `textScaleFactor` argument must not be null. If omitted, it defaults
+  /// to 1.0. The other arguments may be null. The `maxLines` argument, if
+  /// specified and non-null, must be greater than zero.
+  ///
+  /// If the font size on this style isn't set, it will default to 14 logical
+  /// pixels.
   ui.ParagraphStyle getParagraphStyle({
       TextAlign textAlign,
+      TextDirection textDirection,
       double textScaleFactor: 1.0,
       String ellipsis,
       int maxLines,
-   }) {
+  }) {
+    assert(textScaleFactor != null);
+    assert(maxLines == null || maxLines > 0);
     return new ui.ParagraphStyle(
       textAlign: textAlign,
+      textDirection: textDirection,
       fontWeight: fontWeight,
       fontStyle: fontStyle,
       fontFamily: fontFamily,
-      fontSize: fontSize == null ? null : fontSize * textScaleFactor,
+      fontSize: (fontSize ?? _defaultFontSize) * textScaleFactor,
       lineHeight: height,
       maxLines: maxLines,
       ellipsis: ellipsis,
     );
   }
 
+  /// Describe the difference between this style and another, in terms of how
+  /// much damage it will make to the rendering.
+  ///
+  /// See also:
+  ///
+  ///  * [TextSpan.compareTo], which does the same thing for entire [TextSpan]s.
+  RenderComparison compareTo(TextStyle other) {
+    if (identical(this, other))
+      return RenderComparison.identical;
+    if (inherit != other.inherit ||
+        fontFamily != other.fontFamily ||
+        fontSize != other.fontSize ||
+        fontWeight != other.fontWeight ||
+        fontStyle != other.fontStyle ||
+        letterSpacing != other.letterSpacing ||
+        wordSpacing != other.wordSpacing ||
+        textBaseline != other.textBaseline ||
+        height != other.height)
+      return RenderComparison.layout;
+    if (color != other.color ||
+        decoration != other.decoration ||
+        decorationColor != other.decorationColor ||
+        decorationStyle != other.decorationStyle)
+      return RenderComparison.paint;
+    return RenderComparison.identical;
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextStyle)
+    if (other.runtimeType != runtimeType)
       return false;
     final TextStyle typedOther = other;
     return inherit == typedOther.inherit &&
@@ -294,112 +627,91 @@ class TextStyle {
   }
 
   @override
-  String toString([String prefix = '']) {
-    final List<String> result = <String>[];
-    result.add('${prefix}inherit: $inherit');
-    if (color != null)
-      result.add('${prefix}color: $color');
-    if (fontFamily != null)
-      result.add('${prefix}family: "$fontFamily"');
-    if (fontSize != null)
-      result.add('${prefix}size: $fontSize');
+  String toStringShort() => '$runtimeType';
+
+  /// Adds all properties prefixing property names with the optional `prefix`.
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties, { String prefix: '' }) {
+    super.debugFillProperties(properties);
+    if (debugLabel != null)
+      properties.add(new MessageProperty('${prefix}debugLabel', debugLabel));
+    final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
+    styles.add(new DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
+    styles.add(new StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
+    styles.add(new DoubleProperty('${prefix}size', fontSize, defaultValue: null));
+    String weightDescription;
     if (fontWeight != null) {
       switch (fontWeight) {
         case FontWeight.w100:
-          result.add('${prefix}weight: 100');
+          weightDescription = '100';
           break;
         case FontWeight.w200:
-          result.add('${prefix}weight: 200');
+          weightDescription = '200';
           break;
         case FontWeight.w300:
-          result.add('${prefix}weight: 300');
+          weightDescription = '300';
           break;
         case FontWeight.w400:
-          result.add('${prefix}weight: 400');
+          weightDescription = '400';
           break;
         case FontWeight.w500:
-          result.add('${prefix}weight: 500');
+          weightDescription = '500';
           break;
         case FontWeight.w600:
-          result.add('${prefix}weight: 600');
+          weightDescription = '600';
           break;
         case FontWeight.w700:
-          result.add('${prefix}weight: 700');
+          weightDescription = '700';
           break;
         case FontWeight.w800:
-          result.add('${prefix}weight: 800');
+          weightDescription = '800';
           break;
         case FontWeight.w900:
-          result.add('${prefix}weight: 900');
+          weightDescription = '900';
           break;
       }
     }
-    if (fontStyle != null) {
-      switch (fontStyle) {
-        case FontStyle.normal:
-          result.add('${prefix}style: normal');
-          break;
-        case FontStyle.italic:
-          result.add('${prefix}style: italic');
-          break;
-      }
-    }
-    if (letterSpacing != null)
-      result.add('${prefix}letterSpacing: ${letterSpacing}x');
-    if (wordSpacing != null)
-      result.add('${prefix}wordSpacing: ${wordSpacing}x');
-    if (textBaseline != null) {
-      switch (textBaseline) {
-        case TextBaseline.alphabetic:
-          result.add('${prefix}baseline: alphabetic');
-          break;
-        case TextBaseline.ideographic:
-          result.add('${prefix}baseline: ideographic');
-          break;
-      }
-    }
-    if (height != null)
-      result.add('${prefix}height: ${height}x');
+    // TODO(jacobr): switch this to use enumProperty which will either cause the
+    // weight description to change to w600 from 600 or require existing
+    // enumProperty to handle this special case.
+    styles.add(new DiagnosticsProperty<FontWeight>(
+      '${prefix}weight',
+      fontWeight,
+      description: weightDescription,
+      defaultValue: null,
+    ));
+    styles.add(new EnumProperty<FontStyle>('${prefix}style', fontStyle, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}letterSpacing', letterSpacing, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}wordSpacing', wordSpacing, defaultValue: null));
+    styles.add(new EnumProperty<TextBaseline>('${prefix}baseline', textBaseline, defaultValue: null));
+    styles.add(new DoubleProperty('${prefix}height', height, unit: 'x', defaultValue: null));
     if (decoration != null || decorationColor != null || decorationStyle != null) {
-      String decorationDescription = '${prefix}decoration: ';
-      bool haveDecorationDescription = false;
-      if (decorationStyle != null) {
-        switch (decorationStyle) {
-          case TextDecorationStyle.solid:
-            decorationDescription += 'solid';
-            break;
-          case TextDecorationStyle.double:
-            decorationDescription += 'double';
-            break;
-          case TextDecorationStyle.dotted:
-            decorationDescription += 'dotted';
-            break;
-          case TextDecorationStyle.dashed:
-            decorationDescription += 'dashed';
-            break;
-          case TextDecorationStyle.wavy:
-            decorationDescription += 'wavy';
-            break;
-        }
-        haveDecorationDescription = true;
-      }
-      if (decorationColor != null) {
-        if (haveDecorationDescription)
-          decorationDescription += ' ';
-        decorationDescription += '$decorationColor';
-        haveDecorationDescription = true;
-      }
-      if (decoration != null) {
-        if (haveDecorationDescription)
-          decorationDescription += ' ';
-        decorationDescription += '$decoration';
-        haveDecorationDescription = true;
-      }
-      assert(haveDecorationDescription);
-      result.add(decorationDescription);
+      final List<String> decorationDescription = <String>[];
+      if (decorationStyle != null)
+        decorationDescription.add(describeEnum((decorationStyle)));
+
+      // Hide decorationColor from the default text view as it is shown in the
+      // terse decoration summary as well.
+      styles.add(new DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+
+      if (decorationColor != null)
+        decorationDescription.add('$decorationColor');
+
+      // Intentionally collide with the property 'decoration' added below.
+      // Tools that show hidden properties could choose the first property
+      // matching the name to disambiguate.
+      styles.add(new DiagnosticsProperty<TextDecoration>('${prefix}decoration', decoration, defaultValue: null, level: DiagnosticLevel.hidden));
+      if (decoration != null)
+        decorationDescription.add('$decoration');
+      assert(decorationDescription.isNotEmpty);
+      styles.add(new MessageProperty('${prefix}decoration', decorationDescription.join(' ')));
     }
-    if (result.isEmpty)
-      return '$prefix<no style specified>';
-    return result.join('\n');
+
+    final bool styleSpecified = styles.any((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info));
+    properties.add(new DiagnosticsProperty<bool>('${prefix}inherit', inherit, level: (!styleSpecified && inherit) ? DiagnosticLevel.fine : DiagnosticLevel.info));
+    styles.forEach(properties.add);
+
+    if (!styleSpecified)
+      properties.add(new FlagProperty('inherit', value: inherit, ifTrue: '$prefix<all styles inherited>', ifFalse: '$prefix<no style specified>'));
   }
 }

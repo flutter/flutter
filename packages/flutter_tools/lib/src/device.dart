@@ -81,11 +81,17 @@ class DeviceManager {
         : getAllConnectedDevices();
   }
 
+  Iterable<DeviceDiscovery> get _platformDiscoverers {
+    return _deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+  }
+
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() {
-    return new Stream<Device>.fromIterable(_deviceDiscoverers
-      .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform)
-      .expand((DeviceDiscovery discoverer) => discoverer.devices));
+  Stream<Device> getAllConnectedDevices() async* {
+    for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      for (Device device in await discoverer.devices) {
+        yield device;
+      }
+    }
   }
 }
 
@@ -97,7 +103,7 @@ abstract class DeviceDiscovery {
   /// current environment configuration.
   bool get canListAnything;
 
-  List<Device> get devices;
+  Future<List<Device>> get devices;
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -105,31 +111,38 @@ abstract class DeviceDiscovery {
 abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   PollingDeviceDiscovery(this.name);
 
-  static const Duration _pollingDuration = const Duration(seconds: 4);
+  static const Duration _pollingInterval = const Duration(seconds: 4);
+  static const Duration _pollingTimeout = const Duration(seconds: 30);
 
   final String name;
   ItemListNotifier<Device> _items;
-  Timer _timer;
+  Poller _poller;
 
-  List<Device> pollingGetDevices();
+  Future<List<Device>> pollingGetDevices();
 
   void startPolling() {
-    if (_timer == null) {
+    if (_poller == null) {
       _items ??= new ItemListNotifier<Device>();
-      _timer = new Timer.periodic(_pollingDuration, (Timer timer) {
-        _items.updateWithNewList(pollingGetDevices());
-      });
+
+      _poller = new Poller(() async {
+        try {
+          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+          _items.updateWithNewList(devices);
+        } on TimeoutException {
+          printTrace('Device poll timed out.');
+        }
+      }, _pollingInterval);
     }
   }
 
   void stopPolling() {
-    _timer?.cancel();
-    _timer = null;
+    _poller?.cancel();
+    _poller = null;
   }
 
   @override
-  List<Device> get devices {
-    _items ??= new ItemListNotifier<Device>.from(pollingGetDevices());
+  Future<List<Device>> get devices async {
+    _items ??= new ItemListNotifier<Device>.from(await pollingGetDevices());
     return _items.items;
   }
 
@@ -178,7 +191,7 @@ abstract class Device {
 
   // String meant to be displayed to the user indicating if the device is
   // supported by Flutter, and, if not, why.
-  String supportMessage() => isSupported() ? "Supported" : "Unsupported";
+  String supportMessage() => isSupported() ? 'Supported' : 'Unsupported';
 
   /// The device's platform.
   Future<TargetPlatform> get targetPlatform;
@@ -193,22 +206,6 @@ abstract class Device {
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
 
-  Future<int> forwardPort(int devicePort, {int hostPort}) async {
-    try {
-      hostPort = await portForwarder
-          .forward(devicePort, hostPort: hostPort)
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-            throw new ToolExit(
-                'Timeout while atempting to foward device port $devicePort');
-          });
-      printTrace('Forwarded host port $hostPort to device port $devicePort');
-      return hostPort;
-    } catch (e) {
-      throw new ToolExit(
-          'Unable to forward host port $hostPort to device port $devicePort: $e');
-    }
-  }
-
   /// Clear the device's logs.
   void clearLogs();
 
@@ -216,16 +213,21 @@ abstract class Device {
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
+  ///
+  /// If [usesTerminalUi] is true, Flutter Tools may attempt to prompt the
+  /// user to resolve fixable issues such as selecting a signing certificate
+  /// for iOS device deployment. Set to false if stdin cannot be read from while
+  /// attempting to start the app.
   Future<LaunchResult> startApp(
-    ApplicationPackage package,
-    BuildMode mode, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    String kernelPath,
     bool prebuiltApplication: false,
-    bool applicationNeedsRebuild: false
+    bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
+    bool ipv6: false,
   });
 
   /// Does this device implement support for hot reloading / restarting?
@@ -297,27 +299,30 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled(this.buildMode, {
+  DebuggingOptions.enabled(this.buildInfo, {
     this.startPaused: false,
+    this.enableSoftwareRendering: false,
+    this.traceSkia: false,
     this.useTestFonts: false,
     this.observatoryPort,
-    this.diagnosticPort
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildMode) :
+  DebuggingOptions.disabled(this.buildInfo) :
     debuggingEnabled = false,
     useTestFonts = false,
     startPaused = false,
-    observatoryPort = null,
-    diagnosticPort = null;
+    enableSoftwareRendering = false,
+    traceSkia = false,
+    observatoryPort = null;
 
   final bool debuggingEnabled;
 
-  final BuildMode buildMode;
+  final BuildInfo buildInfo;
   final bool startPaused;
+  final bool enableSoftwareRendering;
+  final bool traceSkia;
   final bool useTestFonts;
   final int observatoryPort;
-  final int diagnosticPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
 
@@ -328,35 +333,22 @@ class DebuggingOptions {
       return new Future<int>.value(observatoryPort);
     return portScanner.findPreferredPort(observatoryPort ?? kDefaultObservatoryPort);
   }
-
-  bool get hasDiagnosticPort => diagnosticPort != null;
-
-  /// Return the user specified diagnostic port. If that isn't available,
-  /// return [kDefaultDiagnosticPort], or a port close to that one.
-  Future<int> findBestDiagnosticPort() {
-    if (hasDiagnosticPort)
-      return new Future<int>.value(diagnosticPort);
-    return portScanner.findPreferredPort(diagnosticPort ?? kDefaultDiagnosticPort);
-  }
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri, this.diagnosticUri }) : started = true;
-  LaunchResult.failed() : started = false, observatoryUri = null, diagnosticUri = null;
+  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.failed() : started = false, observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
   final bool started;
   final Uri observatoryUri;
-  final Uri diagnosticUri;
 
   @override
   String toString() {
     final StringBuffer buf = new StringBuffer('started=$started');
     if (observatoryUri != null)
       buf.write(', observatory=$observatoryUri');
-    if (diagnosticUri != null)
-      buf.write(', diagnostic=$diagnosticUri');
     return buf.toString();
   }
 }
@@ -398,14 +390,13 @@ abstract class DeviceLogReader {
   @override
   String toString() => name;
 
-  /// Process ID of the app on the deivce.
+  /// Process ID of the app on the device.
   int appPid;
 }
 
 /// Describes an app running on the device.
 class DiscoveredApp {
-  DiscoveredApp(this.id, this.observatoryPort, this.diagnosticPort);
+  DiscoveredApp(this.id, this.observatoryPort);
   final String id;
   final int observatoryPort;
-  final int diagnosticPort;
 }

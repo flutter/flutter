@@ -13,7 +13,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:test/test.dart';
 
-import 'package:flutter_tools/executable.dart' as tools;
+import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -64,8 +64,14 @@ void main() {
                 return <String>[name, value];
               })
               .where((List<String> pair) => pair != null),
-          key: (List<String> pair) => pair[0],
-          value: (List<String> pair) => pair[1],
+          key: (dynamic key) {
+            final List<String> pair = key;
+            return pair[0];
+          },
+          value: (dynamic value) {
+            final List<String> pair = value;
+            return pair[1];
+          }
         );
 
         return new Response(

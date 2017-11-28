@@ -8,7 +8,10 @@ import 'package:flutter_driver/driver_extension.dart';
 import 'keys.dart' as keys;
 
 void main() {
-  enableFlutterDriverExtension();
+  enableFlutterDriverExtension(handler: (String message) async {
+    // TODO(cbernaschina) remove when test flakiness is resolved
+    return 'keyboard_resize';
+  });
   runApp(new MyApp());
 }
 
@@ -29,7 +32,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController _controller = new TextEditingController();
+  final TextEditingController _controller = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return new Scaffold(
       body: new Stack(
         fit: StackFit.expand,
-        alignment: FractionalOffset.bottomCenter,
+        alignment: Alignment.bottomCenter,
         children: <Widget>[
           new LayoutBuilder(
             builder: (BuildContext context, BoxConstraints constraints) {

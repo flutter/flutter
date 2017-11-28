@@ -13,6 +13,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:test/test.dart';
 
 import 'src/common.dart';
@@ -335,7 +336,34 @@ void main() {
     testUsingContext('delete dev file system', () async {
       expect(vmService.messages, isEmpty, reason: 'prior test timeout');
       await devFS.destroy();
-      vmService.expectMessages(<String>['_deleteDevFS {fsName: test}']);
+      vmService.expectMessages(<String>['destroy test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+    });
+
+    testUsingContext('cleanup preexisting file system', () async {
+      // simulate workspace
+      final File file = fs.file(fs.path.join(basePath, filePath));
+      await file.parent.create(recursive: true);
+      file.writeAsBytesSync(<int>[1, 2, 3]);
+
+      // simulate package
+      await _createPackage(fs, 'somepkg', 'somefile.txt');
+
+      devFS = new DevFS(vmService, 'test', tempDir);
+      await devFS.create();
+      vmService.expectMessages(<String>['create test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+
+      // Try to create again.
+      await devFS.create();
+      vmService.expectMessages(<String>['create test', 'destroy test', 'create test']);
+      expect(devFS.assetPathsToEvict, isEmpty);
+
+      // Really destroy.
+      await devFS.destroy();
+      vmService.expectMessages(<String>['destroy test']);
       expect(devFS.assetPathsToEvict, isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -390,13 +418,27 @@ class MockVMService extends BasicMock implements VMService {
 class MockVM implements VM {
   final MockVMService _service;
   final Uri _baseUri = Uri.parse('file:///tmp/devfs/test');
+  bool _devFSExists = false;
+
+  static const int kFileSystemAlreadyExists = 1001;
 
   MockVM(this._service);
 
   @override
   Future<Map<String, dynamic>> createDevFS(String fsName) async {
     _service.messages.add('create $fsName');
+    if (_devFSExists) {
+      throw new rpc.RpcException(kFileSystemAlreadyExists, 'File system already exists');
+    }
+    _devFSExists = true;
     return <String, dynamic>{'uri': '$_baseUri'};
+  }
+
+  @override
+  Future<Map<String, dynamic>> deleteDevFS(String fsName) async {
+    _service.messages.add('destroy $fsName');
+    _devFSExists = false;
+    return <String, dynamic>{'type': 'Success'};
   }
 
   @override

@@ -3,11 +3,14 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show ProcessResult;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -15,92 +18,92 @@ import 'package:test/test.dart';
 
 import '../src/context.dart';
 
+class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockXcode extends Mock implements Xcode {}
 class MockFile extends Mock implements File {}
+class MockProcess extends Mock implements Process {}
 
 void main() {
   final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
   osx.operatingSystem = 'macos';
 
-  group('test screenshot', () {
-    MockProcessManager mockProcessManager;
-    MockFile mockOutputFile;
-    IOSDevice iosDeviceUnderTest;
+  group('getAttachedDevices', () {
+    MockIMobileDevice mockIMobileDevice;
 
     setUp(() {
-      mockProcessManager = new MockProcessManager();
-      mockOutputFile = new MockFile();
+      mockIMobileDevice = new MockIMobileDevice();
     });
 
-    testUsingContext(
-      'screenshot without ideviceinstaller error',
-      () async {
-        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
-        // Let everything else return exit code 0 so process.dart doesn't crash.
-        // The matcher order is important.
-        when(
-          mockProcessManager.run(any, environment: null, workingDirectory:  null)
-        ).thenReturn(
-          new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
-        );
-        // Let `which idevicescreenshot` fail with exit code 1.
-        when(
-          mockProcessManager.runSync(
-            <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
-        ).thenReturn(
-          new ProcessResult(1, 1, '', '')
-        );
+    testUsingContext('return no devices if Xcode is not installed', () async {
+      when(mockIMobileDevice.isInstalled).thenReturn(false);
+      expect(await IOSDevice.getAttachedDevices(), isEmpty);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
 
-        iosDeviceUnderTest = new IOSDevice('1234');
-        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.runSync(
-          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verifyNever(mockProcessManager.run(
-          <String>['idevicescreenshot', fs.path.join('some', 'test', 'path', 'image.png')],
-          environment: null,
-          workingDirectory: null
-        ));
-        expect(testLogger.errorText, contains('brew install ideviceinstaller'));
-      },
-      overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-        Platform: () => osx,
-      }
-    );
+    testUsingContext('returns no devices if none are attached', () async {
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs()).thenReturn(new Future<String>.value(''));
+      final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
+      expect(devices, isEmpty);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
 
-    testUsingContext(
-      'screenshot with ideviceinstaller gets command',
-      () async {
-        when(mockOutputFile.path).thenReturn(fs.path.join('some', 'test', 'path', 'image.png'));
-        // Let everything else return exit code 0.
-        // The matcher order is important.
-        when(
-          mockProcessManager.run(any, environment: null, workingDirectory:  null)
-        ).thenReturn(
-          new Future<ProcessResult>.value(new ProcessResult(4, 0, '', ''))
-        );
-        // Let there be idevicescreenshot in the PATH.
-        when(
-          mockProcessManager.runSync(
-            <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null)
-        ).thenReturn(
-          new ProcessResult(3, 0, fs.path.join('some', 'path', 'to', 'iscreenshot'), '')
-        );
+    testUsingContext('returns attached devices', () async {
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs()).thenReturn(new Future<String>.value('''
+98206e7a4afd4aedaff06e687594e089dede3c44
+f577a7903cc54959be2e34bc4f7f80b7009efcf4
+'''));
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName')).thenReturn('La tele me regarde');
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion')).thenReturn('10.3.2');
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName')).thenReturn('Puits sans fond');
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion')).thenReturn('11.0');
+      final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
+      expect(devices, hasLength(2));
+      expect(devices[0].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
+      expect(devices[0].name, 'La tele me regarde');
+      expect(devices[1].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
+      expect(devices[1].name, 'Puits sans fond');
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
+  });
 
-        iosDeviceUnderTest = new IOSDevice('1234');
-        await iosDeviceUnderTest.takeScreenshot(mockOutputFile);
-        verify(mockProcessManager.runSync(
-          <String>['which', 'idevicescreenshot'], environment: null, workingDirectory: null));
-        verify(mockProcessManager.run(
-          <String>[
-            fs.path.join('some', 'path', 'to', 'iscreenshot'),
-            fs.path.join('some', 'test', 'path', 'image.png')
-          ],
-          environment: null,
-          workingDirectory: null
-        ));
-      },
-      overrides: <Type, Generator>{ProcessManager: () => mockProcessManager}
-    );
+  group('logging', () {
+    MockIMobileDevice mockIMobileDevice;
+
+    setUp(() {
+      mockIMobileDevice = new MockIMobileDevice();
+    });
+
+    testUsingContext('suppresses non-Flutter lines from output', () async {
+      when(mockIMobileDevice.startLogger()).thenAnswer((_) {
+        final Process mockProcess = new MockProcess();
+        when(mockProcess.stdout).thenReturn(new Stream<List<int>>.fromIterable(<List<int>>['''
+  Runner(Flutter)[297] <Notice>: A is for ari
+  Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
+  Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
+  Runner(Flutter)[297] <Notice>: I is for ichigo
+  Runner(UIKit)[297] <Notice>: E is for enpitsu"
+  '''.codeUnits]));
+        when(mockProcess.stderr).thenReturn(const Stream<List<int>>.empty());
+        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+        when(mockProcess.exitCode).thenReturn(new Future<int>.delayed(Duration.ZERO, () => 0));
+        return new Future<Process>.value(mockProcess);
+      });
+
+      final IOSDevice device = new IOSDevice('123456');
+      final DeviceLogReader logReader = device.getLogReader(
+        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+      );
+
+      final List<String> lines = await logReader.logLines.toList();
+      expect(lines, <String>['A is for ari', 'I is for ichigo']);
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
   });
 }

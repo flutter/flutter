@@ -91,7 +91,7 @@ void main() {
       final FlutterCommandResult commandResult = new FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
-        analyticsParameters: <String> ['blah1', 'blah2', null, 'blah3'],
+        timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: new DateTime.fromMillisecondsSinceEpoch(1500)
       );
 

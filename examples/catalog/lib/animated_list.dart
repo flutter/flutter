@@ -117,10 +117,9 @@ class ListModel<E> {
     @required this.listKey,
     @required this.removedItemBuilder,
     Iterable<E> initialItems,
-  }) : _items =  new List<E>.from(initialItems ?? <E>[]) {
-    assert(listKey != null);
-    assert(removedItemBuilder != null);
-  }
+  }) : assert(listKey != null),
+       assert(removedItemBuilder != null),
+       _items = new List<E>.from(initialItems ?? <E>[]);
 
   final GlobalKey<AnimatedListState> listKey;
   final dynamic removedItemBuilder;
@@ -153,17 +152,16 @@ class ListModel<E> {
 /// This widget's height is based on the animation parameter, it varies
 /// from 0 to 128 as the animation varies from 0.0 to 1.0.
 class CardItem extends StatelessWidget {
-  CardItem({
+  const CardItem({
     Key key,
     @required this.animation,
     this.onTap,
     @required this.item,
     this.selected: false
-  }) : super(key: key) {
-    assert(animation != null);
-    assert(item != null && item >= 0);
-    assert(selected != null);
-  }
+  }) : assert(animation != null),
+       assert(item != null && item >= 0),
+       assert(selected != null),
+       super(key: key);
 
   final Animation<double> animation;
   final VoidCallback onTap;
@@ -207,10 +205,9 @@ Sample Catalog
 
 Title: AnimatedList
 
-Summary: In this app an AnimatedList displays a list of cards which stays
+Summary: An AnimatedList for displaying a list of cards that stay
 in sync with an app-specific ListModel. When an item is added to or removed
-from the model, a corresponding card items animate in or out of view
-in the animated list.
+from the model, the corresponding card animates in or out of view.
 
 Description:
 Tap an item to select it, tap it again to unselect. Tap '+' to insert at the

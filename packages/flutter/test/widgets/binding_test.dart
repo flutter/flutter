@@ -26,6 +26,16 @@ class AppLifecycleStateObserver extends WidgetsBindingObserver {
   }
 }
 
+class PushRouteObserver extends WidgetsBindingObserver {
+  String pushedRoute;
+
+  @override
+  Future<bool> didPushRoute(String route) async {
+    pushedRoute = route;
+    return true;
+  }
+}
+
 void main() {
   setUp(() {
     WidgetsFlutterBinding.ensureInitialized();
@@ -60,5 +70,18 @@ void main() {
     message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
     await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
     expect(observer.lifecycleState, AppLifecycleState.suspending);
+  });
+
+  testWidgets('didPushRoute callback', (WidgetTester tester) async {
+    final PushRouteObserver observer = new PushRouteObserver();
+    WidgetsBinding.instance.addObserver(observer);
+
+    final String testRouteName = 'testRouteName';
+    final ByteData message = const JSONMethodCodec().encodeMethodCall(
+      new MethodCall('pushRoute', testRouteName));
+    await BinaryMessages.handlePlatformMessage('flutter/navigation', message, (_) {});
+    expect(observer.pushedRoute, testRouteName);
+
+    WidgetsBinding.instance.removeObserver(observer);
   });
 }

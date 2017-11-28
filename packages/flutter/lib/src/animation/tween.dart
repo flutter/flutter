@@ -97,7 +97,7 @@ class _ChainedEvaluation<T> extends Animatable<T> {
 /// `_animation`:
 ///
 /// ```dart
-/// _animation = new Tween<Offset>(
+/// Animation<Offset> _animation = new Tween<Offset>(
 ///   begin: const Offset(100.0, 50.0),
 ///   end: const Offset(200.0, 300.0),
 /// ).animate(_controller);
@@ -176,6 +176,22 @@ class Tween<T extends dynamic> extends Animatable<T> {
 
   @override
   String toString() => '$runtimeType($begin \u2192 $end)';
+}
+
+/// A [Tween] that evaluates its [parent] in reverse.
+class ReverseTween<T> extends Tween<T> {
+  /// Construct a [Tween] that evaluates its [parent] in reverse.
+  ReverseTween(this.parent) : assert(parent != null), super(begin: parent.end, end: parent.begin);
+
+  /// This tween's value is the same as the parent's value evaluated in reverse.
+  ///
+  /// This tween's [begin] is the parent's [end] and its [end] is the parent's
+  /// [begin]. The [lerp] method returns `parent.lerp(1.0 - t)` and its
+  /// [evaluate] method is similar.
+  final Tween<T> parent;
+
+  @override
+  T lerp(double t) => parent.lerp(1.0 - t);
 }
 
 /// An interpolation between two colors.
@@ -291,9 +307,8 @@ class CurveTween extends Animatable<double> {
   /// Creates a curve tween.
   ///
   /// The [curve] argument must not be null.
-  CurveTween({ @required this.curve }) {
-    assert(curve != null);
-  }
+  CurveTween({ @required this.curve })
+    : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;

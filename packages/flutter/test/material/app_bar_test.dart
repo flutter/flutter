@@ -8,31 +8,34 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap: false }) {
-  return new MediaQuery(
-    data: const MediaQueryData(),
-    child: new Scaffold(
-      body: new DefaultTabController(
-        length: 3,
-        child: new CustomScrollView(
-          primary: true,
-          slivers: <Widget>[
-            new SliverAppBar(
-              title: const Text('AppBar Title'),
-              floating: floating,
-              pinned: pinned,
-              expandedHeight: expandedHeight,
-              snap: snap,
-              bottom: new TabBar(
-                tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
+      child: new Scaffold(
+        body: new DefaultTabController(
+          length: 3,
+          child: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                title: const Text('AppBar Title'),
+                floating: floating,
+                pinned: pinned,
+                expandedHeight: expandedHeight,
+                snap: snap,
+                bottom: new TabBar(
+                  tabs: <String>['A','B','C'].map((String t) => new Tab(text: 'TAB $t')).toList(),
+                ),
               ),
-            ),
-            new SliverToBoxAdapter(
-              child: new Container(
-                height: 1200.0,
-                color: Colors.orange[400],
+              new SliverToBoxAdapter(
+                child: new Container(
+                  height: 1200.0,
+                  color: Colors.orange[400],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     ),
@@ -154,23 +157,88 @@ void main() {
     expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:false title left edge is 16.0 ', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
         home: new Scaffold(
           appBar: new AppBar(
             centerTitle: false,
-            title: const Text('X'),
+            title: const Placeholder(key: const Key('X')),
           ),
         ),
       ),
     );
 
-    expect(tester.getTopLeft(find.text('X')).dx, 16.0);
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopLeft(titleWidget).dx, 16.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopRight(titleWidget).dx, 800 - 16.0 - 4.0);
+  });
+
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              centerTitle: false,
+              title: const Placeholder(key: const Key('X')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopRight(titleWidget).dx, 800.0 - 16.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopLeft(titleWidget).dx, 16.0 + 4.0);
+  });
+
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          appBar: new AppBar(
+            centerTitle: false,
+            titleSpacing: 32.0,
+            title: const Placeholder(key: const Key('X')),
+          ),
+        ),
+      ),
+    );
+
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopLeft(titleWidget).dx, 32.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopRight(titleWidget).dx, 800 - 32.0 - 4.0);
+  });
+
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              centerTitle: false,
+              titleSpacing: 32.0,
+              title: const Placeholder(key: const Key('X')),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder titleWidget = find.byKey(const Key('X'));
+    expect(tester.getTopRight(titleWidget).dx, 800.0 - 32.0);
+    // 4.0 is due to AppBar right padding.
+    expect(tester.getTopLeft(titleWidget).dx, 32.0 + 4.0);
   });
 
   testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 ',
+    'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
     (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
@@ -188,7 +256,29 @@ void main() {
     expect(tester.getTopLeft(find.text('X')).dx, 72.0);
   });
 
-  testWidgets('AppBar centerTitle:false title overflow OK ', (WidgetTester tester) async {
+  testWidgets(
+    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
+    (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              centerTitle: false,
+              title: const Text('X'),
+            ),
+            // A drawer causes a leading hamburger.
+            drawer: const Drawer(),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
+  });
+
+  testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
@@ -216,8 +306,12 @@ void main() {
 
     final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).dx, 72.0);
-    // The toolbar's contents are padded on the right by 4.0
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0)); // Title right side padding.
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -227,19 +321,25 @@ void main() {
 
     expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(
+        800.0 // Screen width.
+        - 4.0 // Left margin before the leading button.
+        - 56.0 // Leading button width.
+        - 16.0 // Leading button to title padding.
+        - 16.0 // Title to actions padding
+        - 200.0)); // Actions' width.
 
     leading = new Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 72.0 - 4.0 - 200.0));
+    expect(tester.getSize(title).width, equals(800.0 - 4.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
-  testWidgets('AppBar centerTitle:true title overflow OK ', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets. When it's also centered it may
-    // also be left or right justified if it doesn't fit in the overall center.
+    // also be start or end justified if it doesn't fit in the overall center.
 
     final Key titleKey = new UniqueKey();
     double titleWidth = 700.0;
@@ -263,8 +363,8 @@ void main() {
     }
 
     // Centering a title with width 700 within the 800 pixel wide test widget
-    // would mean that its left edge would have to be 50. The material spec says
-    // that the left edge of the title must be atleast 72.
+    // would mean that its start edge would have to be 50. The material spec says
+    // that the start edge of the title must be atleast 72.
     await tester.pumpWidget(buildApp());
 
     final Finder title = find.byKey(titleKey);
@@ -272,9 +372,9 @@ void main() {
     expect(tester.getSize(title).width, equals(700.0));
 
     // Centering a title with width 620 within the 800 pixel wide test widget
-    // would mean that its left edge would have to be 90. We reserve 72
-    // on the left and the padded actions occupy 96 + 4 on the right. That
-    // leaves 628, so the title is right justified but its width isn't changed.
+    // would mean that its start edge would have to be 90. We reserve 72
+    // on the start and the padded actions occupy 96 + 4 on the end. That
+    // leaves 628, so the title is end justified but its width isn't changed.
 
     await tester.pumpWidget(buildApp());
     leading = null;
@@ -285,6 +385,61 @@ void main() {
     ];
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 800 - 620 - 48 - 48 - 4);
+    expect(tester.getSize(title).width, equals(620.0));
+  });
+
+  testWidgets('AppBar centerTitle:true title overflow OK (RTL)', (WidgetTester tester) async {
+    // The app bar's title should be constrained to fit within the available space
+    // between the leading and actions widgets. When it's also centered it may
+    // also be start or end justified if it doesn't fit in the overall center.
+
+    final Key titleKey = new UniqueKey();
+    double titleWidth = 700.0;
+    Widget leading = new Container();
+    List<Widget> actions;
+
+    Widget buildApp() {
+      return new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Scaffold(
+            appBar: new AppBar(
+              leading: leading,
+              centerTitle: true,
+              title: new Container(
+                key: titleKey,
+                constraints: new BoxConstraints.loose(new Size(titleWidth, 1000.0)),
+              ),
+              actions: actions,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Centering a title with width 700 within the 800 pixel wide test widget
+    // would mean that its start edge would have to be 50. The material spec says
+    // that the start edge of the title must be atleast 72.
+    await tester.pumpWidget(buildApp());
+
+    final Finder title = find.byKey(titleKey);
+    expect(tester.getTopRight(title).dx, 800.0 - 72.0);
+    expect(tester.getSize(title).width, equals(700.0));
+
+    // Centering a title with width 620 within the 800 pixel wide test widget
+    // would mean that its start edge would have to be 90. We reserve 72
+    // on the start and the padded actions occupy 96 + 4 on the end. That
+    // leaves 628, so the title is end justified but its width isn't changed.
+
+    await tester.pumpWidget(buildApp());
+    leading = null;
+    titleWidth = 620.0;
+    actions = <Widget>[
+      const SizedBox(width: 48.0),
+      const SizedBox(width: 48.0)
+    ];
+    await tester.pumpWidget(buildApp());
+    expect(tester.getTopRight(title).dx, 620 + 48 + 48 + 4);
     expect(tester.getSize(title).width, equals(620.0));
   });
 
@@ -689,11 +844,14 @@ void main() {
     const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: false,
-          appBar: new AppBar(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(),
+          ),
         ),
       ),
     );
@@ -701,11 +859,14 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: true,
-          appBar: new AppBar(title: const Text('title'))
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: true,
+            appBar: new AppBar(title: const Text('title'))
+          ),
         ),
       ),
     );
@@ -714,14 +875,17 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: false,
-          appBar: new AppBar(
-            bottom: new PreferredSize(
-              preferredSize: const Size.fromHeight(200.0),
-              child: new Container(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(
+              bottom: new PreferredSize(
+                preferredSize: const Size.fromHeight(200.0),
+                child: new Container(),
+              ),
             ),
           ),
         ),
@@ -731,14 +895,17 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 200.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new Scaffold(
-          primary: true,
-          appBar: new AppBar(
-            bottom: new PreferredSize(
-              preferredSize: const Size.fromHeight(200.0),
-              child: new Container(),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: true,
+            appBar: new AppBar(
+              bottom: new PreferredSize(
+                preferredSize: const Size.fromHeight(200.0),
+                child: new Container(),
+              ),
             ),
           ),
         ),
@@ -748,11 +915,14 @@ void main() {
     expect(appBarHeight(tester), kToolbarHeight + 100.0 + 200.0);
 
     await tester.pumpWidget(
-      new MediaQuery(
-        data: topPadding100,
-        child: new AppBar(
-          primary: false,
-          title: const Text('title'),
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new AppBar(
+            primary: false,
+            title: const Text('title'),
+          ),
         ),
       ),
     );
@@ -780,6 +950,18 @@ void main() {
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
+  testWidgets('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Scaffold(
+          drawer: const Drawer(),
+          appBar: new AppBar(automaticallyImplyLeading: false),
+        ),
+      ),
+    );
+    expect(find.byIcon(Icons.menu), findsNothing);
+  });
+
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
@@ -789,9 +971,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
           ),
         ),
@@ -810,15 +992,15 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),
@@ -840,15 +1022,15 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             flexibleSpace: new DecoratedBox(
               decoration: new BoxDecoration(
                 gradient: new LinearGradient(
-                  begin: const FractionalOffset(0.50, 0.0),
-                  end: const FractionalOffset(0.48, 1.0),
+                  begin: const Alignment(0.0, -1.0),
+                  end: const Alignment(-0.04, 1.0),
                   colors: <Color>[Colors.blue.shade500, Colors.blue.shade800],
                 ),
               ),
@@ -881,9 +1063,9 @@ void main() {
             leading: new Placeholder(key: key),
             title: const Text('Abc'),
             actions: <Widget>[
-              const Placeholder(),
-              const Placeholder(),
-              const Placeholder(),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
+              const Placeholder(fallbackWidth: 10.0),
             ],
             bottom: new PreferredSize(
               preferredSize: const Size(0.0, kToolbarHeight),
@@ -902,5 +1084,65 @@ void main() {
     );
     expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
     expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+  });
+
+  testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    final Key leadingKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
+    final Key trailingKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new Scaffold(
+            primary: false,
+            appBar: new AppBar(
+              leading: new Placeholder(key: leadingKey),
+              title: new Placeholder(key: titleKey),
+              actions: <Widget>[ new Placeholder(key: trailingKey) ],
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
+  });
+
+  testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0));
+
+    final Key leadingKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
+    final Key trailingKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                leading: new Placeholder(key: leadingKey),
+                title: new Placeholder(key: titleKey),
+                actions: <Widget>[ new Placeholder(key: trailingKey) ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
   });
 }

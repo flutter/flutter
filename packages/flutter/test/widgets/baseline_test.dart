@@ -14,7 +14,7 @@ void main() {
             fontFamily: 'Ahem',
             fontSize: 100.0,
           ),
-          child: const Text('X'),
+          child: const Text('X', textDirection: TextDirection.ltr),
         ),
       ),
     );
@@ -32,7 +32,7 @@ void main() {
               fontFamily: 'Ahem',
               fontSize: 100.0,
             ),
-            child: const Text('X'),
+            child: const Text('X', textDirection: TextDirection.ltr),
           ),
         ),
       ),

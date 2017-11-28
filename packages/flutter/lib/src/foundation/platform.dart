@@ -45,7 +45,7 @@ TargetPlatform get defaultTargetPlatform {
     if (debugDefaultTargetPlatformOverride != null)
       result = debugDefaultTargetPlatformOverride;
     return true;
-  });
+  }());
   if (result == null) {
     throw new FlutterError(
       'Unknown platform.\n'

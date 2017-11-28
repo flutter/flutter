@@ -9,6 +9,7 @@ import '../globals.dart';
 import 'file_system.dart';
 import 'io.dart';
 import 'process_manager.dart';
+import 'utils.dart';
 
 typedef String StringConverter(String string);
 
@@ -156,13 +157,40 @@ Future<int> runCommandAndStreamOutput(List<String> cmd, {
 
   // Wait for stdout to be fully processed
   // because process.exitCode may complete first causing flaky tests.
-  await Future.wait(<Future<Null>>[
+  await waitGroup<Null>(<Future<Null>>[
     stdoutSubscription.asFuture<Null>(),
     stderrSubscription.asFuture<Null>(),
   ]);
-  stdoutSubscription.cancel();
-  stderrSubscription.cancel();
 
+  await waitGroup<Null>(<Future<Null>>[
+    stdoutSubscription.cancel(),
+    stderrSubscription.cancel(),
+  ]);
+
+  return await process.exitCode;
+}
+
+/// Runs the [command] interactively, connecting the stdin/stdout/stderr
+/// streams of this process to those of the child process. Completes with
+/// the exit code of the child process.
+Future<int> runInteractively(List<String> command, {
+  String workingDirectory,
+  bool allowReentrantFlutter: false,
+  Map<String, String> environment
+}) async {
+  final Process process = await runCommand(
+    command,
+    workingDirectory: workingDirectory,
+    allowReentrantFlutter: allowReentrantFlutter,
+    environment: environment,
+  );
+  process.stdin.addStream(stdin);
+  // Wait for stdout and stderr to be fully processed, because process.exitCode
+  // may complete first.
+  Future.wait<dynamic>(<Future<dynamic>>[
+    stdout.addStream(process.stdout),
+    stderr.addStream(process.stderr),
+  ]);
   return await process.exitCode;
 }
 
@@ -211,7 +239,7 @@ Future<RunResult> runCheckedAsync(List<String> cmd, {
       environment: environment
   );
   if (result.exitCode != 0)
-    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}';
+    throw 'Exit code ${result.exitCode} from: ${cmd.join(' ')}:\n$result';
   return result;
 }
 
@@ -270,7 +298,7 @@ void _traceCommand(List<String> args, { String workingDirectory }) {
   if (workingDirectory == null)
     printTrace(argsText);
   else
-    printTrace("[$workingDirectory${fs.path.separator}] $argsText");
+    printTrace('[$workingDirectory${fs.path.separator}] $argsText');
 }
 
 String _runWithLoggingSync(List<String> cmd, {

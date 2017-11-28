@@ -4,17 +4,16 @@
 
 import 'dart:async';
 
-import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/io.dart';
+import '../base/context.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import 'cocoapods.dart';
 import 'mac.dart';
 
-Xcode get xcode => Xcode.instance;
+IOSWorkflow get iosWorkflow => context.putIfAbsent(IOSWorkflow, () => new IOSWorkflow());
 
 class IOSWorkflow extends DoctorValidator implements Workflow {
   IOSWorkflow() : super('iOS toolchain - develop for iOS devices');
@@ -22,7 +21,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get appliesToHostPlatform => platform.isMacOS;
 
-  // We need xcode (+simctl) to list simulator devices, and idevice_id to list real devices.
+  // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
   bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck;
 
@@ -31,26 +30,11 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
   @override
   bool get canLaunchDevices => xcode.isInstalledAndMeetsVersionCheck;
 
-  bool get hasIDeviceId => exitsHappy(<String>['idevice_id', '-h']);
-
-  Future<bool> get hasWorkingLibimobiledevice async {
-    // Verify that libimobiledevice tools are installed.
-    if (!hasIDeviceId)
-      return false;
-
-    // If a device is attached, verify that we can get its name.
-    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
-    if (result.exitCode == 0 && result.stdout.isNotEmpty && !await exitsHappyAsync(<String>['idevicename']))
-      return false;
-
-    return true;
-  }
-
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
   Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
 
-  String get iosDeployMinimumVersion => '1.9.0';
+  String get iosDeployMinimumVersion => '1.9.2';
 
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
@@ -58,11 +42,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
 
   bool get hasPythonSixModule => kPythonSix.isInstalled;
 
-  Future<bool> get hasCocoaPods => exitsHappyAsync(<String>['pod', '--version']);
-
-  String get cocoaPodsMinimumVersion => '1.0.0';
-
-  Future<String> get cocoaPodsVersionText async => (await runAsync(<String>['pod', '--version'])).processResult.stdout.trim();
+  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
     if (!await hasIosDeploy)
@@ -74,20 +54,6 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
       return false;
     }
   }
-
-  Future<bool> get isCocoaPodsInstalledAndMeetsVersionCheck async {
-    if (!await hasCocoaPods)
-      return false;
-    try {
-      final Version installedVersion = new Version.parse(await cocoaPodsVersionText);
-      return installedVersion >= new Version.parse(cocoaPodsMinimumVersion);
-    } on FormatException {
-      return false;
-    }
-  }
-
-  /// Whether CocoaPods ran 'pod setup' once where the costly pods' specs are cloned.
-  Future<bool> get isCocoaPodsInitialized => fs.isDirectory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master'));
 
   @override
   Future<ValidationResult> validate() async {
@@ -121,6 +87,14 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.'
         ));
       }
+      if ((await macDevMode).contains('disabled')) {
+        xcodeStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+          'Your Mac needs to enabled for developer mode before using Xcode for the first time.\n'
+          'Run \'sudo DevToolsSecurity -enable\' to enable developer mode.'
+        ));
+      }
+
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
@@ -132,7 +106,9 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         messages.add(new ValidationMessage.error(
             'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
             'Download at: https://developer.apple.com/xcode/download/\n'
-            'Once installed, run \'sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\'.'
+            'Or install Xcode via the App Store.\n'
+            'Once installed, run:\n'
+            '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer'
         ));
       }
     }
@@ -149,22 +125,28 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
     if (hasHomebrew) {
       brewStatus = ValidationType.installed;
 
-      if (!await hasWorkingLibimobiledevice) {
+      if (!iMobileDevice.isInstalled) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-            'libimobiledevice is incompatible with the installed Xcode version. To update, run:\n'
-                '  brew update\n'
-                '  brew uninstall --ignore-dependencies libimobiledevice\n'
-                '  brew install --HEAD libimobiledevice'
+            'libimobiledevice and ideviceinstaller are not installed. To install, run:\n'
+            '  brew install --HEAD libimobiledevice\n'
+            '  brew install ideviceinstaller'
         ));
-      }
-
-      if (!await hasIDeviceInstaller) {
+      } else if (!await iMobileDevice.isWorking) {
         brewStatus = ValidationType.partial;
         messages.add(new ValidationMessage.error(
-          'ideviceinstaller not available; this is used to discover connected iOS devices.\n'
+            'Verify that all connected devices have been paired with this computer in Xcode.\n'
+            'If all devices have been paired, libimobiledevice and ideviceinstaller may require updating.\n'
+            'To update, run:\n'
+            '  brew uninstall --ignore-dependencies libimobiledevice\n'
+            '  brew install --HEAD libimobiledevice\n'
+            '  brew install ideviceinstaller'
+        ));
+      } else if (!await hasIDeviceInstaller) {
+        brewStatus = ValidationType.partial;
+        messages.add(new ValidationMessage.error(
+          'ideviceinstaller is not installed; this is used to discover connected iOS devices.\n'
           'To install, run:\n'
-          '  brew update\n'
           '  brew install --HEAD libimobiledevice\n'
           '  brew install ideviceinstaller'
         ));
@@ -179,21 +161,19 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         if (await hasIosDeploy) {
           messages.add(new ValidationMessage.error(
             'ios-deploy out of date ($iosDeployMinimumVersion is required). To upgrade:\n'
-            '  brew update\n'
             '  brew upgrade ios-deploy'
           ));
         } else {
           messages.add(new ValidationMessage.error(
             'ios-deploy not installed. To install:\n'
-            '  brew update\n'
             '  brew install ios-deploy'
           ));
         }
       }
 
-      if (await isCocoaPodsInstalledAndMeetsVersionCheck) {
-        if (await isCocoaPodsInitialized) {
-          messages.add(new ValidationMessage('CocoaPods version ${await cocoaPodsVersionText}'));
+      if (await cocoaPods.isCocoaPodsInstalledAndMeetsVersionCheck) {
+        if (await cocoaPods.isCocoaPodsInitialized) {
+          messages.add(new ValidationMessage('CocoaPods version ${await cocoaPods.cocoaPodsVersionText}'));
         } else {
           brewStatus = ValidationType.partial;
           messages.add(new ValidationMessage.error(
@@ -206,7 +186,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
         }
       } else {
         brewStatus = ValidationType.partial;
-        if (!await hasCocoaPods) {
+        if (!await cocoaPods.hasCocoaPods) {
           messages.add(new ValidationMessage.error(
             'CocoaPods not installed.\n'
             '$noCocoaPodsConsequence\n'
@@ -215,7 +195,7 @@ class IOSWorkflow extends DoctorValidator implements Workflow {
           ));
         } else {
           messages.add(new ValidationMessage.error(
-            'CocoaPods out of date ($cocoaPodsMinimumVersion is required).\n'
+            'CocoaPods out of date ($cocoaPods.cocoaPodsMinimumVersion is required).\n'
             '$noCocoaPodsConsequence\n'
             'To upgrade:\n'
             '$cocoaPodsUpgradeInstructions'

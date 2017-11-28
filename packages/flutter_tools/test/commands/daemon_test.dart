@@ -8,7 +8,6 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
-import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:test/test.dart';
@@ -220,7 +219,8 @@ void main() {
       expect(response['params'], containsPair('title', 'Unable to list devices'));
       expect(response['params'], containsPair('message', contains('Unable to discover Android devices')));
     }, overrides: <Type, Generator>{
-      Doctor: () => new MockDoctor(androidCanListDevices: false),
+      AndroidWorkflow: () => new MockAndroidWorkflow(canListDevices: false),
+      IOSWorkflow: () => new MockIOSWorkflow(),
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
@@ -263,36 +263,24 @@ void main() {
         commands.close();
       });
     }, overrides: <Type, Generator>{
-      Doctor: () => new MockDoctor(),
+      AndroidWorkflow: () => new MockAndroidWorkflow(),
+      IOSWorkflow: () => new MockIOSWorkflow(),
     });
   });
 }
 
 bool _notEvent(Map<String, dynamic> map) => map['event'] == null;
 
-class MockDoctor extends Doctor {
-  final bool androidCanListDevices;
-  final bool iosCanListDevices;
-
-  MockDoctor({this.androidCanListDevices: true, this.iosCanListDevices: true});
-
-  @override
-  AndroidWorkflow get androidWorkflow => new MockAndroidWorkflow(androidCanListDevices);
-
-  @override
-  IOSWorkflow get iosWorkflow => new MockIosWorkflow(iosCanListDevices);
-}
-
 class MockAndroidWorkflow extends AndroidWorkflow {
+  MockAndroidWorkflow({ this.canListDevices: true });
+
   @override
   final bool canListDevices;
-
-  MockAndroidWorkflow(this.canListDevices);
 }
 
-class MockIosWorkflow extends IOSWorkflow {
+class MockIOSWorkflow extends IOSWorkflow {
+  MockIOSWorkflow({ this.canListDevices:true });
+
   @override
   final bool canListDevices;
-
-  MockIosWorkflow(this.canListDevices);
 }

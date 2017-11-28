@@ -39,14 +39,14 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to dynmically insert or remove
+/// This widget's [AnimatedListState] can be used to dynamically insert or remove
 /// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
 /// use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
-  AnimatedList({
+  const AnimatedList({
     Key key,
     @required this.itemBuilder,
     this.initialItemCount: 0,
@@ -57,17 +57,16 @@ class AnimatedList extends StatefulWidget {
     this.physics,
     this.shrinkWrap: false,
     this.padding,
-  }) : super(key: key) {
-    assert(itemBuilder != null);
-    assert(initialItemCount != null && initialItemCount >= 0);
-  }
+  }) : assert(itemBuilder != null),
+       assert(initialItemCount != null && initialItemCount >= 0),
+       super(key: key);
 
   /// Called, as needed, to build list item widgets.
   ///
   /// List items are only built when they're scrolled into view.
   ///
   /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// posiition in the list. The value of the index parameter will be between 0
+  /// position in the list. The value of the index parameter will be between 0
   /// and [initialItemCount] plus the total number of items that have been
   /// inserted with [AnimatedListState.insertItem] and less the total number of
   /// items that have been removed with [AnimatedListState.removeItem].
@@ -78,8 +77,8 @@ class AnimatedList extends StatefulWidget {
 
   /// The number of items the list will start with.
   ///
-  /// The appareance of the initial items is not animated. They
-  /// are created, as needed, by [itemBuilder] with an animation paramter
+  /// The appearance of the initial items is not animated. They
+  /// are created, as needed, by [itemBuilder] with an animation parameter
   /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
 
@@ -106,6 +105,14 @@ class AnimatedList extends StatefulWidget {
   /// view is scrolled.
   ///
   /// Must be null if [primary] is true.
+  ///
+  /// A [ScrollController] serves several purposes. It can be used to control
+  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
+  /// It can be used to control whether the scroll view should automatically
+  /// save and restore its scroll position in the [PageStorage] (see
+  /// [ScrollController.keepScrollOffset]). It can be used to read the current
+  /// scroll position (see [ScrollController.offset]), or change it (see
+  /// [ScrollController.animateTo]).
   final ScrollController controller;
 
   /// Whether this is the primary scroll view associated with the parent
@@ -143,7 +150,7 @@ class AnimatedList extends StatefulWidget {
   final bool shrinkWrap;
 
   /// The amount of space by which to inset the children.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -154,8 +161,8 @@ class AnimatedList extends StatefulWidget {
   /// AnimatedListState animatedList = AnimatedList.of(context);
   /// ```
   static AnimatedListState of(BuildContext context, { bool nullOk: false }) {
-    assert(nullOk != null);
     assert(context != null);
+    assert(nullOk != null);
     final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
     if (nullOk || result != null)
       return result;

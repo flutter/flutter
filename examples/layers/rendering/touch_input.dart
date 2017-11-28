@@ -48,7 +48,7 @@ class RenderDots extends RenderBox {
   @override
   bool get sizedByParent => true;
 
-  /// By selecting the biggest value permitted by the incomming constraints
+  /// By selecting the biggest value permitted by the incoming constraints
   /// during layout, this function makes this render object as large as
   /// possible (i.e., fills the entire screen).
   @override
@@ -104,17 +104,19 @@ void main() {
   final RenderParagraph paragraph = new RenderParagraph(
     const TextSpan(
       style: const TextStyle(color: Colors.black87),
-      text: "Touch me!"
-    )
+      text: 'Touch me!',
+    ),
+    textDirection: TextDirection.ltr,
   );
   // A stack is a render object that layers its children on top of each other.
   // The bottom later is our RenderDots object, and on top of that we show the
   // text.
   final RenderStack stack = new RenderStack(
+    textDirection: TextDirection.ltr,
     children: <RenderBox>[
       new RenderDots(),
       paragraph,
-    ]
+    ],
   );
   // The "parentData" field of a render object is controlled by the render
   // object's parent render object. Now that we've added the paragraph as a

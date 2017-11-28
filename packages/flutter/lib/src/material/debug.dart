@@ -38,6 +38,6 @@ bool debugCheckHasMaterial(BuildContext context) {
       );
     }
     return true;
-  });
+  }());
   return true;
 }

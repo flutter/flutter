@@ -31,8 +31,8 @@ Future<Null> parseServiceConfigs(
   Map<String, Uri> packageMap;
   try {
     packageMap = new PackageMap(PackageMap.globalPackagesPath).map;
-  } on FormatException catch(e) {
-    printTrace('Invalid ".packages" file while parsing service configs:\n$e');
+  } on FormatException catch (error) {
+    printTrace('Invalid ".packages" file while parsing service configs:\n$error');
     return;
   }
 
@@ -40,9 +40,9 @@ Future<Null> parseServiceConfigs(
   try {
     manifest = _loadYamlFile(_kFlutterManifestPath);
     manifest = manifest['flutter'];
-  } catch (e) {
+  } catch (error) {
     printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(e);
+    printError('$error');
     return;
   }
   if (manifest == null || manifest['services'] == null) {
@@ -69,20 +69,18 @@ Future<Null> parseServiceConfigs(
 
     if (jars != null && serviceConfig['jars'] is Iterable) {
       for (String jar in serviceConfig['jars'])
-        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service, unzip: false)));
+        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service)));
     }
   }
 }
 
-Future<String> getServiceFromUrl(
-  String url, String rootDir, String serviceName, { bool unzip: false }
-) async {
-  if (url.startsWith("android-sdk:") && androidSdk != null) {
+Future<String> getServiceFromUrl(String url, String rootDir, String serviceName) async {
+  if (url.startsWith('android-sdk:') && androidSdk != null) {
     // It's something shipped in the standard android SDK.
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
-  } else if (url.startsWith("http")) {
+  } else if (url.startsWith('http')) {
     // It's a regular file to download.
-    return await cache.getThirdPartyFile(url, serviceName, unzip: unzip);
+    return await cache.getThirdPartyFile(url, serviceName);
   } else {
     // Assume url is a path relative to the service's root dir.
     return fs.path.join(rootDir, url);

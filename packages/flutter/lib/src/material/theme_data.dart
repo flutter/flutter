@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show Color, hashValues;
 
 import 'package:flutter/foundation.dart';
@@ -42,32 +41,6 @@ const Color _kLightThemeSplashColor = const Color(0x66C8C8C8);
 // means we assume the values in the spec are actually correct.
 const Color _kDarkThemeHighlightColor = const Color(0x40CCCCCC);
 const Color _kDarkThemeSplashColor = const Color(0x40CCCCCC);
-
-// See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-double _linearizeColorComponent(double component) {
-  if (component <= 0.03928)
-    return component / 12.92;
-  return math.pow((component + 0.055) / 1.055, 2.4);
-}
-
-Brightness _estimateBrightnessForColor(Color color) {
-  // See <https://www.w3.org/TR/WCAG20/#relativeluminancedef>
-  final double R = _linearizeColorComponent(color.red / 0xFF);
-  final double G = _linearizeColorComponent(color.green / 0xFF);
-  final double B = _linearizeColorComponent(color.blue / 0xFF);
-  final double L = 0.2126 * R + 0.7152 * G + 0.0722 * B;
-
-  // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
-  // The spec says to use kThreshold=0.0525, but Material Design appears to bias
-  // more towards using light text than WCAG20 recommends. Material Design spec
-  // doesn't say what value to use, but 0.15 seemed close to what the Material
-  // Design spec shows for its color palette on
-  // <https://material.io/guidelines/style/color.html#color-color-palette>.
-  const double kThreshold = 0.15;
-  if ((L + 0.05) * (L + 0.05) > kThreshold )
-    return Brightness.light;
-  return Brightness.dark;
-}
 
 /// Holds the color and typography values for a material design theme.
 ///
@@ -134,10 +107,10 @@ class ThemeData {
     final bool isDark = brightness == Brightness.dark;
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch[500];
-    primaryColorBrightness ??= _estimateBrightnessForColor(primaryColor);
+    primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
     final bool primaryIsDark = primaryColorBrightness == Brightness.dark;
     accentColor ??= isDark ? Colors.tealAccent[200] : primarySwatch[500];
-    accentColorBrightness ??= _estimateBrightnessForColor(accentColor);
+    accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
     scaffoldBackgroundColor ??= canvasColor;
@@ -274,14 +247,26 @@ class ThemeData {
        assert(platform != null);
 
   /// A default light blue theme.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.light() => new ThemeData(brightness: Brightness.light);
 
   /// A default dark theme with a teal accent color.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
   factory ThemeData.dark() => new ThemeData(brightness: Brightness.dark);
 
-  /// The default theme. Same as [new ThemeData.light].
+  /// The default color theme. Same as [new ThemeData.light].
   ///
   /// This is used by [Theme.of] when no theme has been specified.
+  ///
+  /// This theme does not contain text geometry. Instead, it is expected that
+  /// this theme is localized using text geometry using [ThemeData.localize].
+  ///
+  /// Most applications would use [Theme.of], which provides correct localized
+  /// text geometry.
   factory ThemeData.fallback() => new ThemeData.light();
 
   /// The brightness of the overall theme of the application. Used by widgets
@@ -467,6 +452,70 @@ class ThemeData {
     );
   }
 
+  // The number 5 was chosen without any real science or research behind it. It
+  // just seemed like a number that's not too big (we should be able to fit 5
+  // copies of ThemeData in memory comfortably) and not too small (most apps
+  // shouldn't have more than 5 theme/localization pairs).
+  static const int _localizedThemeDataCacheSize = 5;
+
+  /// Caches localized themes to speed up the [localize] method.
+  static final _FifoCache<_IdentityThemeDataCacheKey, ThemeData> _localizedThemeDataCache = new _FifoCache<_IdentityThemeDataCacheKey, ThemeData>(_localizedThemeDataCacheSize);
+
+  /// Returns a new theme built by merging the text geometry provided by the
+  /// [localTextGeometry] theme with the [baseTheme].
+  ///
+  /// For those text styles in the [baseTheme] whose [TextStyle.inherit] is set
+  /// to true, the returned theme's text styles inherit the geometric properties
+  /// of [localTextGeometry]. The resulting text styles' [TextStyle.inherit] is
+  /// set to those provided by [localTextGeometry].
+  static ThemeData localize(ThemeData baseTheme, TextTheme localTextGeometry) {
+    // WARNING: this method memoizes the result in a cache based on the
+    // previously seen baseTheme and localTextGeometry. Memoization is safe
+    // because all inputs and outputs of this function are deeply immutable, and
+    // the computations are referentially transparent. It only short-circuits
+    // the computation if the new inputs are identical() to the previous ones.
+    // It does not use the == operator, which performs a costly deep comparison.
+    //
+    // When changing this method, make sure the memoization logic is correct.
+    // Remember:
+    //
+    // There are only two hard things in Computer Science: cache invalidation
+    // and naming things. -- Phil Karlton
+    assert(baseTheme != null);
+    assert(localTextGeometry != null);
+
+    return _localizedThemeDataCache.putIfAbsent(
+      new _IdentityThemeDataCacheKey(baseTheme, localTextGeometry),
+      () {
+        return baseTheme.copyWith(
+          primaryTextTheme: localTextGeometry.merge(baseTheme.primaryTextTheme),
+          accentTextTheme: localTextGeometry.merge(baseTheme.accentTextTheme),
+          textTheme: localTextGeometry.merge(baseTheme.textTheme),
+        );
+      },
+    );
+  }
+
+  /// Determines whether the given [Color] is [Brightness.light] or
+  /// [Brightness.dark].
+  ///
+  /// This compares the luminosity of the given color to a threshold value that
+  /// matches the material design specification.
+  static Brightness estimateBrightnessForColor(Color color) {
+    final double relativeLuminance = color.computeLuminance();
+
+    // See <https://www.w3.org/TR/WCAG20/#contrast-ratiodef>
+    // The spec says to use kThreshold=0.0525, but Material Design appears to bias
+    // more towards using light text than WCAG20 recommends. Material Design spec
+    // doesn't say what value to use, but 0.15 seemed close to what the Material
+    // Design spec shows for its color palette on
+    // <https://material.io/guidelines/style/color.html#color-color-palette>.
+    const double kThreshold = 0.15;
+    if ((relativeLuminance + 0.05) * (relativeLuminance + 0.05) > kThreshold )
+      return Brightness.light;
+    return Brightness.dark;
+  }
+
   /// Linearly interpolate between two themes.
   ///
   /// The arguments must not be null.
@@ -584,4 +633,60 @@ class ThemeData {
 
   @override
   String toString() => '$runtimeType(${ platform != defaultTargetPlatform ? "$platform " : ''}$brightness $primaryColor etc...)';
+}
+
+class _IdentityThemeDataCacheKey {
+  _IdentityThemeDataCacheKey(this.baseTheme, this.localTextGeometry);
+
+  final ThemeData baseTheme;
+  final TextTheme localTextGeometry;
+
+  // Using XOR to make the hash function as fast as possible (e.g. Jenkins is
+  // noticeably slower).
+  @override
+  int get hashCode => identityHashCode(baseTheme) ^ identityHashCode(localTextGeometry);
+
+  @override
+  bool operator ==(Object other) {
+    // We are explicitly ignoring the possibility that the types might not
+    // match in the interests of speed.
+    final _IdentityThemeDataCacheKey otherKey = other;
+    return identical(baseTheme, otherKey.baseTheme) && identical(localTextGeometry, otherKey.localTextGeometry);
+  }
+}
+
+/// Cache of objects of limited size that uses the first in first out eviction
+/// strategy (a.k.a least recently inserted).
+///
+/// The key that was inserted before all other keys is evicted first, i.e. the
+/// one inserted least recently.
+class _FifoCache<K, V> {
+  _FifoCache(this._maximumSize)
+    : assert(_maximumSize != null && _maximumSize > 0);
+
+  /// In Dart the map literal uses a linked hash-map implementation, whose keys
+  /// are stored such that [Map.keys] returns them in the order they were
+  /// inserted.
+  final Map<K, V> _cache = <K, V>{};
+
+  /// Maximum number of entries to store in the cache.
+  ///
+  /// Once this many entries have been cached, the entry inserted least recently
+  /// is evicted when adding a new entry.
+  final int _maximumSize;
+
+  /// Returns the previously cached value for the given key, if available;
+  /// if not, calls the given callback to obtain it first.
+  ///
+  /// The arguments must not be null.
+  V putIfAbsent(K key, V loader()) {
+    assert(key != null);
+    assert(loader != null);
+    final V result = _cache[key];
+    if (result != null)
+      return result;
+    if (_cache.length == _maximumSize)
+      _cache.remove(_cache.keys.first);
+    return _cache[key] = loader();
+  }
 }

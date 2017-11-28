@@ -52,16 +52,17 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new DecoratedBox(decoration: kBoxDecorationA),
           new Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
+            child: new DecoratedBox(decoration: kBoxDecorationB),
           ),
           new DecoratedBox(decoration: kBoxDecorationC),
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -72,20 +73,21 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             bottom: 5.0,
             right: 7.0,
-            child: new DecoratedBox(decoration: kBoxDecorationA)
+            child: new DecoratedBox(decoration: kBoxDecorationA),
           ),
           new Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(decoration: kBoxDecorationB)
+            child: new DecoratedBox(decoration: kBoxDecorationB),
           ),
           new DecoratedBox(decoration: kBoxDecorationC),
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -100,20 +102,21 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             bottom: 5.0,
             right: 7.0,
-            child: kDecoratedBoxA
+            child: kDecoratedBoxA,
           ),
           new Positioned(
             top: 10.0,
             left: 10.0,
-            child: kDecoratedBoxB
+            child: kDecoratedBoxB,
           ),
           kDecoratedBoxC,
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -124,20 +127,21 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             bottom: 6.0,
             right: 8.0,
-            child: kDecoratedBoxA
+            child: kDecoratedBoxA,
           ),
           new Positioned(
             left: 10.0,
             right: 10.0,
-            child: kDecoratedBoxB
+            child: kDecoratedBoxB,
           ),
           kDecoratedBoxC,
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -148,16 +152,17 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
           new Positioned(
             left: 11.0,
             right: 12.0,
-            child: new Container(child: kDecoratedBoxB)
+            child: new Container(child: kDecoratedBoxB),
           ),
           kDecoratedBoxC,
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -168,20 +173,21 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           kDecoratedBoxA,
           new Positioned(
             right: 10.0,
-            child: new Container(child: kDecoratedBoxB)
+            child: new Container(child: kDecoratedBoxB),
           ),
           new Container(
             child: new Positioned(
               top: 8.0,
-              child: kDecoratedBoxC
-            )
-          )
-        ]
-      )
+              child: kDecoratedBoxC,
+            ),
+          ),
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -192,13 +198,14 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             right: 10.0,
-            child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)
+            child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -214,13 +221,14 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 7.0,
-            child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB)
+            child: new FlipWidget(left: kDecoratedBoxA, right: kDecoratedBoxB),
           ),
-        ]
-      )
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -235,7 +243,7 @@ void main() {
     ]);
 
     await tester.pumpWidget(
-      new Stack()
+      new Stack(textDirection: TextDirection.ltr)
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -244,6 +252,7 @@ void main() {
   testWidgets('ParentDataWidget conflicting data', (WidgetTester tester) async {
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 5.0,
@@ -251,15 +260,15 @@ void main() {
             child: new Positioned(
               top: 6.0,
               left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB)
-            )
-          )
-        ]
-      )
+              child: new DecoratedBox(decoration: kBoxDecorationB),
+            ),
+          ),
+        ],
+      ),
     );
     expect(tester.takeException(), isFlutterError);
 
-    await tester.pumpWidget(new Stack());
+    await tester.pumpWidget(new Stack(textDirection: TextDirection.ltr));
 
     checkTree(tester, <TestParentData>[]);
 
@@ -270,16 +279,16 @@ void main() {
             new Positioned(
               top: 6.0,
               left: 7.0,
-              child: new DecoratedBox(decoration: kBoxDecorationB)
-            )
-          ]
-        )
-      )
+              child: new DecoratedBox(decoration: kBoxDecorationB),
+            ),
+          ],
+        ),
+      ),
     );
     expect(tester.takeException(), isFlutterError);
 
     await tester.pumpWidget(
-      new Stack()
+      new Stack(textDirection: TextDirection.ltr)
     );
 
     checkTree(tester, <TestParentData>[]);
@@ -290,14 +299,15 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
-          )
-        ]
-      )
+            child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+          ),
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -306,17 +316,18 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 10.0,
             left: 10.0,
             child: new DecoratedBox(
               decoration: kBoxDecorationB,
-              child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
-            )
-          )
-        ]
-      )
+              child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+            ),
+          ),
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -325,14 +336,15 @@ void main() {
 
     await tester.pumpWidget(
       new Stack(
+        textDirection: TextDirection.ltr,
         children: <Widget>[
           new Positioned(
             top: 10.0,
             left: 10.0,
-            child: new DecoratedBox(key: key, decoration: kBoxDecorationA)
-          )
-        ]
-      )
+            child: new DecoratedBox(key: key, decoration: kBoxDecorationA),
+          ),
+        ],
+      ),
     );
 
     checkTree(tester, <TestParentData>[
@@ -344,6 +356,7 @@ void main() {
     await tester.pumpWidget(new Row(
       children: <Widget>[
         new Stack(
+        textDirection: TextDirection.ltr,
           children: <Widget>[
             new Expanded(
               child: new Container()

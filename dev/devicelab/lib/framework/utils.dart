@@ -5,7 +5,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
+import 'package:args/args.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
@@ -96,6 +98,21 @@ void copy(File sourceFile, Directory targetDirectory, {String name}) {
   target.writeAsBytesSync(sourceFile.readAsBytesSync());
 }
 
+void recursiveCopy(Directory source, Directory target) {
+  if (!target.existsSync())
+    target.createSync();
+
+  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
+    final String name = path.basename(entity.path);
+    if (entity is Directory)
+      recursiveCopy(entity, new Directory(path.join(target.path, name)));
+    else if (entity is File) {
+      final File dest = new File(path.join(target.path, name));
+      dest.writeAsBytesSync(entity.readAsBytesSync());
+    }
+  }
+}
+
 FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove
@@ -115,7 +132,12 @@ void mkdirs(Directory directory) {
 bool exists(FileSystemEntity entity) => entity.existsSync();
 
 void section(String title) {
-  print('\n••• $title •••');
+  title = '╡ ••• $title ••• ╞';
+  final String line = '═' * math.max((80 - title.length) ~/ 2, 2);
+  String output = '$line$title$line';
+  if (output.length == 79)
+    output += '═';
+  print('\n\n$output\n');
 }
 
 Future<String> getDartVersion() async {
@@ -166,7 +188,7 @@ Future<Process> startProcess(
   String workingDirectory,
 }) async {
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('Executing: $command');
+  print('\nExecuting: $command');
   environment ??= <String, String>{};
   environment['BOT'] = 'true';
   final Process process = await _processManager.start(
@@ -177,7 +199,8 @@ Future<Process> startProcess(
   final ProcessInfo processInfo = new ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.whenComplete(() {
+  process.exitCode.then((int exitCode) {
+    print('exitcode: $exitCode');
     _runningProcesses.remove(processInfo);
   });
 
@@ -210,15 +233,22 @@ Future<int> exec(
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
 
+  final Completer<Null> stdoutDone = new Completer<Null>();
+  final Completer<Null> stderrDone = new Completer<Null>();
   process.stdout
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(print);
+      .listen((String line) {
+        print('stdout: $line');
+      }, onDone: () { stdoutDone.complete(); });
   process.stderr
       .transform(UTF8.decoder)
       .transform(const LineSplitter())
-      .listen(stderr.writeln);
+      .listen((String line) {
+        print('stderr: $line');
+      }, onDone: () { stderrDone.complete(); });
 
+  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
@@ -229,7 +259,7 @@ Future<int> exec(
 
 /// Executes a command and returns its standard output as a String.
 ///
-/// Standard error is redirected to the current process' standard error stream.
+/// For logging purposes, the command's output is also printed out.
 Future<String> eval(
   String executable,
   List<String> arguments, {
@@ -237,16 +267,31 @@ Future<String> eval(
   bool canFail: false,
 }) async {
   final Process process = await startProcess(executable, arguments, environment: environment);
-  process.stderr.listen((List<int> data) {
-    stderr.add(data);
-  });
-  final String output = await UTF8.decodeStream(process.stdout);
+
+  final StringBuffer output = new StringBuffer();
+  final Completer<Null> stdoutDone = new Completer<Null>();
+  final Completer<Null> stderrDone = new Completer<Null>();
+  process.stdout
+      .transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        print('stdout: $line');
+        output.writeln(line);
+      }, onDone: () { stdoutDone.complete(); });
+  process.stderr
+      .transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+        print('stderr: $line');
+      }, onDone: () { stderrDone.complete(); });
+
+  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
     fail('Executable failed with exit code $exitCode.');
 
-  return output.trimRight();
+  return output.toString().trimRight();
 }
 
 Future<int> flutter(String command, {
@@ -379,35 +424,6 @@ void checkNotNull(Object o1,
     throw 'o10 is null';
 }
 
-/// Add benchmark values to a JSON results file.
-///
-/// If the file contains information about how long the benchmark took to run
-/// (a `time` field), then return that info.
-// TODO(yjbanov): move this data to __metadata__
-num addBuildInfo(File jsonFile,
-    {num expected, String sdk, String commit, DateTime timestamp}) {
-  Map<String, dynamic> json;
-
-  if (jsonFile.existsSync())
-    json = JSON.decode(jsonFile.readAsStringSync());
-  else
-    json = <String, dynamic>{};
-
-  if (expected != null)
-    json['expected'] = expected;
-  if (sdk != null)
-    json['sdk'] = sdk;
-  if (commit != null)
-    json['commit'] = commit;
-  if (timestamp != null)
-    json['timestamp'] = timestamp.millisecondsSinceEpoch;
-
-  jsonFile.writeAsStringSync(jsonEncode(json));
-
-  // Return the elapsed time of the benchmark (if any).
-  return json['time'];
-}
-
 /// Splits [from] into lines and selects those that contain [pattern].
 Iterable<String> grep(Pattern pattern, {@required String from}) {
   return from.split('\n').where((String line) {
@@ -452,3 +468,33 @@ Future<int> findAvailablePort() async {
 }
 
 bool canRun(String path) => _processManager.canRun(path);
+
+String extractCloudAuthTokenArg(List<String> rawArgs) {
+  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
+  ArgResults args;
+  try {
+    args = argParser.parse(rawArgs);
+  } on FormatException catch(error) {
+    stderr.writeln('${error.message}\n');
+    stderr.writeln('Usage:\n');
+    stderr.writeln(argParser.usage);
+    return null;
+  }
+
+  final String token = args['cloud-auth-token'];
+  if (token == null) {
+    stderr.writeln('Required option --cloud-auth-token not found');
+    return null;
+  }
+  return token;
+}
+
+// "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
+final RegExp _kObservatoryRegExp = new RegExp(r'An Observatory debugger .* is available at: (\S+:(\d+))');
+
+bool lineContainsServicePort(String line) => line.contains(_kObservatoryRegExp);
+
+int parseServicePort(String line) {
+  final Match match = _kObservatoryRegExp.firstMatch(line);
+  return match == null ? null : int.parse(match.group(2));
+}

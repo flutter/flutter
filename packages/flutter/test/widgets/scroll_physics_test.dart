@@ -75,4 +75,120 @@ void main() {
     expect(types(page.applyTo(bounce.applyTo(clamp.applyTo(never.applyTo(always))))),
       'PageScrollPhysics BouncingScrollPhysics ClampingScrollPhysics NeverScrollableScrollPhysics AlwaysScrollableScrollPhysics');
   });
+
+  group('BouncingScrollPhysics test', () {
+    BouncingScrollPhysics physicsUnderTest;
+
+    setUp(() {
+      physicsUnderTest = const BouncingScrollPhysics();
+    });
+
+    test('overscroll is progressively harder', () {
+      final ScrollMetrics lessOverscrolledPosition = new FixedScrollMetrics(
+          minScrollExtent: 0.0,
+          maxScrollExtent: 1000.0,
+          pixels: -20.0,
+          viewportDimension: 100.0,
+          axisDirection: AxisDirection.down,
+      );
+
+      final ScrollMetrics moreOverscrolledPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -40.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      final double lessOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(lessOverscrolledPosition, 10.0);
+
+      final double moreOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(moreOverscrolledPosition, 10.0);
+
+      expect(lessOverscrollApplied, greaterThan(1.0));
+      expect(lessOverscrollApplied, lessThan(20.0));
+
+      expect(moreOverscrollApplied, greaterThan(1.0));
+      expect(moreOverscrollApplied, lessThan(20.0));
+
+      // Scrolling from a more overscrolled position meets more resistance.
+      expect(lessOverscrollApplied.abs(), greaterThan(moreOverscrollApplied.abs()));
+    });
+
+    test('easing an overscroll still has resistance', () {
+      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      final double easingApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+
+      expect(easingApplied, lessThan(-1.0));
+      expect(easingApplied, greaterThan(-10.0));
+    });
+
+    test('no resistance when not overscrolled', () {
+      final ScrollMetrics scrollPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: 300.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, 10.0), 10.0);
+      expect(physicsUnderTest.applyPhysicsToUserOffset(scrollPosition, -10.0), -10.0);
+    });
+
+    test('easing an overscroll meets less resistance than tensioning', () {
+      final ScrollMetrics overscrolledPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      final double easingApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, -10.0);
+      final double tensioningApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(overscrolledPosition, 10.0);
+
+      expect(easingApplied.abs(), greaterThan(tensioningApplied.abs()));
+    });
+
+    test('overscroll a small list and a big list works the same way', () {
+      final ScrollMetrics smallListOverscrolledPosition = new FixedScrollMetrics(
+          minScrollExtent: 0.0,
+          maxScrollExtent: 10.0,
+          pixels: -20.0,
+          viewportDimension: 100.0,
+          axisDirection: AxisDirection.down,
+      );
+
+      final ScrollMetrics bigListOverscrolledPosition = new FixedScrollMetrics(
+        minScrollExtent: 0.0,
+        maxScrollExtent: 1000.0,
+        pixels: -20.0,
+        viewportDimension: 100.0,
+        axisDirection: AxisDirection.down,
+      );
+
+      final double smallListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(smallListOverscrolledPosition, 10.0);
+
+      final double bigListOverscrollApplied =
+          physicsUnderTest.applyPhysicsToUserOffset(bigListOverscrolledPosition, 10.0);
+
+      expect(smallListOverscrollApplied, equals(bigListOverscrollApplied));
+
+      expect(smallListOverscrollApplied, greaterThan(1.0));
+      expect(smallListOverscrollApplied, lessThan(20.0));
+    });
+  });
 }

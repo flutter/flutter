@@ -31,6 +31,9 @@ import 'theme.dart';
 /// [secondary] widget is placed on the opposite side. This maps to the
 /// [ListTile.leading] and [ListTile.trailing] properties of [ListTile].
 ///
+/// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
+/// callback.
+///
 /// ## Sample code
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations

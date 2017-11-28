@@ -51,6 +51,9 @@ class Switch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage
   }) : super(key: key);
@@ -89,6 +92,21 @@ class Switch extends StatefulWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to accent color of the current [Theme] with the opacity set at 50%.
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  final Color inactiveTrackColor;
+
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
 
@@ -99,11 +117,10 @@ class Switch extends StatefulWidget {
   _SwitchState createState() => new _SwitchState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('value: ${value ? "on" : "off"}');
-    if (onChanged == null)
-      description.add('disabled');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('value', value: value, ifTrue: 'on', ifFalse: 'off', showName: true));
+    description.add(new ObjectFlagProperty<ValueChanged<bool>>('onChanged', onChanged, ifNull: 'disabled'));
   }
 }
 
@@ -115,16 +132,16 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
     final bool isDark = themeData.brightness == Brightness.dark;
 
     final Color activeThumbColor = widget.activeColor ?? themeData.accentColor;
-    final Color activeTrackColor = activeThumbColor.withAlpha(0x80);
+    final Color activeTrackColor = widget.activeTrackColor ?? activeThumbColor.withAlpha(0x80);
 
     Color inactiveThumbColor;
     Color inactiveTrackColor;
     if (widget.onChanged != null) {
-      inactiveThumbColor = isDark ? Colors.grey.shade400 : Colors.grey.shade50;
-      inactiveTrackColor = isDark ? Colors.white30 : Colors.black26;
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade400 : Colors.grey.shade50);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white30 : Colors.black26);
     } else {
-      inactiveThumbColor = isDark ? Colors.grey.shade800 : Colors.grey.shade400;
-      inactiveTrackColor = isDark ? Colors.white10 : Colors.black12;
+      inactiveThumbColor = widget.inactiveThumbColor ?? (isDark ? Colors.grey.shade800 : Colors.grey.shade400);
+      inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
 
     return new _SwitchRenderObjectWidget(
@@ -169,18 +186,21 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   final TickerProvider vsync;
 
   @override
-  _RenderSwitch createRenderObject(BuildContext context) => new _RenderSwitch(
-    value: value,
-    activeColor: activeColor,
-    inactiveColor: inactiveColor,
-    activeThumbImage: activeThumbImage,
-    inactiveThumbImage: inactiveThumbImage,
-    activeTrackColor: activeTrackColor,
-    inactiveTrackColor: inactiveTrackColor,
-    configuration: configuration,
-    onChanged: onChanged,
-    vsync: vsync,
-  );
+  _RenderSwitch createRenderObject(BuildContext context) {
+    return new _RenderSwitch(
+      value: value,
+      activeColor: activeColor,
+      inactiveColor: inactiveColor,
+      activeThumbImage: activeThumbImage,
+      inactiveThumbImage: inactiveThumbImage,
+      activeTrackColor: activeTrackColor,
+      inactiveTrackColor: inactiveTrackColor,
+      configuration: configuration,
+      onChanged: onChanged,
+      textDirection: Directionality.of(context),
+      vsync: vsync,
+    );
+  }
 
   @override
   void updateRenderObject(BuildContext context, _RenderSwitch renderObject) {
@@ -194,6 +214,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
       ..inactiveTrackColor = inactiveTrackColor
       ..configuration = configuration
       ..onChanged = onChanged
+      ..textDirection = Directionality.of(context)
       ..vsync = vsync;
   }
 }
@@ -215,13 +236,16 @@ class _RenderSwitch extends RenderToggleable {
     Color activeTrackColor,
     Color inactiveTrackColor,
     ImageConfiguration configuration,
+    @required TextDirection textDirection,
     ValueChanged<bool> onChanged,
     @required TickerProvider vsync,
-  }) : _activeThumbImage = activeThumbImage,
+  }) : assert(textDirection != null),
+       _activeThumbImage = activeThumbImage,
        _inactiveThumbImage = inactiveThumbImage,
        _activeTrackColor = activeTrackColor,
        _inactiveTrackColor = inactiveTrackColor,
        _configuration = configuration,
+       _textDirection = textDirection,
        super(
          value: value,
          activeColor: activeColor,
@@ -284,6 +308,16 @@ class _RenderSwitch extends RenderToggleable {
     markNeedsPaint();
   }
 
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsPaint();
+  }
+
   @override
   void detach() {
     _cachedThumbPainter?.dispose();
@@ -305,7 +339,15 @@ class _RenderSwitch extends RenderToggleable {
       position
         ..curve = null
         ..reverseCurve = null;
-      positionController.value += details.primaryDelta / _trackInnerLength;
+      final double delta = details.primaryDelta / _trackInnerLength;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          positionController.value -= delta;
+          break;
+        case TextDirection.ltr:
+          positionController.value += delta;
+          break;
+      }
     }
   }
 
@@ -354,9 +396,19 @@ class _RenderSwitch extends RenderToggleable {
     final Canvas canvas = context.canvas;
 
     final bool isActive = onChanged != null;
-    final double currentPosition = position.value;
+    final double currentValue = position.value;
 
-    final Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentPosition) : inactiveTrackColor;
+    double visualPosition;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        visualPosition = 1.0 - currentValue;
+        break;
+      case TextDirection.ltr:
+        visualPosition = currentValue;
+        break;
+    }
+
+    final Color trackColor = isActive ? Color.lerp(inactiveTrackColor, activeTrackColor, currentValue) : inactiveTrackColor;
 
     // Paint the track
     final Paint paint = new Paint()
@@ -372,7 +424,7 @@ class _RenderSwitch extends RenderToggleable {
     canvas.drawRRect(trackRRect, paint);
 
     final Offset thumbPosition = new Offset(
-      kRadialReactionRadius + currentPosition * _trackInnerLength,
+      kRadialReactionRadius + visualPosition * _trackInnerLength,
       size.height / 2.0
     );
 
@@ -381,8 +433,8 @@ class _RenderSwitch extends RenderToggleable {
     try {
       _isPainting = true;
       BoxPainter thumbPainter;
-      final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentPosition) : inactiveColor;
-      final ImageProvider thumbImage = isActive ? (currentPosition < 0.5 ? inactiveThumbImage : activeThumbImage) : inactiveThumbImage;
+      final Color thumbColor = isActive ? Color.lerp(inactiveColor, activeColor, currentValue) : inactiveColor;
+      final ImageProvider thumbImage = isActive ? (currentValue < 0.5 ? inactiveThumbImage : activeThumbImage) : inactiveThumbImage;
       if (_cachedThumbPainter == null || thumbColor != _cachedThumbColor || thumbImage != _cachedThumbImage) {
         _cachedThumbColor = thumbColor;
         _cachedThumbImage = thumbImage;
@@ -391,7 +443,7 @@ class _RenderSwitch extends RenderToggleable {
       thumbPainter = _cachedThumbPainter;
 
       // The thumb contracts slightly during the animation
-      final double inset = 1.0 - (currentPosition - 0.5).abs() * 2.0;
+      final double inset = 1.0 - (currentValue - 0.5).abs() * 2.0;
       final double radius = _kThumbRadius - inset;
       thumbPainter.paint(
         canvas,

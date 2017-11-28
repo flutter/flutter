@@ -12,18 +12,16 @@ import '../demo/all.dart';
 typedef Widget GalleryDemoBuilder();
 
 class GalleryItem extends StatelessWidget {
-  GalleryItem({
+  const GalleryItem({
     @required this.title,
     this.subtitle,
     @required this.category,
     @required this.routeName,
     @required this.buildRoute,
-  }) {
-    assert(title != null);
-    assert(category != null);
-    assert(routeName != null);
-    assert(buildRoute != null);
-  }
+  }) : assert(title != null),
+       assert(category != null),
+       assert(routeName != null),
+       assert(buildRoute != null);
 
   final String title;
   final String subtitle;
@@ -288,6 +286,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new CupertinoDialogDemo(),
     ),
     new GalleryItem(
+      title: 'Navigation',
+      subtitle: 'Cupertino styled navigation patterns',
+      category: 'Cupertino Components',
+      routeName: CupertinoNavigationDemo.routeName,
+      buildRoute: (BuildContext context) => new CupertinoNavigationDemo(),
+    ),
+    new GalleryItem(
       title: 'Sliders',
       subtitle: 'Cupertino styled sliders',
       category: 'Cupertino Components',
@@ -331,7 +336,7 @@ List<GalleryItem> _buildGalleryItems() {
       ),
     );
     return true;
-  });
+  }());
 
   return galleryItems;
 }

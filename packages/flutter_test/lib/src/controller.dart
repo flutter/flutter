@@ -299,11 +299,28 @@ class WidgetController {
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [drag].
+  ///
+  /// The `initialOffset` argument, if non-zero, causes the pointer to first
+  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
+  /// used to simulate a drag followed by a fling, including dragging in the
+  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
+  /// then fling to the left over 200 pixels, ending at the exact point that the
+  /// drag started).
   Future<Null> fling(Finder finder, Offset offset, double speed, {
     int pointer,
     Duration frameInterval: const Duration(milliseconds: 16),
+    Offset initialOffset: Offset.zero,
+    Duration initialOffsetDelay: const Duration(seconds: 1),
   }) {
-    return flingFrom(getCenter(finder), offset, speed, pointer: pointer, frameInterval: frameInterval);
+    return flingFrom(
+      getCenter(finder),
+      offset,
+      speed,
+      pointer: pointer,
+      frameInterval: frameInterval,
+      initialOffset: initialOffset,
+      initialOffsetDelay: initialOffsetDelay,
+    );
   }
 
   /// Attempts a fling gesture starting from the given location, moving the
@@ -320,11 +337,23 @@ class WidgetController {
   /// To make tests more realistic, frames may be pumped during this time (using
   /// calls to [pump]). If the total duration is longer than `frameInterval`,
   /// then one frame is pumped each time that amount of time elapses while
-  /// sending events, or each time an event is synthesised, whichever is rarer.
+  /// sending events, or each time an event is synthesized, whichever is rarer.
   ///
   /// A fling is essentially a drag that ends at a particular speed. If you
   /// just want to drag and end without a fling, use [dragFrom].
-  Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, { int pointer, Duration frameInterval: const Duration(milliseconds: 16) }) {
+  ///
+  /// The `initialOffset` argument, if non-zero, causes the pointer to first
+  /// apply that offset, then pump a delay of `initialOffsetDelay`. This can be
+  /// used to simulate a drag followed by a fling, including dragging in the
+  /// opposite direction of the fling (e.g. dragging 200 pixels to the right,
+  /// then fling to the left over 200 pixels, ending at the exact point that the
+  /// drag started).
+  Future<Null> flingFrom(Offset startLocation, Offset offset, double speed, {
+    int pointer,
+    Duration frameInterval: const Duration(milliseconds: 16),
+    Offset initialOffset: Offset.zero,
+    Duration initialOffsetDelay: const Duration(seconds: 1),
+  }) {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard(() async {
@@ -335,8 +364,13 @@ class WidgetController {
       double timeStamp = 0.0;
       double lastTimeStamp = timeStamp;
       await sendEventToBinding(testPointer.down(startLocation, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+      if (initialOffset.distance > 0.0) {
+        await sendEventToBinding(testPointer.move(startLocation + initialOffset, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
+        timeStamp += initialOffsetDelay.inMilliseconds;
+        await pump(initialOffsetDelay);
+      }
       for (int i = 0; i <= kMoveCount; i += 1) {
-        final Offset location = startLocation + Offset.lerp(Offset.zero, offset, i / kMoveCount);
+        final Offset location = startLocation + initialOffset + Offset.lerp(Offset.zero, offset, i / kMoveCount);
         await sendEventToBinding(testPointer.move(location, timeStamp: new Duration(milliseconds: timeStamp.round())), result);
         timeStamp += timeStampDelta;
         if (timeStamp - lastTimeStamp > frameInterval.inMilliseconds) {
@@ -473,4 +507,8 @@ class WidgetController {
     assert(box != null);
     return box.size;
   }
+
+  /// Returns the rect of the given widget. This is only valid once
+  /// the widget's render object has been laid out at least once.
+  Rect getRect(Finder finder) => getTopLeft(finder) & getSize(finder);
 }

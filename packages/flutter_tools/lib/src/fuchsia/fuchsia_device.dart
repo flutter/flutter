@@ -59,15 +59,16 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage app,
-    BuildMode mode, {
+    ApplicationPackage app, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    String kernelPath,
+    bool previewDart2: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: false,
+    bool ipv6: false,
   }) => new Future<Null>.error('unimplemented');
 
   @override

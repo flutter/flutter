@@ -19,10 +19,11 @@ Widget buildFrame(ScrollPhysics physics) {
       height: 650.0,
       child: new Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        textDirection: TextDirection.ltr,
         children: <Widget>[
-          const SizedBox(height: 100.0, child: const Text('top')),
+          const SizedBox(height: 100.0, child: const Text('top', textDirection: TextDirection.ltr)),
           new Expanded(child: new Container()),
-          const SizedBox(height: 100.0, child: const Text('bottom')),
+          const SizedBox(height: 100.0, child: const Text('bottom', textDirection: TextDirection.ltr)),
         ],
       ),
     ),

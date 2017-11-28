@@ -8,16 +8,19 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('SliverFillRemaining control test', (WidgetTester tester) async {
     final List<Widget> children = new List<Widget>.generate(20, (int i) {
-      return new Container(child: new Text('$i'));
+      return new Container(child: new Text('$i', textDirection: TextDirection.ltr));
     });
 
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new SliverFillViewport(
-            delegate: new SliverChildListDelegate(children),
-          ),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverFillViewport(
+              delegate: new SliverChildListDelegate(children, addAutomaticKeepAlives: false),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -55,5 +58,47 @@ void main() {
     expect(find.text('1'), findsNothing);
     expect(find.text('2'), findsNothing);
     expect(find.text('3'), findsNothing);
+
+    final RenderObject viewport = tester.renderObject<RenderObject>(find.byType(SliverFillViewport).first);
+    expect(viewport, hasAGoodToStringDeep);
+    expect(
+      viewport.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderSliverFillViewport#00000 relayoutBoundary=up1\n'
+        ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
+        ' │ constraints: SliverConstraints(AxisDirection.down,\n'
+        ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
+        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   crossAxisDirection: AxisDirection.right,\n'
+        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
+        ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true)\n'
+        ' │ currently live children: 0 to 0\n'
+        ' │\n'
+        ' └─child with index 0: RenderRepaintBoundary#00000\n'
+        '   │ parentData: index=0; layoutOffset=0.0\n'
+        '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '   │ layer: OffsetLayer#00000\n'
+        '   │ size: Size(800.0, 600.0)\n'
+        '   │ metrics: 50.0% useful (1 bad vs 1 good)\n'
+        '   │ diagnosis: insufficient data to draw conclusion (less than five\n'
+        '   │   repaints)\n'
+        '   │\n'
+        '   └─child: RenderParagraph#00000\n'
+        '     │ parentData: <none> (can use size)\n'
+        '     │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+        '     │ size: Size(800.0, 600.0)\n'
+        '     │ textAlign: start\n'
+        '     │ textDirection: ltr\n'
+        '     │ softWrap: wrapping at box width\n'
+        '     │ overflow: clip\n'
+        '     │ maxLines: unlimited\n'
+        '     ╘═╦══ text ═══\n'
+        '       ║ TextSpan:\n'
+        '       ║   <all styles inherited>\n'
+        '       ║   "0"\n'
+        '       ╚═══════════\n'
+      ),
+    );
   });
 }

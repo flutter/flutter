@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
+import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
 
 import '../android/android.dart' as android;
 import '../android/android_sdk.dart' as android_sdk;
 import '../android/gradle.dart' as gradle;
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/os.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -22,6 +24,7 @@ import '../ios/xcodeproj.dart';
 import '../plugins.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../version.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
@@ -35,11 +38,19 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Also add a flutter_driver dependency and generate a sample \'flutter drive\' test.'
     );
-    argParser.addFlag(
-      'plugin',
-      negatable: true,
-      defaultsTo: false,
-      help: 'Generate a Flutter plugin project.'
+    argParser.addOption(
+      'template',
+      abbr: 't',
+      allowed: <String>['app', 'package', 'plugin'],
+      help: 'Specify the type of project to create.',
+      valueHelp: 'type',
+      allowedHelp: <String, String>{
+        'app': '(default) Generate a Flutter application.',
+        'package': 'Generate a shareable Flutter project containing modular Dart code.',
+        'plugin': 'Generate a shareable Flutter project containing an API in Dart code\n'
+            'with a platform-specific implementation for Android, for iOS code, or for both.',
+      },
+      defaultsTo: 'app',
     );
     argParser.addOption(
       'description',
@@ -74,7 +85,7 @@ class CreateCommand extends FlutterCommand {
     'If run on a project that already exists, this will repair the project, recreating any files that are missing.';
 
   @override
-  String get invocation => "${runner.executableName} $name <output directory>";
+  String get invocation => '${runner.executableName} $name <output directory>';
 
   @override
   Future<Null> runCommand() async {
@@ -109,7 +120,9 @@ class CreateCommand extends FlutterCommand {
     if (!fs.isFileSync(fs.path.join(flutterDriverPackagePath, 'pubspec.yaml')))
       throwToolExit('Unable to find package:flutter_driver in $flutterDriverPackagePath', exitCode: 2);
 
-    final bool generatePlugin = argResults['plugin'];
+    final String template = argResults['template'];
+    final bool generatePlugin = template == 'plugin';
+    final bool generatePackage = template == 'package';
 
     final Directory projectDir = fs.directory(argResults.rest.first);
     String dirPath = fs.path.normalize(projectDir.absolute.path);
@@ -141,6 +154,23 @@ class CreateCommand extends FlutterCommand {
 
     printStatus('Creating project ${fs.path.relative(dirPath)}...');
     int generatedCount = 0;
+    if (generatePackage) {
+      final String description = argResults.wasParsed('description')
+          ? argResults['description']
+          : 'A new flutter package project.';
+      templateContext['description'] = description;
+      generatedCount += _renderTemplate('package', dirPath, templateContext);
+
+      if (argResults['pub'])
+        await pubGet(directory: dirPath);
+
+      final String relativePath = fs.path.relative(dirPath);
+      printStatus('Wrote $generatedCount files.');
+      printStatus('');
+      printStatus('Your package code is in lib/$projectName.dart in the $relativePath directory.');
+      return;
+    }
+
     String appPath = dirPath;
     if (generatePlugin) {
       final String description = argResults.wasParsed('description')
@@ -167,6 +197,10 @@ class CreateCommand extends FlutterCommand {
     }
 
     generatedCount += _renderTemplate('create', appPath, templateContext);
+    generatedCount += _injectGradleWrapper(appPath);
+    if (appPath != dirPath) {
+      generatedCount += _injectGradleWrapper(dirPath);
+    }
     if (argResults['with-driver-test']) {
       final String testPath = fs.path.join(appPath, 'test_driver');
       generatedCount += _renderTemplate('driver', testPath, templateContext);
@@ -177,7 +211,7 @@ class CreateCommand extends FlutterCommand {
 
     updateXcodeGeneratedProperties(
       projectPath: appPath,
-      mode: BuildMode.debug,
+      buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
       hasPlugins: generatePlugin,
     );
@@ -217,17 +251,17 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       }
     } else {
       printStatus("You'll need to install additional components before you can run "
-        "your Flutter app:");
+        'your Flutter app:');
       printStatus('');
 
       // Give the user more detailed analysis.
       await doctor.diagnose();
       printStatus('');
       printStatus("After installing components, run 'flutter doctor' in order to "
-        "re-validate your setup.");
+        're-validate your setup.');
       printStatus("When complete, type 'flutter run' from the '$relativeAppPath' "
-        "directory in order to launch your app.");
-      printStatus("Your main program file is: $relativeAppPath/lib/main.dart");
+        'directory in order to launch your app.');
+      printStatus('Your main program file is: $relativeAppPath/lib/main.dart');
     }
   }
 
@@ -258,13 +292,15 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
-      'androidFlutterJar': "$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar",
+      'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',
       'withDriverTest': renderDriverTest,
       'pluginClass': pluginClass,
       'pluginDartClass': pluginDartClass,
       'withPluginHook': withPluginHook,
       'androidLanguage': androidLanguage,
       'iosLanguage': iosLanguage,
+      'flutterRevision': FlutterVersion.instance.frameworkRevision,
+      'flutterChannel': FlutterVersion.instance.channel,
     };
   }
 
@@ -272,10 +308,26 @@ To edit platform code in an IDE see https://flutter.io/platform-plugins/#edit-co
     final Template template = new Template.fromName(templateName);
     return template.render(fs.directory(dirPath), context, overwriteExisting: false);
   }
+
+  int _injectGradleWrapper(String projectDir) {
+    int filesCreated = 0;
+    copyDirectorySync(
+      cache.getArtifactDirectory('gradle_wrapper'),
+      fs.directory(fs.path.join(projectDir, 'android')),
+      (File sourceFile, File destinationFile) {
+        filesCreated++;
+        final String modes = sourceFile.statSync().modeString();
+        if (modes != null && modes.contains('x')) {
+          os.makeExecutable(destinationFile);
+        }
+      },
+    );
+    return filesCreated;
+  }
 }
 
 String _createAndroidIdentifier(String organization, String name) {
-  return '$organization.$name';
+  return '$organization.$name'.replaceAll('_', '');
 }
 
 String _createPluginClassName(String name) {
@@ -285,7 +337,7 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
-  final RegExp disallowed = new RegExp(r"[^a-zA-Z0-9\-\.\u0080-\uffff]+");
+  final RegExp disallowed = new RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
   name = camelCase(name).replaceAll(disallowed, '');
   name = name.isEmpty ? 'untitled' : name;
   return '$organization.$name';
@@ -311,31 +363,31 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
   'yaml'
 ]);
 
-/// Return `null` if the project name is legal. Return a validation message if
+/// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!package_names.isValidPackageName(projectName))
+  if (!linter_utils.isValidPackageName(projectName))
     return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
 
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
-      "package dependencies.";
+      'package dependencies.';
   }
   return null;
 }
 
-/// Return `null` if the project directory is legal. Return a validation message
+/// Return null if the project directory is legal. Return a validation message
 /// if we should disallow the directory name.
 String _validateProjectDir(String dirPath, { String flutterRoot }) {
   if (fs.path.isWithin(flutterRoot, dirPath)) {
-    return "Cannot create a project within the Flutter SDK.\n"
+    return 'Cannot create a project within the Flutter SDK.\n'
       "Target directory '$dirPath' is within the Flutter SDK at '$flutterRoot'.";
   }
 
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.NOT_FOUND) {
-    switch(type) {
+    switch (type) {
       case FileSystemEntityType.FILE:
         // Do not overwrite files.
         return "Invalid project name: '$dirPath' - file exists.";

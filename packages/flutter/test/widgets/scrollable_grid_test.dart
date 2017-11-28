@@ -8,27 +8,35 @@ import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('GridView default control', (WidgetTester tester) async {
-    await tester.pumpWidget(new Center(
-      child: new GridView.count(
-        crossAxisCount: 1,
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Center(
+          child: new GridView.count(
+            crossAxisCount: 1,
+          ),
+        ),
       ),
-    ));
+    );
   });
 
   // Tests https://github.com/flutter/flutter/issues/5522
   testWidgets('GridView displays correct children with nonzero padding', (WidgetTester tester) async {
     final EdgeInsets padding = const EdgeInsets.fromLTRB(0.0, 100.0, 0.0, 0.0);
 
-    final Widget testWidget = new Align(
-      child: new SizedBox(
-        height: 800.0,
-        width: 300.0,  // forces the grid children to be 300..300
-        child: new GridView.count(
-          crossAxisCount: 1,
-          padding: padding,
-          children: new List<Widget>.generate(10, (int index) {
-            return new Text('$index', key: new ValueKey<int>(index));
-          }).toList(),
+    final Widget testWidget = new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Align(
+        child: new SizedBox(
+          height: 800.0,
+          width: 300.0,  // forces the grid children to be 300..300
+          child: new GridView.count(
+            crossAxisCount: 1,
+            padding: padding,
+            children: new List<Widget>.generate(10, (int index) {
+              return new Text('$index', key: new ValueKey<int>(index));
+            }).toList(),
+          ),
         ),
       ),
     );
@@ -72,14 +80,17 @@ void main() {
   testWidgets('GridView.count() fixed itemExtent, scroll to end, append, scroll', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/9506
     Widget buildFrame(int itemCount) {
-      return new GridView.count(
-        crossAxisCount: itemCount,
-        children: new List<Widget>.generate(itemCount, (int index) {
-          return new SizedBox(
-            height: 200.0,
-            child: new Text('item $index'),
-          );
-        }),
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.count(
+          crossAxisCount: itemCount,
+          children: new List<Widget>.generate(itemCount, (int index) {
+            return new SizedBox(
+              height: 200.0,
+              child: new Text('item $index'),
+            );
+          }),
+        ),
       );
     }
 

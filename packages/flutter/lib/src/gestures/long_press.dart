@@ -17,9 +17,9 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   /// Creates a long-press gesture recognizer.
   ///
   /// Consider assigning the [onLongPress] callback after creating this object.
-  LongPressGestureRecognizer() : super(deadline: kLongPressTimeout);
+  LongPressGestureRecognizer({ Object debugOwner }) : super(deadline: kLongPressTimeout, debugOwner: debugOwner);
 
-  /// Called when a long-press is recongized.
+  /// Called when a long-press is recognized.
   GestureLongPressCallback onLongPress;
 
   @override
@@ -36,5 +36,5 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'long press';
+  String get debugDescription => 'long press';
 }

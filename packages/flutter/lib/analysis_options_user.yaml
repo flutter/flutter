@@ -8,8 +8,8 @@
 # https://github.com/dart-lang/sdk/tree/master/pkg/analyzer#configuring-the-analyzer
 #
 # There are three similar analysis options files in the flutter repo:
-#   - .analysis_options
-#   - .analysis_options_repo
+#   - analysis_options.yaml
+#   - analysis_options_repo.yaml
 #   - packages/flutter/lib/analysis_options_user.yaml (this file)
 #
 # This file contains the analysis options used by "flutter analyze"
@@ -17,7 +17,7 @@
 # It isn't named 'analysis_options.yaml' because otherwise editors like Atom
 # would use it when analyzing the flutter tool itself.
 #
-# When editing, make sure you keep /.analysis_options consistent.
+# When editing, make sure you keep /analysis_options.yaml consistent.
 
 analyzer:
   language:
@@ -69,7 +69,7 @@ linter:
     - empty_constructor_bodies
     - implementation_imports
     - library_names
-    - library_prefixes
+    # - library_prefixes
     - non_constant_identifier_names
     # - one_member_abstracts
     # - only_throw_errors
@@ -85,7 +85,7 @@ linter:
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures
-    - unnecessary_brace_in_string_interp
+    - unnecessary_brace_in_string_interps
     - unnecessary_getters_setters
 
     # === pub rules ===

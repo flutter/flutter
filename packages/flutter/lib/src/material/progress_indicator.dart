@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
@@ -27,7 +28,7 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// Creates a progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const ProgressIndicator({
     Key key,
@@ -60,13 +61,9 @@ abstract class ProgressIndicator extends StatefulWidget {
   Color _getValueColor(BuildContext context) => valueColor?.value ?? Theme.of(context).accentColor;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (value != null) {
-      description.add('${(value.clamp(0.0, 1.0) * 100.0).toStringAsFixed(1)}%');
-    } else {
-      description.add('<indeterminate>');
-    }
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new PercentProperty('value', value, showName: false, ifNull: '<indeterminate>'));
   }
 }
 
@@ -76,12 +73,14 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     this.valueColor,
     this.value,
     this.animationValue,
-  });
+    @required this.textDirection,
+  }) : assert(textDirection != null);
 
   final Color backgroundColor;
   final Color valueColor;
   final double value;
   final double animationValue;
+  final TextDirection textDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -93,13 +92,35 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     paint.color = valueColor;
     if (value != null) {
       final double width = value.clamp(0.0, 1.0) * size.width;
-      canvas.drawRect(Offset.zero & new Size(width, size.height), paint);
+
+      double left;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          left = size.width - width;
+          break;
+        case TextDirection.ltr:
+          left = 0.0;
+          break;
+      }
+
+      canvas.drawRect(new Offset(left, 0.0) & new Size(width, size.height), paint);
     } else {
       final double startX = size.width * (1.5 * animationValue - 0.5);
       final double endX = startX + 0.5 * size.width;
       final double x = startX.clamp(0.0, size.width);
       final double width = endX.clamp(0.0, size.width) - x;
-      canvas.drawRect(new Offset(x, 0.0) & new Size(width, size.height), paint);
+
+      double left;
+      switch (textDirection) {
+        case TextDirection.rtl:
+          left = size.width - width - x;
+          break;
+        case TextDirection.ltr:
+          left = x;
+          break;
+      }
+
+      canvas.drawRect(new Offset(left, 0.0) & new Size(width, size.height), paint);
     }
   }
 
@@ -108,7 +129,8 @@ class _LinearProgressIndicatorPainter extends CustomPainter {
     return oldPainter.backgroundColor != backgroundColor
         || oldPainter.valueColor != valueColor
         || oldPainter.value != value
-        || oldPainter.animationValue != animationValue;
+        || oldPainter.animationValue != animationValue
+        || oldPainter.textDirection != textDirection;
   }
 }
 
@@ -134,12 +156,14 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// Creates a linear progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const LinearProgressIndicator({
     Key key,
     double value,
-  }) : super(key: key, value: value);
+    Color backgroundColor,
+    Animation<Color> valueColor,
+  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   @override
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
@@ -155,8 +179,20 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     _controller = new AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
-    )..repeat();
+    );
     _animation = new CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+
+    if (widget.value == null)
+      _controller.repeat();
+  }
+
+  @override
+  void didUpdateWidget(LinearProgressIndicator oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value == null && !_controller.isAnimating)
+      _controller.repeat();
+    else if (widget.value != null && _controller.isAnimating)
+      _controller.stop();
   }
 
   @override
@@ -165,7 +201,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
     super.dispose();
   }
 
-  Widget _buildIndicator(BuildContext context, double animationValue) {
+  Widget _buildIndicator(BuildContext context, double animationValue, TextDirection textDirection) {
     return new Container(
       constraints: const BoxConstraints.tightFor(
         width: double.INFINITY,
@@ -177,6 +213,7 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
           valueColor: widget._getValueColor(context),
           value: widget.value, // may be null
           animationValue: animationValue, // ignored if widget.value is not null
+          textDirection: textDirection,
         ),
       ),
     );
@@ -184,13 +221,15 @@ class _LinearProgressIndicatorState extends State<LinearProgressIndicator> with 
 
   @override
   Widget build(BuildContext context) {
+    final TextDirection textDirection = Directionality.of(context);
+
     if (widget.value != null)
-      return _buildIndicator(context, _animation.value);
+      return _buildIndicator(context, _animation.value, textDirection);
 
     return new AnimatedBuilder(
       animation: _animation,
       builder: (BuildContext context, Widget child) {
-        return _buildIndicator(context, _animation.value);
+        return _buildIndicator(context, _animation.value, textDirection);
       },
     );
   }
@@ -276,7 +315,7 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// Creates a circular progress indicator.
   ///
   /// The [value] argument can be either null (corresponding to an indeterminate
-  /// progress indcator) or non-null (corresponding to a determinate progress
+  /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const CircularProgressIndicator({
     Key key,

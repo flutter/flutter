@@ -26,6 +26,10 @@ typedef bool NotificationListenerCallback<T extends Notification>(T notification
 /// widgets with the appropriate type parameters that are ancestors of the given
 /// [BuildContext].
 abstract class Notification {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const Notification();
+
   /// Applied to each ancestor of the [dispatch] target.
   ///
   /// The [Notification] class implementation of this method dispatches the
@@ -89,10 +93,12 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   const NotificationListener({
     Key key,
     @required this.child,
-    this.onNotification
+    this.onNotification,
   }) : super(key: key);
 
-  /// The widget below this widget in the tree.
+  /// The widget directly below this widget in the tree.
+  ///
+  /// This is not necessarily the widget that dispatched the notification.
   final Widget child;
 
   /// Called when a notification of the appropriate type arrives at this
@@ -103,6 +109,15 @@ class NotificationListener<T extends Notification> extends StatelessWidget {
   ///
   /// The notification's [Notification.visitAncestor] method is called for each
   /// ancestor, and invokes this callback as appropriate.
+  ///
+  /// Notifications vary in terms of when they are dispatched. There are two
+  /// main possibilities: dispatch between frames, and dispatch during layout.
+  ///
+  /// For notifications that dispatch during layout, such as those that inherit
+  /// from [LayoutChangedNotification], it is too late to call [State.setState]
+  /// in response to the notification (as layout is currently happening in a
+  /// descendant, by definition, since notifications bubble up the tree). For
+  /// widgets that depend on layout, consider a [LayoutBuilder] instead.
   final NotificationListenerCallback<T> onNotification;
 
   bool _dispatch(Notification notification, Element element) {

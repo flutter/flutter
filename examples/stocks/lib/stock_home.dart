@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree;
+import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'stock_data.dart';
 import 'stock_list.dart';
@@ -50,10 +50,9 @@ class _NotImplementedDialog extends StatelessWidget {
 }
 
 class StockHome extends StatefulWidget {
-  const StockHome(this.stocks, this.symbols, this.configuration, this.updater);
+  const StockHome(this.stocks, this.configuration, this.updater);
 
-  final Map<String, Stock> stocks;
-  final List<String> symbols;
+  final StockData stocks;
   final StockConfiguration configuration;
   final ValueChanged<StockConfiguration> updater;
 
@@ -62,10 +61,9 @@ class StockHome extends StatefulWidget {
 }
 
 class StockHomeState extends State<StockHome> {
-
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  bool _isSearching = false;
   final TextEditingController _searchQuery = new TextEditingController();
+  bool _isSearching = false;
   bool _autorefresh = false;
 
   void _handleSearchBegin() {
@@ -82,17 +80,13 @@ class StockHomeState extends State<StockHome> {
     });
   }
 
-  void _handleSearchEnd() {
-    Navigator.pop(context);
-  }
-
   void _handleStockModeChange(StockMode value) {
     if (widget.updater != null)
       widget.updater(widget.configuration.copyWith(stockMode: value));
   }
 
   void _handleStockMenu(BuildContext context, _StockMenuItem value) {
-    switch(value) {
+    switch (value) {
       case _StockMenuItem.autorefresh:
         setState(() {
           _autorefresh = !_autorefresh;
@@ -136,7 +130,7 @@ class StockHomeState extends State<StockHome> {
                 debugDumpApp();
                 debugDumpRenderTree();
                 debugDumpLayerTree();
-                debugDumpSemanticsTree();
+                debugDumpSemanticsTree(DebugSemanticsDumpOrder.traversal);
               } catch (e, stack) {
                 debugPrint('Exception while dumping app:\n$e\n$stack');
               }
@@ -233,8 +227,8 @@ class StockHomeState extends State<StockHome> {
     );
   }
 
-  Iterable<Stock> _getStockList(Iterable<String> symbols) {
-    return symbols.map((String symbol) => widget.stocks[symbol])
+  static Iterable<Stock> _getStockList(StockData stocks, Iterable<String> symbols) {
+    return symbols.map<Stock>((String symbol) => stocks[symbol])
         .where((Stock stock) => stock != null);
   }
 
@@ -251,9 +245,9 @@ class StockHomeState extends State<StockHome> {
       stock.lastSale += 1.0;
     });
     _scaffoldKey.currentState.showSnackBar(new SnackBar(
-      content: new Text("Purchased ${stock.symbol} for ${stock.lastSale}"),
+      content: new Text('Purchased ${stock.symbol} for ${stock.lastSale}'),
       action: new SnackBarAction(
-        label: "BUY MORE",
+        label: 'BUY MORE',
         onPressed: () {
           _buyStock(stock);
         },
@@ -266,7 +260,7 @@ class StockHomeState extends State<StockHome> {
       stocks: stocks.toList(),
       onAction: _buyStock,
       onOpen: (Stock stock) {
-        Navigator.pushNamed(context, '/stock/${stock.symbol}');
+        Navigator.pushNamed(context, '/stock:${stock.symbol}');
       },
       onShow: (Stock stock) {
         _scaffoldKey.currentState.showBottomSheet<Null>((BuildContext context) => new StockSymbolBottomSheet(stock: stock));
@@ -275,22 +269,21 @@ class StockHomeState extends State<StockHome> {
   }
 
   Widget _buildStockTab(BuildContext context, StockHomeTab tab, List<String> stockSymbols) {
-    return new Container(
+    return new AnimatedBuilder(
       key: new ValueKey<StockHomeTab>(tab),
-      child: _buildStockList(context, _filterBySearchQuery(_getStockList(stockSymbols)).toList(), tab),
+      animation: new Listenable.merge(<Listenable>[_searchQuery, widget.stocks]),
+      builder: (BuildContext context, Widget child) {
+        return _buildStockList(context, _filterBySearchQuery(_getStockList(widget.stocks, stockSymbols)).toList(), tab);
+      },
     );
   }
 
-  static const List<String> portfolioSymbols = const <String>["AAPL","FIZZ", "FIVE", "FLAT", "ZINC", "ZNGA"];
+  static const List<String> portfolioSymbols = const <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
-  // TODO(abarth): Should we factor this into a SearchBar in the framework?
   Widget buildSearchBar() {
     return new AppBar(
-      leading: new IconButton(
-        icon: const Icon(Icons.arrow_back),
+      leading: new BackButton(
         color: Theme.of(context).accentColor,
-        onPressed: _handleSearchEnd,
-        tooltip: 'Back',
       ),
       title: new TextField(
         controller: _searchQuery,
@@ -330,7 +323,7 @@ class StockHomeState extends State<StockHome> {
         drawer: _buildDrawer(context),
         body: new TabBarView(
           children: <Widget>[
-            _buildStockTab(context, StockHomeTab.market, widget.symbols),
+            _buildStockTab(context, StockHomeTab.market, widget.stocks.allSymbols),
             _buildStockTab(context, StockHomeTab.portfolio, portfolioSymbols),
           ],
         ),
@@ -342,7 +335,6 @@ class StockHomeState extends State<StockHome> {
 class _CreateCompanySheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // TODO(ianh): Fill this out.
     return new Column(
       children: <Widget>[
         const TextField(
@@ -351,6 +343,9 @@ class _CreateCompanySheet extends StatelessWidget {
             hintText: 'Company Name',
           ),
         ),
+        const Text('(This demo is not yet complete.)'),
+        // For example, we could add a button that actually updates the list
+        // and then contacts the server, etc.
       ],
     );
   }

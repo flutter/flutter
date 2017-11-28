@@ -23,7 +23,7 @@ class AnalyzeCommand extends FlutterCommand {
     argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
-    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time');
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time.');
 
     usesPubOption();
 
@@ -57,7 +57,7 @@ class AnalyzeCommand extends FlutterCommand {
   @override
   Future<Null> runCommand() {
     if (argResults['watch']) {
-      return new AnalyzeContinuously(argResults, runner.getRepoAnalysisEntryPoints()).analyze();
+      return new AnalyzeContinuously(argResults, runner.getRepoPackages()).analyze();
     } else {
       return new AnalyzeOnce(argResults, runner.getRepoPackages(), workingDirectory: workingDirectory).analyze();
     }

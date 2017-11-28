@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -58,21 +59,27 @@ export 'scroll_activity.dart' show ScrollHoldController;
 ///    other scrollable widgets to control a [ScrollPosition].
 ///  * [ScrollPositionWithSingleContext], which is the most commonly used
 ///    concrete subclass of [ScrollPosition].
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Creates an object that determines which portion of the content is visible
   /// in a scroll view.
+  ///
+  /// The [physics], [context], and [keepScrollOffset] parameters must not be null.
   ScrollPosition({
     @required this.physics,
     @required this.context,
+    this.keepScrollOffset: true,
     ScrollPosition oldPosition,
     this.debugLabel,
-  }) {
-    assert(physics != null);
-    assert(context != null);
-    assert(context.vsync != null);
+  }) : assert(physics != null),
+       assert(context != null),
+       assert(context.vsync != null),
+       assert(keepScrollOffset != null) {
     if (oldPosition != null)
       absorb(oldPosition);
-    restoreScrollOffset();
+    if (keepScrollOffset)
+      restoreScrollOffset();
   }
 
   /// How the scroll position should respond to user input.
@@ -85,6 +92,15 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ///
   /// Typically implemented by [ScrollableState].
   final ScrollContext context;
+
+  /// Save the current scroll offset with [PageStorage] and restore it if
+  /// this scroll position's scrollable is recreated.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollController.keepScrollOffset] and [PageController.keepPage], which
+  ///    create scroll positions and initialize this property.
+  final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying animation controller instances in debug output.
@@ -194,7 +210,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
           );
         }
         return true;
-      });
+      }());
       final double oldPixels = _pixels;
       _pixels = newPixels - overscroll;
       if (_pixels != oldPixels) {
@@ -336,7 +352,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -354,10 +370,51 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     return true;
   }
 
+  Set<SemanticsAction> _semanticActions;
+
+  /// Called whenever the scroll position or the dimensions of the scroll view
+  /// change to schedule an update of the available semantics actions. The
+  /// actual update will be performed in the next frame. If non is pending
+  /// a frame will be scheduled.
+  ///
+  /// For example: If the scroll view has been scrolled all the way to the top,
+  /// the action to scroll further up needs to be removed as the scroll view
+  /// cannot be scrolled in that direction anymore.
+  ///
+  /// This method is potentially called twice per frame (if scroll position and
+  /// scroll view dimensions both change) and therefore shouldn't do anything
+  /// expensive.
+  void _updateSemanticActions() {
+    SemanticsAction forward;
+    SemanticsAction backward;
+    switch (axis) {
+      case Axis.vertical:
+        forward = SemanticsAction.scrollUp;
+        backward = SemanticsAction.scrollDown;
+        break;
+      case Axis.horizontal:
+        forward = SemanticsAction.scrollLeft;
+        backward = SemanticsAction.scrollRight;
+        break;
+    }
+
+    final Set<SemanticsAction> actions = new Set<SemanticsAction>();
+    if (pixels > minScrollExtent)
+      actions.add(backward);
+    if (pixels < maxScrollExtent)
+      actions.add(forward);
+
+    if (setEquals<SemanticsAction>(actions, _semanticActions))
+      return;
+
+    _semanticActions = actions;
+    context.setSemanticsActions(_semanticActions);
+  }
+
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    if (_minScrollExtent != minScrollExtent ||
-        _maxScrollExtent != maxScrollExtent ||
+    if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
+        !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimension) {
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
@@ -392,6 +449,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   void applyNewDimensions() {
     assert(pixels != null);
     activity.applyNewDimensions();
+    _updateSemanticActions();  // will potentially request a semantics update.
   }
 
   /// Animates the position such that the given object is as visible as possible
@@ -466,6 +524,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If this method changes the scroll position, a sequence of start/update/end
   /// scroll notifications will be dispatched. No overscroll notifications can
   /// be generated by this method.
+  @override
   void jumpTo(double value);
 
   /// Deprecated. Use [jumpTo] or a custom [ScrollPosition] instead.
@@ -499,7 +558,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// If the argument is null, this method has no effect. This is convenient for
   /// cases where the new activity is obtained from another method, and that
   /// method might return null, since it means the caller does not have to
-  /// explictly null-check the argument.
+  /// explicitly null-check the argument.
   void beginActivity(ScrollActivity newActivity) {
     if (newActivity == null)
       return;
@@ -540,7 +599,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// This also saves the scroll offset using [saveScrollOffset].
   void didEndScroll() {
     activity.dispatchScrollEndNotification(cloneMetrics(), context.notificationContext);
-    saveScrollOffset();
+    if (keepScrollOffset)
+      saveScrollOffset();
   }
 
   /// Called by [setPixels] to report overscroll when an attempt is made to
@@ -564,6 +624,12 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     activity?.dispose(); // it will be null if it got absorbed by another ScrollPosition
     _activity = null;
     super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    _updateSemanticActions();  // will potentially request a semantics update.
+    super.notifyListeners();
   }
 
   @override

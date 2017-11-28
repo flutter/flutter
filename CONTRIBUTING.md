@@ -8,7 +8,7 @@ _See also: [Flutter's code of conduct](https://flutter.io/design-principles/#cod
 Things you will need
 --------------------
 
- * Linux or Mac OS X. (Windows is not yet supported.)
+ * Linux, Mac OS X, or Windows
  * git (used for source version control).
  * An IDE. We recommend [IntelliJ with the Flutter plugin](https://flutter.io/intellij-ide/).
  * An ssh client (used to authenticate with GitHub).
@@ -44,14 +44,17 @@ Getting the code and configuring your environment
  * Run `flutter update-packages` This will fetch all the Dart packages that
    Flutter depends on. You can replicate what this script does by running
    `pub get` in each directory that contains a `pubspec.yaml` file.
+ * If you plan on using IntelliJ as your IDE, then also run
+   `flutter ide-config --overwrite` to create all of the IntelliJ configuration
+   files so you can open the main flutter directory as a project and run examples
+   from within the IDE.
 
 Running the examples
 --------------------
 
-To run an example with a prebuilt binary from the cloud, switch to that
-example's directory, run `pub get` to make sure its dependencies have been
-downloaded, and use `flutter run`. Make sure you have a device connected over
-USB and debugging enabled on that device.
+To run an example, switch to that example's directory, and use `flutter run`.
+Make sure you have an emulator running, or a device connected over USB and
+debugging enabled on that device.
 
  * `cd examples/hello_world`
  * `flutter run`
@@ -71,16 +74,16 @@ own code by mimicking the `pubspec.yaml` files in the `examples` subdirectories.
 Running the analyzer
 --------------------
 
-When editing Flutter code, it's important to check the code with the analyzer. There are two
-main ways to run it. In either case you will want to run `flutter update-packages --upgrade`
-first, or you will get version conflict issues or bogus error messages about core clases like
-Offset from `dart:ui`.
+When editing Flutter code, it's important to check the code with the
+analyzer. There are two main ways to run it. In either case you will
+want to run `flutter update-packages` first, or you will get bogus
+error messages about core classes like Offset from `dart:ui`.
 
-For a one-off, use `flutter analyze --flutter-repo`. This uses the `.analysis_options_repo` file
+For a one-off, use `flutter analyze --flutter-repo`. This uses the `analysis_options_repo.yaml` file
 at the root of the repository for its configuration.
 
 For continuous analysis, use `flutter analyze --flutter-repo --watch`. This uses normal
-`.analysis_options` files, and they can differ from package to package.
+`analysis_options.yaml` files, and they can differ from package to package.
 
 If you want to see how many members are missing dartdocs, you should use the first option,
 providing the additional command `--dartdocs`.
@@ -91,6 +94,8 @@ assume you want to check a single package and the flutter repository has several
 
 Running the tests
 -----------------
+
+_The `flutter test` command is not available on Windows (See [#8516](https://github.com/flutter/flutter/issues/8516))._
 
 To automatically find all files named `_test.dart` inside a package's `test/` subdirectory, and run them inside the flutter shell as a test, use the `flutter test` command, e.g:
 
@@ -123,16 +128,19 @@ test should have a `main` function and use the `test` package.
 Working with flutter tools
 --------------------------
 
-The flutter tools itself is built when you run `flutter` for the first time and each time
+The flutter tool itself is built when you run `flutter` for the first time and each time
 you run `flutter upgrade`. If you want to alter and re-test the tool's behavior itself,
 locally commit your tool changes in git and the tool will be rebuilt from Dart sources
 in `packages/flutter_tools` the next time you run `flutter`.
+
+Alternatively, delete the `bin/cache/flutter_tools.snapshot` file. Doing so will
+force a rebuild of the tool from your local sources the next time you run `flutter`.
 
 flutter_tools' tests run inside the Dart command line VM rather than in the
 flutter shell. To run the test:
 
 * `cd packages/flutter_tools`
-* `dart --checked test/all.dart`
+* `pub run test -j1`
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the
@@ -165,13 +173,15 @@ To send us a pull request:
 
 Please make sure all your checkins have detailed commit messages explaining the patch.
 
-Once you've gotten an LGTM from a project maintainer, submit your changes to the
-`master` branch using one of the following methods:
+Once you've gotten an LGTM from a project maintainer and once your PR has received
+the green light from all our automated testing (Travis, Appveyor, etc), and once
+the tree is green (see the [design principles](https://flutter.io/design-principles/)
+document for more details), submit your changes to the `master` branch using one of
+the following methods:
 
 * Wait for one of the project maintainers to submit it for you.
 * Click the green "Merge pull request" button on the GitHub UI of your pull
   request (requires commit access)
-* `git push upstream name_of_your_branch:master` (requires commit access)
 
 You must complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
@@ -182,8 +192,8 @@ organization's) name and contact info to the [AUTHORS](AUTHORS) file.
 We grant commit access to people who have gained our trust and demonstrated
 a commitment to Flutter.
 
-Tools for tracking an improving test coverage
----------------------------------------------
+Tools for tracking and improving test coverage
+----------------------------------------------
 
 We strive for a high degree of test coverage for the Flutter framework. We use
 Coveralls to [track our test coverage](https://coveralls.io/github/flutter/flutter?branch=master).
@@ -236,6 +246,11 @@ the following steps.
 3. To run tests on your host machine, build one of the host configurations
    (e.g., `out/host_debug_unopt`). To run examples on Android, build one of the
    Android configurations (e.g., `out/android_debug_unopt`).
+   When running on the device with `--preview-dart-2` flag you will still need
+   to build corresponding host configuration (e.g., `out/host_debug_unopt` if you
+   are using `out/android_debug_unopt`, `out/host_release` if you use `out/android_release`).
+   Host configuration provides standalone dart sdk for the engine, that is used
+   to run engine dart scripts on the host.
 
 You should now be able to run the tests against your locally built
 engine using the `flutter test --local-engine=host_debug_unopt` command. To run

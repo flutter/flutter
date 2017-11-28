@@ -45,9 +45,7 @@ class AnalysisDriver {
 
   DriverOptions options;
 
-  String get sdkDir {
-    return options.dartSdkPath ?? fs.path.absolute(cli_util.getSdkDir().path);
-  }
+  String get sdkDir => options.dartSdkPath ?? cli_util.getSdkPath();
 
   List<AnalysisErrorDescription> analyze(Iterable<File> files) {
     final List<AnalysisErrorInfo> infos = _analyze(files);
@@ -136,7 +134,7 @@ class AnalysisDriver {
 
   bool _isFiltered(AnalysisError error) {
     final ErrorProcessor processor = ErrorProcessor.getProcessor(context.analysisOptions, error);
-    // Filtered errors are processed to a severity of `null`.
+    // Filtered errors are processed to a severity of null.
     return processor != null && processor.severity == null;
   }
 

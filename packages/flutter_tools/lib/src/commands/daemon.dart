@@ -143,7 +143,8 @@ class Daemon {
 
   void shutdown({dynamic error}) {
     _commandSubscription?.cancel();
-    _domainMap.values.forEach((Domain domain) => domain.dispose());
+    for (Domain domain in _domainMap.values)
+      domain.dispose();
     if (!_onExitCompleter.isCompleted) {
       if (error == null)
         _onExitCompleter.complete(0);
@@ -196,28 +197,28 @@ abstract class Domain {
 
   String _getStringArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! String)
-      throw "$name is not a String";
+      throw '$name is not a String';
     return val;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! bool)
-      throw "$name is not a bool";
+      throw '$name is not a bool';
     return val;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required: false }) {
     if (required && !args.containsKey(name))
-      throw "$name is required";
+      throw '$name is required';
     final dynamic val = args[name];
     if (val != null && val is! int)
-      throw "$name is not an int";
+      throw '$name is not an int';
     return val;
   }
 
@@ -302,23 +303,24 @@ class AppDomain extends Domain {
     final bool useTestFonts = _getBoolArg(args, 'useTestFonts') ?? false;
     final String route = _getStringArg(args, 'route');
     final String mode = _getStringArg(args, 'mode');
+    final String flavor = _getStringArg(args, 'flavor');
     final String target = _getStringArg(args, 'target');
     final bool enableHotReload = _getBoolArg(args, 'hot') ?? kHotReloadDefault;
 
-    final Device device = daemon.deviceDomain._getOrLocateDevice(deviceId);
+    final Device device = await daemon.deviceDomain._getOrLocateDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
     if (!fs.isDirectorySync(projectDirectory))
       throw "'$projectDirectory' does not exist";
 
-    final BuildMode buildMode = getBuildModeForName(mode) ?? BuildMode.debug;
+    final BuildInfo buildInfo = new BuildInfo(getBuildModeForName(mode) ?? BuildMode.debug, flavor);
     DebuggingOptions options;
-    if (buildMode == BuildMode.release) {
-      options = new DebuggingOptions.disabled(buildMode);
+    if (buildInfo.isRelease) {
+      options = new DebuggingOptions.disabled(buildInfo);
     } else {
       options = new DebuggingOptions.enabled(
-        buildMode,
+        buildInfo,
         startPaused: startPaused,
         useTestFonts: useTestFonts,
       );
@@ -349,8 +351,8 @@ class AppDomain extends Domain {
     String packagesFilePath,
     String projectAssets,
   }) async {
-    if (await device.isLocalEmulator && !isEmulatorBuildMode(options.buildMode))
-      throw '${toTitleCase(getModeName(options.buildMode))} mode is not supported for emulators.';
+    if (await device.isLocalEmulator && !options.buildInfo.supportsEmulator)
+      throw '${toTitleCase(options.buildInfo.modeName)} mode is not supported for emulators.';
 
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
@@ -370,6 +372,7 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         projectAssets: projectAssets,
+        hostIsIde: true,
       );
     } else {
       runner = new ColdRunner(
@@ -393,7 +396,9 @@ class AppDomain extends Domain {
 
     if (options.debuggingEnabled) {
       connectionInfoCompleter = new Completer<DebugConnectionInfo>();
-      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) {
+      // We don't want to wait for this future to complete and callbacks won't fail.
+      // As it just writes to stdout.
+      connectionInfoCompleter.future.then<Null>((DebugConnectionInfo info) { // ignore: unawaited_futures
         final Map<String, dynamic> params = <String, dynamic>{
           'port': info.httpUri.port,
           'wsUri': info.wsUri.toString(),
@@ -404,7 +409,9 @@ class AppDomain extends Domain {
       });
     }
     final Completer<Null> appStartedCompleter = new Completer<Null>();
-    appStartedCompleter.future.then<Null>((Null value) {
+    // We don't want to wait for this future to complete and callbacks won't fail.
+    // As it just writes to stdout.
+    appStartedCompleter.future.then<Null>((Null value) { // ignore: unawaited_futures
       _sendAppEvent(app, 'started');
     });
 
@@ -493,7 +500,7 @@ class AppDomain extends Domain {
   Future<List<Map<String, dynamic>>> discover(Map<String, dynamic> args) async {
     final String deviceId = _getStringArg(args, 'deviceId', required: true);
 
-    final Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -502,7 +509,6 @@ class AppDomain extends Domain {
       return <String, dynamic>{
         'id': app.id,
         'observatoryDevicePort': app.observatoryPort,
-        'diagnosticDevicePort': app.diagnosticPort,
       };
     }).toList();
   }
@@ -575,11 +581,12 @@ class DeviceDomain extends Domain {
 
   final List<PollingDeviceDiscovery> _discoverers = <PollingDeviceDiscovery>[];
 
-  Future<List<Device>> getDevices([Map<String, dynamic> args]) {
-    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
-      return discoverer.devices;
-    }).toList();
-    return new Future<List<Device>>.value(devices);
+  Future<List<Device>> getDevices([Map<String, dynamic> args]) async {
+    final List<Device> devices = <Device>[];
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      devices.addAll(await discoverer.devices);
+    }
+    return devices;
   }
 
   /// Enable device events.
@@ -602,7 +609,7 @@ class DeviceDomain extends Domain {
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     int hostPort = _getIntArg(args, 'hostPort');
 
-    final Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -617,7 +624,7 @@ class DeviceDomain extends Domain {
     final int devicePort = _getIntArg(args, 'devicePort', required: true);
     final int hostPort = _getIntArg(args, 'hostPort', required: true);
 
-    final Device device = daemon.deviceDomain._getDevice(deviceId);
+    final Device device = await daemon.deviceDomain._getDevice(deviceId);
     if (device == null)
       throw "device '$deviceId' not found";
 
@@ -631,23 +638,25 @@ class DeviceDomain extends Domain {
   }
 
   /// Return the device matching the deviceId field in the args.
-  Device _getDevice(String deviceId) {
-    final List<Device> devices = _discoverers.expand((PollingDeviceDiscovery discoverer) {
-      return discoverer.devices;
-    }).toList();
-    return devices.firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+  Future<Device> _getDevice(String deviceId) async {
+    for (PollingDeviceDiscovery discoverer in _discoverers) {
+      final Device device = (await discoverer.devices).firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+      if (device != null)
+        return device;
+    }
+    return null;
   }
 
   /// Return a known matching device, or scan for devices if no known match is found.
-  Device _getOrLocateDevice(String deviceId) {
+  Future<Device> _getOrLocateDevice(String deviceId) async {
     // Look for an already known device.
-    final Device device = _getDevice(deviceId);
+    final Device device = await _getDevice(deviceId);
     if (device != null)
       return device;
 
     // Scan the different device providers for a match.
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final List<Device> devices = discoverer.pollingGetDevices();
+      final List<Device> devices = await discoverer.pollingGetDevices();
       for (Device device in devices)
         if (device.id == deviceId)
           return device;
@@ -759,7 +768,7 @@ class AppInstance {
   }
 
   dynamic _runInZone(AppDomain domain, dynamic method()) {
-    _logger ??= new _AppRunLogger(domain, this, logToStdout: logToStdout);
+    _logger ??= new _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     final AppContext appContext = new AppContext();
     appContext.setVariable(Logger, _logger);
@@ -768,20 +777,25 @@ class AppInstance {
 }
 
 /// A [Logger] which sends log messages to a listening daemon client.
+///
+/// This class can either:
+///   1) Send stdout messages and progress events to the client IDE
+///   1) Log messages to stdout and send progress events to the client IDE
+///
+/// TODO(devoncarew): To simplify this code a bit, we could choose to specialize
+/// this class into two, one for each of the above use cases.
 class _AppRunLogger extends Logger {
-  _AppRunLogger(this.domain, this.app, { this.logToStdout: false });
+  _AppRunLogger(this.domain, this.app, { this.parent });
 
   AppDomain domain;
   final AppInstance app;
-  final bool logToStdout;
+  final Logger parent;
   int _nextProgressId = 0;
 
   @override
   void printError(String message, { StackTrace stackTrace, bool emphasis: false }) {
-    if (logToStdout) {
-      stderr.writeln(message);
-      if (stackTrace != null)
-        stderr.writeln(stackTrace.toString().trimRight());
+    if (parent != null) {
+      parent.printError(message, stackTrace: stackTrace, emphasis: emphasis);
     } else {
       if (stackTrace != null) {
         _sendLogEvent(<String, dynamic>{
@@ -800,18 +814,25 @@ class _AppRunLogger extends Logger {
 
   @override
   void printStatus(
-    String message,
-    { bool emphasis: false, bool newline: true, String ansiAlternative, int indent }
-  ) {
-    if (logToStdout) {
-      print(message);
+    String message, {
+    bool emphasis: false, bool newline: true, String ansiAlternative, int indent
+  }) {
+    if (parent != null) {
+      parent.printStatus(message, emphasis: emphasis, newline: newline,
+          ansiAlternative: ansiAlternative, indent: indent);
     } else {
       _sendLogEvent(<String, dynamic>{ 'log': message });
     }
   }
 
   @override
-  void printTrace(String message) { }
+  void printTrace(String message) {
+    if (parent != null) {
+      parent.printTrace(message);
+    } else {
+      _sendLogEvent(<String, dynamic>{ 'log': message, 'trace': true });
+    }
+  }
 
   Status _status;
 

@@ -189,10 +189,13 @@ class _PointDemoState extends State<_PointDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
-            ..onStart = _handleOnStart;
-        }
+        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => new ImmediateMultiDragGestureRecognizer(),
+          (ImmediateMultiDragGestureRecognizer instance) {
+            instance
+              ..onStart = _handleOnStart;
+          },
+        ),
       },
       child: new ClipRect(
         child: new CustomPaint(
@@ -208,7 +211,7 @@ class _PointDemoState extends State<_PointDemo> {
             child: new Padding(
               padding: const EdgeInsets.all(16.0),
               child: new Text(
-                "Tap the refresh button to run the animation. Drag the green "
+                'Tap the refresh button to run the animation. Drag the green '
                 "and red points to change the animation's path.",
                 style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
               )
@@ -359,10 +362,13 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     return new RawGestureDetector(
       behavior: _dragTarget == null ? HitTestBehavior.deferToChild : HitTestBehavior.opaque,
       gestures: <Type, GestureRecognizerFactory>{
-        ImmediateMultiDragGestureRecognizer: (ImmediateMultiDragGestureRecognizer recognizer) { // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-          return (recognizer ??= new ImmediateMultiDragGestureRecognizer())
-            ..onStart = _handleOnStart;
-        }
+        ImmediateMultiDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<ImmediateMultiDragGestureRecognizer>(
+          () => new ImmediateMultiDragGestureRecognizer(),
+          (ImmediateMultiDragGestureRecognizer instance) {
+            instance
+              ..onStart = _handleOnStart;
+          },
+        ),
       },
       child: new ClipRect(
         child: new CustomPaint(
@@ -378,7 +384,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
             child: new Padding(
               padding: const EdgeInsets.all(16.0),
               child: new Text(
-                "Tap the refresh button to run the animation. Drag the rectangles "
+                'Tap the refresh button to run the animation. Drag the rectangles '
                 "to change the animation's path.",
                 style: Theme.of(context).textTheme.caption.copyWith(fontSize: 16.0)
               )
@@ -469,6 +475,6 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
 
 void main() {
   runApp(new MaterialApp(
-    home: const AnimationDemo()
+    home: const AnimationDemo(),
   ));
 }

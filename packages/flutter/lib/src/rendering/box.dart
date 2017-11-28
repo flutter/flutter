@@ -11,30 +11,74 @@ import 'package:flutter/gestures.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
-import 'node.dart';
 import 'object.dart';
 
 // This class should only be used in debug builds.
 class _DebugSize extends Size {
-  _DebugSize(Size source, this._owner, this._canBeUsedByParent): super.copy(source);
+  _DebugSize(Size source, this._owner, this._canBeUsedByParent) : super.copy(source);
   final RenderBox _owner;
   final bool _canBeUsedByParent;
 }
 
 /// Immutable layout constraints for [RenderBox] layout.
 ///
-/// A size respects a [BoxConstraints] if, and only if, all of the following
+/// A [Size] respects a [BoxConstraints] if, and only if, all of the following
 /// relations hold:
 ///
-/// * `minWidth <= size.width <= maxWidth`
-/// * `minHeight <= size.height <= maxHeight`
+/// * [minWidth] <= [Size.width] <= [maxWidth]
+/// * [minHeight] <= [Size.height] <= [maxHeight]
 ///
 /// The constraints themselves must satisfy these relations:
 ///
-/// * `0.0 <= minWidth <= maxWidth <= double.INFINITY`
-/// * `0.0 <= minHeight <= maxHeight <= double.INFINITY`
+/// * 0.0 <= [minWidth] <= [maxWidth] <= [double.INFINITY]
+/// * 0.0 <= [minHeight] <= [maxHeight] <= [double.INFINITY]
 ///
 /// [double.INFINITY] is a legal value for each constraint.
+///
+/// ## The box layout model
+///
+/// Render objects in the Flutter framework are laid out by a one-pass layout
+/// model which walks down the render tree passing constraints, then walks back
+/// up the render tree passing concrete geometry.
+///
+/// For boxes, the constraints are [BoxConstraints], which, as described herein,
+/// consist of four numbers: a minimum width [minWidth], a maximum width
+/// [maxWidth], a minimum height [minHeight], and a maximum height [maxHeight].
+///
+/// The geometry for boxes consists of a [Size], which must satisfy the
+/// constraints described above.
+///
+/// Each [RenderBox] (the objects that provide the layout models for box
+/// widgets) receives [BoxConstraints] from its parent, then lays out each of
+/// its children, then picks a [Size] that satisfies the [BoxConstraints].
+///
+/// Render objects position their children independently of laying them out.
+/// Frequently, the parent will use the children's sizes to determine their
+/// position. A child does not know its position and will not necessarily be
+/// laid out again, or repainted, if its position changes.
+///
+/// ## Terminology
+///
+/// When the minimum constraints and the maximum constraint in an axis are the
+/// same, that axis is _tightly_ constrained. See: [new
+/// BoxConstraints.tightFor], [new BoxConstraints.tightForFinite], [tighten],
+/// [hasTightWidth], [hasTightHeight], [isTight].
+///
+/// An axis with a minimum constraint of 0.0 is _loose_ (regardless of the
+/// maximum constraint; if it is also 0.0, then the axis is simultaneously tight
+/// and loose!). See: [new BoxConstraints.loose], [loosen].
+///
+/// An axis whose maximum constraint is not infinite is _bounded_. See:
+/// [hasBoundedWidth], [hasBoundedHeight].
+///
+/// An axis whose maximum constraint is infinite is _unbounded_. An axis is
+/// _expanding_ if it is tightly infinite (its minimum and maximum constraints
+/// are both infinite). See: [new BoxConstraints.expand].
+///
+/// A size is _constrained_ when it satisfies a [BoxConstraints] description.
+/// See: [constrain], [constrainWidth], [constrainHeight],
+/// [constrainDimensions], [constrainSizeAndAttemptToPreserveAspectRatio],
+/// [isSatisfiedBy].
 class BoxConstraints extends Constraints {
   /// Creates box constraints with the given constraints.
   const BoxConstraints({
@@ -68,6 +112,12 @@ class BoxConstraints extends Constraints {
       maxHeight = size.height;
 
   /// Creates box constraints that require the given width or height.
+  ///
+  /// See also:
+  ///
+  ///  * [new BoxConstraints.tightForFinite], which is similar but instead of
+  ///    being tight if the value is non-null, is tight if the value is not
+  ///    infinite.
   const BoxConstraints.tightFor({
     double width,
     double height
@@ -76,7 +126,13 @@ class BoxConstraints extends Constraints {
       minHeight = height != null ? height : 0.0,
       maxHeight = height != null ? height : double.INFINITY;
 
-  /// Creates box constraints that require the given width or height, except if they are infinite.
+  /// Creates box constraints that require the given width or height, except if
+  /// they are infinite.
+  ///
+  /// See also:
+  ///
+  ///  * [new BoxConstraints.tightFor], which is similar but instead of being
+  ///    tight if the value is not infinite, is tight if the value is non-null.
   const BoxConstraints.tightForFinite({
     double width: double.INFINITY,
     double height: double.INFINITY
@@ -204,7 +260,7 @@ class BoxConstraints extends Constraints {
       if (size is _DebugSize)
         result = new _DebugSize(result, size._owner, size._canBeUsedByParent);
       return true;
-    });
+    }());
     return result;
   }
 
@@ -215,7 +271,7 @@ class BoxConstraints extends Constraints {
   /// separately provided widths and heights.
   Size constrain(Size size) {
     Size result = new Size(constrainWidth(size.width), constrainHeight(size.height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
     return result;
   }
 
@@ -230,15 +286,15 @@ class BoxConstraints extends Constraints {
 
   /// Returns a size that attempts to meet the following conditions, in order:
   ///
-  ///  - The size must satisfy these constraints.
-  ///  - The aspect ratio of the returned size matches the aspect ratio of the
+  ///  * The size must satisfy these constraints.
+  ///  * The aspect ratio of the returned size matches the aspect ratio of the
   ///    given size.
-  ///  - The returned size as big as possible while still being equal to or
+  ///  * The returned size as big as possible while still being equal to or
   ///    smaller than the given size.
   Size constrainSizeAndAttemptToPreserveAspectRatio(Size size) {
     if (isTight) {
       Size result = smallest;
-      assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+      assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
       return result;
     }
 
@@ -269,11 +325,11 @@ class BoxConstraints extends Constraints {
     }
 
     Size result = new Size(constrainWidth(width), constrainHeight(height));
-    assert(() { result = _debugPropagateDebugSize(size, result); return true; });
+    assert(() { result = _debugPropagateDebugSize(size, result); return true; }());
     return result;
   }
 
-  /// The biggest size that satisifes the constraints.
+  /// The biggest size that satisfies the constraints.
   Size get biggest => new Size(constrainWidth(), constrainHeight());
 
   /// The smallest size that satisfies the constraints.
@@ -285,7 +341,7 @@ class BoxConstraints extends Constraints {
   /// Whether there is exactly one height value that satisfies the constraints.
   bool get hasTightHeight => minHeight >= maxHeight;
 
-  /// Whether there is exactly one size that satifies the constraints.
+  /// Whether there is exactly one size that satisfies the constraints.
   @override
   bool get isTight => hasTightWidth && hasTightHeight;
 
@@ -355,11 +411,15 @@ class BoxConstraints extends Constraints {
       return a * (1.0 - t);
     assert(a.debugAssertIsValid());
     assert(b.debugAssertIsValid());
+    assert((a.minWidth.isFinite && b.minWidth.isFinite) || (a.minWidth == double.INFINITY && b.minWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxWidth.isFinite && b.maxWidth.isFinite) || (a.maxWidth == double.INFINITY && b.maxWidth == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.minHeight.isFinite && b.minHeight.isFinite) || (a.minHeight == double.INFINITY && b.minHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
+    assert((a.maxHeight.isFinite && b.maxHeight.isFinite) || (a.maxHeight == double.INFINITY && b.maxHeight == double.INFINITY), 'Cannot interpolate between finite constraints and unbounded constraints.');
     return new BoxConstraints(
-      minWidth: ui.lerpDouble(a.minWidth, b.minWidth, t),
-      maxWidth: ui.lerpDouble(a.maxWidth, b.maxWidth, t),
-      minHeight: ui.lerpDouble(a.minHeight, b.minHeight, t),
-      maxHeight: ui.lerpDouble(a.maxHeight, b.maxHeight, t)
+      minWidth: a.minWidth.isFinite ? ui.lerpDouble(a.minWidth, b.minWidth, t) : double.INFINITY,
+      maxWidth: a.maxWidth.isFinite ? ui.lerpDouble(a.maxWidth, b.maxWidth, t) : double.INFINITY,
+      minHeight: a.minHeight.isFinite ? ui.lerpDouble(a.minHeight, b.minHeight, t) : double.INFINITY,
+      maxHeight: a.maxHeight.isFinite ? ui.lerpDouble(a.maxHeight, b.maxHeight, t) : double.INFINITY,
     );
   }
 
@@ -439,7 +499,7 @@ class BoxConstraints extends Constraints {
       }
       assert(isNormalized);
       return true;
-    });
+    }());
     return isNormalized;
   }
 
@@ -516,7 +576,7 @@ class BoxHitTestEntry extends HitTestEntry {
   final Offset localPosition;
 
   @override
-  String toString() => '${target.runtimeType}#${target.hashCode}@$localPosition';
+  String toString() => '${describeIdentity(target)}@$localPosition';
 }
 
 /// Parent data used by [RenderBox] and its subclasses.
@@ -530,7 +590,10 @@ class BoxParentData extends ParentData {
 
 /// Abstract ParentData subclass for RenderBox subclasses that want the
 /// ContainerRenderObjectMixin.
-abstract class ContainerBoxParentDataMixin<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
+///
+/// This is a convenience class that mixes in the relevant classes with
+/// the relevant type arguments.
+abstract class ContainerBoxParentData<ChildType extends RenderObject> extends BoxParentData with ContainerParentDataMixin<ChildType> { }
 
 enum _IntrinsicDimension { minWidth, maxWidth, minHeight, maxHeight }
 
@@ -554,7 +617,7 @@ class _IntrinsicDimensionsCacheEntry {
   int get hashCode => hashValues(dimension, argument);
 }
 
-/// A render object in a 2D cartesian coordinate system.
+/// A render object in a 2D Cartesian coordinate system.
 ///
 /// The [size] of each box is expressed as a width and a height. Each box has
 /// its own coordinate system in which its upper left corner is placed at (0,
@@ -577,7 +640,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// One would implement a new [RenderBox] subclass to describe a new layout
 /// model, new paint model, new hit-testing model, or new semantics model, while
-/// remaining in the cartesian space defined by the [RenderBox] protocol.
+/// remaining in the Cartesian space defined by the [RenderBox] protocol.
 ///
 /// To create a new protocol, consider subclassing [RenderObject] instead.
 ///
@@ -672,7 +735,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// Children can have additional data owned by the parent but stored on the
 /// child using the [parentData] field. The class used for that data must
 /// inherit from [ParentData]. The [setupParentData] method is used to
-/// initialise the [parentData] field of a child when the child is attached.
+/// initialize the [parentData] field of a child when the child is attached.
 ///
 /// By convention, [RenderBox] objects that have [RenderBox] children use the
 /// [BoxParentData] class, which has a [BoxParentData.offset] field to store the
@@ -714,13 +777,13 @@ class _IntrinsicDimensionsCacheEntry {
 /// [parentData]. The class used for [parentData] must itself have the
 /// [ContainerParentDataMixin] class mixed into it; this is where
 /// [ContainerRenderObjectMixin] stores the linked list. A [ParentData] class
-/// can extend [ContainerBoxParentDataMixin]; this is essentially
+/// can extend [ContainerBoxParentData]; this is essentially
 /// [BoxParentData] mixed with [ContainerParentDataMixin]. For example, if a
 /// `RenderFoo` class wanted to have a linked list of [RenderBox] children, one
 /// might create a `FooParentData` class as follows:
 ///
 /// ```dart
-/// class FooParentData extends ContainerBoxParentDataMixin<RenderBox> {
+/// class FooParentData extends ContainerBoxParentData<RenderBox> {
 ///   // (any fields you might need for these children)
 /// }
 /// ```
@@ -777,9 +840,8 @@ class _IntrinsicDimensionsCacheEntry {
 /// * Implement the [visitChildren] method such that it calls its argument for
 ///   each child, typically in paint order (back-most to front-most).
 ///
-/// * Implement [debugDescribeChildren] such that it outputs a string that
-///   describes all the children. In principle, for each child you want to
-///   include the results of that child's [toStringDeep] function.
+/// * Implement [debugDescribeChildren] such that it outputs a [DiagnosticsNode]
+///   for each child.
 ///
 /// Implementing these seven bullet points is essentially all that the two
 /// aforementioned mixins do.
@@ -797,7 +859,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// constraints would be growing to fit the parent.
 ///
 /// Sizing purely based on the constraints allows the system to make some
-/// significant optimisations. Classes that use this approach should override
+/// significant optimizations. Classes that use this approach should override
 /// [sizedByParent] to return true, and then override [performResize] to set the
 /// [size] using nothing but the constraints, e.g.:
 ///
@@ -823,7 +885,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// child, passing it a [BoxConstraints] object describing the constraints
 /// within which the child can render. Passing tight constraints (see
 /// [BoxConstraints.isTight]) to the child will allow the rendering library to
-/// apply some optimisations, as it knows that if the constraints are tight, the
+/// apply some optimizations, as it knows that if the constraints are tight, the
 /// child's dimensions cannot change even if the layout of the child itself
 /// changes.
 ///
@@ -833,7 +895,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// then it must specify the `parentUsesSize` argument to the child's [layout]
 /// function, setting it to true.
 ///
-/// This flag turns off some optimisations; algorithms that do not rely on the
+/// This flag turns off some optimizations; algorithms that do not rely on the
 /// children's sizes will be more efficient. (In particular, relying on the
 /// child's [size] means that if the child is marked dirty for layout, the
 /// parent will probably also be marked dirty for layout, unless the
@@ -851,7 +913,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// subclass, and instead of reading the child's size, the parent would read
 /// whatever the output of [layout] is for that layout protocol. The
 /// `parentUsesSize` flag is still used to indicate whether the parent is going
-/// to read that output, and optimisations still kick in if the child has tight
+/// to read that output, and optimizations still kick in if the child has tight
 /// constraints (as defined by [Constraints.isTight]).
 ///
 /// ### Painting
@@ -980,7 +1042,7 @@ abstract class RenderBox extends RenderObject {
       if (RenderObject.debugCheckingIntrinsics)
         shouldCache = false;
       return true;
-    });
+    }());
     if (shouldCache) {
       _cachedIntrinsicDimensions ??= <_IntrinsicDimensionsCacheEntry, double>{};
       return _cachedIntrinsicDimensions.putIfAbsent(
@@ -1027,7 +1089,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.minWidth, height, computeMinIntrinsicWidth);
   }
 
@@ -1166,7 +1228,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.maxWidth, height, computeMaxIntrinsicWidth);
   }
 
@@ -1242,7 +1304,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.minHeight, width, computeMinIntrinsicHeight);
   }
 
@@ -1315,7 +1377,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     return _computeIntrinsicDimension(_IntrinsicDimension.maxHeight, width, computeMaxIntrinsicHeight);
   }
 
@@ -1365,7 +1427,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The size of a box should be set only during the box's [performLayout] or
   /// [performResize] functions. If you wish to change the size of a box outside
-  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
+  /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
     assert(hasSize);
@@ -1385,7 +1447,7 @@ abstract class RenderBox extends RenderObject {
         assert(_size == this._size);
       }
       return true;
-    });
+    }());
     return _size;
   }
   Size _size;
@@ -1423,22 +1485,76 @@ abstract class RenderBox extends RenderObject {
         'The RenderBox in question is:\n'
         '  $this'
       );
-    });
+    }());
+    assert(() {
+      value = debugAdoptSize(value);
+      return true;
+    }());
+    _size = value;
+    assert(() { debugAssertDoesMeetConstraints(); return true; }());
+  }
+
+  /// Claims ownership of the given [Size].
+  ///
+  /// In debug mode, the [RenderBox] class verifies that [Size] objects obtained
+  /// from other [RenderBox] objects are only used according to the semantics of
+  /// the [RenderBox] protocol, namely that a [Size] from a [RenderBox] can only
+  /// be used by its parent, and then only if `parentUsesSize` was set.
+  ///
+  /// Sometimes, a [Size] that can validly be used ends up no longer being valid
+  /// over time. The common example is a [Size] taken from a child that is later
+  /// removed from the parent. In such cases, this method can be called to first
+  /// check whether the size can legitimately be used, and if so, to then create
+  /// a new [Size] that can be used going forward, regardless of what happens to
+  /// the original owner.
+  Size debugAdoptSize(Size value) {
+    Size result = value;
     assert(() {
       if (value is _DebugSize) {
         if (value._owner != this) {
-          assert(value._owner.parent == this);
-          assert(value._canBeUsedByParent);
+          if (value._owner.parent != this) {
+            throw new FlutterError(
+              'The size property was assigned a size inappropriately.\n'
+              'The following render object:\n'
+              '  $this\n'
+              '...was assigned a size obtained from:\n'
+              '  ${value._owner}\n'
+              'However, this second render object is not, or is no longer, a '
+              'child of the first, and it is therefore a violation of the '
+              'RenderBox layout protocol to use that size in the layout of the '
+              'first render object.\n'
+              'If the size was obtained at a time where it was valid to read '
+              'the size (because the second render object above was a child '
+              'of the first at the time), then it should be adopted using '
+              'debugAdoptSize at that time.\n'
+              'If the size comes from a grandchild or a render object from an '
+              'entirely different part of the render tree, then there is no '
+              'way to be notified when the size changes and therefore attempts '
+              'to read that size are almost certainly a source of bugs. A different '
+              'approach should be used.'
+            );
+          }
+          if (!value._canBeUsedByParent) {
+            throw new FlutterError(
+              'A child\'s size was used without setting parentUsesSize.\n'
+              'The following render object:\n'
+              '  $this\n'
+              '...was assigned a size obtained from its child:\n'
+              '  ${value._owner}\n'
+              'However, when the child was laid out, the parentUsesSize argument '
+              'was not set or set to false. Subsequently this transpired to be '
+              'inaccurate: the size was nonetheless used by the parent.\n'
+              'It is important to tell the framework if the size will be used or not '
+              'as several important performance optimizations can be made if the '
+              'size will not be used by the parent.'
+            );
+          }
         }
       }
+      result = new _DebugSize(value, this, debugCanParentUseSize);
       return true;
-    });
-    _size = value;
-    assert(() {
-      _size = new _DebugSize(_size, this, debugCanParentUseSize);
-      return true;
-    });
-    assert(() { debugAssertDoesMeetConstraints(); return true; });
+    }());
+    return result;
   }
 
   @override
@@ -1482,7 +1598,7 @@ abstract class RenderBox extends RenderObject {
                ((RenderObject.debugActivePaint == this) && debugDoingThisPaint);
       assert(parent == this.parent);
       return false;
-    });
+    }());
     assert(_debugSetDoingBaseline(true));
     final double result = getDistanceToActualBaseline(baseline);
     assert(_debugSetDoingBaseline(false));
@@ -1527,9 +1643,6 @@ abstract class RenderBox extends RenderObject {
   @override
   BoxConstraints get constraints => super.constraints;
 
-  // We check the intrinsic sizes of each render box once by default.
-  bool _debugNeedsIntrinsicSizeCheck = true;
-
   @override
   void debugAssertDoesMeetConstraints() {
     assert(constraints != null);
@@ -1557,22 +1670,17 @@ abstract class RenderBox extends RenderObject {
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded width constraint is:');
-          information.writeln('  $node');
-          final List<String> description = <String>[];
-          node.debugFillDescription(description);
-          for (String line in description)
-            information.writeln('  $line');
-        }
+          information.write('  ');
+          information.writeln(node.toStringShallow(joiner: '\n  '));
+         }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
             node = node.parent;
           information.writeln('The nearest ancestor providing an unbounded height constraint is:');
-          information.writeln('  $node');
-          final List<String> description = <String>[];
-          node.debugFillDescription(description);
-          for (String line in description)
-            information.writeln('  $line');
+          information.write('  ');
+          information.writeln(node.toStringShallow(joiner: '\n  '));
+
         }
         throw new FlutterError(
           '$runtimeType object was given an infinite size during layout.\n'
@@ -1597,7 +1705,7 @@ abstract class RenderBox extends RenderObject {
           'your fault. Contact support: https://github.com/flutter/flutter/issues/new'
         );
       }
-      if (_debugNeedsIntrinsicSizeCheck || debugCheckIntrinsicSizes) {
+      if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
@@ -1636,7 +1744,6 @@ abstract class RenderBox extends RenderObject {
         // TODO(ianh): Test that values are internally consistent in more ways than the above.
 
         RenderObject.debugCheckingIntrinsics = false;
-        _debugNeedsIntrinsicSizeCheck = false;
         if (failures.isNotEmpty) {
           assert(failureCount > 0);
           throw new FlutterError(
@@ -1649,7 +1756,7 @@ abstract class RenderBox extends RenderObject {
         }
       }
       return true;
-    });
+    }());
   }
 
   @override
@@ -1690,14 +1797,15 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
   }
 
   /// Determines the set of render objects located at the given position.
   ///
-  /// Returns true if the given point is contained in this render object or one
-  /// of its descendants. Adds any render objects that contain the point to the
-  /// given hit test result.
+  /// Returns true, and adds any render objects that contain the point to the
+  /// given hit test result, if this render object or one of its descendants
+  /// absorbs the hit (preventing objects below this one from being hit).
+  /// Returns false if the hit can continue to other objects below this one.
   ///
   /// The caller is responsible for transforming [position] into the local
   /// coordinate space of the callee. The callee is responsible for checking
@@ -1736,7 +1844,7 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     if (_size.contains(position)) {
       if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
         result.add(new BoxHitTestEntry(this, position));
@@ -1773,7 +1881,7 @@ abstract class RenderBox extends RenderObject {
   /// Subclasses that apply transforms during painting should override this
   /// function to factor those transforms into the calculation.
   ///
-  /// The RenderBox implementation takes care of adjusting the matrix for the
+  /// The [RenderBox] implementation takes care of adjusting the matrix for the
   /// position of the given child as determined during layout and stored on the
   /// child's [parentData] in the [BoxParentData.offset] field.
   @override
@@ -1797,41 +1905,13 @@ abstract class RenderBox extends RenderObject {
         );
       }
       return true;
-    });
+    }());
     final BoxParentData childParentData = child.parentData;
     final Offset offset = childParentData.offset;
     transform.translate(offset.dx, offset.dy);
   }
 
-  /// Returns a matrix that maps the local coordinate system to the coordinate
-  /// system of `ancestor`.
-  ///
-  /// If `ancestor` is null, this method returns a matrix that maps from the
-  /// local coordinate system to the coordinate system of the
-  /// [PipelineOwner.rootNode]. For the render tree owner by the
-  /// [RendererBinding] (i.e. for the main render tree displayed on the device)
-  /// this means that this method maps to the global coordinate system in
-  /// logical pixels. To get physical pixels, use [applyPaintTransform] from the
-  /// [RenderView] to further transform the coordinate.
-  Matrix4 getTransformTo(RenderObject ancestor) {
-    assert(attached);
-    if (ancestor == null) {
-      final AbstractNode rootNode = owner.rootNode;
-      if (rootNode is RenderObject)
-        ancestor = rootNode;
-    }
-    final List<RenderObject> renderers = <RenderObject>[];
-    for (RenderObject renderer = this; renderer != ancestor; renderer = renderer.parent) {
-      assert(renderer != null); // Failed to find ancestor in parent chain.
-      renderers.add(renderer);
-    }
-    final Matrix4 transform = new Matrix4.identity();
-    for (int index = renderers.length - 1; index > 0; index -= 1)
-      renderers[index].applyPaintTransform(renderers[index - 1], transform);
-    return transform;
-  }
-
-  /// Convert the given point from the global coodinate system in logical pixels
+  /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is
@@ -1928,7 +2008,7 @@ abstract class RenderBox extends RenderObject {
         markNeedsPaint();
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -1942,7 +2022,7 @@ abstract class RenderBox extends RenderObject {
       if (debugPaintPointersEnabled)
         debugPaintPointers(context, offset);
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a border around this render box.
@@ -1954,10 +2034,10 @@ abstract class RenderBox extends RenderObject {
       final Paint paint = new Paint()
        ..style = PaintingStyle.stroke
        ..strokeWidth = 1.0
-       ..color = debugPaintSizeColor;
+       ..color = const Color(0xFF00FFFF);
       context.canvas.drawRect((offset & size).deflate(0.5), paint);
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a line for each baseline.
@@ -1973,7 +2053,7 @@ abstract class RenderBox extends RenderObject {
       // ideographic baseline
       final double baselineI = getDistanceToBaseline(TextBaseline.ideographic, onlyReal: true);
       if (baselineI != null) {
-        paint.color = debugPaintIdeographicBaselineColor;
+        paint.color = const Color(0xFFFFD000);
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineI);
         path.lineTo(offset.dx + size.width, offset.dy + baselineI);
@@ -1982,14 +2062,14 @@ abstract class RenderBox extends RenderObject {
       // alphabetic baseline
       final double baselineA = getDistanceToBaseline(TextBaseline.alphabetic, onlyReal: true);
       if (baselineA != null) {
-        paint.color = debugPaintAlphabeticBaselineColor;
+        paint.color = const Color(0xFF00FF00);
         path = new Path();
         path.moveTo(offset.dx, offset.dy + baselineA);
         path.lineTo(offset.dx + size.width, offset.dy + baselineA);
         context.canvas.drawPath(path, paint);
       }
       return true;
-    });
+    }());
   }
 
   /// In debug mode, paints a rectangle if this render box has counted more
@@ -2004,17 +2084,17 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       if (_debugActivePointers > 0) {
         final Paint paint = new Paint()
-         ..color = new Color(debugPaintPointersColorValue | ((0x04000000 * depth) & 0xFF000000));
+         ..color = new Color(0x00BBBB | ((0x04000000 * depth) & 0xFF000000));
         context.canvas.drawRect(offset & size, paint);
       }
       return true;
-    });
+    }());
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('size: ${ hasSize ? size : "MISSING" }');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Size>('size', _size, missingIfNull: true));
   }
 }
 
@@ -2024,7 +2104,10 @@ abstract class RenderBox extends RenderObject {
 /// By convention, this class doesn't override any members of the superclass.
 /// Instead, it provides helpful functions that subclasses can call as
 /// appropriate.
-abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentDataMixin<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataType extends ContainerBoxParentData<ChildType>> implements ContainerRenderObjectMixin<ChildType, ParentDataType> {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory RenderBoxContainerDefaultsMixin._() => null;
 
   /// Returns the baseline of the first child with a baseline.
   ///
@@ -2070,6 +2153,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   ///
   /// Stops walking once after the first child reports that it contains the
   /// given point. Returns whether any children contain the given point.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultPaint], which paints the children appropriate for this
+  ///    hit-testing strategy.
   bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
@@ -2083,6 +2171,11 @@ abstract class RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, Pare
   }
 
   /// Paints each child by walking the child list forwards.
+  ///
+  /// See also:
+  ///
+  ///  * [defaultHitTestChildren], which implements hit-testing of the children
+  ///    in a manner appropriate for this painting strategy.
   void defaultPaint(PaintingContext context, Offset offset) {
     ChildType child = firstChild;
     while (child != null) {

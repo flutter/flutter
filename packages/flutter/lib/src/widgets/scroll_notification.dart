@@ -15,6 +15,10 @@ import 'scroll_metrics.dart';
 ///
 /// This is used by [ScrollNotification] and [OverscrollIndicatorNotification].
 abstract class ViewportNotificationMixin extends Notification {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory ViewportNotificationMixin._() => null;
+
   /// The number of viewports that this notification has bubbled through.
   ///
   /// Typically listeners only respond to notifications with a [depth] of zero.
@@ -65,6 +69,18 @@ abstract class ViewportNotificationMixin extends Notification {
 /// [Scrollable] widgets. To focus on notifications from the nearest
 /// [Scrollable] descendant, check that the [depth] property of the notification
 /// is zero.
+///
+/// When a scroll notification is received by a [NotificationListener], the
+/// listener will have already completed build and layout, and it is therefore
+/// too late for that widget to call [State.setState]. Any attempt to adjust the
+/// build or layout based on a scroll notification would result in a layout that
+/// lagged one frame behind, which is a poor user experience. Scroll
+/// notifications are therefore primarily useful for paint effects (since paint
+/// happens after layout). The [GlowingOverscrollIndicator] and [Scrollbar]
+/// widgets are examples of paint effects that use scroll notifications.
+///
+/// To drive layout based on the scroll position, consider listening to the
+/// [ScrollPosition] directly (or indirectly via a [ScrollController]).
 abstract class ScrollNotification extends LayoutChangedNotification with ViewportNotificationMixin {
   /// Initializes fields for subclasses.
   ScrollNotification({
@@ -72,7 +88,7 @@ abstract class ScrollNotification extends LayoutChangedNotification with Viewpor
     @required this.context,
   });
 
-  // A description of a [Scrollable]'s contents, useful for modeling the state
+  /// A description of a [Scrollable]'s contents, useful for modeling the state
   /// of its viewport.
   final ScrollMetrics metrics;
 
@@ -171,12 +187,11 @@ class OverscrollNotification extends ScrollNotification {
     this.dragDetails,
     @required this.overscroll,
     this.velocity: 0.0,
-  }) : super(metrics: metrics, context: context) {
-    assert(overscroll != null);
-    assert(overscroll.isFinite);
-    assert(overscroll != 0.0);
-    assert(velocity != null);
-  }
+  }) : assert(overscroll != null),
+       assert(overscroll.isFinite),
+       assert(overscroll != 0.0),
+       assert(velocity != null),
+       super(metrics: metrics, context: context);
 
   /// If the [Scrollable] overscrolled because of a drag, the details about that
   /// drag update.
@@ -230,7 +245,7 @@ class ScrollEndNotification extends ScrollNotification {
   /// If a drag ends with some residual velocity, a typical [ScrollPhysics] will
   /// start a ballistic scroll, which delays the [ScrollEndNotification] until
   /// the ballistic simulation completes, at which time [dragDetails] will
-  /// be null. If the residtual velocity is too small to trigger ballistic
+  /// be null. If the residual velocity is too small to trigger ballistic
   /// scrolling, then the [ScrollEndNotification] will be dispatched immediately
   /// and [dragDetails] will be non-null.
   final DragEndDetails dragDetails;
@@ -266,4 +281,15 @@ class UserScrollNotification extends ScrollNotification {
     super.debugFillDescription(description);
     description.add('direction: $direction');
   }
+}
+
+/// A predicate for [ScrollNotification], used to customize widgets that
+/// listen to notifications from their children.
+typedef bool ScrollNotificationPredicate(ScrollNotification notification);
+
+/// A [ScrollNotificationPredicate] that checks whether 
+/// `notification.depth == 0`, which means that the notification did not bubble
+/// through any intervening scrolling widgets.
+bool defaultScrollNotificationPredicate(ScrollNotification notification) {
+  return notification.depth == 0;
 }

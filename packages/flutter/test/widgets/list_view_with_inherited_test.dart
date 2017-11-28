@@ -15,14 +15,17 @@ Widget buildCard(BuildContext context, int index) {
     height: 100.0,
     child: new DefaultTextStyle(
       style: new TextStyle(fontSize: 2.0 + items.length.toDouble()),
-      child: new Text('${items[index]}')
+      child: new Text('${items[index]}', textDirection: TextDirection.ltr)
     )
   );
 }
 
 Widget buildFrame() {
-  return new ListView.builder(
-    itemBuilder: buildCard,
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new ListView.builder(
+      itemBuilder: buildCard,
+    ),
   );
 }
 

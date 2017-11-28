@@ -15,7 +15,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 
 /// A widget that rebuilds when the given [Listenable] changes value.
 ///
-/// [AnimatedWidget] is most common used with [Animation] objects, which are
+/// [AnimatedWidget] is most commonly used with [Animation] objects, which are
 /// [Listenable], but it can be used with any [Listenable], including
 /// [ChangeNotifier] and [ValueNotifier].
 ///
@@ -58,9 +58,9 @@ abstract class AnimatedWidget extends StatefulWidget {
   _AnimatedState createState() => new _AnimatedState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('animation: $listenable');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Listenable>('animation', listenable));
   }
 }
 
@@ -97,22 +97,28 @@ class _AnimatedState extends State<AnimatedWidget> {
 }
 
 /// Animates the position of a widget relative to its normal position.
+///
+/// The translation is expressed as a [Offset] scaled to the child's size. For
+/// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
+/// translation of one quarter the width of the child.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
   /// The [position] argument must not be null.
   const SlideTransition({
     Key key,
-    @required Animation<FractionalOffset> position,
+    @required Animation<Offset> position,
     this.transformHitTests: true,
     this.child,
-  }) : super(key: key, listenable: position);
+  }) : assert(position != null),
+       super(key: key, listenable: position);
 
   /// The animation that controls the position of the child.
   ///
-  /// If the current value of the position animation is (dx, dy), the child will
-  /// be translated horizontally by width * dx and vertically by height * dy.
-  Animation<FractionalOffset> get position => listenable;
+  /// If the current value of the position animation is `(dx, dy)`, the child
+  /// will be translated horizontally by `width * dx` and vertically by
+  /// `height * dy`.
+  Animation<Offset> get position => listenable;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -140,11 +146,11 @@ class ScaleTransition extends AnimatedWidget {
   /// Creates a scale transition.
   ///
   /// The [scale] argument must not be null. The [alignment] argument defaults
-  /// to [FractionalOffset.center].
+  /// to [Alignment.center].
   const ScaleTransition({
     Key key,
     @required Animation<double> scale,
-    this.alignment: FractionalOffset.center,
+    this.alignment: Alignment.center,
     this.child,
   }) : super(key: key, listenable: scale);
 
@@ -154,12 +160,12 @@ class ScaleTransition extends AnimatedWidget {
   /// painted v times its normal size.
   Animation<double> get scale => listenable;
 
-  /// The alignment of the origin of the coordainte system in which the scale
+  /// The alignment of the origin of the coordinate system in which the scale
   /// takes place, relative to the size of the box.
   ///
   /// For example, to set the origin of the scale to bottom middle, you can use
-  /// an alignment of (0.5, 1.0).
-  final FractionalOffset alignment;
+  /// an alignment of (0.0, 1.0).
+  final Alignment alignment;
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -203,7 +209,7 @@ class RotationTransition extends AnimatedWidget {
     final Matrix4 transform = new Matrix4.rotationZ(turnsValue * math.PI * 2.0);
     return new Transform(
       transform: transform,
-      alignment: FractionalOffset.center,
+      alignment: Alignment.center,
       child: child,
     );
   }
@@ -217,13 +223,13 @@ class SizeTransition extends AnimatedWidget {
   /// Creates a size transition.
   ///
   /// The [sizeFactor] argument must not be null. The [axis] argument defaults
-  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.5, which centers the
+  /// to [Axis.vertical]. The [axisAlignment] defaults to 0.0, which centers the
   /// child along the main axis during the transition.
   const SizeTransition({
     Key key,
     this.axis: Axis.vertical,
     @required Animation<double> sizeFactor,
-    this.axisAlignment: 0.5,
+    this.axisAlignment: 0.0,
     this.child,
   }) : assert(axis != null),
        super(key: key, listenable: sizeFactor);
@@ -244,11 +250,11 @@ class SizeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    FractionalOffset alignment;
+    AlignmentDirectional alignment;
     if (axis == Axis.vertical)
-      alignment = new FractionalOffset(0.0, axisAlignment);
+      alignment = new AlignmentDirectional(-1.0, axisAlignment);
     else
-      alignment = new FractionalOffset(axisAlignment, 0.0);
+      alignment = new AlignmentDirectional(axisAlignment, -1.0);
     return new ClipRect(
       child: new Align(
         alignment: alignment,
@@ -403,7 +409,7 @@ class DecoratedBoxTransition extends AnimatedWidget {
   /// Creates an animated [DecoratedBox] whose [Decoration] animation updates
   /// the widget.
   ///
-  /// The [decoration] and [position] cannot be null.
+  /// The [decoration] and [position] must not be null.
   ///
   /// See also:
   ///
@@ -437,6 +443,45 @@ class DecoratedBoxTransition extends AnimatedWidget {
   }
 }
 
+/// Animated version of an [Align] that animates its [Align.alignment] property.
+class AlignTransition extends AnimatedWidget {
+  /// Creates an animated [Align] whose [AlignmentGeometry] animation updates
+  /// the widget.
+  ///
+  /// See also:
+  ///
+  /// * [new Align].
+  const AlignTransition({
+    Key key,
+    @required Animation<AlignmentGeometry> alignment,
+    @required this.child,
+    this.widthFactor,
+    this.heightFactor,
+  }) : super(key: key, listenable: alignment);
+
+  /// The animation that controls the child's alignment.
+  Animation<AlignmentGeometry> get alignment => listenable;
+
+  /// If non-null, the child's width factor, see [Align.widthFactor].
+  final double widthFactor;
+
+  /// If non-null, the child's height factor, see [Align.heightFactor].
+  final double heightFactor;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return new Align(
+      alignment: alignment.value,
+      widthFactor: widthFactor,
+      heightFactor: heightFactor,
+      child: child,
+    );
+  }
+}
+
 /// A builder that builds a widget given a child.
 ///
 /// The child should typically be part of the returned widget tree.
@@ -450,6 +495,11 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// an animation as part of a larger build function. To use AnimatedBuilder,
 /// simply construct the widget and pass it a builder function.
 ///
+/// For simple cases without additional state, consider using
+/// [AnimatedWidget].
+///
+/// ## Performance optimizations
+///
 /// If your [builder] function contains a subtree that does not depend on the
 /// animation, it's more efficient to build that subtree once instead of
 /// rebuilding it on every animation tick.
@@ -461,8 +511,51 @@ typedef Widget TransitionBuilder(BuildContext context, Widget child);
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// For simple cases without additional state, consider using
-/// [AnimatedWidget].
+/// ## Sample code
+///
+/// This code defines a widget called `Spinner` that spins a green square
+/// continually. It is built with an [AnimatedBuilder] and makes use of the
+/// [child] feature to avoid having to rebuild the [Container] each time.
+///
+/// ```dart
+/// class Spinner extends StatefulWidget {
+///   @override
+///   _SpinnerState createState() => new _SpinnerState();
+/// }
+///
+/// class _SpinnerState extends State<Spinner> with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = new AnimationController(
+///       duration: const Duration(seconds: 10),
+///       vsync: this,
+///     )..repeat();
+///   }
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new AnimatedBuilder(
+///       animation: _controller,
+///       child: new Container(width: 200.0, height: 200.0, color: Colors.green),
+///       builder: (BuildContext context, Widget child) {
+///         return new Transform.rotate(
+///           angle: _controller.value * 2.0 * math.PI,
+///           child: child,
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
 class AnimatedBuilder extends AnimatedWidget {
   /// Creates an animated builder.
   ///

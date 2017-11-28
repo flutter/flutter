@@ -105,6 +105,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// this route from the previous one, and back to the previous route from this
   /// one.
   AnimationController createAnimationController() {
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
     assert(duration != null && duration >= Duration.ZERO);
     return new AnimationController(
@@ -118,6 +119,7 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   /// the transition controlled by the animation controller created by
   /// [createAnimationController()].
   Animation<double> createAnimation() {
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     assert(_controller != null);
     return _controller.view;
   }
@@ -157,21 +159,26 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   void install(OverlayEntry insertionPoint) {
+    assert(!_transitionCompleter.isCompleted, 'Cannot install a $runtimeType after disposing it.');
     _controller = createAnimationController();
-    assert(_controller != null);
+    assert(_controller != null, '$runtimeType.createAnimationController() returned null.');
     _animation = createAnimation();
-    assert(_animation != null);
+    assert(_animation != null, '$runtimeType.createAnimation() returned null.');
     super.install(insertionPoint);
   }
 
   @override
   TickerFuture didPush() {
+    assert(_controller != null, '$runtimeType.didPush called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _animation.addStatusListener(_handleStatusChanged);
     return _controller.forward();
   }
 
   @override
   void didReplace(Route<dynamic> oldRoute) {
+    assert(_controller != null, '$runtimeType.didReplace called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     if (oldRoute is TransitionRoute<dynamic>)
       _controller.value = oldRoute._controller.value;
     _animation.addStatusListener(_handleStatusChanged);
@@ -180,6 +187,8 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   bool didPop(T result) {
+    assert(_controller != null, '$runtimeType.didPop called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _result = result;
     _controller.reverse();
     return super.didPop(result);
@@ -187,12 +196,16 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
 
   @override
   void didPopNext(Route<dynamic> nextRoute) {
+    assert(_controller != null, '$runtimeType.didPopNext called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
     super.didPopNext(nextRoute);
   }
 
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
+    assert(_controller != null, '$runtimeType.didChangeNext called before calling install() or after calling dispose().');
+    assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     _updateSecondaryAnimation(nextRoute);
     super.didChangeNext(nextRoute);
   }
@@ -236,11 +249,12 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   ///
   /// Subclasses can override this method to restrict the set of routes they
   /// need to coordinate transitions with.
-  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) => true;
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) => true;
 
   @override
   void dispose() {
-    _controller.dispose();
+    assert(!_transitionCompleter.isCompleted, 'Cannot dispose a $runtimeType twice.');
+    _controller?.dispose();
     _transitionCompleter.complete(_result);
     super.dispose();
   }
@@ -379,41 +393,12 @@ class _ModalScopeStatus extends InheritedWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('${isCurrent ? "active" : "inactive"}');
-    if (canPop)
-      description.add('can pop');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new FlagProperty('isCurrent', value: isCurrent, ifTrue: 'active', ifFalse: 'inactive'));
+    description.add(new FlagProperty('canPop', value: canPop, ifTrue: 'can pop'));
   }
 }
-
-/// Indicates whether the current route should be popped.
-///
-/// Used as the return value for [Route.willPop].
-enum RoutePopDisposition {
-  /// Pop the route.
-  ///
-  /// If [Route.willPop] returns [pop] then the back button will actually pop
-  /// the current route.
-  pop,
-
-  /// Do not pop the route.
-  ///
-  /// If [Route.willPop] returns [doNotPop] then the back button will be ignored.
-  doNotPop,
-
-  /// Delegate this to the next level of navigation.
-  ///
-  /// If [Route.willPop] return [bubble] then the back button will be handled
-  /// by the [SystemNavigator], which will usually close the application.
-  bubble,
-}
-
-/// Signature for a callback that verifies that it's OK to call [Navigator.pop].
-///
-/// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback], and
-/// [ModalRoute.removeScopedWillPopCallback].
-typedef Future<bool> WillPopCallback();
 
 class _ModalScope extends StatefulWidget {
   const _ModalScope({
@@ -524,26 +509,31 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Returns the modal route most closely associated with the given context.
   ///
-  /// Returns `null` if the given context is not associated with a modal route.
+  /// Returns null if the given context is not associated with a modal route.
   ///
   /// Typical usage is as follows:
   ///
   /// ```dart
   /// ModalRoute<dynamic> route = ModalRoute.of(context);
   /// ```
+  ///
+  /// The given [BuildContext] will be rebuilt if the state of the route changes
+  /// (specifically, if [isCurrent] or [canPop] change value).
   static ModalRoute<dynamic> of(BuildContext context) {
     final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
     return widget?.route;
   }
 
+  /// Schedule a call to [buildTransitions].
+  ///
   /// Whenever you need to change internal state for a ModalRoute object, make
-  /// the change in a function that you pass to setState(), as in:
+  /// the change in a function that you pass to [setState], as in:
   ///
   /// ```dart
   /// setState(() { myState = newValue });
   /// ```
   ///
-  /// If you just change the state directly without calling setState(), then the
+  /// If you just change the state directly without calling [setState], then the
   /// route will not be scheduled for rebuilding, meaning that its rendering
   /// will not be updated.
   @protected
@@ -566,7 +556,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   static RoutePredicate withName(String name) {
     return (Route<dynamic> route) {
       return !route.willHandlePopInternally
-        && route is ModalRoute && route.settings.name == name;
+          && route is ModalRoute
+          && route.settings.name == name;
     };
   }
 
@@ -574,21 +565,40 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// Override this method to build the primary content of this route.
   ///
-  /// * [context] The context in which the route is being built.
-  /// * [animation] The animation for this route's transition. When entering,
-  ///   the animation runs forward from 0.0 to 1.0. When exiting, this animation
-  ///   runs backwards from 1.0 to 0.0.
-  /// * [secondaryAnimation] The animation for the route being pushed on top of
-  ///   this route. This animation lets this route coordinate with the entrance
-  ///   and exit transition of routes pushed on top of this route.
+  /// The arguments have the following meanings:
+  ///
+  ///  * `context`: The context in which the route is being built.
+  ///  * [animation]: The animation for this route's transition. When entering,
+  ///    the animation runs forward from 0.0 to 1.0. When exiting, this animation
+  ///    runs backwards from 1.0 to 0.0.
+  ///  * [secondaryAnimation]: The animation for the route being pushed on top of
+  ///    this route. This animation lets this route coordinate with the entrance
+  ///    and exit transition of routes pushed on top of this route.
+  ///
+  /// This method is called when the route is first built, and rarely
+  /// thereafter. In particular, it is not called again when the route's state
+  /// changes. For a builder that is called every time the route's state
+  /// changes, consider [buildTransitions]. For widgets that change their
+  /// behavior when the route's state changes, consider [ModalRoute.of] to
+  /// obtain a reference to the route; this will cause the widget to be rebuilt
+  /// each time the route changes state.
+  ///
+  /// In general, [buildPage] should be used to build the page contents, and
+  /// [buildTransitions] for the widgets that change as the page is brought in
+  /// and out of view. Avoid using [buildTransitions] for content that never
+  /// changes; building such content once from [buildPage] is more efficient.
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
 
   /// Override this method to wrap the [child] with one or more transition
   /// widgets that define how the route arrives on and leaves the screen.
   ///
-  /// By default, the child is not wrapped in any transition widgets.
+  /// By default, the child (which contains the widget returned by [buildPage])
+  /// is not wrapped in any transition widgets.
   ///
-  /// The buildTransitions method is typically used to define transitions
+  /// The [buildTransitions] method, in contrast to [buildPage], is called each
+  /// time the [Route]'s state changes (e.g. the value of [canPop]).
+  ///
+  /// The [buildTransitions] method is typically used to define transitions
   /// that animate the new topmost route's comings and goings. When the
   /// [Navigator] pushes a route on the top of its stack, the new route's
   /// primary [animation] runs from 0.0 to 1.0. When the Navigator pops the
@@ -622,9 +632,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///    ) {
   ///     return new SlideTransition(
-  ///       position: new FractionalOffsetTween(
-  ///         begin: FractionalOffset.bottomLeft,
-  ///         end: FractionalOffset.topLeft
+  ///       position: new Tween<Offset>(
+  ///         begin: const Offset(0.0, 1.0),
+  ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: child, // child is the value returned by pageBuilder
   ///     );
@@ -632,11 +642,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// );
   ///```
   ///
-  /// We've used [PageRouteBuilder] to demonstrate the buildTransitions method
-  /// here. The body of an override of the buildTransitions method would be
+  /// We've used [PageRouteBuilder] to demonstrate the [buildTransitions] method
+  /// here. The body of an override of the [buildTransitions] method would be
   /// defined in the same way.
   ///
-  /// When the Navigator pushes a route on the top of its stack, the
+  /// When the [Navigator] pushes a route on the top of its stack, the
   /// [secondaryAnimation] can be used to define how the route that was on
   /// the top of the stack leaves the screen. Similarly when the topmost route
   /// is popped, the secondaryAnimation can be used to define how the route
@@ -646,7 +656,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// secondaryAnimation for the route below it runs from 1.0 to 0.0.
   ///
   /// The example below adds a transition that's driven by the
-  /// secondaryAnimation. When this route disappears because a new route has
+  /// [secondaryAnimation]. When this route disappears because a new route has
   /// been pushed on top of it, it translates in the opposite direction of
   /// the new route. Likewise when the route is exposed because the topmost
   /// route has been popped off.
@@ -659,31 +669,39 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///       Widget child,
   ///   ) {
   ///     return new SlideTransition(
-  ///       position: new FractionalOffsetTween(
-  ///         begin: FractionalOffset.bottomLeft,
-  ///         end: FractionalOffset.topLeft,
+  ///       position: new AlignmentTween(
+  ///         begin: const Offset(0.0, 1.0),
+  ///         end: Offset.zero,
   ///       ).animate(animation),
   ///       child: new SlideTransition(
-  ///         position: new FractionalOffsetTween(
-  ///           begin: FractionalOffset.topLeft,
-  ///           end: FractionalOffset.bottomLeft,
+  ///         position: new TweenOffset(
+  ///           begin: Offset.zero,
+  ///           end: const Offset(0.0, 1.0),
   ///         ).animate(secondaryAnimation),
   ///         child: child,
   ///       ),
   ///     );
   ///   }
-  ///```
+  /// ```
   ///
-  /// In practice the secondaryAnimation is used pretty rarely.
+  /// In practice the `secondaryAnimation` is used pretty rarely.
   ///
-  ///  * [context] The context in which the route is being built.
-  ///  * [animation] When the [Navigator] pushes a route on the top of its stack,
-  ///    the new route's primary [animation] runs from 0.0 to 1.0. When the Navigator
+  /// The arguments to this method are as follows:
+  ///
+  ///  * `context`: The context in which the route is being built.
+  ///  * [animation]: When the [Navigator] pushes a route on the top of its stack,
+  ///    the new route's primary [animation] runs from 0.0 to 1.0. When the [Navigator]
   ///    pops the topmost route this animation runs from 1.0 to 0.0.
-  ///  * [secondaryAnimation] When the Navigator pushes a new route
-  ///    on the top of its stack, the old topmost route's secondaryAnimation
-  ///    runs from 0.0 to 1.0.  When the Navigator pops the topmost route, the
-  ///    secondaryAnimation for the route below it runs from 1.0 to 0.0.
+  ///  * [secondaryAnimation]: When the Navigator pushes a new route
+  ///    on the top of its stack, the old topmost route's [secondaryAnimation]
+  ///    runs from 0.0 to 1.0.  When the [Navigator] pops the topmost route, the
+  ///    [secondaryAnimation] for the route below it runs from 1.0 to 0.0.
+  ///  * `child`, the page contents.
+  ///
+  /// See also:
+  ///
+  ///  * [buildPage], which is used to describe the actual contents of the page,
+  ///    and whose result is passed to the `child` argument of this method.
   Widget buildTransitions(
       BuildContext context,
       Animation<double> animation,
@@ -718,10 +736,46 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // The API for subclasses to override - used by this class
 
   /// Whether you can dismiss this route by tapping the modal barrier.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// If [barrierDismissible] is true, then tapping this barrier will cause the
+  /// current route to be popped (see [Navigator.pop]) with null as the value.
+  ///
+  /// If [barrierDismissible] is false, then tapping the barrier has no effect.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierColor], which controls the color of the scrim for this route.
+  ///  * [ModalBarrier], the widget that implements this feature.
   bool get barrierDismissible;
 
   /// The color to use for the modal barrier. If this is null, the barrier will
   /// be transparent.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// The color is ignored, and the barrier made invisible, when [offstage] is
+  /// true.
+  ///
+  /// While the route is animating into position, the color is animated from
+  /// transparent to the specified color.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
   Color get barrierColor;
 
   /// Whether the route should remain in memory when it is inactive. If this is
@@ -741,6 +795,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// non-interactive, but each widget has its final size and position. This
   /// mechanism lets the [HeroController] determine the final local of any hero
   /// widgets being animated as part of the transition.
+  ///
+  /// The modal barrier, if any, is not rendered if [offstage] is true (see
+  /// [barrierColor]).
   bool get offstage => _offstage;
   bool _offstage = false;
   set offstage(bool value) {
@@ -860,9 +917,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// See also:
   ///
-  /// * [Form], which provides an `onWillPop` callback that uses this mechanism.
-  /// * [addScopedWillPopCallback], which adds callback to the list
-  ///   checked by [willPop].
+  ///  * [Form], which provides an `onWillPop` callback that uses this mechanism.
+  ///  * [addScopedWillPopCallback], which adds callback to the list
+  ///    checked by [willPop].
   void removeScopedWillPopCallback(WillPopCallback callback) {
     assert(_scopeKey.currentState != null);
     _scopeKey.currentState.removeWillPopCallback(callback);
@@ -874,10 +931,16 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// supported by [MaterialPageRoute] for [TargetPlatform.iOS].
   /// If a pop might be vetoed, then the back gesture is disabled.
   ///
+  /// The [buildTransitions] method will not be called again if this changes,
+  /// since it can change during the build as descendants of the route add or
+  /// remove callbacks.
+  ///
   /// See also:
   ///
-  /// * [addScopedWillPopCallback], which adds a callback.
-  /// * [removeScopedWillPopCallback], which removes a callback.
+  ///  * [addScopedWillPopCallback], which adds a callback.
+  ///  * [removeScopedWillPopCallback], which removes a callback.
+  ///  * [willHandlePopInternally], which reports on another reason why
+  ///    a pop might be vetoed.
   @protected
   bool get hasScopedWillPopCallback {
     return _scopeKey.currentState == null || _scopeKey.currentState._willPopCallbacks.isNotEmpty;
@@ -910,7 +973,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null) {
+    if (barrierColor != null && !offstage) {
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
@@ -966,4 +1029,124 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
     assert(nextRoute is! PageRoute<dynamic>);
     super.didChangeNext(nextRoute);
   }
+}
+
+/// A [Navigator] observer that notifies [RouteAware]s of changes to the
+/// state of their [Route].
+///
+/// [RouteObserver] informs subscribers whenever a route of type `T` is pushed
+/// on top of their own route of type `T` or popped from it. This is for example
+/// useful to keep track of page transitions, e.i. a `RouteObserver<PageRoute>`
+/// will inform subscribed [RouteAware]s whenever the user navigates away from
+/// the current page route to another page route.
+///
+/// If you want to be informed about route changes of any type, you should
+/// instantiate a `RouteObserver<Route>`.
+///
+/// ## Sample code
+///
+/// To make a [StatefulWidget] aware of its current [Route] state, implement
+/// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
+///
+/// ```dart
+/// // Register the RouteObserver as a navigation observer.
+/// final RouteObserver<PageRoute> routeObserver = new RouteObserver<PageRoute>();
+/// void main() {
+///   runApp(new MaterialApp(
+///     home: new Container(),
+///     navigatorObservers: [routeObserver],
+///   ));
+/// }
+///
+/// class RouteAwareWidget extends StatefulWidget {
+///   State<RouteAwareWidget> createState() => new RouteAwareWidgetState();
+/// }
+///
+/// // Implement RouteAware in a widget's state and subscribe it to the RouteObserver.
+/// class RouteAwareWidgetState extends State<RouteAwareWidget> with RouteAware {
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     routeObserver.subscribe(this, ModalRoute.of(context));
+///   }
+///
+///   @override
+///   void dispose() {
+///     routeObserver.unsubscribe(this);
+///     super.dispose();
+///   }
+///
+///   @override
+///   void didPush() {
+///     // Route was pushed onto navigator and is now topmost route.
+///   }
+///
+///   @override
+///   void didPopNext() {
+///     // Covering route was popped off the navigator.
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) => new Container();
+///
+/// }
+///
+/// ```
+class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
+  final Map<T, RouteAware> _listeners = <T, RouteAware>{};
+
+  /// Subscribe [routeAware] to be informed about changes to [route].
+  ///
+  /// Going forward, [routeAware] will be informed about qualifying changes
+  /// to [route], e.g. when [route] is covered by another route or when [route]
+  /// is popped off the [Navigator] stack.
+  void subscribe(RouteAware routeAware, T route) {
+    assert(routeAware != null);
+    assert(route != null);
+    if (!_listeners.containsKey(route)) {
+      routeAware.didPush();
+      _listeners[route] = routeAware;
+    }
+  }
+
+  /// Unsubscribe [routeAware].
+  ///
+  /// [routeAware] is no longer informed about changes to its route.
+  void unsubscribe(RouteAware routeAware) {
+    assert(routeAware != null);
+    _listeners.remove(routeAware);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPopNext();
+      _listeners[route]?.didPop();
+    }
+  }
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route is T && previousRoute is T) {
+      _listeners[previousRoute]?.didPushNext();
+    }
+  }
+}
+
+/// A interface that is aware of its current Route.
+abstract class RouteAware {
+  /// Called when the top route has been popped off, and the current route
+  /// shows up.
+  void didPopNext() { }
+
+  /// Called when the current route has been pushed.
+  void didPush() { }
+
+  /// Called when the current route has been popped off.
+  void didPop() { }
+
+  /// Called when a new route has been pushed, and the current route is no
+  /// longer visible.
+  void didPushNext() { }
 }

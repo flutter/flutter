@@ -26,6 +26,7 @@ void main() {
       new Center(
         child: new RichText(
           key: textKey,
+          textDirection: TextDirection.ltr,
           text: new TextSpan(
             children: <TextSpan>[
               new TextSpan(

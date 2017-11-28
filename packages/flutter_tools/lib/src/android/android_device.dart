@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import '../android/android_sdk.dart';
+import '../android/android_workflow.dart';
+import '../android/apk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -14,18 +16,15 @@ import '../base/logger.dart';
 import '../base/port_scanner.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
-import '../commands/build_apk.dart';
 import '../device.dart';
-import '../doctor.dart';
 import '../globals.dart';
 import '../protocol_discovery.dart';
 
 import 'adb.dart';
 import 'android.dart';
 import 'android_sdk.dart';
-
-const String _defaultAdbPath = 'adb';
 
 enum _HardwareType { emulator, physical }
 
@@ -35,6 +34,7 @@ const Map<String, _HardwareType> _knownHardware = const <String, _HardwareType>{
   'qcom': _HardwareType.physical,
   'ranchu': _HardwareType.emulator,
   'samsungexynos7420': _HardwareType.physical,
+  'samsungexynos8890': _HardwareType.physical,
   'samsungexynos8895': _HardwareType.physical,
 };
 
@@ -45,10 +45,10 @@ class AndroidDevices extends PollingDeviceDiscovery {
   bool get supportsPlatform => true;
 
   @override
-  bool get canListAnything => doctor.androidWorkflow.canListDevices;
+  bool get canListAnything => androidWorkflow.canListDevices;
 
   @override
-  List<Device> pollingGetDevices() => getAdbDevices();
+  Future<List<Device>> pollingGetDevices() async => getAdbDevices();
 }
 
 class AndroidDevice extends Device {
@@ -242,8 +242,13 @@ class AndroidDevice extends Device {
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
-    final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
-    return LineSplitter.split(listOut.stdout).contains("package:${app.id}");
+    try {
+      final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+      return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
+    } catch (error) {
+      printTrace('$error');
+      return false;
+    }
   }
 
   @override
@@ -276,6 +281,7 @@ class AndroidDevice extends Device {
     }
     if (installResult.exitCode != 0) {
       printError('Error: ADB exited with exit code ${installResult.exitCode}');
+      printError('$installResult');
       return false;
     }
 
@@ -331,20 +337,20 @@ class AndroidDevice extends Device {
 
   @override
   Future<LaunchResult> startApp(
-    ApplicationPackage package,
-    BuildMode mode, {
+    ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    String kernelPath,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
+    bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
 
-    if (await targetPlatform != TargetPlatform.android_arm && mode != BuildMode.debug) {
+    if (await targetPlatform != TargetPlatform.android_arm && !debuggingOptions.buildInfo.isDebug) {
       printError('Profile and release builds are only supported on ARM targets.');
       return new LaunchResult.failed();
     }
@@ -353,12 +359,11 @@ class AndroidDevice extends Device {
       printTrace('Building APK');
       await buildApk(
           target: mainPath,
-          buildMode: debuggingOptions.buildMode,
-          kernelPath: kernelPath,
+          buildInfo: debuggingOptions.buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
-      package = new AndroidApk.fromCurrentDirectory();
+      package = await AndroidApk.fromCurrentDirectory();
     }
 
     printTrace("Stopping app '${package.name}' on $name.");
@@ -372,15 +377,16 @@ class AndroidDevice extends Device {
     printTrace('$this startApp');
 
     ProtocolDiscovery observatoryDiscovery;
-    ProtocolDiscovery diagnosticDiscovery;
 
     if (debuggingOptions.debuggingEnabled) {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
       // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
-      diagnosticDiscovery = new ProtocolDiscovery.diagnosticService(
-        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.diagnosticPort);
+        getLogReader(),
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        ipv6: ipv6,
+      );
     }
 
     List<String> cmd;
@@ -397,8 +403,12 @@ class AndroidDevice extends Device {
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
     if (route != null)
       cmd.addAll(<String>['--es', 'route', route]);
+    if (debuggingOptions.enableSoftwareRendering)
+      cmd.addAll(<String>['--ez', 'enable-software-rendering', 'true']);
+    if (debuggingOptions.traceSkia)
+      cmd.addAll(<String>['--ez', 'trace-skia', 'true']);
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.buildMode == BuildMode.debug)
+      if (debuggingOptions.buildInfo.isDebug)
         cmd.addAll(<String>['--ez', 'enable-checked-mode', 'true']);
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
@@ -420,31 +430,20 @@ class AndroidDevice extends Device {
     // device has printed "Observatory is listening on...".
     printTrace('Waiting for observatory port to be available...');
 
-    // TODO(danrubel) Waiting for observatory and diagnostic services
-    // can be made common across all devices.
+    // TODO(danrubel) Waiting for observatory services can be made common across all devices.
     try {
-      Uri observatoryUri, diagnosticUri;
+      Uri observatoryUri;
 
-      if (debuggingOptions.buildMode == BuildMode.debug) {
-        final List<Uri> deviceUris = await Future.wait(
-            <Future<Uri>>[observatoryDiscovery.uri, diagnosticDiscovery.uri]
-        );
-        observatoryUri = deviceUris[0];
-        diagnosticUri = deviceUris[1];
-      } else if (debuggingOptions.buildMode == BuildMode.profile) {
+      if (debuggingOptions.buildInfo.isDebug || debuggingOptions.buildInfo.isProfile) {
         observatoryUri = await observatoryDiscovery.uri;
       }
 
-      return new LaunchResult.succeeded(
-          observatoryUri: observatoryUri,
-          diagnosticUri: diagnosticUri,
-      );
+      return new LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
       printError('Error waiting for a debug connection: $error');
       return new LaunchResult.failed();
     } finally {
-      observatoryDiscovery.cancel();
-      diagnosticDiscovery.cancel();
+      await observatoryDiscovery.cancel();
     }
   }
 
@@ -474,7 +473,7 @@ class AndroidDevice extends Device {
 
   static final RegExp _timeRegExp = new RegExp(r'^\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}', multiLine: true);
 
-  /// Return the most recent timestamp in the Android log or `null` if there is
+  /// Return the most recent timestamp in the Android log or null if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
     final String output = runCheckedSync(adbCommandForDevice(<String>[
@@ -507,7 +506,7 @@ class AndroidDevice extends Device {
       final Match match = discoverExp.firstMatch(line);
       if (match != null) {
         final Map<String, dynamic> app = JSON.decode(match.group(1));
-        result.add(new DiscoveredApp(app['id'], app['observatoryPort'], app['diagnosticPort']));
+        result.add(new DiscoveredApp(app['id'], app['observatoryPort']));
       }
     });
 
@@ -515,8 +514,10 @@ class AndroidDevice extends Device {
       'shell', 'am', 'broadcast', '-a', 'io.flutter.view.DISCOVER'
     ]));
 
-    await new Future<Null>.delayed(const Duration(seconds: 1));
-    logs.cancel();
+    await waitGroup<Null>(<Future<Null>>[
+      new Future<Null>.delayed(const Duration(seconds: 1)),
+      logs.cancel(),
+    ]);
     return result;
   }
 }
@@ -678,8 +679,22 @@ class _AdbLogReader extends DeviceLogReader {
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
+  // 'F/libc(pid): Fatal signal 11'
+  static final RegExp _fatalLog = new RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
+
+  // 'I/DEBUG(pid): ...'
+  static final RegExp _tombstoneLine = new RegExp(r'^[IF]\/DEBUG\s*\(\s*\d+\):\s(.+)$');
+
+  // 'I/DEBUG(pid): Tombstone written to: '
+  static final RegExp _tombstoneTerminator = new RegExp(r'^Tombstone written to:\s');
+
   // we default to true in case none of the log lines match
   bool _acceptedLastLine = true;
+
+  // Whether a fatal crash is happening or not.
+  // During a fatal crash only lines from the crash are accepted, the rest are
+  // dropped.
+  bool _fatalCrash = false;
 
   // The format of the line is controlled by the '-v' parameter passed to
   // adb logcat. We are currently passing 'time', which has the format:
@@ -705,12 +720,35 @@ class _AdbLogReader extends DeviceLogReader {
     final Match logMatch = _logFormat.firstMatch(line);
     if (logMatch != null) {
       bool acceptLine = false;
-      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+
+      if (_fatalCrash) {
+        // While a fatal crash is going on, only accept lines from the crash
+        // Otherwise the crash log in the console may get interrupted
+
+        final Match fatalMatch = _tombstoneLine.firstMatch(line);
+
+        if (fatalMatch != null) {
+          acceptLine = true;
+
+          line = fatalMatch[1];
+
+          if (_tombstoneTerminator.hasMatch(fatalMatch[1])) {
+            // Hit crash terminator, stop logging the crash info
+            _fatalCrash = false;
+          }
+        }
+      } else if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
         acceptLine = true;
+
+        if (_fatalLog.hasMatch(line)) {
+          // Hit fatal signal, app is now crashing
+          _fatalCrash = true;
+        }
       } else {
         // Filter on approved names and levels.
         acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
       }
+
       if (acceptLine) {
         _acceptedLastLine = true;
         _linesController.add(line);
@@ -758,7 +796,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     final List<String> lines = LineSplitter.split(stdout).toList();
     for (String line in lines) {
       if (line.startsWith(device.id)) {
-        final List<String> splitLine = line.split("tcp:");
+        final List<String> splitLine = line.split('tcp:');
 
         // Sanity check splitLine.
         if (splitLine.length != 3)

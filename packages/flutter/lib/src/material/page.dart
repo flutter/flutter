@@ -9,9 +9,9 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 // Fractional offset from 1/4 screen below the top to fully on screen.
-final FractionalOffsetTween _kBottomUpTween = new FractionalOffsetTween(
-  begin: FractionalOffset.bottomLeft,
-  end: FractionalOffset.topLeft
+final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
+  begin: const Offset(0.0, 0.25),
+  end: Offset.zero,
 );
 
 // Used for Android and Fuchsia.
@@ -26,7 +26,7 @@ class _MountainViewPageTransition extends StatelessWidget {
        )),
        super(key: key);
 
-  final Animation<FractionalOffset> _positionAnimation;
+  final Animation<Offset> _positionAnimation;
   final Widget child;
 
   @override
@@ -54,29 +54,52 @@ class _MountainViewPageTransition extends StatelessWidget {
 ///
 /// Specify whether the incoming page is a fullscreen modal dialog. On iOS, those
 /// pages animate bottom->up rather than right->left.
+///
+/// The type `T` specifies the return type of the route which can be supplied as
+/// the route is popped from the stack via [Navigator.pop] when an optional
+/// `result` can be provided.
+///
+/// See also:
+///
+///  * [CupertinoPageRoute], that this [PageRoute] delegates transition animations to for iOS.
 class MaterialPageRoute<T> extends PageRoute<T> {
   /// Creates a page route for use in a material design app.
   MaterialPageRoute({
     @required this.builder,
     RouteSettings settings: const RouteSettings(),
     this.maintainState: true,
-    this.fullscreenDialog: false,
-  }) : super(settings: settings) {
-    assert(builder != null);
+    bool fullscreenDialog: false,
+  }) : assert(builder != null),
+       super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
     assert(opaque);
   }
 
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
-  /// Whether this route is a full-screen dialog.
-  ///
-  /// Prevents [startPopGesture] from poping the route using an edge swipe on
-  /// iOS.
-  final bool fullscreenDialog;
-
   @override
   final bool maintainState;
+
+  /// A delegate PageRoute to which iOS themed page operations are delegated to.
+  /// It's lazily created on first use.
+  CupertinoPageRoute<T> get _cupertinoPageRoute {
+    assert(_useCupertinoTransitions);
+    _internalCupertinoPageRoute ??= new CupertinoPageRoute<T>(
+      builder: builder, // Not used.
+      fullscreenDialog: fullscreenDialog,
+      hostRoute: this,
+    );
+    return _internalCupertinoPageRoute;
+  }
+  CupertinoPageRoute<T> _internalCupertinoPageRoute;
+
+  /// Whether we should currently be using Cupertino transitions. This is true
+  /// if the theme says we're on iOS, or if we're in an active gesture.
+  bool get _useCupertinoTransitions {
+    return _internalCupertinoPageRoute?.popGestureInProgress == true
+        || Theme.of(navigator.context).platform == TargetPlatform.iOS;
+  }
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 300);
@@ -85,60 +108,21 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
 
   @override
-  bool canTransitionFrom(TransitionRoute<dynamic> nextRoute) {
-    return nextRoute is MaterialPageRoute<dynamic>;
+  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
+    return (previousRoute is MaterialPageRoute || previousRoute is CupertinoPageRoute);
   }
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
-    return nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog;
+    return (nextRoute is MaterialPageRoute && !nextRoute.fullscreenDialog)
+        || (nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog);
   }
 
   @override
   void dispose() {
-    _backGestureController?.dispose();
+    _internalCupertinoPageRoute?.dispose();
     super.dispose();
-  }
-
-  CupertinoBackGestureController _backGestureController;
-
-  /// Support for dismissing this route with a horizontal swipe is enabled
-  /// for [TargetPlatform.iOS]. If attempts to dismiss this route might be
-  /// vetoed because a [WillPopCallback] was defined for the route then the
-  /// platform-specific back gesture is disabled.
-  ///
-  /// See also:
-  ///
-  ///  * [hasScopedWillPopCallback], which is true if a `willPop` callback
-  ///    is defined for this route.
-  @override
-  NavigationGestureController startPopGesture() {
-    // If attempts to dismiss this route might be vetoed, then do not
-    // allow the user to dismiss the route with a swipe.
-    if (hasScopedWillPopCallback)
-      return null;
-    // Fullscreen dialogs aren't dismissable by back swipe.
-    if (fullscreenDialog)
-      return null;
-    if (controller.status != AnimationStatus.completed)
-      return null;
-    assert(_backGestureController == null);
-    _backGestureController = new CupertinoBackGestureController(
-      navigator: navigator,
-      controller: controller,
-    );
-
-    controller.addStatusListener(_handleBackGestureEnded);
-    return _backGestureController;
-  }
-
-  void _handleBackGestureEnded(AnimationStatus status) {
-    if (status == AnimationStatus.completed) {
-      _backGestureController?.dispose();
-      _backGestureController = null;
-      controller.removeStatusListener(_handleBackGestureEnded);
-    }
   }
 
   @override
@@ -152,31 +136,18 @@ class MaterialPageRoute<T> extends PageRoute<T> {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 
   @override
   Widget buildTransitions(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-    if (Theme.of(context).platform == TargetPlatform.iOS) {
-      if (fullscreenDialog)
-        return new CupertinoFullscreenDialogTransition(
-          animation: animation,
-          child: child,
-        );
-      else
-        return new CupertinoPageTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: secondaryAnimation,
-          child: child,
-          // In the middle of a back gesture drag, let the transition be linear to match finger
-          // motions.
-          linearTransition: _backGestureController != null,
-        );
+    if (_useCupertinoTransitions) {
+      return _cupertinoPageRoute.buildTransitions(context, animation, secondaryAnimation, child);
     } else {
       return new _MountainViewPageTransition(
         routeAnimation: animation,
-        child: child
+        child: child,
       );
     }
   }

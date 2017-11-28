@@ -21,7 +21,7 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more dart files.';
 
   @override
-  String get invocation => "${runner.executableName} $name <one or more paths>";
+  String get invocation => '${runner.executableName} $name <one or more paths>';
 
   @override
   Future<Null> runCommand() async {

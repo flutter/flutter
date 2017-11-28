@@ -14,24 +14,59 @@ import 'text_editing.dart';
 export 'dart:ui' show TextAffinity;
 
 /// The type of information for which to optimize the text input control.
+///
+/// On Android, behavior may vary across device and keyboard provider.
 enum TextInputType {
   /// Optimize for textual information.
+  ///
+  /// Requests the default platform keyboard.
   text,
 
+  /// Optimize for multi-line textual information.
+  ///
+  /// Requests the default platform keyboard, but accepts newlines when the
+  /// enter key is pressed. This is the input type used for all multi-line text
+  /// fields.
+  multiline,
+
   /// Optimize for numerical information.
+  ///
+  /// Requests a keyboard with ready access to the decimal point and number
+  /// keys.
   number,
 
   /// Optimize for telephone numbers.
+  ///
+  /// Requests a keyboard with ready access to the number keys, "*", and "#".
   phone,
 
   /// Optimize for date and time information.
+  ///
+  /// On iOS, requests the default keyboard.
+  ///
+  /// On Android, requests a keyboard with ready access to the number keys,
+  /// ":", and "-".
   datetime,
+
+  /// Optimize for email addresses.
+  ///
+  /// Requests a keyboard with ready access to the "@" and "." keys.
+  emailAddress,
+
+  /// Optimize for URLs.
+  ///
+  /// Requests a keyboard with ready access to the "/" and "." keys.
+  url,
 }
 
 /// An action the user has requested the text input control to perform.
 enum TextInputAction {
   /// Complete the text input operation.
   done,
+
+  /// The action to take when the enter button is pressed in a multi-line
+  /// text field (which is typically to do nothing).
+  newline,
 }
 
 /// Controls the visual appearance of the text input control.
@@ -43,13 +78,18 @@ enum TextInputAction {
 class TextInputConfiguration {
   /// Creates configuration information for a text input control.
   ///
-  /// The [inputType] and [obscureText] arguments must not be null.
+  /// All arguments have default values, except [actionLabel].  Only
+  /// [actionLabel] may be null.
   const TextInputConfiguration({
     this.inputType: TextInputType.text,
     this.obscureText: false,
+    this.autocorrect: true,
     this.actionLabel,
+    this.inputAction: TextInputAction.done,
   }) : assert(inputType != null),
-       assert(obscureText != null);
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(inputAction != null);
 
   /// The type of information for which to optimize the text input control.
   final TextInputType inputType;
@@ -59,15 +99,25 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true.
+  final bool autocorrect;
+
   /// What text to display in the text input control's action button.
   final String actionLabel;
+
+  /// What kind of action to request for the action button on the IME.
+  final TextInputAction inputAction;
 
   /// Returns a representation of this object as a JSON object.
   Map<String, dynamic> toJSON() {
     return <String, dynamic>{
       'inputType': inputType.toString(),
       'obscureText': obscureText,
+      'autocorrect': autocorrect,
       'actionLabel': actionLabel,
+      'inputAction': inputAction.toString(),
     };
   }
 }
@@ -200,9 +250,9 @@ abstract class TextInputClient {
 ///
 ///  * [TextInput.attach]
 class TextInputConnection {
-  TextInputConnection._(this._client) : _id = _nextId++ {
-    assert(_client != null);
-  }
+  TextInputConnection._(this._client)
+    : assert(_client != null),
+      _id = _nextId++;
 
   static int _nextId = 1;
   final int _id;
@@ -246,6 +296,8 @@ TextInputAction _toTextInputAction(String action) {
   switch (action) {
     case 'TextInputAction.done':
       return TextInputAction.done;
+    case 'TextInputAction.newline':
+      return TextInputAction.newline;
   }
   throw new FlutterError('Unknown text input action: $action');
 }

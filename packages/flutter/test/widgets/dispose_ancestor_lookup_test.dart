@@ -24,7 +24,7 @@ class TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => const Text('test');
+  Widget build(BuildContext context) => const Text('test', textDirection: TextDirection.ltr);
 }
 
 void main() {
@@ -98,7 +98,7 @@ void main() {
     await tester.pumpWidget(
       new TestWidget((BuildContext context) {
         disposeCalled = true;
-        context.visitAncestorElements((Element element){ });
+        context.visitAncestorElements((Element element) { });
       }),
     );
     await tester.pumpWidget(new Container());

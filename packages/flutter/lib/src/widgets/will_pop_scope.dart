@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import 'framework.dart';
+import 'navigator.dart';
 import 'routes.dart';
 
 /// Registers a callback to veto attempts by the user to dismiss the enclosing

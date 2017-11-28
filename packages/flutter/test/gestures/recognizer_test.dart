@@ -6,22 +6,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
 class TestGestureRecognizer extends GestureRecognizer {
-  @override
-  String toString() => 'toString content';
+  TestGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
-  void addPointer(PointerDownEvent event) {}
+  String get debugDescription => 'debugDescription content';
 
   @override
-  void acceptGesture(int pointer) {}
+  void addPointer(PointerDownEvent event) { }
 
   @override
-  void rejectGesture(int pointer) {}
+  void acceptGesture(int pointer) { }
+
+  @override
+  void rejectGesture(int pointer) { }
 }
 
 void main() {
-  test('GestureRecognizer.toStringShort defaults to toString', () {
-    final TestGestureRecognizer recognizer = new TestGestureRecognizer();
-    expect(recognizer.toStringShort(), equals(recognizer.toString()));
+  test('GestureRecognizer smoketest', () {
+    final TestGestureRecognizer recognizer = new TestGestureRecognizer(debugOwner: 0);
+    expect(recognizer, hasAGoodToStringDeep);
   });
 }

@@ -27,9 +27,9 @@ TextStyle abrilFatfaceRegular34(Color color) => new ShrineStyle.abrilFatface(34.
 /// InheritedWidget is shared by all of the routes and widgets created for
 /// the Shrine app.
 class ShrineTheme extends InheritedWidget {
-  ShrineTheme({ Key key, @required Widget child }) : super(key: key, child: child) {
-    assert(child != null);
-  }
+  ShrineTheme({ Key key, @required Widget child })
+    : assert(child != null),
+      super(key: key, child: child);
 
   final Color cardBackgroundColor = Colors.white;
   final Color appBarBackgroundColor = Colors.white;

@@ -7,6 +7,7 @@ import 'dart:developer' show Timeline; // to disambiguate reference in dartdocs 
 
 import 'package:flutter/foundation.dart';
 
+import 'basic.dart';
 import 'framework.dart';
 import 'media_query.dart';
 import 'table.dart';
@@ -23,6 +24,10 @@ import 'table.dart';
 ///
 /// Combined with [debugPrintScheduleBuildForStacks], this lets you watch a
 /// widget's dirty/clean lifecycle.
+///
+/// To get similar information but showing it on the timeline available from the
+/// Observatory rather than getting it in the console (where it can be
+/// overwhelming), consider [debugProfileBuildsEnabled].
 ///
 /// See also the discussion at [WidgetsBinding.drawFrame].
 bool debugPrintRebuildDirtyWidgets = false;
@@ -63,6 +68,10 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///
 /// For details on how to use [Timeline] events in the Dart Observatory to
 /// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+///
+/// See also [debugProfilePaintsEnabled], which does something similar but for
+/// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
+/// but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.
@@ -105,7 +114,7 @@ bool debugChildrenHaveDuplicateKeys(Widget parent, Iterable<Widget> children) {
       );
     }
     return true;
-  });
+  }());
   return false;
 }
 
@@ -127,7 +136,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
     if (nonUniqueKey != null)
       throw new FlutterError('Duplicate key found: $nonUniqueKey.');
     return true;
-  });
+  }());
   return false;
 }
 
@@ -157,7 +166,7 @@ bool debugCheckHasTable(BuildContext context) {
       );
     }
     return true;
-  });
+  }());
   return true;
 }
 
@@ -190,7 +199,44 @@ bool debugCheckHasMediaQuery(BuildContext context) {
       );
     }
     return true;
-  });
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [Directionality] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasDirectionality(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasDirectionality(BuildContext context) {
+  assert(() {
+    if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
+      final Element element = context;
+      throw new FlutterError(
+        'No Directionality widget found.\n'
+        '${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'
+        'The specific widget that could not find a Directionality ancestor was:\n'
+        '  ${context.widget}\n'
+        'The ownership chain for the affected widget is:\n'
+        '  ${element.debugGetCreatorChain(10)}\n'
+        'Typically, the Directionality widget is introduced by the MaterialApp '
+        'or WidgetsApp widget at the top of your application widget tree. It '
+        'determines the ambient reading direction and is used, for example, to '
+        'determine how to lay out text, how to interpret "start" and "end" '
+        'values, and to resolve EdgeInsetsDirectional, '
+        'AlignmentDirectional, and other *Directional objects.'
+      );
+    }
+    return true;
+  }());
   return true;
 }
 
@@ -212,7 +258,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
       );
     }
     return true;
-  });
+  }());
 }
 
 /// Returns true if none of the widget library debug variables have been changed.
@@ -233,6 +279,6 @@ bool debugAssertAllWidgetVarsUnset(String reason) {
       throw new FlutterError(reason);
     }
     return true;
-  });
+  }());
   return true;
 }

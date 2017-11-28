@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
-import 'commands/trace.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'resident_runner.dart';
+import 'tracing.dart';
 
 class ColdRunner extends ResidentRunner {
   ColdRunner(
@@ -20,15 +20,19 @@ class ColdRunner extends ResidentRunner {
     bool usesTerminalUI: true,
     this.traceStartup: false,
     this.applicationBinary,
+    this.previewDart2 : false,
     bool stayResident: true,
+    bool ipv6: false,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              usesTerminalUI: usesTerminalUI,
-             stayResident: stayResident);
+             stayResident: stayResident,
+             ipv6: ipv6);
 
   final bool traceStartup;
   final String applicationBinary;
+  final bool previewDart2;
 
   @override
   Future<int> run({
@@ -88,7 +92,7 @@ class ColdRunner extends ResidentRunner {
         try {
           await downloadStartupTrace(device.vmServices.first);
         } catch (error) {
-          printError(error);
+          printError('Error downloading startup trace: $error');
           return 2;
         }
       }

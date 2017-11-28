@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
-import 'package:flutter_driver/src/driver.dart';
-import 'package:flutter_driver/src/error.dart';
-import 'package:flutter_driver/src/health.dart';
-import 'package:flutter_driver/src/timeline.dart';
+import 'package:flutter_driver/src/common/error.dart';
+import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/driver/driver.dart';
+import 'package:flutter_driver/src/driver/timeline.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
@@ -230,25 +230,45 @@ void main() {
       });
     });
 
+    group('clearTimeline', () {
+      test('clears timeline', () async {
+        bool clearWasCalled = false;
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((_) async {
+          clearWasCalled = true;
+          return null;
+        });
+        await driver.clearTimeline();
+        expect(clearWasCalled, isTrue);
+      });
+    });
+
     group('traceAction', () {
-      test('traces action', () async {
-        bool actionCalled = false;
-        bool startTracingCalled = false;
-        bool stopTracingCalled = false;
+      List<String> log;
+
+      setUp(() async {
+        log = <String>[];
+
+        when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
+            .thenAnswer((_) async {
+          log.add('clear');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-          .thenAnswer((_) async {
-            startTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((_) async {
+          log.add('startTracing');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-          .thenAnswer((_) async {
-            stopTracingCalled = true;
-            return null;
-          });
+            .thenAnswer((_) async {
+          log.add('stopTracing');
+          return null;
+        });
 
         when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+          log.add('download');
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
@@ -257,14 +277,34 @@ void main() {
             ],
           };
         });
+      });
 
+      test('without clearing timeline', () async {
         final Timeline timeline = await driver.traceAction(() {
-          actionCalled = true;
+          log.add('action');
+        }, retainPriorEvents: true);
+
+        expect(log, const <String>[
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
+        expect(timeline.events.single.name, 'test event');
+      });
+
+      test('with clearing timeline', () async {
+        final Timeline timeline = await driver.traceAction(() {
+          log.add('action');
         });
 
-        expect(actionCalled, isTrue);
-        expect(startTracingCalled, isTrue);
-        expect(stopTracingCalled, isTrue);
+        expect(log, const <String>[
+          'clear',
+          'startTracing',
+          'action',
+          'stopTracing',
+          'download',
+        ]);
         expect(timeline.events.single.name, 'test event');
       });
     });
@@ -304,7 +344,8 @@ void main() {
           TimelineStream.dart,
           TimelineStream.gc,
           TimelineStream.compiler
-        ]);
+        ],
+        retainPriorEvents: true);
 
         expect(actionCalled, isTrue);
         expect(startTracingCalled, isTrue);
@@ -354,23 +395,16 @@ Future<Map<String, dynamic>> makeMockResponse(
   });
 }
 
-@proxy
 class MockVMServiceClient extends Mock implements VMServiceClient { }
 
-@proxy
 class MockVM extends Mock implements VM { }
 
-@proxy
 class MockIsolate extends Mock implements VMRunnableIsolate { }
 
-@proxy
 class MockVMPauseStartEvent extends Mock implements VMPauseStartEvent { }
 
-@proxy
 class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent { }
 
-@proxy
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
 
-@proxy
 class MockPeer extends Mock implements rpc.Peer { }

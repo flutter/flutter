@@ -33,6 +33,11 @@ class PrimaryScrollController extends InheritedWidget {
        super(key: key, child: child);
 
   /// The [ScrollController] associated with the subtree.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollView.controller], which discusses the purpose of specifying a
+  ///    scroll controller.
   final ScrollController controller;
 
   /// Returns the [ScrollController] most closely associated with the given
@@ -49,8 +54,8 @@ class PrimaryScrollController extends InheritedWidget {
   bool updateShouldNotify(PrimaryScrollController old) => controller != old.controller;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('${controller ?? "no controller"}');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ScrollController>('controller', controller, ifNull: 'no controller', showName: false));
   }
 }

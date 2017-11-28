@@ -26,10 +26,11 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, ProcessSignal;
+import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, stdout;
 
 import 'package:meta/meta.dart';
 
+import 'context.dart';
 import 'platform.dart';
 import 'process.dart';
 
@@ -62,10 +63,11 @@ export 'dart:io'
         ProcessStartMode,
         // RandomAccessFile  NO! Use `file_system.dart`
         ServerSocket,
-        stderr,
-        stdin,
+        // stderr,           NO! Use `io.dart`
+        // stdin,            NO! Use `io.dart`
+        Stdin,
         StdinException,
-        stdout,
+        // stdout,           NO! Use `io.dart`
         Socket,
         SocketException,
         SYSTEM_ENCODING,
@@ -142,4 +144,33 @@ class _PosixProcessSignal extends ProcessSignal {
       return const Stream<ProcessSignal>.empty();
     return super.watch();
   }
+}
+
+class Stdio {
+  const Stdio();
+
+  Stream<List<int>> get stdin => io.stdin;
+  io.IOSink get stdout => io.stdout;
+  io.IOSink get stderr => io.stderr;
+}
+
+io.IOSink get stderr {
+  if (context == null)
+    return io.stderr;
+  final Stdio contextStreams = context[Stdio];
+  return contextStreams.stderr;
+}
+
+Stream<List<int>> get stdin {
+  if (context == null)
+    return io.stdin;
+  final Stdio contextStreams = context[Stdio];
+  return contextStreams.stdin;
+}
+
+io.IOSink get stdout {
+  if (context == null)
+    return io.stdout;
+  final Stdio contextStreams = context[Stdio];
+  return contextStreams.stdout;
 }

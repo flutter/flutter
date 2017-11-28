@@ -65,8 +65,13 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
 
   void _update() {
     SchedulerBinding.instance.addPostFrameCallback((Duration timeStamp) {
-      // We want the update to take effect next frame, so to make that
-      // explicit we call setState() in a post-frame callback.
+      // Semantic information are only available at the end of a frame and our
+      // only chance to paint them on the screen is the next frame. To achieve
+      // this, we call setState() in a post-frame callback. THIS PATTERN SHOULD
+      // NOT BE COPIED. Calling setState() in a post-frame callback is a bad
+      // idea as it will not schedule a frame and your app may be lagging behind
+      // by one frame. We manually call scheduleFrame() to force a frame and
+      // ensure that the semantic information are always painted on the screen.
       if (mounted) {
         // If we got disposed this frame, we will still get an update,
         // because the inactive list is flushed after the semantics updates
@@ -74,6 +79,7 @@ class _SemanticsDebuggerState extends State<SemanticsDebugger> with WidgetsBindi
         setState(() {
           // The generation of the _SemanticsDebuggerListener has changed.
         });
+        SchedulerBinding.instance.scheduleFrame();
       }
     });
   }
@@ -222,15 +228,29 @@ String _getMessage(SemanticsNode node) {
   if (isAdjustable)
     annotations.add('adjustable');
 
+  assert(data.label != null);
   String message;
-  if (annotations.isEmpty) {
-    assert(data.label != null);
-    message = data.label;
+  if (data.label.isEmpty) {
+    message = annotations.join('; ');
   } else {
-    if (data.label.isEmpty) {
-      message = annotations.join('; ');
+    String label;
+    if (data.textDirection == null) {
+      label = '${Unicode.FSI}${data.label}${Unicode.PDI}';
+      annotations.insert(0, 'MISSING TEXT DIRECTION');
     } else {
-      message = '${data.label} (${annotations.join('; ')})';
+      switch (data.textDirection) {
+        case TextDirection.rtl:
+          label = '${Unicode.RLI}${data.label}${Unicode.PDF}';
+          break;
+        case TextDirection.ltr:
+          label = data.label;
+          break;
+      }
+    }
+    if (annotations.isEmpty) {
+      message = label;
+    } else {
+      message = '$label (${annotations.join('; ')})';
     }
   }
 
@@ -251,10 +271,15 @@ void _paintMessage(Canvas canvas, SemanticsNode node) {
   canvas.save();
   canvas.clipRect(rect);
   final TextPainter textPainter = new TextPainter()
-    ..text = new TextSpan(style: _messageStyle, text: message)
+    ..text = new TextSpan(
+      style: _messageStyle,
+      text: message,
+    )
+    ..textDirection = TextDirection.ltr // _getMessage always returns LTR text, even if node.label is RTL
+    ..textAlign = TextAlign.center
     ..layout(maxWidth: rect.width);
 
-  textPainter.paint(canvas, FractionalOffset.center.inscribe(textPainter.size, rect).topLeft);
+  textPainter.paint(canvas, Alignment.center.inscribe(textPainter.size, rect).topLeft);
   canvas.restore();
 }
 

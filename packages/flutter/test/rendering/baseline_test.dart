@@ -9,11 +9,11 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test("RenderBaseline", () {
+  test('RenderBaseline', () {
     RenderBaseline parent;
     RenderSizedBox child;
     final RenderBox root = new RenderPositionedBox(
-      alignment: FractionalOffset.topLeft,
+      alignment: Alignment.topLeft,
       child: parent = new RenderBaseline(
         baseline: 0.0,
         baselineType: TextBaseline.alphabetic,

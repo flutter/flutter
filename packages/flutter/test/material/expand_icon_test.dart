@@ -10,14 +10,12 @@ void main() {
     bool expanded = false;
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new ExpandIcon(
             onPressed: (bool isExpanded) {
               expanded = !expanded;
             }
           )
-        )
       )
     );
 
@@ -31,12 +29,10 @@ void main() {
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const Material(
-        child: const Center(
+      wrap(
           child: const ExpandIcon(
             onPressed: null
           )
-        )
       )
     );
 
@@ -48,31 +44,36 @@ void main() {
     bool expanded = false;
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new ExpandIcon(
             isExpanded: false,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
             }
           )
-        )
       )
     );
 
     await tester.pumpWidget(
-      new Material(
-        child: new Center(
+      wrap(
           child: new ExpandIcon(
             isExpanded: true,
             onPressed: (bool isExpanded) {
               expanded = !expanded;
             }
-          )
         )
       )
     );
 
     expect(expanded, isFalse);
   });
+}
+
+Widget wrap({ Widget child }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Center(
+      child: new Material(child: child),
+    ),
+  );
 }

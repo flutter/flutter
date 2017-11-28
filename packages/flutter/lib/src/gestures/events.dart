@@ -35,7 +35,7 @@ const int kMiddleMouseButton = 0x04;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the secondary stylus button.
 ///
-/// The secondary stylus button is typically on the end of the stylus fartherest
+/// The secondary stylus button is typically on the end of the stylus farthest
 /// from the tip but can be reconfigured to be a different physical button.
 const int kSecondaryStylusButton = 0x04;
 
@@ -74,7 +74,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 /// logical pixels. Logical pixels approximate a grid with about 38 pixels per
 /// centimeter, or 96 pixels per inch.
 ///
-/// This allows gestures to be recognised independent of the precise hardware
+/// This allows gestures to be recognized independent of the precise hardware
 /// characteristics of the device. In particular, features such as touch slop
 /// (see [kTouchSlop]) can be defined in terms of roughly physical lengths so
 /// that the user can shift their finger by the same distance on a high-density
@@ -113,7 +113,8 @@ abstract class PointerEvent {
     this.radiusMin: 0.0,
     this.radiusMax: 0.0,
     this.orientation: 0.0,
-    this.tilt: 0.0
+    this.tilt: 0.0,
+    this.synthesized: false,
   });
 
   /// Time of event dispatch, relative to an arbitrary timeline.
@@ -235,6 +236,18 @@ abstract class PointerEvent {
   /// the stylus is flat on that surface).
   final double tilt;
 
+  /// We occasionally synthesize PointerEvents that aren't exact translations
+  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
+  /// in pointer behaviors.
+  ///
+  /// For instance, on end events, Android always drops any location changes
+  /// that happened between its reporting intervals when emitting the end events.
+  ///
+  /// On iOS, minor incorrect location changes from the previous move events
+  /// can be reported on end events. We synthesize a [PointerEvent] to cover
+  /// the difference between the 2 events in that case.
+  final bool synthesized;
+
   @override
   String toString() => '$runtimeType($position)';
 
@@ -261,7 +274,8 @@ abstract class PointerEvent {
              'radiusMin: $radiusMin, '
              'radiusMax: $radiusMax, '
              'orientation: $orientation, '
-             'tilt: $tilt'
+             'tilt: $tilt, '
+             'synthesized: $synthesized'
            ')';
   }
 }
@@ -365,7 +379,8 @@ class PointerHoverEvent extends PointerEvent {
     double radiusMin: 0.0,
     double radiusMax: 0.0,
     double orientation: 0.0,
-    double tilt: 0.0
+    double tilt: 0.0,
+    bool synthesized: false,
   }) : super(
     timeStamp: timeStamp,
     kind: kind,
@@ -384,7 +399,8 @@ class PointerHoverEvent extends PointerEvent {
     radiusMin: radiusMin,
     radiusMax: radiusMax,
     orientation: orientation,
-    tilt: tilt
+    tilt: tilt,
+    synthesized: synthesized,
   );
 }
 
@@ -463,7 +479,8 @@ class PointerMoveEvent extends PointerEvent {
     double radiusMin: 0.0,
     double radiusMax: 0.0,
     double orientation: 0.0,
-    double tilt: 0.0
+    double tilt: 0.0,
+    bool synthesized: false,
   }) : super(
     timeStamp: timeStamp,
     pointer: pointer,
@@ -484,7 +501,8 @@ class PointerMoveEvent extends PointerEvent {
     radiusMin: radiusMin,
     radiusMax: radiusMax,
     orientation: orientation,
-    tilt: tilt
+    tilt: tilt,
+    synthesized: synthesized,
   );
 }
 

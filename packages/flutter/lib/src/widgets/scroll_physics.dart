@@ -130,7 +130,7 @@ class ScrollPhysics {
     return parent.applyBoundaryConditions(position, value);
   }
 
-  /// Returns a simulation for ballisitic scrolling starting from the given
+  /// Returns a simulation for ballistic scrolling starting from the given
   /// position with the given velocity.
   ///
   /// This is used by [ScrollPositionWithSingleContext] in the
@@ -150,7 +150,7 @@ class ScrollPhysics {
 
   static final SpringDescription _kDefaultSpring = new SpringDescription.withDampingRatio(
     mass: 0.5,
-    springConstant: 100.0,
+    stiffness: 100.0,
     ratio: 1.1,
   );
 
@@ -195,6 +195,18 @@ class ScrollPhysics {
   /// Scroll fling velocity magnitudes will be clamped to this value.
   double get maxFlingVelocity => parent?.maxFlingVelocity ?? kMaxFlingVelocity;
 
+  /// Returns the velocity carried on repeated flings.
+  ///
+  /// The function is applied to the existing scroll velocity when another
+  /// scroll drag is applied in the same direction.
+  ///
+  /// By default, physics for platforms other than iOS doesn't carry momentum.
+  double carriedMomentum(double existingVelocity) {
+    if (parent == null)
+      return 0.0;
+    return parent.carriedMomentum(existingVelocity);
+  }
+
   @override
   String toString() {
     if (parent == null)
@@ -226,33 +238,48 @@ class BouncingScrollPhysics extends ScrollPhysics {
 
   /// The multiple applied to overscroll to make it appear that scrolling past
   /// the edge of the scrollable contents is harder than scrolling the list.
+  /// This is done by reducing the ratio of the scroll effect output vs the
+  /// scroll gesture input.
   ///
-  /// By default this is 0.5, meaning that overscroll is twice as hard as normal
-  /// scroll.
-  double get frictionFactor => 0.5;
+  /// This factor starts at 0.52 and progressively becomes harder to overscroll
+  /// as more of the area past the edge is dragged in (represented by an increasing
+  /// `overscrollFraction` which starts at 0 when there is no overscroll).
+  double frictionFactor(double overscrollFraction) => 0.52 * math.pow(1 - overscrollFraction, 2);
 
   @override
   double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
     assert(offset != 0.0);
     assert(position.minScrollExtent <= position.maxScrollExtent);
-    if (offset > 0.0)
-      return _applyFriction(position.pixels, position.minScrollExtent, position.maxScrollExtent, offset, frictionFactor);
-    return -_applyFriction(-position.pixels, -position.maxScrollExtent, -position.minScrollExtent, -offset, frictionFactor);
+
+    if (!position.outOfRange)
+      return offset;
+
+    final double overscrollPastStart = math.max(position.minScrollExtent - position.pixels, 0.0);
+    final double overscrollPastEnd = math.max(position.pixels - position.maxScrollExtent, 0.0);
+    final double overscrollPast = math.max(overscrollPastStart, overscrollPastEnd);
+    final bool easing = (overscrollPastStart > 0.0 && offset < 0.0)
+        || (overscrollPastEnd > 0.0 && offset > 0.0);
+
+    final double friction = easing
+        // Apply less resistance when easing the overscroll vs tensioning.
+        ? frictionFactor((overscrollPast - offset.abs()) / position.viewportDimension)
+        : frictionFactor(overscrollPast / position.viewportDimension);
+    final double direction = offset.sign;
+
+    return direction * _applyFriction(overscrollPast, offset.abs(), friction);
   }
 
-  static double _applyFriction(double start, double lowLimit, double highLimit, double delta, double gamma) {
-    assert(lowLimit <= highLimit);
-    assert(delta > 0.0);
+  static double _applyFriction(double extentOutside, double absDelta, double gamma) {
+    assert(absDelta > 0);
     double total = 0.0;
-    if (start < lowLimit) {
-      final double distanceToLimit = lowLimit - start;
-      final double deltaToLimit = distanceToLimit / gamma;
-      if (delta < deltaToLimit)
-        return total + delta * gamma;
-      total += distanceToLimit;
-      delta -= deltaToLimit;
+    if (extentOutside > 0) {
+      final double deltaToLimit = extentOutside / gamma;
+      if (absDelta < deltaToLimit)
+        return absDelta * gamma;
+      total += extentOutside;
+      absDelta -= deltaToLimit;
     }
-    return total + delta;
+    return total + absDelta;
   }
 
   @override
@@ -279,6 +306,26 @@ class BouncingScrollPhysics extends ScrollPhysics {
   // to trigger a fling.
   @override
   double get minFlingVelocity => kMinFlingVelocity * 2.0;
+
+  // Methodology:
+  // 1- Use https://github.com/flutter/scroll_overlay to test with Flutter and
+  //    platform scroll views superimposed.
+  // 2- Record incoming speed and make rapid flings in the test app.
+  // 3- If the scrollables stopped overlapping at any moment, adjust the desired
+  //    output value of this function at that input speed.
+  // 4- Feed new input/output set into a power curve fitter. Change function
+  //    and repeat from 2.
+  // 5- Repeat from 2 with medium and slow flings.
+  /// Momentum build-up function that mimics iOS's scroll speed increase with repeated flings.
+  ///
+  /// The velocity of the last fling is not an important factor. Existing speed
+  /// and (related) time since last fling are factors for the velocity transfer
+  /// calculations.
+  @override
+  double carriedMomentum(double existingVelocity) {
+    return existingVelocity.sign *
+        math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
+  }
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching
@@ -322,7 +369,7 @@ class ClampingScrollPhysics extends ScrollPhysics {
         );
       }
       return true;
-    });
+    }());
     if (value < position.pixels && position.pixels <= position.minScrollExtent) // underscroll
       return value - position.pixels;
     if (position.maxScrollExtent <= position.pixels && position.pixels < value) // overscroll
@@ -388,7 +435,6 @@ class AlwaysScrollableScrollPhysics extends ScrollPhysics {
   AlwaysScrollableScrollPhysics applyTo(ScrollPhysics ancestor) {
     return new AlwaysScrollableScrollPhysics(parent: buildParent(ancestor));
   }
-
 
   @override
   bool shouldAcceptUserOffset(ScrollMetrics position) => true;

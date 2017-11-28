@@ -64,10 +64,10 @@ void main() {
   });
 
   testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoDialogAction(
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
       child: const Text('Ok'),
-    ));
+    )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
@@ -76,10 +76,10 @@ void main() {
   });
 
   testWidgets('Dialog default action styles', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoDialogAction(
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       child: const Text('Ok'),
-    ));
+    )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
@@ -87,15 +87,22 @@ void main() {
   });
 
   testWidgets('Default and destructive style', (WidgetTester tester) async {
-    await tester.pumpWidget(const CupertinoDialogAction(
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       isDestructiveAction: true,
       child: const Text('Ok'),
-    ));
+    )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
     expect(widget.style.fontWeight, equals(FontWeight.w600));
     expect(widget.style.color.red, greaterThan(widget.style.color.blue));
   });
+}
+
+Widget boilerplate(Widget child) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: child,
+  );
 }

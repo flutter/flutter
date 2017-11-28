@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 
@@ -212,7 +213,7 @@ class CommonFinders {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class Finder {
-  /// Initialises a Finder. Used by subclasses to initialize the [skipOffstage]
+  /// Initializes a Finder. Used by subclasses to initialize the [skipOffstage]
   /// property.
   Finder({ this.skipOffstage: true });
 
@@ -232,10 +233,13 @@ abstract class Finder {
   /// Whether this finder skips nodes that are offstage.
   ///
   /// If this is true, then the elements are walked using
-  /// [Element.visitChildrenForSemantics]. This skips offstage children of
+  /// [Element.debugVisitOnstageChildren]. This skips offstage children of
   /// [Offstage] widgets, as well as children of inactive [Route]s.
   final bool skipOffstage;
 
+  /// Returns all the [Element]s that will be considered by this finder.
+  ///
+  /// See [collectAllElementsFrom].
   @protected
   Iterable<Element> get allCandidates {
     return collectAllElementsFrom(
@@ -281,6 +285,17 @@ abstract class Finder {
   /// matched by this finder.
   Finder get last => new _LastFinder(this);
 
+  /// Returns a variant of this finder that only matches the element at the
+  /// given index matched by this finder.
+  Finder at(int index) => new _IndexFinder(this, index);
+
+  /// Returns a variant of this finder that only matches elements reachable by
+  /// a hit test.
+  ///
+  /// The [at] parameter specifies the location relative to the size of the
+  /// target element where the hit test is performed.
+  Finder hitTestable({ Alignment at: Alignment.center }) => new _HitTestableFinder(this, at);
+
   @override
   String toString() {
     final String additional = skipOffstage ? ' (ignoring offstage widgets)' : '';
@@ -324,10 +339,53 @@ class _LastFinder extends Finder {
   }
 }
 
+class _IndexFinder extends Finder {
+  _IndexFinder(this.parent, this.index);
+
+  final Finder parent;
+
+  final int index;
+
+  @override
+  String get description => '${parent.description} (ignoring all but index $index)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    yield parent.apply(candidates).elementAt(index);
+  }
+}
+
+class _HitTestableFinder extends Finder {
+  _HitTestableFinder(this.parent, this.alignment);
+
+  final Finder parent;
+  final Alignment alignment;
+
+  @override
+  String get description => '${parent.description} (considering only hit-testable ones)';
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) sync* {
+    for (final Element candidate in parent.apply(candidates)) {
+      final RenderBox box = candidate.renderObject;
+      assert(box != null);
+      final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
+      final HitTestResult hitResult = new HitTestResult();
+      WidgetsBinding.instance.hitTest(hitResult, absoluteOffset);
+      for (final HitTestEntry entry in hitResult.path) {
+        if (entry.target == candidate.renderObject) {
+          yield candidate;
+          break;
+        }
+      }
+    }
+  }
+}
+
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class MatchFinder extends Finder {
-  /// Initialises a predicate-based Finder. Used by subclasses to initialize the
+  /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// [skipOffstage] property.
   MatchFinder({ bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 

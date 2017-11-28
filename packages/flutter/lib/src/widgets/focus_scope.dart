@@ -104,7 +104,7 @@ class _FocusScopeState extends State<FocusScope> {
   Widget build(BuildContext context) {
     FocusScope.of(context).reparentScopeIfNeeded(widget.node);
     return new Semantics(
-      container: true,
+      explicitChildNodes: true,
       child: new _FocusScopeMarker(
         node: widget.node,
         child: widget.child,

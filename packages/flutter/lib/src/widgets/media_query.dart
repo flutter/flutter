@@ -40,7 +40,8 @@ class MediaQueryData {
     this.size: Size.zero,
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
-    this.padding: EdgeInsets.zero
+    this.padding: EdgeInsets.zero,
+    this.alwaysUse24HourFormat: false,
   });
 
   /// Creates data for a media query based on the given window.
@@ -52,8 +53,9 @@ class MediaQueryData {
   MediaQueryData.fromWindow(ui.Window window)
     : size = window.physicalSize / window.devicePixelRatio,
       devicePixelRatio = window.devicePixelRatio,
-      textScaleFactor = 1.0, // TODO(abarth): Read this value from window.
-      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio);
+      textScaleFactor = window.textScaleFactor,
+      padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
   ///
@@ -77,6 +79,19 @@ class MediaQueryData {
   /// The padding around the edges of the media (e.g., the screen).
   final EdgeInsets padding;
 
+  /// Whether to use 24-hour format when formatting time.
+  ///
+  /// The behavior of this flag is different across platforms:
+  ///
+  /// - On Android this flag is reported directly from the user settings called
+  ///   "Use 24-hour format". It applies to any locale used by the application,
+  ///   whether it is the system-wide locale, or the custom locale set by the
+  ///   application.
+  /// - On iOS this flag is set to true when the user setting called "24-Hour
+  ///   Time" is set or the system-wide locale's default uses 24-hour
+  ///   formatting.
+  final bool alwaysUse24HourFormat;
+
   /// The orientation of the media (e.g., whether the device is in landscape or portrait mode).
   Orientation get orientation {
     return size.width > size.height ? Orientation.landscape : Orientation.portrait;
@@ -98,6 +113,40 @@ class MediaQueryData {
     );
   }
 
+  /// Creates a copy of this media query data but with the given paddings
+  /// replaced with zero.
+  ///
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then this
+  /// [MediaQueryData] is returned unmodified.
+  ///
+  /// See also:
+  ///
+  ///  * [new MediaQuery.removePadding], which uses this method to remove padding
+  ///    from the ambient [MediaQuery].
+  ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
+  ///    adds a [Padding] widget.
+  MediaQueryData removePadding({
+    bool removeLeft: false,
+    bool removeTop: false,
+    bool removeRight: false,
+    bool removeBottom: false,
+  }) {
+    if (!(removeLeft || removeTop || removeRight || removeBottom))
+      return this;
+    return new MediaQueryData(
+      size: size,
+      devicePixelRatio: devicePixelRatio,
+      textScaleFactor: textScaleFactor,
+      padding: padding.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
+    );
+  }
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
@@ -113,7 +162,10 @@ class MediaQueryData {
   int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
 
   @override
-  String toString() => '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, textScaleFactor: $textScaleFactor, padding: $padding)';
+  String toString() {
+    return '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, '
+           'textScaleFactor: $textScaleFactor, padding: $padding)';
+  }
 }
 
 /// Establishes a subtree in which media queries resolve to the given data.
@@ -148,6 +200,44 @@ class MediaQuery extends InheritedWidget {
        assert(data != null),
        super(key: key, child: child);
 
+  /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
+  /// the given context, but removes the specified paddings.
+  ///
+  /// The [context] argument is required, must not be null, and must have a
+  /// [MediaQuery] in scope.
+  ///
+  /// The `removeLeft`, `removeTop`, `removeRight`, and `removeBottom` arguments
+  /// must not be null. If all four are false (the default) then the returned
+  /// [MediaQuery] reuses the ambient [MediaQueryData] unmodified, which is not
+  /// particularly useful.
+  ///
+  /// The [child] argument is required and must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
+  ///    adds a [Padding] widget.
+  factory MediaQuery.removePadding({
+    Key key,
+    @required BuildContext context,
+    bool removeLeft: false,
+    bool removeTop: false,
+    bool removeRight: false,
+    bool removeBottom: false,
+    @required Widget child,
+  }) {
+    return new MediaQuery(
+      key: key,
+      data: MediaQuery.of(context).removePadding(
+        removeLeft: removeLeft,
+        removeTop: removeTop,
+        removeRight: removeRight,
+        removeBottom: removeBottom,
+      ),
+      child: child,
+    );
+  }
+
   /// Contains information about the current media.
   ///
   /// For example, the [MediaQueryData.size] property contains the width and
@@ -173,6 +263,8 @@ class MediaQuery extends InheritedWidget {
   /// If you use this from a widget (e.g. in its build function), consider
   /// calling [debugCheckHasMediaQuery].
   static MediaQueryData of(BuildContext context, { bool nullOk: false }) {
+    assert(context != null);
+    assert(nullOk != null);
     final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
     if (query != null)
       return query.data;
@@ -193,8 +285,8 @@ class MediaQuery extends InheritedWidget {
   bool updateShouldNotify(MediaQuery old) => data != old.data;
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$data');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<MediaQueryData>('data', data, showName: false));
   }
 }

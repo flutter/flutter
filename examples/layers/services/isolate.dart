@@ -18,12 +18,11 @@ typedef void OnResultListener(String result);
 // in real-world applications.
 class Calculator {
   Calculator({ @required this.onProgressListener, @required this.onResultListener, String data })
-  // In order to keep the example files smaller, we "cheat" a little and
-  // replicate our small json string into a 10,000-element array.
-  : _data = _replicateJson(data, 10000) {
-    assert(onProgressListener != null);
-    assert(onResultListener != null);
-  }
+    : assert(onProgressListener != null),
+      assert(onResultListener != null),
+      // In order to keep the example files smaller, we "cheat" a little and
+      // replicate our small json string into a 10,000-element array.
+      _data = _replicateJson(data, 10000);
 
   final OnProgressListener onProgressListener;
   final OnResultListener onResultListener;
@@ -47,21 +46,21 @@ class Calculator {
     try {
       final List<dynamic> result = decoder.convert(_data);
       final int n = result.length;
-      onResultListener("Decoded $n results");
+      onResultListener('Decoded $n results');
     } catch (e, stack) {
-      print("Invalid JSON file: $e");
+      print('Invalid JSON file: $e');
       print(stack);
     }
   }
 
   static String _replicateJson(String data, int count) {
-    final StringBuffer buffer = new StringBuffer()..write("[");
+    final StringBuffer buffer = new StringBuffer()..write('[');
     for (int i = 0; i < count; i++) {
       buffer.write(data);
       if (i < count - 1)
         buffer.write(',');
     }
-    buffer.write("]");
+    buffer.write(']');
     return buffer.toString();
   }
 }
@@ -87,9 +86,9 @@ class CalculationMessage {
 // progress of the background computation.
 class CalculationManager {
   CalculationManager({ @required this.onProgressListener, @required this.onResultListener })
-  : _receivePort = new ReceivePort() {
-    assert(onProgressListener != null);
-    assert(onResultListener != null);
+    : assert(onProgressListener != null),
+      assert(onResultListener != null),
+      _receivePort = new ReceivePort() {
     _receivePort.listen(_handleMessage);
   }
 
@@ -283,7 +282,7 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 
   String _getStatus(CalculationState state) {
-      switch(state) {
+      switch (state) {
         case CalculationState.loading:
           return 'Loading...';
         case CalculationState.calculating:

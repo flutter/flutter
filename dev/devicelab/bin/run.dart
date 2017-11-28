@@ -103,7 +103,7 @@ final ArgParser _argParser = new ArgParser()
     help: 'Name of the stage. Runs all tasks for that stage. '
         'The tasks and their stages are read from manifest.yaml.',
   )
-  ..addOption(
+  ..addFlag(
     'all',
     abbr: 'a',
     help: 'Runs all tasks defined in manifest.yaml.',

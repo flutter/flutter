@@ -1,0 +1,161 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/painting.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
+import 'common_matchers.dart';
+
+void main() {
+  test('StadiumBorder', () {
+    final StadiumBorder c10 = const StadiumBorder(side: const BorderSide(width: 10.0));
+    final StadiumBorder c15 = const StadiumBorder(side: const BorderSide(width: 15.0));
+    final StadiumBorder c20 = const StadiumBorder(side: const BorderSide(width: 20.0));
+    expect(c10.dimensions, const EdgeInsets.all(10.0));
+    expect(c10.scale(2.0), c20);
+    expect(c20.scale(0.5), c10);
+    expect(ShapeBorder.lerp(c10, c20, 0.0), c10);
+    expect(ShapeBorder.lerp(c10, c20, 0.5), c15);
+    expect(ShapeBorder.lerp(c10, c20, 1.0), c20);
+
+    final StadiumBorder c1 = const StadiumBorder(side: const BorderSide(width: 1.0));
+    expect(c1.getOuterPath(new Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
+    final StadiumBorder c2 = const StadiumBorder(side: const BorderSide(width: 1.0));
+    expect(c2.getInnerPath(new Rect.fromCircle(center: Offset.zero, radius: 2.0)), isUnitCircle);
+    final Rect rect = new Rect.fromLTRB(10.0, 20.0, 100.0, 200.0);
+    expect(
+            (Canvas canvas) => c10.paint(canvas, rect),
+        paints
+          ..rrect(
+            rrect: new RRect.fromRectAndRadius(rect.deflate(5.0), new Radius.circular(rect.shortestSide / 2.0 - 5.0)),
+            strokeWidth: 10.0,
+          )
+    );
+  });
+
+  test('StadiumBorder and CircleBorder', () {
+    final StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
+    final CircleBorder circle = const CircleBorder(side: BorderSide.none);
+    final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Matcher looksLikeS = isPathThat(
+      includes: const <Offset>[ const Offset(30.0, 10.0), const Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(99.0, 19.0), ],
+    );
+    final Matcher looksLikeC = isPathThat(
+      includes: const <Offset>[ const Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ const Offset(1.0, 1.0), const Offset(30.0, 10.0), const Offset(99.0, 19.0), ],
+    );
+    expect(stadium.getOuterPath(rect), looksLikeS);
+    expect(circle.getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(stadium, circle, 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, circle, 0.9).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.1).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), stadium, 0.9).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), circle, 0.9).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.9).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, circle, 0.9), 0.9).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.1).getOuterPath(rect), looksLikeC);
+    expect(ShapeBorder.lerp(circle, ShapeBorder.lerp(stadium, circle, 0.1), 0.9).getOuterPath(rect), looksLikeS);
+
+    expect(ShapeBorder.lerp(stadium, circle, 0.1).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 10.0% of the way to being a CircleBorder)');
+    expect(ShapeBorder.lerp(stadium, circle, 0.2).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 20.0% of the way to being a CircleBorder)');
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.9), 0.9).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 82.0% of the way to being a CircleBorder)');
+
+    expect(ShapeBorder.lerp(circle, stadium, 0.9).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 10.0% of the way to being a CircleBorder)');
+    expect(ShapeBorder.lerp(circle, stadium, 0.8).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 20.0% of the way to being a CircleBorder)');
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, circle, 0.9), ShapeBorder.lerp(stadium, circle, 0.1), 0.1).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), 82.0% of the way to being a CircleBorder)');
+
+    expect(ShapeBorder.lerp(stadium, circle, 0.1), ShapeBorder.lerp(stadium, circle, 0.1));
+    expect(ShapeBorder.lerp(stadium, circle, 0.1).hashCode, ShapeBorder.lerp(stadium, circle, 0.1).hashCode);
+
+    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, circle, 0.5);
+    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(circle, stadium, 0.1), ShapeBorder.lerp(circle, stadium, 0.9), 0.5);
+    expect(direct50, indirect50);
+    expect(direct50.hashCode, indirect50.hashCode);
+    expect(direct50.toString(), indirect50.toString());
+  });
+
+  test('StadiumBorder and RoundedRectBorder', () {
+    final StadiumBorder stadium = const StadiumBorder(side: BorderSide.none);
+    final RoundedRectangleBorder rrect = const RoundedRectangleBorder(side: BorderSide.none);
+    final Rect rect = new Rect.fromLTWH(0.0, 0.0, 100.0, 50.0);
+    final Matcher looksLikeS = isPathThat(
+      includes: const <Offset>[
+        const Offset(25.0, 25.0),
+        const Offset(50.0, 25.0),
+        const Offset(7.33, 7.33),
+      ],
+      excludes: const <Offset>[
+        const Offset(0.001, 0.001),
+        const Offset(99.999, 0.001),
+        const Offset(99.999, 49.999),
+        const Offset(0.001, 49.999),
+      ],
+    );
+    final Matcher looksLikeR = isPathThat(
+      includes: const <Offset>[
+        const Offset(25.0, 25.0),
+        const Offset(50.0, 25.0),
+        const Offset(7.33, 7.33),
+        const Offset(4.0, 4.0),
+        const Offset(96.0, 4.0),
+        const Offset(96.0, 46.0),
+        const Offset(4.0, 46.0),
+      ],
+    );
+    expect(stadium.getOuterPath(rect), looksLikeS);
+    expect(rrect.getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(stadium, rrect, 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, rrect, 0.9).getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.1).getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), stadium, 0.9).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), rrect, 0.9).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.9).getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(stadium, ShapeBorder.lerp(stadium, rrect, 0.9), 0.9).getOuterPath(rect), looksLikeR);
+    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.1).getOuterPath(rect), looksLikeS);
+    expect(ShapeBorder.lerp(rrect, ShapeBorder.lerp(stadium, rrect, 0.1), 0.9).getOuterPath(rect), looksLikeS);
+
+    expect(ShapeBorder.lerp(stadium, rrect, 0.1).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 10.0% of the way to being a RoundedRectangleBorder)');
+    expect(ShapeBorder.lerp(stadium, rrect, 0.2).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 20.0% of the way to being a RoundedRectangleBorder)');
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.9), 0.9).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 82.0% of the way to being a RoundedRectangleBorder)');
+
+    expect(ShapeBorder.lerp(rrect, stadium, 0.9).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 10.0% of the way to being a RoundedRectangleBorder)');
+    expect(ShapeBorder.lerp(rrect, stadium, 0.8).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 20.0% of the way to being a RoundedRectangleBorder)');
+    expect(ShapeBorder.lerp(ShapeBorder.lerp(stadium, rrect, 0.9), ShapeBorder.lerp(stadium, rrect, 0.1), 0.1).toString(),
+        'StadiumBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), '
+        'BorderRadius.zero, 82.0% of the way to being a RoundedRectangleBorder)');
+
+    expect(ShapeBorder.lerp(stadium, rrect, 0.1), ShapeBorder.lerp(stadium, rrect, 0.1));
+    expect(ShapeBorder.lerp(stadium, rrect, 0.1).hashCode, ShapeBorder.lerp(stadium, rrect, 0.1).hashCode);
+
+    final ShapeBorder direct50 = ShapeBorder.lerp(stadium, rrect, 0.5);
+    final ShapeBorder indirect50 = ShapeBorder.lerp(ShapeBorder.lerp(rrect, stadium, 0.1), ShapeBorder.lerp(rrect, stadium, 0.9), 0.5);
+    expect(direct50, indirect50);
+    expect(direct50.hashCode, indirect50.hashCode);
+    expect(direct50.toString(), indirect50.toString());
+  });
+}

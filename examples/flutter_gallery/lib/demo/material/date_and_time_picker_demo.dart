@@ -101,7 +101,7 @@ class _DateTimePicker extends StatelessWidget {
         new Expanded(
           flex: 3,
           child: new _InputDropdown(
-            valueText: selectedTime.toString(),
+            valueText: selectedTime.format(context),
             valueStyle: valueStyle,
             onPressed: () { _selectTime(context); },
           ),

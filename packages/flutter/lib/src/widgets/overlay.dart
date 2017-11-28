@@ -62,11 +62,11 @@ class OverlayEntry {
     @required this.builder,
     bool opaque: false,
     bool maintainState: false,
-  }) : _opaque = opaque, _maintainState = maintainState {
-    assert(builder != null);
-    assert(opaque != null);
-    assert(maintainState != null);
-  }
+  }) : assert(builder != null),
+       assert(opaque != null),
+       assert(maintainState != null),
+       _opaque = opaque,
+       _maintainState = maintainState;
 
   /// This entry will include the widget built by this builder in the overlay at
   /// the entry's position.
@@ -150,13 +150,13 @@ class OverlayEntry {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode(opaque: $opaque; maintainState: $maintainState)';
+  String toString() => '${describeIdentity(this)}(opaque: $opaque; maintainState: $maintainState)';
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(this.entry) : super(key: entry._key) {
-    assert(entry != null);
-  }
+  _OverlayEntry(this.entry)
+    : assert(entry != null),
+      super(key: entry._key);
 
   final OverlayEntry entry;
 
@@ -251,7 +251,7 @@ class Overlay extends StatefulWidget {
         );
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -331,7 +331,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
           break;
       }
       return true;
-    });
+    }());
     return result;
   }
 
@@ -370,9 +370,11 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('entries: $_entries');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    // TODO(jacobr): use IterableProperty instead as that would
+    // provide a slightly more consistent string summary of the List.
+    description.add(new DiagnosticsProperty<List<OverlayEntry>>('entries', _entries));
   }
 }
 
@@ -388,10 +390,8 @@ class _Theatre extends RenderObjectWidget {
   _Theatre({
     this.onstage,
     @required this.offstage,
-  }) {
-    assert(offstage != null);
-    assert(!offstage.any((Widget child) => child == null));
-  }
+  }) : assert(offstage != null),
+       assert(!offstage.any((Widget child) => child == null));
 
   final Stack onstage;
 
@@ -405,9 +405,9 @@ class _Theatre extends RenderObjectWidget {
 }
 
 class _TheatreElement extends RenderObjectElement {
-  _TheatreElement(_Theatre widget) : super(widget) {
-    assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage));
-  }
+  _TheatreElement(_Theatre widget)
+    : assert(!debugChildrenHaveDuplicateKeys(widget, widget.offstage)),
+      super(widget);
 
   @override
   _Theatre get widget => super.widget;
@@ -470,7 +470,7 @@ class _TheatreElement extends RenderObjectElement {
   }
 
   @override
-  void visitChildrenForSemantics(ElementVisitor visitor) {
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
     if (_onstage != null)
       visitor(_onstage);
   }
@@ -559,33 +559,39 @@ class _RenderTheatre extends RenderBox
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    final StringBuffer result = new StringBuffer();
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
     if (child != null)
-      result
-        ..write(prefix)
-        ..write(' \u2502\n')
-        ..write(child.toStringDeep('$prefix \u251C\u2500onstage: ', '$prefix \u254E'));
-    if (firstChild != null) {
+      children.add(child.toDiagnosticsNode(name: 'onstage'));
+
+    if (firstChild  != null) {
       RenderBox child = firstChild;
+
       int count = 1;
-      while (child != lastChild) {
-        result.write(child.toStringDeep("$prefix \u254E\u254Coffstage $count: ", "$prefix \u254E"));
-        count += 1;
+      while (true) {
+        children.add(
+          child.toDiagnosticsNode(
+            name: 'offstage $count',
+            style: DiagnosticsTreeStyle.offstage,
+          ),
+        );
+        if (child == lastChild)
+          break;
         final StackParentData childParentData = child.parentData;
         child = childParentData.nextSibling;
-      }
-      if (child != null) {
-        assert(child == lastChild);
-        result.write(child.toStringDeep("$prefix \u2514\u254Coffstage $count: ", "$prefix  "));
+        count += 1;
       }
     } else {
-      result
-        ..write(prefix)
-        ..write(' \u2514\u254Cno offstage children');
+      children.add(
+        new DiagnosticsNode.message(
+          'no offstage children',
+          style: DiagnosticsTreeStyle.offstage,
+        ),
+      );
     }
-    return result.toString();
-  }
+    return children;
+   }
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {

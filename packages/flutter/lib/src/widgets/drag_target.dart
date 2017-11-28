@@ -94,7 +94,8 @@ class Draggable<T> extends StatefulWidget {
     this.affinity,
     this.maxSimultaneousDrags,
     this.onDragStarted,
-    this.onDraggableCanceled
+    this.onDraggableCanceled,
+    this.onDragCompleted,
   }) : assert(child != null),
        assert(feedback != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
@@ -182,6 +183,16 @@ class Draggable<T> extends StatefulWidget {
   /// callback is still in the tree.
   final DraggableCanceledCallback onDraggableCanceled;
 
+  /// Called when the draggable is dropped and accepted by a [DragTarget].
+  ///
+  /// This function might be called after this widget has been removed from the
+  /// tree. For example, if a drag was in progress when this widget was removed
+  /// from the tree and the drag ended up completing, this callback will
+  /// still be called. For this reason, implementations of this callback might
+  /// need to check [State.mounted] to check whether the state receiving the
+  /// callback is still in the tree.
+  final VoidCallback onDragCompleted;
+
   /// Creates a gesture recognizer that recognizes the start of the drag.
   ///
   /// Subclasses can override this function to customize when they start
@@ -217,7 +228,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
-    DraggableCanceledCallback onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled,
+    VoidCallback onDragCompleted
   }) : super(
     key: key,
     child: child,
@@ -228,7 +240,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
-    onDraggableCanceled: onDraggableCanceled
+    onDraggableCanceled: onDraggableCanceled,
+    onDragCompleted: onDragCompleted
   );
 
   @override
@@ -313,6 +326,8 @@ class _DraggableState<T> extends State<Draggable<T>> {
           _activeCount -= 1;
           _disposeRecognizerIfInactive();
         }
+        if (wasAccepted && widget.onDragCompleted != null)
+          widget.onDragCompleted();
         if (!wasAccepted && widget.onDraggableCanceled != null)
           widget.onDraggableCanceled(velocity, offset);
       }
@@ -444,10 +459,9 @@ class _DragAvatar<T> extends Drag {
     this.feedback,
     this.feedbackOffset: Offset.zero,
     this.onDragEnd
-  }) {
-    assert(overlayState != null);
-    assert(dragStartPoint != null);
-    assert(feedbackOffset != null);
+  }) : assert(overlayState != null),
+       assert(dragStartPoint != null),
+       assert(feedbackOffset != null) {
     _entry = new OverlayEntry(builder: _build);
     overlayState.insert(_entry);
     _position = initialPosition;
@@ -516,11 +530,13 @@ class _DragAvatar<T> extends Drag {
         _enteredTargets.add(target);
         return target.didEnter(this);
       },
-      orElse: () => null
+      orElse: _null
     );
 
     _activeTarget = newTarget;
   }
+
+  static Null _null() => null;
 
   Iterable<_DragTargetState<T>> _getDragTargets(List<HitTestEntry> path) sync* {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target

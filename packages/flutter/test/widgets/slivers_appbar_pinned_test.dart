@@ -27,14 +27,17 @@ void main() {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
-          new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
+            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
+            new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
+          ],
+        ),
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
@@ -56,20 +59,84 @@ void main() {
     verifyPaintPosition(key5, const Offset(0.0, 50.0), true);
   });
 
+  testWidgets('Sliver appbars - toStringDeep of maxExtent that throws', (WidgetTester tester) async {
+    final TestDelegateThatCanThrow delegateThatCanThrow = new TestDelegateThatCanThrow();
+    GlobalKey key;
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new SliverPersistentHeader(key: key = new GlobalKey(), delegate: delegateThatCanThrow, pinned: true),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle(const Duration(milliseconds: 10));
+
+    final RenderObject renderObject = key.currentContext.findRenderObject();
+    // The delegate must only start throwing immediately before calling
+    // toStringDeep to avoid triggering spurious exceptions.
+    // If the _RenderSliverPinnedPersistentHeaderForWidgets class was not
+    // private it would make more sense to create an instance of it directly.
+    delegateThatCanThrow.shouldThrow = true;
+    expect(renderObject, hasAGoodToStringDeep);
+    expect(
+      renderObject.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        '_RenderSliverPinnedPersistentHeaderForWidgets#00000 relayoutBoundary=up1\n'
+        ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
+        ' │ constraints: SliverConstraints(AxisDirection.down,\n'
+        ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
+        ' │   0.0, remainingPaintExtent: 600.0, crossAxisExtent: 800.0,\n'
+        ' │   crossAxisDirection: AxisDirection.right,\n'
+        ' │   viewportMainAxisExtent: 600.0)\n'
+        ' │ geometry: SliverGeometry(scrollExtent: 200.0, paintExtent: 200.0,\n'
+        ' │   maxPaintExtent: 200.0, hasVisualOverflow: true)\n'
+        ' │ maxExtent: EXCEPTION (FlutterError)\n'
+        ' │ child position: 0.0\n'
+        ' │\n'
+        ' └─child: RenderConstrainedBox#00000 relayoutBoundary=up2\n'
+        '   │ parentData: <none> (can use size)\n'
+        '   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=200.0)\n'
+        '   │ size: Size(800.0, 200.0)\n'
+        '   │ additionalConstraints: BoxConstraints(0.0<=w<=Infinity,\n'
+        '   │   100.0<=h<=200.0)\n'
+        '   │\n'
+        '   └─child: RenderLimitedBox#00000 relayoutBoundary=up3\n'
+        '     │ parentData: <none> (can use size)\n'
+        '     │ constraints: BoxConstraints(w=800.0, 100.0<=h<=200.0)\n'
+        '     │ size: Size(800.0, 200.0)\n'
+        '     │ maxWidth: 0.0\n'
+        '     │ maxHeight: 0.0\n'
+        '     │\n'
+        '     └─child: RenderConstrainedBox#00000 relayoutBoundary=up4\n'
+        '         parentData: <none> (can use size)\n'
+        '         constraints: BoxConstraints(w=800.0, 100.0<=h<=200.0)\n'
+        '         size: Size(800.0, 200.0)\n'
+        '         additionalConstraints: BoxConstraints(biggest)\n'
+      ),
+    );
+  });
+
   testWidgets('Sliver appbars - pinned with slow scroll', (WidgetTester tester) async {
     const double bigHeight = 550.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
-          new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
+            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
+            new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
+          ],
+        ),
       ),
     );
+
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 550.0), true);
@@ -149,14 +216,17 @@ void main() {
     const double bigHeight = 650.0;
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new CustomScrollView(
-        slivers: <Widget>[
-          new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
-          new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
-          new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
-          new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          slivers: <Widget>[
+            new BigSliver(key: key1 = new GlobalKey(), height: bigHeight),
+            new SliverPersistentHeader(key: key2 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new SliverPersistentHeader(key: key3 = new GlobalKey(), delegate: new TestDelegate(), pinned: true),
+            new BigSliver(key: key4 = new GlobalKey(), height: bigHeight),
+            new BigSliver(key: key5 = new GlobalKey(), height: bigHeight),
+          ],
+        ),
       ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
@@ -180,19 +250,22 @@ void main() {
 
   testWidgets('Sliver appbars - overscroll gap is below header', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: <Widget>[
-          new SliverPersistentHeader(delegate: new TestDelegate(), pinned: true),
-          new SliverList(
-            delegate: new SliverChildListDelegate(<Widget>[
-              const SizedBox(
-                height: 300.0,
-                child: const Text('X'),
-              ),
-            ]),
-          ),
-        ],
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: <Widget>[
+            new SliverPersistentHeader(delegate: new TestDelegate(), pinned: true),
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(
+                  height: 300.0,
+                  child: const Text('X'),
+                ),
+              ]),
+            ),
+          ],
+        ),
       ),
     );
 
@@ -226,6 +299,28 @@ class TestDelegate extends SliverPersistentHeaderDelegate {
 
   @override
   double get minExtent => 100.0;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return new Container(constraints: new BoxConstraints(minHeight: minExtent, maxHeight: maxExtent));
+  }
+
+  @override
+  bool shouldRebuild(TestDelegate oldDelegate) => false;
+}
+
+class TestDelegateThatCanThrow extends SliverPersistentHeaderDelegate {
+  bool shouldThrow = false;
+
+  @override
+  double get maxExtent {
+    return shouldThrow ? throw new FlutterError('Unavailable maxExtent') : 200.0;
+  }
+
+  @override
+  double get minExtent {
+   return shouldThrow ? throw new FlutterError('Unavailable minExtent') : 100.0;
+  }
 
   @override
   Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {

@@ -8,6 +8,8 @@
 /captures
 GeneratedPluginRegistrant.java
 
-/gradle
+# Gradle wrapper files should normally be checked into source control.
+# See ../../README.md
+gradle-wrapper.jar
 /gradlew
 /gradlew.bat

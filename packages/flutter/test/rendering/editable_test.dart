@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('editable intrinsics', () {
@@ -12,11 +12,38 @@ void main() {
         style: const TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
         text: '12345',
       ),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
       offset: new ViewportOffset.zero(),
     );
     expect(editable.getMinIntrinsicWidth(double.INFINITY), 50.0);
     expect(editable.getMaxIntrinsicWidth(double.INFINITY), 50.0);
     expect(editable.getMinIntrinsicHeight(double.INFINITY), 10.0);
     expect(editable.getMaxIntrinsicHeight(double.INFINITY), 10.0);
+
+    expect(
+      editable.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'RenderEditable#00000 NEEDS-LAYOUT NEEDS-PAINT DETACHED\n'
+        ' │ parentData: MISSING\n'
+        ' │ constraints: MISSING\n'
+        ' │ size: MISSING\n'
+        ' │ cursorColor: null\n'
+        ' │ showCursor: ValueNotifier<bool>#00000(false)\n'
+        ' │ maxLines: 1\n'
+        ' │ selectionColor: null\n'
+        ' │ textScaleFactor: 1.0\n'
+        ' │ selection: null\n'
+        ' │ offset: _FixedViewportOffset#00000(offset: 0.0)\n'
+        ' ╘═╦══ text ═══\n'
+        '   ║ TextSpan:\n'
+        '   ║   inherit: true\n'
+        '   ║   family: Ahem\n'
+        '   ║   size: 10.0\n'
+        '   ║   height: 1.0x\n'
+        '   ║   "12345"\n'
+        '   ╚═══════════\n'
+      ),
+    );
   });
 }

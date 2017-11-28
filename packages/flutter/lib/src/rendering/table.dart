@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'object.dart';
+import 'table_border.dart';
 
 /// Parent data used by [RenderTable] for its children.
 class TableCellParentData extends BoxParentData {
@@ -311,130 +312,6 @@ class MinColumnWidth extends TableColumnWidth {
   String toString() => '$runtimeType($a, $b)';
 }
 
-/// Border specification for [RenderTable].
-///
-/// This is like [Border], with the addition of two sides: the inner
-/// horizontal borders and the inner vertical borders.
-class TableBorder extends Border {
-  /// Creates a border for a table.
-  ///
-  /// All the sides of the border default to [BorderSide.none].
-  const TableBorder({
-    BorderSide top: BorderSide.none,
-    BorderSide right: BorderSide.none,
-    BorderSide bottom: BorderSide.none,
-    BorderSide left: BorderSide.none,
-    this.horizontalInside: BorderSide.none,
-    this.verticalInside: BorderSide.none
-  }) : super(
-    top: top,
-    right: right,
-    bottom: bottom,
-    left: left
-  );
-
-  /// A uniform border with all sides the same color and width.
-  factory TableBorder.all({
-    Color color: const Color(0xFF000000),
-    double width: 1.0
-  }) {
-    final BorderSide side = new BorderSide(color: color, width: width);
-    return new TableBorder(top: side, right: side, bottom: side, left: side, horizontalInside: side, verticalInside: side);
-  }
-
-  /// Creates a border for a table where all the interior sides use the same
-  /// styling and all the exterior sides use the same styling.
-  factory TableBorder.symmetric({
-    BorderSide inside: BorderSide.none,
-    BorderSide outside: BorderSide.none
-  }) {
-    return new TableBorder(
-      top: outside,
-      right: outside,
-      bottom: outside,
-      left: outside,
-      horizontalInside: inside,
-      verticalInside: inside
-    );
-  }
-
-  /// The horizontal interior sides of this border.
-  final BorderSide horizontalInside;
-
-  /// The vertical interior sides of this border.
-  final BorderSide verticalInside;
-
-  @override
-  bool get isUniform {
-    assert(horizontalInside != null);
-    assert(verticalInside != null);
-    if (!super.isUniform)
-      return false;
-
-    final Color topColor = top.color;
-    if (horizontalInside.color != topColor ||
-        verticalInside.color != topColor)
-      return false;
-
-    final double topWidth = top.width;
-    if (horizontalInside.width != topWidth ||
-        verticalInside.width != topWidth)
-      return false;
-
-    final BorderStyle topStyle = top.style;
-    if (horizontalInside.style != topStyle ||
-        verticalInside.style != topStyle)
-      return false;
-
-    return true;
-  }
-
-  @override
-  TableBorder scale(double t) {
-    return new TableBorder(
-      top: top.copyWith(width: t * top.width),
-      right: right.copyWith(width: t * right.width),
-      bottom: bottom.copyWith(width: t * bottom.width),
-      left: left.copyWith(width: t * left.width),
-      horizontalInside: horizontalInside.copyWith(width: t * horizontalInside.width),
-      verticalInside: verticalInside.copyWith(width: t * verticalInside.width)
-    );
-  }
-
-  /// Linearly interpolate between two table borders.
-  static TableBorder lerp(TableBorder a, TableBorder b, double t) {
-    if (a == null && b == null)
-      return null;
-    if (a == null)
-      return b.scale(t);
-    if (b == null)
-      return a.scale(1.0 - t);
-    return new TableBorder(
-      top: BorderSide.lerp(a.top, b.top, t),
-      right: BorderSide.lerp(a.right, b.right, t),
-      bottom: BorderSide.lerp(a.bottom, b.bottom, t),
-      left: BorderSide.lerp(a.left, b.left, t),
-      horizontalInside: BorderSide.lerp(a.horizontalInside, b.horizontalInside, t),
-      verticalInside: BorderSide.lerp(a.verticalInside, b.verticalInside, t)
-    );
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (super != other)
-      return false;
-    final TableBorder typedOther = other;
-    return horizontalInside == typedOther.horizontalInside &&
-           verticalInside == typedOther.verticalInside;
-  }
-
-  @override
-  int get hashCode => hashValues(super.hashCode, horizontalInside, verticalInside);
-
-  @override
-  String toString() => 'TableBorder($top, $right, $bottom, $left, $horizontalInside, $verticalInside)';
-}
-
 /// Vertical alignment options for cells in [RenderTable] objects.
 ///
 /// This is specified using [TableCellParentData] objects on the
@@ -454,7 +331,7 @@ enum TableCellVerticalAlignment {
   /// used is specified by [RenderTable.textBaseline]. It is not valid to use
   /// the baseline value if [RenderTable.textBaseline] is not specified.
   ///
-  /// This vertial alignment is relatively expensive because it causes the table
+  /// This vertical alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.
   baseline,
 
@@ -482,6 +359,7 @@ class RenderTable extends RenderBox {
     int rows,
     Map<int, TableColumnWidth> columnWidths,
     TableColumnWidth defaultColumnWidth: const FlexColumnWidth(1.0),
+    @required TextDirection textDirection,
     TableBorder border,
     List<Decoration> rowDecorations,
     ImageConfiguration configuration: ImageConfiguration.empty,
@@ -489,12 +367,13 @@ class RenderTable extends RenderBox {
     TableCellVerticalAlignment defaultVerticalAlignment: TableCellVerticalAlignment.top,
     TextBaseline textBaseline,
     List<List<RenderBox>> children
-  }) {
-    assert(columns == null || columns >= 0);
-    assert(rows == null || rows >= 0);
-    assert(rows == null || children == null);
-    assert(defaultColumnWidth != null);
-    assert(configuration != null);
+  }) : assert(columns == null || columns >= 0),
+       assert(rows == null || rows >= 0),
+       assert(rows == null || children == null),
+       assert(defaultColumnWidth != null),
+       assert(textDirection != null),
+       assert(configuration != null),
+       _textDirection = textDirection {
     _columns = columns ?? (children != null && children.isNotEmpty ? children.first.length : 0);
     _rows = rows ?? 0;
     _children = <RenderBox>[]..length = _columns * _rows;
@@ -505,10 +384,7 @@ class RenderTable extends RenderBox {
     _configuration = configuration;
     _defaultVerticalAlignment = defaultVerticalAlignment;
     _textBaseline = textBaseline;
-    if (children != null) {
-      for (List<RenderBox> row in children)
-        addRow(row);
-    }
+    children?.forEach(addRow);
   }
 
   // Children are stored in row-major order.
@@ -521,7 +397,7 @@ class RenderTable extends RenderBox {
   /// in the table.
   ///
   /// Changing the number of columns is an expensive operation because the table
-  /// needs to rearranage its internal representation.
+  /// needs to rearrange its internal representation.
   int get columns => _columns;
   int _columns;
   set columns(int value) {
@@ -610,6 +486,17 @@ class RenderTable extends RenderBox {
     if (defaultColumnWidth == value)
       return;
     _defaultColumnWidth = value;
+    markNeedsLayout();
+  }
+
+  /// The direction in which the columns are ordered.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
     markNeedsLayout();
   }
 
@@ -738,8 +625,7 @@ class RenderTable extends RenderBox {
       y += 1;
     }
     // drop all the lost children
-    for (RenderBox oldChild in lostChildren)
-      dropChild(oldChild);
+    lostChildren.forEach(dropChild);
     // update our internal values
     _columns = columns;
     _rows = cells.length ~/ columns;
@@ -762,8 +648,7 @@ class RenderTable extends RenderBox {
     _children.clear();
     _columns = cells.isNotEmpty ? cells.first.length : 0;
     _rows = 0;
-    for (List<RenderBox> row in cells)
-      addRow(row);
+    cells.forEach(addRow);
     assert(_children.length == rows * columns);
   }
 
@@ -1006,7 +891,7 @@ class RenderTable extends RenderBox {
     }
 
     // beyond this point, unflexedTableWidth is no longer valid
-    assert(() { unflexedTableWidth = null; return true; });
+    assert(() { unflexedTableWidth = null; return true; }());
 
     // 4. apply the maximum width of the table, shrinking columns as
     //    necessary, applying minimum column widths as we go
@@ -1083,7 +968,7 @@ class RenderTable extends RenderBox {
 
   // cache the table geometry for painting purposes
   final List<double> _rowTops = <double>[];
-  List<double> _columnLefts;
+  Iterable<double> _columnLefts;
 
   /// Returns the position and dimensions of the box that the given
   /// row covers, in this render object's coordinate space (so the
@@ -1101,6 +986,8 @@ class RenderTable extends RenderBox {
 
   @override
   void performLayout() {
+    final int rows = this.rows;
+    final int columns = this.columns;
     assert(_children.length == rows * columns);
     if (rows * columns == 0) {
       // TODO(ianh): if columns is zero, this should be zero width
@@ -1110,12 +997,25 @@ class RenderTable extends RenderBox {
     }
     final List<double> widths = _computeColumnWidths(constraints);
     final List<double> positions = new List<double>(columns);
-    _rowTops.clear();
-    positions[0] = 0.0;
-    for (int x = 1; x < columns; x += 1)
-      positions[x] = positions[x-1] + widths[x-1];
-    _columnLefts = positions;
+    double tableWidth;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        positions[columns - 1] = 0.0;
+        for (int x = columns - 2; x >= 0; x -= 1)
+          positions[x] = positions[x+1] + widths[x+1];
+        _columnLefts = positions.reversed;
+        tableWidth = positions.first + widths.first;
+        break;
+      case TextDirection.ltr:
+        positions[0] = 0.0;
+        for (int x = 1; x < columns; x += 1)
+          positions[x] = positions[x-1] + widths[x-1];
+        _columnLefts = positions;
+        tableWidth = positions.last + widths.last;
+        break;
+    }
     assert(!positions.any((double value) => value == null));
+    _rowTops.clear();
     _baselineDistance = null;
     // then, lay out each row
     double rowTop = 0.0;
@@ -1194,7 +1094,7 @@ class RenderTable extends RenderBox {
       rowTop += rowHeight;
     }
     _rowTops.add(rowTop);
-    size = constraints.constrain(new Size(positions.last + widths.last, rowTop));
+    size = constraints.constrain(new Size(tableWidth, rowTop));
     assert(_rowTops.length == rows + 1);
   }
 
@@ -1241,84 +1141,48 @@ class RenderTable extends RenderBox {
         context.paintChild(child, childParentData.offset + offset);
       }
     }
-    canvas = context.canvas;
-    final Rect bounds = offset & size;
+    assert(_rows == _rowTops.length - 1);
+    assert(_columns == _columnLefts.length);
     if (border != null) {
-      switch (border.verticalInside.style) {
-        case BorderStyle.solid:
-          final Paint paint = new Paint()
-            ..color = border.verticalInside.color
-            ..strokeWidth = border.verticalInside.width
-            ..style = PaintingStyle.stroke;
-          final Path path = new Path();
-          for (int x = 1; x < columns; x += 1) {
-            path.moveTo(bounds.left + _columnLefts[x], bounds.top);
-            path.lineTo(bounds.left + _columnLefts[x], bounds.bottom);
-          }
-          canvas.drawPath(path, paint);
-          break;
-        case BorderStyle.none: break;
-      }
-      switch (border.horizontalInside.style) {
-        case BorderStyle.solid:
-          final Paint paint = new Paint()
-            ..color = border.horizontalInside.color
-            ..strokeWidth = border.horizontalInside.width
-            ..style = PaintingStyle.stroke;
-          final Path path = new Path();
-          for (int y = 1; y < rows; y += 1) {
-            path.moveTo(bounds.left, bounds.top + _rowTops[y]);
-            path.lineTo(bounds.right, bounds.top + _rowTops[y]);
-          }
-          canvas.drawPath(path, paint);
-          break;
-        case BorderStyle.none: break;
-      }
-      border.paint(canvas, bounds);
+      // The border rect might not fill the entire height of this render object
+      // if the rows underflow. We always force the columns to fill the width of
+      // the render object, which means the columns cannot underflow.
+      final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, _rowTops.last);
+      final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 2);
+      final Iterable<double> columns = _columnLefts.skip(1);
+      border.paint(context.canvas, borderRect, rows: rows, columns: columns);
     }
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (border != null)
-      description.add('border: $border');
-    if (_columnWidths.isNotEmpty)
-      description.add('specified column widths: $_columnWidths');
-    description.add('default column width: $defaultColumnWidth');
-    description.add('table size: $columns\u00D7$rows');
-    description.add('column offsets: ${ _columnLefts ?? "unknown" }');
-    description.add('row offsets: ${ _rowTops ?? "unknown" }');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TableBorder>('border', border, defaultValue: null));
+    description.add(new DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    description.add(new DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
+    description.add(new MessageProperty('table size', '$columns\u00D7$rows'));
+    description.add(new IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
+    description.add(new IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
   }
 
   @override
-  String debugDescribeChildren(String prefix) {
-    final StringBuffer result = new StringBuffer();
-    result.writeln('$prefix \u2502');
-    final int lastIndex = _children.length - 1;
-    if (lastIndex < 0) {
-      result.writeln('$prefix \u2514\u2500table is empty');
-    } else {
-      for (int y = 0; y < rows; y += 1) {
-        for (int x = 0; x < columns; x += 1) {
-          final int xy = x + y * columns;
-          final RenderBox child = _children[xy];
-          if (child != null) {
-            if (xy < lastIndex) {
-              result.write('${child.toStringDeep("$prefix \u251C\u2500child ($x, $y): ", "$prefix \u2502")}');
-            } else {
-              result.write('${child.toStringDeep("$prefix \u2514\u2500child ($x, $y): ", "$prefix  ")}');
-            }
-          } else {
-            if (xy < lastIndex) {
-              result.writeln('$prefix \u251C\u2500child ($x, $y) is null');
-            } else {
-              result.writeln('$prefix \u2514\u2500child ($x, $y) is null');
-            }
-          }
-        }
+  List<DiagnosticsNode> debugDescribeChildren() {
+    if (_children.isEmpty) {
+      return <DiagnosticsNode>[new DiagnosticsNode.message('table is empty')];
+    }
+
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    for (int y = 0; y < rows; y += 1) {
+      for (int x = 0; x < columns; x += 1) {
+        final int xy = x + y * columns;
+        final RenderBox child = _children[xy];
+        final String name = 'child ($x, $y)';
+        if (child != null)
+          children.add(child.toDiagnosticsNode(name: name));
+        else
+          children.add(new DiagnosticsProperty<Object>(name, null, ifNull: 'is null', showSeparator: false));
       }
     }
-    return result.toString();
+    return children;
   }
 }

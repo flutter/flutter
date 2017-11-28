@@ -8,10 +8,10 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Back during pushReplacement', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
-      home: const Material(child: const Text("home")),
+      home: const Material(child: const Text('home')),
       routes: <String, WidgetBuilder> {
-        '/a': (BuildContext context) => const Material(child: const Text("a")),
-        '/b': (BuildContext context) => const Material(child: const Text("b")),
+        '/a': (BuildContext context) => const Material(child: const Text('a')),
+        '/b': (BuildContext context) => const Material(child: const Text('b')),
       },
     ));
 
@@ -41,10 +41,10 @@ void main() {
 
   testWidgets('pushAndRemoveUntil', (WidgetTester tester) async {
     await tester.pumpWidget(new MaterialApp(
-      home: const Material(child: const Text("home")),
+      home: const Material(child: const Text('home')),
       routes: <String, WidgetBuilder> {
-        '/a': (BuildContext context) => const Material(child: const Text("a")),
-        '/b': (BuildContext context) => const Material(child: const Text("b")),
+        '/a': (BuildContext context) => const Material(child: const Text('a')),
+        '/b': (BuildContext context) => const Material(child: const Text('b')),
       },
     ));
 

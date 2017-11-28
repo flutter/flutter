@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data';
-import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
 
@@ -35,9 +34,8 @@ abstract class MessageCodec<T> {
 class MethodCall {
   /// Creates a [MethodCall] representing the invocation of [method] with the
   /// specified [arguments].
-  MethodCall(this.method, [this.arguments]) {
-    assert(method != null);
-  }
+  const MethodCall(this.method, [this.arguments])
+    : assert(method != null);
 
   /// The name of the method to be called.
   final String method;
@@ -46,48 +44,6 @@ class MethodCall {
   ///
   /// Must be a valid value for the [MethodCodec] used.
   final dynamic arguments;
-
-  @override
-  bool operator == (dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (runtimeType != other.runtimeType)
-      return false;
-    return method == other.method && _deepEquals(arguments, other.arguments);
-  }
-
-  @override
-  int get hashCode => hashValues(method, arguments);
-
-  bool _deepEquals(dynamic a, dynamic b) {
-    if (a == b)
-      return true;
-    if (a is List)
-      return b is List && _deepEqualsList(a, b);
-    if (a is Map)
-      return b is Map && _deepEqualsMap(a, b);
-    return false;
-  }
-
-  bool _deepEqualsList(List<dynamic> a, List<dynamic> b) {
-    if (a.length != b.length)
-      return false;
-    for (int i = 0; i < a.length; i++) {
-      if (!_deepEquals(a[i], b[i]))
-        return false;
-    }
-    return true;
-  }
-
-  bool _deepEqualsMap(Map<dynamic, dynamic> a, Map<dynamic, dynamic> b) {
-    if (a.length != b.length)
-      return false;
-    for (dynamic key in a.keys) {
-      if (!b.containsKey(key) || !_deepEquals(a[key], b[key]))
-        return false;
-    }
-    return true;
-  }
 
   @override
   String toString() => '$runtimeType($method, $arguments)';
@@ -148,9 +104,7 @@ class PlatformException implements Exception {
     @required this.code,
     this.message,
     this.details,
-  }) {
-    assert(code != null);
-  }
+  }) : assert(code != null);
 
   /// An error code.
   final String code;

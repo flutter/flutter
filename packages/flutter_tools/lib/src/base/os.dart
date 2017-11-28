@@ -27,7 +27,7 @@ abstract class OperatingSystemUtils {
   /// Make the given file executable. This may be a no-op on some platforms.
   ProcessResult makeExecutable(File file);
 
-  /// Return the path (with symlinks resolved) to the given executable, or `null`
+  /// Return the path (with symlinks resolved) to the given executable, or null
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
@@ -46,6 +46,8 @@ abstract class OperatingSystemUtils {
   void zip(Directory data, File zipFile);
 
   void unzip(File file, Directory targetDirectory);
+
+  void unpack(File gzippedTarFile, Directory targetDirectory);
 
   /// Returns a pretty name string for the current operating system.
   ///
@@ -97,6 +99,12 @@ class _PosixUtils extends OperatingSystemUtils {
     runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
   }
 
+  // tar -xzf tarball -C dest
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) {
+    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+  }
+
   @override
   File makePipe(String path) {
     runSync(<String>['mkfifo', path]);
@@ -110,13 +118,13 @@ class _PosixUtils extends OperatingSystemUtils {
     if (_name == null) {
       if (platform.isMacOS) {
         final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>["sw_vers", "-productName"]),
-          processManager.runSync(<String>["sw_vers", "-productVersion"]),
-          processManager.runSync(<String>["sw_vers", "-buildVersion"]),
+          processManager.runSync(<String>['sw_vers', '-productName']),
+          processManager.runSync(<String>['sw_vers', '-productVersion']),
+          processManager.runSync(<String>['sw_vers', '-buildVersion']),
         ];
         if (results.every((ProcessResult result) => result.exitCode == 0)) {
-          _name = "${results[0].stdout.trim()} ${results[1].stdout
-              .trim()} ${results[2].stdout.trim()}";
+          _name = '${results[0].stdout.trim()} ${results[1].stdout
+              .trim()} ${results[2].stdout.trim()}';
         }
       }
       _name ??= super.name;
@@ -167,7 +175,18 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   void unzip(File file, Directory targetDirectory) {
     final Archive archive = new ZipDecoder().decodeBytes(file.readAsBytesSync());
+    _unpackArchive(archive, targetDirectory);
+  }
 
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) {
+    final Archive archive = new TarDecoder().decodeBytes(
+      new GZipDecoder().decodeBytes(gzippedTarFile.readAsBytesSync()),
+    );
+    _unpackArchive(archive, targetDirectory);
+  }
+
+  void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
@@ -206,7 +225,7 @@ class _WindowsUtils extends OperatingSystemUtils {
 
 /// Find and return the project root directory relative to the specified
 /// directory or the current working directory if none specified.
-/// Return `null` if the project root could not be found
+/// Return null if the project root could not be found
 /// or if the project root is the flutter repository root.
 String findProjectRoot([String directory]) {
   const String kProjectRootSentinel = 'pubspec.yaml';

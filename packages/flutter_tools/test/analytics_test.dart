@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/commands/config.dart';
 import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/usage.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:quiver/time.dart';
 import 'package:test/test.dart';
@@ -53,6 +54,7 @@ void main() {
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
+      FlutterVersion: () => new FlutterVersion(const Clock()),
       Usage: () => new Usage(),
     });
 
@@ -71,6 +73,7 @@ void main() {
       await runner.run(<String>['config']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
+      FlutterVersion: () => new FlutterVersion(const Clock()),
       Usage: () => new Usage(),
     });
   });
@@ -101,7 +104,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
       );
     }, overrides: <Type, Generator>{
@@ -120,7 +123,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured, 
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAny)).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
       );
     }, overrides: <Type, Generator>{

@@ -4,11 +4,19 @@ description: {{description}}
 dependencies:
   flutter:
     sdk: flutter
-{{#withDriverTest}}
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.0
+
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
+{{#withDriverTest}}
   flutter_driver:
     sdk: flutter
 {{/withDriverTest}}
+
 {{#withPluginHook}}
   {{pluginProjectName}}:
     path: ../
@@ -22,25 +30,19 @@ flutter:
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
-  # the Icons class.
+  # the material Icons class.
   uses-material-design: true
 
-  # To add assets to your application, add an assets section here, in
-  # this "flutter" section, as in:
+  # To add assets to your application, add an assets section, like this:
   # assets:
   #  - images/a_dot_burr.jpeg
   #  - images/a_dot_ham.jpeg
 
-  # To add assets from package dependencies, first ensure the asset
-  # is in the lib/ directory of the dependency. Then,
-  # refer to the asset with a path prefixed with
-  # `packages/PACKAGE_NAME/`. Note: the `lib/` is implied, do not
-  # include `lib/` in the asset path.
-  #
-  # Here is an example:
-  #
-  # assets:
-  #  - packages/PACKAGE_NAME/path/to/asset
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.io/assets-and-images/#resolution-aware.
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.io/assets-and-images/#from-packages
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a
@@ -58,3 +60,6 @@ flutter:
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
+  #
+  # For details regarding fonts from package dependencies, 
+  # see https://flutter.io/custom-fonts/#from-packages

@@ -4,14 +4,13 @@
 
 import 'dart:async';
 
-import 'package:meta/meta.dart' show required;
-
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/process.dart';
 import 'build_info.dart';
+import 'compile.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
 import 'globals.dart';
@@ -28,35 +27,7 @@ const String defaultPrivateKeyPath = 'privatekey.der';
 const String _kKernelKey = 'kernel_blob.bin';
 const String _kSnapshotKey = 'snapshot_blob.bin';
 const String _kDylibKey = 'libapp.so';
-
-Future<int> createSnapshot({
-  @required String mainPath,
-  @required String snapshotPath,
-  String depfilePath,
-  @required String packages
-}) {
-  assert(mainPath != null);
-  assert(snapshotPath != null);
-  assert(packages != null);
-  final String snapshotterPath = artifacts.getArtifactPath(Artifact.genSnapshot, null, BuildMode.debug);
-  final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData);
-  final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData);
-
-  final List<String> args = <String>[
-    snapshotterPath,
-    '--snapshot_kind=script',
-    '--vm_snapshot_data=$vmSnapshotData',
-    '--isolate_snapshot_data=$isolateSnapshotData',
-    '--packages=$packages',
-    '--script_snapshot=$snapshotPath'
-  ];
-  if (depfilePath != null) {
-    args.add('--dependencies=$depfilePath');
-    fs.file(depfilePath).parent.childFile('gen_snapshot.d').writeAsString('$depfilePath: $snapshotterPath\n');
-  }
-  args.add(mainPath);
-  return runCommandAndStreamOutput(args);
-}
+const String _kPlatformKernelKey = 'platform.dill';
 
 Future<Null> build({
   String mainPath: defaultMainPath,
@@ -67,7 +38,7 @@ Future<Null> build({
   String privateKeyPath: defaultPrivateKeyPath,
   String workingDirPath,
   String packagesPath,
-  String kernelPath,
+  bool previewDart2 : false,
   bool precompiledSnapshot: false,
   bool reportLicensedPackages: false
 }) async {
@@ -78,16 +49,17 @@ Future<Null> build({
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   File snapshotFile;
 
-  if (!precompiledSnapshot) {
+  if (!precompiledSnapshot && !previewDart2) {
     ensureDirectoryExists(snapshotPath);
 
     // In a precompiled snapshot, the instruction buffer contains script
     // content equivalents
-    final int result = await createSnapshot(
+    final Snapshotter snapshotter = new Snapshotter();
+    final int result = await snapshotter.buildScriptSnapshot(
       mainPath: mainPath,
       snapshotPath: snapshotPath,
       depfilePath: depfilePath,
-      packages: packagesPath
+      packagesPath: packagesPath,
     );
     if (result != 0)
       throwToolExit('Failed to run the Flutter compiler. Exit code: $result', exitCode: result);
@@ -96,8 +68,14 @@ Future<Null> build({
   }
 
   DevFSContent kernelContent;
-  if (kernelPath != null)
-    kernelContent = new DevFSFileContent(fs.file(kernelPath));
+  if (!precompiledSnapshot && previewDart2) {
+    final String kernelBinaryFilename = await compile(
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+      incrementalCompilerByteStorePath: fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
+      mainPath: fs.file(mainPath).absolute.path
+    );
+    kernelContent = new DevFSFileContent(fs.file(kernelBinaryFilename));
+  }
 
   return assemble(
     manifestPath: manifestPath,
@@ -149,8 +127,11 @@ Future<List<String>> assemble({
       .expand((DevFSContent content) => content.fileDependencies)
       .toList();
 
-  if (kernelContent != null)
+  if (kernelContent != null) {
+    final String platformKernelDill = artifacts.getArtifactPath(Artifact.platformKernelDill);
     zipBuilder.entries[_kKernelKey] = kernelContent;
+    zipBuilder.entries[_kPlatformKernelKey] = new DevFSFileContent(fs.file(platformKernelDill));
+  }
   if (snapshotFile != null)
     zipBuilder.entries[_kSnapshotKey] = new DevFSFileContent(snapshotFile);
   if (dylibFile != null)

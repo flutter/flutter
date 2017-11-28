@@ -6,9 +6,12 @@ import 'package:flutter/widgets.dart';
 
 import 'icon_button.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A "back" icon that's appropriate for the current [TargetPlatform].
+///
+/// The current platform is determined by querying for the ambient [Theme].
 ///
 /// See also:
 ///
@@ -17,10 +20,13 @@ import 'theme.dart';
 ///  * [IconButton], which is a more general widget for creating buttons
 ///    with icons.
 ///  * [Icon], a material design icon.
+///  * [ThemeData.platform], which specifies the current platform.
 class BackButtonIcon extends StatelessWidget {
+  /// Creates an icon that shows the appropriate "back" image for
+  /// the current platform (as obtained from the [Theme]).
   const BackButtonIcon({ Key key }) : super(key: key);
 
-  /// Returns tha appropriate "back" icon for the given `platform`.
+  /// Returns the appropriate "back" icon for the given `platform`.
   static IconData _getIconData(TargetPlatform platform) {
     switch (platform) {
       case TargetPlatform.android:
@@ -54,7 +60,8 @@ class BackButtonIcon extends StatelessWidget {
 /// See also:
 ///
 ///  * [AppBar], which automatically uses a [BackButton] in its
-///    [AppBar.leading] slot when appropriate.
+///    [AppBar.leading] slot when the [Scaffold] has no [Drawer] and the
+///    current [Route] is not the [Navigator]'s first route.
 ///  * [BackButtonIcon], which is useful if you need to create a back button
 ///    that responds differently to being pressed.
 ///  * [IconButton], which is a more general widget for creating buttons with
@@ -64,13 +71,20 @@ class BackButtonIcon extends StatelessWidget {
 class BackButton extends StatelessWidget {
   /// Creates an [IconButton] with the appropriate "back" icon for the current
   /// target platform.
-  const BackButton({ Key key }) : super(key: key);
+  const BackButton({ Key key, this.color }) : super(key: key);
+
+  /// The color to use for the icon.
+  ///
+  /// Defaults to the [IconThemeData.color] specified in the ambient [IconTheme],
+  /// which usually matches the ambient [Theme]'s [ThemeData.iconTheme].
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
     return new IconButton(
       icon: const BackButtonIcon(),
-      tooltip: 'Back', // TODO(ianh): Figure out how to localize this string
+      color: color,
+      tooltip: MaterialLocalizations.of(context).backButtonTooltip,
       onPressed: () {
         Navigator.of(context).maybePop();
       }
@@ -102,7 +116,7 @@ class CloseButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return new IconButton(
       icon: const Icon(Icons.close),
-      tooltip: 'Close', // TODO(ianh): Figure out how to localize this string
+      tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
       onPressed: () {
         Navigator.of(context).maybePop();
       },

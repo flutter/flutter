@@ -29,7 +29,7 @@ if ((Test-Path $dartSdkStampPath) -and ($dartSdkVersion -eq (Get-Content $dartSd
 
 Write-Host "Downloading Dart SDK $dartSdkVersion..."
 $dartZipName = "dartsdk-windows-x64-release.zip"
-$dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {"stable"}
+$dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {if ($dartSdkVersion.Contains("hash/")) {"be"} else {"stable"}}
 $dartSdkUrl = "https://storage.googleapis.com/dart-archive/channels/$dartChannel/raw/$dartSdkVersion/sdk/$dartZipName"
 
 if (Test-Path $dartSdkPath) {

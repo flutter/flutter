@@ -7,11 +7,16 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('Scroll flings twice in a row does not crash', (WidgetTester tester) async {
-    await tester.pumpWidget(new ListView(
-      children: <Widget>[
-        new Container(height: 100000.0)
-      ]
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: <Widget>[
+            new Container(height: 100000.0)
+          ],
+        ),
+      ),
+    );
 
     final ScrollableState scrollable =
       tester.state<ScrollableState>(find.byType(Scrollable));

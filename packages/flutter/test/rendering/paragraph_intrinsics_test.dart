@@ -10,13 +10,14 @@ void main() {
     final RenderParagraph paragraph = new RenderParagraph(
       const TextSpan(
         style: const TextStyle(height: 1.0),
-        text: 'Hello World'
-      )
+        text: 'Hello World',
+      ),
+      textDirection: TextDirection.ltr,
     );
     final RenderListBody testBlock = new RenderListBody(
       children: <RenderBox>[
         paragraph,
-      ]
+      ],
     );
 
     final double textWidth = paragraph.getMaxIntrinsicWidth(double.INFINITY);
@@ -51,7 +52,7 @@ void main() {
     expect(testBlock.getMaxIntrinsicHeight(0.0), equals(manyLinesTextHeight));
 
     // horizontal block (same expectations again)
-    testBlock.mainAxis = Axis.horizontal;
+    testBlock.axisDirection = AxisDirection.right;
     expect(testBlock.getMinIntrinsicWidth(double.INFINITY), equals(wrappedTextWidth));
     expect(testBlock.getMaxIntrinsicWidth(double.INFINITY), equals(textWidth));
     expect(testBlock.getMinIntrinsicHeight(double.INFINITY), equals(oneLineTextHeight));

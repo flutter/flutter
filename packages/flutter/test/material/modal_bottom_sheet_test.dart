@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
@@ -102,7 +103,11 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsOneWidget);
 
-    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 30.0), 1000.0);
+    // The fling below must be such that the velocity estimation examines an
+    // offset greater than the kTouchSlop. Too slow or too short a distance, and
+    // it won't trigger. Also, it musn't be so much that it drags the bottom
+    // sheet off the screen, or we won't see it after we pump!
+    await tester.fling(find.text('BottomSheet'), const Offset(0.0, 50.0), 2000.0);
     await tester.pump(); // drain the microtask queue (Future completion callback)
 
     expect(showBottomSheetThenCalled, isTrue);

@@ -16,6 +16,17 @@ void main() {
       expect(data.launchableActivityName, 'io.flutter.app.FlutterActivity');
     });
   });
+
+  group('BuildableIOSApp', () {
+    testUsingContext('check isSwift', () {
+      final BuildableIOSApp buildableIOSApp = new BuildableIOSApp(
+        projectBundleId: 'blah',
+        appDirectory: 'not/important',
+        buildSettings: _swiftBuildSettings,
+      );
+      expect(buildableIOSApp.isSwift, true);
+    });
+  });
 }
 
 final String _aaptData = '''
@@ -44,3 +55,16 @@ locales: '--_--'
 densities: '160' '240' '320' '480' '640'
 native-code: 'armeabi-v7a'
 ''';
+
+final Map<String, String> _swiftBuildSettings = <String, String>{
+  'ARCHS': 'arm64',
+  'ASSETCATALOG_COMPILER_APPICON_NAME': 'AppIcon',
+  'CLANG_ENABLE_MODULES': 'YES',
+  'ENABLE_BITCODE': 'NO',
+  'INFOPLIST_FILE': 'Runner/Info.plist',
+  'PRODUCT_BUNDLE_IDENTIFIER': 'com.yourcompany.test',
+  'PRODUCT_NAME': 'blah',
+  'SWIFT_OBJC_BRIDGING_HEADER': 'Runner/Runner-Bridging-Header.h',
+  'SWIFT_OPTIMIZATION_LEVEL': '-Onone',
+  'SWIFT_VERSION': '3.0',
+};

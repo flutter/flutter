@@ -30,26 +30,26 @@ void main() {
     expect(c1 == b2, isFalse);
   });
 
-  test('TextSpan', () {
+  test('TextSpan toStringDeep', () {
     final TextSpan test = const TextSpan(
       text: 'a',
       style: const TextStyle(
-        fontSize: 10.0
+        fontSize: 10.0,
       ),
       children: const <TextSpan>[
         const TextSpan(
           text: 'b',
           children: const <TextSpan>[
-            const TextSpan()
-          ]
+            const TextSpan(),
+          ],
         ),
         null,
         const TextSpan(
-          text: 'c'
+          text: 'c',
         ),
-      ]
+      ],
     );
-    expect(test.toString(), equals(
+    expect(test.toStringDeep(), equals(
       'TextSpan:\n'
       '  inherit: true\n'
       '  size: 10.0\n'
@@ -58,7 +58,7 @@ void main() {
       '    "b"\n'
       '    TextSpan:\n'
       '      (empty)\n'
-      '  <null>\n'
+      '  <null child>\n'
       '  TextSpan:\n'
       '    "c"\n'
     ));

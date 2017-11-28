@@ -4,16 +4,20 @@
 
 import 'dart:async';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart' as android_studio;
+
+AndroidWorkflow get androidWorkflow => context.putIfAbsent(AndroidWorkflow, () => new AndroidWorkflow());
 
 class AndroidWorkflow extends DoctorValidator implements Workflow {
   AndroidWorkflow() : super('Android toolchain - develop for Android devices');
@@ -83,11 +87,10 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
       messages.add(new ValidationMessage.error('Could not determine java version'));
       return false;
     }
-    messages.add(new ValidationMessage('Java version: $javaVersion'));
+    messages.add(new ValidationMessage('Java version $javaVersion'));
     // TODO(johnmccutchan): Validate version.
     return true;
   }
-
 
   @override
   Future<ValidationResult> validate() async {
@@ -116,12 +119,20 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
 
     messages.add(new ValidationMessage('Android SDK at ${androidSdk.directory}'));
 
+    messages.add(new ValidationMessage(androidSdk.ndkDirectory == null
+          ? 'Unable to locate Android NDK.\n'
+          : 'Android NDK at ${androidSdk.ndkDirectory}'));
+
+    messages.add(new ValidationMessage(androidSdk.ndkCompiler == null
+          ? 'Unable to locate compiler in Android NDK.\n'
+          : 'Compiler in Android NDK at ${androidSdk.ndkCompiler}'));
+
     String sdkVersionText;
     if (androidSdk.latestVersion != null) {
       sdkVersionText = 'Android SDK ${androidSdk.latestVersion.buildToolsVersionName}';
 
       messages.add(new ValidationMessage(
-        'Platform ${androidSdk.latestVersion.platformVersionName}, '
+        'Platform ${androidSdk.latestVersion.platformName}, '
         'build-tools ${androidSdk.latestVersion.buildToolsVersionName}'
       ));
     }
@@ -176,7 +187,7 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
     final String javaBinary = _findJavaBinary();
     if (javaBinary != null) {
       sdkManagerEnv['PATH'] =
-          platform.environment['PATH'] + os.pathVarSeparator + fs.path.dirname(javaBinary);
+          fs.path.dirname(javaBinary) + os.pathVarSeparator + platform.environment['PATH'];
     }
 
     final String sdkManagerPath = fs.path.join(
@@ -187,9 +198,12 @@ class AndroidWorkflow extends DoctorValidator implements Workflow {
         <String>[sdkManagerPath, '--licenses'],
         environment: sdkManagerEnv,
     );
-    stdout.addStream(process.stdout);
-    stderr.addStream(process.stderr);
-    process.stdin.addStream(stdin);
+
+    waitGroup<Null>(<Future<Null>>[
+      stdout.addStream(process.stdout),
+      stderr.addStream(process.stderr),
+      process.stdin.addStream(stdin),
+    ]);
 
     final int exitCode = await process.exitCode;
     return exitCode == 0;

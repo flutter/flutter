@@ -48,7 +48,7 @@ void main() {
 
     box = tester.renderObject(find.byKey(containerKey));
     expect(box.size.width, equals(drawerWidth - 2 * 16.0));
-    expect(box.size.height, equals(drawerHeight - 2 * 16.0 - 1.0)); // bottom edge
+    expect(box.size.height, equals(drawerHeight - 2 * 16.0));
 
     expect(find.text('header'), findsOneWidget);
   });

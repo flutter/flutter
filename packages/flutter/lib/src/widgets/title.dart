@@ -4,24 +4,33 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
+
+import 'basic.dart';
+import 'framework.dart';
 
 /// A widget that describes this app in the operating system.
 class Title extends StatelessWidget {
   /// Creates a widget that describes this app to the operating system.
+  ///
+  /// [title] will default to the empty string if not supplied.
+  /// [color] must be an opaque color (i.e. color.alpha must be 255 (0xFF)).
+  /// [color] and [child] are required arguments.
   Title({
     Key key,
-    this.title,
-    this.color,
+    this.title: '',
+    @required this.color,
     @required this.child,
-  }) : super(key: key) {
-    assert(color == null || color.alpha == 0xFF);
-  }
+  }) : assert(title != null),
+       assert(color != null && color.alpha == 0xFF),
+       super(key: key);
 
   /// A one-line description of this app for use in the window manager.
+  /// Must not be null.
   final String title;
 
-  /// A color that the window manager should use to identify this app.
+  /// A color that the window manager should use to identify this app.  Must be
+  /// an opaque color (i.e. color.alpha must be 255 (0xFF)), and must not be
+  /// null.
   final Color color;
 
   /// The widget below this widget in the tree.
@@ -39,11 +48,9 @@ class Title extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (title != null)
-      description.add('"$title"');
-    if (color != null)
-      description.add('color: $color');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new StringProperty('title', title, defaultValue: ''));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
   }
 }

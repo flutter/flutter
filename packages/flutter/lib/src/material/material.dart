@@ -97,8 +97,8 @@ abstract class MaterialInkController {
 /// splashes and ink highlights) won't move to account for the new layout.
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
-/// [Material] should not change its [color] or [type]). The one exception is
-/// the [elevation], changes to which will be animated.
+/// [Material] should not change its [color], [shadowColor] or [type]). The one
+/// exception is the [elevation], changes to which will be animated.
 ///
 /// See also:
 ///
@@ -108,17 +108,19 @@ abstract class MaterialInkController {
 class Material extends StatefulWidget {
   /// Creates a piece of material.
   ///
-  /// The [type] and the [elevation] arguments must not be null.
+  /// The [type], [elevation] and [shadowColor] arguments must not be null.
   const Material({
     Key key,
     this.type: MaterialType.canvas,
     this.elevation: 0.0,
     this.color,
+    this.shadowColor: const Color(0xFF000000),
     this.textStyle,
     this.borderRadius,
     this.child,
   }) : assert(type != null),
        assert(elevation != null),
+       assert(shadowColor != null),
        assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
        super(key: key);
 
@@ -148,6 +150,11 @@ class Material extends StatefulWidget {
   /// By default, the color is derived from the [type] of material.
   final Color color;
 
+  /// The color to paint the shadow below the material.
+  ///
+  /// Defaults to fully opaque black.
+  final Color shadowColor;
+
   /// The typographical style to use for text within this material.
   final TextStyle textStyle;
 
@@ -175,18 +182,14 @@ class Material extends StatefulWidget {
   _MaterialState createState() => new _MaterialState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$type');
-    description.add('elevation: ${elevation.toStringAsFixed(1)}');
-    if (color != null)
-      description.add('color: $color');
-    if (textStyle != null) {
-      for (String entry in '$textStyle'.split('\n'))
-        description.add('textStyle.$entry');
-    }
-    if (borderRadius != null)
-      description.add('borderRadius: $borderRadius');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<MaterialType>('type', type));
+    description.add(new DoubleProperty('elevation', elevation, defaultValue: 0.0));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: const Color(0xFF000000)));
+    textStyle?.debugFillProperties(description, prefix: 'textStyle.');
+    description.add(new EnumProperty<BorderRadius>('borderRadius', borderRadius, defaultValue: null));
   }
 
   /// The default radius of an ink splash in logical pixels.
@@ -243,6 +246,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         shape: BoxShape.circle,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -263,6 +267,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: radius ?? BorderRadius.zero,
         elevation: widget.elevation,
         color: backgroundColor,
+        shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -272,12 +277,13 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   }
 }
 
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
-
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
-  _RenderInkFeatures({ RenderBox child, @required this.vsync, this.color }) : super(child) {
-    assert(vsync != null);
-  }
+  _RenderInkFeatures({
+    RenderBox child,
+    @required this.vsync,
+    this.color,
+  }) : assert(vsync != null),
+       super(child);
 
   // This class should exist in a 1:1 relationship with a MaterialState object,
   // since there's no current support for dynamically changing the ticker
@@ -291,24 +297,26 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
   @override
   Color color;
 
-  final List<InkFeature> _inkFeatures = <InkFeature>[];
+  List<InkFeature> _inkFeatures;
 
   @override
   void addInkFeature(InkFeature feature) {
     assert(!feature._debugDisposed);
     assert(feature._controller == this);
+    _inkFeatures ??= <InkFeature>[];
     assert(!_inkFeatures.contains(feature));
     _inkFeatures.add(feature);
     markNeedsPaint();
   }
 
   void _removeFeature(InkFeature feature) {
+    assert(_inkFeatures != null);
     _inkFeatures.remove(feature);
     markNeedsPaint();
   }
 
   void _didChangeLayout() {
-    if (_inkFeatures.isNotEmpty)
+    if (_inkFeatures != null && _inkFeatures.isNotEmpty)
       markNeedsPaint();
   }
 
@@ -317,7 +325,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_inkFeatures.isNotEmpty) {
+    if (_inkFeatures != null && _inkFeatures.isNotEmpty) {
       final Canvas canvas = context.canvas;
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
@@ -331,7 +339,12 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 }
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
-  const _InkFeatures({ Key key, this.color, Widget child, @required this.vsync }) : super(key: key, child: child);
+  const _InkFeatures({
+    Key key,
+    this.color,
+    @required this.vsync,
+    Widget child,
+  }) : super(key: key, child: child);
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
   // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.
@@ -344,7 +357,7 @@ class _InkFeatures extends SingleChildRenderObjectWidget {
   _RenderInkFeatures createRenderObject(BuildContext context) {
     return new _RenderInkFeatures(
       color: color,
-      vsync: vsync
+      vsync: vsync,
     );
   }
 
@@ -365,11 +378,10 @@ abstract class InkFeature {
   InkFeature({
     @required MaterialInkController controller,
     @required this.referenceBox,
-    this.onRemoved
-  }) : _controller = controller {
-    assert(_controller != null);
-    assert(referenceBox != null);
-  }
+    this.onRemoved,
+  }) : assert(controller != null),
+       assert(referenceBox != null),
+       _controller = controller;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -390,7 +402,7 @@ abstract class InkFeature {
   @mustCallSuper
   void dispose() {
     assert(!_debugDisposed);
-    assert(() { _debugDisposed = true; return true; });
+    assert(() { _debugDisposed = true; return true; }());
     _controller._removeFeature(this);
     if (onRemoved != null)
       onRemoved();
@@ -418,10 +430,10 @@ abstract class InkFeature {
   /// Override this method to paint the ink feature.
   ///
   /// The transform argument gives the coordinate conversion from the coordinate
-  /// system of the canvas to the coodinate system of the [referenceBox].
+  /// system of the canvas to the coordinate system of the [referenceBox].
   @protected
   void paintFeature(Canvas canvas, Matrix4 transform);
 
   @override
-  String toString() => '$runtimeType#$hashCode';
+  String toString() => describeIdentity(this);
 }

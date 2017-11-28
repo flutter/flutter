@@ -190,11 +190,17 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
 }
 
 class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
-  _DropdownMenuRouteLayout({ this.buttonRect, this.menuTop, this.menuHeight });
+  _DropdownMenuRouteLayout({
+    @required this.buttonRect,
+    @required this.menuTop,
+    @required this.menuHeight,
+    @required this.textDirection,
+  });
 
   final Rect buttonRect;
   final double menuTop;
   final double menuHeight;
+  final TextDirection textDirection;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -203,7 +209,9 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     // with which to dismiss the menu.
     //   -- https://material.google.com/components/menus.html#menus-simple-menus
     final double maxHeight = math.max(0.0, constraints.maxHeight - 2 * _kMenuItemHeight);
-    final double width = buttonRect.width + 8.0;
+    // The width of a menu should be at most the view width. This ensures that
+    // the menu does not extend past the left and right edges of the screen.
+    final double width = math.min(constraints.maxWidth, buttonRect.width + 8.0);
     return new BoxConstraints(
       minWidth: width,
       maxWidth: width,
@@ -224,17 +232,26 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
         assert(menuTop + menuHeight <= size.height);
       }
       return true;
-    });
-
-    final double width = buttonRect.width + 8.0;
-    return new Offset(buttonRect.left.clamp(0.0, size.width - width), menuTop);
+    }());
+    assert(textDirection != null);
+    double left;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = buttonRect.right.clamp(0.0, size.width - childSize.width) - childSize.width;
+        break;
+      case TextDirection.ltr:
+        left = buttonRect.left.clamp(0.0, size.width - childSize.width);
+        break;
+    }
+    return new Offset(left, menuTop);
   }
 
   @override
   bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
     return buttonRect != oldDelegate.buttonRect
-      || menuTop != oldDelegate.menuTop
-      || menuHeight != oldDelegate.menuHeight;
+        || menuTop != oldDelegate.menuTop
+        || menuHeight != oldDelegate.menuHeight
+        || textDirection != oldDelegate.textDirection;
   }
 }
 
@@ -266,9 +283,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.elevation: 8,
     this.theme,
     @required this.style,
-  }) {
-    assert(style != null);
-  }
+  }) : assert(style != null);
 
   final List<DropdownMenuItem<T>> items;
   final Rect buttonRect;
@@ -290,6 +305,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
     final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
@@ -324,6 +340,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
         buttonRect: buttonRect,
         menuTop: menuTop,
         menuHeight: menuHeight,
+        textDirection: Directionality.of(context),
       ),
       child: menu,
     );
@@ -363,7 +380,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      alignment: FractionalOffset.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: child,
     );
   }
@@ -400,10 +417,16 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// shows the currently selected item as well as an arrow that opens a menu for
 /// selecting another item.
 ///
+/// The type `T` is the type of the values the dropdown menu represents. All the
+/// entries in a given menu must represent values with consistent types.
+/// Typically, an enum is used. Each [DropdownMenuItem] in [items] must be
+/// specialized with that same type argument.
+///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
+///  * [DropdownMenuItem], the class used to represent the [items].
 ///  * [DropdownButtonHideUnderline], which prevents its descendant dropdown buttons
 ///    from displaying their underlines.
 ///  * [RaisedButton], [FlatButton], ordinary buttons that trigger a single action.
@@ -425,11 +448,9 @@ class DropdownButton<T> extends StatefulWidget {
     this.style,
     this.iconSize: 24.0,
     this.isDense: false,
-  }) : super(key: key) {
-    assert(items != null);
-    assert(value == null ||
-      items.where((DropdownMenuItem<T> item) => item.value == value).length == 1);
-  }
+  }) : assert(items != null),
+       assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
+      super(key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;
@@ -587,7 +608,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             // the hint or nothing at all.
             new IndexedStack(
               index: _selectedIndex ?? hintIndex,
-              alignment: FractionalOffset.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               children: items,
             ),
             new Icon(Icons.arrow_drop_down,

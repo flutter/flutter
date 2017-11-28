@@ -49,15 +49,13 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
-  }) : primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       super(key: key) {
-    assert(scrollDirection != null);
-    assert(this.primary != null);
-    assert(controller == null || !this.primary,
-       'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
-       'You cannot both set primary to true and pass an explicit controller.'
-    );
-  }
+  }) : assert(scrollDirection != null),
+       assert(!(controller != null && primary == true),
+          'Primary ScrollViews obtain their ScrollController via inheritance from a PrimaryScrollController widget. '
+          'You cannot both set primary to true and pass an explicit controller.'
+       ),
+       primary = primary ?? controller == null && scrollDirection == Axis.vertical,
+       super(key: key);
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -71,7 +69,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// left to right when [reverse] is false and from right to left when
   /// [reverse] is true.
   ///
-  /// Similarly, if [scrollDirection] is [Axis.vertical], then scroll view
+  /// Similarly, if [scrollDirection] is [Axis.vertical], then the scroll view
   /// scrolls from top to bottom when [reverse] is false and from bottom to top
   /// when [reverse] is true.
   ///
@@ -79,12 +77,20 @@ class SingleChildScrollView extends StatelessWidget {
   final bool reverse;
 
   /// The amount of space by which to inset the child.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// An object that can be used to control the position to which this scroll
   /// view is scrolled.
   ///
   /// Must be null if [primary] is true.
+  ///
+  /// A [ScrollController] serves several purposes. It can be used to control
+  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
+  /// It can be used to control whether the scroll view should automatically
+  /// save and restore its scroll position in the [PageStorage] (see
+  /// [ScrollController.keepScrollOffset]). It can be used to read the current
+  /// scroll position (see [ScrollController.offset]), or change it (see
+  /// [ScrollController.animateTo]).
   final ScrollController controller;
 
   /// Whether this is the primary scroll view associated with the parent
@@ -93,7 +99,7 @@ class SingleChildScrollView extends StatelessWidget {
   /// On iOS, this identifies the scroll view that will scroll to top in
   /// response to a tap in the status bar.
   ///
-  /// Defaults to true when `scrollDirection` is vertical and `controller` is
+  /// Defaults to true when [scrollDirection] is vertical and [controller] is
   /// not specified.
   final bool primary;
 
@@ -109,14 +115,7 @@ class SingleChildScrollView extends StatelessWidget {
   final Widget child;
 
   AxisDirection _getDirection(BuildContext context) {
-    // TODO(abarth): Consider reading direction.
-    switch (scrollDirection) {
-      case Axis.horizontal:
-        return reverse ? AxisDirection.left : AxisDirection.right;
-      case Axis.vertical:
-        return reverse ? AxisDirection.up : AxisDirection.down;
-    }
-    return null;
+    return getAxisDirectionFromAxisReverseAndDirectionality(context, scrollDirection, reverse);
   }
 
   @override
@@ -180,10 +179,10 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     AxisDirection axisDirection: AxisDirection.down,
     @required ViewportOffset offset,
     RenderBox child,
-  }) : _axisDirection = axisDirection,
+  }) : assert(axisDirection != null),
+       assert(offset != null),
+       _axisDirection = axisDirection,
        _offset = offset {
-    assert(axisDirection != null);
-    assert(offset != null);
     this.child = child;
   }
 
@@ -206,11 +205,16 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (value == _offset)
       return;
     if (attached)
-      _offset.removeListener(markNeedsPaint);
+      _offset.removeListener(_hasScrolled);
     _offset = value;
     if (attached)
-      _offset.addListener(markNeedsPaint);
+      _offset.addListener(_hasScrolled);
     markNeedsLayout();
+  }
+
+  void _hasScrolled() {
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   @override
@@ -224,12 +228,12 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    _offset.addListener(markNeedsPaint);
+    _offset.addListener(_hasScrolled);
   }
 
   @override
   void detach() {
-    _offset.removeListener(markNeedsPaint);
+    _offset.removeListener(_hasScrolled);
     super.detach();
   }
 
@@ -419,5 +423,24 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     }
 
     return leadingScrollOffset - (mainAxisExtent - targetMainAxisExtent) * alignment;
+  }
+
+  @override
+  void showOnScreen([RenderObject child]) {
+    // Logic duplicated in [RenderViewportBase.showOnScreen].
+    if (child != null) {
+      // Move viewport the smallest distance to bring [child] on screen.
+      final double leadingEdgeOffset = getOffsetToReveal(child, 0.0);
+      final double trailingEdgeOffset = getOffsetToReveal(child, 1.0);
+      final double currentOffset = offset.pixels;
+      if ((currentOffset - leadingEdgeOffset).abs() < (currentOffset - trailingEdgeOffset).abs()) {
+        offset.jumpTo(leadingEdgeOffset);
+      } else {
+        offset.jumpTo(trailingEdgeOffset);
+      }
+    }
+
+    // Make sure the viewport itself is on screen.
+    super.showOnScreen();
   }
 }

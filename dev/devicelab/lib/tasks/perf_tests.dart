@@ -42,6 +42,10 @@ TaskFunction createFlutterGalleryBuildTest() {
   return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery');
 }
 
+TaskFunction createFlutterGalleryPreviewDart2BuildTest() {
+  return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery', previewDart2: true);
+}
+
 TaskFunction createComplexLayoutBuildTest() {
   return new BuildTest('${flutterDirectory.path}/dev/benchmarks/complex_layout');
 }
@@ -73,9 +77,6 @@ TaskFunction createFlutterViewStartupTest() {
   return new StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
-      // This project has a non-standard CocoaPods Podfile. Run pod install
-      // before building the project.
-      runPodInstall: true,
   );
 }
 
@@ -83,27 +84,18 @@ TaskFunction createFlutterViewStartupTest() {
 class StartupTest {
   static const Duration _startupTimeout = const Duration(minutes: 5);
 
-  const StartupTest(this.testDirectory, { this.reportMetrics: true, this.runPodInstall: false });
+  const StartupTest(this.testDirectory, { this.reportMetrics: true });
 
   final String testDirectory;
   final bool reportMetrics;
-  /// Used to trigger a `pod install` when the project has a custom Podfile and
-  /// flutter build ios won't automatically run `pod install` via the managed
-  /// plugin system.
-  final bool runPodInstall;
 
   Future<TaskResult> call() async {
     return await inDirectory(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-        if (runPodInstall)
-          await runPodInstallForCustomPodfile(testDirectory);
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       await flutter('run', options: <String>[
         '--verbose',
@@ -141,11 +133,8 @@ class PerfTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       await flutter('drive', options: <String>[
         '-v',
@@ -180,9 +169,9 @@ class PerfTest {
 /// Measures how long it takes to build a Flutter app and how big the compiled
 /// code is.
 class BuildTest {
+  const BuildTest(this.testDirectory, {this.previewDart2: false});
 
-  const BuildTest(this.testDirectory);
-
+  final bool previewDart2;
   final String testDirectory;
 
   Future<TaskResult> call() async {
@@ -191,8 +180,8 @@ class BuildTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> aotResults = await _buildAot();
-      final Map<String, dynamic> debugResults = await _buildDebug();
+      final Map<String, dynamic> aotResults = await _buildAot(previewDart2);
+      final Map<String, dynamic> debugResults = await _buildDebug(previewDart2);
 
       final Map<String, dynamic> metrics = <String, dynamic>{}
         ..addAll(aotResults)
@@ -202,16 +191,19 @@ class BuildTest {
     });
   }
 
-  static Future<Map<String, dynamic>> _buildAot() async {
-    await flutter('build', options: <String>['clean']);
+  static Future<Map<String, dynamic>> _buildAot(bool previewDart2) async {
+    await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
-    final String buildLog = await evalFlutter('build', options: <String>[
+    final List<String> options = <String>[
       'aot',
       '-v',
       '--release',
       '--no-pub',
-      '--target-platform', 'android-arm'  // Generate blobs instead of assembly.
-    ]);
+      '--target-platform', 'android-arm',  // Generate blobs instead of assembly.
+    ];
+    if (previewDart2)
+      options.add('--preview-dart-2');
+    final String buildLog = await evalFlutter('build', options: options);
     watch.stop();
 
     final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
@@ -225,8 +217,8 @@ class BuildTest {
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _buildDebug() async {
-    await flutter('build', options: <String>['clean']);
+  static Future<Map<String, dynamic>> _buildDebug(bool previewDart2) async {
+    await flutter('clean');
 
     final Stopwatch watch = new Stopwatch();
     if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
@@ -236,7 +228,10 @@ class BuildTest {
       watch.stop();
     } else {
       watch.start();
-      await flutter('build', options: <String>['apk', '--debug']);
+      final List<String> options = <String>['apk', '--debug'];
+      if (previewDart2)
+        options.add('--preview-dart-2');
+      await flutter('build', options: options);
       watch.stop();
     }
 
@@ -280,11 +275,8 @@ class MemoryTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
         await prepareProvisioningCertificates(testDirectory);
-        // This causes an Xcode project to be created.
-        await flutter('build', options: <String>['ios', '--profile']);
-      }
 
       final int observatoryPort = await findAvailablePort();
 

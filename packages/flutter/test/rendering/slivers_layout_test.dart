@@ -25,6 +25,7 @@ void main() {
     RenderBox box;
     final RenderObject root = new RenderLayoutWatcher(
       viewport = new RenderViewport(
+        crossAxisDirection: AxisDirection.right,
         offset: new ViewportOffset.zero(),
         children: <RenderSliver>[
           sliver = new RenderSliverToBoxAdapter(child: box = new RenderSizedBox(const Size(100.0, 400.0))),

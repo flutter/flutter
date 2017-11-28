@@ -49,11 +49,14 @@ abstract class ScrollContext {
   ///
   /// For example, if the scroll position is being driven by an animation, it
   /// might be appropriate to set this value to ignore pointer events to
-  /// prevent the user from accidentially interacting with the contents of the
+  /// prevent the user from accidentally interacting with the contents of the
   /// widget as it animates. The user will still be able to touch the widget,
   /// potentially stopping the animation.
   void setIgnorePointer(bool value);
 
   /// Whether the user can drag the widget, for example to initiate a scroll.
   void setCanDrag(bool value);
+
+  /// Set the [SemanticsAction]s that should be expose to the semantics tree.
+  void setSemanticsActions(Set<SemanticsAction> actions);
 }

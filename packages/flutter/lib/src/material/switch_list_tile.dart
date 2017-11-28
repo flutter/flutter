@@ -32,6 +32,9 @@ import 'theme.dart';
 /// [ListTile.leading] slot. This cannot be changed; there is not sufficient
 /// space in a [ListTile]'s [ListTile.leading] slot for a [Switch].
 ///
+/// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
+/// callback.
+///
 /// ## Sample code
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]

@@ -146,16 +146,21 @@ void main() {
   testWidgets('Nested scrollables have a null PrimaryScrollController', (WidgetTester tester) async {
     const Key innerKey = const Key('inner');
     final ScrollController primaryScrollController = new ScrollController();
-    await tester.pumpWidget(new PrimaryScrollController(
-      controller: primaryScrollController,
-      child: new SingleChildScrollView(
-        primary: true,
-        child: new Container(
-          constraints: const BoxConstraints(maxHeight: 200.0),
-          child: new ListView(key: innerKey, primary: true),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PrimaryScrollController(
+          controller: primaryScrollController,
+          child: new SingleChildScrollView(
+            primary: true,
+            child: new Container(
+              constraints: const BoxConstraints(maxHeight: 200.0),
+              child: new ListView(key: innerKey, primary: true),
+            ),
+          ),
         ),
       ),
-    ));
+    );
 
     final Scrollable innerScrollable = tester.widget(
       find.descendant(

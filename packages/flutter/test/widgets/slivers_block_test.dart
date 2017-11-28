@@ -9,20 +9,25 @@ import 'package:flutter/widgets.dart';
 import '../rendering/mock_canvas.dart';
 
 Future<Null> test(WidgetTester tester, double offset) {
-  return tester.pumpWidget(new Viewport(
-    offset: new ViewportOffset.fixed(offset),
-    slivers: <Widget>[
-      new SliverList(
-        delegate: new SliverChildListDelegate(<Widget>[
-          const SizedBox(height: 400.0, child: const Text('a')),
-          const SizedBox(height: 400.0, child: const Text('b')),
-          const SizedBox(height: 400.0, child: const Text('c')),
-          const SizedBox(height: 400.0, child: const Text('d')),
-          const SizedBox(height: 400.0, child: const Text('e')),
-        ]),
+  return tester.pumpWidget(
+    new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Viewport(
+        offset: new ViewportOffset.fixed(offset),
+        slivers: <Widget>[
+          new SliverList(
+            delegate: new SliverChildListDelegate(<Widget>[
+              const SizedBox(height: 400.0, child: const Text('a')),
+              const SizedBox(height: 400.0, child: const Text('b')),
+              const SizedBox(height: 400.0, child: const Text('c')),
+              const SizedBox(height: 400.0, child: const Text('d')),
+              const SizedBox(height: 400.0, child: const Text('e')),
+            ]),
+          ),
+        ],
       ),
-    ],
-  ));
+    ),
+  );
 }
 
 void verify(WidgetTester tester, List<Offset> answerKey, String text) {
@@ -74,84 +79,109 @@ void main() {
   testWidgets('Viewport with GlobalKey reparenting', (WidgetTester tester) async {
     final Key key1 = new GlobalKey();
     final ViewportOffset offset = new ViewportOffset.zero();
-    await tester.pumpWidget(new Viewport(
-      offset: offset,
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 251.0, child: const Text('a')),
-            const SizedBox(height: 252.0, child: const Text('b')),
-            new SizedBox(key: key1, height: 253.0, child: const Text('c')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: offset,
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 251.0, child: const Text('a')),
+                const SizedBox(height: 252.0, child: const Text('b')),
+                new SizedBox(key: key1, height: 253.0, child: const Text('c')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(0.0, 251.0),
       const Offset(0.0, 503.0),
     ], 'abc');
-    await tester.pumpWidget(new Viewport(
-      offset: offset,
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            new SizedBox(key: key1, height: 253.0, child: const Text('c')),
-            const SizedBox(height: 251.0, child: const Text('a')),
-            const SizedBox(height: 252.0, child: const Text('b')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: offset,
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                new SizedBox(key: key1, height: 253.0, child: const Text('c')),
+                const SizedBox(height: 251.0, child: const Text('a')),
+                const SizedBox(height: 252.0, child: const Text('b')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(0.0, 253.0),
       const Offset(0.0, 504.0),
     ], 'cab');
-    await tester.pumpWidget(new Viewport(
-      offset: offset,
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 251.0, child: const Text('a')),
-            new SizedBox(key: key1, height: 253.0, child: const Text('c')),
-            const SizedBox(height: 252.0, child: const Text('b')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: offset,
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 251.0, child: const Text('a')),
+                new SizedBox(key: key1, height: 253.0, child: const Text('c')),
+                const SizedBox(height: 252.0, child: const Text('b')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(0.0, 251.0),
       const Offset(0.0, 504.0),
     ], 'acb');
-    await tester.pumpWidget(new Viewport(
-      offset: offset,
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 251.0, child: const Text('a')),
-            const SizedBox(height: 252.0, child: const Text('b')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: offset,
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 251.0, child: const Text('a')),
+                const SizedBox(height: 252.0, child: const Text('b')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(0.0, 251.0),
     ], 'ab');
-    await tester.pumpWidget(new Viewport(
-      offset: offset,
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 251.0, child: const Text('a')),
-            new SizedBox(key: key1, height: 253.0, child: const Text('c')),
-            const SizedBox(height: 252.0, child: const Text('b')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: offset,
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 251.0, child: const Text('a')),
+                new SizedBox(key: key1, height: 253.0, child: const Text('c')),
+                const SizedBox(height: 252.0, child: const Text('b')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
     verify(tester, <Offset>[
       const Offset(0.0, 0.0),
       const Offset(0.0, 251.0),
@@ -160,101 +190,141 @@ void main() {
   });
 
   testWidgets('Viewport overflow clipping of SliverToBoxAdapter', (WidgetTester tester) async {
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.zero(),
-      slivers: <Widget>[
-        const SliverToBoxAdapter(
-          child: const SizedBox(height: 400.0, child: const Text('a')),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.zero(),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(
+              child: const SizedBox(height: 400.0, child: const Text('a')),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.fixed(100.0),
-      slivers: <Widget>[
-        const SliverToBoxAdapter(
-          child: const SizedBox(height: 400.0, child: const Text('a')),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.fixed(100.0),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(
+              child: const SizedBox(height: 400.0, child: const Text('a')),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.fixed(100.0),
-      slivers: <Widget>[
-        const SliverToBoxAdapter(
-          child: const SizedBox(height: 4000.0, child: const Text('a')),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.fixed(100.0),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(
+              child: const SizedBox(height: 4000.0, child: const Text('a')),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.zero(),
-      slivers: <Widget>[
-        const SliverToBoxAdapter(
-          child: const SizedBox(height: 4000.0, child: const Text('a')),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.zero(),
+          slivers: <Widget>[
+            const SliverToBoxAdapter(
+              child: const SizedBox(height: 4000.0, child: const Text('a')),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
   });
 
   testWidgets('Viewport overflow clipping of SliverBlock', (WidgetTester tester) async {
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.zero(),
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 400.0, child: const Text('a')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.zero(),
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 400.0, child: const Text('a')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), isNot(paints..clipRect()));
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.fixed(100.0),
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 400.0, child: const Text('a')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.fixed(100.0),
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 400.0, child: const Text('a')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.fixed(100.0),
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 4000.0, child: const Text('a')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.fixed(100.0),
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 4000.0, child: const Text('a')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
 
-    await tester.pumpWidget(new Viewport(
-      offset: new ViewportOffset.zero(),
-      slivers: <Widget>[
-        new SliverList(
-          delegate: new SliverChildListDelegate(<Widget>[
-            const SizedBox(height: 4000.0, child: const Text('a')),
-          ]),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new Viewport(
+          offset: new ViewportOffset.zero(),
+          slivers: <Widget>[
+            new SliverList(
+              delegate: new SliverChildListDelegate(<Widget>[
+                const SizedBox(height: 4000.0, child: const Text('a')),
+              ]),
+            ),
+          ],
         ),
-      ],
-    ));
+      ),
+    );
 
     expect(find.byType(Viewport), paints..clipRect());
   });

@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test("RenderFractionallySizedBox constraints", () {
+  test('RenderFractionallySizedBox constraints', () {
     RenderBox root, leaf, test;
     root = new RenderPositionedBox(
       child: new RenderConstrainedBox(
@@ -31,7 +31,7 @@ void main() {
     expect(leaf.size.height, equals(100.0));
   });
 
-  test("BoxConstraints with NaN", () {
+  test('BoxConstraints with NaN', () {
     String result;
 
     result = 'no exception';

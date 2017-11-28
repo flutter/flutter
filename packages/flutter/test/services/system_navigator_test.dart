@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('System navigator control test', () async {
@@ -15,6 +15,7 @@ void main() {
 
     await SystemNavigator.pop();
 
-    expect(log, equals(<MethodCall>[new MethodCall('SystemNavigator.pop')]));
+    expect(log, hasLength(1));
+    expect(log.single, isMethodCall('SystemNavigator.pop', arguments: null));
   });
 }

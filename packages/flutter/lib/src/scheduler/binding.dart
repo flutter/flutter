@@ -8,7 +8,7 @@ import 'dart:developer';
 import 'dart:ui' as ui show window;
 import 'dart:ui' show VoidCallback;
 
-import 'package:collection/collection.dart';
+import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
 
 import 'debug.dart';
@@ -73,14 +73,14 @@ class _FrameCallbackEntry {
             );
           }
           return true;
-        });
+        }());
         debugStack = debugCurrentCallbackStack;
       } else {
         // TODO(ianh): trim the frames from this library, so that the call to scheduleFrameCallback is the top one
         debugStack = StackTrace.current;
       }
       return true;
-    });
+    }());
   }
 
   final FrameCallback callback;
@@ -159,6 +159,9 @@ enum SchedulerPhase {
 ///   priority and are executed in priority order according to a
 ///   [schedulingStrategy].
 abstract class SchedulerBinding extends BindingBase {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory SchedulerBinding._() => null;
 
   @override
   void initInstances() {
@@ -204,7 +207,14 @@ abstract class SchedulerBinding extends BindingBase {
   void scheduleTask(VoidCallback task, Priority priority) {
     final bool isFirstTask = _taskQueue.isEmpty;
     _taskQueue.add(new _TaskEntry(task, priority.value));
-    if (isFirstTask)
+    if (isFirstTask && !locked)
+      _ensureEventLoopCallback();
+  }
+
+  @override
+  void unlocked() {
+    super.unlocked();
+    if (_taskQueue.isNotEmpty)
       _ensureEventLoopCallback();
   }
 
@@ -213,6 +223,7 @@ abstract class SchedulerBinding extends BindingBase {
 
   // Ensures that the scheduler is awakened by the event loop.
   void _ensureEventLoopCallback() {
+    assert(!locked);
     if (_hasRequestedAnEventLoopCallback)
       return;
     Timer.run(handleEventLoopCallback);
@@ -227,7 +238,7 @@ abstract class SchedulerBinding extends BindingBase {
 
   // Called when the system wakes up and at the end of each frame.
   void _runTasks() {
-    if (_taskQueue.isEmpty)
+    if (_taskQueue.isEmpty || locked)
       return;
     final _TaskEntry entry = _taskQueue.first;
     // TODO(floitsch): for now we only expose the priority. It might
@@ -282,7 +293,6 @@ abstract class SchedulerBinding extends BindingBase {
   /// [cancelFrameCallbackWithId].
   int scheduleFrameCallback(FrameCallback callback, { bool rescheduling: false }) {
     scheduleFrame();
-
     _nextFrameCallbackId += 1;
     _transientCallbacks[_nextFrameCallbackId] = new _FrameCallbackEntry(callback, rescheduling: rescheduling);
     return _nextFrameCallbackId;
@@ -353,7 +363,7 @@ abstract class SchedulerBinding extends BindingBase {
         ));
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -389,7 +399,7 @@ abstract class SchedulerBinding extends BindingBase {
         debugPrint('No transient callback is currently executing.');
       }
       return true;
-    });
+    }());
   }
 
   final List<FrameCallback> _persistentCallbacks = <FrameCallback>[];
@@ -493,7 +503,7 @@ abstract class SchedulerBinding extends BindingBase {
       if (debugPrintScheduleFrameStacks)
         debugPrintStack(label: 'scheduleFrame() called. Current phase is $schedulerPhase.');
       return true;
-    });
+    }());
     ui.window.scheduleFrame();
     _hasScheduledFrame = true;
   }
@@ -503,7 +513,7 @@ abstract class SchedulerBinding extends BindingBase {
   Duration _lastRawTimeStamp = Duration.ZERO;
 
   /// Prepares the scheduler for a non-monotonic change to how time stamps are
-  /// calcuated.
+  /// calculated.
   ///
   /// Callbacks received from the scheduler assume that their time stamps are
   /// monotonically increasing. The raw time stamp passed to [handleBeginFrame]
@@ -547,7 +557,8 @@ abstract class SchedulerBinding extends BindingBase {
   }
   Duration _currentFrameTimeStamp;
 
-  int _debugFrameNumber = 0;
+  int _profileFrameNumber = 0;
+  final Stopwatch _profileFrameStopwatch = new Stopwatch();
   String _debugBanner;
 
   /// Called by the engine to prepare the framework to produce a new frame.
@@ -574,14 +585,19 @@ abstract class SchedulerBinding extends BindingBase {
   /// statements printed during a frame from those printed between frames (e.g.
   /// in response to events or timers).
   void handleBeginFrame(Duration rawTimeStamp) {
-    Timeline.startSync('Frame');
+    Timeline.startSync('Frame', arguments: timelineWhitelistArguments);
     _firstRawTimeStampInEpoch ??= rawTimeStamp;
     _currentFrameTimeStamp = _adjustForEpoch(rawTimeStamp ?? _lastRawTimeStamp);
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
+    profile(() {
+      _profileFrameNumber += 1;
+      _profileFrameStopwatch.reset();
+      _profileFrameStopwatch.start();
+    });
+
     assert(() {
-      _debugFrameNumber += 1;
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = new StringBuffer();
         if (rawTimeStamp != null) {
@@ -589,18 +605,18 @@ abstract class SchedulerBinding extends BindingBase {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_profileFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner)
           debugPrint(_debugBanner);
       }
       return true;
-    });
+    }());
 
     assert(schedulerPhase == SchedulerPhase.idle);
     _hasScheduledFrame = false;
     try {
       // TRANSIENT FRAME CALLBACKS
-      Timeline.startSync('Animate');
+      Timeline.startSync('Animate', arguments: timelineWhitelistArguments);
       _schedulerPhase = SchedulerPhase.transientCallbacks;
       final Map<int, _FrameCallbackEntry> callbacks = _transientCallbacks;
       _transientCallbacks = <int, _FrameCallbackEntry>{};
@@ -641,18 +657,30 @@ abstract class SchedulerBinding extends BindingBase {
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
-      _currentFrameTimeStamp = null;
-      Timeline.finishSync();
+      Timeline.finishSync(); // end the Frame
+      profile(() {
+        _profileFrameStopwatch.stop();
+        _profileFramePostEvent();
+      });
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
         _debugBanner = null;
         return true;
-      });
+      }());
+      _currentFrameTimeStamp = null;
     }
 
     // All frame-related callbacks have been executed. Run lower-priority tasks.
     _runTasks();
+  }
+
+  void _profileFramePostEvent() {
+    postEvent('Flutter.Frame', <String, dynamic>{
+      'number': _profileFrameNumber,
+      'startTime': _currentFrameTimeStamp.inMicroseconds,
+      'elapsed': _profileFrameStopwatch.elapsedMicroseconds
+    });
   }
 
   static void _debugDescribeTimeStamp(Duration timeStamp, StringBuffer buffer) {
@@ -680,7 +708,7 @@ abstract class SchedulerBinding extends BindingBase {
     assert(callback != null);
     assert(_FrameCallbackEntry.debugCurrentCallbackStack == null);
     // TODO(ianh): Consider using a Zone instead to track the current callback registration stack
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = callbackStack; return true; }());
     try {
       callback(timeStamp);
     } catch (exception, exceptionStack) {
@@ -699,7 +727,7 @@ abstract class SchedulerBinding extends BindingBase {
         }
       ));
     }
-    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; });
+    assert(() { _FrameCallbackEntry.debugCurrentCallbackStack = null; return true; }());
   }
 }
 

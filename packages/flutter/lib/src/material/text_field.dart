@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'feedback.dart';
 import 'input_decorator.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType;
-
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 /// A material design text field.
 ///
@@ -62,25 +61,65 @@ class TextField extends StatefulWidget {
   /// To remove the decoration entirely (including the extra padding introduced
   /// by the decoration to save space for the labels), set the [decoration] to
   /// null.
+  ///
+  /// The [maxLines] property can be set to null to remove the restriction on
+  /// the number of lines. By default, it is one, meaning this is a single-line
+  /// text field. [maxLines] must not be zero. If [maxLines] is not one, then
+  /// [keyboardType] is ignored, and the [TextInputType.multiline] keyboard
+  /// type is used.
+  ///
+  /// The [maxLength] property is set to null by default, which means the
+  /// number of characters allowed in the text field is not restricted. If
+  /// [maxLength] is set, a character counter will be displayed below the
+  /// field, showing how many characters have been entered and how many are
+  /// allowed. After [maxLength] characters have been input, additional input
+  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
+  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
+  /// evaluated after the supplied [inputFormatters], if any. The [maxLength]
+  /// value must be either null or greater than zero.
+  ///
+  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
+  /// characters may be entered, and the error counter and divider will
+  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  ///
+  /// The [keyboardType], [textAlign], [autofocus], [obscureText], and
+  /// [autocorrect] arguments must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [maxLength], which discusses the precise meaning of "number of
+  ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
     Key key,
     this.controller,
     this.focusNode,
     this.decoration: const InputDecoration(),
-    this.keyboardType: TextInputType.text,
+    TextInputType keyboardType: TextInputType.text,
     this.style,
-    this.textAlign,
+    this.textAlign: TextAlign.start,
     this.autofocus: false,
     this.obscureText: false,
+    this.autocorrect: true,
     this.maxLines: 1,
+    this.maxLength,
+    this.maxLengthEnforced: true,
     this.onChanged,
     this.onSubmitted,
     this.inputFormatters,
-  }) : super(key: key);
+  }) : assert(keyboardType != null),
+       assert(textAlign != null),
+       assert(autofocus != null),
+       assert(obscureText != null),
+       assert(autocorrect != null),
+       assert(maxLengthEnforced != null),
+       assert(maxLines == null || maxLines > 0),
+       assert(maxLength == null || maxLength > 0),
+       keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
+       super(key: key);
 
   /// Controls the text being edited.
   ///
-  /// If null, this widget will creates its own [TextEditingController].
+  /// If null, this widget will create its own [TextEditingController].
   final TextEditingController controller;
 
   /// Controls whether this widget has keyboard focus.
@@ -98,6 +137,10 @@ class TextField extends StatefulWidget {
   final InputDecoration decoration;
 
   /// The type of keyboard to use for editing the text.
+  ///
+  /// Defaults to [TextInputType.text]. Must not be null. If
+  /// [maxLines] is not one, then [keyboardType] is ignored, and the
+  /// [TextInputType.multiline] keyboard type is used.
   final TextInputType keyboardType;
 
   /// The style to use for the text being edited.
@@ -108,6 +151,8 @@ class TextField extends StatefulWidget {
   final TextStyle style;
 
   /// How the text being edited should be aligned horizontally.
+  ///
+  /// Defaults to [TextAlign.start].
   final TextAlign textAlign;
 
   /// Whether this text field should focus itself if nothing else is already
@@ -116,7 +161,7 @@ class TextField extends StatefulWidget {
   /// If true, the keyboard will open as soon as this text field obtains focus.
   /// Otherwise, the keyboard is only shown after the user taps the text field.
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   // See https://github.com/flutter/flutter/issues/7035 for the rationale for this
   // keyboard behavior.
   final bool autofocus;
@@ -126,14 +171,76 @@ class TextField extends StatefulWidget {
   /// When this is set to true, all the characters in the text field are
   /// replaced by U+2022 BULLET characters (•).
   ///
-  /// Defaults to false.
+  /// Defaults to false. Cannot be null.
   final bool obscureText;
+
+  /// Whether to enable autocorrection.
+  ///
+  /// Defaults to true. Cannot be null.
+  final bool autocorrect;
 
   /// The maximum number of lines for the text to span, wrapping if necessary.
   ///
   /// If this is 1 (the default), the text will not wrap, but will scroll
   /// horizontally instead.
+  ///
+  /// If this is null, there is no limit to the number of lines. If it is not
+  /// null, the value must be greater than zero.
   final int maxLines;
+
+  /// The maximum number of characters (Unicode scalar values) to allow in the
+  /// text field.
+  ///
+  /// If set, a character counter will be displayed below the
+  /// field, showing how many characters have been entered and how many are
+  /// allowed. After [maxLength] characters have been input, additional input
+  /// is ignored, unless [maxLengthEnforced] is set to false. The TextField
+  /// enforces the length with a [LengthLimitingTextInputFormatter], which is
+  /// evaluated after the supplied [inputFormatters], if any.
+  ///
+  /// This value must be either null or greater than zero. If set to null
+  /// (the default), there is no limit to the number of characters allowed.
+  ///
+  /// Whitespace characters (e.g. newline, space, tab) are included in the
+  /// character count.
+  ///
+  /// If [maxLengthEnforced] is set to false, then more than [maxLength]
+  /// characters may be entered, but the error counter and divider will
+  /// switch to the [decoration.errorStyle] when the limit is exceeded.
+  ///
+  /// The TextField does not currently count Unicode grapheme clusters (i.e.
+  /// characters visible to the user), it counts Unicode scalar values, which
+  /// leaves out a number of useful possible characters (like many emoji and
+  /// composed characters), so this will be inaccurate in the presence of those
+  /// characters. If you expect to encounter these kinds of characters, be
+  /// generous in the maxLength used.
+  ///
+  /// For instance, the character "ö" can be represented as '\u{006F}\u{0308}',
+  /// which is the letter "o" followed by a composed diaeresis "¨", or it can
+  /// be represented as '\u{00F6}', which is the Unicode scalar value "LATIN
+  /// SMALL LETTER O WITH DIAERESIS".  In the first case, the text field will
+  /// count two characters, and the second case will be counted as one
+  /// character, even though the user can see no difference in the input.
+  ///
+  /// Similarly, some emoji are represented by multiple scalar values. The
+  /// Unicode "THUMBS UP SIGN + MEDIUM SKIN TONE MODIFIER", "👍🏽", should be
+  /// counted as a single character, but because it is a combination of two
+  /// Unicode scalar values, '\u{1F44D}\u{1F3FD}', it is counted as two
+  /// characters.
+  ///
+  /// See also:
+  ///
+  ///  * [LengthLimitingTextInputFormatter] for more information on how it
+  ///    counts characters, and how it may differ from the intuitive meaning.
+  final int maxLength;
+
+  /// If true, prevents the field from allowing more than [maxLength]
+  /// characters.
+  ///
+  /// If [maxLength] is set, [maxLengthEnforced] indicates whether or not to
+  /// enforce the limit, or merely provide a character counter and warning when
+  /// [maxLength] is exceeded.
+  final bool maxLengthEnforced;
 
   /// Called when the text being edited changes.
   final ValueChanged<String> onChanged;
@@ -142,31 +249,28 @@ class TextField extends StatefulWidget {
   /// field.
   final ValueChanged<String> onSubmitted;
 
-  /// Optional input validation and formatting overrides. Formatters are run 
-  /// in the provided order when the text input changes.
+  /// Optional input validation and formatting overrides.
+  ///
+  /// Formatters are run in the provided order when the text input changes.
   final List<TextInputFormatter> inputFormatters;
 
   @override
   _TextFieldState createState() => new _TextFieldState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (controller != null)
-      description.add('controller: $controller');
-    if (focusNode != null)
-      description.add('focusNode: $focusNode');
-    description.add('decoration: $decoration');
-    if (keyboardType != TextInputType.text)
-      description.add('keyboardType: $keyboardType');
-    if (style != null)
-      description.add('style: $style');
-    if (autofocus)
-      description.add('autofocus: $autofocus');
-    if (obscureText)
-      description.add('obscureText: $obscureText');
-    if (maxLines != 1)
-      description.add('maxLines: $maxLines');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<TextEditingController>('controller', controller, defaultValue: null));
+    description.add(new DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
+    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    description.add(new EnumProperty<TextInputType>('keyboardType', keyboardType, defaultValue: TextInputType.text));
+    description.add(new DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
+    description.add(new DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: false));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: 1));
+    description.add(new IntProperty('maxLength', maxLength, defaultValue: null));
+    description.add(new FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
   }
 }
 
@@ -179,6 +283,28 @@ class _TextFieldState extends State<TextField> {
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
 
+  bool get needsCounter => widget.maxLength != null
+    && widget.decoration != null
+    && widget.decoration.counterText == null;
+
+  InputDecoration _getEffectiveDecoration() {
+    if (!needsCounter)
+      return widget.decoration;
+
+    final InputDecoration effectiveDecoration = widget?.decoration ?? const InputDecoration();
+    final String counterText = '${_effectiveController.value.text.runes.length} / ${widget.maxLength}';
+    if (_effectiveController.value.text.runes.length > widget.maxLength) {
+      final ThemeData themeData = Theme.of(context);
+      return effectiveDecoration.copyWith(
+        errorText: effectiveDecoration.errorText ?? '',
+        counterStyle: effectiveDecoration.errorStyle
+          ?? themeData.textTheme.caption.copyWith(color: themeData.errorColor),
+        counterText: counterText,
+      );
+    }
+    return effectiveDecoration.copyWith(counterText: counterText);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -190,7 +316,7 @@ class _TextFieldState extends State<TextField> {
   void didUpdateWidget(TextField oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller == null && oldWidget.controller != null)
-      _controller == new TextEditingController.fromValue(oldWidget.controller.value);
+      _controller = new TextEditingController.fromValue(oldWidget.controller.value);
     else if (widget.controller != null && oldWidget.controller == null)
       _controller = null;
   }
@@ -205,12 +331,20 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
+  void _onSelectionChanged(BuildContext context, bool longPress) {
+    if (longPress)
+      Feedback.forLongPress(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TextStyle style = widget.style ?? themeData.textTheme.subhead;
     final TextEditingController controller = _effectiveController;
     final FocusNode focusNode = _effectiveFocusNode;
+    final List<TextInputFormatter> formatters = widget.inputFormatters ?? <TextInputFormatter>[];
+    if (widget.maxLength != null && widget.maxLengthEnforced)
+      formatters.add(new LengthLimitingTextInputFormatter(widget.maxLength));
 
     Widget child = new RepaintBoundary(
       child: new EditableText(
@@ -222,13 +356,17 @@ class _TextFieldState extends State<TextField> {
         textAlign: widget.textAlign,
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
+        autocorrect: widget.autocorrect,
         maxLines: widget.maxLines,
         cursorColor: themeData.textSelectionColor,
         selectionColor: themeData.textSelectionColor,
-        selectionControls: materialTextSelectionControls,
+        selectionControls: themeData.platform == TargetPlatform.iOS
+            ? cupertinoTextSelectionControls
+            : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
-        inputFormatters: widget.inputFormatters,
+        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
+        inputFormatters: formatters,
       ),
     );
 
@@ -237,7 +375,7 @@ class _TextFieldState extends State<TextField> {
         animation: new Listenable.merge(<Listenable>[ focusNode, controller ]),
         builder: (BuildContext context, Widget child) {
           return new InputDecorator(
-            decoration: widget.decoration,
+            decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             isFocused: focusNode.hasFocus,

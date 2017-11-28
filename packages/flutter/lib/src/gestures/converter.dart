@@ -37,6 +37,8 @@ class _PointerState {
 /// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
+  PointerEventConverter._();
+
   // Map from platform pointer identifiers to PointerEvent pointer identifiers.
   static final Map<int, _PointerState> _pointers = <int, _PointerState>{};
 
@@ -170,7 +172,8 @@ class PointerEventConverter {
               radiusMin: datum.radiusMin,
               radiusMax: datum.radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
+              synthesized: true,
             );
             state.lastPosition = position;
           }
@@ -257,7 +260,8 @@ class PointerEventConverter {
               radiusMin: datum.radiusMin,
               radiusMax: datum.radiusMax,
               orientation: datum.orientation,
-              tilt: datum.tilt
+              tilt: datum.tilt,
+              synthesized: true,
             );
             state.lastPosition = position;
           }

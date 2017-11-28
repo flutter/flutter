@@ -47,7 +47,7 @@ class TestFocusableState extends State<TestFocusable> {
       child: new AnimatedBuilder(
         animation: focusNode,
         builder: (BuildContext context, Widget child) {
-          return new Text(focusNode.hasFocus ? widget.yes : widget.no);
+          return new Text(focusNode.hasFocus ? widget.yes : widget.no, textDirection: TextDirection.ltr);
         },
       ),
     );
@@ -145,6 +145,7 @@ void main() {
         node: parentFocusScope,
         autofocus: true,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',
@@ -167,6 +168,25 @@ void main() {
     expect(find.text('a'), findsNothing);
     expect(find.text('A FOCUSED'), findsOneWidget);
 
+    expect(parentFocusScope, hasAGoodToStringDeep);
+    expect(
+      parentFocusScope.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+          'FocusScopeNode#00000\n'
+          '   focus: FocusNode#00000(FOCUSED)\n'
+      ),
+    );
+
+    expect(WidgetsBinding.instance.focusManager.rootScope, hasAGoodToStringDeep);
+    expect(
+      WidgetsBinding.instance.focusManager.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
+      equalsIgnoringHashCodes(
+        'FocusScopeNode#00000\n'
+        ' └─child 1: FocusScopeNode#00000\n'
+        '     focus: FocusNode#00000(FOCUSED)\n'
+      ),
+    );
+
     parentFocusScope.setFirstFocus(childFocusScope);
     await tester.idle();
 
@@ -174,6 +194,7 @@ void main() {
       new FocusScope(
         node: parentFocusScope,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',
@@ -199,6 +220,7 @@ void main() {
       new FocusScope(
         node: parentFocusScope,
         child: new Row(
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             const TestFocusable(
               no: 'a',

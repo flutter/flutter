@@ -67,6 +67,8 @@ typedef Widget ViewportBuilder(BuildContext context, ViewportOffset position);
 ///    effects using slivers.
 ///  * [SingleChildScrollView], which is a scrollable widget that has a single
 ///    child.
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class Scrollable extends StatefulWidget {
   /// Creates a widget that scrolls.
   ///
@@ -95,6 +97,14 @@ class Scrollable extends StatefulWidget {
 
   /// An object that can be used to control the position to which this widget is
   /// scrolled.
+  ///
+  /// A [ScrollController] serves several purposes. It can be used to control
+  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
+  /// It can be used to control whether the scroll view should automatically
+  /// save and restore its scroll position in the [PageStorage] (see
+  /// [ScrollController.keepScrollOffset]). It can be used to read the current
+  /// scroll position (see [ScrollController.offset]), or change it (see
+  /// [ScrollController.animateTo]).
   ///
   /// See also:
   ///
@@ -146,11 +156,10 @@ class Scrollable extends StatefulWidget {
   ScrollableState createState() => new ScrollableState();
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('$axisDirection');
-    if (physics != null)
-      description.add('physics: $physics');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<AxisDirection>('axisDirection', axisDirection));
+    description.add(new DiagnosticsProperty<ScrollPhysics>('physics', physics));
   }
 
   /// The state from the closest instance of this class that encloses the given context.
@@ -251,6 +260,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     final ScrollPosition oldPosition = position;
     if (oldPosition != null) {
       controller?.detach(oldPosition);
+      oldPosition.removeListener(_sendSemanticsScrollEvent);
       // It's important that we not dispose the old position until after the
       // viewport has had a chance to unregister its listeners from the old
       // position. So, schedule a microtask to do it.
@@ -259,9 +269,27 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
 
     _position = controller?.createScrollPosition(_physics, this, oldPosition)
       ?? new ScrollPositionWithSingleContext(physics: _physics, context: this, oldPosition: oldPosition);
+    _position.addListener(_sendSemanticsScrollEvent);
 
     assert(position != null);
     controller?.attach(position);
+  }
+
+  bool _semanticsScrollEventScheduled = false;
+
+  void _sendSemanticsScrollEvent() {
+    if (_semanticsScrollEventScheduled)
+      return;
+    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
+      _gestureDetectorKey.currentState?.sendSemanticsEvent(new ScrollCompletedSemanticsEvent(
+        axis: position.axis,
+        pixels: position.pixels,
+        minScrollExtent: position.minScrollExtent,
+        maxScrollExtent: position.maxScrollExtent,
+      ));
+      _semanticsScrollEventScheduled = false;
+    });
+    _semanticsScrollEventScheduled = true;
   }
 
   @override
@@ -304,6 +332,16 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
 
+  // SEMANTICS ACTIONS
+
+  @override
+  @protected
+  void setSemanticsActions(Set<SemanticsAction> actions) {
+    if (_gestureDetectorKey.currentState != null)
+      _gestureDetectorKey.currentState.replaceSemanticsActions(actions);
+  }
+
+
   // GESTURE RECOGNITION AND POINTER IGNORING
 
   final GlobalKey<RawGestureDetectorState> _gestureDetectorKey = new GlobalKey<RawGestureDetectorState>();
@@ -327,32 +365,38 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       switch (widget.axis) {
         case Axis.vertical:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            VerticalDragGestureRecognizer: (VerticalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/7173
-              return (recognizer ??= new VerticalDragGestureRecognizer())
-                ..onDown = _handleDragDown
-                ..onStart = _handleDragStart
-                ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd
-                ..onCancel = _handleDragCancel
-                ..minFlingDistance = _physics?.minFlingDistance
-                ..minFlingVelocity = _physics?.minFlingVelocity
-                ..maxFlingVelocity = _physics?.maxFlingVelocity;
-            }
+            VerticalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<VerticalDragGestureRecognizer>(
+              () => new VerticalDragGestureRecognizer(),
+              (VerticalDragGestureRecognizer instance) {
+                instance
+                  ..onDown = _handleDragDown
+                  ..onStart = _handleDragStart
+                  ..onUpdate = _handleDragUpdate
+                  ..onEnd = _handleDragEnd
+                  ..onCancel = _handleDragCancel
+                  ..minFlingDistance = _physics?.minFlingDistance
+                  ..minFlingVelocity = _physics?.minFlingVelocity
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+              },
+            ),
           };
           break;
         case Axis.horizontal:
           _gestureRecognizers = <Type, GestureRecognizerFactory>{
-            HorizontalDragGestureRecognizer: (HorizontalDragGestureRecognizer recognizer) {  // ignore: map_value_type_not_assignable, https://github.com/flutter/flutter/issues/7173
-              return (recognizer ??= new HorizontalDragGestureRecognizer())
-                ..onDown = _handleDragDown
-                ..onStart = _handleDragStart
-                ..onUpdate = _handleDragUpdate
-                ..onEnd = _handleDragEnd
-                ..onCancel = _handleDragCancel
-                ..minFlingDistance = _physics?.minFlingDistance
-                ..minFlingVelocity = _physics?.minFlingVelocity
-                ..maxFlingVelocity = _physics?.maxFlingVelocity;
-            }
+            HorizontalDragGestureRecognizer: new GestureRecognizerFactoryWithHandlers<HorizontalDragGestureRecognizer>(
+              () => new HorizontalDragGestureRecognizer(),
+              (HorizontalDragGestureRecognizer instance) {
+                instance
+                  ..onDown = _handleDragDown
+                  ..onStart = _handleDragStart
+                  ..onUpdate = _handleDragUpdate
+                  ..onEnd = _handleDragEnd
+                  ..onCancel = _handleDragCancel
+                  ..minFlingDistance = _physics?.minFlingDistance
+                  ..minFlingVelocity = _physics?.minFlingVelocity
+                  ..maxFlingVelocity = _physics?.maxFlingVelocity;
+              },
+            ),
           };
           break;
       }
@@ -396,8 +440,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   void _handleDragStart(DragStartDetails details) {
+    // It's possible for _hold to become null between _handleDragDown and
+    // _handleDragStart, for example if some user code calls jumpTo or otherwise
+    // triggers a new activity to begin.
     assert(_drag == null);
-    assert(_hold != null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
     assert(_hold == null);
@@ -448,6 +494,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       child: new IgnorePointer(
         key: _ignorePointerKey,
         ignoring: _shouldIgnorePointer,
+        ignoringSemantics: false,
         child: new _ScrollableScope(
           scrollable: this,
           position: position,
@@ -459,8 +506,8 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('position: $position');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ScrollPosition>('position', position));
   }
 }

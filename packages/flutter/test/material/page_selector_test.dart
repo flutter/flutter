@@ -5,31 +5,39 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-const Color selectedColor = const Color(0xFF00FF00);
-const Color unselectedColor = Colors.transparent;
+const Color kSelectedColor = const Color(0xFF00FF00);
+const Color kUnselectedColor = Colors.transparent;
 
-Widget buildFrame(TabController tabController) {
-  return new Theme(
-    data: new ThemeData(accentColor: selectedColor),
-    child: new SizedBox.expand(
-      child: new Center(
-        child: new SizedBox(
-          width: 400.0,
-          height: 400.0,
-          child: new Column(
-            children: <Widget>[
-              new TabPageSelector(controller: tabController),
-              new Flexible(
-                child: new TabBarView(
+Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize: 12.0 }) {
+  return new Directionality(
+    textDirection: TextDirection.ltr,
+    child: new Theme(
+      data: new ThemeData(accentColor: kSelectedColor),
+      child: new SizedBox.expand(
+        child: new Center(
+          child: new SizedBox(
+            width: 400.0,
+            height: 400.0,
+            child: new Column(
+              children: <Widget>[
+                new TabPageSelector(
                   controller: tabController,
-                  children: <Widget>[
-                    const Center(child: const Text('0')),
-                    const Center(child: const Text('1')),
-                    const Center(child: const Text('2')),
-                  ],
+                  color: color,
+                  selectedColor: selectedColor,
+                  indicatorSize: indicatorSize,
                 ),
-              ),
-            ],
+                new Flexible(
+                  child: new TabBarView(
+                    controller: tabController,
+                    children: <Widget>[
+                      const Center(child: const Text('0')),
+                      const Center(child: const Text('1')),
+                      const Center(child: const Text('2')),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -56,17 +64,17 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
-    expect(indicatorColors(tester), const <Color>[selectedColor, unselectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
 
     tabController.index = 1;
     await tester.pump();
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     tabController.index = 2;
     await tester.pump();
     expect(tabController.index, 2);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, unselectedColor, selectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
   testWidgets('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
@@ -77,7 +85,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 0);
-    expect(indicatorColors(tester), const <Color>[selectedColor, unselectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kSelectedColor, kUnselectedColor, kUnselectedColor]);
 
     tabController.animateTo(1, duration: const Duration(milliseconds: 200));
     await tester.pump();
@@ -87,14 +95,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     List<Color> colors = indicatorColors(tester);
     expect(colors[0].alpha, greaterThan(colors[1].alpha));
-    expect(colors[2], unselectedColor);
+    expect(colors[2], kUnselectedColor);
     await tester.pump(const Duration(milliseconds: 175));
     colors = indicatorColors(tester);
     expect(colors[0].alpha, lessThan(colors[1].alpha));
-    expect(colors[2], unselectedColor);
+    expect(colors[2], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     tabController.animateTo(2, duration: const Duration(milliseconds: 200));
     await tester.pump();
@@ -102,14 +110,14 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     colors = indicatorColors(tester);
     expect(colors[1].alpha, greaterThan(colors[2].alpha));
-    expect(colors[0], unselectedColor);
+    expect(colors[0], kUnselectedColor);
     await tester.pump(const Duration(milliseconds: 175));
     colors = indicatorColors(tester);
     expect(colors[1].alpha, lessThan(colors[2].alpha));
-    expect(colors[0], unselectedColor);
+    expect(colors[0], kUnselectedColor);
     await tester.pumpAndSettle();
     expect(tabController.index, 2);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, unselectedColor, selectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
   });
 
   testWidgets('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
@@ -121,7 +129,7 @@ void main() {
     await tester.pumpWidget(buildFrame(tabController));
 
     expect(tabController.index, 1);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     final TestGesture gesture = await tester.startGesture(const Offset(200.0, 200.0));
 
@@ -131,13 +139,13 @@ void main() {
     await tester.pumpAndSettle();
     List<Color> colors = indicatorColors(tester);
     expect(colors[1].alpha, greaterThan(colors[2].alpha));
-    expect(colors[0], unselectedColor);
+    expect(colors[0], kUnselectedColor);
 
     // Drag back to where we started.
     await gesture.moveBy(const Offset(100.0, 0.0));
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Drag to the left moving the selection towards indicator 0. Indicator 0's
     // opacity should increase and Indicator 1's opacity should decrease.
@@ -145,30 +153,69 @@ void main() {
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
     expect(colors[1].alpha, greaterThan(colors[0].alpha));
-    expect(colors[2], unselectedColor);
+    expect(colors[2], kUnselectedColor);
 
     // Drag back to where we started.
     await gesture.moveBy(const Offset(-100.0, 0.0));
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Completing the gesture doesn't change anything
     await gesture.up();
     await tester.pumpAndSettle();
     colors = indicatorColors(tester);
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
     // Fling to the left, selects indicator 2
     await tester.fling(find.byType(TabBarView), const Offset(-100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
-    expect(indicatorColors(tester), const <Color>[unselectedColor, unselectedColor, selectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kUnselectedColor, kSelectedColor]);
 
     // Fling to the right, selects indicator 1
     await tester.fling(find.byType(TabBarView), const Offset(100.0, 0.0), 1000.0);
     await tester.pumpAndSettle();
-    expect(indicatorColors(tester), const <Color>[unselectedColor, selectedColor, unselectedColor]);
+    expect(indicatorColors(tester), const <Color>[kUnselectedColor, kSelectedColor, kUnselectedColor]);
 
+  });
+
+  testWidgets('PageSelector indicatorColors', (WidgetTester tester) async {
+    const Color kRed = const Color(0xFFFF0000);
+    const Color kBlue = const Color(0xFF0000FF);
+
+    final TabController tabController = new TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: 3,
+    );
+    await tester.pumpWidget(buildFrame(tabController, color: kRed, selectedColor: kBlue));
+
+    expect(tabController.index, 1);
+    expect(indicatorColors(tester), const <Color>[kRed, kBlue, kRed]);
+
+    tabController.index = 0;
+    await tester.pumpAndSettle();
+    expect(indicatorColors(tester), const <Color>[kBlue, kRed, kRed]);
+  });
+
+  testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
+    final TabController tabController = new TabController(
+      vsync: const TestVSync(),
+      initialIndex: 1,
+      length: 3,
+    );
+    await tester.pumpWidget(buildFrame(tabController, indicatorSize: 16.0));
+
+    final Iterable<Element> indicatorElements = find.descendant(
+      of: find.byType(TabPageSelector),
+      matching: find.byType(TabPageSelectorIndicator),
+    ).evaluate();
+
+    // Indicators get an 8 pixel margin, 16 + 8 = 24.
+    for (Element indicatorElement in indicatorElements)
+      expect(indicatorElement.size, const Size(24.0, 24.0));
+
+    expect(tester.getSize(find.byType(TabPageSelector)).height, 24.0);
   });
 
 }

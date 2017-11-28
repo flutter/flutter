@@ -4,6 +4,8 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 
 void main() {
   testWidgets('Uncontested scrolls start immediately', (WidgetTester tester) async {
@@ -23,7 +25,7 @@ void main() {
       },
       child: new Container(
         color: const Color(0xFF00FF00),
-      )
+      ),
     );
 
     await tester.pumpWidget(widget);
@@ -59,16 +61,16 @@ void main() {
     double dragDistance = 0.0;
 
     final Offset downLocation = const Offset(10.0, 10.0);
-    final Offset upLocation = const Offset(10.0, 20.0);
+    final Offset upLocation = const Offset(10.0, 50.0); // must be far enough to be more than kTouchSlop
 
     final Widget widget = new GestureDetector(
       onVerticalDragUpdate: (DragUpdateDetails details) { dragDistance += details.primaryDelta; },
       onVerticalDragEnd: (DragEndDetails details) { gestureCount += 1; },
-      onHorizontalDragUpdate: (DragUpdateDetails details) { fail("gesture should not match"); },
-      onHorizontalDragEnd: (DragEndDetails details) { fail("gesture should not match"); },
+      onHorizontalDragUpdate: (DragUpdateDetails details) { fail('gesture should not match'); },
+      onHorizontalDragEnd: (DragEndDetails details) { fail('gesture should not match'); },
       child: new Container(
         color: const Color(0xFF00FF00),
-      )
+      ),
     );
     await tester.pumpWidget(widget);
 
@@ -81,7 +83,7 @@ void main() {
     await gesture.up();
 
     expect(gestureCount, 2);
-    expect(dragDistance, 20.0);
+    expect(dragDistance, 40.0 * 2.0); // delta between down and up, twice
 
     await tester.pumpWidget(new Container());
   });
@@ -104,8 +106,8 @@ void main() {
         },
         child: new Container(
           color: const Color(0xFF00FF00),
-        )
-      )
+        ),
+      ),
     );
 
     expect(didStartPan, isFalse);
@@ -126,30 +128,33 @@ void main() {
 
     Future<Null> pumpWidgetTree(HitTestBehavior behavior) {
       return tester.pumpWidget(
-        new Stack(
-          children: <Widget>[
-            new Listener(
-              onPointerDown: (_) {
-                didReceivePointerDown = true;
-              },
-              child: new Container(
+        new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Stack(
+            children: <Widget>[
+              new Listener(
+                onPointerDown: (_) {
+                  didReceivePointerDown = true;
+                },
+                child: new Container(
+                  width: 100.0,
+                  height: 100.0,
+                  color: const Color(0xFF00FF00),
+                ),
+              ),
+              new Container(
                 width: 100.0,
                 height: 100.0,
-                color: const Color(0xFF00FF00),
-              )
-            ),
-            new Container(
-              width: 100.0,
-              height: 100.0,
-              child: new GestureDetector(
-                onTap: () {
-                  didTap = true;
-                },
-                behavior: behavior
-              )
-            )
-          ]
-        )
+                child: new GestureDetector(
+                  onTap: () {
+                    didTap = true;
+                  },
+                  behavior: behavior,
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
 
@@ -191,8 +196,8 @@ void main() {
           onTap: () {
             didTap = true;
           },
-        )
-      )
+        ),
+      ),
     );
     expect(didTap, isFalse);
     await tester.tapAt(const Offset(10.0, 10.0));
@@ -208,11 +213,42 @@ void main() {
             didTap = true;
           },
           child: new Container(),
-        )
-      )
+        ),
+      ),
     );
     expect(didTap, isFalse);
     await tester.tapAt(const Offset(10.0, 10.0));
     expect(didTap, isFalse);
+  });
+
+  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
+    final GestureTapCallback inputCallback = () {};
+
+    await tester.pumpWidget(
+      new Center(
+        child: new GestureDetector(
+          onTap: inputCallback,
+          child: new Container(),
+        ),
+      ),
+    );
+
+    final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
+    final GestureTapCallback actualCallback1 = renderObj1.onTap;
+
+    await tester.pumpWidget(
+      new Center(
+        child: new GestureDetector(
+          onTap: inputCallback,
+          child: new Container(),
+        ),
+      ),
+    );
+
+    final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
+    final GestureTapCallback actualCallback2 = renderObj2.onTap;
+
+    expect(renderObj1, same(renderObj2));
+    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 }

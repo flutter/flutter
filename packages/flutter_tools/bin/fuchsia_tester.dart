@@ -17,17 +17,19 @@ import '../lib/src/base/io.dart';
 import '../lib/src/base/logger.dart';
 import '../lib/src/base/os.dart';
 import '../lib/src/base/platform.dart';
+import '../lib/src/base/terminal.dart';
 import '../lib/src/cache.dart';
 import '../lib/src/dart/package_map.dart';
+import '../lib/src/disabled_usage.dart';
 import '../lib/src/globals.dart';
 import '../lib/src/test/flutter_platform.dart' as loader;
 import '../lib/src/usage.dart';
 
 // Note: this was largely inspired by lib/src/commands/test.dart.
 
-const String _kOptionPackages = "packages";
-const String _kOptionShell = "shell";
-const String _kOptionTestDirectory = "test-directory";
+const String _kOptionPackages = 'packages';
+const String _kOptionShell = 'shell';
+const String _kOptionTestDirectory = 'test-directory';
 const List<String> _kRequiredOptions = const <String>[
   _kOptionPackages,
   _kOptionShell,
@@ -37,16 +39,19 @@ const List<String> _kRequiredOptions = const <String>[
 Future<Null> main(List<String> args) async {
   final AppContext executableContext = new AppContext();
   executableContext.setVariable(Logger, new StdoutLogger());
-  executableContext.runInZone(() {
+  await executableContext.runInZone(() {
     // Initialize the context with some defaults.
+    // This list must be kept in sync with lib/executable.dart.
+    context.putIfAbsent(Stdio, () => const Stdio());
     context.putIfAbsent(Platform, () => const LocalPlatform());
     context.putIfAbsent(FileSystem, () => const LocalFileSystem());
     context.putIfAbsent(ProcessManager, () => const LocalProcessManager());
+    context.putIfAbsent(AnsiTerminal, () => new AnsiTerminal());
     context.putIfAbsent(Logger, () => new StdoutLogger());
     context.putIfAbsent(Cache, () => new Cache());
     context.putIfAbsent(Config, () => new Config());
     context.putIfAbsent(OperatingSystemUtils, () => new OperatingSystemUtils());
-    context.putIfAbsent(Usage, () => new Usage());
+    context.putIfAbsent(Usage, () => new DisabledUsage());
     return run(args);
   });
 }
@@ -88,7 +93,6 @@ Future<Null> run(List<String> args) async {
     }
     loader.installHook(
       shellPath: shellPath,
-      debuggerMode: false,
     );
 
     PackageMap.globalPackagesPath =

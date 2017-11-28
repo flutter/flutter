@@ -56,11 +56,33 @@ void main() {
     expect(logo.margin, EdgeInsets.lerp(start.margin, end.margin, 0.5));
   });
 
+  test('FlutterLogoDecorationl.lerpFrom and FlutterLogoDecorationl.lerpTo', () {
+    expect(Decoration.lerp(start, const BoxDecoration(), 0.0), start);
+    expect(Decoration.lerp(start, const BoxDecoration(), 1.0), const BoxDecoration());
+    expect(Decoration.lerp(const BoxDecoration(), end, 0.0), const BoxDecoration());
+    expect(Decoration.lerp(const BoxDecoration(), end, 1.0), end);
+  });
+
   test('FlutterLogoDecoration lerp changes styles at 0.5', () {
     FlutterLogoDecoration logo = FlutterLogoDecoration.lerp(start, end, 0.4);
     expect(logo.style, start.style);
 
     logo = FlutterLogoDecoration.lerp(start, end, 0.5);
     expect(logo.style, end.style);
+  });
+
+  test('FlutterLogoDecoration toString', () {
+    expect(
+      start.toString(),
+      equals(
+        'FlutterLogoDecoration(Color(0xff000000)/Color(0xffffffff) on Color(0xffd4f144), style: stacked)'
+      ),
+    );
+    expect(
+      FlutterLogoDecoration.lerp(null, end, 0.5).toString(),
+      equals(
+        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
+      ),
+    );
   });
 }

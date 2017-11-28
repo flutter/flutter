@@ -85,11 +85,11 @@ Sample Catalog
 
 Title: Tabbed AppBar
 
-Summary: An AppBar can include a TabBar as its bottom widget.
+Summary: An AppBar with a TabBar for navigating pages just below it.
 
 Description:
 A TabBar can be used to navigate among the pages displayed in a TabBarView.
-Although a TabBar is an ordinary widget that can appear, it's most often
+Although a TabBar is an ordinary widget that can appear anywhere, it's most often
 included in the application's AppBar.
 
 Classes: AppBar, DefaultTabController, TabBar, Scaffold, TabBarView

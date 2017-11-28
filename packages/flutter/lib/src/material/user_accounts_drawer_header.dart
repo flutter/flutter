@@ -3,9 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
+import 'colors.dart';
 import 'debug.dart';
+import 'drawer_header.dart';
+import 'icons.dart';
+import 'ink_well.dart';
+import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
   const _AccountPictures({
@@ -21,13 +26,13 @@ class _AccountPictures extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Stack(
       children: <Widget>[
-        new Positioned(
+        new PositionedDirectional(
           top: 0.0,
-          right: 0.0,
+          end: 0.0,
           child: new Row(
             children: (otherAccountsPictures ?? <Widget>[]).take(3).map((Widget picture) {
               return new Container(
-                margin: const EdgeInsets.only(left: 16.0),
+                margin: const EdgeInsetsDirectional.only(start: 16.0),
                 width: 40.0,
                 height: 40.0,
                 child: picture
@@ -65,7 +70,7 @@ class _AccountDetails extends StatelessWidget {
   Widget addDropdownIcon(Widget line) {
     final Widget icon = new Expanded(
       child: new Align(
-        alignment: FractionalOffset.centerRight,
+        alignment: AlignmentDirectional.centerEnd,
         child: new Icon(
           isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
           color: Colors.white
@@ -126,7 +131,7 @@ class _AccountDetails extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [DrawerHeader], for a drawer header that doesn't show user acounts
+///  * [DrawerHeader], for a drawer header that doesn't show user accounts
 ///  * <https://material.google.com/patterns/navigation-drawer.html>
 class UserAccountsDrawerHeader extends StatefulWidget {
   /// Creates a material design drawer header.
@@ -148,7 +153,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   final Decoration decoration;
 
   /// The margin around the drawer header.
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   /// A widget placed in the upper-left corner that represents the current
   /// user's account. Normally a [CircleAvatar].
@@ -178,6 +183,13 @@ class UserAccountsDrawerHeader extends StatefulWidget {
 class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
   bool _isOpen = false;
 
+  void _handleDetailsPressed() {
+    setState(() {
+      _isOpen = !_isOpen;
+    });
+    widget.onDetailsPressed();
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -199,12 +211,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
             accountName: widget.accountName,
             accountEmail: widget.accountEmail,
             isOpen: _isOpen,
-            onTap: widget.onDetailsPressed == null ? null : () {
-              setState(() {
-                _isOpen = !_isOpen;
-              });
-              widget.onDetailsPressed();
-            },
+            onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
           ),
         ],
       ),

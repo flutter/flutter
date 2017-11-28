@@ -18,8 +18,9 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///
 /// This widget is typically used with [ListView] to create an
 /// "expand / collapse" list entry. When used with scrolling widgets like
-/// [ListView], a unique [key] must be specified to enable the [ExpansionTile] to
-/// save and restore its expanded state when it is scrolled in and out of view.
+/// [ListView], a unique [PageStorageKey] must be specified to enable the
+/// [ExpansionTile] to save and restore its expanded state when it is scrolled
+/// in and out of view.
 ///
 /// See also:
 ///
@@ -29,7 +30,8 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 ///    <https://material.io/guidelines/components/lists-controls.html>.
 class ExpansionTile extends StatefulWidget {
   /// Creates a single-line [ListTile] with a trailing button that expands or collapses
-  /// the tile to reveal or hide the [children].
+  /// the tile to reveal or hide the [children]. The [initiallyExpanded] property must
+  /// be non-null.
   const ExpansionTile({
     Key key,
     this.leading,
@@ -37,7 +39,10 @@ class ExpansionTile extends StatefulWidget {
     this.backgroundColor,
     this.onExpansionChanged,
     this.children: const <Widget>[],
-  }) : super(key: key);
+    this.trailing,
+    this.initiallyExpanded: false,
+  }) : assert(initiallyExpanded != null),
+       super(key: key);
 
   /// A widget to display before the title.
   ///
@@ -52,7 +57,7 @@ class ExpansionTile extends StatefulWidget {
   /// Called when the tile expands or collapses.
   ///
   /// When the tile starts expanding, this function is called with the value
-  /// `true`. When the tile starts collapsing, this function is called with
+  /// true. When the tile starts collapsing, this function is called with
   /// the value false.
   final ValueChanged<bool> onExpansionChanged;
 
@@ -63,6 +68,12 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   final Color backgroundColor;
+  
+  /// A widget to display instead of a rotating arrow icon.
+  final Widget trailing;
+
+  /// Specifies if the list tile is initially expanded (true) or collapsed (false, the default).
+  final bool initiallyExpanded;
 
   @override
   _ExpansionTileState createState() => new _ExpansionTileState();
@@ -92,7 +103,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
     _backgroundColor = new ColorTween();
 
-    _isExpanded = PageStorage.of(context)?.readState(context) ?? false;
+    _isExpanded = PageStorage.of(context)?.readState(context) ?? widget.initiallyExpanded;
     if (_isExpanded)
       _controller.value = 1.0;
   }
@@ -144,7 +155,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
                 style: Theme.of(context).textTheme.subhead.copyWith(color: titleColor),
                 child: widget.title,
               ),
-              trailing: new RotationTransition(
+              trailing: widget.trailing ?? new RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),
               ),

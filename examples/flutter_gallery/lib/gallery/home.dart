@@ -9,20 +9,15 @@ import 'drawer.dart';
 import 'item.dart';
 
 const double _kFlexibleSpaceMaxHeight = 256.0;
-
-List<GalleryItem> _itemsWithCategory(String category) {
-  return kAllGalleryItems.where((GalleryItem item) => item.category == category).toList();
-}
-
-final List<GalleryItem> _demoItems = _itemsWithCategory('Demos');
-final List<GalleryItem> _componentItems = _itemsWithCategory('Components');
-final List<GalleryItem> _styleItems = _itemsWithCategory('Style');
+const String _kGalleryAssetsPackage = 'flutter_gallery_assets';
 
 class _BackgroundLayer {
   _BackgroundLayer({ int level, double parallax })
-    : assetName = 'packages/flutter_gallery_assets/appbar/appbar_background_layer$level.png',
+    : assetName = 'appbar/appbar_background_layer$level.png',
+      assetPackage = _kGalleryAssetsPackage,
       parallaxTween = new Tween<double>(begin: 0.0, end: parallax);
   final String assetName;
+  final String assetPackage;
   final Tween<double> parallaxTween;
 }
 
@@ -54,6 +49,7 @@ class _AppBarBackground extends StatelessWidget {
               bottom: 0.0,
               child: new Image.asset(
                 layer.assetName,
+                package: layer.assetPackage,
                 fit: BoxFit.cover,
                 height: _kFlexibleSpaceMaxHeight
               )
@@ -66,12 +62,14 @@ class _AppBarBackground extends StatelessWidget {
 }
 
 class GalleryHome extends StatefulWidget {
-  GalleryHome({
+  const GalleryHome({
     Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
     this.timeDilation,
     @required this.onTimeDilationChanged,
+    this.textScaleFactor,
+    this.onTextScaleFactorChanged,
     this.showPerformanceOverlay,
     this.onShowPerformanceOverlayChanged,
     this.checkerboardRasterCacheImages,
@@ -80,16 +78,18 @@ class GalleryHome extends StatefulWidget {
     this.onCheckerboardOffscreenLayersChanged,
     this.onPlatformChanged,
     this.onSendFeedback,
-  }) : super(key: key) {
-    assert(onThemeChanged != null);
-    assert(onTimeDilationChanged != null);
-  }
+  }) : assert(onThemeChanged != null),
+       assert(onTimeDilationChanged != null),
+       super(key: key);
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;
 
   final double timeDilation;
   final ValueChanged<double> onTimeDilationChanged;
+
+  final double textScaleFactor;
+  final ValueChanged<double> onTextScaleFactorChanged;
 
   final bool showPerformanceOverlay;
   final ValueChanged<bool> onShowPerformanceOverlayChanged;
@@ -139,11 +139,13 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         if (category != null)
           listItems.add(const Divider());
         listItems.add(
-          new Container(
-            height: 48.0,
-            padding: const EdgeInsets.only(left: 16.0),
-            alignment: FractionalOffset.centerLeft,
-            child: new Text(galleryItem.category, style: headerStyle)
+          new MergeSemantics(
+            child: new Container(
+              height: 48.0,
+              padding: const EdgeInsetsDirectional.only(start: 16.0),
+              alignment: AlignmentDirectional.centerStart,
+              child: new Text(galleryItem.category, style: headerStyle)
+            ),
           )
         );
         category = galleryItem.category;
@@ -162,6 +164,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
         onThemeChanged: widget.onThemeChanged,
         timeDilation: widget.timeDilation,
         onTimeDilationChanged: widget.onTimeDilationChanged,
+        textScaleFactor: widget.textScaleFactor,
+        onTextScaleFactorChanged: widget.onTextScaleFactorChanged,
         showPerformanceOverlay: widget.showPerformanceOverlay,
         onShowPerformanceOverlayChanged: widget.onShowPerformanceOverlayChanged,
         checkerboardRasterCacheImages: widget.checkerboardRasterCacheImages,
@@ -193,7 +197,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
     assert(() {
       showPreviewBanner = false;
       return true;
-    });
+    }());
 
     if (showPreviewBanner) {
       home = new Stack(
@@ -204,7 +208,7 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
             opacity: new CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
             child: const Banner(
               message: 'PREVIEW',
-              location: BannerLocation.topRight,
+              location: BannerLocation.topEnd,
             )
           ),
         ]

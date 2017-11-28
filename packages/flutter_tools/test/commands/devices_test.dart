@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -40,6 +41,19 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {
+  @override
+  Future<ProcessResult> run(
+      List<dynamic> command, {
+        String workingDirectory,
+        Map<String, String> environment,
+        bool includeParentEnvironment: true,
+        bool runInShell: false,
+        Encoding stdoutEncoding: SYSTEM_ENCODING,
+        Encoding stderrEncoding: SYSTEM_ENCODING,
+      }) async {
+    return new ProcessResult(0, 0, '', '');
+  }
+
   @override
   ProcessResult runSync(
       List<dynamic> command, {

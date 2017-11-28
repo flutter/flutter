@@ -22,6 +22,55 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// Interface for classes that register with the Widgets layer binding.
 ///
 /// See [WidgetsBinding.addObserver] and [WidgetsBinding.removeObserver].
+///
+/// This class can be extended directly, to get default behaviors for all of the
+/// handlers, or can used with the `implements` keyword, in which case all the
+/// handlers must be implemented (and the analyzer will list those that have
+/// been omitted).
+///
+/// ## Sample code
+///
+/// This [StatefulWidget] implements the parts of the [State] and
+/// [WidgetsBindingObserver] protocols necessary to react to application
+/// lifecycle messages. See [didChangeAppLifecycleState].
+///
+/// ```dart
+/// class AppLifecycleReactor extends StatefulWidget {
+///   const AppLifecycleReactor({ Key key }) : super(key: key);
+///
+///   @override
+///   _AppLifecycleReactorState createState() => new _AppLifecycleReactorState();
+/// }
+///
+/// class _AppLifecycleReactorState extends State<AppLifecycleReactor> with WidgetsBindingObserver {
+///   @override
+///   void initState() {
+///     super.initState();
+///     WidgetsBinding.instance.addObserver(this);
+///   }
+///
+///   @override
+///   void dispose() {
+///     WidgetsBinding.instance.removeObserver(this);
+///     super.dispose();
+///   }
+///
+///   AppLifecycleState _notification;
+///
+///   @override
+///   void didChangeAppLifecycleState(AppLifecycleState state) {
+///     setState(() { _notification = state; });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new Text('Last notification: $_notification');
+///   }
+/// }
+/// ```
+///
+/// To respond to other notifications, replace the [didChangeAppLifecycleState]
+/// method above with other methods from this class.
 abstract class WidgetsBindingObserver {
   /// Called when the system tells the app to pop the current route.
   /// For example, on Android, this is called when the user presses
@@ -35,27 +84,158 @@ abstract class WidgetsBindingObserver {
   /// box, and false otherwise. The [WidgetsApp] widget uses this
   /// mechanism to notify the [Navigator] widget that it should pop
   /// its current route if possible.
+  ///
+  /// This method exposes the `popRoute` notification from
+  /// [SystemChannels.navigation].
   Future<bool> didPopRoute() => new Future<bool>.value(false);
+
+  /// Called when the host tells the app to push a new route onto the
+  /// navigator.
+  ///
+  /// Observers are expected to return true if they were able to
+  /// handle the notification. Observers are notified in registration
+  /// order until one returns true.
+  ///
+  /// This method exposes the `pushRoute` notification from
+  /// [SystemChannels.navigation].
+  Future<bool> didPushRoute(String route) => new Future<bool>.value(false);
 
   /// Called when the application's dimensions change. For example,
   /// when a phone is rotated.
+  ///
+  /// This method exposes notifications from [Window.onMetricsChanged].
+  ///
+  /// ## Sample code
+  ///
+  /// This [StatefulWidget] implements the parts of the [State] and
+  /// [WidgetsBindingObserver] protocols necessary to react when the device is
+  /// rotated (or otherwise changes dimensions).
+  ///
+  /// ```dart
+  /// class MetricsReactor extends StatefulWidget {
+  ///   const MetricsReactor({ Key key }) : super(key: key);
+  ///
+  ///   @override
+  ///   _MetricsReactorState createState() => new _MetricsReactorState();
+  /// }
+  ///
+  /// class _MetricsReactorState extends State<MetricsReactor> with WidgetsBindingObserver {
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   Size _lastSize;
+  ///
+  ///   @override
+  ///   void didChangeMetrics() {
+  ///     setState(() { _lastSize = ui.window.physicalSize; });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Text('Current size: $_lastSize');
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// In general, this is unnecessary as the layout system takes care of
+  /// automatically recomputing the application geometry when the application
+  /// size changes.
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.of], which provides a similar service with less
+  ///    boilerplate.
   void didChangeMetrics() { }
+
+  /// Called when the platform's text scale factor changes.
+  ///
+  /// This typically happens as the result of the user changing system
+  /// preferences, and it should affect all of the text sizes in the
+  /// application.
+  ///
+  /// This method exposes notifications from [Window.onTextScaleFactorChanged].
+  ///
+  /// ## Sample code
+  ///
+  /// ```dart
+  /// class TextScaleFactorReactor extends StatefulWidget {
+  ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
+  ///
+  ///   @override
+  ///   _TextScaleFactorReactorState createState() => new _TextScaleFactorReactorState();
+  /// }
+  ///
+  /// class _TextScaleFactorReactorState extends State<TextScaleFactorReactor> with WidgetsBindingObserver {
+  ///   @override
+  ///   void initState() {
+  ///     super.initState();
+  ///     WidgetsBinding.instance.addObserver(this);
+  ///   }
+  ///
+  ///   @override
+  ///   void dispose() {
+  ///     WidgetsBinding.instance.removeObserver(this);
+  ///     super.dispose();
+  ///   }
+  ///
+  ///   double _lastTextScaleFactor;
+  ///
+  ///   @override
+  ///   void didChangeTextScaleFactor() {
+  ///     setState(() { _lastTextScaleFactor = ui.window.textScaleFactor; });
+  ///   }
+  ///
+  ///   @override
+  ///   Widget build(BuildContext context) {
+  ///     return new Text('Current scale factor: $_lastTextScaleFactor');
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [MediaQuery.of], which provides a similar service with less
+  ///    boilerplate.
+  void didChangeTextScaleFactor() { }
 
   /// Called when the system tells the app that the user's locale has
   /// changed. For example, if the user changes the system language
   /// settings.
+  ///
+  /// This method exposes notifications from [Window.onLocaleChanged].
   void didChangeLocale(Locale locale) { }
 
   /// Called when the system puts the app in the background or returns
   /// the app to the foreground.
+  ///
+  /// An example of implementing this method is provided in the class-level
+  /// documentation for the [WidgetsBindingObserver] class.
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
   void didChangeAppLifecycleState(AppLifecycleState state) { }
 
   /// Called when the system is running low on memory.
+  ///
+  /// This method exposes the `memoryPressure` notification from
+  /// [SystemChannels.system].
   void didHaveMemoryPressure() { }
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase implements GestureBinding, RendererBinding {
+abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererBinding {
+  // This class is intended to be used as a mixin, and should not be
+  // extended directly.
+  factory WidgetsBinding._() => null;
+
   @override
   void initInstances() {
     super.initInstances();
@@ -105,6 +285,17 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         return _forceRebuild();
       }
     );
+
+    registerBoolServiceExtension(
+        name: 'debugWidgetInspector',
+        getter: () async => WidgetsApp.debugShowWidgetInspectorOverride,
+        setter: (bool value) {
+          if (WidgetsApp.debugShowWidgetInspectorOverride == value)
+            return new Future<Null>.value();
+          WidgetsApp.debugShowWidgetInspectorOverride = value;
+          return _forceRebuild();
+        }
+    );
   }
 
   Future<Null> _forceRebuild() {
@@ -142,24 +333,35 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// [MediaQuery.of] static method and (implicitly) the
   /// [InheritedWidget] mechanism to be notified whenever the screen
   /// size changes (e.g. whenever the screen rotates).
+  ///
+  /// See also:
+  ///
+  ///  * [removeObserver], to release the resources reserved by this method.
+  ///  * [WidgetsBindingObserver], which has an example of using this method.
   void addObserver(WidgetsBindingObserver observer) => _observers.add(observer);
 
   /// Unregisters the given observer. This should be used sparingly as
   /// it is relatively expensive (O(N) in the number of registered
   /// observers).
+  ///
+  /// See also:
+  ///
+  ///  * [addObserver], for the method that adds observers in the first place.
+  ///  * [WidgetsBindingObserver], which has an example of using this method.
   bool removeObserver(WidgetsBindingObserver observer) => _observers.remove(observer);
 
-  /// Called when the system metrics change.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didChangeMetrics].
-  ///
-  /// See [Window.onMetricsChanged].
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeMetrics();
+  }
+
+  @override
+  void handleTextScaleFactorChanged() {
+    super.handleTextScaleFactorChanged();
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didChangeTextScaleFactor();
   }
 
   /// Called when the system locale changes.
@@ -174,6 +376,9 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Notify all the observers that the locale has changed (using
   /// [WidgetsBindingObserver.didChangeLocale]), giving them the
   /// `locale` argument.
+  ///
+  /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
+  /// notification is received.
   void dispatchLocaleChanged(Locale locale) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeLocale(locale);
@@ -182,32 +387,58 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   /// Called when the system pops the current route.
   ///
   /// This first notifies the binding observers (using
-  /// [WidgetsBindingObserver.didPopRoute]), in registration order,
-  /// until one returns true, meaning that it was able to handle the
-  /// request (e.g. by closing a dialog box). If none return true,
-  /// then the application is shut down.
+  /// [WidgetsBindingObserver.didPopRoute]), in registration order, until one
+  /// returns true, meaning that it was able to handle the request (e.g. by
+  /// closing a dialog box). If none return true, then the application is shut
+  /// down by calling [SystemNavigator.pop].
   ///
   /// [WidgetsApp] uses this in conjunction with a [Navigator] to
   /// cause the back button to close dialog boxes, return from modal
   /// pages, and so forth.
+  ///
+  /// This method exposes the `popRoute` notification from
+  /// [SystemChannels.navigation].
   Future<Null> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in  new List<WidgetsBindingObserver>.from(_observers)) {
+    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
     SystemNavigator.pop();
   }
 
-  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) async {
-    if (methodCall.method == 'popRoute')
-      handlePopRoute();
-    // TODO(abarth): Handle 'pushRoute'.
+  /// Called when the host tells the app to push a new route onto the
+  /// navigator.
+  ///
+  /// This notifies the binding observers (using
+  /// [WidgetsBindingObserver.didPushRoute]), in registration order, until one
+  /// returns true, meaning that it was able to handle the request (e.g. by
+  /// opening a dialog box). If none return true, then nothing happens.
+  ///
+  /// This method exposes the `pushRoute` notification from
+  /// [SystemChannels.navigation].
+  Future<Null> handlePushRoute(String route) async {
+    for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
+      if (await observer.didPushRoute(route))
+        return;
+    }
+  }
+
+  Future<dynamic> _handleNavigationInvocation(MethodCall methodCall) {
+    switch (methodCall.method) {
+      case 'popRoute':
+        return handlePopRoute();
+      case 'pushRoute':
+        return handlePushRoute(methodCall.arguments);
+    }
+    return new Future<Null>.value();
   }
 
   /// Called when the application lifecycle state changes.
   ///
   /// Notifies all the observers using
   /// [WidgetsBindingObserver.didChangeAppLifecycleState].
+  ///
+  /// This method exposes notifications from [SystemChannels.lifecycle].
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
@@ -231,29 +462,59 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     return null;
   }
 
+  /// Called when the operating system notifies the application of a memory
+  /// pressure situation.
+  ///
+  /// Notifies all the observers using
+  /// [WidgetsBindingObserver.didHaveMemoryPressure].
+  ///
+  /// This method exposes the `memoryPressure` notification from
+  /// [SystemChannels.system].
+  void handleMemoryPressure() {
+    for (WidgetsBindingObserver observer in _observers)
+      observer.didHaveMemoryPressure();
+  }
+
   Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
     final String type = message['type'];
-    if (type == 'memoryPressure') {
-      for (WidgetsBindingObserver observer in _observers)
-        observer.didHaveMemoryPressure();
+    switch (type) {
+      case 'memoryPressure':
+        handleMemoryPressure();
+        break;
     }
     return null;
   }
 
   bool _needToReportFirstFrame = true;
-  bool _thisFrameWasUseful = true;
+  int _deferFirstFrameReportCount = 0;
+  bool get _reportFirstFrame => _deferFirstFrameReportCount == 0;
 
-  /// Tell the framework that the frame we are currently building
-  /// should not be considered to be a useful first frame.
+  /// Tell the framework not to report the frame it is building as a "useful"
+  /// first frame until there is a corresponding call to [allowFirstFrameReport].
   ///
   /// This is used by [WidgetsApp] to report the first frame.
   //
   // TODO(ianh): This method should only be available in debug and profile modes.
-  void preventThisFrameFromBeingReportedAsFirstFrame() {
-    _thisFrameWasUseful = false;
+  void deferFirstFrameReport() {
+    assert(_deferFirstFrameReportCount >= 0);
+    _deferFirstFrameReportCount += 1;
   }
 
-  void _handleBuildScheduled() {
+  /// When called after [deferFirstFrameReport]: tell the framework to report
+  /// the frame it is building as a "useful" first frame.
+  ///
+  /// This method may only be called once for each corresponding call
+  /// to [deferFirstFrameReport].
+  ///
+  /// This is used by [WidgetsApp] to report the first frame.
+  //
+  // TODO(ianh): This method should only be available in debug and profile modes.
+  void allowFirstFrameReport() {
+    assert(_deferFirstFrameReportCount >= 1);
+    _deferFirstFrameReportCount -= 1;
+  }
+
+    void _handleBuildScheduled() {
     // If we're in the process of building dirty elements, then changes
     // should not trigger a new frame.
     assert(() {
@@ -277,7 +538,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
         );
       }
       return true;
-    });
+    }());
     ensureVisualUpdate();
   }
 
@@ -360,7 +621,7 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
     assert(() {
       debugBuildingDirtyElements = true;
       return true;
-    });
+    }());
     try {
       if (renderViewElement != null)
         buildOwner.buildScope(renderViewElement);
@@ -370,18 +631,14 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
       assert(() {
         debugBuildingDirtyElements = false;
         return true;
-      });
+      }());
     }
     // TODO(ianh): Following code should not be included in release mode, only profile and debug modes.
     // See https://github.com/dart-lang/sdk/issues/27192
-    if (_needToReportFirstFrame) {
-      if (_thisFrameWasUseful) {
-        developer.Timeline.instantSync('Widgets completed first useful frame');
-        developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
-        _needToReportFirstFrame = false;
-      } else {
-        _thisFrameWasUseful = true;
-      }
+    if (_needToReportFirstFrame && _reportFirstFrame) {
+      developer.Timeline.instantSync('Widgets completed first useful frame');
+      developer.postEvent('Flutter.FirstFrame', <String, dynamic>{});
+      _needToReportFirstFrame = false;
     }
   }
 
@@ -407,12 +664,16 @@ abstract class WidgetsBinding extends BindingBase implements GestureBinding, Ren
   }
 
   @override
-  Future<Null> reassembleApplication() {
-    _needToReportFirstFrame = true;
-    preventThisFrameFromBeingReportedAsFirstFrame();
+  Future<Null> performReassemble() {
+    deferFirstFrameReport();
     if (renderViewElement != null)
       buildOwner.reassemble(renderViewElement);
-    return super.reassembleApplication();
+    // TODO(hansmuller): eliminate the value variable after analyzer bug
+    // https://github.com/flutter/flutter/issues/11646 is fixed.
+    final Future<Null> value = super.performReassemble();
+    return value.then((Null _) {
+      allowFirstFrameReport();
+    });
   }
 }
 
@@ -449,7 +710,7 @@ void runApp(Widget app) {
 void debugDumpApp() {
   assert(WidgetsBinding.instance != null);
   String mode = 'RELEASE MODE';
-  assert(() { mode = 'CHECKED MODE'; return true; });
+  assert(() { mode = 'CHECKED MODE'; return true; }());
   debugPrint('${WidgetsBinding.instance.runtimeType} - $mode');
   if (WidgetsBinding.instance.renderViewElement != null) {
     debugPrint(WidgetsBinding.instance.renderViewElement.toStringDeep());

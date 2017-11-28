@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' show Image; // to disambiguate mentions of Image in the dartdocs
 
 import 'package:flutter/foundation.dart';
 
@@ -15,31 +14,50 @@ import 'basic_types.dart';
 /// (though not the alignment semantics).
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fill.png)
   fill,
 
   /// As large as possible while still containing the source entirely within the
   /// target box.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_contain.png)
   contain,
 
   /// As small as possible while still covering the entire target box.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_cover.png)
   cover,
 
   /// Make sure the full width of the source is shown, regardless of
   /// whether this means the source overflows the target box vertically.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitWidth.png)
   fitWidth,
 
   /// Make sure the full height of the source is shown, regardless of
   /// whether this means the source overflows the target box horizontally.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_fitHeight.png)
   fitHeight,
 
   /// Align the source within the target box (by default, centering) and discard
   /// any portions of the source that lie outside the box.
+  ///
+  /// The source image is not resized.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_none.png)
   none,
 
   /// Align the source within the target box (by default, centering) and, if
   /// necessary, scale the source down to ensure that the source fits within the
   /// box.
-  scaleDown
+  ///
+  /// This is the same as `contain` if that would shrink the image, otherwise it
+  /// is the same as `none`.
+  ///
+  /// ![](https://flutter.github.io/assets-for-api-docs/painting/box_fit_scaleDown.png)
+  scaleDown,
 }
 
 /// The pair of sizes returned by [applyBoxFit].
@@ -56,7 +74,7 @@ class FittedSizes {
   final Size destination;
 }
 
-/// Apply an [BoxFit] value.
+/// Apply a [BoxFit] value.
 ///
 /// The arguments to this method, in addition to the [BoxFit] value to apply,
 /// are two sizes, ostensibly the sizes of an input box and an output box.
@@ -80,22 +98,24 @@ class FittedSizes {
 /// This method does not express an opinion regarding the alignment of the
 /// source and destination sizes within the input and output rectangles.
 /// Typically they are centered (this is what [BoxDecoration] does, for
-/// instance, and is how [BoxFit] is defined). The [FractionalOffset] class
-/// provides a convenience function, [FractionalOffset.inscribe], for resolving
-/// the sizes to rects, as shown in the example below.
+/// instance, and is how [BoxFit] is defined). The [Alignment] class provides a
+/// convenience function, [Alignment.inscribe], for resolving the sizes to
+/// rects, as shown in the example below.
 ///
 /// ## Sample code
 ///
-/// This example paints an [Image] `image` onto the [Rect] `outputRect` on a
-/// [Canvas] `canvas`, using a [Paint] paint, applying the [BoxFit] algorithm
+/// This function paints a [dart:ui.Image] `image` onto the [Rect] `outputRect` on a
+/// [Canvas] `canvas`, using a [Paint] `paint`, applying the [BoxFit] algorithm
 /// `fit`:
 ///
 /// ```dart
-/// final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
-/// final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
-/// final Rect inputSubrect = FractionalOffset.center.inscribe(sizes.source, Offset.zero & imageSize);
-/// final Rect outputSubrect = FractionalOffset.center.inscribe(sizes.destination, outputRect);
-/// canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// void paintImage(ui.Image image, Rect outputRect, Canvas canvas, Paint paint, BoxFit fit) {
+///   final Size imageSize = new Size(image.width.toDouble(), image.height.toDouble());
+///   final FittedSizes sizes = applyBoxFit(fit, imageSize, outputRect.size);
+///   final Rect inputSubrect = Alignment.center.inscribe(sizes.source, Offset.zero & imageSize);
+///   final Rect outputSubrect = Alignment.center.inscribe(sizes.destination, outputRect);
+///   canvas.drawImageRect(image, inputSubrect, outputSubrect, paint);
+/// }
 /// ```
 ///
 /// See also:
@@ -105,6 +125,9 @@ class FittedSizes {
 ///  * [DecoratedBox], [BoxDecoration], and [DecorationImage], which together
 ///    provide access to [paintImage] at the widgets layer.
 FittedSizes applyBoxFit(BoxFit fit, Size inputSize, Size outputSize) {
+  if (inputSize.height <= 0.0 || inputSize.width <= 0.0 || outputSize.height <= 0.0 || outputSize.width <= 0.0)
+    return const FittedSizes(Size.zero, Size.zero);
+
   Size sourceSize, destinationSize;
   switch (fit) {
     case BoxFit.fill:

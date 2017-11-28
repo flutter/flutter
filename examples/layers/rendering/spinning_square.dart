@@ -34,12 +34,12 @@ void main() {
   // spin.
   final RenderTransform spin = new RenderTransform(
     transform: new Matrix4.identity(),
-    alignment: FractionalOffset.center,
+    alignment: Alignment.center,
     child: square
   );
   // Finally, we center the spinning green square...
   final RenderBox root = new RenderPositionedBox(
-    alignment: FractionalOffset.center,
+    alignment: Alignment.center,
     child: spin
   );
   // and attach it to the window.

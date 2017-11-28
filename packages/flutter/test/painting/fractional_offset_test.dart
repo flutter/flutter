@@ -7,14 +7,20 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('FractionalOffset control test', () {
-    const FractionalOffset offset = const FractionalOffset(0.5, 0.25);
+    const FractionalOffset a = const FractionalOffset(0.5, 0.25);
+    const FractionalOffset b = const FractionalOffset(1.25, 0.75);
 
-    expect(offset, hasOneLineDescription);
-    expect(offset.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
+    expect(a, hasOneLineDescription);
+    expect(a.hashCode, equals(const FractionalOffset(0.5, 0.25).hashCode));
+    expect(a.toString(), equals('FractionalOffset(0.5, 0.3)'));
 
-    expect(offset / 2.0, const FractionalOffset(0.25, 0.125));
-    expect(offset ~/ 2.0, const FractionalOffset(0.0, 0.0));
-    expect(offset % 5.0, const FractionalOffset(0.5, 0.25));
+    expect(-a, const FractionalOffset(-0.5, -0.25));
+    expect(a - b, const FractionalOffset(-0.75, -0.5));
+    expect(a + b, const FractionalOffset(1.75, 1.0));
+    expect(a * 2.0, const FractionalOffset(1.0, 0.5));
+    expect(a / 2.0, const FractionalOffset(0.25, 0.125));
+    expect(a ~/ 2.0, const FractionalOffset(0.0, 0.0));
+    expect(a % 5.0, const FractionalOffset(0.5, 0.25));
   });
 
   test('FractionalOffset.lerp()', () {
@@ -23,8 +29,8 @@ void main() {
     expect(FractionalOffset.lerp(a, b, 0.25), equals(const FractionalOffset(0.125, 0.0)));
 
     expect(FractionalOffset.lerp(null, null, 0.25), isNull);
-    expect(FractionalOffset.lerp(null, b, 0.25), equals(b * 0.25));
-    expect(FractionalOffset.lerp(a, null, 0.25), equals(a * 0.75));
+    expect(FractionalOffset.lerp(null, b, 0.25), equals(const FractionalOffset(0.5, 0.5 - 0.125)));
+    expect(FractionalOffset.lerp(a, null, 0.25), equals(const FractionalOffset(0.125, 0.125)));
   });
 
   test('FractionalOffset.fromOffsetAndSize()', () {

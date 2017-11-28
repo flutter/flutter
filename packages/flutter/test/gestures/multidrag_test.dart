@@ -7,13 +7,12 @@ import 'package:flutter/gestures.dart';
 
 import 'gesture_tester.dart';
 
-class TestDrag extends Drag {
-}
+class TestDrag extends Drag { }
 
 void main() {
   setUp(ensureGestureBinding);
 
-  testGesture('MultiDrag control test', (GestureTester tester) {
+  testGesture('MultiDrag: moving before delay rejects', (GestureTester tester) {
     final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
 
     bool didStartDrag = false;
@@ -29,12 +28,37 @@ void main() {
     expect(didStartDrag, isFalse);
     tester.async.flushMicrotasks();
     expect(didStartDrag, isFalse);
-    tester.route(pointer.move(const Offset(20.0, 20.0)));
+    tester.route(pointer.move(const Offset(20.0, 60.0))); // move more than touch slop before delay expires
     expect(didStartDrag, isFalse);
-    tester.async.elapse(kLongPressTimeout * 2);
+    tester.async.elapse(kLongPressTimeout * 2); // expire delay
     expect(didStartDrag, isFalse);
-    tester.route(pointer.move(const Offset(30.0, 30.0)));
+    tester.route(pointer.move(const Offset(30.0, 120.0))); // move some more after delay expires
     expect(didStartDrag, isFalse);
+    drag.dispose();
+  });
+
+  testGesture('MultiDrag: delay triggers', (GestureTester tester) {
+    final DelayedMultiDragGestureRecognizer drag = new DelayedMultiDragGestureRecognizer();
+
+    bool didStartDrag = false;
+    drag.onStart = (Offset position) {
+      didStartDrag = true;
+      return new TestDrag();
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(didStartDrag, isFalse);
+    tester.async.flushMicrotasks();
+    expect(didStartDrag, isFalse);
+    tester.route(pointer.move(const Offset(20.0, 20.0))); // move less than touch slop before delay expires
+    expect(didStartDrag, isFalse);
+    tester.async.elapse(kLongPressTimeout * 2); // expire delay
+    expect(didStartDrag, isTrue);
+    tester.route(pointer.move(const Offset(30.0, 70.0))); // move more than touch slop after delay expires
+    expect(didStartDrag, isTrue);
     drag.dispose();
   });
 }

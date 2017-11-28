@@ -10,9 +10,6 @@ import 'edge_insets.dart';
 
 export 'package:flutter/services.dart' show ImageConfiguration;
 
-export 'basic_types.dart' show Offset, Size;
-export 'edge_insets.dart' show EdgeInsets;
-
 // This group of classes is intended for painting in cartesian coordinates.
 
 /// A description of a box decoration (a decoration applied to a [Rect]).
@@ -25,10 +22,13 @@ export 'edge_insets.dart' show EdgeInsets;
 /// shared between boxes; [BoxPainter] objects can cache resources to
 /// make painting on a particular surface faster.
 @immutable
-abstract class Decoration {
+abstract class Decoration extends Diagnosticable {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Decoration();
+
+  @override
+  String toStringShort() => '$runtimeType';
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -44,27 +44,77 @@ abstract class Decoration {
   /// of the decoration. For example, if the decoration draws a frame
   /// around its edge, the padding would return the distance by which
   /// to inset the children so as to not overlap the frame.
-  EdgeInsets get padding => null;
+  ///
+  /// This only works for decorations that have absolute sizes. If the padding
+  /// needed would change based on the size at which the decoration is drawn,
+  /// then this will return incorrect padding values.
+  ///
+  /// For example, when a [BoxDecoration] has [BoxShape.circle], the padding
+  /// does not take into account that the circle is drawn in the center of the
+  /// box regardless of the ratio of the box; it does not provide the extra
+  /// padding that is implied by changing the ratio.
+  ///
+  /// The value returned by this getter must be resolved (using
+  /// [EdgeInsetsGeometry.resolve] to obtain an absolute [EdgeInsets]. (For
+  /// example, [BorderDirectional] will return an [EdgeInsetsDirectional] for
+  /// its [padding].)
+  EdgeInsetsGeometry get padding => EdgeInsets.zero;
 
   /// Whether this decoration is complex enough to benefit from caching its painting.
   bool get isComplex => false;
 
-  /// Linearly interpolates from [a] to [this].
-  Decoration lerpFrom(Decoration a, double t) => this;
-
-  /// Linearly interpolates from [this] to [b].
-  Decoration lerpTo(Decoration b, double t) => b;
-
-  /// Linearly interpolates from [begin] to [end].
+  /// Linearly interpolates from `a` to [this].
   ///
-  /// This defers to [end]'s [lerpTo] function if [end] is not null,
-  /// otherwise it uses [begin]'s [lerpFrom] function.
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `a`. In that case, [lerp] will try `a`'s [lerpTo]
+  /// method instead.
+  ///
+  /// Supporting interpolating from null is recommended as the [Decoration.lerp]
+  /// method uses this as a fallback when two classes can't interpolate between
+  /// each other.
+  ///
+  /// Instead of calling this directly, use [Decoration.lerp].
+  @protected
+  Decoration lerpFrom(Decoration a, double t) => null;
+
+  /// Linearly interpolates from [this] to `b`.
+  ///
+  /// This is called if `b`'s [lerpTo] did not know how to handle this class.
+  ///
+  /// When implementing this method in subclasses, return null if this class
+  /// cannot interpolate from `b`. In that case, [lerp] will apply a default
+  /// behavior instead.
+  ///
+  /// Supporting interpolating to null is recommended as the [Decoration.lerp]
+  /// method uses this as a fallback when two classes can't interpolate between
+  /// each other.
+  ///
+  /// Instead of calling this directly, use [Decoration.lerp].
+  @protected
+  Decoration lerpTo(Decoration b, double t) => null;
+
+  /// Linearly interpolates from `begin` to `end`.
+  ///
+  /// This attempts to use [lerpFrom] and [lerpTo] on `end` and `begin`
+  /// respectively to find a solution. If the two values can't directly be
+  /// interpolated, then the interpolation is done via null (at `t == 0.5`).
+  ///
+  /// If the values aren't null, then for `t == 0.0` and `t == 1.0` the values
+  /// `begin` and `end` are return verbatim.
   static Decoration lerp(Decoration begin, Decoration end, double t) {
-    if (end != null)
-      return end.lerpFrom(begin, t);
-    if (begin != null)
-      return begin.lerpTo(end, t);
-    return null;
+    if (begin == null && end == null)
+      return null;
+    if (begin == null)
+      return end.lerpFrom(null, t) ?? end;
+    if (end == null)
+      return begin.lerpTo(null, t) ?? begin;
+    if (t == 0.0)
+      return begin;
+    if (t == 1.0)
+      return end;
+    return end.lerpFrom(begin, t)
+        ?? begin.lerpTo(end, t)
+        ?? (t < 0.5 ? begin.lerpTo(null, t * 2.0) : end.lerpFrom(null, (t - 0.5) * 2.0));
   }
 
   /// Tests whether the given point, on a rectangle of a given size,
@@ -72,7 +122,12 @@ abstract class Decoration {
   /// if the decoration only draws a circle, this function might
   /// return true if the point was inside the circle and false
   /// otherwise.
-  bool hitTest(Size size, Offset position) => true;
+  ///
+  /// The decoration may be sensitive to the [TextDirection]. The
+  /// `textDirection` argument should therefore be provided. If it is known that
+  /// the decoration is not affected by the text direction, then the argument
+  /// may be omitted or set to null.
+  bool hitTest(Size size, Offset position, { TextDirection textDirection }) => true;
 
   /// Returns a [BoxPainter] that will paint this decoration.
   ///
@@ -80,17 +135,6 @@ abstract class Decoration {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([VoidCallback onChanged]);
-
-  /// Returns a string representation of this object.
-  ///
-  /// Every line of the output should be prefixed by `prefix`.
-  ///
-  /// If `indentPrefix` is non-null, then the description can be further split
-  /// into sublines, and each subline should be prefixed with `indentPrefix`
-  /// (rather that `prefix`). This is used, for example, by [BoxDecoration] for
-  /// the otherwise quite verbose [BoxShadow] descriptions.
-  @override
-  String toString([String prefix = '', String indentPrefix ]) => '$prefix$runtimeType';
 }
 
 /// A stateful class that can paint a particular [Decoration].
@@ -104,7 +148,7 @@ abstract class Decoration {
 abstract class BoxPainter {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  BoxPainter([this._onChanged]);
+  BoxPainter([this.onChanged]);
 
   /// Paints the [Decoration] for which this object was created on the
   /// given canvas using the given configuration.
@@ -136,13 +180,12 @@ abstract class BoxPainter {
   ///
   /// Resources might not start to load until after [paint] has been called,
   /// because they might depend on the configuration.
-  VoidCallback get onChanged => _onChanged;
-  VoidCallback _onChanged;
+  final VoidCallback onChanged;
 
-  /// Discard any resources being held by the object. This also guarantees that
-  /// the [onChanged] callback will not be called again.
+  /// Discard any resources being held by the object.
+  ///
+  /// The [onChanged] callback will not be invoked after this method has been
+  /// called.
   @mustCallSuper
-  void dispose() {
-    _onChanged = null;
-  }
+  void dispose() { }
 }

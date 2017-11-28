@@ -127,7 +127,7 @@ void main() {
     });
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 2');
-      throw "Having a bad day!";
+      throw 'Having a bad day!';
     });
     router.addRoute(2, (PointerEvent event) {
       log.add('per-pointer 3');

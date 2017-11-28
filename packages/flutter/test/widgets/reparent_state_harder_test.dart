@@ -38,7 +38,8 @@ class OrderSwitcherState extends State<OrderSwitcher> {
       children.add(widget.a);
     }
     return new Stack(
-      children: children
+      textDirection: TextDirection.ltr,
+      children: children,
     );
   }
 }
@@ -52,7 +53,7 @@ class DummyStatefulWidget extends StatefulWidget {
 
 class DummyStatefulWidgetState extends State<DummyStatefulWidget> {
   @override
-  Widget build(BuildContext context) => const Text('LEAF');
+  Widget build(BuildContext context) => const Text('LEAF', textDirection: TextDirection.ltr);
 }
 
 class RekeyableDummyStatefulWidgetWrapper extends StatefulWidget {

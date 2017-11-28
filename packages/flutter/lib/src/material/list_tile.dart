@@ -294,7 +294,7 @@ class ListTile extends StatelessWidget {
         position: DecorationPosition.foreground,
         decoration: new BoxDecoration(
           border: new Border(
-            bottom: new BorderSide(color: dividerColor),
+            bottom: new BorderSide(color: dividerColor, width: 0.0),
           ),
         ),
         child: tile,
@@ -351,9 +351,19 @@ class ListTile extends StatelessWidget {
   }
 
   TextStyle _titleTextStyle(ThemeData theme, ListTileTheme tileTheme) {
-    final TextStyle style = tileTheme?.style == ListTileStyle.drawer
-      ? theme.textTheme.body2
-      : theme.textTheme.subhead;
+    TextStyle style;
+    if (tileTheme != null) {
+      switch (tileTheme.style) {
+        case ListTileStyle.drawer:
+          style = theme.textTheme.body2;
+          break;
+        case ListTileStyle.list:
+          style = theme.textTheme.subhead;
+          break;
+      }
+    } else {
+      style = theme.textTheme.subhead;
+    }
     final Color color = _textColor(theme, tileTheme, style.color);
     return _denseLayout(tileTheme)
       ? style.copyWith(fontSize: 13.0, color: color)
@@ -387,13 +397,17 @@ class ListTile extends StatelessWidget {
     // Overall, the list tile is a Row() with these children.
     final List<Widget> children = <Widget>[];
 
+    IconThemeData iconThemeData;
+    if (leading != null || trailing != null)
+      iconThemeData = new IconThemeData(color: _iconColor(theme, tileTheme));
+
     if (leading != null) {
       children.add(IconTheme.merge(
-        data: new IconThemeData(color: _iconColor(theme, tileTheme)),
+        data: iconThemeData,
         child: new Container(
-          margin: const EdgeInsets.only(right: 16.0),
+          margin: const EdgeInsetsDirectional.only(end: 16.0),
           width: 40.0,
-          alignment: FractionalOffset.centerLeft,
+          alignment: AlignmentDirectional.centerStart,
           child: leading,
         ),
       ));
@@ -424,21 +438,29 @@ class ListTile extends StatelessWidget {
     ));
 
     if (trailing != null) {
-      children.add(new Container(
-        margin: const EdgeInsets.only(left: 16.0),
-        alignment: FractionalOffset.centerRight,
-        child: trailing,
+      children.add(IconTheme.merge(
+        data: iconThemeData,
+        child: new Container(
+          margin: const EdgeInsetsDirectional.only(start: 16.0),
+          alignment: AlignmentDirectional.centerEnd,
+          child: trailing,
+        ),
       ));
     }
 
     return new InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      child: new Container(
-        height: tileHeight,
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: new Row(children: children),
-      )
+      child: new ConstrainedBox(
+        constraints: new BoxConstraints(minHeight: tileHeight),
+        child: new Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: new UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
+            child: new Row(children: children),
+          ),
+        )
+      ),
     );
   }
 }

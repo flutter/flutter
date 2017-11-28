@@ -10,7 +10,7 @@ void main() {
   testWidgets('OverflowBox control test', (WidgetTester tester) async {
     final GlobalKey inner = new GlobalKey();
     await tester.pumpWidget(new Align(
-      alignment: const FractionalOffset(1.0, 1.0),
+      alignment: const Alignment(1.0, 1.0),
       child: new SizedBox(
         width: 10.0,
         height: 20.0,
@@ -30,16 +30,19 @@ void main() {
     expect(box.size, equals(const Size(100.0, 50.0)));
   });
 
-  testWidgets('OverflowBox implements debugFillDescription', (WidgetTester tester) async {
-    final List<String> description = <String>[];
+  testWidgets('OverflowBox implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
     const OverflowBox(
       minWidth: 1.0,
       maxWidth: 2.0,
       minHeight: 3.0,
       maxHeight: 4.0
-    ).debugFillDescription(description);
+    ).debugFillProperties(builder);
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode n) => !n.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
-      'alignment: FractionalOffset(0.5, 0.5)',
+      'alignment: Alignment.center',
       'minWidth: 1.0',
       'maxWidth: 2.0',
       'minHeight: 3.0',

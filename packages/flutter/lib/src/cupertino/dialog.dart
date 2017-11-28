@@ -53,11 +53,14 @@ const BoxDecoration _kCupertinoDialogBackFill = const BoxDecoration(
 /// dialog. Rather than using this widget directly, consider using
 /// [CupertinoAlertDialog], which implement a specific kind of dialog.
 ///
+/// Push with `Navigator.of(..., rootNavigator: true)` when using with
+/// [CupertinoTabScaffold] to ensure that the dialog appears above the tabs.
+///
 /// See also:
 ///
 ///  * [CupertinoAlertDialog], which is a dialog with title, contents, and
 ///    actions.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-views/alerts/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoDialog extends StatelessWidget {
   /// Creates an iOS-style dialog.
   const CupertinoDialog({
@@ -105,7 +108,7 @@ class CupertinoDialog extends StatelessWidget {
 /// See also:
 ///
 ///  * [CupertinoDialog], which is a generic iOS-style dialog.
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-views/alerts/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/views/alerts/>
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
   const CupertinoAlertDialog({
@@ -187,7 +190,8 @@ class CupertinoAlertDialog extends StatelessWidget {
 ///
 /// See also:
 ///
-///  * [CupertinoAlertDialog]
+///  * [CupertinoAlertDialog], a dialog that informs the user about situations
+///    that require acknowledgement
 class CupertinoDialogAction extends StatelessWidget {
   /// Creates an action for an iOS-style dialog.
   const CupertinoDialogAction({

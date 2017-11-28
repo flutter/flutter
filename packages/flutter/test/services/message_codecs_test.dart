@@ -177,6 +177,14 @@ void main() {
       ];
       _checkEncodeDecode<dynamic>(standard, message);
     });
+    test('should align doubles to 8 bytes', () {
+      _checkEncoding<dynamic>(
+        standard,
+        1.0,
+        <int>[6, 0, 0, 0, 0, 0, 0, 0,
+              0, 0, 0, 0, 0, 0, 0xf0, 0x3f],
+      );
+    });
   });
 }
 

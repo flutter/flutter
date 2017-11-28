@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../globals.dart';
@@ -20,7 +21,7 @@ String flutterFrameworkDir(BuildMode mode) {
 
 void updateXcodeGeneratedProperties({
   @required String projectPath,
-  @required BuildMode mode,
+  @required BuildInfo buildInfo,
   @required String target,
   @required bool hasPlugins,
 }) {
@@ -38,21 +39,21 @@ void updateXcodeGeneratedProperties({
   localsBuffer.writeln('FLUTTER_TARGET=$target');
 
   // The runtime mode for the current build.
-  localsBuffer.writeln('FLUTTER_BUILD_MODE=${getModeName(mode)}');
+  localsBuffer.writeln('FLUTTER_BUILD_MODE=${buildInfo.modeName}');
 
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 
   localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
 
-  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(mode)}');
+  localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
 
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
   }
 
-  // Add dependency to CocoaPods' generated project only if plugns are used.
+  // Add dependency to CocoaPods' generated project only if plugins are used.
   if (hasPlugins)
     localsBuffer.writeln('#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"');
 
@@ -74,7 +75,6 @@ Map<String, String> getXcodeBuildSettings(String xcodeProjPath, String target) {
   return settings;
 }
 
-
 /// Substitutes variables in [str] with their values from the specified Xcode
 /// project and target.
 String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettings) {
@@ -83,4 +83,112 @@ String substituteXcodeVariables(String str, Map<String, String> xcodeBuildSettin
     return str;
 
   return str.replaceAllMapped(_varExpr, (Match m) => xcodeBuildSettings[m[1]] ?? m[0]);
+}
+
+/// Information about an Xcode project.
+///
+/// Represents the output of `xcodebuild -list`.
+class XcodeProjectInfo {
+  XcodeProjectInfo(this.targets, this.buildConfigurations, this.schemes);
+
+  factory XcodeProjectInfo.fromProjectSync(String projectPath) {
+    final String out = runCheckedSync(<String>[
+      '/usr/bin/xcodebuild', '-list',
+    ], workingDirectory: projectPath);
+    return new XcodeProjectInfo.fromXcodeBuildOutput(out);
+  }
+
+  factory XcodeProjectInfo.fromXcodeBuildOutput(String output) {
+    final List<String> targets = <String>[];
+    final List<String> buildConfigurations = <String>[];
+    final List<String> schemes = <String>[];
+    List<String> collector;
+    for (String line in output.split('\n')) {
+      if (line.isEmpty) {
+        collector = null;
+        continue;
+      } else if (line.endsWith('Targets:')) {
+        collector = targets;
+        continue;
+      } else if (line.endsWith('Build Configurations:')) {
+        collector = buildConfigurations;
+        continue;
+      } else if (line.endsWith('Schemes:')) {
+        collector = schemes;
+        continue;
+      }
+      collector?.add(line.trim());
+    }
+    if (schemes.isEmpty)
+      schemes.add('Runner');
+    return new XcodeProjectInfo(targets, buildConfigurations, schemes);
+  }
+
+  final List<String> targets;
+  final List<String> buildConfigurations;
+  final List<String> schemes;
+
+  bool get definesCustomTargets => !(targets.contains('Runner') && targets.length == 1);
+  bool get definesCustomSchemes => !(schemes.contains('Runner') && schemes.length == 1);
+  bool get definesCustomBuildConfigurations {
+    return !(buildConfigurations.contains('Debug') &&
+        buildConfigurations.contains('Release') &&
+        buildConfigurations.length == 2);
+  }
+
+  /// The expected scheme for [buildInfo].
+  static String expectedSchemeFor(BuildInfo buildInfo) {
+    return toTitleCase(buildInfo.flavor ?? 'runner');
+  }
+
+  /// The expected build configuration for [buildInfo] and [scheme].
+  static String expectedBuildConfigurationFor(BuildInfo buildInfo, String scheme) {
+    final String baseConfiguration = _baseConfigurationFor(buildInfo);
+    if (buildInfo.flavor == null)
+      return baseConfiguration;
+    else
+      return baseConfiguration + '-$scheme';
+  }
+
+  /// Returns unique scheme matching [buildInfo], or null, if there is no unique
+  /// best match.
+  String schemeFor(BuildInfo buildInfo) {
+    final String expectedScheme = expectedSchemeFor(buildInfo);
+    if (schemes.contains(expectedScheme))
+      return expectedScheme;
+    return _uniqueMatch(schemes, (String candidate) {
+      return candidate.toLowerCase() == expectedScheme.toLowerCase();
+    });
+  }
+
+  /// Returns unique build configuration matching [buildInfo] and [scheme], or
+  /// null, if there is no unique best match.
+  String buildConfigurationFor(BuildInfo buildInfo, String scheme) {
+    final String expectedConfiguration = expectedBuildConfigurationFor(buildInfo, scheme);
+    if (buildConfigurations.contains(expectedConfiguration))
+      return expectedConfiguration;
+    final String baseConfiguration = _baseConfigurationFor(buildInfo);
+    return _uniqueMatch(buildConfigurations, (String candidate) {
+      candidate = candidate.toLowerCase();
+      if (buildInfo.flavor == null)
+        return candidate == expectedConfiguration.toLowerCase();
+      else
+        return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
+    });
+  }
+
+  static String _baseConfigurationFor(BuildInfo buildInfo) => buildInfo.isDebug ? 'Debug' : 'Release';
+
+  static String _uniqueMatch(Iterable<String> strings, bool matches(String s)) {
+    final List<String> options = strings.where(matches).toList();
+    if (options.length == 1)
+      return options.first;
+    else
+      return null;
+  }
+
+  @override
+  String toString() {
+    return 'XcodeProjectInfo($targets, $buildConfigurations, $schemes)';
+  }
 }

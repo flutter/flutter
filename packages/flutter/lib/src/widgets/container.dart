@@ -25,7 +25,7 @@ import 'image.dart';
 /// new DecoratedBox(
 ///   decoration: new BoxDecoration(
 ///     gradient: new RadialGradient(
-///       center: const FractionalOffset(0.25, 0.3),
+///       center: const Alignment(-0.5, -0.6),
 ///       radius: 0.15,
 ///       colors: <Color>[
 ///         const Color(0xFFEEEEEE),
@@ -71,7 +71,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     return new RenderDecoratedBox(
       decoration: decoration,
       position: position,
-      configuration: createLocalImageConfiguration(context)
+      configuration: createLocalImageConfiguration(context),
     );
   }
 
@@ -84,8 +84,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
     String label;
     if (position != null) {
       switch (position) {
@@ -97,10 +97,15 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
           break;
       }
     } else {
-      description.add('position: NULL');
       label = 'decoration';
     }
-    description.add(decoration != null ? '$label: $decoration' : 'no decoration');
+    description.add(new EnumProperty<DecorationPosition>('position', position, level: position != null ? DiagnosticLevel.hidden : DiagnosticLevel.info));
+    description.add(new DiagnosticsProperty<Decoration>(
+      label,
+      decoration,
+      ifNull: 'no decoration',
+      showName: decoration != null,
+    ));
   }
 }
 
@@ -124,6 +129,50 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// `width`, `height`, and [constraints] arguments to the constructor override
 /// this.
 ///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
+/// Since [Container] combines a number of other widgets each with their own
+/// layout behavior, [Container]'s layout behavior is somewhat complicated.
+///
+/// tl;dr: [Container] tries, in order: to honor [alignment], to size itself to
+/// the [child], to honor the `width`, `height`, and [constraints], to expand to
+/// fit the parent, to be as small as possible.
+///
+/// More specifically:
+///
+/// If the widget has no child, no `height`, no `width`, no [constraints],
+/// and the parent provides unbounded constraints, then [Container] tries to
+/// size as small as possible.
+///
+/// If the widget has no child and no [alignment], but a `height`, `width`, or
+/// [constraints] are provided, then the [Container] tries to be as small as
+/// possible given the combination of those constraints and the parent's
+/// constraints.
+///
+/// If the widget has no child, no `height`, no `width`, no [constraints], and
+/// no [alignment], but the parent provides bounded constraints, then
+/// [Container] expands to fit the constraints provided by the parent.
+///
+/// If the widget has an [alignment], and the parent provides unbounded
+/// constraints, then the [Container] tries to size itself around the child.
+///
+/// If the widget has an [alignment], and the parent provides bounded
+/// constraints, then the [Container] tries to expand to fit the parent, and
+/// then positions the child within itself as per the [alignment].
+///
+/// Otherwise, the widget has a [child] but no `height`, no `width`, no
+/// [constraints], and no [alignment], and the [Container] passes the
+/// constraints from the parent to the child and sizes itself to match the
+/// child.
+///
+/// The [margin] and [padding] properties also affect the layout, as described
+/// in the documentation for those properties. (Their effects merely augment the
+/// rules described above.) The [decoration] can implicitly increase the
+/// [padding] (e.g. borders in a [BoxDecoration] contribute to the [padding]);
+/// see [Decoration.padding].
+///
 /// ## Sample code
 ///
 /// This example shows a 48x48 green square (placed inside a [Center] widget in
@@ -146,7 +195,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// The [constraints] are set to fit the font size plus ample headroom
 /// vertically, while expanding horizontally to fit the parent. The [padding] is
 /// used to make sure there is space between the contents and the text. The
-/// [color] makes the box teal. The [alignment] causes the [child] to be
+/// `color` makes the box teal. The [alignment] causes the [child] to be
 /// centered in the box. The [foregroundDecoration] overlays a nine-patch image
 /// onto the text. Finally, the [transform] applies a slight rotation to the
 /// entire contraption to complete the effect.
@@ -158,7 +207,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///   ),
 ///   padding: const EdgeInsets.all(8.0),
 ///   color: Colors.teal.shade700,
-///   alignment: FractionalOffset.center,
+///   alignment: Alignment.center,
 ///   child: new Text('Hello World', style: Theme.of(context).textTheme.display1.copyWith(color: Colors.white)),
 ///   foregroundDecoration: new BoxDecoration(
 ///     image: new DecorationImage(
@@ -175,6 +224,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [AnimatedContainer], a variant that smoothly animates the properties when
 ///    they change.
 ///  * [Border], which has a sample which uses [Container] heavily.
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
   ///
@@ -198,22 +248,21 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-  }) : decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+  }) : assert(margin == null || margin.isNonNegative),
+       assert(padding == null || padding.isNonNegative),
+       assert(decoration == null || decoration.debugAssertIsValid()),
+       assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(color == null || decoration == null,
+         'Cannot provide both a color and a decoration\n'
+         'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
+       ),
+       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
        constraints =
         (width != null || height != null)
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key) {
-    assert(margin == null || margin.isNonNegative);
-    assert(padding == null || padding.isNonNegative);
-    assert(decoration == null || decoration.debugAssertIsValid());
-    assert(constraints == null || constraints.debugAssertIsValid());
-    assert(color == null || decoration == null,
-      'Cannot provide both a color and a decoration\n'
-      'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
-    );
-  }
+       super(key: key);
 
   /// The [child] contained by the container.
   ///
@@ -230,11 +279,11 @@ class Container extends StatelessWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
-  final FractionalOffset alignment;
+  final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   /// The decoration to paint behind the [child].
   ///
@@ -255,18 +304,18 @@ class Container extends StatelessWidget {
   final BoxConstraints constraints;
 
   /// Empty space to surround the [decoration] and [child].
-  final EdgeInsets margin;
+  final EdgeInsetsGeometry margin;
 
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  EdgeInsets get _paddingIncludingDecoration {
+  EdgeInsetsGeometry get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
-    final EdgeInsets decorationPadding = decoration.padding;
+    final EdgeInsetsGeometry decorationPadding = decoration.padding;
     if (padding == null)
       return decorationPadding;
-    return padding + decorationPadding;
+    return padding.add(decorationPadding);
   }
 
   @override
@@ -284,7 +333,7 @@ class Container extends StatelessWidget {
     if (alignment != null)
       current = new Align(alignment: alignment, child: current);
 
-    final EdgeInsets effectivePadding = _paddingIncludingDecoration;
+    final EdgeInsetsGeometry effectivePadding = _paddingIncludingDecoration;
     if (effectivePadding != null)
       current = new Padding(padding: effectivePadding, child: current);
 
@@ -312,21 +361,14 @@ class Container extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (alignment != null)
-      description.add('$alignment');
-    if (padding != null)
-      description.add('padding: $padding');
-    if (decoration != null)
-      description.add('bg: $decoration');
-    if (foregroundDecoration != null)
-      description.add('fg: $foregroundDecoration');
-    if (constraints != null)
-      description.add('$constraints');
-    if (margin != null)
-      description.add('margin: $margin');
-    if (transform != null)
-      description.add('has transform');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
+    description.add(new DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
+    description.add(new DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
+    description.add(new ObjectFlagProperty<Matrix4>.has('transform', transform));
   }
 }

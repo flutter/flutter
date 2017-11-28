@@ -24,7 +24,8 @@ void main() {
     for (TargetPlatform platform in TargetPlatform.values) {
       final ThemeData theme = new ThemeData(platform: platform);
       final Typography typography = new Typography(platform: platform);
-      expect(theme.textTheme, typography.black, reason: 'Not using default typography for $platform');
+      expect(theme.textTheme, typography.black.apply(decoration: TextDecoration.none),
+          reason: 'Not using default typography for $platform');
     }
   });
 
@@ -90,7 +91,20 @@ void main() {
     expect(themeData.accentTextTheme.display4.fontFamily, equals('Ahem'));
   });
 
-  test('Can estimate brightness', () {
+  test('Can estimate brightness - directly', () {
+    expect(ThemeData.estimateBrightnessForColor(Colors.white), equals(Brightness.light));
+    expect(ThemeData.estimateBrightnessForColor(Colors.black), equals(Brightness.dark));
+    expect(ThemeData.estimateBrightnessForColor(Colors.blue), equals(Brightness.dark));
+    expect(ThemeData.estimateBrightnessForColor(Colors.yellow), equals(Brightness.light));
+    expect(ThemeData.estimateBrightnessForColor(Colors.deepOrange), equals(Brightness.dark));
+    expect(ThemeData.estimateBrightnessForColor(Colors.orange), equals(Brightness.light));
+    expect(ThemeData.estimateBrightnessForColor(Colors.lime), equals(Brightness.light));
+    expect(ThemeData.estimateBrightnessForColor(Colors.grey), equals(Brightness.light));
+    expect(ThemeData.estimateBrightnessForColor(Colors.teal), equals(Brightness.dark));
+    expect(ThemeData.estimateBrightnessForColor(Colors.indigo), equals(Brightness.dark));
+  });
+
+  test('Can estimate brightness - indirectly', () {
     expect(new ThemeData(primaryColor: Colors.white).primaryColorBrightness, equals(Brightness.light));
     expect(new ThemeData(primaryColor: Colors.black).primaryColorBrightness, equals(Brightness.dark));
     expect(new ThemeData(primaryColor: Colors.blue).primaryColorBrightness, equals(Brightness.dark));

@@ -5,8 +5,8 @@
 import 'dart:async';
 import 'dart:io' show File;
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image;
-import 'dart:ui' show Size, Locale, hashValues;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
+import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -14,11 +14,17 @@ import 'package:http/http.dart' as http;
 import 'asset_bundle.dart';
 import 'http_client.dart';
 import 'image_cache.dart';
-import 'image_decoder.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
 /// select a specific image.
+///
+/// See also:
+///
+///  * [createLocalImageConfiguration], which creates an [ImageConfiguration]
+///    based on ambient configuration in a [Widget] environment.
+///  * [ImageProvider], which uses [ImageConfiguration] objects to determine
+///    which image to obtain.
 @immutable
 class ImageConfiguration {
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -29,8 +35,9 @@ class ImageConfiguration {
     this.bundle,
     this.devicePixelRatio,
     this.locale,
+    this.textDirection,
     this.size,
-    this.platform
+    this.platform,
   });
 
   /// Creates an object holding the configuration information for an [ImageProvider].
@@ -41,15 +48,17 @@ class ImageConfiguration {
     AssetBundle bundle,
     double devicePixelRatio,
     Locale locale,
+    TextDirection textDirection,
     Size size,
-    String platform
+    String platform,
   }) {
     return new ImageConfiguration(
       bundle: bundle ?? this.bundle,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       locale: locale ?? this.locale,
+      textDirection: textDirection ?? this.textDirection,
       size: size ?? this.size,
-      platform: platform ?? this.platform
+      platform: platform ?? this.platform,
     );
   }
 
@@ -63,14 +72,17 @@ class ImageConfiguration {
   /// The language and region for which to select the image.
   final Locale locale;
 
+  /// The reading direction of the language for which to select the image.
+  final TextDirection textDirection;
+
   /// The size at which the image will be rendered.
   final Size size;
 
-  /// A string (same as [Platform.operatingSystem]) that represents the platform
-  /// for which assets should be used. This allows images to be specified in a
-  /// platform-neutral fashion yet use different assets on different platforms,
-  /// to match local conventions e.g. for color matching or shadows.
-  final String platform;
+  /// The [TargetPlatform] for which assets should be used. This allows images
+  /// to be specified in a platform-neutral fashion yet use different assets on
+  /// different platforms, to match local conventions e.g. for color matching or
+  /// shadows.
+  final TargetPlatform platform;
 
   /// An image configuration that provides no additional information.
   ///
@@ -85,6 +97,7 @@ class ImageConfiguration {
     return typedOther.bundle == bundle
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.locale == locale
+        && typedOther.textDirection == textDirection
         && typedOther.size == size
         && typedOther.platform == platform;
   }
@@ -115,6 +128,12 @@ class ImageConfiguration {
       result.write('locale: $locale');
       hasArguments = true;
     }
+    if (textDirection != null) {
+      if (hasArguments)
+        result.write(', ');
+      result.write('textDirection: $textDirection');
+      hasArguments = true;
+    }
     if (size != null) {
       if (hasArguments)
         result.write(', ');
@@ -124,7 +143,7 @@ class ImageConfiguration {
     if (platform != null) {
       if (hasArguments)
         result.write(', ');
-      result.write('platform: $platform');
+      result.write('platform: ${describeEnum(platform)}');
       hasArguments = true;
     }
     result.write(')');
@@ -139,7 +158,7 @@ class ImageConfiguration {
 /// To obtain an [ImageStream] from an [ImageProvider], call [resolve],
 /// passing it an [ImageConfiguration] object.
 ///
-/// ImageProvides uses the global [imageCache] to cache images.
+/// [ImageProvider] uses the global [imageCache] to cache images.
 ///
 /// The type argument `T` is the type of the object used to represent a resolved
 /// configuration. This is also the type used for the key in the image cache. It
@@ -149,6 +168,81 @@ class ImageConfiguration {
 ///
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
+///
+/// ## Sample code
+///
+/// The following shows the code required to write a widget that fully conforms
+/// to the [ImageProvider] and [Widget] protocols. (It is essentially a
+/// bare-bones version of the [widgets.Image] widget.)
+///
+/// ```dart
+/// class MyImage extends StatefulWidget {
+///   const MyImage({
+///     Key key,
+///     @required this.imageProvider,
+///   }) : assert(imageProvider != null),
+///        super(key: key);
+///
+///   final ImageProvider imageProvider;
+///
+///   @override
+///   _MyImageState createState() => new _MyImageState();
+/// }
+///
+/// class _MyImageState extends State<MyImage> {
+///   ImageStream _imageStream;
+///   ImageInfo _imageInfo;
+///
+///   @override
+///   void didChangeDependencies() {
+///     super.didChangeDependencies();
+///     // We call _getImage here because createLocalImageConfiguration() needs to
+///     // be called again if the dependencies changed, in case the changes relate
+///     // to the DefaultAssetBundle, MediaQuery, etc, which that method uses.
+///     _getImage();
+///   }
+///
+///   @override
+///   void didUpdateWidget(MyImage oldWidget) {
+///     super.didUpdateWidget(oldWidget);
+///     if (widget.imageProvider != oldWidget.imageProvider)
+///       _getImage();
+///   }
+///
+///   void _getImage() {
+///     final ImageStream oldImageStream = _imageStream;
+///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
+///     if (_imageStream.key != oldImageStream?.key) {
+///       // If the keys are the same, then we got the same image back, and so we don't
+///       // need to update the listeners. If the key changed, though, we must make sure
+///       // to switch our listeners to the new image stream.
+///       oldImageStream?.removeListener(_updateImage);
+///       _imageStream.addListener(_updateImage);
+///     }
+///   }
+///
+///   void _updateImage(ImageInfo imageInfo, bool synchronousCall) {
+///     setState(() {
+///       // Trigger a build whenever the image changes.
+///       _imageInfo = imageInfo;
+///     });
+///   }
+///
+///   @override
+///   void dispose() {
+///     _imageStream.removeListener(_updateImage);
+///     super.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return new RawImage(
+///       image: _imageInfo?.image, // this is a dart:ui Image object
+///       scale: _imageInfo?.scale ?? 1.0,
+///     );
+///   }
+/// }
+/// ```
 @optionalTypeArgs
 abstract class ImageProvider<T> {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -270,8 +364,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// image using [loadAsync].
   @override
   ImageStreamCompleter load(AssetBundleImageKey key) {
-    return new OneFrameImageStreamCompleter(
-      loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -284,29 +379,21 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ImageInfo> loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    final ui.Image image = await decodeImage(data);
-    if (image == null)
-      throw 'Unable to decode image data';
-    return new ImageInfo(image: image, scale: key.scale);
-  }
-
-  /// Converts raw image data from a [ByteData] buffer into a decoded
-  /// [ui.Image] which can be passed to a [Canvas].
-  ///
-  /// By default, this just uses [decodeImageFromList]. This method could be
-  /// overridden in subclasses (e.g. for testing).
-  Future<ui.Image> decodeImage(ByteData data) {
-    return decodeImageFromList(data.buffer.asUint8List());
+    return await ui.instantiateImageCodec(data.buffer.asUint8List());
   }
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
 ///
-/// Cache headers from the server are ignored.
+/// The image will be cached regardless of cache headers from the server.
+///
+/// See also:
+///
+///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
 // TODO(ianh): Find some way to honour cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
@@ -314,7 +401,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale: 1.0 })
+  const NetworkImage(this.url, { this.scale: 1.0 , this.headers })
       : assert(url != null),
         assert(scale != null);
 
@@ -324,6 +411,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
 
+  /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
+  final Map<String, String> headers;
+
   @override
   Future<NetworkImage> obtainKey(ImageConfiguration configuration) {
     return new SynchronousFuture<NetworkImage>(this);
@@ -331,8 +421,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
@@ -342,26 +433,19 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   static final http.Client _httpClient = createHttpClient();
 
-  Future<ImageInfo> _loadAsync(NetworkImage key) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
-    final http.Response response = await _httpClient.get(resolved);
+    final http.Response response = await _httpClient.get(resolved, headers: headers);
     if (response == null || response.statusCode != 200)
-      return null;
+      throw new Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
     final Uint8List bytes = response.bodyBytes;
     if (bytes.lengthInBytes == 0)
-      return null;
+      throw new Exception('NetworkImage is an empty file: $resolved');
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -382,6 +466,10 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
 /// Decodes the given [File] object as an image, associating it with the given
 /// scale.
+///
+/// See also:
+///
+///  * [Image.file] for a shorthand of an [Image] widget backed by [FileImage].
 class FileImage extends ImageProvider<FileImage> {
   /// Creates an object that decodes a [File] as an image.
   ///
@@ -403,29 +491,23 @@ class FileImage extends ImageProvider<FileImage> {
 
   @override
   ImageStreamCompleter load(FileImage key) {
-    return new OneFrameImageStreamCompleter(
-      _loadAsync(key),
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
       }
     );
   }
 
-  Future<ImageInfo> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return await ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -446,6 +528,16 @@ class FileImage extends ImageProvider<FileImage> {
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the
 /// given scale.
+///
+/// The provided [bytes] buffer should not be changed after it is provided
+/// to a [MemoryImage]. To provide an [ImageStream] that represents an image
+/// that changes over time, consider creating a new subclass of [ImageProvider]
+/// whose [load] method returns a subclass of [ImageStreamCompleter] that can
+/// handle providing multiple images.
+///
+/// See also:
+///
+///  * [Image.memory] for a shorthand of an [Image] widget backed by [MemoryImage].
 class MemoryImage extends ImageProvider<MemoryImage> {
   /// Creates an object that decodes a [Uint8List] buffer as an image.
   ///
@@ -467,20 +559,16 @@ class MemoryImage extends ImageProvider<MemoryImage> {
 
   @override
   ImageStreamCompleter load(MemoryImage key) {
-    return new OneFrameImageStreamCompleter(_loadAsync(key));
+    return new MultiFrameImageStreamCompleter(
+      codec: _loadAsync(key),
+      scale: key.scale
+    );
   }
 
-  Future<ImageInfo> _loadAsync(MemoryImage key) async {
+  Future<ui.Codec> _loadAsync(MemoryImage key) {
     assert(key == this);
 
-    final ui.Image image = await decodeImageFromList(bytes);
-    if (image == null)
-      return null;
-
-    return new ImageInfo(
-      image: image,
-      scale: key.scale,
-    );
+    return ui.instantiateImageCodec(bytes);
   }
 
   @override
@@ -496,31 +584,103 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   int get hashCode => hashValues(bytes.hashCode, scale);
 
   @override
-  String toString() => '$runtimeType(${bytes.runtimeType}#${bytes.hashCode}, scale: $scale)';
+  String toString() => '$runtimeType(${describeIdentity(bytes)}, scale: $scale)';
 }
+
 /// Fetches an image from an [AssetBundle], associating it with the given scale.
 ///
-/// This implementation requires an explicit final [name] and [scale] on
+/// This implementation requires an explicit final [assetName] and [scale] on
 /// construction, and ignores the device pixel ratio and size in the
 /// configuration passed into [resolve]. For a resolution-aware variant that
 /// uses the configuration to pick an appropriate image based on the device
 /// pixel ratio and size, see [AssetImage].
+///
+/// ## Fetching assets
+///
+/// When fetching an image provided by the app itself, use the [assetName]
+/// argument to name the asset to choose. For instance, consider a directory
+/// `icons` with an image `heart.png`. First, the [pubspec.yaml] of the project
+/// should specify its assets in the `flutter` section:
+///
+/// ```yaml
+/// flutter:
+///   assets:
+///     - icons/heart.png
+/// ```
+///
+/// Then, to fetch the image and associate it with scale `1.5`, use
+///
+/// ```dart
+/// new AssetImage('icons/heart.png', scale: 1.5)
+/// ```
+///
+///## Assets in packages
+///
+/// To fetch an asset from a package, the [package] argument must be provided.
+/// For instance, suppose the structure above is inside a package called
+/// `my_icons`. Then to fetch the image, use:
+///
+/// ```dart
+/// new AssetImage('icons/heart.png', scale: 1.5, package: 'my_icons')
+/// ```
+///
+/// Assets used by the package itself should also be fetched using the [package]
+/// argument as above.
+///
+/// If the desired asset is specified in the `pubspec.yaml` of the package, it
+/// is bundled automatically with the app. In particular, assets used by the
+/// package itself must be specified in its `pubspec.yaml`.
+///
+/// A package can also choose to have assets in its 'lib/' folder that are not
+/// specified in its `pubspec.yaml`. In this case for those images to be
+/// bundled, the app has to specify which ones to include. For instance a
+/// package named `fancy_backgrounds` could have:
+///
+/// ```
+/// lib/backgrounds/background1.png
+/// lib/backgrounds/background2.png
+/// lib/backgrounds/background3.png
+///```
+///
+/// To include, say the first image, the `pubspec.yaml` of the app should specify
+/// it in the `assets` section:
+///
+/// ```yaml
+///  assets:
+///    - packages/fancy_backgrounds/backgrounds/background1.png
+/// ```
+///
+/// Note that the `lib/` is implied, so it should not be included in the asset
+/// path.
+///
+/// See also:
+///
+///  * [Image.asset] for a shorthand of an [Image] widget backed by
+///    [ExactAssetImage] when using a scale.
 class ExactAssetImage extends AssetBundleImageProvider {
   /// Creates an object that fetches the given image from an asset bundle.
   ///
-  /// The [name] and [scale] arguments must not be null. The [scale] arguments
+  /// The [assetName] and [scale] arguments must not be null. The [scale] arguments
   /// defaults to 1.0. The [bundle] argument may be null, in which case the
   /// bundle provided in the [ImageConfiguration] passed to the [resolve] call
   /// will be used instead.
-  const ExactAssetImage(this.name, {
+  ///
+  /// The [package] argument must be non-null when fetching an asset that is
+  /// included in a package. See the documentation for the [ExactAssetImage] class
+  /// itself for details.
+  const ExactAssetImage(this.assetName, {
     this.scale: 1.0,
-    this.bundle
-  }) : assert(name != null),
+    this.bundle,
+    this.package,
+  }) : assert(assetName != null),
        assert(scale != null);
+
+  /// The name of the asset.
+  final String assetName;
 
   /// The key to use to obtain the resource from the [bundle]. This is the
   /// argument passed to [AssetBundle.load].
-  final String name;
+  String get keyName => package == null ? assetName : 'packages/$package/$assetName';
 
   /// The scale to place in the [ImageInfo] object of the image.
   final double scale;
@@ -532,14 +692,18 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// that is also null, the [rootBundle] is used.
   ///
   /// The image is obtained by calling [AssetBundle.load] on the given [bundle]
-  /// using the key given by [name].
+  /// using the key given by [keyName].
   final AssetBundle bundle;
+
+  /// The name of the package from which the image is included. See the
+  /// documentation for the [ExactAssetImage] class itself for details.
+  final String package;
 
   @override
   Future<AssetBundleImageKey> obtainKey(ImageConfiguration configuration) {
     return new SynchronousFuture<AssetBundleImageKey>(new AssetBundleImageKey(
       bundle: bundle ?? configuration.bundle ?? rootBundle,
-      name: name,
+      name: keyName,
       scale: scale
     ));
   }
@@ -549,14 +713,14 @@ class ExactAssetImage extends AssetBundleImageProvider {
     if (other.runtimeType != runtimeType)
       return false;
     final ExactAssetImage typedOther = other;
-    return name == typedOther.name
+    return keyName == typedOther.keyName
         && scale == typedOther.scale
         && bundle == typedOther.bundle;
   }
 
   @override
-  int get hashCode => hashValues(name, scale, bundle);
+  int get hashCode => hashValues(keyName, scale, bundle);
 
   @override
-  String toString() => '$runtimeType(name: "$name", scale: $scale, bundle: $bundle)';
+  String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
 }

@@ -10,21 +10,26 @@ import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 import 'package:quiver/time.dart';
 
+import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'platform.dart';
 
 bool get isRunningOnBot {
-  // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-  // https://www.appveyor.com/docs/environment-variables/
-  // CHROME_HEADLESS is one property set on Flutter's Chrome Infra bots.
   return
-    platform.environment['TRAVIS'] == 'true' ||
     platform.environment['BOT'] == 'true' ||
+
+    // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+    platform.environment['TRAVIS'] == 'true' ||
     platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+    platform.environment.containsKey('CI') || // Travis and AppVeyor
+
+    // https://www.appveyor.com/docs/environment-variables/
+    platform.environment.containsKey('APPVEYOR') ||
+
+    // Properties on Flutter's Chrome Infra bots.
     platform.environment['CHROME_HEADLESS'] == '1' ||
-    platform.environment['APPVEYOR'] == 'true' ||
-    platform.environment['CI'] == 'true';
+    platform.environment.containsKey('BUILDBOT_BUILDERNAME');
 }
 
 String hex(List<int> bytes) {
@@ -137,10 +142,8 @@ class ItemListNotifier<T> {
 
     _items = updatedSet;
 
-    for (T item in addedItems)
-      _addedController.add(item);
-    for (T item in removedItems)
-      _removedController.add(item);
+    addedItems.forEach(_addedController.add);
+    removedItems.forEach(_removedController.add);
   }
 
   /// Close the streams.
@@ -181,15 +184,15 @@ class SettingsFile {
 ///
 ///     f47ac10b-58cc-4372-a567-0e02b2c3d479
 ///
-/// The generated uuids are 128 bit numbers encoded in a specific string format.
+/// The generated UUIDs are 128 bit numbers encoded in a specific string format.
 ///
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
   final Random _random = new Random();
 
-  /// Generate a version 4 (random) uuid. This is a uuid scheme that only uses
-  /// random numbers as the source of the generated uuid.
+  /// Generate a version 4 (random) UUID. This is a UUID scheme that only uses
+  /// random numbers as the source of the generated UUID.
   String generateV4() {
     // Generate xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx / 8-4-4-4-12.
     final int special = 8 + _random.nextInt(4);
@@ -212,3 +215,53 @@ class Uuid {
 }
 
 Clock get clock => context.putIfAbsent(Clock, () => const Clock());
+
+typedef Future<Null> AsyncCallback();
+
+/// A [Timer] inspired class that:
+///   - has a different initial value for the first callback delay
+///   - waits for a callback to be complete before it starts the next timer
+class Poller {
+  Poller(this.callback, this.pollingInterval, { this.initialDelay: Duration.ZERO }) {
+    new Future<Null>.delayed(initialDelay, _handleCallback);
+  }
+
+  final AsyncCallback callback;
+  final Duration initialDelay;
+  final Duration pollingInterval;
+
+  bool _cancelled = false;
+  Timer _timer;
+
+  Future<Null> _handleCallback() async {
+    if (_cancelled)
+      return;
+
+    try {
+      await callback();
+    } catch (error) {
+      printTrace('Error from poller: $error');
+    }
+
+    if (!_cancelled)
+      _timer = new Timer(pollingInterval, _handleCallback);
+  }
+
+  /// Cancels the poller.
+  void cancel() {
+    _cancelled = true;
+    _timer?.cancel();
+    _timer = null;
+  }
+}
+
+/// Returns a [Future] that completes when all given [Future]s complete.
+///
+/// Uses [Future.wait] but removes null elements from the provided
+/// `futures` iterable first.
+///
+/// The returned [Future<List>] will be shorter than the given `futures` if
+/// it contains nulls.
+Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
+  return Future.wait<T>(futures.where((Future<T> future) => future != null));
+}

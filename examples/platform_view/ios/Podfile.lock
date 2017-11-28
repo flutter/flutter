@@ -1,0 +1,15 @@
+PODS:
+  - Flutter (1.0.0)
+  - MaterialControls (1.2.2)
+
+DEPENDENCIES:
+  - Flutter (from `/Users/zarah/flutter/bin/cache/artifacts/engine/ios`)
+  - MaterialControls
+
+SPEC CHECKSUMS:
+  Flutter: d674e78c937094a75ac71dd77e921e840bea3dbf
+  MaterialControls: 1c6b29e78d3a13d8dd6a67ed31b6d26eb5de8f72
+
+PODFILE CHECKSUM: d6aabe8e71e2432dda8b99c2a5dbd2bdd65b3c0c
+
+COCOAPODS: 1.2.1

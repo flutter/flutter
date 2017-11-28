@@ -45,7 +45,7 @@ class Version implements Comparable<Version> {
 
   /// Creates a new [Version] by parsing [text].
   factory Version.parse(String text) {
-    final Match match = versionPattern.firstMatch(text);
+    final Match match = versionPattern.firstMatch(text ?? '');
     if (match == null) {
       return null;
     }

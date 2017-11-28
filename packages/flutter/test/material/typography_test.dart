@@ -30,23 +30,27 @@ void main() {
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
     // Ref: https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/
-    final Matcher hasCorrectFont = predicate((TextStyle s) {
-      return s.fontFamily == (s.fontSize <= 19.0 ? '.SF UI Text' : '.SF UI Display');
-    }, 'Uses SF Display font for font sizes over 19.0, otherwise SF Text font');
+    final Matcher isDisplayFont = predicate((TextStyle s) {
+      return s.fontFamily == '.SF UI Display';
+    }, 'Uses SF Display font');
+
+    final Matcher isTextFont = predicate((TextStyle s) {
+      return s.fontFamily == '.SF UI Text';
+    }, 'Uses SF Text font');
 
     final Typography typography = new Typography(platform: TargetPlatform.iOS);
     for (TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
-      expect(textTheme.display4, hasCorrectFont);
-      expect(textTheme.display3, hasCorrectFont);
-      expect(textTheme.display2, hasCorrectFont);
-      expect(textTheme.display1, hasCorrectFont);
-      expect(textTheme.headline, hasCorrectFont);
-      expect(textTheme.title, hasCorrectFont);
-      expect(textTheme.subhead, hasCorrectFont);
-      expect(textTheme.body2, hasCorrectFont);
-      expect(textTheme.body1, hasCorrectFont);
-      expect(textTheme.caption, hasCorrectFont);
-      expect(textTheme.button, hasCorrectFont);
+      expect(textTheme.display4, isDisplayFont);
+      expect(textTheme.display3, isDisplayFont);
+      expect(textTheme.display2, isDisplayFont);
+      expect(textTheme.display1, isDisplayFont);
+      expect(textTheme.headline, isDisplayFont);
+      expect(textTheme.title, isDisplayFont);
+      expect(textTheme.subhead, isTextFont);
+      expect(textTheme.body2, isTextFont);
+      expect(textTheme.body1, isTextFont);
+      expect(textTheme.caption, isTextFont);
+      expect(textTheme.button, isTextFont);
     }
   });
 }

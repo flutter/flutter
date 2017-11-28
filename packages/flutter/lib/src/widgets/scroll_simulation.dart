@@ -35,14 +35,13 @@ class BouncingScrollSimulation extends Simulation {
     @required this.trailingExtent,
     @required this.spring,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : super(tolerance: tolerance) {
-    assert(position != null);
-    assert(velocity != null);
-    assert(leadingExtent != null);
-    assert(trailingExtent != null);
-    assert(leadingExtent <= trailingExtent);
-    assert(spring != null);
-
+  }) : assert(position != null),
+       assert(velocity != null),
+       assert(leadingExtent != null),
+       assert(trailingExtent != null),
+       assert(leadingExtent <= trailingExtent),
+       assert(spring != null),
+       super(tolerance: tolerance) {
     if (position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.NEGATIVE_INFINITY;
@@ -54,11 +53,17 @@ class BouncingScrollSimulation extends Simulation {
       final double finalX = _frictionSimulation.finalX;
       if (velocity > 0.0 && finalX > trailingExtent) {
         _springTime = _frictionSimulation.timeAtX(trailingExtent);
-        _springSimulation = _overscrollSimulation(trailingExtent, _frictionSimulation.dx(_springTime));
+        _springSimulation = _overscrollSimulation(
+          trailingExtent,
+          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+        );
         assert(_springTime.isFinite);
       } else if (velocity < 0.0 && finalX < leadingExtent) {
         _springTime = _frictionSimulation.timeAtX(leadingExtent);
-        _springSimulation = _underscrollSimulation(leadingExtent, _frictionSimulation.dx(_springTime));
+        _springSimulation = _underscrollSimulation(
+          leadingExtent,
+          math.min(_frictionSimulation.dx(_springTime), maxSpringTransferVelocity),
+        );
         assert(_springTime.isFinite);
       } else {
         _springTime = double.INFINITY;
@@ -66,6 +71,10 @@ class BouncingScrollSimulation extends Simulation {
     }
     assert(_springTime != null);
   }
+
+  /// The maximum velocity that can be transferred from the inertia of a ballistic
+  /// scroll into overscroll.
+  static const double maxSpringTransferVelocity = 5000.0;
 
   /// When [x] falls below this value the simulation switches from an internal friction
   /// model to a spring model which causes [x] to "spring" back to [leadingExtent].
@@ -136,8 +145,8 @@ class ClampingScrollSimulation extends Simulation {
     @required this.velocity,
     this.friction: 0.015,
     Tolerance tolerance: Tolerance.defaultTolerance,
-  }) : super(tolerance: tolerance) {
-    assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration);
+  }) : assert(_flingVelocityPenetration(0.0) == _kInitialVelocityPenetration),
+       super(tolerance: tolerance) {
     _duration = _flingDuration(velocity);
     _distance = (velocity * _duration / _kInitialVelocityPenetration).abs();
   }

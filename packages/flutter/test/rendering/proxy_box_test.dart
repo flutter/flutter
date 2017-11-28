@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:test/test.dart';
 
@@ -28,5 +30,65 @@ void main() {
     painted = false;
     layout(makeFittedBox(), constraints: new BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
+  });
+
+  test('RenderPhysicalModel compositing on Fuchsia', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+
+    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
+    layout(root, phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    // On Fuchsia, the system compositor is responsible for drawing shadows
+    // for physical model layers with non-zero elevation.
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isTrue);
+
+    root.elevation = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('RenderPhysicalModel compositing on non-Fuchsia', () {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final RenderPhysicalModel root = new RenderPhysicalModel(color: const Color(0xffff00ff));
+    layout(root, phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    // On non-Fuchsia platforms, Flutter draws its own shadows.
+    root.elevation = 1.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    root.elevation = 0.0;
+    pumpFrame(phase: EnginePhase.composite);
+    expect(root.needsCompositing, isFalse);
+
+    debugDefaultTargetPlatformOverride = null;
+  });
+
+  test('RenderSemanticsGestureHandler adds/removes correct semantic actions', () {
+    final RenderSemanticsGestureHandler renderObj = new RenderSemanticsGestureHandler(
+      onTap: () {},
+      onHorizontalDragUpdate: (DragUpdateDetails details) {},
+    );
+
+    SemanticsConfiguration config = new SemanticsConfiguration();
+    renderObj.describeSemanticsConfiguration(config);
+    expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollRight), isNotNull);
+
+    config = new SemanticsConfiguration();
+    renderObj.validActions = <SemanticsAction>[SemanticsAction.tap, SemanticsAction.scrollLeft].toSet();
+
+    renderObj.describeSemanticsConfiguration(config);
+    expect(config.getActionHandler(SemanticsAction.tap), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
+    expect(config.getActionHandler(SemanticsAction.scrollRight), isNull);
   });
 }

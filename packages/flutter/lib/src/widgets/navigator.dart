@@ -14,8 +14,40 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
-import 'routes.dart';
 import 'ticker_provider.dart';
+
+/// Indicates whether the current route should be popped.
+///
+/// Used as the return value for [Route.willPop].
+///
+/// See also:
+///
+///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
+///    mechanism.
+enum RoutePopDisposition {
+  /// Pop the route.
+  ///
+  /// If [Route.willPop] returns [pop] then the back button will actually pop
+  /// the current route.
+  pop,
+
+  /// Do not pop the route.
+  ///
+  /// If [Route.willPop] returns [doNotPop] then the back button will be ignored.
+  doNotPop,
+
+  /// Delegate this to the next level of navigation.
+  ///
+  /// If [Route.willPop] return [bubble] then the back button will be handled
+  /// by the [SystemNavigator], which will usually close the application.
+  bubble,
+}
+
+/// Signature for a callback that verifies that it's OK to call [Navigator.pop].
+///
+/// Used by [Form.onWillPop], [ModalRoute.addScopedWillPopCallback],
+/// [ModalRoute.removeScopedWillPopCallback], and [WillPopScope].
+typedef Future<bool> WillPopCallback();
 
 /// An abstraction for an entry managed by a [Navigator].
 ///
@@ -79,7 +111,10 @@ abstract class Route<T> {
   ///
   /// See also:
   ///
-  /// * [Form], which provides a [Form.onWillPop] callback that uses this mechanism.
+  ///  * [Form], which provides a [Form.onWillPop] callback that uses this
+  ///    mechanism.
+  ///  * [WillPopScope], another widget that provides a way to intercept the
+  ///    back button.
   Future<RoutePopDisposition> willPop() async {
     return isFirst ? RoutePopDisposition.bubble : RoutePopDisposition.pop;
   }
@@ -122,7 +157,7 @@ abstract class Route<T> {
   /// This route's previous route has changed to the given new route. This is
   /// called on a route whenever the previous route changes for any reason, so
   /// long as it is in the history, except for immediately after the route has
-  /// been pushed (in which wase [didPush] or [didReplace] will be called
+  /// been pushed (in which case [didPush] or [didReplace] will be called
   /// instead). `previousRoute` will be null if there's no previous route.
   @protected
   @mustCallSuper
@@ -143,28 +178,8 @@ abstract class Route<T> {
   @mustCallSuper
   @protected
   void dispose() {
-    assert(() {
-      if (navigator == null) {
-        throw new FlutterError(
-          '$runtimeType.dipose() called more than once.\n'
-          'A given route cannot be disposed more than once.'
-        );
-      }
-      return true;
-    });
     _navigator = null;
   }
-
-  /// If the route's transition can be popped via a user gesture (e.g. the iOS
-  /// back gesture), this should return a controller object that can be used to
-  /// control the transition animation's progress. Otherwise, it should return
-  /// null.
-  ///
-  /// If attempts to dismiss this route might be vetoed, for example because
-  /// a [WillPopCallback] was defined for the route, then it may make sense
-  /// to disable the pop gesture. For example, the iOS back gesture is disabled
-  /// when [ModalRoute.hasScopedWillPopCallback] is true.
-  NavigationGestureController startPopGesture() => null;
 
   /// Whether this route is the top-most route on the navigator.
   ///
@@ -192,7 +207,7 @@ abstract class Route<T> {
   ///
   /// If a later route is entirely opaque, then the route will be active but not
   /// rendered. It is even possible for the route to be active but for the stateful
-  /// widgets within the route to not be instatiated. See [ModalRoute.maintainState].
+  /// widgets within the route to not be instantiated. See [ModalRoute.maintainState].
   bool get isActive {
     return _navigator != null && _navigator._history.contains(this);
   }
@@ -206,6 +221,18 @@ class RouteSettings {
     this.name,
     this.isInitialRoute: false,
   });
+
+  /// Creates a copy of this route settings object with the given fields
+  /// replaced with the new values.
+  RouteSettings copyWith({
+    String name,
+    bool isInitialRoute,
+  }) {
+    return new RouteSettings(
+      name: name ?? this.name,
+      isInitialRoute: isInitialRoute ?? this.isInitialRoute,
+    );
+  }
 
   /// The name of the route (e.g., "/settings").
   ///
@@ -241,54 +268,16 @@ class NavigatorObserver {
   /// The [Navigator] removed `route`.
   void didRemove(Route<dynamic> route, Route<dynamic> previousRoute) { }
 
-  /// The [Navigator] is being controlled by a user gesture.
+  /// The [Navigator]'s routes are being moved by a user gesture.
   ///
-  /// Used for the iOS back gesture.
+  /// For example, this is called when an iOS back gesture starts, and is used
+  /// to disabled hero animations during such interactions.
   void didStartUserGesture() { }
 
   /// User gesture is no longer controlling the [Navigator].
+  ///
+  /// Paired with an earlier call to [didStartUserGesture].
   void didStopUserGesture() { }
-}
-
-/// Interface describing an object returned by the [Route.startPopGesture]
-/// method, allowing the route's transition animations to be controlled by a
-/// drag or other user gesture.
-abstract class NavigationGestureController {
-  /// Configures the NavigationGestureController and tells the given [Navigator] that
-  /// a gesture has started.
-  NavigationGestureController(this._navigator) {
-    assert(_navigator != null);
-    // Disable Hero transitions until the gesture is complete.
-    _navigator.didStartUserGesture();
-  }
-
-  /// The navigator that this object is controlling.
-  @protected
-  NavigatorState get navigator => _navigator;
-  NavigatorState _navigator;
-
-  /// Release the resources used by this object. The object is no longer usable
-  /// after this method is called.
-  ///
-  /// Must be called when the gesture is done.
-  ///
-  /// Calling this method notifies the navigator that the gesture has completed.
-  @mustCallSuper
-  void dispose() {
-    _navigator.didStopUserGesture();
-    _navigator = null;
-  }
-
-  /// The drag gesture has changed by [fractionalDelta]. The total range of the
-  /// drag should be 0.0 to 1.0.
-  void dragUpdate(double fractionalDelta);
-
-  /// The drag gesture has ended with a horizontal motion of
-  /// [fractionalVelocity] as a fraction of screen width per second.
-  ///
-  /// Returns true if the gesture will complete (i.e. a back gesture will
-  /// result in a pop).
-  bool dragEnd(double fractionalVelocity);
 }
 
 /// Signature for the [Navigator.popUntil] predicate argument.
@@ -374,7 +363,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 /// The app's home page route is named '/' by default.
 ///
 /// The [MaterialApp] can be created
-/// with a `Map<String, WidgetBuilder>` which maps from a route's name to
+/// with a [Map<String, WidgetBuilder>] which maps from a route's name to
 /// a builder function that will create it. The [MaterialApp] uses this
 /// map to create a value for its navigator's [onGenerateRoute] callback.
 ///
@@ -431,10 +420,10 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Popup routes
 ///
-/// Routes don't have to obscure the entire screen. [PopupRoute]s cover
-/// the screen with a barrierColor that can be only partially opaque to
-/// allow the current screen to show through. Popup routes are "modal"
-/// because they block input to the widgets below.
+/// Routes don't have to obscure the entire screen. [PopupRoute]s cover the
+/// screen with a [ModalRoute.barrierColor] that can be only partially opaque to
+/// allow the current screen to show through. Popup routes are "modal" because
+/// they block input to the widgets below.
 ///
 /// There are functions which create and show popup routes. For
 /// example: [showDialog], [showMenu], and [showModalBottomSheet]. These
@@ -448,7 +437,7 @@ typedef bool RoutePredicate(Route<dynamic> route);
 ///
 /// ### Custom routes
 ///
-/// You can create your own subclass of one the widget library route classes
+/// You can create your own subclass of one of the widget library route classes
 /// like [PopupRoute], [ModalRoute], or [PageRoute], to control the animated
 /// transition employed to show the route, the color and behavior of the route's
 /// modal barrier, and other aspects of the route.
@@ -496,6 +485,17 @@ class Navigator extends StatefulWidget {
        super(key: key);
 
   /// The name of the first route to show.
+  ///
+  /// By default, this defers to [dart:ui.Window.defaultRouteName].
+  ///
+  /// If this string contains any `/` characters, then the string is split on
+  /// those characters and substrings from the start of the string up to each
+  /// such character are, in turn, used as routes to push.
+  ///
+  /// For example, if the route `/stocks/HOOLI` was used as the [initialRoute],
+  /// then the [Navigator] would push the following routes on startup: `/`,
+  /// `/stocks`, `/stocks/HOOLI`. This enables deep linking while allowing the
+  /// application to maintain a predictable route history.
   final String initialRoute;
 
   /// Called to generate a route for a given [RouteSettings].
@@ -514,7 +514,12 @@ class Navigator extends StatefulWidget {
   /// A list of observers for this navigator.
   final List<NavigatorObserver> observers;
 
-  /// The default name for the initial route.
+  /// The default name for the [initialRoute].
+  ///
+  /// See also:
+  ///
+  ///  * [dart:ui.Window.defaultRouteName], which reflects the route that the
+  ///    application was started with.
   static const String defaultRouteName = '/';
 
   /// Push a named route onto the navigator that most tightly encloses the given context.
@@ -703,8 +708,17 @@ class Navigator extends StatefulWidget {
   ///   ..pop()
   ///   ..pushNamed('/settings');
   /// ```
-  static NavigatorState of(BuildContext context) {
-    final NavigatorState navigator = context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+  ///
+  /// If `rootNavigator` is set to true, the state from the furthest instance of
+  /// this class is given instead. Useful for pushing contents above all subsequent
+  /// instances of [Navigator].
+  static NavigatorState of(
+    BuildContext context, {
+      bool rootNavigator: false
+    }) {
+    final NavigatorState navigator = rootNavigator
+        ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
+        : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
     assert(() {
       if (navigator == null) {
         throw new FlutterError(
@@ -713,7 +727,7 @@ class Navigator extends StatefulWidget {
         );
       }
       return true;
-    });
+    }());
     return navigator;
   }
 
@@ -730,6 +744,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
   final FocusScopeNode focusScopeNode = new FocusScopeNode();
 
+  final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
+
   @override
   void initState() {
     super.initState();
@@ -737,10 +753,55 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
-    push(widget.onGenerateRoute(new RouteSettings(
-      name: widget.initialRoute ?? Navigator.defaultRouteName,
-      isInitialRoute: true
-    )));
+    String initialRouteName = widget.initialRoute ?? Navigator.defaultRouteName;
+    if (initialRouteName.startsWith('/') && initialRouteName.length > 1) {
+      initialRouteName = initialRouteName.substring(1); // strip leading '/'
+      assert(Navigator.defaultRouteName == '/');
+      final List<String> plannedInitialRouteNames = <String>[
+        Navigator.defaultRouteName,
+      ];
+      final List<Route<dynamic>> plannedInitialRoutes = <Route<dynamic>>[
+        _routeNamed(Navigator.defaultRouteName, allowNull: true),
+      ];
+      final List<String> routeParts = initialRouteName.split('/');
+      if (initialRouteName.isNotEmpty) {
+        String routeName = '';
+        for (String part in routeParts) {
+          routeName += '/$part';
+          plannedInitialRouteNames.add(routeName);
+          plannedInitialRoutes.add(_routeNamed(routeName, allowNull: true));
+        }
+      }
+      if (plannedInitialRoutes.contains(null)) {
+        assert(() {
+          FlutterError.reportError(
+            new FlutterErrorDetails( // ignore: prefer_const_constructors, https://github.com/dart-lang/sdk/issues/29952
+              exception:
+                'Could not navigate to initial route.\n'
+                'The requested route name was: "/$initialRouteName"\n'
+                'The following routes were therefore attempted:\n'
+                ' * ${plannedInitialRouteNames.join("\n * ")}\n'
+                'This resulted in the following objects:\n'
+                ' * ${plannedInitialRoutes.join("\n * ")}\n'
+                'One or more of those objects was null, and therefore the initial route specified will be '
+                'ignored and "${Navigator.defaultRouteName}" will be used instead.'
+            ),
+          );
+          return true;
+        }());
+        push(_routeNamed(Navigator.defaultRouteName));
+      } else {
+        plannedInitialRoutes.forEach(push);
+      }
+    } else {
+      Route<dynamic> route;
+      if (initialRouteName != Navigator.defaultRouteName)
+        route = _routeNamed(initialRouteName, allowNull: true);
+      route ??= _routeNamed(Navigator.defaultRouteName);
+      push(route);
+    }
+    for (Route<dynamic> route in _history)
+      _initialOverlayEntries.addAll(route.overlayEntries);
   }
 
   @override
@@ -759,7 +820,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void dispose() {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     for (NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
@@ -769,7 +830,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _history.clear();
     focusScopeNode.detach();
     super.dispose();
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// The overlay this navigator uses for its visual presentation.
@@ -785,15 +846,40 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<dynamic> _routeNamed(String name) {
+  Route<dynamic> _routeNamed(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
-    final RouteSettings settings = new RouteSettings(name: name);
+    final RouteSettings settings = new RouteSettings(
+      name: name,
+      isInitialRoute: _history.isEmpty,
+    );
     Route<dynamic> route = widget.onGenerateRoute(settings);
-    if (route == null) {
-      assert(widget.onUnknownRoute != null);
+    if (route == null && !allowNull) {
+      assert(() {
+        if (widget.onUnknownRoute == null) {
+          throw new FlutterError(
+            'If a Navigator has no onUnknownRoute, then its onGenerateRoute must never return null.\n'
+            'When trying to build the route "$name", onGenerateRoute returned null, but there was no '
+            'onUnknownRoute callback specified.\n'
+            'The Navigator was:\n'
+            '  $this'
+          );
+        }
+        return true;
+      }());
       route = widget.onUnknownRoute(settings);
-      assert(route != null);
+      assert(() {
+        if (route == null) {
+          throw new FlutterError(
+            'A Navigator\'s onUnknownRoute returned null.\n'
+            'When trying to build the route "$name", both onGenerateRoute and onUnknownRoute returned '
+            'null. The onUnknownRoute callback should never return null.\n'
+            'The Navigator was:\n'
+            '  $this'
+          );
+        }
+        return true;
+      }());
     }
     return route;
   }
@@ -829,7 +915,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// when the pushed route is popped off the navigator.
   Future<dynamic> push(Route<dynamic> route) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(route != null);
     assert(route._navigator == null);
     setState(() {
@@ -844,7 +930,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(route, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return route.popped;
   }
@@ -863,7 +949,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(newRoute != null);
     if (oldRoute == newRoute)
       return;
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(oldRoute._navigator == this);
     assert(newRoute._navigator == null);
     assert(oldRoute.overlayEntries.isNotEmpty);
@@ -886,7 +972,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         _history[index - 1].didChangeNext(newRoute);
       oldRoute.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// Push the [newRoute] and dispose the old current Route.
@@ -901,7 +987,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// as if the old route had been popped.
   Future<dynamic> pushReplacement(Route<dynamic> newRoute, { dynamic result }) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final Route<dynamic> oldRoute = _history.last;
     assert(oldRoute != null && oldRoute._navigator == this);
     assert(oldRoute.overlayEntries.isNotEmpty);
@@ -929,7 +1015,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(newRoute, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return newRoute.popped;
   }
@@ -968,7 +1054,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// [Route.didChangePrevious]). The navigator observer is not notified.
   void removeRouteBelow(Route<dynamic> anchorRoute) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(anchorRoute._navigator == this);
     final int index = _history.indexOf(anchorRoute) - 1;
     assert(index >= 0);
@@ -985,7 +1071,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         nextRoute.didChangePrevious(previousRoute);
       targetRoute.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
   }
 
   /// Push the given route and then remove all the previous routes until the
@@ -1001,7 +1087,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// that always returns false.
   Future<dynamic> pushAndRemoveUntil(Route<dynamic> newRoute, RoutePredicate predicate) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final List<Route<dynamic>> removedRoutes = <Route<dynamic>>[];
     while (_history.isNotEmpty && !predicate(_history.last)) {
       final Route<dynamic> removedRoute = _history.removeLast();
@@ -1028,7 +1114,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       for (NavigatorObserver observer in widget.observers)
         observer.didPush(newRoute, oldRoute);
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return newRoute.popped;
   }
@@ -1055,10 +1141,12 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// See also:
   ///
-  /// * [Form], which provides a [Form.onWillPop] callback that enables the form
-  ///   to veto a [maybePop] initiated by the app's back button.
-  /// * [ModalRoute], which has as a [ModalRoute.willPop] method that can be
-  ///   defined by a list of [WillPopCallback]s.
+  ///  * [Form], which provides a [Form.onWillPop] callback that enables the form
+  ///    to veto a [maybePop] initiated by the app's back button.
+  ///  * [WillPopScope], a widget that hooks into the route's [Route.willPop]
+  ///    mechanism.
+  ///  * [ModalRoute], which has as a [ModalRoute.willPop] method that can be
+  ///    defined by a list of [WillPopCallback]s.
   Future<bool> maybePop([dynamic result]) async {
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
@@ -1086,11 +1174,11 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// popped.
   bool pop([dynamic result]) {
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     final Route<dynamic> route = _history.last;
     assert(route._navigator == this);
     bool debugPredictedWouldPop;
-    assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; });
+    assert(() { debugPredictedWouldPop = !route.willHandlePopInternally; return true; }());
     if (route.didPop(result ?? route.currentResult)) {
       assert(debugPredictedWouldPop);
       if (_history.length > 1) {
@@ -1109,13 +1197,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
             observer.didPop(route, _history.last);
         });
       } else {
-        assert(() { _debugLocked = false; return true; });
+        assert(() { _debugLocked = false; return true; }());
         return false;
       }
     } else {
       assert(!debugPredictedWouldPop);
     }
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
     return true;
   }
@@ -1132,7 +1220,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void removeRoute(Route<dynamic> route) {
     assert(route != null);
     assert(!_debugLocked);
-    assert(() { _debugLocked = true; return true; });
+    assert(() { _debugLocked = true; return true; }());
     assert(route._navigator == this);
     final int index = _history.indexOf(route);
     assert(index != -1);
@@ -1146,7 +1234,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(route, previousRoute);
       route.dispose();
     });
-    assert(() { _debugLocked = false; return true; });
+    assert(() { _debugLocked = false; return true; }());
     _cancelActivePointers();
   }
 
@@ -1187,33 +1275,35 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     return _history.length > 1 || _history[0].willHandlePopInternally;
   }
 
-  /// Starts a gesture that results in popping the navigator.
-  NavigationGestureController startPopGesture() {
-    if (canPop())
-      return _history.last.startPopGesture();
-    return null;
-  }
-
-  /// Whether a gesture controlled by a [NavigationGestureController] is currently in progress.
-  bool get userGestureInProgress => _userGestureInProgress;
-  // TODO(mpcomplete): remove this bool when we fix
-  // https://github.com/flutter/flutter/issues/5577
-  bool _userGestureInProgress = false;
+  /// Whether a route is currently being manipulated by the user, e.g.
+  /// as during an iOS back gesture.
+  bool get userGestureInProgress => _userGesturesInProgress > 0;
+  int _userGesturesInProgress = 0;
 
   /// The navigator is being controlled by a user gesture.
   ///
-  /// Used for the iOS back gesture.
+  /// For example, called when the user beings an iOS back gesture.
+  ///
+  /// When the gesture finishes, call [didStopUserGesture].
   void didStartUserGesture() {
-    _userGestureInProgress = true;
-    for (NavigatorObserver observer in widget.observers)
-      observer.didStartUserGesture();
+    _userGesturesInProgress += 1;
+    if (_userGesturesInProgress == 1) {
+      for (NavigatorObserver observer in widget.observers)
+        observer.didStartUserGesture();
+    }
   }
 
-  /// A user gesture is no longer controlling the navigator.
+  /// A user gesture completed.
+  ///
+  /// Notifies the navigator that a gesture regarding which the navigator was
+  /// previously notified with [didStartUserGesture] has completed.
   void didStopUserGesture() {
-    _userGestureInProgress = false;
-    for (NavigatorObserver observer in widget.observers)
-      observer.didStopUserGesture();
+    assert(_userGesturesInProgress > 0);
+    _userGesturesInProgress -= 1;
+    if (_userGesturesInProgress == 0) {
+      for (NavigatorObserver observer in widget.observers)
+        observer.didStopUserGesture();
+    }
   }
 
   final Set<int> _activePointers = new Set<int>();
@@ -1237,15 +1327,13 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         absorber?.absorbing = true;
       });
     }
-    for (int pointer in _activePointers.toList())
-      WidgetsBinding.instance.cancelPointer(pointer);
+    _activePointers.toList().forEach(WidgetsBinding.instance.cancelPointer);
   }
 
   @override
   Widget build(BuildContext context) {
     assert(!_debugLocked);
     assert(_history.isNotEmpty);
-    final Route<dynamic> initialRoute = _history.first;
     return new Listener(
       onPointerDown: _handlePointerDown,
       onPointerUp: _handlePointerUpOrCancel,
@@ -1257,7 +1345,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           autofocus: true,
           child: new Overlay(
             key: _overlayKey,
-            initialEntries: initialRoute.overlayEntries,
+            initialEntries: _initialOverlayEntries,
           ),
         ),
       ),

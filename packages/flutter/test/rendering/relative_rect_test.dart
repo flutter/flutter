@@ -38,6 +38,11 @@ void main() {
     final Rect r2 = r1.toRect(new Rect.fromLTRB(10.0, 20.0, 90.0, 180.0));
     expect(r2, new Rect.fromLTRB(10.0, 20.0, 50.0, 120.0));
   });
+  test('RelativeRect.toSize', () {
+    final RelativeRect r1 = const RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    final Size r2 = r1.toSize(const Size(80.0, 160.0));
+    expect(r2, const Size(40.0, 100.0));
+  });
   test('RelativeRect.lerp', () {
     final RelativeRect r1 = RelativeRect.fill;
     final RelativeRect r2 = const RelativeRect.fromLTRB(10.0, 20.0, 30.0, 40.0);

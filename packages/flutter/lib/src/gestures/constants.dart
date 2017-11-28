@@ -50,23 +50,27 @@ const double kDoubleTapSlop = 100.0;  // Logical pixels
 /// displayed on the screen, from the moment they were last requested.
 const Duration kZoomControlsTimeout = const Duration(milliseconds: 3000);
 
-/// The distance a touch has to travel for us to be confident that the gesture
-/// is a scroll gesture.
-const double kTouchSlop = 8.0;  // Logical pixels
+/// The distance a touch has to travel for the framework to be confident that
+/// the gesture is a scroll gesture, or, inversely, the maximum distance that a
+/// touch can travel before the framework becomes confident that it is not a
+/// tap.
+// This value was empirically derived. We started at 8.0 and increased it to
+// 18.0 after getting complaints that it was too difficult to hit targets.
+const double kTouchSlop = 18.0;  // Logical pixels
 
-/// The distance a touch has to travel for us to be confident that the gesture
-/// is a paging gesture. (Currently not used, because paging uses a regular drag
-/// gesture, which uses kTouchSlop.)
+/// The distance a touch has to travel for the framework to be confident that
+/// the gesture is a paging gesture. (Currently not used, because paging uses a
+/// regular drag gesture, which uses kTouchSlop.)
 // TODO(ianh): Create variants of HorizontalDragGestureRecognizer et al for
 // paging, which use this constant.
 const double kPagingTouchSlop = kTouchSlop * 2.0;  // Logical pixels
 
-/// The distance a touch has to travel for us to be confident that the gesture
-/// is a panning gesture.
+/// The distance a touch has to travel for the framework to be confident that
+/// the gesture is a panning gesture.
 const double kPanSlop = kTouchSlop * 2.0;  // Logical pixels
 
-/// The distance a touch has to travel for us to be confident that the gesture
-/// is a scale gesture.
+/// The distance a touch has to travel for the framework to be confident that
+/// the gesture is a scale gesture.
 const double kScaleSlop = kTouchSlop;  // Logical pixels
 
 /// The margin around a dialog, popup menu, or other window-like widget inside

@@ -39,6 +39,15 @@
                             }
                         }
                     }
+                },
+                "plugin": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                        "androidPackage": { "type": "string" },
+                        "iosPrefix": { "type": "string" },
+                        "pluginClass": { "type": "string" }
+                    }
                 }
             }
         }

@@ -53,7 +53,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
     _formWasEdited = true;
     if (value.isEmpty)
       return 'Name is required.';
-    final RegExp nameExp = new RegExp(r'^[A-za-z ]+$');
+    final RegExp nameExp = new RegExp(r'^[A-Za-z ]+$');
     if (!nameExp.hasMatch(value))
       return 'Please enter only alphabetical characters.';
     return null;
@@ -129,6 +129,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 icon: const Icon(Icons.phone),
                 hintText: 'Where can we reach you?',
                 labelText: 'Phone Number *',
+                prefixText: '+1'
               ),
               keyboardType: TextInputType.phone,
               onSaved: (String value) { person.phoneNumber = value; },
@@ -143,9 +144,20 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
             new TextFormField(
               decoration: const InputDecoration(
                 hintText: 'Tell us about yourself',
+                helperText: 'Keep it short, this is just a demo',
                 labelText: 'Life story',
               ),
               maxLines: 3,
+            ),
+            new TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Salary',
+                prefixText: '\$',
+                suffixText: 'USD',
+                suffixStyle: const TextStyle(color: Colors.green)
+              ),
+              maxLines: 1,
             ),
             new Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +188,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
             ),
             new Container(
               padding: const EdgeInsets.all(20.0),
-              alignment: const FractionalOffset(0.5, 0.5),
+              alignment: Alignment.center,
               child: new RaisedButton(
                 child: const Text('SUBMIT'),
                 onPressed: _handleSubmitted,

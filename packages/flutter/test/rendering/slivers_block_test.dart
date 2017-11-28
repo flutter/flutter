@@ -26,7 +26,6 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   void createChild(int index, { @required RenderBox after }) {
-    assert(index >= 0);
     if (index < 0 || index >= children.length)
       return null;
     try {
@@ -79,6 +78,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
@@ -153,6 +153,7 @@ void main() {
     );
     final RenderViewport root = new RenderViewport(
       axisDirection: AxisDirection.up,
+      crossAxisDirection: AxisDirection.right,
       offset: new ViewportOffset.zero(),
       children: <RenderSliver>[
         inner = childManager.createRenderObject(),
@@ -213,4 +214,56 @@ void main() {
     expect(e.attached, false);
   });
 
+  test('SliverList - no zero scroll offset correction', () {
+    RenderSliverList inner;
+    RenderBox a;
+    final TestRenderSliverBoxChildManager childManager = new TestRenderSliverBoxChildManager(
+      children: <RenderBox>[
+        a = new RenderSizedBox(const Size(100.0, 400.0)),
+        new RenderSizedBox(const Size(100.0, 400.0)),
+        new RenderSizedBox(const Size(100.0, 400.0)),
+        new RenderSizedBox(const Size(100.0, 400.0)),
+        new RenderSizedBox(const Size(100.0, 400.0)),
+      ],
+    );
+    final RenderViewport root = new RenderViewport(
+      axisDirection: AxisDirection.down,
+      crossAxisDirection: AxisDirection.right,
+      offset: new ViewportOffset.zero(),
+      children: <RenderSliver>[
+        inner = childManager.createRenderObject(),
+      ],
+    );
+    layout(root);
+
+    final SliverMultiBoxAdaptorParentData parentData = a.parentData;
+    parentData.layoutOffset = 0.001;
+
+    root.offset = new ViewportOffset.fixed(900.0);
+    pumpFrame();
+
+    root.offset = new ViewportOffset.fixed(0.0);
+    pumpFrame();
+
+    expect(inner.geometry.scrollOffsetCorrection, isNull);
+  });
+
+  test('SliverMultiBoxAdaptorParentData.toString', () {
+    final SliverMultiBoxAdaptorParentData candidate = new SliverMultiBoxAdaptorParentData();
+    expect(candidate.keepAlive, isFalse);
+    expect(candidate.index, isNull);
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.keepAlive = null;
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.keepAlive = true;
+    expect(candidate.toString(), 'index=null; keepAlive; layoutOffset=0.0');
+    candidate.keepAlive = false;
+    expect(candidate.toString(), 'index=null; layoutOffset=0.0');
+    candidate.index = 0;
+    expect(candidate.toString(), 'index=0; layoutOffset=0.0');
+    candidate.index = 1;
+    expect(candidate.toString(), 'index=1; layoutOffset=0.0');
+    candidate.index = -1;
+    expect(candidate.toString(), 'index=-1; layoutOffset=0.0');
+  });
 }

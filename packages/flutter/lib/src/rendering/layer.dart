@@ -2,15 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
 import 'dart:ui' as ui show ImageFilter, Picture, SceneBuilder;
 import 'dart:ui' show Offset;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
-
-import 'debug.dart';
-import 'node.dart';
 
 /// A composited layer.
 ///
@@ -30,8 +28,8 @@ import 'node.dart';
 /// See also:
 ///
 ///  * [RenderView.compositeFrame], which implements this recomposition protocol
-///    for painting [RenderObject] trees on the the display.
-abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
+///    for painting [RenderObject] trees on the display.
+abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// This layer's parent in the layer tree.
   ///
   /// The [parent] of the root node in the layer tree is null.
@@ -75,7 +73,7 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
         node = node.parent;
       assert(node != newLayer); // indicates we are about to create a cycle
       return true;
-    });
+    }());
     parent.adoptChild(newLayer);
     assert(newLayer.attached == parent.attached);
     if (parent.firstChild == this)
@@ -90,7 +88,7 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
 
   /// Override this method to upload this layer to the engine.
   ///
-  /// The layerOffset is the accumulated offset of this layer's parent from the
+  /// The `layerOffset` is the accumulated offset of this layer's parent from the
   /// origin of the builder's coordinate system.
   void addToScene(ui.SceneBuilder builder, Offset layerOffset);
 
@@ -101,15 +99,13 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
   dynamic debugCreator;
 
   @override
-  String toString() => '${super.toString()}${ owner == null ? " DETACHED" : ""}';
+  String toStringShort() => '${super.toStringShort()}${ owner == null ? " DETACHED" : ""}';
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    if (parent == null && owner != null)
-      description.add('owner: $owner');
-    if (debugCreator != null)
-      description.add('creator: $debugCreator');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Object>('owner', owner, level: parent != null ? DiagnosticLevel.hidden : DiagnosticLevel.info, defaultValue: null));
+    description.add(new DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
   }
 }
 
@@ -117,9 +113,20 @@ abstract class Layer extends AbstractNode with TreeDiagnosticsMixin {
 ///
 /// Picture layers are always leaves in the layer tree.
 class PictureLayer extends Layer {
+  /// Creates a leaf layer for the layer tree.
+  PictureLayer(this.canvasBounds);
+
+  /// The bounds that were used for the canvas that drew this layer's [picture].
+  ///
+  /// This is purely advisory. It is included in the information dumped with
+  /// [debugDumpLayerTree] (which can be triggered by pressing "L" when using
+  /// "flutter run" at the console), which can help debug why certain drawing
+  /// commands are being culled.
+  final Rect canvasBounds;
+
   /// The picture recorded for this layer.
   ///
-  /// The picture's coodinate system matches this layer's coodinate system.
+  /// The picture's coordinate system matches this layer's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -149,6 +156,64 @@ class PictureLayer extends Layer {
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Rect>('paint bounds', canvasBounds));
+  }
+}
+
+/// A composited layer that maps a backend texture to a rectangle.
+///
+/// Backend textures are images that can be applied (mapped) to an area of the
+/// Flutter view. They are created, managed, and updated using a
+/// platform-specific texture registry. This is typically done by a plugin
+/// that integrates with host platform video player, camera, or OpenGL APIs,
+/// or similar image sources.
+///
+/// A texture layer refers to its backend texture using an integer ID. Texture
+/// IDs are obtained from the texture registry and are scoped to the Flutter
+/// view. Texture IDs may be reused after deregistration, at the discretion
+/// of the registry. The use of texture IDs currently unknown to the registry
+/// will silently result in a blank rectangle.
+///
+/// Once inserted into the layer tree, texture layers are repainted autonomously
+/// as dictated by the backend (e.g. on arrival of a video frame). Such
+/// repainting generally does not involve executing Dart code.
+///
+/// Texture layers are always leaves in the layer tree.
+///
+/// See also:
+///
+/// * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///   for how to create and manage backend textures on Android.
+/// * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///   for how to create and manage backend textures on iOS.
+class TextureLayer extends Layer {
+  /// Creates a texture layer bounded by [rect] and with backend texture
+  /// identified by [textureId].
+  TextureLayer({
+    @required this.rect,
+    @required this.textureId,
+  }): assert(rect != null), assert(textureId != null);
+
+  /// Bounding rectangle of this layer.
+  final Rect rect;
+
+  /// The identity of the backend texture.
+  final int textureId;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    final Rect shiftedRect = rect.shift(layerOffset);
+    builder.addTexture(
+      textureId,
+      offset: shiftedRect.topLeft,
+      width: shiftedRect.width,
+      height: shiftedRect.height,
+    );
   }
 }
 
@@ -283,7 +348,7 @@ class ContainerLayer extends Layer {
         node = node.parent;
       assert(node != child); // indicates we are about to create a cycle
       return true;
-    });
+    }());
     adoptChild(child);
     child._previousSibling = lastChild;
     if (lastChild != null)
@@ -357,25 +422,59 @@ class ContainerLayer extends Layer {
     }
   }
 
+  /// Applies the transform that would be applied when compositing the given
+  /// child to the given matrix.
+  ///
+  /// Specifically, this should apply the transform that is applied to child's
+  /// _origin_. When using [applyTransform] with a chain of layers, results will
+  /// be unreliable unless the deepest layer in the chain collapses the
+  /// `layerOffset` in [addToScene] to zero, meaning that it passes
+  /// [Offset.zero] to its children, and bakes any incoming `layerOffset` into
+  /// the [SceneBuilder] as (for instance) a transform (which is then also
+  /// included in the transformation applied by [applyTransform]).
+  ///
+  /// For example, if [addToScene] applies the `layerOffset` and then
+  /// passes [Offset.zero] to the children, then it should be included in the
+  /// transform applied here, whereas if [addToScene] just passes the
+  /// `layerOffset` to the child, then it should not be included in the
+  /// transform applied here.
+  ///
+  /// This method is only valid immediately after [addToScene] has been called,
+  /// before any of the properties have been changed.
+  ///
+  /// The default implementation does nothing, since [ContainerLayer], by
+  /// default, composites its children at the origin of the [ContainerLayer]
+  /// itself.
+  ///
+  /// The `child` argument should generally not be null, since in principle a
+  /// layer could transform each child independently. However, certain layers
+  /// may explicitly allow null as a value, for example if they know that they
+  /// transform all their children identically.
+  ///
+  /// The `transform` argument must not be null.
+  ///
+  /// Used by [FollowerLayer] to transform its child to a [LeaderLayer]'s
+  /// position.
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+  }
+
   @override
-  String debugDescribeChildren(String prefix) {
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
     if (firstChild == null)
-      return '';
-    final StringBuffer result = new StringBuffer()
-      ..write(prefix)
-      ..write(' \u2502\n');
+      return children;
     Layer child = firstChild;
     int count = 1;
-    while (child != lastChild) {
-      result.write(child.toStringDeep("$prefix \u251C\u2500child $count: ", "$prefix \u2502"));
+    while (true) {
+      children.add(child.toDiagnosticsNode(name: 'child $count'));
+      if (child == lastChild)
+        break;
       count += 1;
       child = child.nextSibling;
     }
-    if (child != null) {
-      assert(child == lastChild);
-      result.write(child.toStringDeep("$prefix \u2514\u2500child $count: ", "$prefix  "));
-    }
-    return result.toString();
+    return children;
   }
 }
 
@@ -391,13 +490,17 @@ class ContainerLayer extends Layer {
 class OffsetLayer extends ContainerLayer {
   /// Creates an offset layer.
   ///
-  /// By default, [offset] is zero.
+  /// By default, [offset] is zero. It must be non-null before the compositing
+  /// phase of the pipeline.
   OffsetLayer({ this.offset: Offset.zero });
 
   /// Offset from parent in the parent's coordinate system.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// The [offset] property must be non-null before the compositing phase of the
+  /// pipeline.
   Offset offset;
 
   @override
@@ -406,12 +509,11 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('offset: $offset');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Offset>('offset', offset));
   }
 }
-
 
 /// A composite layer that clips its children using a rectangle.
 class ClipRectLayer extends ContainerLayer {
@@ -435,9 +537,9 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('clipRect: $clipRect');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Rect>('clipRect', clipRect));
   }
 }
 
@@ -463,9 +565,9 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('clipRRect: $clipRRect');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
   }
 }
 
@@ -491,46 +593,61 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('clipPath: $clipPath');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Path>('clipPath', clipPath));
   }
 }
 
-/// A composited layer that applies a transformation matrix to its children.
+/// A composited layer that applies a given transformation matrix to its
+/// children.
+///
+/// This class inherits from [OffsetLayer] to make it one of the layers that
+/// can be used at the root of a [RenderObject] hierarchy.
 class TransformLayer extends OffsetLayer {
   /// Creates a transform layer.
   ///
-  /// The [transform] property must be non-null before the compositing phase of
-  /// the pipeline.
-  TransformLayer({
-    this.transform
-  });
+  /// The [transform] and [offset] properties must be non-null before the
+  /// compositing phase of the pipeline.
+  TransformLayer({ this.transform, Offset offset: Offset.zero }) : super(offset: offset);
 
   /// The matrix to apply.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// This transform is applied before [offset], if both are set.
+  ///
+  /// The [transform] property must be non-null before the compositing phase of
+  /// the pipeline.
   Matrix4 transform;
+
+  Matrix4 _lastEffectiveTransform;
 
   @override
   void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
-    assert(offset == Offset.zero);
-    Matrix4 effectiveTransform = transform;
-    if (layerOffset != Offset.zero) {
-      effectiveTransform = new Matrix4.translationValues(layerOffset.dx, layerOffset.dy, 0.0)
-        ..multiply(transform);
+    _lastEffectiveTransform = transform;
+    final Offset totalOffset = offset + layerOffset;
+    if (totalOffset != Offset.zero) {
+      _lastEffectiveTransform = new Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
+        ..multiply(_lastEffectiveTransform);
     }
-    builder.pushTransform(effectiveTransform.storage);
+    builder.pushTransform(_lastEffectiveTransform.storage);
     addChildrenToScene(builder, Offset.zero);
     builder.pop();
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('transform:');
-    description.addAll(debugDescribeTransform(transform));
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    transform.multiply(_lastEffectiveTransform);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new TransformProperty('transform', transform));
   }
 }
 
@@ -559,13 +676,13 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('alpha: $alpha');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new IntProperty('alpha', alpha));
   }
 }
 
-/// A composited layer that applies a shader to hits children.
+/// A composited layer that applies a shader to its children.
 class ShaderMaskLayer extends ContainerLayer {
   /// Creates a shader mask layer.
   ///
@@ -599,11 +716,11 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('shader: $shader');
-    description.add('maskRect: $maskRect');
-    description.add('blendMode: $blendMode');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Shader>('shader', shader));
+    description.add(new DiagnosticsProperty<Rect>('maskRect', maskRect));
+    description.add(new DiagnosticsProperty<BlendMode>('blendMode', blendMode));
   }
 }
 
@@ -643,11 +760,9 @@ class PhysicalModelLayer extends ContainerLayer {
     @required this.clipRRect,
     @required this.elevation,
     @required this.color,
-  }) {
-    assert(clipRRect != null);
-    assert(elevation != null);
-    assert(color != null);
-  }
+  }) : assert(clipRRect != null),
+       assert(elevation != null),
+       assert(color != null);
 
   /// The rounded-rect to clip in the parent's coordinate system.
   ///
@@ -679,8 +794,307 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('clipRRect: $clipRRect');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+  }
+}
+
+/// An object that a [LeaderLayer] can register with.
+///
+/// An instance of this class should be provided as the [LeaderLayer.link] and
+/// the [FollowerLayer.link] properties to cause the [FollowerLayer] to follow
+/// the [LeaderLayer].
+///
+/// See also:
+///
+///  * [CompositedTransformTarget], the widget that creates a [LeaderLayer].
+///  * [CompositedTransformFollower], the widget that creates a [FollowerLayer].
+///  * [RenderLeaderLayer] and [RenderFollowerLayer], the corresponding
+///    render objects.
+class LayerLink {
+  /// The currently-registered [LeaderLayer], if any.
+  LeaderLayer get leader => _leader;
+  LeaderLayer _leader;
+
+  @override
+  String toString() => '${describeIdentity(this)}(${ _leader != null ? "<linked>" : "<dangling>" })';
+}
+
+/// A composited layer that can be followed by a [FollowerLayer].
+///
+/// This layer collapses the accumulated offset into a transform and passes
+/// [Offset.zero] to its child layers in the [addToScene]/[addChildrenToScene]
+/// methods, so that [applyTransform] will work reliably.
+class LeaderLayer extends ContainerLayer {
+  /// Creates a leader layer.
+  ///
+  /// The [link] property must not be null, and must not have been provided to
+  /// any other [LeaderLayer] layers that are [attached] to the layer tree at
+  /// the same time.
+  ///
+  /// The [offset] property must be non-null before the compositing phase of the
+  /// pipeline.
+  LeaderLayer({ @required this.link, this.offset: Offset.zero }) : assert(link != null);
+
+  /// The object with which this layer should register.
+  ///
+  /// The link will be established when this layer is [attach]ed, and will be
+  /// cleared when this layer is [detach]ed.
+  final LayerLink link;
+
+  /// Offset from parent in the parent's coordinate system.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ///
+  /// The [offset] property must be non-null before the compositing phase of the
+  /// pipeline.
+  Offset offset;
+
+  @override
+  void attach(Object owner) {
+    super.attach(owner);
+    assert(link.leader == null);
+    _lastOffset = null;
+    link._leader = this;
+  }
+
+  @override
+  void detach() {
+    assert(link.leader == this);
+    link._leader = null;
+    _lastOffset = null;
+    super.detach();
+  }
+
+  /// The offset the last time this layer was composited.
+  ///
+  /// This is reset to null when the layer is attached or detached, to help
+  /// catch cases where the follower layer ends up before the leader layer, but
+  /// not every case can be detected.
+  Offset _lastOffset;
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    assert(offset != null);
+    _lastOffset = offset + layerOffset;
+    if (_lastOffset != Offset.zero)
+      builder.pushTransform(new Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
+    addChildrenToScene(builder, Offset.zero);
+    if (_lastOffset != Offset.zero)
+      builder.pop();
+  }
+
+  /// Applies the transform that would be applied when compositing the given
+  /// child to the given matrix.
+  ///
+  /// See [ContainerLayer.applyTransform] for details.
+  ///
+  /// The `child` argument may be null, as the same transform is applied to all
+  /// children.
+  @override
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(_lastOffset != null);
+    if (_lastOffset != Offset.zero)
+      transform.translate(_lastOffset.dx, _lastOffset.dy);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<Offset>('offset', offset));
+    description.add(new DiagnosticsProperty<LayerLink>('link', link));
+  }
+}
+
+/// A composited layer that applies a transformation matrix to its children such
+/// that they are positioned to match a [LeaderLayer].
+///
+/// If any of the ancestors of this layer have a degenerate matrix (e.g. scaling
+/// by zero), then the [FollowerLayer] will not be able to transform its child
+/// to the coordinate space of the [LeaderLayer].
+///
+/// A [linkedOffset] property can be provided to further offset the child layer
+/// from the leader layer, for example if the child is to follow the linked
+/// layer at a distance rather than directly overlapping it.
+class FollowerLayer extends ContainerLayer {
+  /// Creates a follower layer.
+  ///
+  /// The [link] property must not be null.
+  ///
+  /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
+  /// must be non-null before the compositing phase of the pipeline.
+  FollowerLayer({
+    @required this.link,
+    this.showWhenUnlinked: true,
+    this.unlinkedOffset: Offset.zero,
+    this.linkedOffset: Offset.zero,
+  }) : assert(link != null);
+
+  /// The link to the [LeaderLayer].
+  ///
+  /// The same object should be provided to a [LeaderLayer] that is earlier in
+  /// the layer tree. When this layer is composited, it will apply a transform
+  /// that moves its children to match the position of the [LeaderLayer].
+  final LayerLink link;
+
+  /// Whether to show the layer's contents when the [link] does not point to a
+  /// [LeaderLayer].
+  ///
+  /// When the layer is linked, children layers are positioned such that they
+  /// have the same global position as the linked [LeaderLayer].
+  ///
+  /// When the layer is not linked, then: if [showWhenUnlinked] is true,
+  /// children are positioned as if the [FollowerLayer] was a [ContainerLayer];
+  /// if it is false, then children are hidden.
+  ///
+  /// The [showWhenUnlinked] property must be non-null before the compositing
+  /// phase of the pipeline.
+  bool showWhenUnlinked;
+
+  /// Offset from parent in the parent's coordinate system, used when the layer
+  /// is not linked to a [LeaderLayer].
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ///
+  /// The [unlinkedOffset] property must be non-null before the compositing
+  /// phase of the pipeline.
+  ///
+  /// See also:
+  ///
+  ///  * [linkedOffset], for when the layers are linked.
+  Offset unlinkedOffset;
+
+  /// Offset from the origin of the leader layer to the origin of the child
+  /// layers, used when the layer is linked to a [LeaderLayer].
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ///
+  /// The [linkedOffset] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ///
+  /// See also:
+  ///
+  ///  * [unlinkedOffset], for when the layer is not linked.
+  Offset linkedOffset;
+
+  Offset _lastOffset;
+  Matrix4 _lastTransform;
+
+  /// The transform that was used during the last composition phase.
+  ///
+  /// If the [link] was not linked to a [LeaderLayer], or if this layer has
+  /// a degenerate matrix applied, then this will be null.
+  ///
+  /// This method returns a new [Matrix4] instance each time it is invoked.
+  Matrix4 getLastTransform() {
+    if (_lastTransform == null)
+      return null;
+    final Matrix4 result = new Matrix4.translationValues(-_lastOffset.dx, -_lastOffset.dy, 0.0);
+    result.multiply(_lastTransform);
+    return result;
+  }
+
+  /// Call [applyTransform] for each layer in the provided list.
+  ///
+  /// The list is in reverse order (deepest first). The first layer will be
+  /// treated as the child of the second, and so forth. The first layer in the
+  /// list won't have [applyTransform] called on it. The first layer may be
+  /// null.
+  Matrix4 _collectTransformForLayerChain(List<ContainerLayer> layers) {
+    // Initialize our result matrix.
+    final Matrix4 result = new Matrix4.identity();
+    // Apply each layer to the matrix in turn, starting from the last layer,
+    // and providing the previous layer as the child.
+    for (int index = layers.length - 1; index > 0; index -= 1)
+      layers[index].applyTransform(layers[index - 1], result);
+    return result;
+  }
+
+  /// Populate [_lastTransform] given the current state of the tree.
+  void _establishTransform() {
+    assert(link != null);
+    _lastTransform = null;
+    // Check to see if we are linked.
+    if (link.leader == null)
+      return;
+    // If we're linked, check the link is valid.
+    assert(link.leader.owner == owner, 'Linked LeaderLayer anchor is not in the same layer tree as the FollowerLayer.');
+    assert(link.leader._lastOffset != null, 'LeaderLayer anchor must come before FollowerLayer in paint order, but the reverse was true.');
+    // Collect all our ancestors into a Set so we can recognize them.
+    final Set<Layer> ancestors = new HashSet<Layer>();
+    Layer ancestor = parent;
+    while (ancestor != null) {
+      ancestors.add(ancestor);
+      ancestor = ancestor.parent;
+    }
+    // Collect all the layers from a hypothetical child (null) of the target
+    // layer up to the common ancestor layer.
+    ContainerLayer layer = link.leader;
+    final List<ContainerLayer> forwardLayers = <ContainerLayer>[null, layer];
+    do {
+      layer = layer.parent;
+      forwardLayers.add(layer);
+    } while (!ancestors.contains(layer));
+    ancestor = layer;
+    // Collect all the layers from this layer up to the common ancestor layer.
+    layer = this;
+    final List<ContainerLayer> inverseLayers = <ContainerLayer>[layer];
+    do {
+      layer = layer.parent;
+      inverseLayers.add(layer);
+    } while (layer != ancestor);
+    // Establish the forward and backward matrices given these lists of layers.
+    final Matrix4 forwardTransform = _collectTransformForLayerChain(forwardLayers);
+    final Matrix4 inverseTransform = _collectTransformForLayerChain(inverseLayers);
+    if (inverseTransform.invert() == 0.0) {
+      // We are in a degenerate transform, so there's not much we can do.
+      return;
+    }
+    // Combine the matrices and store the result.
+    inverseTransform.multiply(forwardTransform);
+    inverseTransform.translate(linkedOffset.dx, linkedOffset.dy);
+    _lastTransform = inverseTransform;
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, Offset layerOffset) {
+    assert(link != null);
+    assert(showWhenUnlinked != null);
+    if (link.leader == null && !showWhenUnlinked) {
+      _lastTransform = null;
+      _lastOffset = null;
+      return;
+    }
+    _establishTransform();
+    if (_lastTransform != null) {
+      builder.pushTransform(_lastTransform.storage);
+      addChildrenToScene(builder, Offset.zero);
+      builder.pop();
+      _lastOffset = unlinkedOffset + layerOffset;
+    } else {
+      _lastOffset = null;
+      addChildrenToScene(builder, unlinkedOffset + layerOffset);
+    }
+  }
+
+  @override
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    if (_lastTransform != null)
+      transform.multiply(_lastTransform);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<LayerLink>('link', link));
+    description.add(new TransformProperty('transform', getLastTransform(), defaultValue: null));
   }
 }

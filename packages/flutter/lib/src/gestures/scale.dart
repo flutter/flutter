@@ -32,9 +32,8 @@ class ScaleStartDetails {
   /// Creates details for [GestureScaleStartCallback].
   ///
   /// The [focalPoint] argument must not be null.
-  ScaleStartDetails({ this.focalPoint: Offset.zero }) {
-    assert(focalPoint != null);
-  }
+  ScaleStartDetails({ this.focalPoint: Offset.zero })
+    : assert(focalPoint != null);
 
   /// The initial focal point of the pointers in contact with the screen.
   /// Reported in global coordinates.
@@ -50,10 +49,11 @@ class ScaleUpdateDetails {
   ///
   /// The [focalPoint] and [scale] arguments must not be null. The [scale]
   /// argument must be greater than or equal to zero.
-  ScaleUpdateDetails({ this.focalPoint: Offset.zero, this.scale: 1.0 }) {
-    assert(focalPoint != null);
-    assert(scale != null && scale >= 0.0);
-  }
+  ScaleUpdateDetails({
+    this.focalPoint: Offset.zero,
+    this.scale: 1.0,
+  }) : assert(focalPoint != null),
+       assert(scale != null && scale >= 0.0);
 
   /// The focal point of the pointers in contact with the screen. Reported in
   /// global coordinates.
@@ -72,9 +72,8 @@ class ScaleEndDetails {
   /// Creates details for [GestureScaleEndCallback].
   ///
   /// The [velocity] argument must not be null.
-  ScaleEndDetails({ this.velocity: Velocity.zero }) {
-    assert(velocity != null);
-  }
+  ScaleEndDetails({ this.velocity: Velocity.zero })
+    : assert(velocity != null);
 
   /// The velocity of the last pointer to be lifted off of the screen.
   final Velocity velocity;
@@ -103,11 +102,14 @@ bool _isFlingGesture(Velocity velocity) {
 /// Recognizes a scale gesture.
 ///
 /// [ScaleGestureRecognizer] tracks the pointers in contact with the screen and
-/// calculates their focal point and indiciated scale. When a focal pointer is
+/// calculates their focal point and indicated scale. When a focal pointer is
 /// established, the recognizer calls [onStart]. As the focal point and scale
 /// change, the recognizer calls [onUpdate]. When the pointers are no longer in
 /// contact with the screen, the recognizer calls [onEnd].
 class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
+  /// Create a gesture recognizer for interactions intended for scaling content.
+  ScaleGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
   /// The pointers in contact with the screen have established a focal point and
   /// initial scale of 1.0.
   GestureScaleStartCallback onStart;
@@ -150,7 +152,8 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
     if (event is PointerMoveEvent) {
       final VelocityTracker tracker = _velocityTrackers[event.pointer];
       assert(tracker != null);
-      tracker.addPosition(event.timeStamp, event.position);
+      if (!event.synthesized)
+        tracker.addPosition(event.timeStamp, event.position);
       _pointerLocations[event.pointer] = event.position;
       shouldStartIfAccepted = true;
     } else if (event is PointerDownEvent) {
@@ -251,7 +254,7 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    switch(_state) {
+    switch (_state) {
       case _ScaleState.possible:
         resolve(GestureDisposition.rejected);
         break;
@@ -274,5 +277,5 @@ class ScaleGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 
   @override
-  String toStringShort() => 'scale';
+  String get debugDescription => 'scale';
 }

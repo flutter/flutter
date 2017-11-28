@@ -8,15 +8,37 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
+/// A base class for slivers that have a [RenderBox] child which scrolls
+/// normally, except that when it hits the leading edge (typically the top) of
+/// the viewport, it shrinks to a minimum size ([minExtent]).
+///
+/// This class primarily provides helpers for managing the child, in particular:
+///
+///  * [layoutChild], which applies min and max extents and a scroll offset to
+///    lay out the child. This is normally called from [performLayout].
+///
+///  * [childExtent], to convert the child's box layout dimensions to the sliver
+///    geometry model.
+///
+///  * hit testing, painting, and other details of the sliver protocol.
+///
+/// Subclasses must implement [performLayout], [minExtent], and [maxExtent], and
+/// typically also will implement [updateChild].
 abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObjectWithChildMixin<RenderBox>, RenderSliverHelpers {
+  /// Creates a sliver that changes its size when scrolled to the start of the
+  /// viewport.
+  ///
+  /// This is an abstract class; this constructor only initializes the [child].
   RenderSliverPersistentHeader({ RenderBox child }) {
     this.child = child;
   }
@@ -35,6 +57,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// child changes its intrinsic dimensions.
   double get minExtent;
 
+  /// The dimension of the child in the main axis.
   @protected
   double get childExtent {
     if (child == null)
@@ -85,6 +108,15 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     super.markNeedsLayout();
   }
 
+  /// Lays out the [child].
+  ///
+  /// This is called by [performLayout]. It applies the given `scrollOffset`
+  /// (which need not match the offset given by the [constraints]) and the
+  /// `maxExtent` (which need not match the value returned by the [maxExtent]
+  /// getter).
+  ///
+  /// The `overlapsContent` argument is passed to [updateChild].
+  @protected
   void layoutChild(double scrollOffset, double maxExtent, { bool overlapsContent: false }) {
     assert(maxExtent != null);
     final double shrinkOffset = math.min(scrollOffset, maxExtent);
@@ -106,7 +138,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
         'The specified maxExtent was: ${maxExtent.toStringAsFixed(1)}\n'
         'The specified minExtent was: ${minExtent.toStringAsFixed(1)}\n'
       );
-    });
+    }());
     child?.layout(
       constraints.asBoxConstraints(maxExtent: math.max(minExtent, maxExtent - shrinkOffset)),
       parentUsesSize: true,
@@ -173,19 +205,34 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
     }
   }
 
+  /// Whether the [SemanticsNode]s associated with this [RenderSliver] should
+  /// be excluded from the semantic scrolling area.
+  ///
+  /// [RenderSliver]s that stay on the screen even though the user has scrolled
+  /// past them (e.g. a pinned app bar) should set this to true.
+  @protected
+  bool get excludeFromSemanticsScrolling => _excludeFromSemanticsScrolling;
+  bool _excludeFromSemanticsScrolling = false;
+  set excludeFromSemanticsScrolling(bool value) {
+    if (_excludeFromSemanticsScrolling == value)
+      return;
+    _excludeFromSemanticsScrolling = value;
+    markNeedsSemanticsUpdate();
+  }
+
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    try {
-      description.add('maxExtent: ${maxExtent.toStringAsFixed(1)}');
-    } catch (e) {
-      description.add('maxExtent: EXCEPTION (${e.runtimeType})');
-    }
-    try {
-      description.add('child position: ${childMainAxisPosition(child).toStringAsFixed(1)}');
-    } catch (e) {
-      description.add('child position: EXCEPTION (${e.runtimeType})');
-    }
+  void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
+
+    if (_excludeFromSemanticsScrolling)
+      config.addTagForChildren(RenderSemanticsGestureHandler.excludeFromScrolling);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty.lazy('maxExtent', () => maxExtent));
+    description.add(new DoubleProperty.lazy('child position', () => childMainAxisPosition(child)));
   }
 }
 
@@ -195,6 +242,8 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
 ///
 /// This sliver makes no effort to avoid overlapping other content.
 abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// scrolls off.
   RenderSliverScrollingPersistentHeader({
     RenderBox child,
   }) : super(child: child);
@@ -231,6 +280,8 @@ abstract class RenderSliverScrollingPersistentHeader extends RenderSliverPersist
 ///
 /// This sliver avoids overlapping other earlier slivers where possible.
 abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// stays pinned there.
   RenderSliverPinnedPersistentHeader({
     RenderBox child,
   }) : super(child: child);
@@ -238,13 +289,16 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
   @override
   void performLayout() {
     final double maxExtent = this.maxExtent;
-    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: constraints.overlap > 0.0);
+    final bool overlapsContent = constraints.overlap > 0.0;
+    excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
+    layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     geometry = new SliverGeometry(
       scrollExtent: maxExtent,
       paintOrigin: constraints.overlap,
       paintExtent: math.min(childExtent, constraints.remainingPaintExtent),
       layoutExtent: (maxExtent - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: minExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
   }
@@ -270,11 +324,9 @@ class FloatingHeaderSnapConfiguration {
     @required this.vsync,
     this.curve: Curves.ease,
     this.duration: const Duration(milliseconds: 300),
-  }) {
-    assert(vsync != null);
-    assert(curve != null);
-    assert(duration != null);
-  }
+  }) : assert(vsync != null),
+       assert(curve != null),
+       assert(duration != null);
 
   /// The [TickerProvider] for the [AnimationController] that causes a
   /// floating header to snap in or out of view.
@@ -287,7 +339,18 @@ class FloatingHeaderSnapConfiguration {
   final Duration duration;
 }
 
+/// A sliver with a [RenderBox] child which shrinks and scrolls like a
+/// [RenderSliverScrollingPersistentHeader], but immediately comes back when the
+/// user scrolls in the reverse direction.
+///
+/// See also:
+///
+///  * [RenderSliverFloatingPinnedPersistentHeader], which is similar but sticks
+///    to the start of the viewport rather than scrolling off.
 abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// scrolls off, and comes back immediately when the user reverses the scroll
+  /// direction.
   RenderSliverFloatingPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
@@ -335,7 +398,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     _snapConfiguration = value;
   }
 
-  // Update [geometry] and return the new value for [childMainAxisPosition].
+  /// Updates [geometry], and returns the new value for [childMainAxisPosition].
+  ///
+  /// This is used by [performLayout].
   @protected
   double updateGeometry() {
     final double maxExtent = this.maxExtent;
@@ -347,6 +412,7 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
       paintExtent: paintExtent.clamp(0.0, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return math.min(0.0, paintExtent - childExtent);
@@ -408,7 +474,9 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
     } else {
       _effectiveScrollOffset = constraints.scrollOffset;
     }
-    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: _effectiveScrollOffset < constraints.scrollOffset);
+    final bool overlapsContent = _effectiveScrollOffset < constraints.scrollOffset;
+    excludeFromSemanticsScrolling = overlapsContent;
+    layoutChild(_effectiveScrollOffset, maxExtent, overlapsContent: overlapsContent);
     _childPosition = updateGeometry();
     _lastActualScrollOffset = constraints.scrollOffset;
   }
@@ -420,13 +488,24 @@ abstract class RenderSliverFloatingPersistentHeader extends RenderSliverPersiste
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-    description.add('effective scroll offset: ${_effectiveScrollOffset?.toStringAsFixed(1)}');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DoubleProperty('effective scroll offset', _effectiveScrollOffset));
   }
 }
 
+/// A sliver with a [RenderBox] child which shrinks and then remains pinned to
+/// the start of the viewport like a [RenderSliverPinnedPersistentHeader], but
+/// immediately grows when the user scrolls in the reverse direction.
+///
+/// See also:
+///
+///  * [RenderSliverFloatingPersistentHeader], which is similar but scrolls off
+///    the top rather than sticking to it.
 abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFloatingPersistentHeader {
+  /// Creates a sliver that shrinks when it hits the start of the viewport, then
+  /// stays pinned there, and grows immediately when the user reverses the
+  /// scroll direction.
   RenderSliverFloatingPinnedPersistentHeader({
     RenderBox child,
     FloatingHeaderSnapConfiguration snapConfiguration,
@@ -434,7 +513,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
 
   @override
   double updateGeometry() {
-    final double minExtent = this.maxExtent;
+    final double minExtent = this.minExtent;
     final double maxExtent = this.maxExtent;
     final double paintExtent = (maxExtent - _effectiveScrollOffset);
     final double layoutExtent = (maxExtent - constraints.scrollOffset);
@@ -443,6 +522,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
       paintExtent: paintExtent.clamp(minExtent, constraints.remainingPaintExtent),
       layoutExtent: layoutExtent.clamp(0.0, constraints.remainingPaintExtent - minExtent),
       maxPaintExtent: maxExtent,
+      maxScrollObstructionExtent: maxExtent,
       hasVisualOverflow: true, // Conservatively say we do have overflow to avoid complexity.
     );
     return 0.0;

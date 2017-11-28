@@ -6,6 +6,7 @@ import 'package:meta/meta.dart';
 
 import 'assertions.dart';
 import 'basic_types.dart';
+import 'diagnostics.dart';
 import 'observer_list.dart';
 
 /// An object that maintains a list of listeners.
@@ -20,7 +21,7 @@ abstract class Listenable {
   /// The list must not be changed after this method has been called. Doing so
   /// will lead to memory leaks or exceptions.
   ///
-  /// The list may contain `null`s; they are ignored.
+  /// The list may contain nulls; they are ignored.
   factory Listenable.merge(List<Listenable> listenables) = _MergingListenable;
 
   /// Register a closure to be called when the object notifies its listeners.
@@ -34,7 +35,7 @@ abstract class Listenable {
 /// A class that can be extended or mixed in that provides a change notification
 /// API using [VoidCallback] for notifications.
 ///
-/// [ChangeNotifier] is optimised for small numbers (one or two) of listeners.
+/// [ChangeNotifier] is optimized for small numbers (one or two) of listeners.
 /// It is O(N) for adding and removing listeners and O(N²) for dispatching
 /// notifications (where N is the number of listeners).
 ///
@@ -53,7 +54,7 @@ class ChangeNotifier extends Listenable {
         );
       }
       return true;
-    });
+    }());
     return true;
   }
 
@@ -62,7 +63,7 @@ class ChangeNotifier extends Listenable {
   /// This method must not be called after [dispose] has been called.
   @override
   void addListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners.add(listener);
   }
 
@@ -87,7 +88,7 @@ class ChangeNotifier extends Listenable {
   /// registrations to a common upstream object.
   @override
   void removeListener(VoidCallback listener) {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners.remove(listener);
   }
 
@@ -99,7 +100,7 @@ class ChangeNotifier extends Listenable {
   /// This method should only be called by the object's owner.
   @mustCallSuper
   void dispose() {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     _listeners = null;
   }
 
@@ -120,7 +121,7 @@ class ChangeNotifier extends Listenable {
   /// See the discussion at [removeListener].
   @protected
   void notifyListeners() {
-    assert(_debugAssertNotDisposed);
+    assert(_debugAssertNotDisposed());
     if (_listeners != null) {
       final List<VoidCallback> localListeners = new List<VoidCallback>.from(_listeners);
       for (VoidCallback listener in localListeners) {
@@ -185,5 +186,5 @@ class ValueNotifier<T> extends ChangeNotifier {
   }
 
   @override
-  String toString() => '$runtimeType#$hashCode($value)';
+  String toString() => '${describeIdentity(this)}($value)';
 }

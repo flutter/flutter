@@ -24,6 +24,10 @@ import 'scroll_position_with_single_context.dart';
 /// to an individual [Scrollable] widget. To use a custom [ScrollPosition],
 /// subclass [ScrollController] and override [createScrollPosition].
 ///
+/// A [ScrollController] is a [Listenable]. It notifies its listeners whenever
+/// any of the attached [ScrollPosition]s notify _their_ listeners (i.e.
+/// whenever any of them scroll).
+///
 /// Typically used with [ListView], [GridView], [CustomScrollView].
 ///
 /// See also:
@@ -36,24 +40,46 @@ import 'scroll_position_with_single_context.dart';
 ///    [PageView].
 ///  * [ScrollPosition], which manages the scroll offset for an individual
 ///    scrolling widget.
+///  * [ScrollNotification] and [NotificationListener], which can be used to watch
+///    the scroll position without using a [ScrollController].
 class ScrollController extends ChangeNotifier {
   /// Creates a controller for a scrollable widget.
   ///
-  /// The [initialScrollOffset] must not be null.
+  /// The values of `initialScrollOffset` and `keepScrollOffset` must not be null.
   ScrollController({
-    this.initialScrollOffset: 0.0,
+    double initialScrollOffset: 0.0,
+    this.keepScrollOffset: true,
     this.debugLabel,
-  }) {
-    assert(initialScrollOffset != null);
-  }
+  }) : assert(initialScrollOffset != null),
+       assert(keepScrollOffset != null),
+       _initialScrollOffset = initialScrollOffset;
 
   /// The initial value to use for [offset].
   ///
   /// New [ScrollPosition] objects that are created and attached to this
-  /// controller will have their offset initialized to this value.
+  /// controller will have their offset initialized to this value
+  /// if [keepScrollOffset] is false or a scroll offset hasn't been saved yet.
   ///
   /// Defaults to 0.0.
-  final double initialScrollOffset;
+  double get initialScrollOffset => _initialScrollOffset;
+  final double _initialScrollOffset;
+
+  /// Each time a scroll completes, save the current scroll [offset] with
+  /// [PageStorage] and restore it if this controller's scrollable is recreated.
+  ///
+  /// If this property is set to false, the scroll offset is never saved
+  /// and [initialScrollOffset] is always used to initialize the scroll
+  /// offset. If true (the default), the initial scroll offset is used the
+  /// first time the controller's scrollable is created, since there's no
+  /// scroll offset to restore yet. Subsequently the saved offset is
+  /// restored and [initialScrollOffset] is ignored.
+  ///
+  /// See also:
+  ///
+  ///  * [PageStorageKey], which should be used when more than one
+  ////   scrollable appears in the same route, to distinguish the [PageStorage]
+  ///    locations used to save scroll offsets.
+  final bool keepScrollOffset;
 
   /// A label that is used in the [toString] output. Intended to aid with
   /// identifying scroll controller instances in debug output.
@@ -206,6 +232,7 @@ class ScrollController extends ChangeNotifier {
       physics: physics,
       context: context,
       initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
       oldPosition: oldPosition,
       debugLabel: debugLabel,
     );
@@ -215,7 +242,7 @@ class ScrollController extends ChangeNotifier {
   String toString() {
     final List<String> description = <String>[];
     debugFillDescription(description);
-    return '$runtimeType#$hashCode(${description.join(", ")})';
+    return '${describeIdentity(this)}(${description.join(", ")})';
   }
 
   /// Add additional information to the given description for use by [toString].
@@ -237,9 +264,110 @@ class ScrollController extends ChangeNotifier {
       description.add('no clients');
     } else if (_positions.length == 1) {
       // Don't actually list the client itself, since its toString may refer to us.
-      description.add('one client, offset ${offset.toStringAsFixed(1)}');
+      description.add('one client, offset ${offset?.toStringAsFixed(1)}');
     } else {
       description.add('${_positions.length} clients');
     }
+  }
+}
+
+// Examples can assume:
+// TrackingScrollController _trackingScrollController;
+
+/// A [ScrollController] whose [initialScrollOffset] tracks its most recently
+/// updated [ScrollPosition].
+///
+/// This class can be used to synchronize the scroll offset of two or more
+/// lazily created scroll views that share a single [TrackingScrollController].
+/// It tracks the most recently updated scroll position and reports it as its
+/// `initialScrollOffset`.
+///
+/// ## Sample code
+///
+/// In this example each [PageView] page contains a [ListView] and all three
+/// [ListView]'s share a [TrackingScrollController]. The scroll offsets of all
+/// three list views will track each other, to the extent that's possible given
+/// the different list lengths.
+///
+/// ```dart
+/// new PageView(
+///   children: <Widget>[
+///     new ListView(
+///       controller: _trackingScrollController,
+///       children: new List<Widget>.generate(100, (int i) => new Text('page 0 item $i')).toList(),
+///     ),
+///    new ListView(
+///      controller: _trackingScrollController,
+///      children: new List<Widget>.generate(200, (int i) => new Text('page 1 item $i')).toList(),
+///    ),
+///    new ListView(
+///      controller: _trackingScrollController,
+///      children: new List<Widget>.generate(300, (int i) => new Text('page 2 item $i')).toList(),
+///     ),
+///   ],
+/// )
+/// ```
+///
+/// In this example the `_trackingController` would have been created by the
+/// stateful widget that built the widget tree.
+class TrackingScrollController extends ScrollController {
+  /// Creates a scroll controller that continually updates its
+  /// [initialScrollOffset] to match the last scroll notification it received.
+  TrackingScrollController({
+    double initialScrollOffset: 0.0,
+    bool keepScrollOffset: true,
+    String debugLabel,
+  }) : super(initialScrollOffset: initialScrollOffset,
+             keepScrollOffset: keepScrollOffset,
+             debugLabel: debugLabel);
+
+  final Map<ScrollPosition, VoidCallback> _positionToListener = <ScrollPosition, VoidCallback>{};
+  ScrollPosition _lastUpdated;
+  double _lastUpdatedOffset;
+
+  /// The last [ScrollPosition] to change. Returns null if there aren't any
+  /// attached scroll positions, or there hasn't been any scrolling yet, or the
+  /// last [ScrollPosition] to change has since been removed.
+  ScrollPosition get mostRecentlyUpdatedPosition => _lastUpdated;
+
+  /// Returns the scroll offset of the [mostRecentlyUpdatedPosition] or, if that
+  /// is null, the initial scroll offset provided to the constructor.
+  ///
+  /// See also:
+  ///
+  ///  * [ScrollController.initialScrollOffset], which this overrides.
+  @override
+  double get initialScrollOffset => _lastUpdatedOffset ?? super.initialScrollOffset;
+
+  @override
+  void attach(ScrollPosition position) {
+    super.attach(position);
+    assert(!_positionToListener.containsKey(position));
+    _positionToListener[position] = () {
+      _lastUpdated = position;
+      _lastUpdatedOffset = position.pixels;
+    };
+    position.addListener(_positionToListener[position]);
+  }
+
+  @override
+  void detach(ScrollPosition position) {
+    super.detach(position);
+    assert(_positionToListener.containsKey(position));
+    position.removeListener(_positionToListener[position]);
+    _positionToListener.remove(position);
+    if (_lastUpdated == position)
+      _lastUpdated = null;
+    if (_positionToListener.isEmpty)
+      _lastUpdatedOffset = null;
+  }
+
+  @override
+  void dispose() {
+    for (ScrollPosition position in positions) {
+      assert(_positionToListener.containsKey(position));
+      position.removeListener(_positionToListener[position]);
+    }
+    super.dispose();
   }
 }

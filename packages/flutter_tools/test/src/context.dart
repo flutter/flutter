@@ -8,6 +8,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -59,7 +60,8 @@ void _defaultInitializeContext(AppContext testContext) {
     ..putIfAbsent(SimControl, () => new MockSimControl())
     ..putIfAbsent(Usage, () => new MockUsage())
     ..putIfAbsent(FlutterVersion, () => new MockFlutterVersion())
-    ..putIfAbsent(Clock, () => const Clock());
+    ..putIfAbsent(Clock, () => const Clock())
+    ..putIfAbsent(HttpClient, () => new MockHttpClient());
 }
 
 void testUsingContext(String description, dynamic testMethod(), {
@@ -68,16 +70,32 @@ void testUsingContext(String description, dynamic testMethod(), {
   ContextInitializer initializeContext: _defaultInitializeContext,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
+
+  // Ensure we don't rely on the default [Config] constructor which will
+  // leak a sticky $HOME/.flutter_settings behind!
+  Directory configDir;
+  tearDown(() {
+    configDir?.deleteSync(recursive: true);
+    configDir = null;
+  });
+  Config buildConfig(FileSystem fs) {
+    configDir = fs.systemTempDirectory.createTempSync('config-dir');
+    final File settingsFile = fs.file(
+        fs.path.join(configDir.path, '.flutter_settings'));
+    return new Config(settingsFile);
+  }
+
   test(description, () async {
     final AppContext testContext = new AppContext();
 
     // The context always starts with these value since others depend on them.
     testContext
+      ..putIfAbsent(Stdio, () => const Stdio())
       ..putIfAbsent(Platform, () => const LocalPlatform())
       ..putIfAbsent(FileSystem, () => const LocalFileSystem())
       ..putIfAbsent(ProcessManager, () => const LocalProcessManager())
       ..putIfAbsent(Logger, () => new BufferLogger())
-      ..putIfAbsent(Config, () => new Config());
+      ..putIfAbsent(Config, () => buildConfig(testContext[FileSystem]));
 
     // Apply the initializer after seeding the base value above.
     initializeContext(testContext);
@@ -218,10 +236,10 @@ class MockUsage implements Usage {
   String get clientId => '00000000-0000-4000-0000-000000000000';
 
   @override
-  void sendCommand(String command) { }
+  void sendCommand(String command, { Map<String, String> parameters }) { }
 
   @override
-  void sendEvent(String category, String parameter) { }
+  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
 
   @override
   void sendTiming(String category, String variableName, Duration duration, { String label }) { }
@@ -242,3 +260,5 @@ class MockUsage implements Usage {
 class MockFlutterVersion extends Mock implements FlutterVersion {}
 
 class MockClock extends Mock implements Clock {}
+
+class MockHttpClient extends Mock implements HttpClient {}

@@ -44,7 +44,7 @@ void main() {
           width: 100.0,
           height: 100.0,
           color: const Color(0xFF0000FF),
-          child: new Text('$i')
+          child: new Text('$i', textDirection: TextDirection.ltr)
         )
       );
     }

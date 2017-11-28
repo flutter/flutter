@@ -50,17 +50,21 @@ void main() {
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
-    tester.route(pointer.move(const Offset(20.0, 20.0)));
-    expect(didStartPan, isTrue);
+    // touch should give up when it hits kTouchSlop, which was 18.0 when this test was last updated.
+
+    tester.route(pointer.move(const Offset(20.0, 20.0))); // moved 10 horizontally and 10 vertically which is 14 total
+    expect(didStartPan, isFalse); // 14 < 18
+    tester.route(pointer.move(const Offset(20.0, 30.0))); // moved 10 horizontally and 20 vertically which is 22 total
+    expect(didStartPan, isTrue); // 22 > 18
     didStartPan = false;
-    expect(updatedScrollDelta, const Offset(10.0, 10.0));
+    expect(updatedScrollDelta, const Offset(10.0, 20.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
 
     tester.route(pointer.move(const Offset(20.0, 25.0)));
     expect(didStartPan, isFalse);
-    expect(updatedScrollDelta, const Offset(0.0, 5.0));
+    expect(updatedScrollDelta, const Offset(0.0, -5.0));
     updatedScrollDelta = null;
     expect(didEndPan, isFalse);
     expect(didTap, isFalse);
@@ -125,6 +129,37 @@ void main() {
     expect(updatedDelta, isNull);
     expect(didEndDrag, isTrue);
     didEndDrag = false;
+
+    drag.dispose();
+  });
+
+  testGesture('Should report original timestamps', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Duration startTimestamp;
+    drag.onStart = (DragStartDetails details) {
+      startTimestamp = details.sourceTimeStamp;
+    };
+
+    Duration updatedTimestamp;
+    drag.onUpdate = (DragUpdateDetails details) {
+      updatedTimestamp = details.sourceTimeStamp;
+    };
+
+    final TestPointer pointer = new TestPointer(5);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 10.0), timeStamp: const Duration(milliseconds: 100));
+    drag.addPointer(down);
+    tester.closeArena(5);
+    expect(startTimestamp, isNull);
+
+    tester.route(down);
+    expect(startTimestamp, const Duration(milliseconds: 100));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 200)));
+    expect(updatedTimestamp, const Duration(milliseconds: 200));
+
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 300)));
+    expect(updatedTimestamp, const Duration(milliseconds: 300));
 
     drag.dispose();
   });
@@ -228,6 +263,63 @@ void main() {
     expect(velocity.pixelsPerSecond.dx, inInclusiveRange(0.99 * kMaxFlingVelocity, kMaxFlingVelocity));
     expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
     expect(primaryVelocity, velocity.pixelsPerSecond.dx);
+
+    drag.dispose();
+  });
+
+  testGesture('Synthesized pointer events are ignored for velocity tracking', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Velocity velocity;
+    drag.onEnd = (DragEndDetails details) {
+      velocity = details.velocity;
+    };
+
+    final TestPointer pointer = new TestPointer(1);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    drag.addPointer(down);
+    tester.closeArena(1);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.move(const Offset(30.0, 25.0), timeStamp: const Duration(milliseconds: 30)));
+    tester.route(pointer.move(const Offset(40.0, 25.0), timeStamp: const Duration(milliseconds: 40)));
+    tester.route(pointer.move(const Offset(50.0, 25.0), timeStamp: const Duration(milliseconds: 50)));
+    tester.route(const PointerMoveEvent(
+      pointer: 1,
+      // Simulate a small synthesized wobble which would have slowed down the
+      // horizontal velocity from 1 px/ms and introduced a slight vertical velocity.
+      position: const Offset(51.0, 26.0),
+      timeStamp: const Duration(milliseconds: 60),
+      synthesized: true,
+    ));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 70)));
+    expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
+    expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
+
+    drag.dispose();
+  });
+
+  /// Checks that quick flick gestures with 1 down, 2 move and 1 up pointer
+  /// events still have a velocity
+  testGesture('Quick flicks have velocity', (GestureTester tester) {
+    final HorizontalDragGestureRecognizer drag = new HorizontalDragGestureRecognizer();
+
+    Velocity velocity;
+    drag.onEnd = (DragEndDetails details) {
+      velocity = details.velocity;
+    };
+
+    final TestPointer pointer = new TestPointer(1);
+    final PointerDownEvent down = pointer.down(const Offset(10.0, 25.0), timeStamp: const Duration(milliseconds: 10));
+    drag.addPointer(down);
+    tester.closeArena(1);
+    tester.route(down);
+    tester.route(pointer.move(const Offset(20.0, 25.0), timeStamp: const Duration(milliseconds: 20)));
+    tester.route(pointer.move(const Offset(30.0, 25.0), timeStamp: const Duration(milliseconds: 30)));
+    tester.route(pointer.up(timeStamp: const Duration(milliseconds: 40)));
+    // 3 events moving by 10px every 10ms = 1000px/s.
+    expect(velocity.pixelsPerSecond.dx, moreOrLessEquals(1000.0));
+    expect(velocity.pixelsPerSecond.dy, moreOrLessEquals(0.0));
 
     drag.dispose();
   });

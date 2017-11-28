@@ -11,9 +11,9 @@ const double kSectionIndicatorWidth = 32.0;
 
 // The card for a single section. Displays the section's gradient and background image.
 class SectionCard extends StatelessWidget {
-  SectionCard({ Key key, @required this.section }) : super(key: key) {
-    assert(section != null);
-  }
+  const SectionCard({ Key key, @required this.section })
+    : assert(section != null),
+      super(key: key);
 
   final Section section;
 
@@ -25,8 +25,8 @@ class SectionCard extends StatelessWidget {
         decoration: new BoxDecoration(
           borderRadius: new BorderRadius.circular(4.0),
           gradient: new LinearGradient(
-            begin: FractionalOffset.topLeft,
-            end: FractionalOffset.topRight,
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
             colors: <Color>[
               section.leftColor,
               section.rightColor,
@@ -35,6 +35,7 @@ class SectionCard extends StatelessWidget {
         ),
         child: new Image.asset(
           section.backgroundAsset,
+          package: section.backgroundAssetPackage,
           color: const Color.fromRGBO(255, 255, 255, 0.075),
           colorBlendMode: BlendMode.modulate,
           fit: BoxFit.cover,
@@ -60,16 +61,15 @@ class SectionTitle extends StatelessWidget {
     color: const Color(0x19000000),
   );
 
-  SectionTitle({
+  const SectionTitle({
     Key key,
     @required this.section,
     @required this.scale,
     @required this.opacity,
-  }) : super(key: key) {
-    assert(section != null);
-    assert(scale != null);
-    assert(opacity != null && opacity >= 0.0 && opacity <= 1.0);
-  }
+  }) : assert(section != null),
+       assert(scale != null),
+       assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       super(key: key);
 
   final Section section;
   final double scale;
@@ -82,7 +82,7 @@ class SectionTitle extends StatelessWidget {
         opacity: opacity,
         child: new Transform(
           transform: new Matrix4.identity()..scale(scale),
-          alignment: FractionalOffset.center,
+          alignment: Alignment.center,
           child: new Stack(
             children: <Widget>[
               new Positioned(
@@ -118,10 +118,10 @@ class SectionIndicator extends StatelessWidget {
 
 // Display a single SectionDetail.
 class SectionDetailView extends StatelessWidget {
-  SectionDetailView({ Key key, @required this.detail }) : super(key: key) {
-    assert(detail != null && detail.imageAsset != null);
-    assert((detail.imageAsset ?? detail.title) != null);
-  }
+  SectionDetailView({ Key key, @required this.detail })
+    : assert(detail != null && detail.imageAsset != null),
+      assert((detail.imageAsset ?? detail.title) != null),
+      super(key: key);
 
   final SectionDetail detail;
 
@@ -131,9 +131,12 @@ class SectionDetailView extends StatelessWidget {
       decoration: new BoxDecoration(
         borderRadius: new BorderRadius.circular(6.0),
         image: new DecorationImage(
-          image: new AssetImage(detail.imageAsset),
+          image: new AssetImage(
+            detail.imageAsset,
+            package: detail.imageAssetPackage,
+          ),
           fit: BoxFit.cover,
-          alignment: FractionalOffset.center,
+          alignment: Alignment.center,
         ),
       ),
     );

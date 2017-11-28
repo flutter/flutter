@@ -60,7 +60,7 @@ void main() {
     expect(log, <String>['long-tap-down 6']);
     log.clear();
 
-    tester.route(pointer6.move(const Offset(4.0, 3.0)));
+    tester.route(pointer6.move(const Offset(40.0, 30.0))); // move more than kTouchSlop from 15.0,15.0
     expect(log, <String>['tap-cancel 6']);
     log.clear();
 

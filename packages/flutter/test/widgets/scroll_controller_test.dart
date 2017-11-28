@@ -11,15 +11,20 @@ void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
 
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: kStates.map<Widget>((String state) {
-        return new Container(
-          height: 200.0,
-          child: new Text(state),
-        );
-      }).toList()
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) {
+            return new Container(
+              height: 200.0,
+              child: new Text(state),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     double realOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
@@ -44,16 +49,21 @@ void main() {
     expect(controller.offset, equals(326.0));
     expect(realOffset(), equals(controller.offset));
 
-    await tester.pumpWidget(new ListView(
-      key: const Key('second'),
-      controller: controller,
-      children: kStates.map<Widget>((String state) {
-        return new Container(
-          height: 200.0,
-          child: new Text(state),
-        );
-      }).toList()
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          key: const Key('second'),
+          controller: controller,
+          children: kStates.map<Widget>((String state) {
+            return new Container(
+              height: 200.0,
+              child: new Text(state),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(controller.offset, equals(0.0));
     expect(realOffset(), equals(controller.offset));
@@ -65,16 +75,21 @@ void main() {
 
     final ScrollController controller2 = new ScrollController();
 
-    await tester.pumpWidget(new ListView(
-      key: const Key('second'),
-      controller: controller2,
-      children: kStates.map<Widget>((String state) {
-        return new Container(
-          height: 200.0,
-          child: new Text(state),
-        );
-      }).toList()
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          key: const Key('second'),
+          controller: controller2,
+          children: kStates.map<Widget>((String state) {
+            return new Container(
+              height: 200.0,
+              child: new Text(state),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(() => controller.offset, throwsAssertionError);
     expect(controller2.offset, equals(653.0));
@@ -83,17 +98,22 @@ void main() {
     expect(() => controller.jumpTo(120.0), throwsAssertionError);
     expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throwsAssertionError);
 
-    await tester.pumpWidget(new ListView(
-      key: const Key('second'),
-      controller: controller2,
-      physics: const BouncingScrollPhysics(),
-      children: kStates.map<Widget>((String state) {
-        return new Container(
-          height: 200.0,
-          child: new Text(state),
-        );
-      }).toList()
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          key: const Key('second'),
+          controller: controller2,
+          physics: const BouncingScrollPhysics(),
+          children: kStates.map<Widget>((String state) {
+            return new Container(
+              height: 200.0,
+              child: new Text(state),
+            );
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(controller2.offset, equals(653.0));
     expect(realOffset(), equals(controller2.offset));
@@ -114,11 +134,16 @@ void main() {
       initialScrollOffset: 209.0,
     );
 
-    await tester.pumpWidget(new GridView.count(
-      crossAxisCount: 4,
-      controller: controller,
-      children: kStates.map<Widget>((String state) => new Text(state)).toList(),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.count(
+          crossAxisCount: 4,
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    );
 
     double realOffset() {
       return tester.state<ScrollableState>(find.byType(Scrollable)).position.pixels;
@@ -134,11 +159,16 @@ void main() {
     expect(controller.offset, equals(105.0));
     expect(realOffset(), equals(controller.offset));
 
-    await tester.pumpWidget(new GridView.count(
-      crossAxisCount: 2,
-      controller: controller,
-      children: kStates.map<Widget>((String state) => new Text(state)).toList(),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new GridView.count(
+          crossAxisCount: 2,
+          controller: controller,
+          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+        ),
+      ),
+    );
 
     expect(controller.offset, equals(105.0));
     expect(realOffset(), equals(controller.offset));
@@ -147,10 +177,15 @@ void main() {
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
 
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: <Widget>[ new Container(height: 200000.0) ],
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: <Widget>[ new Container(height: 200000.0) ],
+        ),
+      ),
+    );
 
     controller.animateTo(1000.0, duration: const Duration(seconds: 1), curve: Curves.linear);
 
@@ -168,28 +203,33 @@ void main() {
 
   testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: <Widget>[
-        new Container(
-          constraints: const BoxConstraints(maxHeight: 500.0),
-          child: new ListView(
-            controller: controller,
-            children: kStates.map<Widget>((String state) {
-              return new Container(height: 200.0, child: new Text(state));
-            }).toList(),
-          ),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: <Widget>[
+            new Container(
+              constraints: const BoxConstraints(maxHeight: 500.0),
+              child: new ListView(
+                controller: controller,
+                children: kStates.map<Widget>((String state) {
+                  return new Container(height: 200.0, child: new Text(state));
+                }).toList(),
+              ),
+            ),
+            new Container(
+              constraints: const BoxConstraints(maxHeight: 500.0),
+              child: new ListView(
+                controller: controller,
+                children: kStates.map<Widget>((String state) {
+                  return new Container(height: 200.0, child: new Text(state));
+                }).toList(),
+              ),
+            ),
+          ],
         ),
-        new Container(
-          constraints: const BoxConstraints(maxHeight: 500.0),
-          child: new ListView(
-            controller: controller,
-            children: kStates.map<Widget>((String state) {
-              return new Container(height: 200.0, child: new Text(state));
-            }).toList(),
-          ),
-        ),
-      ],
-    ));
+      ),
+    );
 
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
@@ -203,28 +243,33 @@ void main() {
 
   testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
     final ScrollController controller = new ScrollController();
-    await tester.pumpWidget(new ListView(
-      children: <Widget>[
-        new Container(
-          constraints: const BoxConstraints(maxHeight: 500.0),
-          child: new ListView(
-            controller: controller,
-            children: kStates.map<Widget>((String state) {
-              return new Container(height: 200.0, child: new Text(state));
-            }).toList(),
-          ),
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          children: <Widget>[
+            new Container(
+              constraints: const BoxConstraints(maxHeight: 500.0),
+              child: new ListView(
+                controller: controller,
+                children: kStates.map<Widget>((String state) {
+                  return new Container(height: 200.0, child: new Text(state));
+                }).toList(),
+              ),
+            ),
+            new Container(
+              constraints: const BoxConstraints(maxHeight: 500.0),
+              child: new ListView(
+                controller: controller,
+                children: kStates.map<Widget>((String state) {
+                  return new Container(height: 200.0, child: new Text(state));
+                }).toList(),
+              ),
+            ),
+          ],
         ),
-        new Container(
-          constraints: const BoxConstraints(maxHeight: 500.0),
-          child: new ListView(
-            controller: controller,
-            children: kStates.map<Widget>((String state) {
-              return new Container(height: 200.0, child: new Text(state));
-            }).toList(),
-          ),
-        ),
-      ],
-    ));
+      ),
+    );
 
     controller.jumpTo(1.0);
     controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear);
@@ -240,12 +285,17 @@ void main() {
       log.add(controller.offset);
     });
 
-    await tester.pumpWidget(new ListView(
-      controller: controller,
-      children: kStates.map<Widget>((String state) {
-        return new Container(height: 200.0, child: new Text(state));
-      }).toList(),
-    ));
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new ListView(
+          controller: controller,
+          children: kStates.map<Widget>((String state) {
+            return new Container(height: 200.0, child: new Text(state));
+          }).toList(),
+        ),
+      ),
+    );
 
     expect(log, isEmpty);
 
@@ -258,5 +308,58 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -130.0));
     expect(log, isEmpty);
+  });
+
+  testWidgets('keepScrollOffset', (WidgetTester tester) async {
+    final PageStorageBucket bucket = new PageStorageBucket();
+
+    Widget buildFrame(ScrollController controller) {
+      return new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new PageStorage(
+          bucket: bucket,
+          child: new KeyedSubtree(
+            key: const PageStorageKey<String>('ListView'),
+            child: new ListView(
+              key: new UniqueKey(), // it's a different ListView every time
+              controller: controller,
+              children: new List<Widget>.generate(50, (int index) {
+                return new Container(height: 100.0, child: new Text('Item $index'));
+              }).toList(),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // keepScrollOffset: true (the default). The scroll offset is restored
+    // when the ListView is recreated with a new ScrollController.
+
+    // The initialScrollOffset is used in this case, because there's no saved
+    // scroll offset.
+    ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 2')), Offset.zero);
+
+    controller.jumpTo(2000.0);
+    await tester.pump();
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+
+    // The initialScrollOffset isn't used in this case, because the scrolloffset
+    // can be restored.
+    controller = new ScrollController(initialScrollOffset: 25.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.offset, 2000.0);
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
+
+    // keepScrollOffset: false. The scroll offset is -not- restored
+    // when the ListView is recreated with a new ScrollController and
+    // the initialScrollOffset is used.
+
+    controller = new ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
+    await tester.pumpWidget(buildFrame(controller));
+    expect(controller.offset, 100.0);
+    expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);
+
   });
 }

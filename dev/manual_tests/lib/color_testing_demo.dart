@@ -14,8 +14,6 @@ class ColorTestingDemo extends StatelessWidget {
   Widget build(BuildContext context) => new ColorDemoHome();
 }
 
-const double _kPageMaxWidth = 500.0;
-
 class ColorDemoHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -64,8 +62,8 @@ class GradientRow extends StatelessWidget {
       height: 100.0,
       decoration: new BoxDecoration(
         gradient: new LinearGradient(
-          begin: FractionalOffset.topLeft,
-          end: FractionalOffset.bottomRight,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
           colors: <Color>[ leftColor, rightColor ],
         ),
       ),

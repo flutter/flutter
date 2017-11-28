@@ -27,7 +27,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
       final int result = await methodChannel.invokeMethod('getBatteryLevel');
       batteryLevel = 'Battery level: $result%.';
     } on PlatformException {
-      batteryLevel = "Failed to get battery level.";
+      batteryLevel = 'Failed to get battery level.';
     }
     setState(() {
       _batteryLevel = batteryLevel;
@@ -49,7 +49,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
 
   void _onError(PlatformException error) {
     setState(() {
-      _chargingStatus = "Battery status: unknown.";
+      _chargingStatus = 'Battery status: unknown.';
     });
   }
 
@@ -80,5 +80,5 @@ class _PlatformChannelState extends State<PlatformChannel> {
 }
 
 void main() {
-  runApp(new PlatformChannel());
+  runApp(new MaterialApp(home: new PlatformChannel()));
 }

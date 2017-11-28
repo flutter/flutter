@@ -7,7 +7,7 @@ import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
-  test("MatrixUtils.getAsTranslation()", () {
+  test('MatrixUtils.getAsTranslation()', () {
     Matrix4 test;
     test = new Matrix4.identity();
     expect(MatrixUtils.getAsTranslation(test), equals(Offset.zero));

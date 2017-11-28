@@ -8,6 +8,13 @@ import 'dart:io';
 
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
+import 'update_versions.dart';
+
+/// Whether to report all error messages (true) or attempt to filter out some
+/// known false positives (false).
+///
+/// Set this to false locally if you want to address Flutter-specific issues.
+const bool kVerbose = true; // please leave this as true on Travis
 
 const String kDocRoot = 'dev/docs/doc';
 
@@ -29,9 +36,13 @@ Future<Null> main(List<String> args) async {
   if (path.basename(Directory.current.path) == 'tools')
     Directory.current = Directory.current.parent.parent;
 
+  final RawVersion version = new RawVersion('VERSION');
+
   // Create the pubspec.yaml file.
   final StringBuffer buf = new StringBuffer('''
 name: Flutter
+homepage: https://flutter.io
+version: $version
 dependencies:
 ''');
   for (String package in findPackageNames()) {
@@ -63,8 +74,8 @@ dependencies:
       'FLUTTER_ROOT': Directory.current.path,
     },
   );
-  printStream(process.stdout);
-  printStream(process.stderr);
+  printStream(process.stdout, prefix: 'pub:stdout: ');
+  printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.exitCode;
   if (code != 0)
     exit(code);
@@ -89,8 +100,12 @@ dependencies:
     '--favicon=favicon.ico',
     '--use-categories',
     '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
+    '--show-warnings',
+    '--auto-include-dependencies',
   ];
 
+  // Explicitly list all the packages in //flutter/packages/* that are
+  // not listed 'nodoc' in their pubspec.yaml.
   for (String libraryRef in libraryRefs(diskPath: true)) {
     args.add('--include-external');
     args.add(libraryRef);
@@ -101,8 +116,18 @@ dependencies:
     args,
     workingDirectory: 'dev/docs',
   );
-  printStream(process.stdout);
-  printStream(process.stderr);
+  printStream(process.stdout, prefix: 'dartdoc:stdout: ',
+    filter: kVerbose ? const <Pattern>[] : <Pattern>[
+      new RegExp(r'^generating docs for library '), // unnecessary verbosity
+      new RegExp(r'^pars'), // unnecessary verbosity
+    ],
+  );
+  printStream(process.stderr, prefix: 'dartdoc:stderr: ',
+    filter: kVerbose ? const <Pattern>[] : <Pattern>[
+      new RegExp(r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+      new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
+    ],
+  );
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0)
@@ -114,14 +139,17 @@ dependencies:
 }
 
 void createFooter(String footerPath) {
+  const int kGitRevisionLength = 10;
+
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  final String gitHead = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  String gitRevision = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 
   final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
   new File(footerPath).writeAsStringSync(
     '• </span class="no-break">$timestamp<span> '
-    '• </span class="no-break">$gitHead</span>'
+    '• </span class="no-break">$gitRevision</span>'
   );
 }
 
@@ -189,12 +217,19 @@ void copyIndexToRootOfDocs() {
 void addHtmlBaseToIndex() {
   final File indexFile = new File('$kDocRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
-  indexContents = indexContents.replaceFirst('</title>\n',
-    '</title>\n  <base href="./flutter/">\n');
+  indexContents = indexContents.replaceFirst(
+    '</title>\n',
+    '</title>\n  <base href="./flutter/">\n',
+  );
   indexContents = indexContents.replaceAll(
     'href="Android/Android-library.html"',
-    'href="https://docs.flutter.io/javadoc/"'
+    'href="/javadoc/"',
   );
+  indexContents = indexContents.replaceAll(
+      'href="iOS/iOS-library.html"',
+      'href="/objcdoc/"',
+  );
+
   indexFile.writeAsStringSync(indexContents);
 }
 
@@ -238,15 +273,23 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 
   // Add a fake package for platform integration APIs.
-  if (diskPath)
+  if (diskPath) {
     yield 'platform_integration/lib/android.dart';
-  else
+    yield 'platform_integration/lib/ios.dart';
+  } else {
     yield 'platform_integration/android.dart';
+    yield 'platform_integration/ios.dart';
+  }
 }
 
-void printStream(Stream<List<int>> stream) {
+void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> filter: const <Pattern>[] }) {
+  assert(prefix != null);
+  assert(filter != null);
   stream
     .transform(UTF8.decoder)
     .transform(const LineSplitter())
-    .listen(print);
+    .listen((String line) {
+      if (!filter.any((Pattern pattern) => line.contains(pattern)))
+        print('$prefix$line'.trim());
+    });
 }

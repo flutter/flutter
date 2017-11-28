@@ -30,14 +30,14 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
-  List<Device> _devices = <Device>[];
-  StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
-  StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
+  final List<Device> _devices = <Device>[];
+  final StreamController<Device> _onAddedController = new StreamController<Device>.broadcast();
+  final StreamController<Device> _onRemovedController = new StreamController<Device>.broadcast();
 
   MockPollingDeviceDiscovery() : super('mock');
 
   @override
-  List<Device> pollingGetDevices() => _devices;
+  Future<List<Device>> pollingGetDevices() async => _devices;
 
   @override
   bool get supportsPlatform => true;
@@ -52,7 +52,7 @@ class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   }
 
   @override
-  List<Device> get devices => _devices;
+  Future<List<Device>> get devices async => _devices;
 
   @override
   Stream<Device> get onAdded => _onAddedController.stream;
@@ -103,8 +103,7 @@ class MockDeviceLogReader extends DeviceLogReader {
 
 void applyMocksToCommand(FlutterCommand command) {
   command
-    ..applicationPackages = new MockApplicationPackageStore()
-    ..commandValidator = () => true;
+    ..applicationPackages = new MockApplicationPackageStore();
 }
 
 /// Common functionality for tracking mock interaction

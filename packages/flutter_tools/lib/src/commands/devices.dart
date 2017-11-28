@@ -23,7 +23,7 @@ class DevicesCommand extends FlutterCommand {
     if (!doctor.canListAnything) {
       throwToolExit(
         "Unable to locate a development device; please run 'flutter doctor' for "
-        "information about installing additional components.",
+        'information about installing additional components.',
         exitCode: 1);
     }
 

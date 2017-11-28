@@ -33,8 +33,9 @@ void main() {
 
   testWidgets('Aspect ratio infinite width', (WidgetTester tester) async {
     final Key childKey = new UniqueKey();
-    await tester.pumpWidget(
-      new Center(
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Center(
         child: new SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: new AspectRatio(
@@ -45,7 +46,7 @@ void main() {
           )
         )
       )
-    );
+    ));
     final RenderBox box = tester.renderObject(find.byKey(childKey));
     expect(box.size, equals(const Size(1200.0, 600.0)));
   });

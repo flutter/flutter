@@ -9,7 +9,7 @@ void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
     final Widget widget = const TickerMode(
       enabled: false,
-      child: const LinearProgressIndicator()
+      child: const CircularProgressIndicator()
     );
     expect(widget.toString, isNot(throwsException));
 
@@ -19,14 +19,14 @@ void main() {
 
     await tester.pumpWidget(const TickerMode(
       enabled: true,
-      child: const LinearProgressIndicator()
+      child: const CircularProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 1);
 
     await tester.pumpWidget(const TickerMode(
       enabled: false,
-      child: const LinearProgressIndicator()
+      child: const CircularProgressIndicator()
     ));
 
     expect(tester.binding.transientCallbackCount, 0);

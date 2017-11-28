@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -12,6 +13,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
+import '../base/flags.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
@@ -59,6 +61,9 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     argParser.addFlag('version',
         negatable: false,
         help: 'Reports the version of this tool.');
+    argParser.addFlag('machine',
+        negatable: false,
+        hide: true);
     argParser.addFlag('color',
         negatable: true,
         hide: !verboseHelp,
@@ -159,6 +164,8 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   @override
   Future<Null> runCommand(ArgResults globalResults) async {
+    context.setVariable(Flags, new Flags(globalResults));
+
     // Check for verbose.
     if (globalResults['verbose']) {
       // Override the logger.
@@ -255,8 +262,18 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
     if (globalResults['version']) {
       flutterUsage.sendCommand('version');
-      printStatus(FlutterVersion.instance.toString());
+      String status;
+      if (globalResults['machine']) {
+        status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
+      } else {
+        status = FlutterVersion.instance.toString();
+      }
+      printStatus(status);
       return;
+    }
+
+    if (globalResults['machine']) {
+      throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
     }
 
     await super.runCommand(globalResults);
@@ -289,40 +306,41 @@ class FlutterCommandRunner extends CommandRunner<Null> {
       engineSourcePath ??= _tryEnginePath(fs.path.join(Cache.flutterRoot, '../engine/src'));
 
       if (engineSourcePath == null) {
-        printError('Unable to detect local Flutter engine build directory.\n'
-            'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
-            'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
-            'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.');
-        throw new ProcessExit(2);
+        throwToolExit('Unable to detect local Flutter engine build directory.\n'
+          'Either specify a dependency_override for the $kFlutterEnginePackageName package in your pubspec.yaml and\n'
+          'ensure --package-root is set if necessary, or set the \$$kFlutterEngineEnvironmentVariableName environment variable, or\n'
+          'use --local-engine-src-path to specify the path to the root of your flutter/engine repository.',
+          exitCode: 2);
       }
     }
 
     if (engineSourcePath != null && _tryEnginePath(engineSourcePath) == null) {
-      printError('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
-          'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that\n'
-          'you have compiled the engine in that directory, which should produce an \'out\' directory');
-      throw new ProcessExit(2);
+      throwToolExit('Unable to detect a Flutter engine build directory in $engineSourcePath.\n'
+        'Please ensure that $engineSourcePath is a Flutter engine \'src\' directory and that\n'
+        'you have compiled the engine in that directory, which should produce an \'out\' directory',
+        exitCode: 2);
     }
 
     return engineSourcePath;
   }
 
-  String _findEngineBuildPath(ArgResults globalResults, String enginePath) {
+  EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
       localEngine = globalResults['local-engine'];
     } else {
-      printError('You must specify --local-engine if you are using a locally built engine.');
-      throw new ProcessExit(2);
+      throwToolExit('You must specify --local-engine if you are using a locally built engine.', exitCode: 2);
     }
 
     final String engineBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', localEngine));
     if (!fs.isDirectorySync(engineBuildPath)) {
-      printError('No Flutter engine build found at $engineBuildPath.');
-      throw new ProcessExit(2);
+      throwToolExit('No Flutter engine build found at $engineBuildPath.', exitCode: 2);
     }
 
-    return engineBuildPath;
+    final String hostLocalEngine = 'host_' + localEngine.substring(localEngine.indexOf('_') + 1);
+    final String engineHostBuildPath = fs.path.normalize(fs.path.join(enginePath, 'out', hostLocalEngine));
+
+    return new EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
   static void initFlutterRoot() {
@@ -331,7 +349,10 @@ class FlutterCommandRunner extends CommandRunner<Null> {
 
   /// Get all pub packages in the Flutter repo.
   List<Directory> getRepoPackages() {
-    return _gatherProjectPaths(fs.path.absolute(Cache.flutterRoot))
+    final String root = fs.path.absolute(Cache.flutterRoot);
+    // not bin, and not the root
+    return <String>['dev', 'examples', 'packages']
+      .expand<String>((String path) => _gatherProjectPaths(fs.path.join(root, path)))
       .map((String dir) => fs.directory(dir))
       .toList();
   }
@@ -349,22 +370,6 @@ class FlutterCommandRunner extends CommandRunner<Null> {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
       })
       .toList();
-  }
-
-  /// Get the entry-points we want to analyze in the Flutter repo.
-  List<Directory> getRepoAnalysisEntryPoints() {
-    final String rootPath = fs.path.absolute(Cache.flutterRoot);
-    final List<Directory> result = <Directory>[
-      // not bin, and not the root
-      fs.directory(fs.path.join(rootPath, 'dev')),
-      fs.directory(fs.path.join(rootPath, 'examples')),
-    ];
-    // And since analyzer refuses to look at paths that end in "packages/":
-    result.addAll(
-      _gatherProjectPaths(fs.path.join(rootPath, 'packages'))
-      .map<Directory>((String path) => fs.directory(path))
-    );
-    return result;
   }
 
   void _checkFlutterCopy() {

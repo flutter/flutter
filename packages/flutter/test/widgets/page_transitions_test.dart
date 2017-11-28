@@ -200,7 +200,7 @@ void main() {
     expect(settingsOffset.dy, 100.0);
   });
 
-  testWidgets('Check back gesture doesnt start during transitions', (WidgetTester tester) async {
+  testWidgets('Check back gesture doesn\'t start during transitions', (WidgetTester tester) async {
     final GlobalKey containerKey1 = new GlobalKey();
     final GlobalKey containerKey2 = new GlobalKey();
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -268,24 +268,39 @@ void main() {
     expect(find.text('Home'), findsNothing);
     expect(find.text('Sheet'), isOnstage);
 
+    // Drag from left edge to invoke the gesture. We should go back.
+    TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await gesture.up();
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    Navigator.pushNamed(containerKey1.currentContext, '/sheet');
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Sheet'), isOnstage);
+
     // Show the bottom sheet.
     final PersistentBottomSheetTestState sheet = containerKey2.currentState;
     sheet.showBottomSheet();
 
     await tester.pump(const Duration(seconds: 1));
 
-    // Drag from left edge to invoke the gesture.
-    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 100.0));
+    // Drag from left edge to invoke the gesture. Nothing should happen.
+    gesture = await tester.startGesture(const Offset(5.0, 100.0));
     await gesture.moveBy(const Offset(500.0, 0.0));
     await gesture.up();
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(find.text('Home'), isOnstage);
-    expect(find.text('Sheet'), findsNothing);
+    expect(find.text('Home'), findsNothing);
+    expect(find.text('Sheet'), isOnstage);
 
-    // Sheet called setState and didn't crash.
-    expect(sheet.setStateCalled, isTrue);
+    // Sheet did not call setState (since the gesture did nothing).
+    expect(sheet.setStateCalled, isFalse);
   });
 
   testWidgets('Test completed future', (WidgetTester tester) async {
