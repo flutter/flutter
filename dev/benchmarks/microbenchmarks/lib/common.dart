@@ -51,7 +51,7 @@ class BenchmarkResultPrinter {
 
   String _printJson() {
     final Map<String, double> results = <String, double>{};
-    for(_BenchmarkResult result in _results) {
+    for (_BenchmarkResult result in _results) {
       results[result.name] = result.value;
     }
     return JSON.encode(results);

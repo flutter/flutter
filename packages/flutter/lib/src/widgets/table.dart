@@ -301,7 +301,7 @@ class _TableElement extends RenderObjectElement {
     assert(!_debugWillReattachChildren);
     assert(() { _debugWillReattachChildren = true; return true; }());
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
-    for(_TableElementRow row in _children) {
+    for (_TableElementRow row in _children) {
       if (row.key != null) {
         oldKeyedRows[row.key] = row.children;
       }
