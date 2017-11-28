@@ -3,17 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show ProcessResult;
 
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
@@ -129,7 +129,7 @@ class Cache {
       } else if (platform.isMacOS) {
         dartSdkBin = engineDirectory.childFile('darwin-x64/dart-sdk/bin/dart');
       } else if (platform.isWindows) {
-        dartSdkBin = engineDirectory.childFile('windows-x64/dart-sdk/bin/dart.bat');
+        dartSdkBin = engineDirectory.childFile('windows-x64\\dart-sdk\\bin\\dart.bat');
       }
       if (dartSdkBin != null) {
         final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
