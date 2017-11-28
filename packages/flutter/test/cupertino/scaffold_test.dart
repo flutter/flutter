@@ -89,7 +89,7 @@ void main() {
             settings: settings,
             builder: (BuildContext context) {
               return new MediaQuery(
-                data: new MediaQueryData(
+                data: const MediaQueryData(
                   padding: const EdgeInsets.symmetric(vertical: 20.0),
                 ),
                 child: new CupertinoTabScaffold(

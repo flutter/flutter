@@ -273,7 +273,7 @@ void main() {
       new Directionality(
         textDirection: TextDirection.ltr,
         child: new MediaQuery(
-          data: new MediaQueryData(
+          data: const MediaQueryData(
             padding: const EdgeInsets.all(30.0),
           ),
           child: new ListView(
