@@ -18,7 +18,7 @@ const Duration _kBenchmarkTimeout = const Duration(minutes: 6);
 
 /// Creates a device lab task that runs benchmarks in
 /// `dev/benchmarks/microbenchmarks` reports results to the dashboard.
-TaskFunction createMicrobenchmarkTask() {
+TaskFunction createMicrobenchmarkTask({bool previewDart2: false}) {
   return () async {
     final Device device = await devices.workingDevice;
     await device.unlock();
@@ -31,15 +31,18 @@ TaskFunction createMicrobenchmarkTask() {
         final Process flutterProcess = await inDirectory(appDir, () async {
           if (deviceOperatingSystem == DeviceOperatingSystem.ios)
             await prepareProvisioningCertificates(appDir.path);
+          final List<String> options = <String>[
+            '-v',
+            // --release doesn't work on iOS due to code signing issues
+            '--profile',
+            '-d',
+            device.deviceId,
+          ];
+          if (previewDart2)
+            options.add('--preview-dart-2');
+          options.add(benchmarkPath);
           return await _startFlutter(
-            options: <String>[
-              '-v',
-              // --release doesn't work on iOS due to code signing issues
-              '--profile',
-              '-d',
-              device.deviceId,
-              benchmarkPath,
-            ],
+            options: options,
             canFail: false,
           );
         });

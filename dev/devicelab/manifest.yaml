@@ -128,6 +128,15 @@ tasks:
     required_agent_capabilities: ["has-android-device"]
     timeout_in_minutes: 30
 
+  microbenchmarks__preview_dart_2:
+    description: >
+      Runs benchmarks from dev/benchmarks/microbenchmarks
+      with --preview-dart-2 option.
+    stage: devicelab
+    required_agent_capabilities: ["has-android-device"]
+    timeout_in_minutes: 30
+    flaky: true
+
   flutter_view__start_up:
     description: >
       Verifies that Flutter View can be used from an Android project.
@@ -254,6 +263,15 @@ tasks:
   microbenchmarks_ios:
     description: >
       Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["has-ios-device"]
+    timeout_in_minutes: 30
+    flaky: true
+
+  microbenchmarks_ios__preview_dart_2:
+    description: >
+      Runs benchmarks from dev/benchmarks/microbenchmarks on iOS.
+      with --preview-dart-2 option.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
     timeout_in_minutes: 30
