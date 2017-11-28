@@ -561,8 +561,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       style: _textStyle,
     );
 
-    Navigator.push(context, _dropdownRoute).then<Null>((Object poppedValue) {
-      final _DropdownRouteResult<T> newValue = poppedValue;
+    Navigator.push(context, _dropdownRoute).then<Null>((_DropdownRouteResult<T> newValue) {
       _dropdownRoute = null;
       if (!mounted || newValue == null)
         return null;

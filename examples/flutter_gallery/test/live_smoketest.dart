@@ -39,9 +39,9 @@ Future<Null> main() async {
       print('Success');
     }
 
-    _kTestChannel.invokeMethod('success');
+    _kTestChannel.invokeMethod<dynamic>('success');
   } catch (error) {
-    _kTestChannel.invokeMethod('failure');
+    _kTestChannel.invokeMethod<dynamic>('failure');
   }
 }
 

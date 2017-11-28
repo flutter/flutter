@@ -207,11 +207,10 @@ class BuildTest {
     watch.stop();
 
     final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
-    final Map<String, dynamic> metrics = new Map<String, dynamic>.fromIterable(
-      metricExpression.allMatches(buildLog),
-      key: (Match m) => _sdkNameToMetricName(m.group(1)),
-      value: (Match m) => int.parse(m.group(2)),
-    );
+    final Map<String, dynamic> metrics = <String, dynamic>{};
+    for (Match m in metricExpression.allMatches(buildLog)) {
+      metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
+    }
     metrics['aot_snapshot_build_millis'] = watch.elapsedMilliseconds;
 
     return metrics;
