@@ -1,7 +1,0 @@
-.idea
-*.iml
-.pub/
-pubspec.lock
-doc/api/
-coverage/
-.vscode
