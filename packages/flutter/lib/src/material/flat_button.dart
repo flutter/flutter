@@ -164,23 +164,15 @@ class FlatButton extends StatelessWidget {
   }
 
   @override
-  void debugFillDescription(List<String> description) {
-    super.debugFillDescription(description);
-
-    if (onPressed != null)
-      description.add('onPressed: $onPressed');
-    if (textColor != null)
-      description.add('textColor: $textColor');
-    if (disabledTextColor != null)
-      description.add('disabledTextColor: $disabledTextColor');
-    if (color != null)
-      description.add('color: $color');
-    if (highlightColor != null)
-      description.add('highlightColor: $highlightColor');
-    if (splashColor != null)
-      description.add('splashColor: $splashColor');
-    if (child != null)
-      description.add('child: $child');
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Widget>('child', child, defaultValue: null));
   }
 
 }
