@@ -46,7 +46,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the indicator hide animation
     expect(refreshCalled, true);
   });
-  
+
   testWidgets('Refresh Indicator - nested', (WidgetTester tester) async {
     refreshCalled = false;
     await tester.pumpWidget(
@@ -348,5 +348,34 @@ void main() {
     expect(refreshCalled, true);
     expect(completed1, true);
     expect(completed2, true);
+  });
+
+  testWidgets('RefreshIndicator - onRefresh asserts', (WidgetTester tester) async {
+    refreshCalled = false;
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new RefreshIndicator(
+          onRefresh: () {
+            refreshCalled = true;
+            // Missing a returned Future value here.
+          },
+          child: new ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            children: <String>['A', 'B', 'C', 'D', 'E', 'F'].map((String item) {
+              return new SizedBox(
+                height: 200.0,
+                child: new Text(item),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    await tester.fling(find.text('A'), const Offset(0.0, 300.0), 1000.0);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1)); // finish the scroll animation
+    expect(refreshCalled, true);
+    expect(tester.takeException(), isFlutterError);
   });
 }
