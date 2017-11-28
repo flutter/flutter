@@ -93,23 +93,27 @@ class GalleryAppState extends State<GalleryApp> {
         });
       },
       showPerformanceOverlay: _showPerformanceOverlay,
-      onShowPerformanceOverlayChanged: widget.enablePerformanceOverlay ? (bool value) {
+      onShowPerformanceOverlayChanged: widget.enablePerformanceOverlay ? (
+          bool value) {
         setState(() {
           _showPerformanceOverlay = value;
         });
       } : null,
       checkerboardRasterCacheImages: _checkerboardRasterCacheImages,
-      onCheckerboardRasterCacheImagesChanged: widget.checkerboardRasterCacheImages ? (bool value) {
+      onCheckerboardRasterCacheImagesChanged: widget
+          .checkerboardRasterCacheImages ? (bool value) {
         setState(() {
           _checkerboardRasterCacheImages = value;
         });
       } : null,
       checkerboardOffscreenLayers: _checkerboardOffscreenLayers,
-      onCheckerboardOffscreenLayersChanged: widget.checkerboardOffscreenLayers ? (bool value) {
+      onCheckerboardOffscreenLayersChanged: widget.checkerboardOffscreenLayers
+          ? (bool value) {
         setState(() {
           _checkerboardOffscreenLayers = value;
         });
-      } : null,
+      }
+          : null,
       onPlatformChanged: (TargetPlatform value) {
         setState(() {
           _platform = value == defaultTargetPlatform ? null : value;
@@ -125,7 +129,8 @@ class GalleryAppState extends State<GalleryApp> {
             // We delay the time dilation change long enough that the user can see
             // that the checkbox in the drawer has started reacting, then we slam
             // on the brakes so that they see that the time is in fact now dilated.
-            _timeDilationTimer = new Timer(const Duration(milliseconds: 150), () {
+            _timeDilationTimer =
+            new Timer(const Duration(milliseconds: 150), () {
               timeDilation = _timeDilation;
             });
           } else {
@@ -149,17 +154,14 @@ class GalleryAppState extends State<GalleryApp> {
       );
     }
 
-    final Map<String, WidgetBuilder> _kRoutes =
-        new Map<String, WidgetBuilder>.fromIterable(
+    final Map<String, WidgetBuilder> _kRoutes = <String, WidgetBuilder>{};
+    for(GalleryItem item in kAllGalleryItems) {
       // For a different example of how to set up an application routing table
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-      kAllGalleryItems,
-      key: (GalleryItem item) => item.routeName,
-      value: (GalleryItem item) {
-        return (BuildContext context) => _applyScaleFactor(item.buildRoute(context));
-      },
-    );
+      _kRoutes[item.routeName] = (BuildContext context) =>
+          _applyScaleFactor(item.buildRoute(context));
+    }
 
     return new MaterialApp(
       title: 'Flutter Gallery',

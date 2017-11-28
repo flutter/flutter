@@ -40,7 +40,7 @@ class _PlatformChannelState extends State<PlatformChannel> {
     eventChannel.receiveBroadcastStream().listen(_onEvent, onError: _onError);
   }
 
-  void _onEvent(String event) {
+  void _onEvent(Object event) {
     setState(() {
       _chargingStatus =
           "Battery status: ${event == 'charging' ? '' : 'dis'}charging.";
