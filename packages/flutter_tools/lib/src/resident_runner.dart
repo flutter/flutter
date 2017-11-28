@@ -144,7 +144,9 @@ class FlutterDevice {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    await Future.wait(views.map((view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
+    await Future.wait(views.map(
+      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+    ));
   }
 
   // Lists program elements changed in the most recent reload that have not
