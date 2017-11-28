@@ -20,7 +20,7 @@ import 'sliver.dart';
 /// [SliverPrototypeExtentList] is more efficient than [SliverList] because
 /// [SliverPrototypeExtentList] does not need to lay out its children to obtain
 /// their extent along the main axis. It's a little more flexible than
-/// [SliverFixedExtentList] because there's no need to determine the approriate
+/// [SliverFixedExtentList] because there's no need to determine the appropriate
 /// item extent in pixels.
 ///
 /// See also:

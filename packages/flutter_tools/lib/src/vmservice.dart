@@ -140,15 +140,19 @@ class VMService {
   /// protocol itself.
   ///
   /// See: https://github.com/dart-lang/sdk/commit/df8bf384eb815cf38450cb50a0f4b62230fba217
-  static VMService connect(
+  static Future<VMService> connect(
     Uri httpUri, {
     Duration requestTimeout: kDefaultRequestTimeout,
     ReloadSources reloadSources,
-  }) {
+  }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = _openChannel(wsUri);
     final rpc.Peer peer = new rpc.Peer.withoutJson(jsonDocument.bind(channel));
-    return new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
+    final VMService service = new VMService._(peer, httpUri, wsUri, requestTimeout, reloadSources);
+    // This call is to ensure we are able to establish a connection instead of
+    // keeping on trucking and failing farther down the process.
+    await service._sendRequest('getVersion', const <String, dynamic>{});
+    return service;
   }
 
   final Uri httpAddress;
@@ -529,7 +533,7 @@ class ServiceEvent extends ServiceObject {
 }
 
 /// A ServiceObjectOwner is either a [VM] or an [Isolate]. Owners can cache
-/// and/or canonicalize service objets received over the wire.
+/// and/or canonicalize service objects received over the wire.
 abstract class ServiceObjectOwner extends ServiceObject {
   ServiceObjectOwner._empty(ServiceObjectOwner owner) : super._empty(owner);
 
@@ -902,9 +906,9 @@ class HeapSpace extends ServiceObject {
   }
 }
 
-// A function, field or class along with its source location.
+/// A function, field or class along with its source location.
 class ProgramElement {
-  ProgramElement(this.qualifiedName, this.uri, this.line, this.column);
+  ProgramElement(this.qualifiedName, this.uri, [this.line, this.column]);
 
   final String qualifiedName;
   final Uri uri;
@@ -1087,7 +1091,7 @@ class Isolate extends ServiceObjectOwner {
         }
       }
     }
-    return new ProgramElement(name, uri, null, null);
+    return new ProgramElement(name, uri);
   }
 
   // Lists program elements changed in the most recent reload that have not

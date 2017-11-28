@@ -245,6 +245,17 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     assert(duration > Duration.ZERO);
     assert(timeout != null);
     assert(timeout > Duration.ZERO);
+    assert(() {
+      final WidgetsBinding binding = this.binding;
+      if (binding is LiveTestWidgetsFlutterBinding &&
+          binding.framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark) {
+        throw 'When using LiveTestWidgetsFlutterBindingFramePolicy.benchmark, '
+              'hasScheduledFrame is never set to true. This means that pumpAndSettle() '
+              'cannot be used, because it has no way to know if the application has '
+              'stopped registering new frames.';
+      }
+      return true;
+    }());
     int count = 0;
     return TestAsyncUtils.guard(() async {
       final DateTime endTime = binding.clock.fromNowBy(timeout);

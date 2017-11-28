@@ -220,16 +220,15 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 }
 
 class _LocalizationsScope extends InheritedWidget {
-  _LocalizationsScope ({
+  const _LocalizationsScope ({
     Key key,
     @required this.locale,
     @required this.localizationsState,
     @required this.typeToResources,
     Widget child,
-  }) : super(key: key, child: child) {
-    assert(localizationsState != null);
-    assert(typeToResources != null);
-  }
+  }) : assert(localizationsState != null),
+       assert(typeToResources != null),
+       super(key: key, child: child);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -337,11 +336,10 @@ class Localizations extends StatefulWidget {
     @required this.locale,
     @required this.delegates,
     this.child,
-  }) : super(key: key) {
-    assert(locale != null);
-    assert(delegates != null);
-    assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>));
-  }
+  }) : assert(locale != null),
+       assert(delegates != null),
+       assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
+       super(key: key);
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///

@@ -382,7 +382,7 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 ///  * [SliverFixedExtentList], which is more efficient for children with
 ///    the same extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
-///    except that it uses a prototype list item intead a pixel value to define
+///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
 ///  * [SliverGrid], which places its children in arbitrary positions.
 class SliverList extends SliverMultiBoxAdaptorWidget {
@@ -434,7 +434,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// See also:
 ///
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
-///    except that it uses a prototype list item intead a pixel value to define
+///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
 ///  * [SliverFillViewport], which determines the [itemExtent] based on
 ///    [SliverConstraints.viewportMainAxisExtent].
@@ -505,7 +505,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverFixedExtentList], which places its children in a linear
 ///    array with a fixed extent in the main axis.
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
-///    except that it uses a prototype list item intead a pixel value to define
+///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
 class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
@@ -607,7 +607,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///  * [SliverFixedExtentList], which has a configurable
 ///    [SliverFixedExtentList.itemExtent].
 ///  * [SliverPrototypeExtentList], which is similar to [SliverFixedExtentList]
-///    except that it uses a prototype list item intead a pixel value to define
+///    except that it uses a prototype list item instead of a pixel value to define
 ///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.

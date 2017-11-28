@@ -331,7 +331,7 @@ enum TableCellVerticalAlignment {
   /// used is specified by [RenderTable.textBaseline]. It is not valid to use
   /// the baseline value if [RenderTable.textBaseline] is not specified.
   ///
-  /// This vertial alignment is relatively expensive because it causes the table
+  /// This vertical alignment is relatively expensive because it causes the table
   /// to compute the baseline for each cell in the row.
   baseline,
 
@@ -397,7 +397,7 @@ class RenderTable extends RenderBox {
   /// in the table.
   ///
   /// Changing the number of columns is an expensive operation because the table
-  /// needs to rearranage its internal representation.
+  /// needs to rearrange its internal representation.
   int get columns => _columns;
   int _columns;
   set columns(int value) {

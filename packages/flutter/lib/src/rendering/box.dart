@@ -329,7 +329,7 @@ class BoxConstraints extends Constraints {
     return result;
   }
 
-  /// The biggest size that satisifes the constraints.
+  /// The biggest size that satisfies the constraints.
   Size get biggest => new Size(constrainWidth(), constrainHeight());
 
   /// The smallest size that satisfies the constraints.
@@ -341,7 +341,7 @@ class BoxConstraints extends Constraints {
   /// Whether there is exactly one height value that satisfies the constraints.
   bool get hasTightHeight => minHeight >= maxHeight;
 
-  /// Whether there is exactly one size that satifies the constraints.
+  /// Whether there is exactly one size that satisfies the constraints.
   @override
   bool get isTight => hasTightWidth && hasTightHeight;
 
@@ -617,7 +617,7 @@ class _IntrinsicDimensionsCacheEntry {
   int get hashCode => hashValues(dimension, argument);
 }
 
-/// A render object in a 2D cartesian coordinate system.
+/// A render object in a 2D Cartesian coordinate system.
 ///
 /// The [size] of each box is expressed as a width and a height. Each box has
 /// its own coordinate system in which its upper left corner is placed at (0,
@@ -640,7 +640,7 @@ class _IntrinsicDimensionsCacheEntry {
 ///
 /// One would implement a new [RenderBox] subclass to describe a new layout
 /// model, new paint model, new hit-testing model, or new semantics model, while
-/// remaining in the cartesian space defined by the [RenderBox] protocol.
+/// remaining in the Cartesian space defined by the [RenderBox] protocol.
 ///
 /// To create a new protocol, consider subclassing [RenderObject] instead.
 ///
@@ -735,7 +735,7 @@ class _IntrinsicDimensionsCacheEntry {
 /// Children can have additional data owned by the parent but stored on the
 /// child using the [parentData] field. The class used for that data must
 /// inherit from [ParentData]. The [setupParentData] method is used to
-/// initialise the [parentData] field of a child when the child is attached.
+/// initialize the [parentData] field of a child when the child is attached.
 ///
 /// By convention, [RenderBox] objects that have [RenderBox] children use the
 /// [BoxParentData] class, which has a [BoxParentData.offset] field to store the
@@ -1427,7 +1427,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// The size of a box should be set only during the box's [performLayout] or
   /// [performResize] functions. If you wish to change the size of a box outside
-  /// of those functins, call [markNeedsLayout] instead to schedule a layout of
+  /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
   Size get size {
     assert(hasSize);
@@ -1911,7 +1911,7 @@ abstract class RenderBox extends RenderObject {
     transform.translate(offset.dx, offset.dy);
   }
 
-  /// Convert the given point from the global coodinate system in logical pixels
+  /// Convert the given point from the global coordinate system in logical pixels
   /// to the local coordinate system for this box.
   ///
   /// If the transform from global coordinates to local coordinates is

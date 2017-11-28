@@ -131,6 +131,52 @@ void main() {
       ProcessManager: () => mockProcessManager,
     },
   );
+
+  testUsingContext(
+    'outdated specs repo should print error',
+    () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+
+      when(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      )).thenReturn(new ProcessResult(
+        1,
+        1,
+        '''
+[!] Unable to satisfy the following requirements:
+
+- `Firebase/Auth` required by `Podfile`
+- `Firebase/Auth (= 4.0.0)` required by `Podfile.lock`
+
+None of your spec sources contain a spec satisfying the dependencies: `Firebase/Auth, Firebase/Auth (= 4.0.0)`.
+
+You have either:
+ * out-of-date source repos which you can update with `pod repo update` or with `pod install --repo-update`.
+ * mistyped the name or version.
+ * not added the source repo that hosts the Podspec to your Podfile.
+
+Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by default.''',
+        '',
+      ));
+      try {
+        await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
+        );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
+        fail('Exception expected');
+      } catch (ToolExit) {
+        expect(testLogger.errorText, contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"));
+      }
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

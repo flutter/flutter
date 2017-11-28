@@ -158,7 +158,7 @@ class _TimePickerHeaderPiece {
 /// out horizontally. Pieces are laid out horizontally if portrait orientation,
 /// and vertically in landscape orientation.
 ///
-/// One of the pieces is identified as a _centrepiece_. It is a piece that is
+/// One of the pieces is identified as a _centerpiece_. It is a piece that is
 /// positioned in the center of the header, with all other pieces positioned
 /// to the left or right of it.
 class _TimePickerHeaderFormat {

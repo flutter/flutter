@@ -169,6 +169,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.text = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// How the text should be aligned horizontally.
@@ -192,7 +193,7 @@ class RenderEditable extends RenderBox {
   /// example, if the [text] is an English phrase followed by a Hebrew phrase,
   /// in a [TextDirection.ltr] context the English phrase will be on the left
   /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
-  /// context, the English phrase will be on the right and the Hebrow phrase on
+  /// context, the English phrase will be on the right and the Hebrew phrase on
   /// its left.
   ///
   /// This must not be null.
@@ -203,6 +204,7 @@ class RenderEditable extends RenderBox {
       return;
     _textPainter.textDirection = value;
     markNeedsTextLayout();
+    markNeedsSemanticsUpdate();
   }
 
   /// The color to use when painting the cursor.
@@ -322,6 +324,8 @@ class RenderEditable extends RenderBox {
     super.describeSemanticsConfiguration(config);
 
     config
+      ..value = text.toPlainText()
+      ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
   }
@@ -484,6 +488,12 @@ class RenderEditable extends RenderBox {
   @override
   double computeMaxIntrinsicHeight(double width) {
     return _preferredHeight(width);
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    _layoutText(constraints.maxWidth);
+    return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
   @override

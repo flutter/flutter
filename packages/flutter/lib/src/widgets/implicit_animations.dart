@@ -41,6 +41,7 @@ class BoxConstraintsTween extends Tween<BoxConstraints> {
 /// interpolation between decorations.
 ///
 /// See also:
+///
 ///   * [Tween] for a discussion on how to use interpolation objects.
 ///   * [ShapeDecoration], [RoundedRectangleBorder], [CircleBorder], and
 ///     [StadiumBorder] for examples of shape borders that can be smoothly
@@ -346,6 +347,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 ///
 ///  * [AnimatedPadding], which is a subset of this widget that only
 ///    supports animating the [padding].
+///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// Creates a container that animates its parameters implicitly.
   ///
@@ -546,6 +548,80 @@ class _AnimatedPaddingState extends AnimatedWidgetBaseState<AnimatedPadding> {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<EdgeInsetsGeometryTween>('padding', _padding, defaultValue: null));
+  }
+}
+
+/// Animated version of [Align] which automatically transitions the child's
+/// position over a given duration whenever the given [alignment] changes.
+///
+/// See also:
+///
+///  * [AnimatedContainer], which can transition more values at once.
+class AnimatedAlign extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that positions its child by an alignment that animates
+  /// implicitly.
+  ///
+  /// The [alignment], [curve], and [duration] arguments must not be null.
+  const AnimatedAlign({
+    Key key,
+    @required this.alignment,
+    this.child,
+    Curve curve: Curves.linear,
+    @required Duration duration,
+  }) : assert(alignment != null),
+       super(key: key, curve: curve, duration: duration);
+
+  /// How to align the child.
+  ///
+  /// The x and y values of the [Alignment] control the horizontal and vertical
+  /// alignment, respectively. An x value of -1.0 means that the left edge of
+  /// the child is aligned with the left edge of the parent whereas an x value
+  /// of 1.0 means that the right edge of the child is aligned with the right
+  /// edge of the parent. Other values interpolate (and extrapolate) linearly.
+  /// For example, a value of 0.0 means that the center of the child is aligned
+  /// with the center of the parent.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], which has more details and some convenience constants for
+  ///    common positions.
+  ///  * [AlignmentDirectional], which has a horizontal coordinate orientation
+  ///    that depends on the [TextDirection].
+  final AlignmentGeometry alignment;
+
+  /// The widget below this widget in the tree.
+  final Widget child;
+
+  @override
+  _AnimatedAlignState createState() => new _AnimatedAlignState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
+  }
+}
+
+class _AnimatedAlignState extends AnimatedWidgetBaseState<AnimatedAlign> {
+  AlignmentGeometryTween _alignment;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _alignment = visitor(_alignment, widget.alignment, (dynamic value) => new AlignmentGeometryTween(begin: value));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Align(
+      alignment: _alignment.evaluate(animation),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<AlignmentGeometryTween>('alignment', _alignment, defaultValue: null));
   }
 }
 
@@ -931,10 +1007,12 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
 class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the properties of a [PhysicalModel].
   ///
-  /// The [child], [shape], [borderRadius], [elevation], [color], [curve], and
+  /// The [child], [shape], [borderRadius], [elevation], [color], [shadowColor], [curve], and
   /// [duration] arguments must not be null.
   ///
   /// Animating [color] is optional and is controlled by the [animateColor] flag.
+  ///
+  /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
   const AnimatedPhysicalModel({
     Key key,
     @required this.child,
@@ -943,6 +1021,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     @required this.elevation,
     @required this.color,
     this.animateColor: true,
+    @required this.shadowColor,
+    this.animateShadowColor: true,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(child != null),
@@ -950,6 +1030,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(borderRadius != null),
        assert(elevation != null),
        assert(color != null),
+       assert(shadowColor != null),
+       assert(animateColor != null),
+       assert(animateShadowColor != null),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -972,6 +1055,12 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   /// Whether the color should be animated.
   final bool animateColor;
 
+  /// The target shadow color.
+  final Color shadowColor;
+
+  /// Whether the shadow color should be animated.
+  final bool animateShadowColor;
+
   @override
   _AnimatedPhysicalModelState createState() => new _AnimatedPhysicalModelState();
 
@@ -983,6 +1072,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<bool>('animateColor', animateColor));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(new DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }
 
@@ -990,12 +1081,14 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
   BorderRadiusTween _borderRadius;
   Tween<double> _elevation;
   ColorTween _color;
+  ColorTween _shadowColor;
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
     _borderRadius = visitor(_borderRadius, widget.borderRadius, (dynamic value) => new BorderRadiusTween(begin: value));
     _elevation = visitor(_elevation, widget.elevation, (dynamic value) => new Tween<double>(begin: value));
     _color = visitor(_color, widget.color, (dynamic value) => new ColorTween(begin: value));
+    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => new ColorTween(begin: value));
   }
 
   @override
@@ -1006,6 +1099,9 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
+      shadowColor: widget.animateShadowColor 
+          ? _shadowColor.evaluate(animation)
+          : widget.shadowColor,
     );
   }
 }

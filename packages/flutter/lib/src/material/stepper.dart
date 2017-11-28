@@ -104,7 +104,7 @@ class Step {
   /// Below the content, every step has a 'continue' and 'cancel' button.
   final Widget content;
 
-  /// The state of the step which determines the styling of its componenents
+  /// The state of the step which determines the styling of its components
   /// and whether steps are interactive.
   final StepState state;
 

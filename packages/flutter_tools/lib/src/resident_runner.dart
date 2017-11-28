@@ -53,14 +53,15 @@ class FlutterDevice {
   /// code of the running application (a.k.a. HotReload).
   /// This ensures that the reload process follows the normal orchestration of
   /// the Flutter Tools and not just the VM internal service.
-  void connect({ReloadSources reloadSources}) {
+  Future<Null> _connect({ReloadSources reloadSources}) async {
     if (vmServices != null)
       return;
     vmServices = new List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i++) {
-      vmServices[i] = VMService.connect(observatoryUris[i],
+      printTrace('Connecting to service protocol: ${observatoryUris[i]}');
+      vmServices[i] = await VMService.connect(observatoryUris[i],
           reloadSources: reloadSources);
-      printTrace('Connected to service protocol: ${observatoryUris[i]}');
+      printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
   }
 
@@ -608,7 +609,7 @@ abstract class ResidentRunner {
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
       device.viewFilter = viewFilter;
-      device.connect(reloadSources: reloadSources);
+      await device._connect(reloadSources: reloadSources);
       await device.getVMs();
       await device.waitForViews();
       if (device.views == null)
@@ -833,7 +834,7 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, [this.hint]);
+  OperationResult(this.code, this.message, { this.hint });
 
   final int code;
   final String message;

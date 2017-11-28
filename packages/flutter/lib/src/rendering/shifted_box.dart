@@ -8,12 +8,14 @@ import 'package:flutter/foundation.dart';
 
 import 'box.dart';
 import 'debug.dart';
+import 'debug_overflow_indicator.dart';
 import 'object.dart';
+import 'stack.dart' show RelativeRect;
 
 /// Abstract class for one-child-layout render boxes that provide control over
 /// the child's position.
 abstract class RenderShiftedBox extends RenderBox with RenderObjectWithChildMixin<RenderBox> {
-  /// Initializes the [child] property for sublasses.
+  /// Initializes the [child] property for subclasses.
   RenderShiftedBox(RenderBox child) {
     this.child = child;
   }
@@ -236,6 +238,12 @@ abstract class RenderAligningShiftedBox extends RenderShiftedBox {
        _textDirection = textDirection,
        super(child);
 
+  /// A constructor to be used only when the extending class also has a mixin.
+  // TODO(gspencer): Remove this constructor once https://github.com/dart-lang/sdk/issues/15101 is fixed.
+  @protected
+  RenderAligningShiftedBox.mixin(AlignmentGeometry alignment,TextDirection textDirection, RenderBox child)
+    : this(alignment: alignment, textDirection: textDirection, child: child);
+
   Alignment _resolvedAlignment;
 
   void _resolve() {
@@ -338,7 +346,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
        _heightFactor = heightFactor,
        super(child: child, alignment: alignment, textDirection: textDirection);
 
-  /// If non-null, sets its width to the child's width multipled by this factor.
+  /// If non-null, sets its width to the child's width multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get widthFactor => _widthFactor;
@@ -351,7 +359,7 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
     markNeedsLayout();
   }
 
-  /// If non-null, sets its height to the child's height multipled by this factor.
+  /// If non-null, sets its height to the child's height multiplied by this factor.
   ///
   /// Can be both greater and less than 1.0 but must be positive.
   double get heightFactor => _heightFactor;
@@ -467,6 +475,16 @@ class RenderPositionedBox extends RenderAligningShiftedBox {
 /// The child is positioned according to [alignment]. To position a smaller
 /// child inside a larger parent, use [RenderPositionedBox] and
 /// [RenderConstrainedBox] rather than RenderConstrainedOverflowBox.
+///
+/// See also:
+///
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+
 class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render object that lets its child overflow itself.
   RenderConstrainedOverflowBox({
@@ -562,8 +580,150 @@ class RenderConstrainedOverflowBox extends RenderAligningShiftedBox {
   }
 }
 
-/// A render box that is a specific size but passes its original constraints
-/// through to its child, which will probably overflow.
+/// Renders a box, imposing no constraints on its child, allowing the child to
+/// render at its "natural" size.
+///
+/// This allows a child to render at the size it would render if it were alone
+/// on an infinite canvas with no constraints. This box will then expand
+/// as much as it can within its own constraints and align the child based on
+/// [alignment].  If the box cannot expand enough to accommodate the entire
+/// child, the child will be clipped.
+///
+/// In debug mode, if the child overflows the box, a warning will be printed on
+/// the console, and black and yellow striped areas will appear where theR
+/// overflow occurs.
+///
+/// See also:
+///
+///  * [RenderConstrainedBox] renders a box which imposes constraints on its
+///    child.
+///  * [RenderConstrainedOverflowBox], renders a box that imposes different
+///    constraints on its child than it gets from its parent, possibly allowing
+///    the child to overflow the parent.
+///  * [RenderSizedOverflowBox], a render object that is a specific size but
+///    passes its original constraints through to its child, which it allows to
+///    overflow.
+class RenderUnconstrainedBox extends RenderAligningShiftedBox with DebugOverflowIndicatorMixin {
+  /// Create a render object that sizes itself to the child but does not
+  /// pass the [constraints] down to that child.
+  ///
+  /// The [alignment] must not be null.
+  RenderUnconstrainedBox({
+    @required AlignmentGeometry alignment,
+    @required TextDirection textDirection,
+    Axis constrainedAxis,
+    RenderBox child,
+  }) : assert(alignment != null),
+       _constrainedAxis = constrainedAxis,
+       super.mixin(alignment, textDirection, child);
+
+  /// The axis to retain constraints on, if any.
+  ///
+  /// If not set, or set to null (the default), neither axis will retain its
+  /// constraints.  If set to [Axis.vertical], then vertical constraints will
+  /// be retained, and if set to [Axis.horizontal], then horizontal constraints
+  /// will be retained.
+  Axis get constrainedAxis => _constrainedAxis;
+  Axis _constrainedAxis;
+  set constrainedAxis(Axis value) {
+    assert(value != null);
+    if (_constrainedAxis == value)
+      return;
+    _constrainedAxis = value;
+    markNeedsLayout();
+  }
+  
+  Rect _overflowContainerRect = Rect.zero;
+  Rect _overflowChildRect = Rect.zero;
+  bool _isOverflowing = false;
+
+  @override
+  void performLayout() {
+    if (child != null) {
+      // Let the child lay itself out at it's "natural" size, but if
+      // constrainedAxis is non-null, keep any constraints on that axis.
+      if (constrainedAxis != null) {
+        switch (constrainedAxis) {
+          case Axis.horizontal:
+            child.layout(new BoxConstraints(
+              maxWidth: constraints.maxWidth, minWidth: constraints.minWidth),
+              parentUsesSize: true,
+            );
+            break;
+          case Axis.vertical:
+            child.layout(new BoxConstraints(
+              maxHeight: constraints.maxHeight, minHeight: constraints.minHeight),
+              parentUsesSize: true,
+            );
+            break;
+        }
+      } else {
+        child.layout(const BoxConstraints(), parentUsesSize: true);
+      }
+      size = constraints.constrain(child.size);
+      alignChild();
+      final BoxParentData childParentData = child.parentData;
+      _overflowContainerRect = Offset.zero & size;
+      _overflowChildRect = childParentData.offset & child.size;
+    } else {
+      size = constraints.constrain(Size.zero);
+      _overflowContainerRect = Rect.zero;
+      _overflowChildRect = Rect.zero;
+    }
+
+    final RelativeRect overflow = new RelativeRect.fromRect(_overflowContainerRect, _overflowChildRect);
+    _isOverflowing = overflow.left > 0.0 ||
+      overflow.right > 0.0 ||
+      overflow.top > 0.0 ||
+      overflow.bottom > 0.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    // There's no point in drawing the child if we're empty, or there is no
+    // child.
+    if (child == null || size.isEmpty)
+      return;
+
+    if (!_isOverflowing) {
+      super.paint(context, offset);
+      return;
+    }
+
+    // We have overflow. Clip it.
+    context.pushClipRect(needsCompositing, offset, Offset.zero & size, super.paint);
+
+    // Display the overflow indicator.
+    assert(() {
+      paintOverflowIndicator(context, offset, _overflowContainerRect, _overflowChildRect);
+      return true;
+    }());
+  }
+
+  @override
+  Rect describeApproximatePaintClip(RenderObject child) {
+    return _isOverflowing ? Offset.zero & size : null;
+  }
+
+  @override
+  String toStringShort() {
+    String header = super.toStringShort();
+    if (_isOverflowing)
+      header += ' OVERFLOWING';
+    return header;
+  }
+}
+
+/// A render object that is a specific size but passes its original constraints
+/// through to its child, which it allows to overflow.
+///
+/// See also:
+///  * [RenderUnconstrainedBox] for a render object that allows its children
+///    to render themselves unconstrained, expands to fit them, and considers
+///    overflow to be an error.
+///  * [RenderConstrainedOverflowBox] for a render object that imposes
+///    different constraints on its child than it gets from its parent,
+///    possibly allowing the child to overflow the parent.
 class RenderSizedOverflowBox extends RenderAligningShiftedBox {
   /// Creates a render box of a given size that lets its child overflow.
   ///
@@ -655,7 +815,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming width to use.
   ///
   /// If non-null, the child is given a tight width constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor.  If null, the child is
   /// given the incoming width constraints.
   double get widthFactor => _widthFactor;
   double _widthFactor;
@@ -670,7 +830,7 @@ class RenderFractionallySizedOverflowBox extends RenderAligningShiftedBox {
   /// If non-null, the factor of the incoming height to use.
   ///
   /// If non-null, the child is given a tight height constraint that is the max
-  /// incoming width constraint multipled by this factor.  If null, the child is
+  /// incoming width constraint multiplied by this factor.  If null, the child is
   /// given the incoming width constraints.
   double get heightFactor => _heightFactor;
   double _heightFactor;
@@ -807,7 +967,7 @@ abstract class SingleChildLayoutDelegate {
 
   /// The size of this object given the incoming constraints.
   ///
-  /// Defaults to the biggest size that satifies the given constraints.
+  /// Defaults to the biggest size that satisfies the given constraints.
   Size getSize(BoxConstraints constraints) => constraints.biggest;
 
   /// The constraints for the child given the incoming constraints.
@@ -859,7 +1019,7 @@ abstract class SingleChildLayoutDelegate {
 /// of the parent, but the size of the parent cannot depend on the size of the
 /// child.
 class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
-  /// Creates a render box that defers its layout to a delgate.
+  /// Creates a render box that defers its layout to a delegate.
   ///
   /// The [delegate] argument must not be null.
   RenderCustomSingleChildLayoutBox({
@@ -958,7 +1118,7 @@ class RenderCustomSingleChildLayoutBox extends RenderShiftedBox {
 ///
 /// If [baseline] is less than the distance from the top of the child
 /// to the baseline of the child, then the child will overflow the top
-/// of the box. This is typically not desireable, in particular, that
+/// of the box. This is typically not desirable, in particular, that
 /// part of the child will not be found when doing hit tests, so the
 /// user cannot interact with that part of the child.
 ///

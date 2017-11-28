@@ -190,11 +190,17 @@ class _DropdownMenuState<T> extends State<_DropdownMenu<T>> {
 }
 
 class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
-  _DropdownMenuRouteLayout({ this.buttonRect, this.menuTop, this.menuHeight });
+  _DropdownMenuRouteLayout({
+    @required this.buttonRect,
+    @required this.menuTop,
+    @required this.menuHeight,
+    @required this.textDirection,
+  });
 
   final Rect buttonRect;
   final double menuTop;
   final double menuHeight;
+  final TextDirection textDirection;
 
   @override
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
@@ -227,14 +233,25 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
       }
       return true;
     }());
-    return new Offset(buttonRect.left.clamp(0.0, size.width - childSize.width), menuTop);
+    assert(textDirection != null);
+    double left;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        left = buttonRect.right.clamp(0.0, size.width - childSize.width) - childSize.width;
+        break;
+      case TextDirection.ltr:
+        left = buttonRect.left.clamp(0.0, size.width - childSize.width);
+        break;
+    }
+    return new Offset(left, menuTop);
   }
 
   @override
   bool shouldRelayout(_DropdownMenuRouteLayout<T> oldDelegate) {
     return buttonRect != oldDelegate.buttonRect
-      || menuTop != oldDelegate.menuTop
-      || menuHeight != oldDelegate.menuHeight;
+        || menuTop != oldDelegate.menuTop
+        || menuHeight != oldDelegate.menuHeight
+        || textDirection != oldDelegate.textDirection;
   }
 }
 
@@ -288,6 +305,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    assert(debugCheckHasDirectionality(context));
     final double screenHeight = MediaQuery.of(context).size.height;
     final double maxMenuHeight = screenHeight - 2.0 * _kMenuItemHeight;
     final double preferredMenuHeight = (items.length * _kMenuItemHeight) + kMaterialListPadding.vertical;
@@ -322,6 +340,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
         buttonRect: buttonRect,
         menuTop: menuTop,
         menuHeight: menuHeight,
+        textDirection: Directionality.of(context),
       ),
       child: menu,
     );
@@ -361,7 +380,7 @@ class DropdownMenuItem<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Container(
       height: _kMenuItemHeight,
-      alignment: Alignment.centerLeft,
+      alignment: AlignmentDirectional.centerStart,
       child: child,
     );
   }
@@ -589,7 +608,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
             // the hint or nothing at all.
             new IndexedStack(
               index: _selectedIndex ?? hintIndex,
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               children: items,
             ),
             new Icon(Icons.arrow_drop_down,

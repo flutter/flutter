@@ -30,19 +30,19 @@ class TimelineSummary {
   ///
   /// Returns null if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
-    return _averageInMillis(_extractFrameThreadDurations());
+    return _averageInMillis(_extractFrameDurations());
   }
 
   /// The longest frame build time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
   double computeWorstFrameBuildTimeMillis() {
-    return _maxInMillis(_extractFrameThreadDurations());
+    return _maxInMillis(_extractFrameDurations());
   }
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameThreadDurations()
+  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameDurations()
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
@@ -67,7 +67,7 @@ class TimelineSummary {
       .length;
 
   /// The total number of frames recorded in the timeline.
-  int countFrames() => _extractFrameThreadDurations().length;
+  int countFrames() => _extractFrameDurations().length;
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
@@ -79,7 +79,7 @@ class TimelineSummary {
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
-      'frame_build_times': _extractFrameThreadDurations()
+      'frame_build_times': _extractFrameDurations()
         .map((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
@@ -124,9 +124,8 @@ class TimelineSummary {
       .toList();
   }
 
-  List<Duration> _extractThreadDurations(String name) {
-    return _extractNamedEvents(name)
-        .map((TimelineEvent event) => event.threadDuration).toList();
+  List<Duration> _extractDurations(String name) {
+    return _extractNamedEvents(name).map((TimelineEvent event) => event.duration).toList();
   }
 
   /// Extracts timed events that are reported as a pair of begin/end events.
@@ -171,7 +170,7 @@ class TimelineSummary {
 
   List<TimedEvent> _extractGpuRasterizerDrawEvents() => _extractBeginEndEvents('GPURasterizer::Draw');
 
-  List<Duration> _extractFrameThreadDurations() => _extractThreadDurations('Frame');
+  List<Duration> _extractFrameDurations() => _extractDurations('Frame');
 
   Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
     return events.map((TimedEvent e) => e.duration);

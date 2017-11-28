@@ -213,7 +213,7 @@ class CommonFinders {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class Finder {
-  /// Initialises a Finder. Used by subclasses to initialize the [skipOffstage]
+  /// Initializes a Finder. Used by subclasses to initialize the [skipOffstage]
   /// property.
   Finder({ this.skipOffstage: true });
 
@@ -385,7 +385,7 @@ class _HitTestableFinder extends Finder {
 /// Searches a widget tree and returns nodes that match a particular
 /// pattern.
 abstract class MatchFinder extends Finder {
-  /// Initialises a predicate-based Finder. Used by subclasses to initialize the
+  /// Initializes a predicate-based Finder. Used by subclasses to initialize the
   /// [skipOffstage] property.
   MatchFinder({ bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
 

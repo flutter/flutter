@@ -142,8 +142,8 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
           new MergeSemantics(
             child: new Container(
               height: 48.0,
-              padding: const EdgeInsets.only(left: 16.0),
-              alignment: Alignment.centerLeft,
+              padding: const EdgeInsetsDirectional.only(start: 16.0),
+              alignment: AlignmentDirectional.centerStart,
               child: new Text(galleryItem.category, style: headerStyle)
             ),
           )

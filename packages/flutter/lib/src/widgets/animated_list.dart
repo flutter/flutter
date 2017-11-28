@@ -39,7 +39,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 
 /// A scrolling container that animates items when they are inserted or removed.
 ///
-/// This widget's [AnimatedListState] can be used to dynmically insert or remove
+/// This widget's [AnimatedListState] can be used to dynamically insert or remove
 /// items. To refer to the [AnimatedListState] either provide a [GlobalKey] or
 /// use the static [of] method from an item's input callback.
 ///
@@ -66,7 +66,7 @@ class AnimatedList extends StatefulWidget {
   /// List items are only built when they're scrolled into view.
   ///
   /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// posiition in the list. The value of the index parameter will be between 0
+  /// position in the list. The value of the index parameter will be between 0
   /// and [initialItemCount] plus the total number of items that have been
   /// inserted with [AnimatedListState.insertItem] and less the total number of
   /// items that have been removed with [AnimatedListState.removeItem].
@@ -77,8 +77,8 @@ class AnimatedList extends StatefulWidget {
 
   /// The number of items the list will start with.
   ///
-  /// The appareance of the initial items is not animated. They
-  /// are created, as needed, by [itemBuilder] with an animation paramter
+  /// The appearance of the initial items is not animated. They
+  /// are created, as needed, by [itemBuilder] with an animation parameter
   /// of [kAlwaysCompleteAnimation].
   final int initialItemCount;
 

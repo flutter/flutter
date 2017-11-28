@@ -171,10 +171,8 @@ Future<Null> _runTests() async {
 }
 
 Future<Null> _runCoverage() async {
-  if (Platform.environment['TRAVIS'] == null ||
-      Platform.environment['TRAVIS_PULL_REQUEST'] != 'false' ||
-      Platform.environment['TRAVIS_OS_NAME'] != 'linux') {
-    print('${bold}DONE: test.dart does not run coverage for Travis pull requests or not non-Linux environments');
+  if (Platform.environment['TRAVIS'] != null) {
+    print('${bold}DONE: test.dart does not run coverage in Travis$reset');
     return;
   }
 
@@ -206,7 +204,8 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  return _runCommand(pub, args, workingDirectory: workingDirectory);
+  return _runCommand(pub, args, workingDirectory: workingDirectory,
+      environment: <String, String>{'DART_VM_OPTIONS': '--assert-initializer'});
 }
 
 class EvalResult {

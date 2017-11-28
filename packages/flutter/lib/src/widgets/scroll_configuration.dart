@@ -81,7 +81,7 @@ class ScrollBehavior {
 /// Controls how [Scrollable] widgets behave in a subtree.
 ///
 /// The scroll configuration determines the [ScrollPhysics] and viewport
-/// decorations used by decendants of [child].
+/// decorations used by descendants of [child].
 class ScrollConfiguration extends InheritedWidget {
   /// Creates a widget that controls how [Scrollable] widgets behave in a subtree.
   ///
@@ -92,7 +92,7 @@ class ScrollConfiguration extends InheritedWidget {
     @required Widget child,
   }) : super(key: key, child: child);
 
-  /// How [Scrollable] widgets that are decendants of [child] should behave.
+  /// How [Scrollable] widgets that are descendants of [child] should behave.
   final ScrollBehavior behavior;
 
   /// The [ScrollBehavior] for [Scrollable] widgets in the given [BuildContext].

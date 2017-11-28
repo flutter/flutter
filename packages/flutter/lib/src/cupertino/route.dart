@@ -89,6 +89,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
        assert(maintainState != null),
        assert(fullscreenDialog != null),
        super(settings: settings, fullscreenDialog: fullscreenDialog) {
+    // ignore: prefer_asserts_in_initializer_lists , https://github.com/dart-lang/sdk/issues/31223
     assert(opaque); // PageRoute makes it return true.
   }
 
@@ -199,7 +200,7 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   /// Begin dismissing this route from a horizontal swipe, if appropriate.
   ///
   /// Swiping will be disabled if the page is a fullscreen dialog or if
-  /// dismissals can be overriden because a [WillPopCallback] was
+  /// dismissals can be overridden because a [WillPopCallback] was
   /// defined for the route.
   ///
   /// When this method decides a pop gesture is appropriate, it returns a

@@ -23,7 +23,7 @@ enum ImageRepeat {
   /// Repeat the image in the y direction until the box is filled vertically.
   repeatY,
 
-  /// Leave uncovered poritions of the box transparent.
+  /// Leave uncovered portions of the box transparent.
   noRepeat
 }
 

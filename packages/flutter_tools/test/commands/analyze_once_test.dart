@@ -47,7 +47,7 @@ void main() {
         ],
       );
       expect(libMain.existsSync(), isTrue);
-    });
+    }, timeout: allowForRemotePubInvocation);
 
     // Analyze in the current directory - no arguments
     testUsingContext('flutter analyze working directory', () async {

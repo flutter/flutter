@@ -97,3 +97,10 @@ Future<String> createProject(Directory temp) async {
   await runner.run(<String>['create', '--no-pub', projectPath]);
   return projectPath;
 }
+
+/// Test case timeout for tests involving remote calls to `pub get` or similar.
+const Timeout allowForRemotePubInvocation = const Timeout.factor(10.0);
+
+/// Test case timeout for tests involving creating a Flutter project with
+/// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
+const Timeout allowForCreateFlutterProject = const Timeout.factor(2.0);

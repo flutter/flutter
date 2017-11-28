@@ -184,15 +184,15 @@ class SettingsFile {
 ///
 ///     f47ac10b-58cc-4372-a567-0e02b2c3d479
 ///
-/// The generated uuids are 128 bit numbers encoded in a specific string format.
+/// The generated UUIDs are 128 bit numbers encoded in a specific string format.
 ///
 /// For more information, see
 /// http://en.wikipedia.org/wiki/Universally_unique_identifier.
 class Uuid {
   final Random _random = new Random();
 
-  /// Generate a version 4 (random) uuid. This is a uuid scheme that only uses
-  /// random numbers as the source of the generated uuid.
+  /// Generate a version 4 (random) UUID. This is a UUID scheme that only uses
+  /// random numbers as the source of the generated UUID.
   String generateV4() {
     // Generate xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx / 8-4-4-4-12.
     final int special = 8 + _random.nextInt(4);

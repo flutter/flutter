@@ -372,6 +372,7 @@ class AppDomain extends Domain {
         projectRootPath: projectRootPath,
         packagesFilePath: packagesFilePath,
         projectAssets: projectAssets,
+        hostIsIde: true,
       );
     } else {
       runner = new ColdRunner(

@@ -391,6 +391,26 @@ void main() {
     expect(exceptions.first, const isInstanceOf<FlutterError>());
   });
 
+  test('MainAxisSize.min inside tightly constrained', () {
+    final BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
+    final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box2 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderConstrainedBox box3 = new RenderConstrainedBox(additionalConstraints: square);
+    final RenderFlex flex = new RenderFlex(
+      textDirection: TextDirection.rtl,
+      mainAxisSize: MainAxisSize.min,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex);
+    expect(flex.constraints.hasTightWidth, isTrue);
+    expect(box1.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 250.0));
+    expect(box2.localToGlobal(const Offset(0.0, 0.0)), const Offset(600.0, 250.0));
+    expect(box3.localToGlobal(const Offset(0.0, 0.0)), const Offset(500.0, 250.0));
+    expect(box1.size, const Size(100.0, 100.0));
+    expect(box2.size, const Size(100.0, 100.0));
+    expect(box3.size, const Size(100.0, 100.0));
+  });
+
   test('Flex RTL', () {
     final BoxConstraints square = const BoxConstraints.tightFor(width: 100.0, height: 100.0);
     final RenderConstrainedBox box1 = new RenderConstrainedBox(additionalConstraints: square);

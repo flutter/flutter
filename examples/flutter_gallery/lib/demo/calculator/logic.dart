@@ -246,7 +246,7 @@ class CalcExpression {
   /// Append a minus sign to the current expression and return a new expression
   /// representing the result. Returns null to indicate that it is not legal
   /// to append a minus sign in the current state. Depending on the current
-  /// state the minus sign will be interpretted as either a leading negative
+  /// state the minus sign will be interpreted as either a leading negative
   /// sign or a subtraction operation.
   CalcExpression appendMinus() {
     switch (state) {

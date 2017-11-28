@@ -60,7 +60,8 @@ Future<String> compile(
     {String sdkRoot,
     String mainPath,
     bool linkPlatformKernelIn : false,
-    List<String> extraFrontEndOptions}) async {
+    List<String> extraFrontEndOptions,
+    String incrementalCompilerByteStorePath}) async {
   final String frontendServer = artifacts.getArtifactPath(
     Artifact.frontendServerSnapshotForEngineDartSdk
   );
@@ -76,6 +77,13 @@ Future<String> compile(
   ];
   if (!linkPlatformKernelIn)
     command.add('--no-link-platform');
+  if (incrementalCompilerByteStorePath != null) {
+    command.addAll(<String>[
+      '--incremental',
+      '--byte-store',
+      incrementalCompilerByteStorePath]);
+    fs.directory(incrementalCompilerByteStorePath).createSync(recursive: true);
+  }
   if (extraFrontEndOptions != null)
     command.addAll(extraFrontEndOptions);
   command.add(mainPath);
@@ -104,8 +112,8 @@ Future<String> compile(
 /// The wrapper is intended to stay resident in memory as user changes, reloads,
 /// restarts the Flutter app.
 class ResidentCompiler {
-  ResidentCompiler(this._sdkRoot) {
-    assert(_sdkRoot != null);
+  ResidentCompiler(this._sdkRoot)
+    : assert(_sdkRoot != null) {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
     if (!_sdkRoot.endsWith('/'))
       _sdkRoot = '$_sdkRoot/';

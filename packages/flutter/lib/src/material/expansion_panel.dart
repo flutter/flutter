@@ -64,7 +64,7 @@ typedef Widget ExpansionPanelHeaderBuilder(BuildContext context, bool isExpanded
 class ExpansionPanel {
   /// Creates an expansion panel to be used as a child for [ExpansionPanelList].
   ///
-  /// None of the arguments can be null.
+  /// The [headerBuilder], [body], and [isExpanded] arguments must not be null.
   ExpansionPanel({
     @required this.headerBuilder,
     @required this.body,
@@ -133,9 +133,9 @@ class ExpansionPanelList extends StatelessWidget {
       vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
     );
 
-    for (int i = 0; i < children.length; i += 1) {
-      if (_isChildExpanded(i) && i != 0 && !_isChildExpanded(i - 1))
-        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, i * 2 - 1)));
+    for (int index = 0; index < children.length; index += 1) {
+      if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
+        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 - 1)));
 
       final Row header = new Row(
         children: <Widget>[
@@ -143,58 +143,57 @@ class ExpansionPanelList extends StatelessWidget {
             child: new AnimatedContainer(
               duration: animationDuration,
               curve: Curves.fastOutSlowIn,
-              margin: _isChildExpanded(i) ? kExpandedEdgeInsets : EdgeInsets.zero,
+              margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
               child: new SizedBox(
                 height: _kPanelHeaderCollapsedHeight,
-                child: children[i].headerBuilder(
+                child: children[index].headerBuilder(
                   context,
-                  children[i].isExpanded
-                )
-              )
-            )
+                  children[index].isExpanded,
+                ),
+              ),
+            ),
           ),
           new Container(
             margin: const EdgeInsetsDirectional.only(end: 8.0),
             child: new ExpandIcon(
-              isExpanded: _isChildExpanded(i),
+              isExpanded: _isChildExpanded(index),
               padding: const EdgeInsets.all(16.0),
               onPressed: (bool isExpanded) {
-                if (expansionCallback != null) {
-                  expansionCallback(i, isExpanded);
-                }
-              }
-            )
-          )
-        ]
+                if (expansionCallback != null)
+                  expansionCallback(index, isExpanded);
+              },
+            ),
+          ),
+        ],
       );
 
       items.add(
         new MaterialSlice(
-          key: new _SaltedKey<BuildContext, int>(context, i * 2),
+          key: new _SaltedKey<BuildContext, int>(context, index * 2),
           child: new Column(
             children: <Widget>[
               header,
               new AnimatedCrossFade(
                 firstChild: new Container(height: 0.0),
-                secondChild: children[i].body,
+                secondChild: children[index].body,
                 firstCurve: const Interval(0.0, 0.6, curve: Curves.fastOutSlowIn),
                 secondCurve: const Interval(0.4, 1.0, curve: Curves.fastOutSlowIn),
                 sizeCurve: Curves.fastOutSlowIn,
-                crossFadeState: _isChildExpanded(i) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+                crossFadeState: _isChildExpanded(index) ? CrossFadeState.showSecond : CrossFadeState.showFirst,
                 duration: animationDuration,
-              )
-            ]
-          )
-        )
+              ),
+            ],
+          ),
+        ),
       );
 
-      if (_isChildExpanded(i) && i != children.length - 1)
-        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, i * 2 + 1)));
+      if (_isChildExpanded(index) && index != children.length - 1)
+        items.add(new MaterialGap(key: new _SaltedKey<BuildContext, int>(context, index * 2 + 1)));
     }
 
     return new MergeableMaterial(
       hasDividers: true,
-      children: items
+      children: items,
     );
   }
 }

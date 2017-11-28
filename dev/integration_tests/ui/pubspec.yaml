@@ -2,6 +2,7 @@ name: integration_ui
 description: Flutter non-plugin UI integration tests.
 
 dependencies:
+  image: 1.1.29
   flutter:
     sdk: flutter
   flutter_driver:

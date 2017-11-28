@@ -626,9 +626,9 @@ abstract class StatelessWidget extends Widget {
   /// The given [BuildContext] contains information about the location in the
   /// tree at which this widget is being built. For example, the context
   /// provides the set of inherited widgets for this location in the tree. A
-  /// given widget might be with multiple different [BuildContext] arguments
-  /// over time if the widget is moved around the tree or if the widget is
-  /// inserted into the tree in multiple places at once.
+  /// given widget might be built with multiple different [BuildContext]
+  /// arguments over time if the widget is moved around the tree or if the
+  /// widget is inserted into the tree in multiple places at once.
   ///
   /// The implementation of this method must only depend on:
   ///
@@ -692,7 +692,7 @@ abstract class StatelessWidget extends Widget {
 /// location). The [State] objects associated with [StatefulWidget] are grafted
 /// along with the rest of the subtree, which means the [State] object is reused
 /// (instead of being recreated) in the new location. However, in order to be
-/// eligible for grafting, the widget might be inserted into the new location in
+/// eligible for grafting, the widget must be inserted into the new location in
 /// the same animation frame in which it was removed from the old location.
 ///
 /// ## Performance considerations
@@ -710,7 +710,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// The second category is widgets that use [State.setState] or depend on
 /// [InheritedWidget]s. These will typically rebuild many times during the
-/// application's lifetime, and it is therefore important to minimise the impact
+/// application's lifetime, and it is therefore important to minimize the impact
 /// of rebuilding such a widget. (They may also use [State.initState] or
 /// [State.didChangeDependencies] and allocate resources, but the important part
 /// is that they rebuild.)
@@ -948,7 +948,7 @@ typedef void StateSetter(VoidCallback fn);
 ///    releasing most resources until the framework calls their [dispose]
 ///    method.
 ///  * If the framework does not reinsert this subtree by the end of the current
-///    animation frame, the framework will call [dispose], which indiciates that
+///    animation frame, the framework will call [dispose], which indicates that
 ///    this [State] object will never build again. Subclasses should override
 ///    this method to release any resources retained by this object (e.g.,
 ///    stop any active animations).
@@ -2483,7 +2483,7 @@ class BuildOwner {
 ///    element to the [owner]'s list of inactive elements, causing the framework
 ///    to call [deactivate] on this element.
 ///  * At this point, the element is considered "inactive" and will not appear
-///    on screen. An element can remain in the inactive state only only until
+///    on screen. An element can remain in the inactive state only until
 ///    the end of the current animation frame. At the end of the animation
 ///    frame, any elements that are still inactive will be unmounted.
 ///  * If the element gets reincorporated into the tree (e.g., because it or one
@@ -2506,6 +2506,30 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
       _widget = widget;
 
   Element _parent;
+
+  // Custom implementation of `operator ==` optimized for the ".of" pattern
+  // used with `InheritedWidgets`.
+  @override
+  bool operator ==(Object other) => identical(this, other);
+
+  // Custom implementation of hash code optimized for the ".of" pattern used
+  // with `InheritedWidgets`.
+  //
+  // `Element.inheritFromWidgetOfExactType` relies heavily on hash-based
+  // `Set` look-ups, putting this getter on the performance critical path.
+  //
+  // The value is designed to fit within the SMI representation. This makes
+  // the cached value use less memory (one field and no extra heap objects) and
+  // cheap to compare (no indirection).
+  //
+  // See also:
+  //
+  //  * https://www.dartlang.org/articles/dart-vm/numeric-computation, which
+  //    explains how numbers are represented in Dart.
+  @override
+  int get hashCode => _cachedHash;
+  final int _cachedHash = _nextHashCode = (_nextHashCode + 1) % 0xffffff;
+  static int _nextHashCode = 1;
 
   /// Information set by parent to define where this child fits in its parent's
   /// child list.
@@ -2658,7 +2682,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// or the child that was passed in, if it just had to update the child, or
   /// null, if it removed the child and did not replace it.
   ///
-  /// The following table summarises the above:
+  /// The following table summarizes the above:
   ///
   /// <table>
   /// <tr><th><th>`newWidget == null`<th>`newWidget != null`
@@ -3891,7 +3915,7 @@ class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
   ///    descendant).
   ///
   ///  * Paint is currently under way, but the [ParentData] in question does not
-  ///    affect layour or paint, and the value to be applied could not be
+  ///    affect layout or paint, and the value to be applied could not be
   ///    determined before paint (e.g. it depends on the compositing phase).
   ///
   /// In either case, the next build is expected to cause this element to be
@@ -4227,7 +4251,7 @@ abstract class RenderObjectElement extends Element {
   /// checks whether the child is in `forgottenChildren`. If it is, the function
   /// acts as if the child was not in `oldChildren`.
   ///
-  /// This function is a convienence wrapper around [updateChild], which updates
+  /// This function is a convenience wrapper around [updateChild], which updates
   /// each individual child. When calling [updateChild], this function uses the
   /// previous element as the `newSlot` argument.
   @protected

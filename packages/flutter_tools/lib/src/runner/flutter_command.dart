@@ -50,7 +50,7 @@ class FlutterCommandResult {
   /// latency without measuring user interaction time.
   ///
   /// [FlutterCommand] will automatically measure and report the command's
-  /// complete time if not overriden.
+  /// complete time if not overridden.
   final DateTime endTimeOverride;
 }
 
@@ -161,7 +161,10 @@ abstract class FlutterCommand extends Command<Null> {
           : null,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
-          : null);
+          : null,
+      preferSharedLibrary: argParser.options.containsKey('prefer-shared-library')
+        ? argResults['prefer-shared-library']
+        : false);
   }
 
   void setupApplicationPackages() {

@@ -155,11 +155,11 @@ class FuchsiaReloadCommand extends FlutterCommand {
   // A cache of VMService connections.
   final HashMap<int, VMService> _vmServiceCache = new HashMap<int, VMService>();
 
-  VMService _getVMService(int port) {
+  Future<VMService> _getVMService(int port) async {
     if (!_vmServiceCache.containsKey(port)) {
       final String addr = 'http://$ipv4Loopback:$port';
       final Uri uri = Uri.parse(addr);
-      final VMService vmService = VMService.connect(uri);
+      final VMService vmService = await VMService.connect(uri);
       _vmServiceCache[port] = vmService;
     }
     return _vmServiceCache[port];
@@ -183,7 +183,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
     for (int port in ports) {
       if (!await _checkPort(port))
         continue;
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       views.addAll(vmService.vm.views);
@@ -283,7 +283,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
 
   Future<Null> _listVMs(List<int> ports) async {
     for (int port in ports) {
-      final VMService vmService = _getVMService(port);
+      final VMService vmService = await _getVMService(port);
       await vmService.getVM();
       await vmService.waitForViews();
       printStatus(_vmServiceToString(vmService));
@@ -329,7 +329,7 @@ class FuchsiaReloadCommand extends FlutterCommand {
       throwToolExit('Couldn\'t find application entry point at $_target.');
 
     final String packagesFileName = '${_projectName}_dart_package.packages';
-    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/gen/$_projectRoot/$packagesFileName';
+    _dotPackagesPath = '$_fuchsiaRoot/out/$_buildType/dartlang/gen/$_projectRoot/$packagesFileName';
     if (!_fileExists(_dotPackagesPath))
       throwToolExit('Couldn\'t find .packages file at $_dotPackagesPath.');
 

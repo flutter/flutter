@@ -13,7 +13,7 @@ import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-/// The maximum amount of time a single microbenchmarks is allowed to take.
+/// The maximum amount of time a single microbenchmark is allowed to take.
 const Duration _kBenchmarkTimeout = const Duration(minutes: 6);
 
 /// Creates a device lab task that runs benchmarks in

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
@@ -373,7 +374,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called whenever the scroll position or the dimensions of the scroll view
   /// change to schedule an update of the available semantics actions. The
-  /// actual update will be performed in the nxt frame. If non is pending
+  /// actual update will be performed in the next frame. If non is pending
   /// a frame will be scheduled.
   ///
   /// For example: If the scroll view has been scrolled all the way to the top,
@@ -412,8 +413,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
-    if (_minScrollExtent != minScrollExtent ||
-        _maxScrollExtent != maxScrollExtent ||
+    if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
+        !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimension) {
       _minScrollExtent = minScrollExtent;
       _maxScrollExtent = maxScrollExtent;
