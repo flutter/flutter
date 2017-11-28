@@ -128,13 +128,12 @@ class FlutterDevice {
   }) {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
-
     final List<Future<Map<String, dynamic>>> reports = <Future<Map<String, dynamic>>>[];
     for (FlutterView view in views) {
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
         rootLibUri: deviceEntryUri,
-        packagesUri: devicePackagesUri,
+        packagesUri: devicePackagesUri
       );
       reports.add(report);
     }
@@ -144,6 +143,7 @@ class FlutterDevice {
   Future<Null> resetAssetDirectory() async {
     final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
         fs.path.toUri(getAssetBuildDirectory()));
+    assert(deviceAssetsDirectoryUri != null);
     await Future.wait(views.map((view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
   }
 
