@@ -33,10 +33,10 @@ void main() {
       Platform: () => osx,
     });
 
-    testUsingContext('respects IOS_SIMULATOR_HOME', () {
+    testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
       osx.environment['HOME'] = '/foo/bar';
-      osx.environment['IOS_SIMULATOR_HOME'] = '/baz/qux';
-      expect(new IOSSimulator('456').logFilePath, '/baz/qux/Library/Logs/CoreSimulator/456/system.log');
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      expect(new IOSSimulator('456').logFilePath, '/baz/qux/456/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     });
