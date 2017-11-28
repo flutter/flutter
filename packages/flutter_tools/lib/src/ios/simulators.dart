@@ -414,8 +414,14 @@ class IOSSimulator extends Device {
     return false;
   }
 
+  String _simulatorHomePath;
+  String get simulatorHomePath {
+     _simulatorHomePath ??= platform.environment['IOS_SIMULATOR_HOME'] ?? homeDirPath;
+    return _simulatorHomePath;
+  }
+
   String get logFilePath {
-    return fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return fs.path.join(simulatorHomePath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
