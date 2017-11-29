@@ -415,7 +415,9 @@ class IOSSimulator extends Device {
   }
 
   String get logFilePath {
-    return fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
+        ? platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
+        : fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
@@ -423,6 +425,13 @@ class IOSSimulator extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async => category;
+
+  final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
+
+  Future<int> get sdkMajorVersion async {
+    final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
+    return int.parse(sdkMatch.group(1) ?? 11);
+  }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
@@ -444,10 +453,12 @@ class IOSSimulator extends Device {
     }
   }
 
-  void ensureLogsExists() {
-    final File logFile = fs.file(logFilePath);
-    if (!logFile.existsSync())
-      logFile.writeAsBytesSync(<int>[]);
+  Future<Null> ensureLogsExists() async {
+    if (await sdkMajorVersion < 11) {
+      final File logFile = fs.file(logFilePath);
+      if (!logFile.existsSync())
+        logFile.writeAsBytesSync(<int>[]);
+    }
   }
 
   bool get _xcodeVersionSupportsScreenshot {
@@ -463,15 +474,10 @@ class IOSSimulator extends Device {
   }
 }
 
-final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
-
 /// Launches the device log reader process on the host.
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
-  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
-  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
-
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
-  if (majorVersion < 11)
+  if (await device.sdkMajorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', device.logFilePath]);
 
   // For iOS 11 and above, use /usr/bin/log to tail process logs.
@@ -482,11 +488,8 @@ Future<Process> launchDeviceLogTool(IOSSimulator device) async {
 }
 
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
-  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
-  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
-
   // Versions of iOS prior to 11 tail the simulator syslog file.
-  if (majorVersion < 11)
+  if (await device.sdkMajorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
 
   // For iOS 11 and later, all relevant detail is in the device log.
@@ -520,7 +523,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   Future<Null> _start() async {
     // Device log.
-    device.ensureLogsExists();
+    await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
     _deviceProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
     _deviceProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
