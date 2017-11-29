@@ -25,6 +25,7 @@
 /dev/bots/android_tools/
 /dev/docs/doc/
 /dev/docs/lib/
+/dev/docs/pubspec.yaml
 /packages/flutter/coverage/
 
 # Flutter/Dart/Pub related
@@ -35,7 +36,6 @@
 build/
 flutter_*.png
 linked_*.ds
-pubspec.yaml
 unlinked.ds
 unlinked_spec.ds
 
