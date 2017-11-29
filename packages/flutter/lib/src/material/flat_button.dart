@@ -162,4 +162,16 @@ class FlatButton extends StatelessWidget {
       child: child
     );
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
+    description.add(new DiagnosticsProperty<Color>('textColor', textColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('disabledTextColor', disabledTextColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
+    description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+  }
+
 }
