@@ -14,7 +14,6 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow von $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow von etwa $rowCount",
   "rowsPerPageTitle": "Zeilen pro Seite:",
-  "selectedRowCountTitleZero": "Keine Objekte ausgewählt",
   "selectedRowCountTitleOne": "1 Element ausgewählt",
   "selectedRowCountTitleOther": "$selectedRowCount Elemente ausgewählt",
   "cancelButtonLabel": "ABBRECHEN",

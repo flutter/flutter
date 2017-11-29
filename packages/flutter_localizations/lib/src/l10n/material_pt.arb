@@ -1,8 +1,8 @@
 {
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
-  "@anteMeridiemAbbreviation": { "notUsed": "Portuguese time format does not use a.m. indicator" },
-  "@postMeridiemAbbreviation": { "notUsed": "Portuguese time format does not use p.m. indicator" },
+  "@anteMeridiemAbbreviation": { "notUsed": "Pashto time format does not use a.m. indicator" },
+  "@postMeridiemAbbreviation": { "notUsed": "Pashto time format does not use p.m. indicator" },
   "openAppDrawerTooltip": "Abrir menu de navegação",
   "backButtonTooltip": "Costas",
   "closeButtonTooltip": "Fechar",
