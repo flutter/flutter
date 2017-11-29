@@ -208,6 +208,7 @@ class _FlutterValidator extends DoctorValidator {
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
+    messages.add(new ValidationMessage('Engine Dart version ${version.engineDartVersion}'));
     final String genSnapshotPath =
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
