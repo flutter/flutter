@@ -107,7 +107,6 @@ class ThreadSpecific {
 
 #if USE(PTHREADS)
   pthread_key_t m_key;
-  i
 #elif OS(WIN)
   int m_index;
 #endif
