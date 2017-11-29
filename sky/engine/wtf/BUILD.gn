@@ -96,14 +96,11 @@ source_set("wtf") {
     "StringExtras.h",
     "StringHasher.h",
     "TemporaryChange.h",
-    "ThreadIdentifierDataPthreads.cpp",
-    "ThreadIdentifierDataPthreads.h",
     "ThreadRestrictionVerifier.h",
     "ThreadSafeRefCounted.h",
     "ThreadSpecific.h",
     "Threading.h",
     "ThreadingPrimitives.h",
-    "ThreadingPthreads.cpp",
     "TypeTraits.cpp",
     "TypeTraits.h",
     "Vector.h",
@@ -208,6 +205,19 @@ source_set("wtf") {
 
   if (is_android) {
     libs = [ "log" ]
+  }
+
+  if (is_win) {
+    sources += [
+      "ThreadSpecificWin.cpp",
+      "ThreadingWin.cpp",
+    ]
+  } else {
+    sources += [
+      "ThreadIdentifierDataPthreads.cpp",
+      "ThreadIdentifierDataPthreads.h",
+      "ThreadingPthreads.cpp",
+    ]
   }
 }
 

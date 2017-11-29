@@ -51,6 +51,8 @@
 #define MAP_ANONYMOUS MAP_ANON
 #endif
 
+#elif OS(WIN)
+#include <windows.h>
 #else
 #error Unknown OS
 #endif  // OS(POSIX)
@@ -65,10 +67,16 @@ static void* systemAllocPages(void* addr, size_t len) {
   ASSERT(!(reinterpret_cast<uintptr_t>(addr) &
            kPageAllocationGranularityOffsetMask));
   void* ret = 0;
+#if OS(WIN)
+  ret = VirtualAlloc(addr, len, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+  if (!ret)
+    ret = VirtualAlloc(0, len, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
+#else
   ret = mmap(addr, len, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1,
              0);
   if (ret == MAP_FAILED)
     ret = 0;
+#endif
   return ret;
 }
 
@@ -76,6 +84,9 @@ static bool trimMapping(void* baseAddr,
                         size_t baseLen,
                         void* trimAddr,
                         size_t trimLen) {
+#if OS(WIN)
+  return false;
+#else
   char* basePtr = static_cast<char*>(baseAddr);
   char* trimPtr = static_cast<char*>(trimAddr);
   ASSERT(trimPtr >= basePtr);
@@ -91,6 +102,7 @@ static bool trimMapping(void* baseAddr,
     RELEASE_ASSERT(!ret);
   }
   return true;
+#endif
 }
 
 void* allocPages(void* addr, size_t len, size_t align) {

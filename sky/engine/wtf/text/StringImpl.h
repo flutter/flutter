@@ -141,6 +141,18 @@ class WTF_EXPORT StringImpl {
     hash();
   }
 
+  enum ConstructEmptyString16BitTag { ConstructEmptyString16Bit };
+  explicit StringImpl(ConstructEmptyString16BitTag)
+      : m_refCount(1),
+        m_length(0),
+        m_hash(0),
+        m_isAtomic(false),
+        m_is8Bit(false),
+        m_isStatic(true) {
+    STRING_STATS_ADD_16BIT_STRING(m_length);
+    hash();
+  }
+
   // FIXME: there has to be a less hacky way to do this.
   enum Force8Bit { Force8BitConstructor };
   StringImpl(unsigned length, Force8Bit)
@@ -295,6 +307,7 @@ class WTF_EXPORT StringImpl {
   }
 
   static StringImpl* empty();
+  static StringImpl* empty16Bit();
 
   // FIXME: Does this really belong in StringImpl?
   template <typename T>

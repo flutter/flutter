@@ -32,6 +32,7 @@
 #include "flutter/sky/engine/platform/geometry/IntPoint.h"
 #include "flutter/sky/engine/wtf/CPU.h"
 #include "flutter/sky/engine/wtf/FastAllocBase.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 #include "third_party/skia/include/core/SkMatrix44.h"
 
 namespace blink {
@@ -42,7 +43,7 @@ class LayoutRect;
 class FloatRect;
 class FloatQuad;
 class FloatBox;
-#if CPU(X86_64)
+#if CPU(X86_64) && !OS(WIN)
 #define TRANSFORMATION_MATRIX_USE_X86_64_SSE2
 #endif
 

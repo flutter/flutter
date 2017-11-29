@@ -25,19 +25,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// The vprintf_stderr_common function triggers this error in the Mac build.
-// Feel free to remove this pragma if this file builds on Mac.
-// According to
-// http://gcc.gnu.org/onlinedocs/gcc-4.2.1/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
-// we need to place this directive before any data or functions are defined.
-#pragma GCC diagnostic ignored "-Wmissing-format-attribute"
-
 #include "flutter/sky/engine/wtf/Assertions.h"
 
 #include "flutter/glue/stack_trace.h"
 #include "flutter/sky/engine/wtf/Compiler.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
 #include "flutter/sky/engine/wtf/PassOwnPtr.h"
+
+// The vprintf_stderr_common function triggers this error in the Mac build.
+// Feel free to remove this pragma if this file builds on Mac.
+// According to
+// http://gcc.gnu.org/onlinedocs/gcc-4.2.1/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
+// we need to place this directive before any data or functions are defined.
+#if !OS(WIN)
+#pragma GCC diagnostic ignored "-Wmissing-format-attribute"
+#endif
 
 #include <stdarg.h>
 #include <stdio.h>

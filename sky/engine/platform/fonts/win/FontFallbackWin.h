@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 Google Inc. All rights reserved.
+ * Copyright (c) 2006, 2007, 2008, Google Inc. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,68 +28,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SKY_ENGINE_WTF_BYTESWAP_H_
-#define SKY_ENGINE_WTF_BYTESWAP_H_
+#ifndef FontFallbackWin_h
+#define FontFallbackWin_h
 
-#include "flutter/sky/engine/wtf/CPU.h"
-#include "flutter/sky/engine/wtf/Compiler.h"
+#include <unicode/locid.h>
+#include <unicode/uscript.h>
+#include <usp10.h>
+#include <wchar.h>
+#include <windows.h>
+#include "platform/PlatformExport.h"
+#include "platform/fonts/FontDescription.h"
 
-#include <stdint.h>
+class SkFontMgr;
 
-#if COMPILER(MSVC)
-#include <stdlib.h>
-#endif
+namespace blink {
 
-namespace WTF {
+// Return a font family that can render |character| based on what script
+// that characters belong to.
+// When scriptChecked is non-zero, the script used to determine
+// the family is returned.
+PLATFORM_EXPORT const UChar* getFallbackFamily(
+    UChar32 character,
+    FontDescription::GenericFamilyType,
+    UScriptCode* scriptChecked,
+    SkFontMgr* fontManager);
+PLATFORM_EXPORT UScriptCode
+scriptCodeForUnifiedHanFromLocale(const icu::Locale&);
 
-inline uint32_t wswap32(uint32_t x) {
-  return ((x & 0xffff0000) >> 16) | ((x & 0x0000ffff) << 16);
-}
+}  // namespace blink
 
-#if COMPILER(MSVC)
-ALWAYS_INLINE uint64_t bswap64(uint64_t x) {
-  return _byteswap_uint64(x);
-}
-ALWAYS_INLINE uint32_t bswap32(uint32_t x) {
-  return _byteswap_ulong(x);
-}
-#else
-ALWAYS_INLINE uint64_t bswap64(uint64_t x) {
-  return __builtin_bswap64(x);
-}
-ALWAYS_INLINE uint32_t bswap32(uint32_t x) {
-  return __builtin_bswap32(x);
-}
-#endif
-// GCC 4.6 lacks __builtin_bswap16. Newer versions have it but we support 4.6.
-#if COMPILER(CLANG)
-ALWAYS_INLINE uint16_t bswap16(uint16_t x) {
-  return __builtin_bswap16(x);
-}
-#elif COMPILER(MSVC)
-ALWAYS_INLINE uint16_t bswap16(uint16_t x) {
-  return _byteswap_ushort(x);
-}
-#else
-inline uint16_t bswap16(uint16_t x) {
-  return ((x & 0xff00) >> 8) | ((x & 0x00ff) << 8);
-}
-#endif
-
-#if CPU(64BIT)
-
-ALWAYS_INLINE size_t bswapuintptrt(size_t x) {
-  return bswap64(x);
-}
-
-#else
-
-ALWAYS_INLINE size_t bswapuintptrt(size_t x) {
-  return bswap32(x);
-}
-
-#endif
-
-}  // namespace WTF
-
-#endif  // SKY_ENGINE_WTF_BYTESWAP_H_
+#endif  // FontFallbackWin_h

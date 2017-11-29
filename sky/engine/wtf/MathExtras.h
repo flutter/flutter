@@ -26,12 +26,19 @@
 #ifndef SKY_ENGINE_WTF_MATHEXTRAS_H_
 #define SKY_ENGINE_WTF_MATHEXTRAS_H_
 
-#include <cmath>
 #include <cstddef>
 #include <limits>
 
 #include "flutter/sky/engine/wtf/CPU.h"
 #include "flutter/sky/engine/wtf/OperatingSystem.h"
+
+#if COMPILER(MSVC)
+#define _USE_MATH_DEFINES
+#include <math.h>
+#include <stdint.h>
+#else
+#include <cmath>
+#endif
 
 const double piDouble = M_PI;
 const float piFloat = static_cast<float>(M_PI);

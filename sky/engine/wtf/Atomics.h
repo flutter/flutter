@@ -32,14 +32,95 @@
 
 #include "flutter/sky/engine/wtf/Assertions.h"
 #include "flutter/sky/engine/wtf/CPU.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 
 #include <stdint.h>
+
+#if OS(WIN)
+#include <windows.h>
+#endif
 
 #if defined(THREAD_SANITIZER)
 #include <sanitizer/tsan_interface_atomic.h>
 #endif
 
 namespace WTF {
+
+#if OS(WIN)
+
+// atomicAdd returns the result of the addition.
+ALWAYS_INLINE int atomicAdd(int volatile* addend, int increment) {
+  return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend),
+                                static_cast<long>(increment)) +
+         increment;
+}
+
+ALWAYS_INLINE unsigned atomicAdd(unsigned volatile* addend,
+                                 unsigned increment) {
+  return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend),
+                                static_cast<long>(increment)) +
+         increment;
+}
+
+#if OS(WIN64)
+ALWAYS_INLINE unsigned long long atomicAdd(unsigned long long volatile* addend,
+                                           unsigned long long increment) {
+  return InterlockedExchangeAdd64(reinterpret_cast<long long volatile*>(addend),
+                                  static_cast<long long>(increment)) +
+         increment;
+}
+#endif
+
+// atomicSubtract returns the result of the subtraction.
+ALWAYS_INLINE int atomicSubtract(int volatile* addend, int decrement) {
+  return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend),
+                                static_cast<long>(-decrement)) -
+         decrement;
+}
+
+ALWAYS_INLINE unsigned atomicSubtract(unsigned volatile* addend,
+                                      unsigned decrement) {
+  return InterlockedExchangeAdd(reinterpret_cast<long volatile*>(addend),
+                                -static_cast<long>(decrement)) -
+         decrement;
+}
+
+#if OS(WIN64)
+ALWAYS_INLINE unsigned long long atomicSubtract(
+    unsigned long long volatile* addend,
+    unsigned long long decrement) {
+  return InterlockedExchangeAdd64(reinterpret_cast<long long volatile*>(addend),
+                                  -static_cast<long long>(decrement)) -
+         decrement;
+}
+#endif
+
+ALWAYS_INLINE int atomicIncrement(int volatile* addend) {
+  return InterlockedIncrement(reinterpret_cast<long volatile*>(addend));
+}
+ALWAYS_INLINE int atomicDecrement(int volatile* addend) {
+  return InterlockedDecrement(reinterpret_cast<long volatile*>(addend));
+}
+
+ALWAYS_INLINE int64_t atomicIncrement(int64_t volatile* addend) {
+  return InterlockedIncrement64(reinterpret_cast<long long volatile*>(addend));
+}
+ALWAYS_INLINE int64_t atomicDecrement(int64_t volatile* addend) {
+  return InterlockedDecrement64(reinterpret_cast<long long volatile*>(addend));
+}
+
+ALWAYS_INLINE int atomicTestAndSetToOne(int volatile* ptr) {
+  int ret = InterlockedExchange(reinterpret_cast<long volatile*>(ptr), 1);
+  ASSERT(!ret || ret == 1);
+  return ret;
+}
+
+ALWAYS_INLINE void atomicSetOneToZero(int volatile* ptr) {
+  ASSERT(*ptr == 1);
+  InterlockedExchange(reinterpret_cast<long volatile*>(ptr), 0);
+}
+
+#else
 
 // atomicAdd returns the result of the addition.
 ALWAYS_INLINE int atomicAdd(int volatile* addend, int increment) {
@@ -75,6 +156,8 @@ ALWAYS_INLINE void atomicSetOneToZero(int volatile* ptr) {
   __sync_lock_release(ptr);
 }
 
+#endif
+
 #if defined(THREAD_SANITIZER)
 ALWAYS_INLINE void releaseStore(volatile int* ptr, int value) {
   __tsan_atomic32_store(ptr, value, __tsan_memory_order_release);
@@ -97,7 +180,11 @@ ALWAYS_INLINE unsigned acquireLoad(volatile const unsigned* ptr) {
 
 #if CPU(X86) || CPU(X86_64)
 // Only compiler barrier is needed.
+#if OS(WIN)
+#define MEMORY_BARRIER() _ReadWriteBarrier()
+#else
 #define MEMORY_BARRIER() __asm__ __volatile__("" : : : "memory")
+#endif  // OS(WIN)
 #elif CPU(ARM) && (OS(LINUX) || OS(ANDROID))
 // On ARM __sync_synchronize generates dmb which is very expensive on single
 // core devices which don't actually need it. Avoid the cost by calling into

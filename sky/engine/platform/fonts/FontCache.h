@@ -42,6 +42,11 @@
 #include "flutter/sky/engine/wtf/unicode/Unicode.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#if OS(WIN)
+#include "SkFontMgr.h"
+struct IDWriteFactory;
+#endif
+
 #if OS(ANDROID)
 #include <unicode/uscript.h>
 #endif
@@ -97,6 +102,44 @@ class PLATFORM_EXPORT FontCache {
 
   unsigned short generation();
   void invalidate();
+
+#if OS(WIN)
+  bool useSubpixelPositioning() const { return s_useSubpixelPositioning; }
+  SkFontMgr* fontManager() { return m_fontManager.get(); }
+  static bool useDirectWrite() { return s_useDirectWrite; }
+  static float deviceScaleFactor() { return s_deviceScaleFactor; }
+  static void setUseDirectWrite(bool useDirectWrite) {
+    s_useDirectWrite = useDirectWrite;
+  }
+  static void setDirectWriteFactory(IDWriteFactory* factory) {
+    s_directWriteFactory = factory;
+  }
+  static void setDeviceScaleFactor(float deviceScaleFactor) {
+    s_deviceScaleFactor = deviceScaleFactor;
+  }
+  static void setUseSubpixelPositioning(bool useSubpixelPositioning) {
+    s_useSubpixelPositioning = useSubpixelPositioning;
+  }
+  static void addSideloadedFontForTesting(SkTypeface*);
+  // Functions to cache and retrieve the system font metrics.
+  static void setMenuFontMetrics(const wchar_t* familyName, int32_t fontHeight);
+  static void setSmallCaptionFontMetrics(const wchar_t* familyName,
+                                         int32_t fontHeight);
+  static void setStatusFontMetrics(const wchar_t* familyName,
+                                   int32_t fontHeight);
+  static int32_t menuFontHeight() { return s_menuFontHeight; }
+  static const AtomicString& menuFontFamily() {
+    return *s_smallCaptionFontFamilyName;
+  }
+  static int32_t smallCaptionFontHeight() { return s_smallCaptionFontHeight; }
+  static const AtomicString& smallCaptionFontFamily() {
+    return *s_smallCaptionFontFamilyName;
+  }
+  static int32_t statusFontHeight() { return s_statusFontHeight; }
+  static const AtomicString& statusFontFamily() {
+    return *s_statusFontFamilyName;
+  }
+#endif
 
 #if ENABLE(OPENTYPE_VERTICAL)
   typedef uint32_t FontFileKey;
@@ -154,6 +197,22 @@ class PLATFORM_EXPORT FontCache {
 
   // Don't purge if this count is > 0;
   int m_purgePreventCount;
+
+#if OS(WIN)
+  sk_sp<SkFontMgr> m_fontManager;
+  static bool s_useDirectWrite;
+  static IDWriteFactory* s_directWriteFactory;
+  static float s_deviceScaleFactor;
+  static bool s_useSubpixelPositioning;
+  static HashMap<String, RefPtr<SkTypeface>>* s_sideloadedFonts;
+  // The system font metrics cache.
+  static AtomicString* s_menuFontFamilyName;
+  static int32_t s_menuFontHeight;
+  static AtomicString* s_smallCaptionFontFamilyName;
+  static int32_t s_smallCaptionFontHeight;
+  static AtomicString* s_statusFontFamilyName;
+  static int32_t s_statusFontHeight;
+#endif
 
 #if OS(ANDROID)
   friend class ComplexTextController;

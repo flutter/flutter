@@ -30,6 +30,8 @@
 
 #include "flutter/sky/engine/wtf/Threading.h"
 
+#if USE(PTHREADS)
+
 #include <errno.h>
 #include "flutter/sky/engine/wtf/HashMap.h"
 #include "flutter/sky/engine/wtf/OwnPtr.h"
@@ -45,8 +47,6 @@
 #include <limits.h>
 #include <sched.h>
 #include <sys/time.h>
-
-#if USE(PTHREADS)
 
 namespace WTF {
 

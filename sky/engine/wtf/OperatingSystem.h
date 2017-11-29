@@ -59,8 +59,20 @@
 #define WTF_OS_FUCHSIA 1
 #endif
 
+/* OS(WIN) - Windows */
+#ifdef _WIN32
+#define WTF_OS_WIN 1
+#endif
+
+/* OS(WIN64) - Windows 64-bit */
+#ifdef _WIN64
+#define WTF_OS_WIN64 1
+#endif
+
 /* Always OS(POSIX) */
+#ifndef _WIN32
 #define WTF_OS_POSIX 1
+#endif
 
 #ifdef __APPLE__
 /* OS(MACOSX) - Mac and iOS */

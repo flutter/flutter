@@ -43,6 +43,11 @@
 #define CLANG_PRAGMA(PRAGMA)
 #endif
 
+/* COMPILER(MSVC) - Microsoft Visual C++ */
+#if defined(_MSC_VER)
+#define WTF_COMPILER_MSVC 1
+#endif
+
 /* COMPILER(GCC) - GNU Compiler Collection */
 #if defined(__GNUC__)
 #define WTF_COMPILER_GCC 1

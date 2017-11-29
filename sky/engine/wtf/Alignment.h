@@ -32,6 +32,10 @@ namespace WTF {
 #define WTF_ALIGN_OF(type) __alignof__(type)
 #define WTF_ALIGNED(variable_type, variable, n) \
   variable_type variable __attribute__((__aligned__(n)))
+#elif COMPILER(MSVC)
+#define WTF_ALIGN_OF(type) __alignof(type)
+#define WTF_ALIGNED(variable_type, variable, n) \
+  __declspec(align(n)) variable_type variable
 #else
 #error WTF_ALIGN macros need alignment control.
 #endif

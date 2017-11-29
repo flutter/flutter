@@ -19,7 +19,11 @@ config("config") {
     "$root_out_dir",
   ]
 
-  cflags = [ "-Wno-inconsistent-missing-override" ]
+  if (!is_win) {
+    cflags = [ "-Wno-inconsistent-missing-override" ]
+  } else {
+    defines = [ "_USE_MATH_DEFINES" ]
+  }
 
   if (is_fuchsia) {
     # TODO(abarth): Remove once the kernel support unmapping memory properly.

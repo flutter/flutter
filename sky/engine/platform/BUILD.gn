@@ -303,6 +303,18 @@ source_set("platform") {
   ]
 
   include_dirs = [ "$root_build_dir" ]
+  if (is_win) {
+     cflags = [
+       "/wd4334",  # Result of 32-bit shift implicity converted to 64 bits.
+       "/wd4724",  # Modulo by 0.
+     ]
+     sources += [
+       "fonts/win/FontCacheSkiaWin.cpp",
+       "fonts/win/FontFallbackWin.cpp",
+       "fonts/win/FontFallbackWin.h",
+       "fonts/win/FontPlatformDataWin.cpp",
+     ]
+  }
 
   if (is_android) {
     # Add in some Linux files also shared with Android.

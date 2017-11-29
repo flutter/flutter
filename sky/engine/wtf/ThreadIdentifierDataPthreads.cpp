@@ -28,14 +28,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
+
+#if USE(PTHREADS)
+
 #include "flutter/sky/engine/wtf/ThreadIdentifierDataPthreads.h"
 
 #include "flutter/sky/engine/wtf/Assertions.h"
 #include "flutter/sky/engine/wtf/WTF.h"
 
 #include <limits.h>
-
-#if USE(PTHREADS)
 
 // PTHREAD_KEYS_MAX might be not defined (e.g. in certain bionic versions), so
 // explicitly define it here.

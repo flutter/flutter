@@ -50,7 +50,9 @@ using namespace WTF;
 
 namespace blink {
 
+#if !OS(WIN)
 FontCache::FontCache() : m_purgePreventCount(0) {}
+#endif
 
 typedef HashMap<FontCacheKey,
                 OwnPtr<FontPlatformData>,
@@ -59,6 +61,13 @@ typedef HashMap<FontCacheKey,
     FontPlatformDataCache;
 
 static FontPlatformDataCache* gFontPlatformDataCache = 0;
+
+#if OS(WIN)
+bool FontCache::s_useDirectWrite = false;
+IDWriteFactory* FontCache::s_directWriteFactory = 0;
+bool FontCache::s_useSubpixelPositioning = false;
+float FontCache::s_deviceScaleFactor = 1.0;
+#endif
 
 FontCache* FontCache::fontCache() {
   DEFINE_STATIC_LOCAL(FontCache, globalFontCache, ());

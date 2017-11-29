@@ -40,6 +40,15 @@ StringImpl* StringImpl::empty() {
   return &emptyString;
 }
 
+StringImpl* StringImpl::empty16Bit() {
+  DEFINE_STATIC_LOCAL(StringImpl, emptyString, (ConstructEmptyString16Bit));
+  WTF_ANNOTATE_BENIGN_RACE(
+      &emptyString,
+      "Benign race on the reference counter of a static string created by"
+      "StringImpl::empty16Bit");
+  return &emptyString;
+}
+
 WTF_EXPORT DEFINE_GLOBAL(AtomicString, nullAtom) WTF_EXPORT
     DEFINE_GLOBAL(AtomicString, emptyAtom) WTF_EXPORT
     DEFINE_GLOBAL(AtomicString, starAtom)

@@ -50,9 +50,18 @@
 
 #if USE(PTHREADS)
 #include <pthread.h>
+#elif OS(WIN)
+#include <windows.h>
 #endif
 
 namespace WTF {
+
+#if OS(WIN)
+// ThreadSpecificThreadExit should be called each time when a thread is
+// detached. This is done automatically for threads created with
+// WTF::createThread.
+WTF_EXPORT void ThreadSpecificThreadExit();
+#endif
 
 template <typename T>
 class ThreadSpecific {
@@ -67,6 +76,10 @@ class ThreadSpecific {
   T& operator*();
 
  private:
+#if OS(WIN)
+  WTF_EXPORT friend void ThreadSpecificThreadExit();
+#endif
+
   // Not implemented. It's technically possible to destroy a thread specific
   // key, but one would need to make sure that all values have been destroyed
   // already (usually, that all threads that used it have exited). It's unlikely
@@ -87,10 +100,16 @@ class ThreadSpecific {
 
     T* value;
     ThreadSpecific<T>* owner;
+#if OS(WIN)
+    void (*destructor)(void*);
+#endif
   };
 
 #if USE(PTHREADS)
   pthread_key_t m_key;
+  i
+#elif OS(WIN)
+  int m_index;
 #endif
 };
 
@@ -138,6 +157,63 @@ inline void ThreadSpecific<T>::set(T* ptr) {
   pthread_setspecific(m_key, new Data(ptr, this));
 }
 
+#elif OS(WIN)
+
+// TLS_OUT_OF_INDEXES is not defined on WinCE.
+#ifndef TLS_OUT_OF_INDEXES
+#define TLS_OUT_OF_INDEXES 0xffffffff
+#endif
+
+// The maximum number of TLS keys that can be created. For simplification, we
+// assume that: 1) Once the instance of ThreadSpecific<> is created, it will not
+// be destructed until the program dies. 2) We do not need to hold many
+// instances of ThreadSpecific<> data. This fixed number should be far enough.
+const int kMaxTlsKeySize = 256;
+
+WTF_EXPORT long& tlsKeyCount();
+WTF_EXPORT DWORD* tlsKeys();
+
+class PlatformThreadSpecificKey;
+typedef PlatformThreadSpecificKey* ThreadSpecificKey;
+
+WTF_EXPORT void threadSpecificKeyCreate(ThreadSpecificKey*, void (*)(void*));
+WTF_EXPORT void threadSpecificKeyDelete(ThreadSpecificKey);
+WTF_EXPORT void threadSpecificSet(ThreadSpecificKey, void*);
+WTF_EXPORT void* threadSpecificGet(ThreadSpecificKey);
+
+template <typename T>
+inline ThreadSpecific<T>::ThreadSpecific() : m_index(-1) {
+  DWORD tlsKey = TlsAlloc();
+  if (tlsKey == TLS_OUT_OF_INDEXES)
+    CRASH();
+
+  m_index = InterlockedIncrement(&tlsKeyCount()) - 1;
+  if (m_index >= kMaxTlsKeySize)
+    CRASH();
+  tlsKeys()[m_index] = tlsKey;
+}
+
+template <typename T>
+inline ThreadSpecific<T>::~ThreadSpecific() {
+  // Does not invoke destructor functions. They will be called from
+  // ThreadSpecificThreadExit when the thread is detached.
+  TlsFree(tlsKeys()[m_index]);
+}
+
+template <typename T>
+inline T* ThreadSpecific<T>::get() {
+  Data* data = static_cast<Data*>(TlsGetValue(tlsKeys()[m_index]));
+  return data ? data->value : 0;
+}
+
+template <typename T>
+inline void ThreadSpecific<T>::set(T* ptr) {
+  ASSERT(!get());
+  Data* data = new Data(ptr, this);
+  data->destructor = &ThreadSpecific<T>::destroy;
+  TlsSetValue(tlsKeys()[m_index], data);
+}
+
 #else
 #error ThreadSpecific is not implemented for this platform.
 #endif
@@ -161,6 +237,8 @@ inline void ThreadSpecific<T>::destroy(void* ptr) {
 
 #if USE(PTHREADS)
   pthread_setspecific(data->owner->m_key, 0);
+#elif OS(WIN)
+  TlsSetValue(tlsKeys()[data->owner->m_index], 0);
 #else
 #error ThreadSpecific is not implemented for this platform.
 #endif

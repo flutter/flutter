@@ -92,6 +92,18 @@ class PLATFORM_EXPORT FontPlatformData {
   bool operator==(const FontPlatformData&) const;
   FontPlatformData& operator=(const FontPlatformData&);
   bool isHashTableDeletedValue() const { return m_isHashTableDeletedValue; }
+
+#if OS(WIN)
+  void setMinSizeForAntiAlias(unsigned size) { m_minSizeForAntiAlias = size; }
+  unsigned minSizeForAntiAlias() const { return m_minSizeForAntiAlias; }
+  void setMinSizeForSubpixel(float size) { m_minSizeForSubpixel = size; }
+  float minSizeForSubpixel() const { return m_minSizeForSubpixel; }
+  void setHinting(SkPaint::Hinting style) {
+    m_style.useAutoHint = 0;
+    m_style.hintStyle = style;
+  }
+#endif
+
   bool fontContainsCharacter(UChar32 character);
 
 #if ENABLE(OPENTYPE_VERTICAL)
@@ -108,11 +120,15 @@ class PLATFORM_EXPORT FontPlatformData {
   const FontRenderStyle& fontRenderStyle() const { return m_style; }
   void setupPaint(SkPaint*, GraphicsContext* = 0) const;
 
+#if OS(WIN)
+  int paintTextFlags() const { return m_paintTextFlags; }
+#else
   static void setHinting(SkPaint::Hinting);
   static void setAutoHint(bool);
   static void setUseBitmaps(bool);
   static void setAntiAlias(bool);
   static void setSubpixelRendering(bool);
+#endif
 
  private:
   bool static defaultUseSubpixelPositioning();
@@ -127,6 +143,12 @@ class PLATFORM_EXPORT FontPlatformData {
   FontRenderStyle m_style;
   mutable RefPtr<HarfBuzzFace> m_harfBuzzFace;
   bool m_isHashTableDeletedValue;
+#if OS(WIN)
+  int m_paintTextFlags;
+  bool m_useSubpixelPositioning;
+  unsigned m_minSizeForAntiAlias;
+  float m_minSizeForSubpixel;
+#endif
 };
 
 }  // namespace blink
