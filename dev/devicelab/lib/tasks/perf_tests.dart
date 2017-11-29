@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert' show JSON;
+import 'dart:io';
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
@@ -15,7 +16,7 @@ TaskFunction createComplexLayoutScrollPerfTest() {
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'test_driver/scroll_perf.dart',
     'complex_layout_scroll_perf',
-  );
+  ).run;
 }
 
 TaskFunction createComplexLayoutScrollMemoryTest() {
@@ -23,38 +24,34 @@ TaskFunction createComplexLayoutScrollMemoryTest() {
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
     'com.yourcompany.complexLayout',
     testTarget: 'test_driver/scroll_perf.dart',
-  );
+  ).run;
 }
 
 TaskFunction createFlutterGalleryStartupTest() {
   return new StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
-  );
+  ).run;
 }
 
 TaskFunction createComplexLayoutStartupTest() {
   return new StartupTest(
     '${flutterDirectory.path}/dev/benchmarks/complex_layout',
-  );
+  ).run;
 }
 
-TaskFunction createFlutterGalleryBuildTest() {
-  return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery');
+TaskFunction createFlutterGalleryCompileTest() {
+  return new CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
 
-TaskFunction createFlutterGalleryPreviewDart2BuildTest() {
-  return new BuildTest('${flutterDirectory.path}/examples/flutter_gallery', previewDart2: true);
-}
-
-TaskFunction createComplexLayoutBuildTest() {
-  return new BuildTest('${flutterDirectory.path}/dev/benchmarks/complex_layout');
+TaskFunction createComplexLayoutCompileTest() {
+  return new CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
 
 TaskFunction createHelloWorldMemoryTest() {
   return new MemoryTest(
     '${flutterDirectory.path}/examples/hello_world',
     'io.flutter.examples.hello_world',
-  );
+  ).run;
 }
 
 TaskFunction createGalleryNavigationMemoryTest() {
@@ -62,7 +59,7 @@ TaskFunction createGalleryNavigationMemoryTest() {
     '${flutterDirectory.path}/examples/flutter_gallery',
     'io.flutter.examples.gallery',
     testTarget: 'test_driver/memory_nav.dart',
-  );
+  ).run;
 }
 
 TaskFunction createGalleryBackButtonMemoryTest() {
@@ -70,15 +67,28 @@ TaskFunction createGalleryBackButtonMemoryTest() {
     '${flutterDirectory.path}/examples/flutter_gallery',
     'io.flutter.examples.gallery',
     'io.flutter.examples.gallery.MainActivity',
-  );
+  ).run;
 }
 
 TaskFunction createFlutterViewStartupTest() {
   return new StartupTest(
       '${flutterDirectory.path}/examples/flutter_view',
       reportMetrics: false,
-  );
+  ).run;
 }
+
+TaskFunction createBasicMaterialCompileTest() {
+  return () async {
+    const String sampleAppName = 'sample_flutter_app';
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+
+    if (await sampleDir.exists())
+      rmTree(sampleDir);
+
+    return new CompileTest(sampleDir.path).run();
+  };
+}
+
 
 /// Measure application startup performance.
 class StartupTest {
@@ -89,7 +99,7 @@ class StartupTest {
   final String testDirectory;
   final bool reportMetrics;
 
-  Future<TaskResult> call() async {
+  Future<TaskResult> run() async {
     return await inDirectory(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
@@ -119,14 +129,13 @@ class StartupTest {
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
-
   const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
 
-  Future<TaskResult> call() {
+  Future<TaskResult> run() {
     return inDirectory(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -166,32 +175,39 @@ class PerfTest {
   }
 }
 
-/// Measures how long it takes to build a Flutter app and how big the compiled
+/// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
-class BuildTest {
-  const BuildTest(this.testDirectory, {this.previewDart2: false});
+class CompileTest {
+  const CompileTest(this.testDirectory);
 
-  final bool previewDart2;
   final String testDirectory;
 
-  Future<TaskResult> call() async {
+  Future<TaskResult> run() async {
     return await inDirectory(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> aotResults = await _buildAot(previewDart2);
-      final Map<String, dynamic> debugResults = await _buildDebug(previewDart2);
-
       final Map<String, dynamic> metrics = <String, dynamic>{}
-        ..addAll(aotResults)
-        ..addAll(debugResults);
+        ..addAll(await _compileAot())
+        ..addAll(await _compileApp())
+        ..addAll(await _compileDebug())
+        ..addAll(_suffix(await _compileAot(previewDart2: true), '__preview_dart_2'))
+        ..addAll(_suffix(await _compileApp(previewDart2: true), '__preview_dart_2'))
+        ..addAll(_suffix(await _compileDebug(previewDart2: true), '__preview_dart_2'));
 
       return new TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
   }
 
-  static Future<Map<String, dynamic>> _buildAot(bool previewDart2) async {
+  static Map<String, dynamic> _suffix(Map<String, dynamic> map, String suffix) {
+    return new Map<String, dynamic>.fromIterables(
+      map.keys.map<String>((String key) => '$key$suffix'),
+      map.values,
+    );
+  }
+
+  static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: false }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
     final List<String> options = <String>[
@@ -203,23 +219,52 @@ class BuildTest {
     ];
     if (previewDart2)
       options.add('--preview-dart-2');
-    final String buildLog = await evalFlutter('build', options: options);
+    final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
     final RegExp metricExpression = new RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
     final Map<String, dynamic> metrics = new Map<String, dynamic>.fromIterable(
-      metricExpression.allMatches(buildLog),
+      metricExpression.allMatches(compileLog),
       key: (Match m) => _sdkNameToMetricName(m.group(1)),
       value: (Match m) => int.parse(m.group(2)),
     );
-    metrics['aot_snapshot_build_millis'] = watch.elapsedMilliseconds;
+    metrics['aot_snapshot_compile_millis'] = watch.elapsedMilliseconds;
 
     return metrics;
   }
 
-  static Future<Map<String, dynamic>> _buildDebug(bool previewDart2) async {
+  static Future<Map<String, dynamic>> _compileApp({ bool previewDart2: false }) async {
     await flutter('clean');
+    final Stopwatch watch = new Stopwatch();
+    int releaseSizeInBytes;
+    final List<String> options = <String>['--release'];
+    if (previewDart2)
+      options.add('--preview-dart-2');
+    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
+      options.add('ios');
+      await prepareProvisioningCertificates(cwd);
+      watch.start();
+      await flutter('build', options: options);
+      watch.stop();
+      // IPAs are created manually AFAICT
+      await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
+      releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+    } else {
+      options.add('apk');
+      watch.start();
+      await flutter('build', options: options);
+      watch.stop();
+      releaseSizeInBytes = await file('$cwd/build/app/outputs/apk/app-release.apk').length();
+    }
 
+    return <String, dynamic>{
+      'release_full_compile_millis': watch.elapsedMilliseconds,
+      'release_size_bytes': releaseSizeInBytes,
+    };
+  }
+
+  static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: false }) async {
+    await flutter('clean');
     final Stopwatch watch = new Stopwatch();
     if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
       await prepareProvisioningCertificates(cwd);
@@ -236,7 +281,7 @@ class BuildTest {
     }
 
     return <String, dynamic>{
-      'debug_full_build_millis': watch.elapsedMilliseconds,
+      'debug_full_compile_millis': watch.elapsedMilliseconds,
     };
   }
 
@@ -268,7 +313,7 @@ class MemoryTest {
   /// If not specified, then the test will start the app, gather statistics, and then exit.
   final String testTarget;
 
-  Future<TaskResult> call() {
+  Future<TaskResult> run() {
     return inDirectory(testDirectory, () async {
       final Device device = await devices.workingDevice;
       await device.unlock();
@@ -330,7 +375,7 @@ class AndroidBackButtonMemoryTest {
   final String packageName;
   final String activityName;
 
-  Future<TaskResult> call() {
+  Future<TaskResult> run() {
     return inDirectory(testDirectory, () async {
       if (deviceOperatingSystem != DeviceOperatingSystem.android) {
         throw 'This test is only supported on Android';

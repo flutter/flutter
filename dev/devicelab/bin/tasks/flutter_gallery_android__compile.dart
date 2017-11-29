@@ -4,9 +4,11 @@
 
 import 'dart:async';
 
-import 'package:flutter_devicelab/tasks/perf_tests.dart';
+import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
+import 'package:flutter_devicelab/tasks/perf_tests.dart';
 
 Future<Null> main() async {
-  await task(createFlutterGalleryBuildTest());
+  deviceOperatingSystem = DeviceOperatingSystem.android;
+  await task(createFlutterGalleryCompileTest());
 }
