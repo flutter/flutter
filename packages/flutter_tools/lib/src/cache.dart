@@ -124,13 +124,15 @@ class Cache {
     if (_engineDartVersion == null) {
       final Directory engineDirectory = getArtifactDirectory('engine');
       File dartSdkBin;
+      List<String> dartSdkBinParts;
       if (platform.isLinux) {
-        dartSdkBin = engineDirectory.childFile('linux-x64/dart-sdk/bin/dart');
+        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
       } else if (platform.isMacOS) {
-        dartSdkBin = engineDirectory.childFile('darwin-x64/dart-sdk/bin/dart');
+        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
       } else if (platform.isWindows) {
-        dartSdkBin = engineDirectory.childFile('windows-x64\\dart-sdk\\bin\\dart.bat');
+        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
       }
+      dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
       if (dartSdkBin != null) {
         final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
         _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');

@@ -61,6 +61,12 @@ void main() {
       _expectVersionMessage('');
     });
 
+    testFlutterVersion('prints non-empty version for engine Dart SDK', () async {
+      final FlutterVersion version = FlutterVersion.instance;
+      final String engineDartVersion = version.engineDartVersion;
+      expect(engineDartVersion.length, greaterThan(0));
+    });
+
     testFlutterVersion('does not ping server when version stamp is up-to-date', () async {
       final FlutterVersion version = FlutterVersion.instance;
 
