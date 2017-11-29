@@ -208,6 +208,7 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileAot({ bool previewDart2: false }) async {
+    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = new Stopwatch()..start();
     final List<String> options = <String>[
@@ -215,8 +216,16 @@ class CompileTest {
       '-v',
       '--release',
       '--no-pub',
-      '--target-platform', 'android-arm',  // Generate blobs instead of assembly.
+      '--target-platform',
     ];
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        options.add('ios');
+        break;
+      case DeviceOperatingSystem.android:
+        options.add('android-arm');
+        break;
+    }
     if (previewDart2)
       options.add('--preview-dart-2');
     final String compileLog = await evalFlutter('build', options: options);
@@ -240,21 +249,24 @@ class CompileTest {
     final List<String> options = <String>['--release'];
     if (previewDart2)
       options.add('--preview-dart-2');
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-      options.add('ios');
-      await prepareProvisioningCertificates(cwd);
-      watch.start();
-      await flutter('build', options: options);
-      watch.stop();
-      // IPAs are created manually AFAICT
-      await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
-      releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
-    } else {
-      options.add('apk');
-      watch.start();
-      await flutter('build', options: options);
-      watch.stop();
-      releaseSizeInBytes = await file('$cwd/build/app/outputs/apk/app-release.apk').length();
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        options.insert(0, 'ios');
+        await prepareProvisioningCertificates(cwd);
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        // IPAs are created manually AFAICT
+        await exec('tar', <String>['-zcf', 'build/app.ipa', 'build/ios/Release-iphoneos/Runner.app/']);
+        releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
+        break;
+      case DeviceOperatingSystem.android:
+        options.insert(0, 'apk');
+        watch.start();
+        await flutter('build', options: options);
+        watch.stop();
+        releaseSizeInBytes = await file('$cwd/build/app/outputs/apk/app-release.apk').length();
+        break;
     }
 
     return <String, dynamic>{
@@ -266,19 +278,21 @@ class CompileTest {
   static Future<Map<String, dynamic>> _compileDebug({ bool previewDart2: false }) async {
     await flutter('clean');
     final Stopwatch watch = new Stopwatch();
-    if (deviceOperatingSystem == DeviceOperatingSystem.ios) {
-      await prepareProvisioningCertificates(cwd);
-      watch.start();
-      await flutter('build', options: <String>['ios', '--debug']);
-      watch.stop();
-    } else {
-      watch.start();
-      final List<String> options = <String>['apk', '--debug'];
-      if (previewDart2)
-        options.add('--preview-dart-2');
-      await flutter('build', options: options);
-      watch.stop();
+    final List<String> options = <String>['--debug'];
+    if (previewDart2)
+      options.add('--preview-dart-2');
+    switch (deviceOperatingSystem) {
+      case DeviceOperatingSystem.ios:
+        options.insert(0, 'ios');
+        await prepareProvisioningCertificates(cwd);
+        break;
+      case DeviceOperatingSystem.android:
+        options.insert(0, 'apk');
+        break;
     }
+    watch.start();
+    await flutter('build', options: options);
+    watch.stop();
 
     return <String, dynamic>{
       'debug_full_compile_millis': watch.elapsedMilliseconds,
