@@ -306,6 +306,14 @@ List<GalleryItem> _buildGalleryItems() {
       routeName: CupertinoSwitchDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoSwitchDemo(),
     ),
+    // Media
+    new GalleryItem(
+      title: 'Animated images',
+      subtitle: 'GIF and WebP animations',
+      category: 'Media',
+      routeName: ImagesDemo.routeName,
+      buildRoute: (BuildContext context) => new ImagesDemo(),
+    ),
     // Styles
     new GalleryItem(
       title: 'Colors',
