@@ -123,7 +123,7 @@ class Cache {
   String get engineDartVersion {
     if (_engineDartVersion == null) {
       final Directory engineDirectory = getArtifactDirectory('engine');
-      File dartSdkBin;
+
       List<String> dartSdkBinParts;
       if (platform.isLinux) {
         dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
@@ -131,12 +131,15 @@ class Cache {
         dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
       } else if (platform.isWindows) {
         dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
+      } else {
+        // Unknown platform, we can't derive version.
+        return null;
       }
-      dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
-      if (dartSdkBin != null) {
-        final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
-        _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
-      }
+      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
+      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+      // https://github.com/dart-lang/sdk/issues/31481
+      // We can use the process utils directly when this is fixed instead of parsing stderr.
+      _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
     }
     return _engineDartVersion;
   }
@@ -165,7 +168,7 @@ class Cache {
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
-    return fs.directory(fs.path.join(getCacheArtifacts().path, name));
+    return getCacheArtifacts().childDirectory(name);
   }
 
   String getVersionFor(String artifactName) {
