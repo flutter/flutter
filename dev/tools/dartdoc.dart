@@ -95,6 +95,7 @@ dependencies:
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
+    '--header', 'survey.html',
     '--footer-text', 'lib/footer.html',
     '--exclude', 'temp_doc',
     '--favicon=favicon.ico',
