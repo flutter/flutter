@@ -52,8 +52,11 @@ public class MainActivity extends FlutterActivity {
             producerTimer.scheduleAtFixedRate(new TimerTask() {
               @Override
               public void run() {
-                renderer.drawFrame();
-                framesProduced.incrementAndGet();
+                final long time = System.currentTimeMillis();
+                if (frameRate(framesProduced, startTime, time) < fps) {
+                  renderer.drawFrame();
+                  framesProduced.incrementAndGet();
+                }
               }
             }, 0, 1000 / fps);
             consumerTimer = new Timer();
@@ -78,13 +81,14 @@ public class MainActivity extends FlutterActivity {
             producerTimer.cancel();
             consumerTimer.cancel();
             endTime = System.currentTimeMillis();
+            Log.e("TET", "Stopped at " + endTime);
             result.success(null);
             break;
           case "getProducedFrameRate":
-            result.success(framesProduced.get() * 1000 / (double) (endTime - startTime));
+            result.success(frameRate(framesProduced, startTime, endTime));
             break;
           case "getConsumedFrameRate":
-            result.success(framesConsumed.get() * 1000 / (double) (endTime - startTime));
+            result.success(frameRate(framesConsumed, startTime, endTime));
             break;
           default: result.notImplemented();
         }
@@ -108,6 +112,10 @@ public class MainActivity extends FlutterActivity {
       public void surfaceDestroyed(SurfaceHolder holder) {
       }
     });
+  }
+
+  double frameRate(AtomicInteger frameCounter, long startTime, long endTime) {
+    return frameCounter.get() * 1000 / (double) (endTime - startTime);
   }
 
   @Override

@@ -55,7 +55,7 @@ Future<Null> main() async {
       final String statsFast = await driver.getText(summary);
       final Match matchFast = statsRegExp.matchAsPrefix(statsFast);
       expect(matchFast, isNotNull);
-      expect(double.parse(matchFast.group(1)), closeTo(flutterFrameRate * 2.0, 10.0));
+      expect(double.parse(matchFast.group(1)), closeTo(flutterFrameRate * 2.0, 5.0));
       expect(double.parse(matchFast.group(2)), closeTo(flutterFrameRate, 10.0));
       expect(int.parse(matchFast.group(3)), 1);
     });
