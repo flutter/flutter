@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.util.Log;
 
 import java.util.Timer;
 import java.util.TimerTask;
