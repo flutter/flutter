@@ -4,4 +4,13 @@
 
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const Center(child: const Text('flutter run -t lib/xxx.dart')));
+void main() {
+  runApp(
+    const Directionality(
+      textDirection: TextDirection.ltr,
+      child: const Center(
+        child: const Text('flutter run -t lib/xxx.dart'),
+      ),
+    ),
+  );
+}

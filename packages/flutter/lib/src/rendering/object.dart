@@ -649,7 +649,7 @@ class PipelineOwner {
   /// duplicate calls quickly.
   final VoidCallback onNeedVisualUpdate;
 
-  /// Called whenever this pipeline owner creates as semantics object.
+  /// Called whenever this pipeline owner creates a semantics object.
   ///
   /// Typical implementations will schedule the creation of the initial
   /// semantics tree.
@@ -703,7 +703,7 @@ class PipelineOwner {
     Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
     _debugDoingLayout = true;
     try {
-      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
+      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themselves
       while (_nodesNeedingLayout.isNotEmpty) {
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
@@ -797,8 +797,8 @@ class PipelineOwner {
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
   /// An owner is created by [ensureSemantics]. The owner is valid for as long
-  /// there are [SemanticsHandle] returned by [ensureSemantics] that have not
-  /// yet be disposed. Once the last handle has been disposed, the
+  /// there are [SemanticsHandle]s returned by [ensureSemantics] that have not
+  /// yet been disposed. Once the last handle has been disposed, the
   /// [semanticsOwner] field will revert to null, and the previous owner will be
   /// disposed.
   ///
@@ -972,7 +972,7 @@ class PipelineOwner {
 ///
 /// ### Layout interactions between render objects
 ///
-/// In general, the layout of a render box should only depend on the output of
+/// In general, the layout of a render object should only depend on the output of
 /// its child's layout, and then only if `parentUsesSize` is set to true in the
 /// [layout] call. Furthermore, if it is set to true, the parent must call the
 /// child's [layout] if the child is to be rendered, because otherwise the
@@ -1086,6 +1086,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Used in debug messages.
   dynamic debugCreator;
+
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     FlutterError.reportError(new FlutterErrorDetailsForRendering(
       exception: exception,
