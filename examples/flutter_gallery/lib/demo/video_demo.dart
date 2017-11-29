@@ -58,21 +58,26 @@ class VideoCard extends StatelessWidget {
     return new Card(
       child: new Column(
         children: <Widget>[
+          new ListTile(title: new Text(title), subtitle: new Text(subtitle)),
           new GestureDetector(
             onTap: () {
               final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
+                settings: new RouteSettings(name: title, isInitialRoute: false),
                 pageBuilder: (BuildContext context, Animation<double> animation,
                     Animation<double> secondaryAnimation) {
-                  return _buildFullScreenVideo();
-                },
-                transitionsBuilder: (BuildContext context,
-                    Animation<double> animation,
-                    Animation<double> secondaryAnimation,
-                    Widget child) {
-                  controller.setVolume(animation.value);
-                  return child;
-                },
-              );
+                  return new AnimatedBuilder(
+                    child: _buildFullScreenVideo(),
+                    animation: animation,
+                    builder: (BuildContext context, Widget child) {
+                      // TODO(sigurdm): It seems we get a animation.value of 1.0
+                      // at first when entering the route. Find out how to avoid
+                      // this.
+                      controller.setVolume(animation.value);
+                      return child;
+                    },
+                  );
+                });
+
               route.completed.then((Null _) {
                 controller.setVolume(0.0);
               });
@@ -83,26 +88,6 @@ class VideoCard extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class FadeVolumePageRoute extends PageRouteBuilder<Null> {
-  final VideoPlayerController videoController;
-  FadeVolumePageRoute({
-    RouteSettings settings: const RouteSettings(),
-    RoutePageBuilder pageBuilder,
-    RouteTransitionsBuilder transitionsBuilder,
-    this.videoController,
-  })
-      : super(
-            settings: settings,
-            pageBuilder: pageBuilder,
-            transitionsBuilder: transitionsBuilder);
-
-  @override
-  void dispose() {
-    videoController.setVolume(0.0);
-    super.dispose();
   }
 }
 
@@ -279,56 +264,22 @@ class _VideoDemoState extends State<VideoDemo> {
 
   @override
   Widget build(BuildContext context) {
-    Widget inset(Widget child) {
-      return new Padding(padding: const EdgeInsets.all(10.0), child: child);
-    }
-
-    final TextTheme textTheme = Theme.of(context).textTheme;
-
     return new Scaffold(
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
       body: new ListView(
         children: <Widget>[
-          inset(
-            new Text(
-              'The Butterfly and the Bee',
-              style: textTheme.headline,
-            ),
-          ),
-          inset(new RichText(
-              text: new TextSpan(style: textTheme.body1, children: [
-            new TextSpan(text: 'Methought', style: textTheme.body2),
-            const TextSpan(text: '''
-I heard a butterfly
-Say to a labouring bee:
-"Thou hast no colours of the sky
-On painted wings like me."''')
-          ]))),
           new VideoCard(
+            title: 'Butterfly',
+            subtitle: '… flutters by',
             controller: butterflyController,
-            title: 'The Butterfly',
-            subtitle: '''''',
           ),
-          inset(const Text('''
-"Poor child of vanity! those dyes,
-And colours bright and rare,"
-With mild reproach, the bee replies,
-"Are all beneath my care."''')),
           new VideoCard(
+            title: 'Bee',
+            subtitle: '… gently buzzing',
             controller: beeController,
-            title: 'The Bee',
-            subtitle: '''''',
           ),
-          inset(
-            const Text('''
-"Content I toil from morn to eve,
-And scorning idleness,
-To tribes of gaudy sloth I leave
-The vanity of dress."'''),
-          ),
-          inset(const Text('– William Lisle Bowles')),
         ],
       ),
     );
