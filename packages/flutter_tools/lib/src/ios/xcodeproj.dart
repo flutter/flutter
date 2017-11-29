@@ -24,6 +24,7 @@ void updateXcodeGeneratedProperties({
   @required BuildInfo buildInfo,
   @required String target,
   @required bool hasPlugins,
+  @required bool previewDart2,
 }) {
   final StringBuffer localsBuffer = new StringBuffer();
 
@@ -51,6 +52,10 @@ void updateXcodeGeneratedProperties({
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     localsBuffer.writeln('LOCAL_ENGINE=${localEngineArtifacts.engineOutPath}');
+  }
+
+  if (previewDart2) {
+    localsBuffer.writeln('PREVIEW_DART_2=true');
   }
 
   // Add dependency to CocoaPods' generated project only if plugins are used.
