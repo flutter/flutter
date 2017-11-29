@@ -29,7 +29,7 @@ MessageLookupByLibrary _findExact(localeName) {
 }
 
 /// User programs should call this before using [localeName] for messages.
-Future initializeMessages(String localeName) {
+Future<Null> initializeMessages(String localeName) {
   var lib = _deferredLibraries[Intl.canonicalizedLocale(localeName)];
   var load = lib == null ? new Future.value(false) : lib();
   return load.then((_) {
