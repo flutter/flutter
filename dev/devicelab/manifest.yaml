@@ -56,6 +56,7 @@ tasks:
       Layout for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true
 
   basic_material_app_android__compile:
     description: >
@@ -79,6 +80,7 @@ tasks:
       app for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true
 
   flutter_gallery_android__compile:
     description: >
@@ -86,6 +88,7 @@ tasks:
       Gallery for Android from Linux.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+    flaky: true
 
   flutter_gallery_ios__compile:
     description: >
@@ -93,6 +96,7 @@ tasks:
       Gallery for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_win__compile:
     description: >
@@ -100,6 +104,7 @@ tasks:
       Gallery for Android from Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows"]
+    flaky: true
 
   # Android on-device tests
 
