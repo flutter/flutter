@@ -1324,7 +1324,7 @@ class SemanticsConfiguration {
   /// result in this configuration.
   ///
   /// Only configurations that have [explicitChildNodes] set to false can
-  /// absorb other configurations and its recommended to only absorb compatible
+  /// absorb other configurations and it is recommended to only absorb compatible
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration other) {
     assert(!explicitChildNodes);
