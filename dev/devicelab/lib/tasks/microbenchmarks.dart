@@ -23,7 +23,7 @@ TaskFunction createMicrobenchmarkTask() {
     final Device device = await devices.workingDevice;
     await device.unlock();
 
-    Future<Map<String, double>> _runMicrobench(String benchmarkPath) async {
+    Future<Map<String, double>> _runMicrobench(String benchmarkPath, {bool previewDart2: false}) async {
       Future<Map<String, double>> _run() async {
         print('Running $benchmarkPath');
         final Directory appDir = dir(
@@ -31,15 +31,18 @@ TaskFunction createMicrobenchmarkTask() {
         final Process flutterProcess = await inDirectory(appDir, () async {
           if (deviceOperatingSystem == DeviceOperatingSystem.ios)
             await prepareProvisioningCertificates(appDir.path);
+          final List<String> options = <String>[
+            '-v',
+            // --release doesn't work on iOS due to code signing issues
+            '--profile',
+            '-d',
+            device.deviceId,
+          ];
+          if (previewDart2)
+            options.add('--preview-dart-2');
+          options.add(benchmarkPath);
           return await _startFlutter(
-            options: <String>[
-              '-v',
-              // --release doesn't work on iOS due to code signing issues
-              '--profile',
-              '-d',
-              device.deviceId,
-              benchmarkPath,
-            ],
+            options: options,
             canFail: false,
           );
         });
@@ -54,6 +57,33 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/stocks/build_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/gestures/velocity_tracker_bench.dart'));
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
+
+    // Run micro-benchmarks once again in --preview-dart-2 mode.
+    // Append "_dart2" suffix to the result keys to distinguish them from
+    // the original results.
+
+    void addDart2Results(Map<String, double> benchmarkResults) {
+      benchmarkResults.forEach((String key, double result) {
+        allResults[key + '_dart2'] = result;
+      });
+    }
+
+    try {
+      addDart2Results(await _runMicrobench(
+          'lib/stocks/layout_bench.dart', previewDart2: true));
+      addDart2Results(await _runMicrobench(
+          'lib/stocks/layout_bench.dart', previewDart2: true));
+      addDart2Results(await _runMicrobench(
+          'lib/stocks/build_bench.dart', previewDart2: true));
+      addDart2Results(await _runMicrobench(
+          'lib/gestures/velocity_tracker_bench.dart', previewDart2: true));
+      addDart2Results(await _runMicrobench(
+          'lib/stocks/animation_bench.dart', previewDart2: true));
+    } catch (e) {
+      // Ignore any exceptions from running benchmarks in Dart 2.0 mode,
+      // as these benchmarks are considered flaky.
+      stderr.writeln('WARNING: microbenchmarks FAILED in --preview-dart-2 mode.');
+    }
 
     return new TaskResult.success(allResults, benchmarkScoreKeys: allResults.keys.toList());
   };
