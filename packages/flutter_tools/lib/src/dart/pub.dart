@@ -148,15 +148,25 @@ List<String> _pubCommand(List<String> arguments) {
 ///
 /// [context] provides extra information to package server requests to
 /// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
-Map<String, String> _createPubEnvironment(String context) => <String, String>{
-  'FLUTTER_ROOT': Cache.flutterRoot,
-  _pubEnvironmentKey: _getPubEnvironmentValue(context),
-};
+Map<String, String> _createPubEnvironment(String context) {
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_ROOT': Cache.flutterRoot,
+    _pubEnvironmentKey: _getPubEnvironmentValue(context),
+  };
+  final String pubCache = _getRootPubCacheIfAvailable();
+  if (pubCache != null) {
+    environment[_pubCacheEnvironmentKey] = pubCache;
+  }
+  return environment;
+}
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
+
+/// The console environment key used by the pub tool to find the cache directory.
+const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 
 final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
 
@@ -187,6 +197,21 @@ String _getPubEnvironmentValue(String pubContext) {
   values.add('ctx_$pubContext');
 
   return values.join(':');
+}
+
+String _getRootPubCacheIfAvailable() {
+  if (platform.environment.containsKey(_pubCacheEnvironmentKey)) {
+    return platform.environment[_pubCacheEnvironmentKey];
+  }
+
+  final String cachePath = fs.path.join(Cache.flutterRoot, '.pub-cache');
+  if (fs.directory(cachePath).existsSync()) {
+    printTrace('Using $cachePath for the pub cache.');
+    return cachePath;
+  }
+
+  // Use pub's default location by returning null.
+  return null;
 }
 
 String _filterOverrideWarnings(String message) {

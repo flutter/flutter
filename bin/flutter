@@ -16,7 +16,7 @@ set -e
 
 function follow_links() {
   cd -P "${1%/*}"
-  file="$PWD/${1##*/}"
+  local file="$PWD/${1##*/}"
   while [ -h "$file" ]; do
     # On Mac OS, readlink -f doesn't work.
     cd -P "${file%/*}"
@@ -31,6 +31,39 @@ function follow_links() {
 function path_uri() {
   # Reduce multiple leading slashes to a single slash.
   echo "$1" | sed -E -e "s,^/+,/,"
+}
+
+function upgrade_flutter () {
+  if hash flock 2>/dev/null; then
+    flock 3 # ensures that we don't simultaneously update Dart in multiple parallel instances
+    # some platforms (e.g. Mac) don't have flock or any reliable alternative
+  fi
+
+  local revision=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
+  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$revision" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
+    mkdir -p "$FLUTTER_ROOT/bin/cache"
+    touch "$FLUTTER_ROOT/bin/cache/.dartignore"
+    "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
+
+    echo Building flutter tool...
+    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
+      PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_bot"
+    fi
+    export PUB_ENVIRONMENT="$PUB_ENVIRONMENT:flutter_install"
+
+    if [ -d "$FLUTTER_ROOT/.pub-cache" ]; then
+      export PUB_CACHE="${PUB_CACHE:-"$FLUTTER_ROOT/.pub-cache"}"
+    fi
+
+    while : ; do
+      cd "$FLUTTER_TOOLS_DIR"
+      "$PUB" upgrade --verbosity=error --no-packages-dir && break
+      echo Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
+      sleep 5
+    done
+    "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
+    echo "$revision" > "$STAMP_PATH"
+  fi
 }
 
 PROG_NAME="$(path_uri "$(follow_links "$BASH_SOURCE")")"
@@ -70,33 +103,7 @@ FLUTTER_TOOL_ARGS="--assert-initializer $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="--checked $FLUTTER_TOOL_ARGS"
 # FLUTTER_TOOL_ARGS="$FLUTTER_TOOL_ARGS --observe=65432"
 
-(
-  if hash flock 2>/dev/null; then
-    flock 3 # ensures that we don't simultaneously update Dart in multiple parallel instances
-    # some platforms (e.g. Mac) don't have flock or any reliable alternative
-  fi
-  REVISION=`(cd "$FLUTTER_ROOT"; git rev-parse HEAD)`
-  if [ ! -f "$SNAPSHOT_PATH" ] || [ ! -s "$STAMP_PATH" ] || [ `cat "$STAMP_PATH"` != "$REVISION" ] || [ "$FLUTTER_TOOLS_DIR/pubspec.yaml" -nt "$FLUTTER_TOOLS_DIR/pubspec.lock" ]; then
-    mkdir -p "$FLUTTER_ROOT/bin/cache"
-    touch "$FLUTTER_ROOT/bin/cache/.dartignore"
-    "$FLUTTER_ROOT/bin/internal/update_dart_sdk.sh"
-
-    echo Building flutter tool...
-    LOCAL_PUB_ENV="$PUB_ENVIRONMENT"
-    if [ "$TRAVIS" == "true" ] || [ "$BOT" == "true" ] || [ "$CONTINUOUS_INTEGRATION" == "true" ] || [ "$CHROME_HEADLESS" == "1" ] || [ "$APPVEYOR" == "true" ] || [ "$CI" == "true" ]; then
-      LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_bot"
-    fi
-    LOCAL_PUB_ENV="$LOCAL_PUB_ENV:flutter_install"
-    while : ; do
-      cd "$FLUTTER_TOOLS_DIR"
-      PUB_ENVIRONMENT="$LOCAL_PUB_ENV" "$PUB" upgrade --verbosity=error --no-packages-dir && break
-      echo Error: Unable to 'pub upgrade' flutter tool. Retrying in five seconds...
-      sleep 5
-    done
-    "$DART" --snapshot="$SNAPSHOT_PATH" --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH"
-    echo $REVISION > "$STAMP_PATH"
-  fi
-) 3< "$PROG_NAME"
+(upgrade_flutter) 3< "$PROG_NAME"
 
 set +e
 "$DART" $FLUTTER_TOOL_ARGS "$SNAPSHOT_PATH" "$@"
