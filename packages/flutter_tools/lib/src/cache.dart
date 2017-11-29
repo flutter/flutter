@@ -8,10 +8,12 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
@@ -105,19 +107,41 @@ class Cache {
     }
   }
 
-  static String _dartSdkVersion;
+  String _dartSdkVersion;
 
-  static String get dartSdkVersion => _dartSdkVersion ??= platform.version;
+  String get dartSdkVersion => _dartSdkVersion ??= platform.version;
 
-  static String _engineRevision;
+  String _engineRevision;
 
-  static String get engineRevision {
-    if (_engineRevision == null) {
-      final File revisionFile = fs.file(fs.path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
-      if (revisionFile.existsSync())
-        _engineRevision = revisionFile.readAsStringSync().trim();
-    }
+  String get engineRevision {
+    _engineRevision ??= getVersionFor('engine');
     return _engineRevision;
+  }
+
+  String _engineDartVersion;
+
+  String get engineDartVersion {
+    if (_engineDartVersion == null) {
+      final Directory engineDirectory = getArtifactDirectory('engine');
+
+      List<String> dartSdkBinParts;
+      if (platform.isLinux) {
+        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
+      } else if (platform.isMacOS) {
+        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
+      } else if (platform.isWindows) {
+        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
+      } else {
+        // Unknown platform, we can't derive version.
+        return null;
+      }
+      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
+      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+      // https://github.com/dart-lang/sdk/issues/31481
+      // We can use the process utils directly when this is fixed instead of parsing stderr.
+      _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
+    }
+    return _engineDartVersion;
   }
 
   static Cache get instance => context[Cache];
@@ -144,7 +168,7 @@ class Cache {
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
-    return fs.directory(fs.path.join(getCacheArtifacts().path, name));
+    return getCacheArtifacts().childDirectory(name);
   }
 
   String getVersionFor(String artifactName) {
