@@ -450,6 +450,8 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'timeOfDayFormat': r'HH ' "'" r'h' "'" r' mm',
   },
   'gsw': const <String, String>{
+    'scriptCategory': r'English-like',
+    'timeOfDayFormat': r'HH:mm',
     'openAppDrawerTooltip': r'Navigationsmenü öffnen',
     'backButtonTooltip': r'Zurück',
     'closeButtonTooltip': r'Schließen',
