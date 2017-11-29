@@ -85,6 +85,13 @@ TaskFunction createBasicMaterialCompileTest() {
     if (await sampleDir.exists())
       rmTree(sampleDir);
 
+    await inDirectory(Directory.systemTemp, () async {
+      await flutter('create', options: <String>[sampleAppName]);
+    });
+
+    if (!(await sampleDir.exists()))
+      throw 'Failed to create default Flutter app in ${sampleDir.path}';
+
     return new CompileTest(sampleDir.path).run();
   };
 }
