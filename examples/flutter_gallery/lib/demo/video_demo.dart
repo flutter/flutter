@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
+// TODO(sigurdm): These should not be stored here.
 const String butterflyUri =
     'https://flutter.github.io/assets-for-api-docs/videos/butterfly.mp4';
 
@@ -20,24 +21,22 @@ class VideoCard extends StatelessWidget {
   const VideoCard({Key key, this.controller, this.title, this.subtitle})
       : super(key: key);
 
-  Widget buildInlineVideo() {
+  Widget _buildInlineVideo() {
     return new Padding(
-      padding: const EdgeInsets.all(5.0),
+      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
       child: new Center(
         child: new AspectRatio(
           aspectRatio: 3 / 2,
           child: new Hero(
-            tag: title,
-            child: (controller == null)
-                ? new Container()
-                : new VideoPlayer(controller),
+            tag: controller,
+            child: new VideoPlayer(controller),
           ),
         ),
       ),
     );
   }
 
-  Widget buildFullScreenVideo() {
+  Widget _buildFullScreenVideo() {
     return new Scaffold(
       appBar: new AppBar(
         title: new Text(title),
@@ -46,10 +45,8 @@ class VideoCard extends StatelessWidget {
         child: new AspectRatio(
           aspectRatio: 3 / 2,
           child: new Hero(
-            tag: title,
-            child: (controller == null)
-                ? new Container()
-                : new VideoPlayPause(controller),
+            tag: controller,
+            child: new VideoPlayPause(controller),
           ),
         ),
       ),
@@ -61,26 +58,51 @@ class VideoCard extends StatelessWidget {
     return new Card(
       child: new Column(
         children: <Widget>[
-          new ListTile(
-            title: new Text(title),
-            subtitle: new Text(subtitle),
-          ),
           new GestureDetector(
             onTap: () {
-              final double oldVolume = controller.value.volume;
-              controller.setVolume(1.0);
-              Navigator.of(context).push(
-                  new MaterialPageRoute<Null>(builder: (BuildContext context) {
-                return buildFullScreenVideo();
-              })).then((dynamic _) {
-                controller.setVolume(oldVolume);
+              final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
+                pageBuilder: (BuildContext context, Animation<double> animation,
+                    Animation<double> secondaryAnimation) {
+                  return _buildFullScreenVideo();
+                },
+                transitionsBuilder: (BuildContext context,
+                    Animation<double> animation,
+                    Animation<double> secondaryAnimation,
+                    Widget child) {
+                  controller.setVolume(animation.value);
+                  return child;
+                },
+              );
+              route.completed.then((Null _) {
+                controller.setVolume(0.0);
               });
+              Navigator.of(context).push(route);
             },
-            child: buildInlineVideo(),
+            child: _buildInlineVideo(),
           ),
         ],
       ),
     );
+  }
+}
+
+class FadeVolumePageRoute extends PageRouteBuilder<Null> {
+  final VideoPlayerController videoController;
+  FadeVolumePageRoute({
+    RouteSettings settings: const RouteSettings(),
+    RoutePageBuilder pageBuilder,
+    RouteTransitionsBuilder transitionsBuilder,
+    this.videoController,
+  })
+      : super(
+            settings: settings,
+            pageBuilder: pageBuilder,
+            transitionsBuilder: transitionsBuilder);
+
+  @override
+  void dispose() {
+    videoController.setVolume(0.0);
+    super.dispose();
   }
 }
 
@@ -257,27 +279,56 @@ class _VideoDemoState extends State<VideoDemo> {
 
   @override
   Widget build(BuildContext context) {
+    Widget inset(Widget child) {
+      return new Padding(padding: const EdgeInsets.all(10.0), child: child);
+    }
+
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
     return new Scaffold(
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
       body: new ListView(
         children: <Widget>[
-          new VideoCard(
-            controller: butterflyController,
-            title: 'Float',
-            subtitle: '… like a butterfly',
-          ),
-          new VideoCard(
-            controller: beeController,
-            title: 'Sting',
-            subtitle: '… like a bee',
-          ),
-          const Card(
-            child: const ListTile(
-              title: const Text('– Muhammad Ali'),
+          inset(
+            new Text(
+              'The Butterfly and the Bee',
+              style: textTheme.headline,
             ),
           ),
+          inset(new RichText(
+              text: new TextSpan(style: textTheme.body1, children: [
+            new TextSpan(text: 'Methought', style: textTheme.body2),
+            const TextSpan(text: '''
+I heard a butterfly
+Say to a labouring bee:
+"Thou hast no colours of the sky
+On painted wings like me."''')
+          ]))),
+          new VideoCard(
+            controller: butterflyController,
+            title: 'The Butterfly',
+            subtitle: '''''',
+          ),
+          inset(const Text('''
+"Poor child of vanity! those dyes,
+And colours bright and rare,"
+With mild reproach, the bee replies,
+"Are all beneath my care."''')),
+          new VideoCard(
+            controller: beeController,
+            title: 'The Bee',
+            subtitle: '''''',
+          ),
+          inset(
+            const Text('''
+"Content I toil from morn to eve,
+And scorning idleness,
+To tribes of gaudy sloth I leave
+The vanity of dress."'''),
+          ),
+          inset(const Text('– William Lisle Bowles')),
         ],
       ),
     );
