@@ -343,11 +343,15 @@ void Engine::OnOutputSurfaceDestroyed(const fxl::Closure& gpu_continuation) {
 }
 
 void Engine::SetViewportMetrics(const blink::ViewportMetrics& metrics) {
+  bool dimensions_changed =
+      viewport_metrics_.physical_height != metrics.physical_height ||
+      viewport_metrics_.physical_width != metrics.physical_width;
   viewport_metrics_ = metrics;
   if (runtime_)
     runtime_->SetViewportMetrics(viewport_metrics_);
   if (animator_) {
-    animator_->SetDimensionChangePending();
+    if (dimensions_changed)
+      animator_->SetDimensionChangePending();
     if (have_surface_)
       ScheduleFrame();
   }
