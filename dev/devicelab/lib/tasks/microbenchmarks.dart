@@ -64,7 +64,7 @@ TaskFunction createMicrobenchmarkTask() {
 
     void addDart2Results(Map<String, double> benchmarkResults) {
       benchmarkResults.forEach((String key, double result) {
-        allResults[key + "_dart2"] = result;
+        allResults[key + '_dart2'] = result;
       });
     }
 
