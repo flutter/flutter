@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/rendering/proxy_box.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -214,4 +215,9 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   bool shouldRepaint(_ScrollbarPainter oldDelegate) => false;
+
+  @override
+  Iterable<CustomPainterSemantics> buildSemantics(Size size) {
+    return const <CustomPainterSemantics>[];
+  }
 }

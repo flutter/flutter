@@ -26,7 +26,7 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(
+          new Semantics(
             container: true,
             label: 'L1',
           ),
@@ -36,10 +36,10 @@ void main() {
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(
+                new Semantics(
                   checked: false,
                 ),
               ],
@@ -88,7 +88,7 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(
+          new Semantics(
             label: 'L1',
             container: true,
           ),
@@ -98,10 +98,10 @@ void main() {
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(),
+                new Semantics(),
               ],
             ),
           ),
@@ -136,17 +136,17 @@ void main() {
       child: new Stack(
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(),
+          new Semantics(),
           new Semantics(
             label: 'L2',
             container: true,
             child: new Stack(
               fit: StackFit.expand,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(),
+                new Semantics(),
               ],
             ),
           ),

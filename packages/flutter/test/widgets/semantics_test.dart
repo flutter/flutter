@@ -262,10 +262,10 @@ void main() {
           container: true,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 hint: 'hint one',
               ),
-              const Semantics(
+              new Semantics(
                 hint: 'hint two',
               )
 
@@ -347,10 +347,10 @@ void main() {
           container: true,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 hint: 'hint',
               ),
-              const Semantics(
+              new Semantics(
                 value: 'value',
               ),
             ],

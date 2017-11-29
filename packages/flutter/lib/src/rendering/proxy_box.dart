@@ -2175,6 +2175,10 @@ abstract class CustomPainter extends Listenable {
   ///    obtain the correct rendering size.
   void paint(Canvas canvas, Size size);
 
+  Iterable<CustomPainterSemantics> buildSemantics(Size size) {
+    return const <CustomPainterSemantics>[];
+  }
+
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
   /// [CustomPaint] object is created with a new instance of the custom painter
@@ -2217,6 +2221,15 @@ abstract class CustomPainter extends Listenable {
 
   @override
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
+}
+
+@immutable
+class CustomPainterSemantics {
+  const CustomPainterSemantics({
+    @required this.properties,
+  });
+
+  final SemanticsProperties properties;
 }
 
 /// Provides a canvas on which to draw during the paint phase.

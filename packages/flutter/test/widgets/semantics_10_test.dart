@@ -47,10 +47,10 @@ Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBo
           isSemanticBoundary: isSemanticsBoundary,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 label: 'child1',
               ),
-              const Semantics(
+              new Semantics(
                 label: 'child2',
               ),
             ],
