@@ -265,13 +265,13 @@ class TextInputConnection {
   /// Requests that the text input control become visible.
   void show() {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<dynamic>('TextInput.show');
+    SystemChannels.textInput.invokeMethod('TextInput.show');
   }
 
   /// Requests that the text input control change its internal state to match the given state.
   void setEditingState(TextEditingValue value) {
     assert(attached);
-    SystemChannels.textInput.invokeMethod<dynamic>(
+    SystemChannels.textInput.invokeMethod(
       'TextInput.setEditingState',
       value.toJSON(),
     );
@@ -283,7 +283,7 @@ class TextInputConnection {
   /// other client attaches to it within this animation frame.
   void close() {
     if (attached) {
-      SystemChannels.textInput.invokeMethod<dynamic>('TextInput.clearClient');
+      SystemChannels.textInput.invokeMethod('TextInput.clearClient');
       _clientHandler
         .._currentConnection = null
         .._scheduleHide();
@@ -343,7 +343,7 @@ class _TextInputClientHandler {
     scheduleMicrotask(() {
       _hidePending = false;
       if (_currentConnection == null)
-        SystemChannels.textInput.invokeMethod<dynamic>('TextInput.hide');
+        SystemChannels.textInput.invokeMethod('TextInput.hide');
     });
   }
 }
@@ -369,7 +369,7 @@ class TextInput {
     assert(configuration != null);
     final TextInputConnection connection = new TextInputConnection._(client);
     _clientHandler._currentConnection = connection;
-    SystemChannels.textInput.invokeMethod<dynamic>(
+    SystemChannels.textInput.invokeMethod(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJSON() ],
     );

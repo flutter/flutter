@@ -154,8 +154,9 @@ class GalleryAppState extends State<GalleryApp> {
       // For a different example of how to set up an application routing table
       // using named routes, consider the example in the Navigator class documentation:
       // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-      _kRoutes[item.routeName] = (BuildContext context) =>
-          _applyScaleFactor(item.buildRoute(context));
+      _kRoutes[item.routeName] = (BuildContext context) {
+        return _applyScaleFactor(item.buildRoute(context));
+      };
     }
 
     return new MaterialApp(

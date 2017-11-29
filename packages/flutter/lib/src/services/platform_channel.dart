@@ -143,7 +143,7 @@ class MethodChannel {
   ///   [JSONMethodCodec].
   /// * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///   for how to access method call arguments on Android.
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     assert(method != null);
     final dynamic result = await BinaryMessages.send(
       name,
@@ -223,9 +223,9 @@ class OptionalMethodChannel extends MethodChannel {
     : super(name, codec);
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<dynamic> invokeMethod(String method, [dynamic arguments]) async {
     try {
-      return await super.invokeMethod<T>(method, arguments);
+      return await super.invokeMethod(method, arguments);
     } on MissingPluginException {
       return null;
     }
@@ -290,7 +290,7 @@ class EventChannel {
         }
       });
       try {
-        await methodChannel.invokeMethod<dynamic>('listen', arguments);
+        await methodChannel.invokeMethod('listen', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(new FlutterErrorDetails(
           exception: exception,
@@ -302,7 +302,7 @@ class EventChannel {
     }, onCancel: () async {
       BinaryMessages.setMessageHandler(name, null);
       try {
-        await methodChannel.invokeMethod<dynamic>('cancel', arguments);
+        await methodChannel.invokeMethod('cancel', arguments);
       } catch (exception, stack) {
         FlutterError.reportError(new FlutterErrorDetails(
           exception: exception,

@@ -64,7 +64,7 @@ void main() {
         },
       );
       try {
-        await channel.invokeMethod<dynamic>('sayHello', 'hello');
+        await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
       } on PlatformException catch(e) {
         expect(e.code, equals('bad'));
@@ -80,7 +80,7 @@ void main() {
         (ByteData message) async => null,
       );
       try {
-        await channel.invokeMethod<dynamic>('sayHello', 'hello');
+        await channel.invokeMethod('sayHello', 'hello');
         fail('Exception expected');
       } on MissingPluginException catch(e) {
         expect(e.message, contains('sayHello'));

@@ -913,6 +913,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
+  @optionalTypeArgs
   Future<T> push<T>(Route<T> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
