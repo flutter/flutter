@@ -308,7 +308,7 @@ List<GalleryItem> _buildGalleryItems() {
     ),
     // Media
     new GalleryItem(
-      title: 'Animated Images',
+      title: 'Animated images',
       subtitle: 'GIF and WebP animations',
       category: 'Media',
       routeName: ImagesDemo.routeName,
