@@ -31,7 +31,7 @@ void main() {
       expect(new IOSSimulator('123').logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
-    });
+    }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
       osx.environment['HOME'] = '/foo/bar';
