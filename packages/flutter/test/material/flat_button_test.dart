@@ -27,7 +27,6 @@ void main() {
       'color: Color(0xff000000)',
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
-      'child: Text',
     ]);
   });
 }

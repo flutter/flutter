@@ -172,7 +172,6 @@ class FlatButton extends StatelessWidget {
     description.add(new DiagnosticsProperty<Color>('color', color, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
     description.add(new DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
-    description.add(new DiagnosticsProperty<Widget>('child', child, defaultValue: null));
   }
 
 }
