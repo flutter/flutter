@@ -24,6 +24,8 @@
 #include "txt/paragraph_builder.h"
 #include "utils.h"
 
+#define DISABLE_ON_WINDOWS(TEST) DISABLE_TEST_WINDOWS(TEST)
+
 namespace txt {
 
 using ParagraphTest = RenderTest;
@@ -253,7 +255,7 @@ TEST_F(ParagraphTest, BoldParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, LeftAlignParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(LeftAlignParagraph)) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -349,7 +351,7 @@ TEST_F(ParagraphTest, LeftAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, RightAlignParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(RightAlignParagraph)) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -452,7 +454,7 @@ TEST_F(ParagraphTest, RightAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, CenterAlignParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(CenterAlignParagraph)) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -559,7 +561,7 @@ TEST_F(ParagraphTest, CenterAlignParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, JustifyAlignParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(JustifyAlignParagraph)) {
   const char* text =
       "This is a very long sentence to test if the text will properly wrap "
       "around and go to the next line. Sometimes, short sentence. Longer "
@@ -913,7 +915,7 @@ TEST_F(ParagraphTest, GetGlyphPositionAtCoordinateParagraph) {
   ASSERT_EQ(paragraph->GetGlyphPositionAtCoordinate(85, 10000).position, 74ull);
 }
 
-TEST_F(ParagraphTest, GetRectsForRangeParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   const char* text =
       "12345,  \"67890\" 12345 67890 12345 67890 12345 67890 12345 67890 12345 "
       "67890 12345";
@@ -1305,7 +1307,7 @@ TEST_F(ParagraphTest, KernScaleParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 253.36328125f);
 }
 
-TEST_F(ParagraphTest, NewlineParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
   txt::ParagraphStyle paragraph_style;
   paragraph_style.break_strategy = minikin::kBreakStrategy_HighQuality;
 
@@ -1344,7 +1346,7 @@ TEST_F(ParagraphTest, NewlineParagraph) {
   EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 0);
 }
 
-TEST_F(ParagraphTest, EmojiParagraph) {
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiParagraph)) {
   const char* text =
       "😀😃😄😁😆😅😂🤣☺😇🙂😍😡😟😢😻👽💩👍👎🙏👌👋👄👁👦👼👨‍🚀👨‍🚒🙋‍♂️👳👨‍👨‍👧‍👧\
       💼👡👠☂🐶🐰🐻🐼🐷🐒🐵🐔🐧🐦🐋🐟🐡🕸🐌🐴🐊🐄🐪🐘🌸🌏🔥🌟🌚🌝💦💧\

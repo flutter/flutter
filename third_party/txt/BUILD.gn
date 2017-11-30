@@ -100,6 +100,7 @@ source_set("txt") {
     "src/utils/JenkinsHash.h",
     "src/utils/LruCache.h",
     "src/utils/TypeHelpers.h",
+    "src/utils/WindowsUtils.h",
   ]
 
   if (is_mac || is_ios) {
@@ -144,8 +145,6 @@ executable("txt_unittests") {
     "tests/ICUTestBase.h",
     "tests/LayoutUtilsTest.cpp",
     "tests/MeasurementTests.cpp",
-    "tests/MinikinFontForTest.cpp",
-    "tests/MinikinFontForTest.h",
     "tests/SparseBitSetTest.cpp",
     "tests/UnicodeUtils.cpp",
     "tests/UnicodeUtils.h",
@@ -168,6 +167,13 @@ executable("txt_unittests") {
     # "tests/HyphenatorTest.cpp",
     # "tests/LayoutTest.cpp",
   ]
+
+  if (!is_win) {
+    sources += [
+      "tests/MinikinFontForTest.cpp",
+      "tests/MinikinFontForTest.h",
+    ]
+  }
 
   deps = [
            ":txt",

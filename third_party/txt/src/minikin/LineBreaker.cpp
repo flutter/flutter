@@ -18,12 +18,14 @@
 
 #define LOG_TAG "Minikin"
 
+#include <algorithm>
 #include <limits>
 
 #include <log/log.h>
 
 #include <minikin/Layout.h>
 #include <minikin/LineBreaker.h>
+#include <utils/WindowsUtils.h>
 #include "LayoutUtils.h"
 
 using std::vector;

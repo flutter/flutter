@@ -22,6 +22,7 @@
 #include <log/log.h>
 
 #include <minikin/SparseBitSet.h>
+#include <utils/WindowsUtils.h>
 
 namespace minikin {
 
@@ -106,10 +107,16 @@ void SparseBitSet::initFromRanges(const uint32_t* ranges, size_t nRanges) {
   }
 }
 
+#if defined(_WIN32)
+int SparseBitSet::CountLeadingZeros(element x) {
+  return sizeof(element) <= sizeof(int) ? clz_win(x) : clzl_win(x);
+}
+#else
 int SparseBitSet::CountLeadingZeros(element x) {
   // Note: GCC / clang builtin
   return sizeof(element) <= sizeof(int) ? __builtin_clz(x) : __builtin_clzl(x);
 }
+#endif
 
 uint32_t SparseBitSet::nextSetBit(uint32_t fromIndex) const {
   if (fromIndex >= mMaxVal) {

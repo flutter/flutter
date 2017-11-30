@@ -78,6 +78,8 @@ int GetWeight(const FontWeight weight) {
       return 8;
     case FontWeight::w900:
       return 9;
+    default:
+      return -1;
   }
 }
 
@@ -87,10 +89,11 @@ int GetWeight(const TextStyle& style) {
 
 bool GetItalic(const TextStyle& style) {
   switch (style.font_style) {
-    case FontStyle::normal:
-      return false;
     case FontStyle::italic:
       return true;
+    case FontStyle::normal:
+    default:
+      return false;
   }
 }
 

@@ -49,7 +49,6 @@ group("flutter") {
       "$flutter_root/fml:fml_unittests",
       "$flutter_root/sky/engine/wtf:wtf_unittests",
       "$flutter_root/synchronization:synchronization_unittests",
-      "$flutter_root/third_party/txt:txt_benchmarks",
       "$flutter_root/third_party/txt:txt_unittests",
       "//garnet/public/lib/fxl:fxl_unittests",
     ]

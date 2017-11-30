@@ -22,6 +22,7 @@
 
 #include "text_style.h"
 #include "third_party/gtest/include/gtest/gtest_prod.h"
+#include "utils/WindowsUtils.h"
 
 namespace txt {
 
@@ -66,10 +67,10 @@ class StyledRuns {
   FRIEND_TEST(ParagraphTest, RainbowParagraph);
   FRIEND_TEST(ParagraphTest, DefaultStyleParagraph);
   FRIEND_TEST(ParagraphTest, BoldParagraph);
-  FRIEND_TEST(ParagraphTest, LeftAlignParagraph);
-  FRIEND_TEST(ParagraphTest, RightAlignParagraph);
-  FRIEND_TEST(ParagraphTest, CenterAlignParagraph);
-  FRIEND_TEST(ParagraphTest, JustifyAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, LeftAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, RightAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, CenterAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyAlignParagraph);
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
   FRIEND_TEST(ParagraphTest, ChineseParagraph);
@@ -84,6 +85,9 @@ class StyledRuns {
     size_t style_index = 0;
     size_t start = 0;
     size_t end = 0;
+
+    explicit IndexedRun(size_t style_index, size_t start, size_t end)
+        : style_index(style_index), start(start), end(end) {}
   };
 
   std::vector<TextStyle> styles_;

@@ -27,6 +27,7 @@
 #define LOG_TAG "Minikin"
 
 #include "minikin/Hyphenator.h"
+#include "utils/WindowsUtils.h"
 
 using std::vector;
 
@@ -375,7 +376,7 @@ HyphenationType Hyphenator::alphabetLookup(uint16_t* alpha_codes,
     alpha_codes[0] = 0;
     for (size_t i = 0; i < len; i++) {
       uint16_t c = word[i];
-      auto p = std::lower_bound(begin, end, c << 11);
+      auto p = std::lower_bound<const uint32_t*, uint32_t>(begin, end, c << 11);
       if (p == end) {
         return HyphenationType::DONT_BREAK;
       }

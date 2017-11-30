@@ -19,6 +19,7 @@
 
 #include <memory>
 #include "lib/fxl/macros.h"
+#include "third_party/skia/include/core/SkStream.h"
 #include "third_party/skia/include/ports/SkFontMgr.h"
 #include "txt/asset_data_provider.h"
 

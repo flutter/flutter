@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <string>
 
 #include "lib/fxl/command_line.h"

@@ -20,6 +20,7 @@
 #include <log/log.h>
 #include <minikin/CmapCoverage.h>
 #include <minikin/SparseBitSet.h>
+#include <utils/WindowsUtils.h>
 
 namespace minikin {
 
@@ -65,8 +66,12 @@ static std::vector<uint8_t> buildCmapFormat4Table(
 
   head = writeU16(segmentCount * 2, out.data(), head);  // segCountX2
   head = writeU16(searchRange, out.data(), head);       // searchRange
+#if defined(_WIN32)
+  head = writeU16(ctz_win(searchRange) - 1, out.data(), head);
+#else
   head = writeU16(__builtin_ctz(searchRange) - 1, out.data(),
                   head);  // entrySelector
+#endif
   head =
       writeU16(segmentCount * 2 - searchRange, out.data(), head);  // rangeShift
 

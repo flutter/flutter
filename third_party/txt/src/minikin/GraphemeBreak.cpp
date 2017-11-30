@@ -22,6 +22,7 @@
 #include <minikin/Emoji.h>
 #include <minikin/GraphemeBreak.h>
 #include "MinikinInternal.h"
+#include "utils/WindowsUtils.h"
 
 namespace minikin {
 

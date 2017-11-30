@@ -20,6 +20,11 @@
 
 #include "lib/fxl/logging.h"
 
+#if defined(_WIN32)
+// Conflicts with macro on Windows.
+#undef ERROR
+#endif
+
 #ifndef LOG_ALWAYS_FATAL_IF
 #define LOG_ALWAYS_FATAL_IF(cond, ...) \
   ((cond) ? (FXL_LOG(FATAL) << #cond) : (void)0)
