@@ -63,7 +63,7 @@ linter:
     # - avoid_setters_without_getters # not yet tested
     - avoid_slow_async_io
     # - avoid_types_on_closure_parameters # conflicts with always_specify_types
-    # - avoid_unused_constructor_parameters # not yet tested
+    # - avoid_unused_constructor_parameters # https://github.com/dart-lang/linter/pull/847
     - await_only_futures
     - camel_case_types
     - cancel_subscriptions
