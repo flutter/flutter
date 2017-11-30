@@ -235,6 +235,7 @@ class CompileTest {
     }
     if (previewDart2)
       options.add('--preview-dart-2');
+    setLocalEngineOptionIfNecessary(options);
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
@@ -256,6 +257,7 @@ class CompileTest {
     final List<String> options = <String>['--release'];
     if (previewDart2)
       options.add('--preview-dart-2');
+    setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
@@ -288,6 +290,7 @@ class CompileTest {
     final List<String> options = <String>['--debug'];
     if (previewDart2)
       options.add('--preview-dart-2');
+    setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
