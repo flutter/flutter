@@ -72,44 +72,10 @@ enum AppLifecycleState {
   suspending,
 }
 
-/// A representation of the insets relative to each side of the window into
-/// which the application can render, but over which the operating system will
-/// likely place system UI, such as the keyboard, that fully obscures any
-/// content. These insets are exposed by [Window.viewInsets] and preferrably
-/// read via [MediaQuery.of].
-///
-/// For a generic class that represents distances around a rectangle, see the
-/// [EdgeInsets] class.
-///
-/// See also:
-///
-///  * [WidgetsBindingObserver], for a widgets layer mechanism to receive
-///    notifications when the margin changes.
-///  * [MediaQuery.of], for the preferred mechanism for accessing this value.
-///  * [Scaffold], which automatically applies the view insets in material
-///    design applications.
-class ViewInsets {
-  const ViewInsets._({ this.left, this.top, this.right, this.bottom });
-
-  /// The distance from the left edge to the first unobscured pixel, in physical pixels.
-  final double left;
-
-  /// The distance from the top edge to the first unobscured pixel, in physical pixels.
-  final double top;
-
-  /// The distance from the right edge to the first unobscured pixel, in physical pixels.
-  final double right;
-
-  /// The distance from the bottom edge to the first unobscured pixel, in physical pixels.
-  final double bottom;
-
-  /// A view inset that has zeros for each edge.
-  static const ViewInsets zero = const ViewInsets._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
-}
-
 /// A representation of distances for each of the four edges of a rectangle,
-/// used to encode the padding that applications should place around their user
-/// interface, as exposed by [Window.padding] and preferrably read via
+/// used to encode the view insets and padding that applications should place
+/// around their user interface, as exposed by [Window.viewInsets] and
+/// [Window.padding]. View insets and padding are preferrably read via
 /// [MediaQuery.of].
 ///
 /// For a generic class that represents distances around a rectangle, see the
@@ -119,22 +85,22 @@ class ViewInsets {
 ///
 ///  * [WidgetsBindingObserver], for a widgets layer mechanism to receive
 ///    notifications when the padding changes.
-///  * [MediaQuery.of], for the preferred mechanism for accessing this value.
+///  * [MediaQuery.of], for the preferred mechanism for accessing these values.
 ///  * [Scaffold], which automatically applies the padding in material design
 ///    applications.
 class WindowPadding {
   const WindowPadding._({ this.left, this.top, this.right, this.bottom });
 
-  /// The distance from the left edge to the first unobscured pixel, in physical pixels.
+  /// The distance from the left edge to the first unpadded pixel, in physical pixels.
   final double left;
 
-  /// The distance from the top edge to the first unobscured pixel, in physical pixels.
+  /// The distance from the top edge to the first unpadded pixel, in physical pixels.
   final double top;
 
-  /// The distance from the right edge to the first unobscured pixel, in physical pixels.
+  /// The distance from the right edge to the first unpadded pixel, in physical pixels.
   final double right;
 
-  /// The distance from the bottom edge to the first unobscured pixel, in physical pixels.
+  /// The distance from the bottom edge to the first unpadded pixel, in physical pixels.
   final double bottom;
 
   /// A window padding that has zeros for each edge.
@@ -240,8 +206,8 @@ class Window {
   ///  * [MediaQuery.of], a simpler mechanism for the same.
   ///  * [Scaffold], which automatically applies the view insets in material
   ///    design applications.
-  ViewInsets get viewInsets => _viewInsets;
-  ViewInsets _viewInsets = ViewInsets.zero;
+  WindowPadding get viewInsets => _viewInsets;
+  WindowPadding _viewInsets = WindowPadding.zero;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but which may be partially obscured by
