@@ -2200,24 +2200,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Mark this node as needing an update to its semantics description.
   ///
-  /// `onlyLocalUpdates` should be set to true to reduce cost if the semantics
-  /// update does not in any way change the shape of the semantics tree (e.g.
-  /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
-  /// within the tree). In other words, with `onlyLocalUpdates` the
-  /// [RenderObject] can indicate that it only wants to perform updates on the
-  /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
-  /// other nodes in the tree.
-  ///
-  /// `onlyLocalUpdates` has to be set to false in the following cases as they
-  /// will change the shape of the tree:
-  ///
-  /// 1. [isSemanticBoundary] changed its value.
-  /// 2. [semanticsAnnotator] changed from or to returning null and
-  ///    [isSemanticBoundary] isn't true.
-  ///
-  /// If `onlyLocalUpdates` is incorrectly set to true, asserts
-  /// might throw or the computed semantics tree might be out-of-date without
-  /// warning.
+  /// This must be called whenever the semantics configuration of this
+  /// [RenderObject] as annotated by [describeSemanticsConfiguration] changes in
+  /// any way to update the semantics tree.
   void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
     if ((attached && owner._semanticsOwner == null))
