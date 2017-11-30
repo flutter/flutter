@@ -50,9 +50,11 @@ class InputDecoration {
     this.errorStyle,
     this.isDense: false,
     this.hideDivider: false,
+    this.prefixIcon,
     this.prefixText,
     this.prefixStyle,
     this.suffixText,
+    this.suffixIcon,
     this.suffixStyle,
     this.counterText,
     this.counterStyle,
@@ -89,8 +91,10 @@ class InputDecoration {
        isDense = false,
        isCollapsed = true,
        hideDivider = true,
+       prefixIcon = null,
        prefixText = null,
        prefixStyle = null,
+       suffixIcon = null,
        suffixText = null,
        suffixStyle = null,
        counterText = null,
@@ -183,6 +187,8 @@ class InputDecoration {
   /// Defaults to false.
   final bool hideDivider;
 
+  final Widget prefixIcon;
+
   /// Optional text prefix to place on the line before the input.
   ///
   /// Uses the [prefixStyle]. Uses [hintStyle] if [prefixStyle] isn't
@@ -193,6 +199,8 @@ class InputDecoration {
   ///
   /// If null, defaults to the [hintStyle].
   final TextStyle prefixStyle;
+
+  final Widget suffixIcon;
 
   /// Optional text suffix to place on the line after the input.
   ///
@@ -238,8 +246,10 @@ class InputDecoration {
     TextStyle errorStyle,
     bool isDense,
     bool hideDivider,
+    Widget prefixIcon,
     String prefixText,
     TextStyle prefixStyle,
+    Widget suffixIcon,
     String suffixText,
     TextStyle suffixStyle,
     String counterText,
@@ -260,8 +270,10 @@ class InputDecoration {
       errorStyle: errorStyle ?? this.errorStyle,
       isDense: isDense ?? this.isDense,
       hideDivider: hideDivider ?? this.hideDivider,
+      prefixIcon: prefixIcon ?? this.prefixIcon,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
+      suffixIcon: suffixIcon ?? this.suffixIcon,
       suffixText: suffixText ?? this.suffixText,
       suffixStyle: suffixStyle ?? this.suffixStyle,
       counterText: counterText ?? this.counterText,
@@ -291,8 +303,10 @@ class InputDecoration {
         && typedOther.isDense == isDense
         && typedOther.isCollapsed == isCollapsed
         && typedOther.hideDivider == hideDivider
+        && typedOther.prefixIcon == prefixIcon
         && typedOther.prefixText == prefixText
         && typedOther.prefixStyle == prefixStyle
+        && typedOther.suffixIcon == suffixIcon
         && typedOther.suffixText == suffixText
         && typedOther.suffixStyle == suffixStyle
         && typedOther.counterText == counterText
@@ -305,27 +319,31 @@ class InputDecoration {
   @override
   int get hashCode {
     return hashValues(
-      icon,
-      labelText,
-      labelStyle,
-      helperText,
-      helperStyle,
-      hintText,
-      hintStyle,
-      errorText,
-      errorStyle,
-      isDense,
-      isCollapsed,
-      hideDivider,
-      prefixText,
-      prefixStyle,
-      suffixText,
-      suffixStyle,
-      counterText,
-      counterStyle,
-      filled,
-      fillColor,
-      //enabled, hashValues supports 20 parameters
+      hashList(<Object>[ // Over 20 fields...
+        icon,
+        labelText,
+        labelStyle,
+        helperText,
+        helperStyle,
+        hintText,
+        hintStyle,
+        errorText,
+        errorStyle,
+        isDense,
+        isCollapsed,
+        hideDivider,
+        prefixIcon,
+        prefixText,
+        prefixStyle,
+        suffixIcon,
+        suffixText,
+        suffixStyle,
+        counterText,
+        counterStyle,
+        filled,
+        fillColor,
+        enabled,
+      ]),
     );
   }
 
@@ -348,10 +366,14 @@ class InputDecoration {
       description.add('isCollapsed: $isCollapsed');
     if (hideDivider)
       description.add('hideDivider: $hideDivider');
+    if (prefixIcon != null)
+      description.add('prefixIcon: $prefixIcon');
     if (prefixText != null)
       description.add('prefixText: $prefixText');
     if (prefixStyle != null)
       description.add('prefixStyle: $prefixStyle');
+    if (suffixIcon != null)
+      description.add('suffixIcon: $suffixIcon');
     if (suffixText != null)
       description.add('suffixText: $suffixText');
     if (suffixStyle != null)
