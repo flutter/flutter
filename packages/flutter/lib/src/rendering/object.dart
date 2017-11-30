@@ -2209,10 +2209,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       return;
 
     // Dirty the semantics tree starting at `this` until we have reached a
-    // RenderObject that was a semantics boundary in the previous generation
-    // of the tree and still is going to be one in the next generation. All
-    // semantics past this RenderObject are still up-to date. Therefore, we will
-    // later only rebuild the semantics subtree starting at that RenderObject.
+    // RenderObject that is a semantics boundary. All semantics past this
+    // RenderObject are still up-to date. Therefore, we will later only rebuild
+    // the semantics subtree starting at th identified semantics boundary.
+
     final bool wasSemanticsBoundary = _cachedSemanticsConfiguration?.isSemanticBoundary == true;
     _cachedSemanticsConfiguration = null;
     bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
@@ -2228,11 +2228,11 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
     }
     if (node != this && _semantics != null && _needsSemanticsUpdate) {
-      // If [this] node has already been added to [owner._nodesNeedingSemantics]
+      // If `this` node has already been added to [owner._nodesNeedingSemantics]
       // remove it as it is no longer guaranteed that its semantics
       // node will continue to be in the tree. If it still is in the tree, the
-      // ancestor [node] added to [owner._nodesNeedingSemantics] at the end of
-      // this block will ensure that the semantics of [this] node actually get
+      // ancestor `node` added to [owner._nodesNeedingSemantics] at the end of
+      // this block will ensure that the semantics of `this` node actually get
       // updated.
       // (See semantics_10_test.dart for an example why this is required).
       owner._nodesNeedingSemantics.remove(this);
