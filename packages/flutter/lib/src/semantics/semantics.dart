@@ -226,13 +226,11 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
 
 /// Contains properties for a [SemanticsNode].
 @immutable
-class SemanticsProperties {
+class SemanticsProperties extends DiagnosticableTree {
   /// Creates a semantic annotation.
   ///
   /// The [container] argument must not be null.
   const SemanticsProperties({
-    this.container: false,
-    this.explicitChildNodes: false,
     this.checked,
     this.selected,
     this.button,
@@ -250,30 +248,7 @@ class SemanticsProperties {
     this.onScrollDown,
     this.onIncrease,
     this.onDecrease,
-  }) : assert(container != null);
-
-  /// If 'container' is true, this widget will introduce a new
-  /// node in the semantics tree. Otherwise, the semantics will be
-  /// merged with the semantics of any ancestors (if the ancestor allows that).
-  ///
-  /// Whether descendants of this widget can add their semantic information to the
-  /// [SemanticsNode] introduced by this configuration is controlled by
-  /// [explicitChildNodes].
-  final bool container;
-
-  /// Whether descendants of this widget are allowed to add semantic information
-  /// to the [SemanticsNode] annotated by this widget.
-  ///
-  /// When set to false descendants are allowed to annotate [SemanticNode]s of
-  /// their parent with the semantic information they want to contribute to the
-  /// semantic tree.
-  /// When set to true the only way for descendants to contribute semantic
-  /// information to the semantic tree is to introduce new explicit
-  /// [SemanticNode]s to the tree.
-  ///
-  /// This setting is often used in combination with [isSemanticBoundary] to
-  /// create semantic boundaries that are either writable or not for children.
-  final bool explicitChildNodes;
+  });
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -457,8 +432,9 @@ class SemanticsProperties {
   /// volume down button.
   final VoidCallback onDecrease;
 
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    description.add(new DiagnosticsProperty<bool>('container', container));
+    super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
     description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
     description.add(new StringProperty('label', label, defaultValue: ''));
@@ -480,6 +456,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
+    this.key,
     VoidCallback showOnScreen,
   }) : id = _generateNewId(),
        _showOnScreen = showOnScreen;
@@ -488,6 +465,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
+    this.key,
     VoidCallback showOnScreen,
     SemanticsOwner owner,
   }) : id = 0,
@@ -500,6 +478,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _lastIdentifier += 1;
     return _lastIdentifier;
   }
+
+  /// Uniquely identifies this node in the list of sibling nodes.
+  final Key key;
 
   /// The unique identifier for this node.
   ///

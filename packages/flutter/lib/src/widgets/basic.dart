@@ -4726,9 +4726,9 @@ class Semantics extends SingleChildRenderObjectWidget {
   }) : this.fromProperties(
     key: key,
     child: child,
+    container: container,
+    explicitChildNodes: explicitChildNodes,
     properties: new SemanticsProperties(
-      container: container,
-      explicitChildNodes: explicitChildNodes,
       checked: checked,
       selected: selected,
       button: button,
@@ -4752,17 +4752,43 @@ class Semantics extends SingleChildRenderObjectWidget {
   const Semantics.fromProperties({
     Key key,
     Widget child,
+    this.container: false,
+    this.explicitChildNodes: false,
     @required this.properties,
-  }) : assert(properties != null),
+  }) : assert(container != null),
+       assert(properties != null),
        super(key: key, child: child);
 
   final SemanticsProperties properties;
 
+  /// If 'container' is true, this widget will introduce a new
+  /// node in the semantics tree. Otherwise, the semantics will be
+  /// merged with the semantics of any ancestors (if the ancestor allows that).
+  ///
+  /// Whether descendants of this widget can add their semantic information to the
+  /// [SemanticsNode] introduced by this configuration is controlled by
+  /// [explicitChildNodes].
+  final bool container;
+
+  /// Whether descendants of this widget are allowed to add semantic information
+  /// to the [SemanticsNode] annotated by this widget.
+  ///
+  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// their parent with the semantic information they want to contribute to the
+  /// semantic tree.
+  /// When set to true the only way for descendants to contribute semantic
+  /// information to the semantic tree is to introduce new explicit
+  /// [SemanticNode]s to the tree.
+  ///
+  /// This setting is often used in combination with [isSemanticBoundary] to
+  /// create semantic boundaries that are either writable or not for children.
+  final bool explicitChildNodes;
+
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
-      container: properties.container,
-      explicitChildNodes: properties.explicitChildNodes,
+      container: container,
+      explicitChildNodes: explicitChildNodes,
       checked: properties.checked,
       selected: properties.selected,
       button: properties.button,
@@ -4798,8 +4824,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSemanticsAnnotations renderObject) {
     renderObject
-      ..container = properties.container
-      ..explicitChildNodes = properties.explicitChildNodes
+      ..container = container
+      ..explicitChildNodes = explicitChildNodes
       ..checked = properties.checked
       ..selected = properties.selected
       ..label = properties.label
@@ -4821,6 +4847,8 @@ class Semantics extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('container', container));
+    description.add(new DiagnosticsProperty<SemanticsProperties>('properties', properties));
     properties.debugFillProperties(description);
   }
 }
