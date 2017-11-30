@@ -227,12 +227,12 @@ class ScrollDragController implements Drag {
     @required DragStartDetails details,
     this.onDragCanceled,
     this.carriedVelocity,
-    this.motionStartDistanceThreshold
+    this.motionStartDistanceThreshold,
   }) : assert(delegate != null),
        assert(details != null),
        assert(
          motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
-         'Must be a positive number or null'
+         'motionStartDistanceThreshold must be a positive number or null'
        ),
        _delegate = delegate,
        _lastDetails = details,
@@ -301,7 +301,8 @@ class ScrollDragController implements Drag {
   /// Returns false either way if there's no offset.
   bool _breakMotionStartThreshold(double offset, Duration timestamp) {
     if (timestamp == null) {
-      // If we can't track time, we can't apply thresholds. Should never happen.
+      // If we can't track time, we can't apply thresholds.
+      // May be null for proxied drags like via accessibility.
       return true;
     }
 
