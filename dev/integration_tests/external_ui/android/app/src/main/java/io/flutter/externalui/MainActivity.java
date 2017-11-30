@@ -81,7 +81,6 @@ public class MainActivity extends FlutterActivity {
             producerTimer.cancel();
             consumerTimer.cancel();
             endTime = System.currentTimeMillis();
-            Log.e("TET", "Stopped at " + endTime);
             result.success(null);
             break;
           case "getProducedFrameRate":
