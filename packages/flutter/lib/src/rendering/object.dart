@@ -2234,6 +2234,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     RenderObject node = this;
 
     while (!(wasSemanticsBoundary && isSemanticsBoundary) && node.parent is RenderObject) {
+      if (node != this && node._needsSemanticsUpdate)
+        break;
       node._needsSemanticsUpdate = true;
 
       node = node.parent;
