@@ -503,7 +503,7 @@ int parseServicePort(String line) {
 
 /// If FLUTTER_ENGINE environment variable is set then we need to pass
 /// correct --local-engine setting too.
-setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
+void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
   if (Platform.environment['FLUTTER_ENGINE'] != null) {
     if (flavor == null) {
       // If engine flavor was not specified explicitly then scan options looking
@@ -513,7 +513,7 @@ setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
         '--release': 'release', '--debug': 'debug', '--profile': 'profile'
       };
 
-      for (var option in options) {
+      for (String option in options) {
         flavor = optionToFlavor[option];
         if (flavor != null) {
           break;
@@ -528,6 +528,6 @@ setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       DeviceOperatingSystem.android: 'android',
     };
 
-    options.add('--local-engine=${osNames[deviceOperatingSystem]}_${flavor}');
+    options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
   }
 }
