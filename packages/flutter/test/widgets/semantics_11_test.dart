@@ -37,7 +37,7 @@ void main() {
             new TestSemantics(
               id: 2,
               actions: SemanticsAction.tap.index,
-              children: [
+              children: <TestSemantics>[
                 new TestSemantics(
                   id: 3,
                   actions: SemanticsAction.tap.index,
@@ -77,7 +77,7 @@ void main() {
             new TestSemantics(
               id: 2,
               actions: SemanticsAction.tap.index,
-              children: [
+              children: <TestSemantics>[
                 new TestSemantics(
                   id: 3,
                   actions: SemanticsAction.tap.index,
