@@ -67,9 +67,9 @@ class IconsDemoState extends State<IconsDemo> {
 
 class _IconsDemoCard extends StatelessWidget {
 
-  final VoidCallback handleIconButtonPress;
-
   const _IconsDemoCard(this.handleIconButtonPress);
+
+  final VoidCallback handleIconButtonPress;
 
   Widget _buildIconButton(double iconSize, IconData icon, bool enabled) {
     return new IconButton(
@@ -84,7 +84,7 @@ class _IconsDemoCard extends StatelessWidget {
     new Padding(
       // Match the default padding of IconButton.
       padding: const EdgeInsets.all(8.0),
-      child: new Text(label, textAlign: TextAlign.center)
+      child: new Text(label, textAlign: TextAlign.center),
     );
 
   TableRow _buildIconRow(double size) {
