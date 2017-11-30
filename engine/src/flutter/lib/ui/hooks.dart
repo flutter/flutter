@@ -31,7 +31,7 @@ void _updateWindowMetrics(double devicePixelRatio,
         right: paddingRight,
         bottom: paddingBottom,
         left: paddingLeft)
-    .._viewInsets = new ViewInsets._(
+    .._viewInsets = new WindowPadding._(
         top: viewInsetTop,
         right: viewInsetRight,
         bottom: viewInsetBottom,
