@@ -41,6 +41,7 @@ class MediaQueryData {
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
     this.padding: EdgeInsets.zero,
+    this.viewInsets: EdgeInsets.zero,
     this.alwaysUse24HourFormat: false,
   });
 
@@ -55,6 +56,7 @@ class MediaQueryData {
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
       padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -76,7 +78,17 @@ class MediaQueryData {
   /// the specified font size.
   final double textScaleFactor;
 
-  /// The padding around the edges of the media (e.g., the screen).
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but over which the operating system
+  /// will likely place system UI, such as the keyboard, that fully obscures
+  /// any content.
+  final EdgeInsets viewInsets;
+
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but which may be partially obscured by
+  /// system UI (such as the system notification area), or or physical
+  /// intrusions in the display (e.g. overscan regions on television screens or
+  /// phone sensor housings).
   final EdgeInsets padding;
 
   /// Whether to use 24-hour format when formatting time.
@@ -104,12 +116,14 @@ class MediaQueryData {
     double devicePixelRatio,
     double textScaleFactor,
     EdgeInsets padding,
+    EdgeInsets viewInsets,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
+      viewInsets: viewInsets ?? this.viewInsets,
     );
   }
 
@@ -144,6 +158,12 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
+      viewInsets: viewInsets.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
     );
   }
 
@@ -155,16 +175,17 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.padding == padding;
+        && typedOther.padding == padding
+        && typedOther.viewInsets == viewInsets;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets);
 
   @override
   String toString() {
     return '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, '
-           'textScaleFactor: $textScaleFactor, padding: $padding)';
+           'textScaleFactor: $textScaleFactor, padding: $padding, viewInsets: $viewInsets)';
   }
 }
 
