@@ -1939,10 +1939,7 @@ abstract class BuildContext {
   /// Calling this method is O(1) with a small constant factor.
   ///
   /// This method does not establish a relationship with the target in the way
-  /// that [inheritFromWidgetOfExactType] does. It is normally used by such
-  /// widgets to obtain their corresponding [InheritedElement] object so that they
-  /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
-  /// notify the widgets that _did_ register such a relationship.
+  /// that [inheritFromWidgetOfExactType] does.
   ///
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
@@ -3331,15 +3328,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       if (owner._debugCurrentBuildTarget == null) {
         throw new FlutterError(
-            '$methodName for ${widget.runtimeType} was called at an '
-                'inappropriate time.\n'
-                'It may only be called while the widgets are being built. A possible '
-                'cause of this error is when $methodName is called during '
-                'one of:\n'
-                ' * network I/O event\n'
-                ' * file I/O event\n'
-                ' * timer\n'
-                ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
+          '$methodName for ${widget.runtimeType} was called at an '
+          'inappropriate time.\n'
+          'It may only be called while the widgets are being built. A possible '
+          'cause of this error is when $methodName is called during '
+          'one of:\n'
+          ' * network I/O event\n'
+          ' * file I/O event\n'
+          ' * timer\n'
+          ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
         );
       }
       return true;
@@ -3990,23 +3987,22 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
+  /// Calls [Element.didChangeDependencies] of all dependent elements, if
+  /// [InheritedWidget.updateShouldNotify] returns true.
+  ///
+  /// Notifies all dependent elements that this inherited widget has changed.
+  ///
+  /// [InheritedElement] calls this function if the [widget]'s
+  /// [InheritedWidget.updateShouldNotify] returns true.
+  ///
+  /// This method must be called during the build phase. Usually this method is
+  /// called automatically when an inherited widget is rebuilt, e.g. as a
+  /// result of calling [State.setState] above the inherited widget.
   @override
   void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-    dispatchDidChangeDependencies();
-  }
-
-  /// Notifies all dependent elements that this inherited widget has changed.
-  ///
-  /// [InheritedElement] calls this function if [InheritedWidget.updateShouldNotify]
-  /// returns true. Subclasses of [InheritedElement] might wish to call this
-  /// function at other times if their inherited information changes outside of
-  /// the build phase. [InheritedWidget] subclasses can also call this directly
-  /// by first obtaining their [InheritedElement] using
-  /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
-  void dispatchDidChangeDependencies() {
-    assert(_debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies'));
+    assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
@@ -4015,7 +4011,7 @@ class InheritedElement extends ProxyElement {
           ancestor = ancestor._parent;
         return ancestor == this;
       }());
-      // check that it really deepends on us
+      // check that it really depends on us
       assert(dependent._dependencies.contains(this));
       dependent.didChangeDependencies();
     }
