@@ -35,7 +35,6 @@ class IconsDemoState extends State<IconsDemo> {
   ];
 
   int iconColorIndex = 8; // teal
-  double iconOpacity = 1.0;
 
   Color get iconColor => iconColors[iconColorIndex];
 
@@ -49,7 +48,6 @@ class IconsDemoState extends State<IconsDemo> {
     return new IconButton(
       icon: new Icon(icon),
       iconSize: iconSize,
-      color: iconColor,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null
     );
@@ -74,7 +72,7 @@ class IconsDemoState extends State<IconsDemo> {
         title: const Text('Icons')
       ),
       body: new IconTheme(
-        data: new IconThemeData(opacity: iconOpacity),
+        data: new IconThemeData(color: iconColor),
         child: new Padding(
           padding: const EdgeInsets.all(24.0),
           child: new Column(
