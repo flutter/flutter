@@ -2244,6 +2244,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }
       node._needsSemanticsUpdate = true;
       if (owner != null) {
+        assert(node._semanticsConfiguration.isSemanticBoundary || node.parent is! RenderObject);
         owner._nodesNeedingSemantics.add(node);
         owner.requestVisualUpdate();
       }
