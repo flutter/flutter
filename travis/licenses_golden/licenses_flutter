@@ -1157,6 +1157,7 @@ FILE: ../../../flutter/shell/platform/android/android_surface_software.h
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityDelegate.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterActivityEvents.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterFragmentActivity.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/app/FlutterPluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BasicMessageChannel.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryCodec.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/plugin/common/BinaryMessenger.java
