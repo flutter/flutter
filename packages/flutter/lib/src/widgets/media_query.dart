@@ -78,10 +78,17 @@ class MediaQueryData {
   /// the specified font size.
   final double textScaleFactor;
 
-  /// The system insets around the edges of the media (e.g., the screen).
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but over which the operating system
+  /// will likely place system UI, such as the keyboard, that fully obscures
+  /// any content.
   final EdgeInsets viewInsets;
 
-  /// The padding around the edges of the media (e.g., the screen).
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but which may be partially obscured by
+  /// system UI (such as the system notification area), or or physical
+  /// intrusions in the display (e.g. overscan regions on television screens or
+  /// phone sensor housings).
   final EdgeInsets padding;
 
   /// Whether to use 24-hour format when formatting time.
