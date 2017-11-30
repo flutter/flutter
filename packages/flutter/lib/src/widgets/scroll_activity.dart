@@ -227,12 +227,18 @@ class ScrollDragController implements Drag {
     @required DragStartDetails details,
     this.onDragCanceled,
     this.carriedVelocity,
+    this.motionStartDistanceThreshold,
   }) : assert(delegate != null),
        assert(details != null),
+       assert(
+         motionStartDistanceThreshold == null || motionStartDistanceThreshold > 0.0,
+         'motionStartDistanceThreshold must be a positive number or null'
+       ),
        _delegate = delegate,
        _lastDetails = details,
        _retainMomentum = carriedVelocity != null && carriedVelocity != 0.0,
-       _lastNonStationaryTimestamp = details.sourceTimeStamp;
+       _lastNonStationaryTimestamp = details.sourceTimeStamp,
+       _offsetSinceLastStop = motionStartDistanceThreshold == null ? null : 0.0;
 
   /// The object that will actuate the scroll view as the user drags.
   ScrollActivityDelegate get delegate => _delegate;
@@ -245,14 +251,26 @@ class ScrollDragController implements Drag {
   /// began.
   final double carriedVelocity;
 
+  /// Amount of pixels in either direction the drag has to move by to start
+  /// scroll movement again after each time scrolling came to a stop.
+  final double motionStartDistanceThreshold;
+
   Duration _lastNonStationaryTimestamp;
   bool _retainMomentum;
+  /// Null if already in motion or has no [motionStartDistanceThreshold].
+  double _offsetSinceLastStop;
 
   /// Maximum amount of time interval the drag can have consecutive stationary
   /// pointer update events before losing the momentum carried from a previous
   /// scroll activity.
-  static const Duration momentumRetainStationaryThreshold =
+  static const Duration momentumRetainStationaryDurationThreshold =
       const Duration(milliseconds: 20);
+
+  /// Maximum amount of time interval the drag can have consecutive stationary
+  /// pointer update events before needing to break the
+  /// [motionStartDistanceThreshold] to start motion again.
+  static const Duration motionStoppedDurationThreshold =
+      const Duration(milliseconds: 50);
 
   bool get _reversed => axisDirectionIsReversed(delegate.axisDirection);
 
@@ -265,21 +283,66 @@ class ScrollDragController implements Drag {
     _delegate = value;
   }
 
+  /// Determines whether to lose the existing incoming velocity when starting
+  /// the drag.
+  void _maybeLoseMomentum(double offset, Duration timestamp) {
+    if (_retainMomentum &&
+        offset == 0.0 &&
+        (timestamp == null || // If drag event has no timestamp, we lose momentum.
+         timestamp - _lastNonStationaryTimestamp > momentumRetainStationaryDurationThreshold)) {
+      // If pointer is stationary for too long, we lose momentum.
+      _retainMomentum = false;
+    }
+  }
+
+  /// If a motion start threshold exists, determine whether the threshold is
+  /// reached to start applying position offset.
+  ///
+  /// Returns false either way if there's no offset.
+  bool _breakMotionStartThreshold(double offset, Duration timestamp) {
+    if (timestamp == null) {
+      // If we can't track time, we can't apply thresholds.
+      // May be null for proxied drags like via accessibility.
+      return true;
+    }
+
+    if (offset == 0.0) {
+      if (motionStartDistanceThreshold != null &&
+          _offsetSinceLastStop == null &&
+          timestamp - _lastNonStationaryTimestamp > motionStoppedDurationThreshold) {
+        // Enforce a new threshold.
+        _offsetSinceLastStop = 0.0;
+      }
+      // Not moving can't break threshold.
+      return false;
+    } else {
+      if (_offsetSinceLastStop == null) {
+        // Already in motion. Allow transparent offset transmission.
+        return true;
+      } else {
+        _offsetSinceLastStop += offset;
+        if (_offsetSinceLastStop.abs() > motionStartDistanceThreshold) {
+          // Threshold broken.
+          _offsetSinceLastStop = null;
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+  }
+
   @override
   void update(DragUpdateDetails details) {
     assert(details.primaryDelta != null);
     _lastDetails = details;
     double offset = details.primaryDelta;
-    if (offset == 0.0) {
-      if (_retainMomentum &&
-          (details.sourceTimeStamp == null || // If drag event has no timestamp, we lose momentum.
-              details.sourceTimeStamp - _lastNonStationaryTimestamp > momentumRetainStationaryThreshold )) {
-        // If pointer is stationary for too long, we lose momentum.
-        _retainMomentum = false;
-      }
-      return;
-    } else {
+    if (offset != 0) {
       _lastNonStationaryTimestamp = details.sourceTimeStamp;
+    }
+    _maybeLoseMomentum(offset, details.sourceTimeStamp);
+    if (!_breakMotionStartThreshold(offset, details.sourceTimeStamp)) {
+      return;
     }
     if (_reversed) // e.g. an AxisDirection.up scrollable
       offset = -offset;
