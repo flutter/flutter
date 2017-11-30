@@ -17,6 +17,7 @@
 #include "styled_runs.h"
 
 #include "lib/fxl/logging.h"
+#include "utils/WindowsUtils.h"
 
 namespace txt {
 

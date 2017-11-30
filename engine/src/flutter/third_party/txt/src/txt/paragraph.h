@@ -32,6 +32,7 @@
 #include "third_party/skia/include/core/SkPoint.h"
 #include "third_party/skia/include/core/SkRect.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
+#include "utils/WindowsUtils.h"
 
 class SkCanvas;
 
@@ -164,10 +165,10 @@ class Paragraph {
   FRIEND_TEST(ParagraphTest, RainbowParagraph);
   FRIEND_TEST(ParagraphTest, DefaultStyleParagraph);
   FRIEND_TEST(ParagraphTest, BoldParagraph);
-  FRIEND_TEST(ParagraphTest, LeftAlignParagraph);
-  FRIEND_TEST(ParagraphTest, RightAlignParagraph);
-  FRIEND_TEST(ParagraphTest, CenterAlignParagraph);
-  FRIEND_TEST(ParagraphTest, JustifyAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, LeftAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, RightAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, CenterAlignParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, JustifyAlignParagraph);
   FRIEND_TEST(ParagraphTest, DecorationsParagraph);
   FRIEND_TEST(ParagraphTest, ItalicsParagraph);
   FRIEND_TEST(ParagraphTest, ChineseParagraph);
@@ -175,8 +176,8 @@ class Paragraph {
   FRIEND_TEST(ParagraphTest, SpacingParagraph);
   FRIEND_TEST(ParagraphTest, LongWordParagraph);
   FRIEND_TEST(ParagraphTest, KernScaleParagraph);
-  FRIEND_TEST(ParagraphTest, NewlineParagraph);
-  FRIEND_TEST(ParagraphTest, EmojiParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, NewlineParagraph);
+  FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, EmojiParagraph);
   FRIEND_TEST(ParagraphTest, HyphenBreakParagraph);
   FRIEND_TEST(ParagraphTest, RepeatLayoutParagraph);
   FRIEND_TEST(ParagraphTest, Ellipsize);

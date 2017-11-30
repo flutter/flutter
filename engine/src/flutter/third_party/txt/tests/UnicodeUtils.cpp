@@ -18,6 +18,7 @@
 #include <unicode/utf.h>
 #include <unicode/utf8.h>
 #include <cstdlib>
+#include <memory>
 #include <string>
 #include <vector>
 

@@ -295,7 +295,7 @@ SparseBitSet CmapCoverage::getCoverage(const uint8_t* cmap_data,
   } else {
     success = getCoverageFormat12(coverageVec, tableData, tableSize);
   }
-  if (success) {
+  if (success && (coverageVec.size() != 0)) {
     return SparseBitSet(&coverageVec.front(), coverageVec.size() >> 1);
   } else {
     return SparseBitSet();

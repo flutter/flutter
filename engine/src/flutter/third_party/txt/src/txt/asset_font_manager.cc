@@ -15,6 +15,7 @@
  */
 
 #include "txt/asset_font_manager.h"
+#include <memory>
 #include "lib/fxl/logging.h"
 
 namespace txt {

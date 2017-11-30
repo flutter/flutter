@@ -25,6 +25,7 @@
 
 #include <memory>
 #include "unicode/brkiter.h"
+#include "utils/WindowsUtils.h"
 
 namespace minikin {
 

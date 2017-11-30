@@ -50,7 +50,8 @@ void WordBreaker::setText(const uint16_t* data, size_t size) {
   mScanOffset = 0;
   mInEmailOrUrl = false;
   UErrorCode status = U_ZERO_ERROR;
-  utext_openUChars(&mUText, data, size, &status);
+  utext_openUChars(&mUText, reinterpret_cast<const UChar*>(data), size,
+                   &status);
   mBreakIterator->setText(&mUText, status);
   mBreakIterator->first();
 }
