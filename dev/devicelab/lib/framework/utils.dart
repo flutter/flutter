@@ -510,7 +510,9 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       // for flags that specify the engine flavor (--release, --profile or
       // --debug). Default flavor to debug if no flags were found.
       const Map<String, String> optionToFlavor = const <String, String>{
-        '--release': 'release', '--debug': 'debug', '--profile': 'profile'
+        '--release': 'release',
+        '--debug': 'debug',
+        '--profile': 'profile',
       };
 
       for (String option in options) {
