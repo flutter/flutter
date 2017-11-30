@@ -34,6 +34,7 @@ import android.view.accessibility.AccessibilityNodeProvider;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import io.flutter.app.FlutterActivity;
+import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.plugin.common.*;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.editing.TextInputPlugin;
@@ -132,12 +133,13 @@ public class FlutterView extends SurfaceView
         setFocusable(true);
         setFocusableInTouchMode(true);
 
+        Activity activity = (Activity) getContext();
         if (nativeView == null) {
-            mNativeView = new FlutterNativeView(this);
+            mNativeView = new FlutterNativeView(activity.getApplicationContext());
         } else {
             mNativeView = nativeView;
-            mNativeView.setFlutterView(this);
         }
+        mNativeView.attachViewAndActivity(this, activity);
 
         int color = 0xFF000000;
         TypedValue typedValue = new TypedValue();
@@ -190,15 +192,11 @@ public class FlutterView extends SurfaceView
         mFlutterSettingsChannel = new BasicMessageChannel<>(this, "flutter/settings",
             JSONMessageCodec.INSTANCE);
 
-        // TODO(plugins): Change PlatformPlugin to accept a Context. Disable the
-        // operations that require an Activity when a Context is passed.
-        if (getContext() instanceof Activity) {
-            PlatformPlugin platformPlugin = new PlatformPlugin((Activity) getContext());
-            MethodChannel flutterPlatformChannel = new MethodChannel(this,
-                "flutter/platform", JSONMethodCodec.INSTANCE);
-            flutterPlatformChannel.setMethodCallHandler(platformPlugin);
-            addActivityLifecycleListener(platformPlugin);
-        }
+        PlatformPlugin platformPlugin = new PlatformPlugin(activity);
+        MethodChannel flutterPlatformChannel = new MethodChannel(this,
+            "flutter/platform", JSONMethodCodec.INSTANCE);
+        flutterPlatformChannel.setMethodCallHandler(platformPlugin);
+        addActivityLifecycleListener(platformPlugin);
         mTextInputPlugin = new TextInputPlugin(this);
 
         setLocale(getResources().getConfiguration().locale);
@@ -250,6 +248,10 @@ public class FlutterView extends SurfaceView
 
     public FlutterNativeView getFlutterNativeView() {
         return mNativeView;
+    }
+
+    public FlutterPluginRegistry getPluginRegistry() {
+        return mNativeView.getPluginRegistry();
     }
 
     public void addActivityLifecycleListener(ActivityLifecycleListener listener) {

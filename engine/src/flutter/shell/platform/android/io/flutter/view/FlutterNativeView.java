@@ -4,7 +4,10 @@
 
 package io.flutter.view;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.plugin.common.*;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -18,21 +21,19 @@ public class FlutterNativeView implements BinaryMessenger {
     private int mNextReplyId = 1;
     private final Map<Integer, BinaryReply> mPendingReplies = new HashMap<>();
 
+    private final FlutterPluginRegistry mPluginRegistry;
     private long mNativePlatformView;
     private FlutterView mFlutterView;
 
-    public FlutterNativeView(FlutterView flutterView) {
-        mFlutterView = flutterView;
+    public FlutterNativeView(Context context) {
+        mPluginRegistry = new FlutterPluginRegistry(this, context);
         attach(this);
         assertAttached();
         mMessageHandlers = new HashMap<>();
     }
 
-    public FlutterNativeView() {
-        this(null);
-    }
-
     public void detach() {
+        mPluginRegistry.detach();
         mFlutterView = null;
         nativeDetach(mNativePlatformView);
     }
@@ -43,8 +44,13 @@ public class FlutterNativeView implements BinaryMessenger {
         mNativePlatformView = 0;
     }
 
-    public void setFlutterView(FlutterView flutterView) {
+    public FlutterPluginRegistry getPluginRegistry() {
+        return mPluginRegistry;
+    }
+
+    public void attachViewAndActivity(FlutterView flutterView, Activity activity) {
         mFlutterView = flutterView;
+        mPluginRegistry.attach(flutterView, activity);
     }
 
     public boolean isAttached() {

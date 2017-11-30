@@ -5,6 +5,7 @@
 package io.flutter.plugin.common;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
@@ -67,8 +68,17 @@ public interface PluginRegistry {
          * {@link io.flutter.app.FlutterActivity} or
          * {@link io.flutter.app.FlutterFragmentActivity}), as applications
          * are free to use any activity subclass.</p>
+         *
+         * <p>When there is no foreground activity in the application, this
+         * will return null. If a {@link Context} is needed, use context() to
+         * get the application's context.</p>
          */
         Activity activity();
+
+        /**
+         * Returns the {@link Application}'s {@link Context}.
+         */
+        Context context();
 
         /**
          * Returns a {@link BinaryMessenger} which the plugin can use for
@@ -200,5 +210,16 @@ public interface PluginRegistry {
      */
     interface ViewDestroyListener {
         boolean onViewDestroy(FlutterNativeView view);
+    }
+
+    /**
+     * Callback interface for registering plugins with a plugin registry.
+     *
+     * <p>For example, an Application may use this callback interface to
+     * provide a background service with a callback for calling its
+     * GeneratedPluginRegistrant.registerWith method.</p>
+     */
+    interface PluginRegistrantCallback {
+        void registerWith(PluginRegistry registry);
     }
 }

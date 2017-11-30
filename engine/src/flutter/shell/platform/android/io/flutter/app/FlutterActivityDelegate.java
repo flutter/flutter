@@ -91,13 +91,6 @@ public final class FlutterActivityDelegate
 
     private final Activity activity;
     private final ViewFactory viewFactory;
-    private final Map<String, Object> pluginMap = new LinkedHashMap<>(0);
-    private final List<RequestPermissionResultListener> requestPermissionResultListeners = new ArrayList<>(0);
-    private final List<ActivityResultListener> activityResultListeners = new ArrayList<>(0);
-    private final List<NewIntentListener> newIntentListeners = new ArrayList<>(0);
-    private final List<UserLeaveHintListener> userLeaveHintListeners = new ArrayList<>(0);
-    private final List<ViewDestroyListener> viewDestroyListeners = new ArrayList<>(0);
-
     private FlutterView flutterView;
     private View launchView;
 
@@ -111,45 +104,32 @@ public final class FlutterActivityDelegate
         return flutterView;
     }
 
+    // The implementation of PluginRegistry forwards to flutterView.
     @Override
     public boolean hasPlugin(String key) {
-        return pluginMap.containsKey(key);
+        return flutterView.getPluginRegistry().hasPlugin(key);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> T valuePublishedByPlugin(String pluginKey) {
-        return (T) pluginMap.get(pluginKey);
+        return (T) flutterView.getPluginRegistry().valuePublishedByPlugin(pluginKey);
     }
 
     @Override
     public Registrar registrarFor(String pluginKey) {
-        if (pluginMap.containsKey(pluginKey)) {
-            throw new IllegalStateException("Plugin key " + pluginKey + " is already in use");
-        }
-        pluginMap.put(pluginKey, null);
-        return new FlutterRegistrar(pluginKey);
+        return flutterView.getPluginRegistry().registrarFor(pluginKey);
     }
 
     @Override
     public boolean onRequestPermissionResult(
             int requestCode, String[] permissions, int[] grantResults) {
-        for (RequestPermissionResultListener listener : requestPermissionResultListeners) {
-            if (listener.onRequestPermissionResult(requestCode, permissions, grantResults)) {
-                return true;
-            }
-        }
-        return false;
+        return flutterView.getPluginRegistry().onRequestPermissionResult(requestCode, permissions, grantResults);
     }
 
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
-        for (ActivityResultListener listener : activityResultListeners) {
-            if (listener.onActivityResult(requestCode, resultCode, data)) {
-                return true;
-            }
-        }
-        return false;
+        return flutterView.getPluginRegistry().onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -196,11 +176,7 @@ public final class FlutterActivityDelegate
         // Only attempt to reload the Flutter Dart code during development. Use
         // the debuggable flag as an indicator that we are in development mode.
         if (!isDebuggable() || !loadIntent(intent)) {
-            for (NewIntentListener listener : newIntentListeners) {
-                if (listener.onNewIntent(intent)) {
-                    return;
-                }
-            }
+            flutterView.getPluginRegistry().onNewIntent(intent);
         }
     }
 
@@ -253,18 +229,14 @@ public final class FlutterActivityDelegate
             }
         }
         if (flutterView != null) {
-            boolean destroy = true;
-            for (ViewDestroyListener listener : viewDestroyListeners) {
-                if (listener.onViewDestroy(flutterView.getFlutterNativeView())) {
-                    destroy = false;
-                }
-            }
-            if (destroy) {
-                flutterView.destroy();
-            } else {
+            final boolean detach =
+                flutterView.getPluginRegistry().onViewDestroy(flutterView.getFlutterNativeView());
+            if (detach) {
                 // Detach, but do not destroy the FlutterView if a plugin
                 // expressed interest in its FlutterNativeView.
                 flutterView.detach();
+            } else {
+                flutterView.destroy();
             }
         }
     }
@@ -280,6 +252,7 @@ public final class FlutterActivityDelegate
 
     @Override
     public void onUserLeaveHint() {
+        flutterView.getPluginRegistry().onUserLeaveHint();
     }
 
     @Override
@@ -462,83 +435,5 @@ public final class FlutterActivityDelegate
         //
         // We can make this configurable if users want it.
         activity.setTheme(android.R.style.Theme_Black_NoTitleBar);
-    }
-
-    private class FlutterRegistrar implements Registrar {
-        private final String pluginKey;
-
-        FlutterRegistrar(String pluginKey) {
-            this.pluginKey = pluginKey;
-        }
-
-        @Override
-        public Activity activity() {
-            return activity;
-        }
-
-        @Override
-        public BinaryMessenger messenger() {
-            return flutterView;
-        }
-
-        @Override
-        public TextureRegistry textures() {
-            return flutterView;
-        }
-
-        @Override
-        public FlutterView view() {
-            return flutterView;
-        }
-
-        /**
-         * Publishes a value associated with the plugin being registered.
-         *
-         * <p>The published value is available to interested clients via
-         * {@link PluginRegistry#valuePublishedByPlugin(String)}.</p>
-         *
-         * <p>Publication should be done only when there is an interesting value
-         * to be shared with other code. This would typically be an instance of
-         * the plugin's main class itself that must be wired up to receive
-         * notifications or events from an Android API.
-         *
-         * <p>Overwrites any previously published value.</p>
-         */
-        @Override
-        public Registrar publish(Object value) {
-            pluginMap.put(pluginKey, value);
-            return this;
-        }
-
-        @Override
-        public Registrar addRequestPermissionResultListener(
-                RequestPermissionResultListener listener) {
-            requestPermissionResultListeners.add(listener);
-            return this;
-        }
-
-        @Override
-        public Registrar addActivityResultListener(ActivityResultListener listener) {
-            activityResultListeners.add(listener);
-            return this;
-        }
-
-        @Override
-        public Registrar addNewIntentListener(NewIntentListener listener) {
-            newIntentListeners.add(listener);
-            return this;
-        }
-
-        @Override
-        public Registrar addUserLeaveHintListener(UserLeaveHintListener listener) {
-            userLeaveHintListeners.add(listener);
-            return this;
-        }
-
-        @Override
-        public Registrar addViewDestroyListener(ViewDestroyListener listener) {
-            viewDestroyListeners.add(listener);
-            return this;
-        }
     }
 }

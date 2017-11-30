@@ -89,6 +89,7 @@ java_library("flutter_shell_java") {
     "io/flutter/app/FlutterActivityEvents.java",
     "io/flutter/app/FlutterApplication.java",
     "io/flutter/app/FlutterFragmentActivity.java",
+    "io/flutter/app/FlutterPluginRegistry.java",
     "io/flutter/plugin/common/ActivityLifecycleListener.java",
     "io/flutter/plugin/common/BasicMessageChannel.java",
     "io/flutter/plugin/common/BinaryCodec.java",
