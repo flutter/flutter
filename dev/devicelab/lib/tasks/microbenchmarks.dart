@@ -60,12 +60,12 @@ TaskFunction createMicrobenchmarkTask() {
     allResults.addAll(await _runMicrobench('lib/stocks/animation_bench.dart'));
 
     // Run micro-benchmarks once again in --preview-dart-2 mode.
-    // Append "_dart2" suffix to the result keys to distinguish them from
+    // Append suffix to the result keys to distinguish them from
     // the original results.
 
     void addDart2Results(Map<String, double> benchmarkResults) {
       benchmarkResults.forEach((String key, double result) {
-        allResults[key + '_dart2'] = result;
+        allResults[key + '__preview_dart_2'] = result;
       });
     }
 
