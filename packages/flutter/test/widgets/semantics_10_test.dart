@@ -9,10 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-List<String> callLog = <String>[];
-
 void main() {
-  testWidgets('can call markNeedsSemanticsUpdate(onlyChanges: true) followed by markNeedsSemanticsUpdate(onlyChanges: false)', (WidgetTester tester) async {
+  testWidgets('can cease to be semantics boundary after markNeedsSemanticsUpdate() has already been called once', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -23,8 +21,6 @@ void main() {
       ),
     );
 
-    callLog.clear();
-
     // The following should not trigger an assert.
     await tester.pumpWidget(
       buildTestWidgets(
@@ -33,8 +29,6 @@ void main() {
         isSemanticsBoundary: false,
       ),
     );
-
-    expect(callLog, <String>['markNeedsSemanticsUpdate(onlyChanges: true)', 'markNeedsSemanticsUpdate(onlyChanges: false)']);
 
     semantics.dispose();
   });
@@ -109,22 +103,20 @@ class RenderTest extends RenderProxyBox {
 
   }
 
-  String _label;
+  String _label = '<>';
   set label(String value) {
     if (value == _label)
       return;
     _label = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
-    callLog.add('markNeedsSemanticsUpdate(onlyChanges: true)');
+    markNeedsSemanticsUpdate();
   }
 
 
-  bool _isSemanticBoundary;
+  bool _isSemanticBoundary = false;
   set isSemanticBoundary(bool value) {
     if (_isSemanticBoundary == value)
       return;
     _isSemanticBoundary = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: false);
-    callLog.add('markNeedsSemanticsUpdate(onlyChanges: false)');
+    markNeedsSemanticsUpdate();
   }
 }

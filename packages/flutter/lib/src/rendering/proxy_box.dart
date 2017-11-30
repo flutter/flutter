@@ -992,7 +992,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   void _markNeedsClip() {
     _clip = null;
     markNeedsPaint();
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
   }
 
   T get _defaultClip;
@@ -3003,7 +3003,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
   }
 
    /// Called when the user taps on the render object.
@@ -3012,11 +3012,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -3025,11 +3024,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -3038,11 +3036,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user scrolls up or down.
@@ -3051,11 +3048,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -3296,9 +3292,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set checked(bool value) {
     if (checked == value)
       return;
-    final bool hadValue = checked != null;
     _checked = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
@@ -3308,9 +3303,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set selected(bool value) {
     if (selected == value)
       return;
-    final bool hadValue = selected != null;
     _selected = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
@@ -3319,9 +3313,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set button(bool value) {
     if (button == value)
       return;
-    final bool hadValue = button != null;
     _button = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
@@ -3332,9 +3325,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set label(String value) {
     if (_label == value)
       return;
-    final bool hadValue = _label != null;
     _label = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
@@ -3345,9 +3337,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set value(String value) {
     if (_value == value)
       return;
-    final bool hadValue = _value != null;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
@@ -3359,9 +3350,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set increasedValue(String value) {
     if (_increasedValue == value)
       return;
-    final bool hadValue = _increasedValue != null;
     _increasedValue = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
@@ -3373,9 +3363,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set decreasedValue(String value) {
     if (_decreasedValue == value)
       return;
-    final bool hadValue = _decreasedValue != null;
     _decreasedValue = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
@@ -3386,9 +3375,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set hint(String value) {
     if (_hint == value)
       return;
-    final bool hadValue = _hint != null;
     _hint = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
@@ -3400,9 +3388,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set textDirection(TextDirection value) {
     if (textDirection == value)
       return;
-    final bool hadValue = textDirection != null;
     _textDirection = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.tap].
@@ -3421,7 +3408,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onTap != null;
     _onTap = handler;
     if ((handler != null) == hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.longPress].
@@ -3440,7 +3427,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onLongPress != null;
     _onLongPress = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollLeft].
@@ -3462,7 +3449,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollLeft != null;
     _onScrollLeft = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollRight].
@@ -3484,7 +3471,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollRight != null;
     _onScrollRight = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollUp].
@@ -3506,7 +3493,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollUp != null;
     _onScrollUp = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollDown].
@@ -3528,7 +3515,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollDown != null;
     _onScrollDown = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.increase].
@@ -3547,7 +3534,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onIncrease != null;
     _onIncrease = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.decrease].
@@ -3566,20 +3553,11 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onDecrease != null;
     _onDecrease = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    assert(
-      onIncrease == null || (value == null) == (increasedValue == null),
-      'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
-    );
-    assert(
-      onDecrease == null || (value == null) == (decreasedValue == null),
-      'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
-    );
-
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
