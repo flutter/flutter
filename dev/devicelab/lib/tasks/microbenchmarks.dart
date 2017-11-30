@@ -40,6 +40,7 @@ TaskFunction createMicrobenchmarkTask() {
           ];
           if (previewDart2)
             options.add('--preview-dart-2');
+          setLocalEngineOptionIfNecessary(options);
           options.add(benchmarkPath);
           return await _startFlutter(
             options: options,
