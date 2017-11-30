@@ -145,12 +145,6 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
           }
         },
       ),
-      new Align(
-          alignment: Alignment.bottomCenter,
-          child: new SizedBox(
-              height: 20.0,
-              width: double.INFINITY,
-              child: new VideoProgressBar(controller))),
       new Center(child: imageFadeAnimation),
     ];
 
