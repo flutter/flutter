@@ -27,7 +27,7 @@ const List<String> kAotSnapshotFiles = const <String>[
 ];
 
 class BuildAotCommand extends BuildSubCommand {
-  BuildAotCommand() {
+  BuildAotCommand({bool verboseHelp: false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
@@ -39,7 +39,7 @@ class BuildAotCommand extends BuildSubCommand {
       )
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
-      ..addFlag('preview-dart-2', negatable: false)
+      ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
       ..addOption(FlutterOptions.kExtraFrontEndOptions,
         allowMultiple: true,
         splitCommas: true,
