@@ -41,6 +41,7 @@ class MediaQueryData {
     this.devicePixelRatio: 1.0,
     this.textScaleFactor: 1.0,
     this.padding: EdgeInsets.zero,
+    this.viewInsets: EdgeInsets.zero,
     this.alwaysUse24HourFormat: false,
   });
 
@@ -55,6 +56,7 @@ class MediaQueryData {
       devicePixelRatio = window.devicePixelRatio,
       textScaleFactor = window.textScaleFactor,
       padding = new EdgeInsets.fromWindowPadding(window.padding, window.devicePixelRatio),
+      viewInsets = new EdgeInsets.fromWindowPadding(window.viewInsets, window.devicePixelRatio),
       alwaysUse24HourFormat = window.alwaysUse24HourFormat;
 
   /// The size of the media in logical pixel (e.g, the size of the screen).
@@ -75,6 +77,9 @@ class MediaQueryData {
   /// For example, if the text scale factor is 1.5, text will be 50% larger than
   /// the specified font size.
   final double textScaleFactor;
+
+  /// The system insets around the edges of the media (e.g., the screen).
+  final EdgeInsets viewInsets;
 
   /// The padding around the edges of the media (e.g., the screen).
   final EdgeInsets padding;
@@ -104,12 +109,14 @@ class MediaQueryData {
     double devicePixelRatio,
     double textScaleFactor,
     EdgeInsets padding,
+    EdgeInsets viewInsets,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
       devicePixelRatio: devicePixelRatio ?? this.devicePixelRatio,
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
+      viewInsets: viewInsets ?? this.viewInsets,
     );
   }
 
@@ -144,6 +151,12 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
+      viewInsets: viewInsets.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
     );
   }
 
@@ -155,16 +168,17 @@ class MediaQueryData {
     return typedOther.size == size
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.padding == padding;
+        && typedOther.padding == padding
+        && typedOther.viewInsets == viewInsets;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets);
 
   @override
   String toString() {
     return '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, '
-           'textScaleFactor: $textScaleFactor, padding: $padding)';
+           'textScaleFactor: $textScaleFactor, padding: $padding, viewInsets: $viewInsets)';
   }
 }
 
