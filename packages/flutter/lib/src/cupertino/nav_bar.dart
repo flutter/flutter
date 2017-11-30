@@ -69,7 +69,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-class CupertinoNavigationBar extends StatelessWidget implements BaseCupertinoNavigationBar {
+class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
@@ -118,7 +118,7 @@ class CupertinoNavigationBar extends StatelessWidget implements BaseCupertinoNav
 
   /// True if the navigation bar's background color has no transparency.
   @override
-  bool get opaque => backgroundColor.alpha == 0xFF;
+  bool get fullObstruction => backgroundColor.alpha == 0xFF;
 
   @override
   Size get preferredSize {

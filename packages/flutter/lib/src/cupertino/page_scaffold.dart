@@ -34,7 +34,7 @@ class CupertinoPageScaffold extends StatelessWidget {
   ///
   /// The scaffold assumes the nav bar will consume the [MediaQuery] top padding.
   // TODO(xster): document its page transition animation when ready
-  final BaseCupertinoNavigationBar navigationBar;
+  final ObstructingPreferredSizeWidget navigationBar;
 
   /// Widget to show in the main content area.
   ///
@@ -55,9 +55,10 @@ class CupertinoPageScaffold extends StatelessWidget {
       final double topPadding = navigationBar.preferredSize.height
           + existingMediaQuery.padding.top;
 
-      // If nav bar opaque, directly shift the main content down. If translucent,
-      // let main content draw behind nav bar but hint the obstructed area.
-      if (navigationBar.opaque) {
+      // If nav bar is opaquely obstructing, directly shift the main content
+      // down. If translucent, let main content draw behind nav bar but hint the
+      // obstructed area.
+      if (navigationBar.fullObstruction) {
         paddedContent = new Padding(
           padding: new EdgeInsets.only(top: topPadding),
           child: child,
@@ -95,11 +96,12 @@ class CupertinoPageScaffold extends StatelessWidget {
   }
 }
 
-/// Widget that fits in [CupertinoPageScaffold.navigationBar].
-///
-/// Must report its preferred size and whether it's opaque or translucent.
-abstract class BaseCupertinoNavigationBar extends PreferredSizeWidget {
-  /// If translucent, the [CupertinoPageScaffold] will let content slide behind
-  /// it.
-  bool get opaque;
+/// Widget that has a preferred size and reports whether it fully obstructs
+/// widgets behind it.
+abstract class ObstructingPreferredSizeWidget extends PreferredSizeWidget {
+  /// If true, this widget fully obstructs widgets behind it by the specified
+  /// size.
+  ///
+  /// If false, this widget partially obstructs.
+  bool get fullObstruction;
 }
