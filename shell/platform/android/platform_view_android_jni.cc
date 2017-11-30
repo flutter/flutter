@@ -181,14 +181,22 @@ static void SetViewportMetrics(JNIEnv* env,
                                jint physicalPaddingTop,
                                jint physicalPaddingRight,
                                jint physicalPaddingBottom,
-                               jint physicalPaddingLeft) {
-  return PLATFORM_VIEW->SetViewportMetrics(devicePixelRatio,       //
-                                           physicalWidth,          //
-                                           physicalHeight,         //
-                                           physicalPaddingTop,     //
-                                           physicalPaddingRight,   //
-                                           physicalPaddingBottom,  //
-                                           physicalPaddingLeft);
+                               jint physicalPaddingLeft,
+                               jint physicalViewInsetTop,
+                               jint physicalViewInsetRight,
+                               jint physicalViewInsetBottom,
+                               jint physicalViewInsetLeft) {
+  return PLATFORM_VIEW->SetViewportMetrics(devicePixelRatio,         //
+                                           physicalWidth,            //
+                                           physicalHeight,           //
+                                           physicalPaddingTop,       //
+                                           physicalPaddingRight,     //
+                                           physicalPaddingBottom,    //
+                                           physicalPaddingLeft,      //
+                                           physicalViewInsetTop,     //
+                                           physicalViewInsetRight,   //
+                                           physicalViewInsetBottom,  //
+                                           physicalViewInsetLeft);
 }
 
 static jobject GetBitmap(JNIEnv* env, jobject jcaller, jlong platform_view) {
@@ -390,7 +398,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       },
       {
           .name = "nativeSetViewportMetrics",
-          .signature = "(JFIIIIII)V",
+          .signature = "(JFIIIIIIIIII)V",
           .fnPtr = reinterpret_cast<void*>(&shell::SetViewportMetrics),
       },
       {

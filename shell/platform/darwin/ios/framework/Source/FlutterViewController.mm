@@ -637,9 +637,8 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
     _viewportMetrics.physical_padding_top = self.view.safeAreaInsets.top * scale;
     _viewportMetrics.physical_padding_left = self.view.safeAreaInsets.left * scale;
     _viewportMetrics.physical_padding_right = self.view.safeAreaInsets.right * scale;
-    // TODO(cbracken) enable bottom padding once safe area and keyboard view
-    // occlusion are differentiated as two different Window getters (margin,
-    // padding).
+    // TODO(cbracken): Once framework has been updated to use view insets for the keyboard, enable
+    // bottom safe area padding.
     // _viewportMetrics.physical_padding_bottom = self.view.safeAreaInsets.bottom * scale;
 #pragma clang diagnostic pop
   } else {
@@ -653,11 +652,17 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   NSDictionary* info = [notification userInfo];
   CGFloat bottom = CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
+  // TODO(cbracken): Once framework has been updated to use view insets, keyboard should change
+  // insets rather than padding.
+  // _viewportMetrics.physical_view_inset_bottom = bottom * scale;
   _viewportMetrics.physical_padding_bottom = bottom * scale;
   [self updateViewportMetrics];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
+  // TODO(cbracken): Once framework has been updated to use view insets, keyboard should change
+  // insets rather than padding.
+  // _viewportMetrics.physical_view_inset_bottom = 0;
   _viewportMetrics.physical_padding_bottom = 0;
   [self updateViewportMetrics];
 }

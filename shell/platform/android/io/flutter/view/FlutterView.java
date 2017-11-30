@@ -91,6 +91,10 @@ public class FlutterView extends SurfaceView
         int physicalPaddingRight = 0;
         int physicalPaddingBottom = 0;
         int physicalPaddingLeft = 0;
+        int physicalViewInsetTop = 0;
+        int physicalViewInsetRight = 0;
+        int physicalViewInsetBottom = 0;
+        int physicalViewInsetLeft = 0;
     }
 
     private final TextInputPlugin mTextInputPlugin;
@@ -548,10 +552,15 @@ public class FlutterView extends SurfaceView
 
     @Override
     public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        // On Android, we do not differentiate between 'safe areas' and view insets.
         mMetrics.physicalPaddingTop = insets.getSystemWindowInsetTop();
         mMetrics.physicalPaddingRight = insets.getSystemWindowInsetRight();
         mMetrics.physicalPaddingBottom = insets.getSystemWindowInsetBottom();
         mMetrics.physicalPaddingLeft = insets.getSystemWindowInsetLeft();
+        mMetrics.physicalViewInsetTop = insets.getSystemWindowInsetTop();
+        mMetrics.physicalViewInsetRight = insets.getSystemWindowInsetRight();
+        mMetrics.physicalViewInsetBottom = insets.getSystemWindowInsetBottom();
+        mMetrics.physicalViewInsetLeft = insets.getSystemWindowInsetLeft();
         updateViewportMetrics();
         return super.onApplyWindowInsets(insets);
     }
@@ -560,10 +569,15 @@ public class FlutterView extends SurfaceView
     @SuppressWarnings("deprecation")
     protected boolean fitSystemWindows(Rect insets) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            // On Android, we do not differentiate between 'safe areas' and view insets.
             mMetrics.physicalPaddingTop = insets.top;
             mMetrics.physicalPaddingRight = insets.right;
             mMetrics.physicalPaddingBottom = insets.bottom;
             mMetrics.physicalPaddingLeft = insets.left;
+            mMetrics.physicalViewInsetTop = insets.top;
+            mMetrics.physicalViewInsetRight = insets.right;
+            mMetrics.physicalViewInsetBottom = insets.bottom;
+            mMetrics.physicalViewInsetLeft = insets.left;
             updateViewportMetrics();
             return true;
         } else {
@@ -653,7 +667,11 @@ public class FlutterView extends SurfaceView
         int physicalPaddingTop,
         int physicalPaddingRight,
         int physicalPaddingBottom,
-        int physicalPaddingLeft);
+        int physicalPaddingLeft,
+        int physicalViewInsetTop,
+        int physicalViewInsetRight,
+        int physicalViewInsetBottom,
+        int physicalViewInsetLeft);
 
     private static native Bitmap nativeGetBitmap(long nativePlatformViewAndroid);
 
@@ -684,7 +702,11 @@ public class FlutterView extends SurfaceView
             mMetrics.physicalPaddingTop,
             mMetrics.physicalPaddingRight,
             mMetrics.physicalPaddingBottom,
-            mMetrics.physicalPaddingLeft);
+            mMetrics.physicalPaddingLeft,
+            mMetrics.physicalViewInsetTop,
+            mMetrics.physicalViewInsetRight,
+            mMetrics.physicalViewInsetBottom,
+            mMetrics.physicalViewInsetLeft);
 
         WindowManager wm = (WindowManager) getContext()
             .getSystemService(Context.WINDOW_SERVICE);

@@ -74,7 +74,7 @@ void main() {
       });
 
       window.onMetricsChanged();
-      _updateWindowMetrics(0.1234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
+      _updateWindowMetrics(0.1234, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
       expect(devicePixelRatio, equals(0.1234));

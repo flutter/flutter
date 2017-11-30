@@ -17,6 +17,10 @@ struct ViewportMetrics {
   int32_t physical_padding_right = 0;
   int32_t physical_padding_bottom = 0;
   int32_t physical_padding_left = 0;
+  int32_t physical_view_inset_top = 0;
+  int32_t physical_view_inset_right = 0;
+  int32_t physical_view_inset_bottom = 0;
+  int32_t physical_view_inset_left = 0;
 };
 
 }  // namespace blink

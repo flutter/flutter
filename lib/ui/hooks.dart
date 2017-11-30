@@ -15,15 +15,27 @@ dynamic _decodeJSON(String message) {
 void _updateWindowMetrics(double devicePixelRatio,
                           double width,
                           double height,
-                          double top,
-                          double right,
-                          double bottom,
-                          double left) {
+                          double paddingTop,
+                          double paddingRight,
+                          double paddingBottom,
+                          double paddingLeft,
+                          double viewInsetTop,
+                          double viewInsetRight,
+                          double viewInsetBottom,
+                          double viewInsetLeft) {
   window
     .._devicePixelRatio = devicePixelRatio
     .._physicalSize = new Size(width, height)
     .._padding = new WindowPadding._(
-      top: top, right: right, bottom: bottom, left: left);
+        top: paddingTop,
+        right: paddingRight,
+        bottom: paddingBottom,
+        left: paddingLeft)
+    .._viewInsets = new ViewInsets._(
+        top: viewInsetTop,
+        right: viewInsetRight,
+        bottom: viewInsetBottom,
+        left: viewInsetLeft);
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 

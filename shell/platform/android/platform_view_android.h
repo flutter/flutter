@@ -53,7 +53,11 @@ class PlatformViewAndroid : public PlatformView {
                           jint physical_padding_top,
                           jint physical_padding_right,
                           jint physical_padding_bottom,
-                          jint physical_padding_left);
+                          jint physical_padding_left,
+                          jint physical_view_inset_top,
+                          jint physical_view_inset_right,
+                          jint physical_view_inset_bottom,
+                          jint physical_view_inset_left);
 
   void DispatchPlatformMessage(JNIEnv* env,
                                std::string name,

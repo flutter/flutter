@@ -146,6 +146,10 @@ void Window::UpdateWindowMetrics(const ViewportMetrics& metrics) {
           ToDart(static_cast<double>(metrics.physical_padding_right)),
           ToDart(static_cast<double>(metrics.physical_padding_bottom)),
           ToDart(static_cast<double>(metrics.physical_padding_left)),
+          ToDart(static_cast<double>(metrics.physical_view_inset_top)),
+          ToDart(static_cast<double>(metrics.physical_view_inset_right)),
+          ToDart(static_cast<double>(metrics.physical_view_inset_bottom)),
+          ToDart(static_cast<double>(metrics.physical_view_inset_left)),
       });
 }
 
