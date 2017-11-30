@@ -31,16 +31,17 @@ class CupertinoIcons {
 
   /// The icon font used for Cupertino icons.
   static const String iconFont = 'CupertinoIcons';
+
   /// The dependent package providing the Cupertino icons font.
   static const String iconFontPackage = 'cupertino_icons';
 
-  // Manually maintained list
+  // Manually maintained list.
 
   /// A thin left chevron.
-  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData left_chevron = const IconData(0xf3f0, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// A thin right chevron.
-  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData right_chevron = const IconData(0xf3f2, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// iOS style share icon with an arrow pointing up from a box.
   static const IconData share = const IconData(0xf4ca, fontFamily: iconFont, fontPackage: iconFontPackage);
@@ -79,14 +80,14 @@ class CupertinoIcons {
   static const IconData check_mark_circled = const IconData(0xf3fe, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A thicker left chevron used in iOS for the nav bar back button.
-  static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage);
+  static const IconData back = const IconData(0xf3cf, fontFamily: iconFont, fontPackage: iconFontPackage, matchTextDirection: true);
 
   /// Outline of a simple front-facing house.
   static const IconData home = const IconData(0xf447, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// A right facing shopping cart outline.
+  /// A right-facing shopping cart outline.
   static const IconData shopping_cart = const IconData(0xf3f7, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// 3 solid dots.
+  /// Three solid dots.
   static const IconData ellipsis = const IconData(0xf46a, fontFamily: iconFont, fontPackage: iconFontPackage);
 }
