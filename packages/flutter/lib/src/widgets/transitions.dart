@@ -101,6 +101,12 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// The translation is expressed as a [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
+///
+/// By default, the offsets are applied in the coordinate system of the canvas
+/// (so positive x offsets move the child towards the right). If a
+/// [textDirection] is provided, then the offsets are applied in the reading
+/// direction, so in right-to-left text, positive x offsets move towards the
+/// left, and in left-to-right text, positive x offsets move towards the right.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
@@ -109,6 +115,7 @@ class SlideTransition extends AnimatedWidget {
     Key key,
     @required Animation<Offset> position,
     this.transformHitTests: true,
+    this.textDirection,
     this.child,
   }) : assert(position != null),
        super(key: key, listenable: position);
@@ -117,8 +124,21 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// If the current value of the position animation is `(dx, dy)`, the child
   /// will be translated horizontally by `width * dx` and vertically by
-  /// `height * dy`.
+  /// `height * dy`, after applying the [textDirection] if available.
   Animation<Offset> get position => listenable;
+
+  /// The direction to use for the x offset described by the [position].
+  ///
+  /// If [textDirection] is null, the x offset is applied in the coordinate
+  /// system of the canvas (so positive x offsets move the child towards the
+  /// right).
+  ///
+  /// If [textDirection] is [TextDirection.rtl], the x offset is applied in the
+  /// reading direction such that x offsets move the child towards the left.
+  ///
+  /// If [textDirection] is [TextDirection.ltr], the x offset is applied in the
+  /// reading direction such that x offsets move the child towards the right.
+  final TextDirection textDirection;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -133,8 +153,11 @@ class SlideTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
+    Offset offset = position.value;
+    if (textDirection == TextDirection.rtl)
+      offset = new Offset(-offset.dx, offset.dy);
     return new FractionalTranslation(
-      translation: position.value,
+      translation: offset,
       transformHitTests: transformHitTests,
       child: child,
     );

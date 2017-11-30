@@ -39,7 +39,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     });
                   }
                 ),
-                const Text('Cupertino Continuous'),
+                new Text('Cupertino Continuous: ${_value.toStringAsFixed(1)}'),
               ]
             ),
             new Column(
@@ -56,7 +56,7 @@ class _CupertinoSliderDemoState extends State<CupertinoSliderDemo> {
                     });
                   }
                 ),
-                const Text('Cupertino Discrete'),
+                new Text('Cupertino Discrete: $_discreteValue'),
               ]
             ),
           ],
