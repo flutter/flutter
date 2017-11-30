@@ -60,7 +60,7 @@ void main() {
       expect(node.getSemanticsData().tags, tags);
     });
 
-    test('after markNeedsSemanticsUpdate(onlyLocalUpdates: true) all render objects between two semantic boundaries are asked for annotations', () {
+    test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
       renderer.pipelineOwner.ensureSemantics();
 
       TestRender middle;
@@ -92,7 +92,7 @@ void main() {
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
 
       middle.action = SemanticsAction.scrollDown;
-      middle.markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      middle.markNeedsSemanticsUpdate();
 
       pumpFrame(phase: EnginePhase.flushSemantics);
 

@@ -21,21 +21,6 @@ void main() {
     renderObject.markNeedsSemanticsUpdate();
     expect(onNeedVisualUpdateCallCount, 2);
   });
-
-  test('ensure frame is scheduled for markNeedsSemanticsUpdate with onlyChanges: true', () {
-    final TestRenderObject renderObject = new TestRenderObject();
-    int onNeedVisualUpdateCallCount = 0;
-    final PipelineOwner owner = new PipelineOwner(onNeedVisualUpdate: () {
-      onNeedVisualUpdateCallCount +=1;
-    });
-    owner.ensureSemantics();
-    renderObject.attach(owner);
-    owner.flushSemantics();
-
-    expect(onNeedVisualUpdateCallCount, 1);
-    renderObject.markNeedsSemanticsUpdate(onlyLocalUpdates: true);
-    expect(onNeedVisualUpdateCallCount, 2);
-  });
 }
 
 class TestRenderObject extends RenderObject {
