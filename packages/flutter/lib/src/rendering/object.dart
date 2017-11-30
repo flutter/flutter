@@ -2228,20 +2228,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     // of the tree and still is going to be one in the next generation. All
     // semantics past this RenderObject are still up-to date. Therefore, we will
     // later only rebuild the semantics subtree starting at that RenderObject.
-    bool wasSemanticsBoundary = _cachedSemanticsConfiguration?.isSemanticBoundary == true;
+    final bool wasSemanticsBoundary = _cachedSemanticsConfiguration?.isSemanticBoundary == true;
     _cachedSemanticsConfiguration = null;
-    bool isSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary;
+    bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
     RenderObject node = this;
 
-    while (!(wasSemanticsBoundary && isSemanticsBoundary) && node.parent is RenderObject) {
+    while (!isEffectiveSemanticsBoundary && node.parent is RenderObject) {
       if (node != this && node._needsSemanticsUpdate)
         break;
       node._needsSemanticsUpdate = true;
 
       node = node.parent;
-      wasSemanticsBoundary = node._cachedSemanticsConfiguration?.isSemanticBoundary == true;
       node._cachedSemanticsConfiguration = null;
-      isSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
+      isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
     }
     if (node != this && _semantics != null && _needsSemanticsUpdate) {
       // If [this] node has already been added to [owner._nodesNeedingSemantics]
