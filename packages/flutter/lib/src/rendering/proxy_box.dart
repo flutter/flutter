@@ -3558,15 +3558,6 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    assert(
-      onIncrease == null || (value == null) == (increasedValue == null),
-      'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
-    );
-    assert(
-      onDecrease == null || (value == null) == (decreasedValue == null),
-      'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
-    );
-
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
