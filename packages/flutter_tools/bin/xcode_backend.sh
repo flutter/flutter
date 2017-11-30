@@ -88,6 +88,11 @@ BuildApp() {
     local_engine_flag="--local-engine=$LOCAL_ENGINE"
   fi
 
+  local preview_dart_2_flag=""
+  if [[ -n "$PREVIEW_DART_2" ]]; then
+    preview_dart_2_flag="--preview-dart-2"
+  fi
+
   if [[ "$CURRENT_ARCH" != "x86_64" ]]; then
     local aot_flags=""
     if [[ "$build_mode" == "debug" ]]; then
@@ -101,7 +106,8 @@ BuildApp() {
       --target-platform=ios                                                 \
       --target="${target_path}"                                             \
       ${aot_flags}                                                          \
-      ${local_engine_flag}
+      ${local_engine_flag}                                                  \
+      ${preview_dart_2_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."
@@ -133,6 +139,7 @@ BuildApp() {
     --working-dir="${build_dir}/flx"                                      \
     ${precompilation_flag}                                                \
     ${local_engine_flag}                                                  \
+    ${preview_dart_2_flag}                                                \
 
   if [[ $? -ne 0 ]]; then
     EchoError "Failed to package ${project_path}."

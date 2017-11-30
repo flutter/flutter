@@ -29,6 +29,7 @@ class BuildIOSCommand extends BuildSubCommand {
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).');
+    argParser.addFlag('preview-dart-2', negatable: false);
   }
 
   @override
@@ -70,7 +71,8 @@ class BuildIOSCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       target: targetFile,
       buildForDevice: !forSimulator,
-      codesign: shouldCodesign
+      codesign: shouldCodesign,
+      previewDart2 : argResults['preview-dart-2'],
     );
 
     if (!result.success) {
