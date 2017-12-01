@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
@@ -76,7 +77,8 @@ class VideoCard extends StatelessWidget {
                       return child;
                     },
                   );
-                });
+                },
+              );
 
               route.completed.then((Null _) {
                 controller.setVolume(0.0);
@@ -219,6 +221,74 @@ class _FadeAnimationState extends State<FadeAnimation>
   }
 }
 
+// Shows a
+class ConnectivityOverlay extends StatefulWidget {
+  final Widget child;
+  final Completer<Null> connectedCompleter;
+  final GlobalKey<ScaffoldState> scaffoldKey;
+
+  const ConnectivityOverlay(
+      {this.child, this.connectedCompleter, this.scaffoldKey});
+
+  @override
+  _ConnectivityOverlayState createState() => new _ConnectivityOverlayState();
+}
+
+class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
+  StreamSubscription<ConnectivityResult> connectivitySubscription;
+  bool connected = true;
+
+  static const Widget errorSnackBar = const SnackBar(
+    backgroundColor: Colors.red,
+    content: const ListTile(
+      title: const Text('No network'),
+      subtitle: const Text(
+          'To load the videos you must have an active network connection'),
+    ),
+  );
+
+  Stream<ConnectivityResult> connectivityStream() async* {
+    final Connectivity connectivity = new Connectivity();
+    ConnectivityResult previousResult = await connectivity.checkConnectivity();
+    yield previousResult;
+    await for (ConnectivityResult result
+        in connectivity.onConnectivityChanged) {
+      if (result != previousResult) {
+        yield result;
+        previousResult = result;
+      }
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    connectivitySubscription =
+        connectivityStream().listen((ConnectivityResult connectivityResult) {
+      print(connectivityResult);
+      if (!mounted) {
+        return;
+      }
+      if (connectivityResult == ConnectivityResult.none) {
+        widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
+      } else {
+        if (!widget.connectedCompleter.isCompleted) {
+          widget.connectedCompleter.complete(null);
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
 class VideoDemo extends StatefulWidget {
   const VideoDemo({Key key}) : super(key: key);
 
@@ -228,10 +298,14 @@ class VideoDemo extends StatefulWidget {
   _VideoDemoState createState() => new _VideoDemoState();
 }
 
-class _VideoDemoState extends State<VideoDemo> {
+class _VideoDemoState extends State<VideoDemo>
+    with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController =
       new VideoPlayerController(butterflyUri);
   final VideoPlayerController beeController = new VideoPlayerController(beeUri);
+
+  final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
+  final Completer<Null> connectedCompleter = new Completer<Null>();
 
   @override
   void initState() {
@@ -241,6 +315,7 @@ class _VideoDemoState extends State<VideoDemo> {
       controller.setLooping(true);
       controller.setVolume(0.0);
       controller.play();
+      await connectedCompleter.future;
       await controller.initialize();
       setState(() {});
     }
@@ -259,22 +334,27 @@ class _VideoDemoState extends State<VideoDemo> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
+      key: scaffoldKey,
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
-      body: new ListView(
-        children: <Widget>[
-          new VideoCard(
-            title: 'Butterfly',
-            subtitle: '… flutters by',
-            controller: butterflyController,
-          ),
-          new VideoCard(
-            title: 'Bee',
-            subtitle: '… gently buzzing',
-            controller: beeController,
-          ),
-        ],
+      body: new ConnectivityOverlay(
+        child: new ListView(
+          children: <Widget>[
+            new VideoCard(
+              title: 'Butterfly',
+              subtitle: '… flutters by',
+              controller: butterflyController,
+            ),
+            new VideoCard(
+              title: 'Bee',
+              subtitle: '… gently buzzing',
+              controller: beeController,
+            ),
+          ],
+        ),
+        connectedCompleter: connectedCompleter,
+        scaffoldKey: scaffoldKey,
       ),
     );
   }
