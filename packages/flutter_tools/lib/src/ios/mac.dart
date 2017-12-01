@@ -205,7 +205,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool buildForDevice,
   bool codesign: true,
   bool usesTerminalUi: true,
-  bool previewDart2: false,
 }) async {
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
@@ -266,7 +265,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildInfo: buildInfo,
     target: target,
     hasPlugins: hasFlutterPlugins,
-    previewDart2: previewDart2,
+    previewDart2: buildInfo.previewDart2,
   );
 
   final List<String> commands = <String>[
