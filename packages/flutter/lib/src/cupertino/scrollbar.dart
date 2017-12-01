@@ -26,6 +26,8 @@ const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 50);
 ///
 ///  * [ListView], which display a linear, scrollable list of children.
 ///  * [GridView], which display a 2 dimensional, scrollable array of children.
+///  * [Scrollbar], a Material Design scrollbar that dynamically adapts to the
+///    platform showing either an Android style or iOS style scrollbar.
 class CupertinoScrollbar extends StatefulWidget {
   /// Creates an iOS style scrollbar that wraps the given [child].
   ///
@@ -54,8 +56,7 @@ class CupertinoScrollbar extends StatefulWidget {
       radius: _kScrollbarRadius,
       minLength: _kScrollbarMinLength,
       timeToFadeout: _kScrollbarTimeToFade,
-    )
-        ..color = _kScrollbarColor;
+    )..color = _kScrollbarColor;
   }
 }
 

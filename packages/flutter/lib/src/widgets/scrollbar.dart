@@ -126,6 +126,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void scheduleFade() {
+    _fadeOut?.cancel();
     _fadeOut = new Timer(timeToFadeout, startFadeOut);
   }
 

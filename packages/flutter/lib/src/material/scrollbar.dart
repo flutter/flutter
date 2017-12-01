@@ -82,7 +82,6 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
       _painter ??= Scrollbar.buildMaterialScrollbarPainter(this);
       _painter.color = theme.highlightColor.withOpacity(1.0);
     }
-
     _painter.textDirection = Directionality.of(context);
   }
 
