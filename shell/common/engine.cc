@@ -4,11 +4,28 @@
 
 #include "flutter/shell/common/engine.h"
 
+#if OS(WIN)
+#include <io.h>
+#include <windows.h>
+#define access _access
+#define R_OK 0x4
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode) (((mode)&S_IFMT) == S_IFDIR)
+#endif
+
+#ifndef S_ISREG
+#define S_ISREG(mode) (((mode)&S_IFMT) == S_IFREG)
+#endif
+
+#else
 #include <dlfcn.h>
-#include <fcntl.h>
 #include <sys/mman.h>
-#include <sys/stat.h>
 #include <unistd.h>
+#endif  // OS(WIN)
+
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <memory>
 #include <utility>
 
@@ -46,6 +63,30 @@ constexpr char kNavigationChannel[] = "flutter/navigation";
 constexpr char kLocalizationChannel[] = "flutter/localization";
 constexpr char kSettingsChannel[] = "flutter/settings";
 
+void FindAndReplaceInPlace(std::string& str,
+                           const std::string& findStr,
+                           const std::string& replaceStr) {
+  size_t pos = 0;
+  while ((pos = str.find(findStr, pos)) != std::string::npos) {
+    str.replace(pos, findStr.length(), replaceStr);
+    pos += replaceStr.length();
+  }
+}
+
+std::string SanitizePath(const std::string& path) {
+#if OS(WIN)
+  std::string sanitized = path;
+  FindAndReplaceInPlace(sanitized, "\\\\", "/");
+  if ((sanitized.length() > 2) && (sanitized[1] == ':')) {
+    // Path begins with a drive letter.
+    sanitized = '/' + sanitized;
+  }
+  return sanitized;
+#else
+  return path;
+#endif
+}
+
 bool PathExists(const std::string& path) {
   return access(path.c_str(), R_OK) == 0;
 }
@@ -63,7 +104,7 @@ std::string FindPackagesPath(const std::string& main_dart) {
 }
 
 std::string GetScriptUriFromPath(const std::string& path) {
-  return "file://" + path;
+  return "file://" + SanitizePath(path);
 }
 
 }  // namespace
@@ -93,6 +134,7 @@ fml::WeakPtr<Engine> Engine::GetWeakPtr() {
 #if !FLUTTER_AOT
 #elif OS(IOS)
 #elif OS(ANDROID)
+// TODO(bkonyi): do we even get here for Windows?
 static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
                                      const std::string& default_file_name,
                                      const std::string& settings_file_name,
@@ -104,6 +146,49 @@ static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
     asset_path = aot_snapshot_path + "/" + settings_file_name;
   }
 
+#if OS(WIN)
+  HANDLE file_handle_ =
+      CreateFileA(reinterpret_cast<LPCSTR>(path.c_str()), GENERIC_READ,
+                  FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+                  FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS, nullptr);
+
+  if (file_handle_ == INVALID_HANDLE_VALUE) {
+    return;
+  }
+
+  size_ = GetFileSize(file_handle_, nullptr);
+  if (size_ == INVALID_FILE_SIZE) {
+    size_ = 0;
+    return;
+  }
+
+  int mapping_flags = executable ? PAGE_EXECUTE_READ : PAGE_READONLY;
+  mapping_handle_ = CreateFileMapping(file_handle_, nullptr, mapping_flags, 0,
+                                      size_, nullptr);
+
+  CloseHandle(file_handle_);
+
+  if (mapping_handle_ == INVALID_HANDLE_VALUE) {
+    return;
+  }
+
+  int access_flags = FILE_MAP_READ;
+  if (executable) {
+    access_flags |= FILE_MAP_EXECUTE;
+  }
+  auto mapping = MapViewOfFile(mapping_handle_, access_flags, 0, 0, size_);
+
+  if (mapping == INVALID_HANDLE_VALUE) {
+    CloseHandle(mapping_handle_);
+    mapping_handle_ = INVALID_HANDLE_VALUE;
+    return;
+  }
+
+  void* symbol = static_cast<void*>(mapping);
+  if (symbol == NULL) {
+    return nullptr;
+  }
+#else
   struct stat info;
   if (stat(asset_path.c_str(), &info) < 0) {
     return nullptr;
@@ -123,6 +208,7 @@ static const uint8_t* MemMapSnapshot(const std::string& aot_snapshot_path,
   if (symbol == MAP_FAILED) {
     return nullptr;
   }
+#endif
   return reinterpret_cast<const uint8_t*>(symbol);
 }
 #endif
@@ -161,7 +247,7 @@ void Engine::Init(const std::string& bundle_path) {
       dlsym(library_handle, "kDartIsolateSnapshotData"));
   default_isolate_snapshot_instr = reinterpret_cast<const uint8_t*>(
       dlsym(library_handle, "kDartIsolateSnapshotInstructions"));
-#elif OS(ANDROID)
+#elif OS(ANDROID) || OS(WIN)
   const blink::Settings& settings = blink::Settings::Get();
   const std::string& aot_shared_library_path = settings.aot_shared_library_path;
   const std::string& aot_snapshot_path = settings.aot_snapshot_path;

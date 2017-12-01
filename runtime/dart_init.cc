@@ -3,11 +3,18 @@
 // found in the LICENSE file.
 
 #include "flutter/runtime/dart_init.h"
+#include "flutter/sky/engine/wtf/OperatingSystem.h"
 
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+
+#if defined(OS_WIN)
+#include <windows.h>
+#undef ERROR
+#else
 #include <unistd.h>
+#endif
 
 #include <memory>
 #include <string>

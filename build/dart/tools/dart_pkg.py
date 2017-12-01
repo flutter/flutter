@@ -119,6 +119,8 @@ def list_files(from_root, filter_func=None):
 
 
 def remove_broken_symlink(path):
+  if not USE_LINKS:
+    return
   try:
     link_path = os.readlink(path)
   except OSError as e:
@@ -131,6 +133,8 @@ def remove_broken_symlink(path):
 
 
 def remove_broken_symlinks(root_dir):
+  if not USE_LINKS:
+    return
   for current_dir, _, child_files in os.walk(root_dir):
     for filename in child_files:
       path = os.path.join(current_dir, filename)
@@ -268,7 +272,7 @@ def main():
 
   # Symlink packages/
   package_path = os.path.join(args.package_root, args.package_name)
-  link(lib_path, package_path)
+  copy_or_link(lib_path, package_path)
 
   # Link dart-pkg/$package/packages to dart-pkg/packages
   link_if_possible(args.package_root, target_packages_dir)

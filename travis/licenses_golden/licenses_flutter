@@ -9600,6 +9600,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/FlutterAppDele
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/framework/Source/vsync_waiter_ios.mm
 FILE: ../../../flutter/shell/platform/linux/main_linux.cc
+FILE: ../../../flutter/shell/platform/win/main_win.cc
 FILE: ../../../flutter/sky/engine/wtf/Allocator.h
 FILE: ../../../flutter/sky/engine/wtf/MakeUnique.h
 ----------------------------------------------------------------------------------------------------

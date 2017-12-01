@@ -2,6 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include "lib/fxl/build_config.h"
+
+#if defined(OS_WIN)
+#define _USE_MATH_DEFINES
+#endif
+#include <cmath>
+
 #include "flutter/flow/matrix_decomposition.h"
 #include "third_party/gtest/include/gtest/gtest.h"
 

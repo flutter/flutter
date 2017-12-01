@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+#include <algorithm>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
@@ -27,7 +28,7 @@ struct SwitchDesc {
 // clang-format off
 #define DEF_SWITCHES_START static const struct SwitchDesc gSwitchDescs[] = {
 #define DEF_SWITCH(p_swtch, p_flag, p_help) \
-  { .sw = shell::Switch:: p_swtch, .flag = p_flag, .help = p_help },
+  { shell::Switch:: p_swtch, p_flag, p_help },
 #define DEF_SWITCHES_END };
 // clang-format on
 
