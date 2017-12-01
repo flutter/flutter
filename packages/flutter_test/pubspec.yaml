@@ -9,7 +9,7 @@ dependencies:
   test: 0.12.26
 
   # We use FakeAsync and other testing utilities.
-  quiver: 0.26.0
+  quiver: 0.26.2
 
   flutter:
     sdk: flutter
