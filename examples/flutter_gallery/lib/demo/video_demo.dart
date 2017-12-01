@@ -230,14 +230,16 @@ class _FadeAnimationState extends State<FadeAnimation>
   }
 }
 
-// Shows a
 class ConnectivityOverlay extends StatefulWidget {
   final Widget child;
   final Completer<Null> connectedCompleter;
   final GlobalKey<ScaffoldState> scaffoldKey;
 
-  const ConnectivityOverlay(
-      {this.child, this.connectedCompleter, this.scaffoldKey});
+  const ConnectivityOverlay({
+    this.child,
+    this.connectedCompleter,
+    this.scaffoldKey,
+  });
 
   @override
   _ConnectivityOverlayState createState() => new _ConnectivityOverlayState();
