@@ -73,7 +73,6 @@ class BuildIOSCommand extends BuildSubCommand {
       target: targetFile,
       buildForDevice: !forSimulator,
       codesign: shouldCodesign,
-      previewDart2 : argResults['preview-dart-2'],
     );
 
     if (!result.success) {
