@@ -19,7 +19,7 @@ void main() {
   testUsingContext('pub get 69', () async {
     String error;
     new FakeAsync().run((FakeAsync time) {
-      pubGet(checkLastModified: false).then((Null value) {
+      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic error) {
         error = 'test failed unexpectedly';

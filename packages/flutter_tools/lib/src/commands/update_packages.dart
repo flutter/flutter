@@ -146,7 +146,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
+        await pubGet(context: 'update_packages', directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -154,6 +154,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // each package.
         await pub(
           <String>['deps', '--style=compact'],
+          context: 'update_pkgs',
           directory: temporaryDirectory.path,
           filter: tree.fill,
           retry: false, // errors here are usually fatal since we're not hitting the network
@@ -210,7 +211,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (Directory dir in packages) {
-      await pubGet(directory: dir.path, checkLastModified: false);
+      await pubGet(context: 'update_packages', directory: dir.path, checkLastModified: false);
       count += 1;
     }
 
