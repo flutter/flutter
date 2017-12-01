@@ -63,6 +63,7 @@ constexpr char kNavigationChannel[] = "flutter/navigation";
 constexpr char kLocalizationChannel[] = "flutter/localization";
 constexpr char kSettingsChannel[] = "flutter/settings";
 
+#if OS(WIN)
 void FindAndReplaceInPlace(std::string& str,
                            const std::string& findStr,
                            const std::string& replaceStr) {
@@ -72,6 +73,7 @@ void FindAndReplaceInPlace(std::string& str,
     pos += replaceStr.length();
   }
 }
+#endif
 
 std::string SanitizePath(const std::string& path) {
 #if OS(WIN)
