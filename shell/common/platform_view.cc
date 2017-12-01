@@ -167,7 +167,9 @@ void PlatformView::SetupResourceContextOnIOThread() {
 
 void PlatformView::SetupResourceContextOnIOThreadPerform(
     fxl::AutoResetWaitableEvent* latch) {
-  if (blink::ResourceContext::Get() != nullptr) {
+  std::unique_ptr<blink::ResourceContext> resourceContext =
+      blink::ResourceContext::Acquire();
+  if (resourceContext->Get() != nullptr) {
     // The resource context was already setup. This could happen if platforms
     // try to setup a context multiple times, or, if there are multiple platform
     // views. In any case, there is nothing else to do. So just signal the
@@ -199,8 +201,8 @@ void PlatformView::SetupResourceContextOnIOThreadPerform(
 
   // Do not cache textures created by the image decoder.  These textures should
   // be deleted when they are no longer referenced by an SkImage.
-  if (blink::ResourceContext::Get())
-    blink::ResourceContext::Get()->setResourceCacheLimits(0, 0);
+  if (resourceContext->Get())
+    resourceContext->Get()->setResourceCacheLimits(0, 0);
 
   latch->Signal();
 }

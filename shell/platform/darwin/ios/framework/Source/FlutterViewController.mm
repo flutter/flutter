@@ -11,6 +11,7 @@
 #include "flutter/fml/platform/darwin/platform_version.h"
 #include "flutter/fml/platform/darwin/scoped_block.h"
 #include "flutter/fml/platform/darwin/scoped_nsobject.h"
+#include "flutter/lib/ui/painting/resource_context.h"
 #include "flutter/shell/platform/darwin/common/buffer_conversions.h"
 #include "flutter/shell/platform/darwin/common/platform_mac.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
@@ -398,6 +399,8 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
 - (void)applicationDidEnterBackground:(NSNotification*)notification {
   TRACE_EVENT0("flutter", "applicationDidEnterBackground");
   [self surfaceUpdated:NO];
+  // GrContext operations are blocked when the app is in the background.
+  blink::ResourceContext::Freeze();
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.paused"];
 }
 
@@ -405,6 +408,7 @@ class PlatformMessageResponseDarwin : public blink::PlatformMessageResponse {
   TRACE_EVENT0("flutter", "applicationWillEnterForeground");
   if (_viewportMetrics.physical_width)
     [self surfaceUpdated:YES];
+  blink::ResourceContext::Unfreeze();
   [_lifecycleChannel.get() sendMessage:@"AppLifecycleState.inactive"];
 }
 
