@@ -367,9 +367,10 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!linter_utils.isValidPackageName(projectName))
-    return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
-
+  if (!linter_utils.isValidPackageName(projectName)) {
+    final String packageNameDetails = new package_names.PubPackageNames().details;
+    return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
+  }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
       'package dependencies.';
