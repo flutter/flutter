@@ -5,6 +5,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
 import 'theme.dart';
@@ -57,23 +58,29 @@ class Scrollbar extends StatefulWidget {
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _painter;
-  TargetPlatform _lastPlatform;
+  TargetPlatform _currentPlatform;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final ThemeData theme = Theme.of(context);
-    if (_lastPlatform != null && _lastPlatform != theme.platform) {
-      _painter.dispose();
+    if (_currentPlatform != null && _currentPlatform != theme.platform) {
+      final ScrollbarPainter oldPainter = _painter;
+      // Dispose old painter to avoid leak but do it after letting CustomPaint
+      // swap to the new painter.
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        oldPainter.dispose();
+      });
       _painter = null;
     }
+    _currentPlatform = theme.platform;
 
-    if (theme.platform == TargetPlatform.iOS) {
+    if (_currentPlatform == TargetPlatform.iOS) {
       _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
     } else {
       _painter ??= Scrollbar.buildMaterialScrollbarPainter(this);
-      _painter.color = theme.highlightColor;
+      _painter.color = theme.highlightColor.withOpacity(1.0);
     }
 
     _painter.textDirection = Directionality.of(context);
@@ -81,8 +88,16 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
-        notification is OverscrollNotification)
+        notification is OverscrollNotification) {
       _painter.update(notification.metrics, notification.metrics.axisDirection);
+      if (_currentPlatform != TargetPlatform.iOS) {
+        _painter.scheduleFade();
+      }
+    } else if (_currentPlatform == TargetPlatform.iOS
+        && notification is ScrollEndNotification) {
+      // On iOS, the scrollbar can only go away once the user lifted the finger.
+      _painter.scheduleFade();
+    }
     return false;
   }
 

@@ -111,7 +111,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
 
-  void update(ScrollMetrics metrics, AxisDirection axisDirection) {
+  void update(
+    ScrollMetrics metrics,
+    AxisDirection axisDirection,
+  ) {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
     if (_fadeController.status == AnimationStatus.completed) {
@@ -120,6 +123,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       _fadeController.forward();
     }
     _fadeOut?.cancel();
+  }
+
+  void scheduleFade() {
     _fadeOut = new Timer(timeToFadeout, startFadeOut);
   }
 
@@ -128,7 +134,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _fadeController.reverse();
   }
 
-  Paint get _paint => new Paint()..color = color.withOpacity(_opacity.value);
+  Paint get _paint {
+    return new Paint()..color = color.withOpacity(color.opacity * _opacity.value);
+  }
 
   double _getThumbX(Size size) {
     assert(textDirection != null);

@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 // All values eyeballed.
-const Color _kScrollbarColor = const Color(0x99999999);
+const Color _kScrollbarColor = const Color(0x99777777);
 const double _kScrollbarThickness = 2.5;
 const double _kScrollbarMainAxisMargin = 4.0;
 const double _kScrollbarCrossAxisMargin = 2.5;
@@ -71,8 +71,12 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
-        notification is OverscrollNotification)
+        notification is OverscrollNotification) {
       _painter.update(notification.metrics, notification.metrics.axisDirection);
+    } else if (notification is ScrollEndNotification) {
+      // On iOS, the scrollbar can only go away once the user lifted the finger.
+      _painter.scheduleFade();
+    }
     return false;
   }
 
