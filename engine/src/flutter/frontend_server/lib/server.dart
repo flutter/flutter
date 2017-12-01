@@ -5,12 +5,18 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
-import 'package:front_end/compilation_message.dart';
 
-import 'package:front_end/byte_store.dart';
-import 'package:front_end/compiler_options.dart';
-import 'package:front_end/incremental_kernel_generator.dart';
-import 'package:front_end/kernel_generator.dart';
+// front_end/src imports below that require lint `ignore_for_file`
+// are a temporary state of things until frontend team builds better api
+// that would replace api used below. This api was made private in
+// an effort to discourage further use.
+// ignore_for_file: implementation_imports
+import 'package:front_end/src/api_prototype/compilation_message.dart';
+
+import 'package:front_end/src/api_prototype/byte_store.dart';
+import 'package:front_end/src/api_prototype/compiler_options.dart';
+import 'package:front_end/src/api_prototype/incremental_kernel_generator.dart';
+import 'package:front_end/src/api_prototype/kernel_generator.dart';
 import 'package:kernel/ast.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:kernel/binary/limited_ast_to_binary.dart';
