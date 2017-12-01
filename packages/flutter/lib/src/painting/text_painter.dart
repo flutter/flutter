@@ -285,6 +285,11 @@ class TextPainter {
     return new Size(width, height);
   }
 
+  // Workaround for https://github.com/flutter/flutter/issues/13303
+  double _workaroundBaselineBug(double value) {
+    return value >= 0.0 ? value : preferredLineHeight;
+  }
+
   /// Returns the distance from the top of the text to the first baseline of the
   /// given type.
   ///
@@ -294,9 +299,9 @@ class TextPainter {
     assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
-        return _paragraph.alphabeticBaseline;
+        return _workaroundBaselineBug(_paragraph.alphabeticBaseline);
       case TextBaseline.ideographic:
-        return _paragraph.ideographicBaseline;
+        return _workaroundBaselineBug(_paragraph.ideographicBaseline);
     }
     return null;
   }
