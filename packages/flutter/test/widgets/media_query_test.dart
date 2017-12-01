@@ -78,19 +78,8 @@ void main() {
     const Size size = const Size(2.0, 4.0);
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
-    const EdgeInsets padding = const EdgeInsets.only(
-      top: 1.0,
-      right: 2.0,
-      left: 3.0,
-      bottom: 4.0,
-    );
-    const EdgeInsets viewInsets = const EdgeInsets.only(
-      top: 5.0,
-      right: 6.0,
-      left: 7.0,
-      bottom: 8.0,
-    );
-    const bool alwaysUse24HourFormat = true;
+    const EdgeInsets padding = const EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
+    const EdgeInsets viewInsets = const EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
     MediaQueryData unpadded;
     await tester.pumpWidget(
@@ -101,7 +90,7 @@ void main() {
           textScaleFactor: textScaleFactor,
           padding: padding,
           viewInsets: viewInsets,
-          alwaysUse24HourFormat: alwaysUse24HourFormat,
+          alwaysUse24HourFormat: true,
         ),
         child: new Builder(
           builder: (BuildContext context) {
@@ -127,59 +116,6 @@ void main() {
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, EdgeInsets.zero);
     expect(unpadded.viewInsets, viewInsets);
-    expect(unpadded.alwaysUse24HourFormat, alwaysUse24HourFormat);
-  });
-
-  testWidgets('MediaQuery.removePadding removes specified padding', (WidgetTester tester) async {
-    const Size size = const Size(2.0, 4.0);
-    const double devicePixelRatio = 2.0;
-    const double textScaleFactor = 1.2;
-    const EdgeInsets padding = const EdgeInsets.only(
-      top: 1.0,
-      right: 2.0,
-      left: 3.0,
-      bottom: 4.0,
-    );
-    const EdgeInsets viewInsets = const EdgeInsets.only(
-      top: 5.0,
-      right: 6.0,
-      left: 7.0,
-      bottom: 8.0,
-    );
-
-    MediaQueryData unpadded;
-    await tester.pumpWidget(
-      new MediaQuery(
-        data: const MediaQueryData(
-          size: size,
-          devicePixelRatio: devicePixelRatio,
-          textScaleFactor: textScaleFactor,
-          padding: padding,
-          viewInsets: viewInsets,
-        ),
-        child: new Builder(
-          builder: (BuildContext context) {
-            return new MediaQuery.removePadding(
-              context: context,
-              removeTop: true,
-              removeRight: true,
-              removeLeft: true,
-              removeBottom: true,
-              child: new Builder(
-                builder: (BuildContext context) {
-                  unpadded = MediaQuery.of(context);
-                  return new Container();
-                }
-              ),
-            );
-          }),
-      )
-    );
-
-    expect(unpadded.size, size);
-    expect(unpadded.devicePixelRatio, devicePixelRatio);
-    expect(unpadded.textScaleFactor, textScaleFactor);
-    expect(unpadded.padding, EdgeInsets.zero);
-    expect(unpadded.viewInsets, viewInsets);
+    expect(unpadded.alwaysUse24HourFormat, true);
   });
 }
