@@ -602,92 +602,70 @@ class Tab2ConversationAvatar extends StatelessWidget {
   }
 }
 
+class Tab2ConversationRow extends StatelessWidget {
+  const Tab2ConversationRow({this.avatar, this.text});
+
+  final Tab2ConversationAvatar avatar;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> children = <Widget>[];
+    if (avatar != null)
+      children.add(avatar);
+
+    final bool isSelf = avatar == null;
+    children.add(
+      new Tab2ConversationBubble(
+        text: text,
+        color: isSelf
+          ? Tab2ConversationBubbleColor.blue
+          : Tab2ConversationBubbleColor.gray,
+      ),
+    );
+    return new Row(
+      mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
+      children: children,
+    );
+  }
+}
+
 List<Widget> buildTab2Conversation() {
  return <Widget>[
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget> [
-        const Tab2ConversationBubble(
-          text: "My Xanadu doesn't look right",
-          color: Tab2ConversationBubbleColor.blue
-        ),
-      ],
+    const Tab2ConversationRow(
+      text: "My Xanadu doesn't look right",
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget> [
-        const Tab2ConversationAvatar(
-          text: 'KL',
-          color: const Color(0xFFFD5015),
-        ),
-        const Tab2ConversationBubble(
-          text: "We'll rush you a new one.\nIt's gonna be incredible",
-          color: Tab2ConversationBubbleColor.gray,
-        ),
-      ],
+    const Tab2ConversationRow(
+      avatar: const Tab2ConversationAvatar(
+        text: 'KL',
+        color: const Color(0xFFFD5015),
+      ),
+      text: "We'll rush you a new one.\nIt's gonna be incredible",
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget> [
-        const Tab2ConversationBubble(
-          text: 'Awesome thanks!',
-          color: Tab2ConversationBubbleColor.blue,
-        ),
-      ],
+    const Tab2ConversationRow(
+      text: 'Awesome thanks!',
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget> [
-        const Tab2ConversationAvatar(
-          text: 'SJ',
-          color: const Color(0xFF34CAD6),
-        ),
-        const Tab2ConversationBubble(
-          text: "We'll send you our\nnewest Labrabor too!",
-          color: Tab2ConversationBubbleColor.gray,
-        ),
-      ],
+    const Tab2ConversationRow(
+      avatar: const Tab2ConversationAvatar(
+        text: 'SJ',
+        color: const Color(0xFF34CAD6),
+      ),
+      text: "We'll send you our\nnewest Labrabor too!",
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget> [
-        const Tab2ConversationBubble(
-          text: 'Yay',
-          color: Tab2ConversationBubbleColor.blue,
-        ),
-      ],
+    const Tab2ConversationRow(
+      text: 'Yay',
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: <Widget> [
-        const Tab2ConversationAvatar(
-          text: 'KL',
-          color: const Color(0xFFFD5015),
-        ),
-        const Tab2ConversationBubble(
-          text: "Actually there's one more thing...",
-          color: Tab2ConversationBubbleColor.gray,
-        ),
-      ],
+    const Tab2ConversationRow(
+      avatar: const Tab2ConversationAvatar(
+        text: 'KL',
+        color: const Color(0xFFFD5015),
+      ),
+      text: "Actually there's one more thing...",
     ),
-    new Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget> [
-        const Tab2ConversationBubble(
-          text: "What's that?",
-          color: Tab2ConversationBubbleColor.blue,
-        ),
-      ],
+    const Tab2ConversationRow(
+      text: "What's that?",
     ),
   ];
 }
