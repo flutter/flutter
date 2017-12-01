@@ -158,12 +158,7 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      viewInsets: viewInsets.copyWith(
-        left: removeLeft ? 0.0 : null,
-        top: removeTop ? 0.0 : null,
-        right: removeRight ? 0.0 : null,
-        bottom: removeBottom ? 0.0 : null,
-      ),
+      viewInsets: viewInsets,
     );
   }
 
