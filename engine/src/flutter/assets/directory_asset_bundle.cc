@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 #include "flutter/assets/directory_asset_bundle.h"
+#include "lib/fxl/build_config.h"
 
 #include <fcntl.h>
+
+#if !defined(OS_WIN)
 #include <unistd.h>
+#endif
 
 #include <utility>
 

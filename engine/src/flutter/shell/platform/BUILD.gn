@@ -17,7 +17,9 @@ group("platform") {
       "embedder",
     ]
   } else if (is_win) {
-    print("Shell currently not supported on Windows.")
+    deps = [
+      "win"
+    ]
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }
