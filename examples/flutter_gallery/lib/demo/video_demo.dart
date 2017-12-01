@@ -56,35 +56,39 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget fullScreenRoutePageBuilder(BuildContext context,
+        Animation<double> animation, Animation<double> secondaryAnimation) {
+      return new AnimatedBuilder(
+        child: _buildFullScreenVideo(),
+        animation: animation,
+        builder: (BuildContext context, Widget child) {
+          // TODO(sigurdm): It seems we get a animation.value of 1.0
+          // at first when entering the route. Find out how to avoid
+          // this.
+          controller.setVolume(animation.value);
+          return child;
+        },
+      );
+    }
+
+    void pushFullScreenWidget() {
+      final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
+        settings: new RouteSettings(name: title, isInitialRoute: false),
+        pageBuilder: fullScreenRoutePageBuilder,
+      );
+
+      route.completed.then((Null _) {
+        controller.setVolume(0.0);
+      });
+      Navigator.of(context).push(route);
+    }
+
     return new Card(
       child: new Column(
         children: <Widget>[
           new ListTile(title: new Text(title), subtitle: new Text(subtitle)),
           new GestureDetector(
-            onTap: () {
-              final TransitionRoute<Null> route = new PageRouteBuilder<Null>(
-                settings: new RouteSettings(name: title, isInitialRoute: false),
-                pageBuilder: (BuildContext context, Animation<double> animation,
-                    Animation<double> secondaryAnimation) {
-                  return new AnimatedBuilder(
-                    child: _buildFullScreenVideo(),
-                    animation: animation,
-                    builder: (BuildContext context, Widget child) {
-                      // TODO(sigurdm): It seems we get a animation.value of 1.0
-                      // at first when entering the route. Find out how to avoid
-                      // this.
-                      controller.setVolume(animation.value);
-                      return child;
-                    },
-                  );
-                },
-              );
-
-              route.completed.then((Null _) {
-                controller.setVolume(0.0);
-              });
-              Navigator.of(context).push(route);
-            },
+            onTap: pushFullScreenWidget,
             child: _buildInlineVideo(),
           ),
         ],
@@ -142,7 +146,8 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
             controller.pause();
           } else {
             imageFadeAnimation = new FadeAnimation(
-                child: new Icon(Icons.play_arrow, size: 100.0));
+              child: new Icon(Icons.play_arrow, size: 100.0),
+            );
             controller.play();
           }
         },
@@ -166,8 +171,10 @@ class FadeAnimation extends StatefulWidget {
   final Widget child;
   final Duration duration;
 
-  const FadeAnimation(
-      {this.child, this.duration: const Duration(milliseconds: 500)});
+  const FadeAnimation({
+    this.child,
+    this.duration: const Duration(milliseconds: 500),
+  });
 
   @override
   _FadeAnimationState createState() => new _FadeAnimationState();
@@ -180,8 +187,10 @@ class _FadeAnimationState extends State<FadeAnimation>
   @override
   void initState() {
     super.initState();
-    animationController =
-        new AnimationController(duration: widget.duration, vsync: this);
+    animationController = new AnimationController(
+      duration: widget.duration,
+      vsync: this,
+    );
     animationController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -243,7 +252,8 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     content: const ListTile(
       title: const Text('No network'),
       subtitle: const Text(
-          'To load the videos you must have an active network connection'),
+        'To load the videos you must have an active network connection',
+      ),
     ),
   );
 
@@ -263,20 +273,20 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   @override
   void initState() {
     super.initState();
-    connectivitySubscription =
-        connectivityStream().listen((ConnectivityResult connectivityResult) {
-      print(connectivityResult);
-      if (!mounted) {
-        return;
-      }
-      if (connectivityResult == ConnectivityResult.none) {
-        widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
-      } else {
-        if (!widget.connectedCompleter.isCompleted) {
-          widget.connectedCompleter.complete(null);
+    connectivitySubscription = connectivityStream().listen(
+      (ConnectivityResult connectivityResult) {
+        if (!mounted) {
+          return;
         }
-      }
-    });
+        if (connectivityResult == ConnectivityResult.none) {
+          widget.scaffoldKey.currentState.showSnackBar(errorSnackBar);
+        } else {
+          if (!widget.connectedCompleter.isCompleted) {
+            widget.connectedCompleter.complete(null);
+          }
+        }
+      },
+    );
   }
 
   @override
@@ -300,9 +310,12 @@ class VideoDemo extends StatefulWidget {
 
 class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
-  final VideoPlayerController butterflyController =
-      new VideoPlayerController(butterflyUri);
-  final VideoPlayerController beeController = new VideoPlayerController(beeUri);
+  final VideoPlayerController butterflyController = new VideoPlayerController(
+    butterflyUri,
+  );
+  final VideoPlayerController beeController = new VideoPlayerController(
+    beeUri,
+  );
 
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   final Completer<Null> connectedCompleter = new Completer<Null>();
