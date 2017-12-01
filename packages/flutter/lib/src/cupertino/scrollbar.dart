@@ -8,9 +8,11 @@ import 'package:flutter/widgets.dart';
 // All values eyeballed.
 const Color _kScrollbarColor = const Color(0x99999999);
 const double _kScrollbarThickness = 2.5;
-const double _kScrollbarDistanceFromEdge = 2.5;
+const double _kScrollbarMainAxisMargin = 4.0;
+const double _kScrollbarCrossAxisMargin = 2.5;
+const double _kScrollbarMinLength = 4.0;
 const Radius _kScrollbarRadius = const Radius.circular(1.25);
-const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 20);
+const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 50);
 
 /// A iOS style scrollbar.
 ///
@@ -42,17 +44,19 @@ class CupertinoScrollbar extends StatefulWidget {
 
   @override
   _CupertinoScrollbarState createState() => new _CupertinoScrollbarState();
-}
 
-ScrollbarPainter buildScrollbarPainter(TickerProvider vsync) {
-  return new ScrollbarPainter(
-    vsync: vsync,
-    thickness: _kScrollbarThickness,
-    distanceFromEdge: _kScrollbarDistanceFromEdge,
-    radius: _kScrollbarRadius,
-    timeToFadeout: _kScrollbarTimeToFade,
-  )
-      ..color = _kScrollbarColor;
+  static ScrollbarPainter buildCupertinoScrollbarPainter(TickerProvider vsync) {
+    return new ScrollbarPainter(
+      vsync: vsync,
+      thickness: _kScrollbarThickness,
+      mainAxisMargin: _kScrollbarMainAxisMargin,
+      crossAxisMargin: _kScrollbarCrossAxisMargin,
+      radius: _kScrollbarRadius,
+      minLength: _kScrollbarMinLength,
+      timeToFadeout: _kScrollbarTimeToFade,
+    )
+        ..color = _kScrollbarColor;
+  }
 }
 
 class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
@@ -61,7 +65,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _painter ??= buildScrollbarPainter(this);
+    _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
     _painter.textDirection = Directionality.of(context);
   }
 

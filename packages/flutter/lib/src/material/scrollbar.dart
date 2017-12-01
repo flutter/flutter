@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -14,6 +15,9 @@ const double _kScrollbarThickness = 6.0;
 ///
 /// A scrollbar indicates which portion of a [Scrollable] widget is actually
 /// visible.
+///
+/// Dynamically changes to a iOS style scrollbar that looks like
+/// [CupertinoScrollbar] on iOS platform.
 ///
 /// To add a scrollbar to a [ScrollView], simply wrap the scroll view widget in
 /// a [Scrollbar] widget.
@@ -40,22 +44,39 @@ class Scrollbar extends StatefulWidget {
 
   @override
   _ScrollbarState createState() => new _ScrollbarState();
+
+  static ScrollbarPainter buildMaterialScrollbarPainter(TickerProvider vsync) {
+    return new ScrollbarPainter(
+        vsync: vsync,
+        thickness: _kScrollbarThickness,
+        crossAxisMargin: 0.0,
+      );
+  }
 }
+
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _painter;
+  TargetPlatform _lastPlatform;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _painter ??= new ScrollbarPainter(
-      vsync: this,
-      thickness: _kScrollbarThickness,
-      distanceFromEdge: 0.0,
-    );
-    _painter
-      ..color = Theme.of(context).highlightColor
-      ..textDirection = Directionality.of(context);
+
+    final ThemeData theme = Theme.of(context);
+    if (_lastPlatform != null && _lastPlatform != theme.platform) {
+      _painter.dispose();
+      _painter = null;
+    }
+
+    if (theme.platform == TargetPlatform.iOS) {
+      _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
+    } else {
+      _painter ??= Scrollbar.buildMaterialScrollbarPainter(this);
+      _painter.color = theme.highlightColor;
+    }
+
+    _painter.textDirection = Directionality.of(context);
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {

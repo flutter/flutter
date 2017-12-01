@@ -28,17 +28,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollbarPainter({
     @required TickerProvider vsync,
     @required this.thickness,
-    @required this.distanceFromEdge,
+    @required this.crossAxisMargin,
+    this.mainAxisMargin: 0.0,
     this.radius,
+    this.minLength: _kMinThumbExtent,
     this.timeToFadeout: _kDefaultTimeToFade,
     this.fadeoutDuration: _kDefaultThumbFadeDuration,
-  }) : assert(vsync != null) {
+  })
+      : assert(vsync != null),
+        assert(thickness != null),
+        assert(mainAxisMargin != null),
+        assert(minLength != null),
+        assert(timeToFadeout != null),
+        assert(fadeoutDuration != null) {
     _fadeController = new AnimationController(duration: fadeoutDuration, vsync: vsync);
     _opacity = new CurvedAnimation(parent: _fadeController, curve: Curves.fastOutSlowIn)
       ..addListener(notifyListeners);
   }
 
-  /// Thickness of the scrollbar in its cross-axis in pixels.
+  /// Thickness of the scrollbar in its cross-axis in pixels. Mustn't be null.
   double thickness;
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
@@ -46,20 +54,31 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Scrollbar will be rectangular if [radius] is null.
   Radius radius;
 
-  /// Distance from the scrollbar's nearest edge in pixels.
-  double distanceFromEdge;
+  /// Distance from the scrollbar's side to the nearest edge in pixels. Musn't
+  /// be null.
+  double crossAxisMargin;
 
-  /// Duration the scrollbar is immobile before starting to fade out.
+  /// Distance from the scrollbar's start and end to the edge of the viewport in
+  /// pixels. Mustn't be null.
+  double mainAxisMargin;
+
+  /// The smallest size the scrollbar can shrink to when the total scrollable
+  /// extent is large and the current visible viewport is small. Mustn't be
+  /// null.
+  double minLength;
+
+  /// Duration the scrollbar is immobile before starting to fade out. Mustn't be
+  /// null.
   Duration timeToFadeout;
 
-  /// Duration of the fade out animation once started.
+  /// Duration of the fade out animation once started. Mustn't be null.
   Duration fadeoutDuration;
 
-  // animation of the main axis direction
+  // Animation of the main axis direction.
   AnimationController _fadeController;
   Animation<double> _opacity;
 
-  // fade-out timer
+  // Fade-out timer.
   Timer _fadeOut;
 
   Color get color => _color;
@@ -115,9 +134,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     assert(textDirection != null);
     switch (textDirection) {
       case TextDirection.rtl:
-        return distanceFromEdge;
+        return crossAxisMargin;
       case TextDirection.ltr:
-        return size.width - thickness - distanceFromEdge;
+        return size.width - thickness - crossAxisMargin;
     }
     return null;
   }
@@ -142,14 +161,29 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       canvas.drawRRect(new RRect.fromRectAndRadius(thumbRect, radius), _paint);
   }
 
-  void _paintThumb(double before, double inside, double after, double viewport, Canvas canvas, Size size,
-                   void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent)) {
-    double thumbExtent = math.min(viewport, _kMinThumbExtent);
-    if (before + inside + after > 0.0)
-      thumbExtent = math.max(thumbExtent, viewport * inside / (before + inside + after));
+  void _paintThumb(
+    double before,
+    double inside,
+    double after,
+    double viewport,
+    Canvas canvas,
+    Size size,
+    void painter(Canvas canvas, Size size, double thumbOffset, double thumbExtent),
+  ) {
+    // Establish the minimum size possible.
+    double thumbExtent = math.min(viewport, minLength);
+    if (before + inside + after > 0.0) {
+      final double fractionVisible = inside / (before + inside + after);
+      thumbExtent = math.max(
+        thumbExtent,
+        viewport * fractionVisible - 2 * mainAxisMargin,
+      );
+    }
 
-    final double thumbOffset = (before + after > 0.0) ?
-        before * (viewport - thumbExtent) / (before + after) : 0.0;
+    final double fractionPast = before / (before + after);
+    final double thumbOffset = (before + after > 0.0)
+        ? fractionPast * (viewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin
+        : mainAxisMargin;
 
     painter(canvas, size, thumbOffset, thumbExtent);
   }
