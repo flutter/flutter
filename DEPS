@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'edf890f30cb465f508933d065a60147f1cd3e038',
+  'dart_revision': '48a927acb2dc4178691b4ddfa817e87043e30b01',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.0',

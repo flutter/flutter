@@ -5,7 +5,12 @@ import 'dart:isolate';
 
 import 'package:args/src/arg_results.dart';
 import 'package:frontend_server/server.dart';
-import 'package:front_end/incremental_kernel_generator.dart';
+// front_end/src imports below that require lint `ignore_for_file`
+// are a temporary state of things until frontend team builds better api
+// that would replace api used below. This api was made private in
+// an effort to discourage further use.
+// ignore_for_file: implementation_imports
+import 'package:front_end/src/api_prototype/incremental_kernel_generator.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
