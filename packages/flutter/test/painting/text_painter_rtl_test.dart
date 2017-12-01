@@ -658,6 +658,21 @@ void main() {
       skip: skipExpectsWithKnownBugs,
     );
   }, skip: skipTestsWithKnownBugs);
+
+  test('TextPainter - empty text baseline', () {
+    final TextPainter painter = new TextPainter()
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(
+      text: '',
+      style: const TextStyle(fontFamily: 'Ahem', fontSize: 100.0, height: 1.0),
+    );
+    painter.layout();
+    expect(
+      // Returns -1
+      painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 80.0,
+      skip: skipExpectsWithKnownBugs,
+    );
+  }, skip: skipTestsWithKnownBugs);
 }
 
 
