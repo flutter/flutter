@@ -35,7 +35,7 @@ void main() {
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
       );
-      expect(processMock.lastPubEnvironmment, 'flutter_cli:ctx_flutter_tests');
+      expect(processMock.lastPubEnvironmment, contains('flutter_cli:ctx_flutter_tests'));
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'
