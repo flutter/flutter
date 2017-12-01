@@ -244,9 +244,8 @@ abstract class CachedArtifact {
     if (location.existsSync())
       location.deleteSync(recursive: true);
     location.createSync(recursive: true);
-    return updateInner().then<Null>((_) {
-      cache.setStampFor(name, version);
-    });
+    await updateInner();
+    cache.setStampFor(name, version);
   }
 
   /// Hook method for extra checks for being up-to-date.
@@ -410,14 +409,14 @@ class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
   @override
-  Future<Null> updateInner() async {
+  Future<Null> updateInner() {
     final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
 
-    final String url = 'https://android.googlesource.com'
-        '/platform/tools/base/+archive/$version/templates/gradle/wrapper.tgz';
-    await _downloadZippedTarball(Uri.parse(url), location).then<Null>((_) {
+    return _downloadZippedTarball(Uri.parse(version), location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
+      // Remove NOTICE file. Should not be part of the template.
+      fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
       status.stop();
     }).whenComplete(status.cancel);
   }
