@@ -117,6 +117,7 @@ class MediaQueryData {
     double textScaleFactor,
     EdgeInsets padding,
     EdgeInsets viewInsets,
+    bool alwaysUse24HourFormat,
   }) {
     return new MediaQueryData(
       size: size ?? this.size,
@@ -124,6 +125,7 @@ class MediaQueryData {
       textScaleFactor: textScaleFactor ?? this.textScaleFactor,
       padding: padding ?? this.padding,
       viewInsets: viewInsets ?? this.viewInsets,
+      alwaysUse24HourFormat: alwaysUse24HourFormat ?? this.alwaysUse24HourFormat,
     );
   }
 
@@ -159,6 +161,7 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       viewInsets: viewInsets,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
     );
   }
 
@@ -171,16 +174,18 @@ class MediaQueryData {
         && typedOther.devicePixelRatio == devicePixelRatio
         && typedOther.textScaleFactor == textScaleFactor
         && typedOther.padding == padding
-        && typedOther.viewInsets == viewInsets;
+        && typedOther.viewInsets == viewInsets
+        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat;
   }
 
   @override
-  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets);
+  int get hashCode => hashValues(size, devicePixelRatio, textScaleFactor, padding, viewInsets, alwaysUse24HourFormat);
 
   @override
   String toString() {
     return '$runtimeType(size: $size, devicePixelRatio: $devicePixelRatio, '
-           'textScaleFactor: $textScaleFactor, padding: $padding, viewInsets: $viewInsets)';
+           'textScaleFactor: $textScaleFactor, padding: $padding, '
+           'viewInsets: $viewInsets, alwaysUse24HourFormat: $alwaysUse24HourFormat)';
   }
 }
 
