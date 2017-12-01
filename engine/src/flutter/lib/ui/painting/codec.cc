@@ -53,13 +53,17 @@ sk_sp<SkImage> DecodeImage(sk_sp<SkData> buffer, size_t trace_id) {
     return nullptr;
   }
 
-  GrContext* context = ResourceContext::Get();
+  std::unique_ptr<ResourceContext> resourceContext = ResourceContext::Acquire();
+  GrContext* context = resourceContext->Get();
   if (context) {
     // This indicates that we do not want a "linear blending" decode.
     sk_sp<SkColorSpace> dstColorSpace = nullptr;
     return SkImage::MakeCrossContextFromEncoded(context, std::move(buffer),
                                                 false, dstColorSpace.get());
   } else {
+    // Defer decoding until time of draw later on the GPU thread. Can happen
+    // when GL operations are currently forbidden such as in the background
+    // on iOS.
     return SkImage::MakeFromEncoded(std::move(buffer));
   }
 }
@@ -241,7 +245,8 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage() {
     }
   }
 
-  GrContext* context = ResourceContext::Get();
+  std::unique_ptr<ResourceContext> resourceContext = ResourceContext::Acquire();
+  GrContext* context = resourceContext->Get();
   if (context) {
     SkPixmap pixmap(bitmap.info(), bitmap.pixelRef()->pixels(),
                     bitmap.pixelRef()->rowBytes());
@@ -250,6 +255,9 @@ sk_sp<SkImage> MultiFrameCodec::GetNextFrameImage() {
     return SkImage::MakeCrossContextFromPixmap(context, pixmap, false,
                                                dstColorSpace.get());
   } else {
+    // Defer decoding until time of draw later on the GPU thread. Can happen
+    // when GL operations are currently forbidden such as in the background
+    // on iOS.
     return SkImage::MakeFromBitmap(bitmap);
   }
 }
