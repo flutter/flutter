@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:mockito/mockito.dart';
@@ -18,8 +19,12 @@ import '../src/context.dart';
 void main() {
   testUsingContext('pub get 69', () async {
     String error;
+
+    final MockProcessManager processMock = context.getVariable(ProcessManager);
+
     new FakeAsync().run((FakeAsync time) {
-      pubGet(checkLastModified: false).then((Null value) {
+      expect(processMock.lastPubEnvironmment, isNull);
+      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic error) {
         error = 'test failed unexpectedly';
@@ -30,6 +35,7 @@ void main() {
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
       );
+      expect(processMock.lastPubEnvironmment, contains('flutter_cli:ctx_flutter_tests'));
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'
@@ -83,6 +89,8 @@ class MockProcessManager implements ProcessManager {
 
   final int fakeExitCode;
 
+  String lastPubEnvironmment;
+
   @override
   Future<Process> start(
     List<dynamic> command, {
@@ -92,6 +100,7 @@ class MockProcessManager implements ProcessManager {
     bool runInShell: false,
     ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) {
+    lastPubEnvironmment = environment['PUB_ENVIRONMENT'];
     return new Future<Process>.value(new MockProcess(fakeExitCode));
   }
 

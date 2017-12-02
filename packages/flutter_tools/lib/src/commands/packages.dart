@@ -69,7 +69,7 @@ class PackagesGetCommand extends FlutterCommand {
       );
     }
 
-    await pubGet(
+    await pubGet(context: 'get',
       directory: target,
       upgrade: upgrade,
       offline: argResults['offline'],
@@ -102,7 +102,7 @@ class PackagesTestCommand extends FlutterCommand {
   }
 
   @override
-  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), retry: false);
+  Future<Null> runCommand() => pub(<String>['run', 'test']..addAll(argResults.rest), context: 'run_test', retry: false);
 }
 
 class PackagesPassthroughCommand extends FlutterCommand {
