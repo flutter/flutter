@@ -127,7 +127,9 @@ the "Other" suffix. For example the English translations
 
 If you look at the comment at the top of `localizations.dart` you'll
 see that it was manually generated using a `dev/tools` app called
-`gen_localizations` roughly like this:
+`gen_localizations`.
+
+You can see what that script would generate by running this command:
 
 ```dart
 dart dev/tools/gen_localizations.dart packages/flutter_localizations/lib/src/l10n material
@@ -144,14 +146,20 @@ been updated. The app's first parameter is the path to this directory,
 the second is the file name prefix (the file name less the locale
 suffix) for the .arb files in this directory.
 
+To in-place update the `localizations.dart` file using the default
+values, you can just run:
+
+```dart
+dart dev/tools/gen_localizations.dart --overwrite
+```
+
 
 ### Translations Status, Reporting Errors
 
-The transltations (the `.arb` files) in this directory are based on
-the english translations in `material_en.arb`. As noted earlier,
-material_en.arb, contains a small amount of descriptive information
-for each resource ID, under the companion resources whose IDs begin
-with '@'.
+The translations (the `.arb` files) in this directory are based on the
+English translations in `material_en.arb`. Google contributes
+translations for all the languages supported by this package.
+(Googlers, for more details see <go/flutter-l10n>.)
 
 Not all of the translations represented here have been vetted by
 native speakers. The following translations have been reviewed by

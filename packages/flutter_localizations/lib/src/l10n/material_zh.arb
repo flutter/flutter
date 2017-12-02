@@ -23,6 +23,7 @@
   "selectAllButtonLabel": "全选",
   "viewLicensesButtonLabel": "查看许可",
   "closeButtonTooltip": "关闭",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "下个月",
   "previousMonthTooltip": "上个月",
   "anteMeridiemAbbreviation": "上午",
