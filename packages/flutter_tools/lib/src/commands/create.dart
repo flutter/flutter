@@ -162,7 +162,7 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('package', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(directory: dirPath);
+        await pubGet(context: 'create_pkg', directory: dirPath);
 
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
@@ -180,7 +180,7 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(directory: dirPath);
+        await pubGet(context: 'create_plugin', directory: dirPath);
 
       if (android_sdk.androidSdk != null)
         gradle.updateLocalProperties(projectPath: dirPath);
@@ -218,7 +218,7 @@ class CreateCommand extends FlutterCommand {
     );
 
     if (argResults['pub']) {
-      await pubGet(directory: appPath);
+      await pubGet(context: 'create', directory: appPath);
       injectPlugins(directory: appPath);
     }
 
