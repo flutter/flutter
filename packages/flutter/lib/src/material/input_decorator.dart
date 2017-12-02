@@ -638,9 +638,12 @@ class _RenderDecoration extends RenderBox {
     return 0.0;
   }
 
+  // Records where the label was painted.
+  Matrix4 _labelTransform;
+
   @override
   void performLayout() {
-    _paintTransform = null;
+    _labelTransform = null;
     final _RenderDecorationLayout layout = _layout(constraints);
 
     // TBD: if maxWidth is unconstrained then use intrinsicWidth
@@ -736,8 +739,6 @@ class _RenderDecoration extends RenderBox {
     context.paintChild(label, offset);
   }
 
-  Matrix4 _paintTransform;
-
   @override
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
@@ -751,10 +752,10 @@ class _RenderDecoration extends RenderBox {
       final double scale = lerpDouble(1.0, 0.75, t);
       final double floatingY = contentPadding.top;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
-      _paintTransform = new Matrix4.identity()
+      _labelTransform = new Matrix4.identity()
         ..translate(labelOffset.dx, labelOffset.dy + dy)
         ..scale(scale);
-      context.pushTransform(needsCompositing, offset, _paintTransform, _paintLabel);
+      context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
     doPaint(prefix);
     doPaint(suffix);
@@ -782,10 +783,10 @@ class _RenderDecoration extends RenderBox {
 
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
-    if (child == label && _paintTransform != null) {
+    if (child == label && _labelTransform != null) {
       final Offset labelOffset = _boxParentData(label).offset;
       transform
-        ..multiply(_paintTransform)
+        ..multiply(_labelTransform)
         ..translate(-labelOffset.dx, -labelOffset.dy);
     }
     super.applyPaintTransform(child, transform);
@@ -1165,17 +1166,18 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
       ),
     );
 
-    final Widget container = decoration.isCollapsed ? null : new AnimatedContainer(
+    final Widget container = new AnimatedContainer(
       duration: _kTransitionDuration,
       curve: _kTransitionCurve,
       decoration: new BoxDecoration(
         color: _getFillColor(themeData),
-        border: new Border(
-          bottom: new BorderSide(
-            color: _getDividerColor(themeData),
-            width: _dividerWeight,
+        border: (decoration.hideDivider || decoration.isCollapsed) ? null :
+          new Border(
+            bottom: new BorderSide(
+              color: _getDividerColor(themeData),
+              width: _dividerWeight,
+            ),
           ),
-        ),
       ),
     );
 

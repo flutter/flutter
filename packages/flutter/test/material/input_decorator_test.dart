@@ -52,8 +52,8 @@ double getDividerWeight(WidgetTester tester) {
     return 0.0;
   final AnimatedContainer input = tester.widget<AnimatedContainer>(inputContainer);
   final BoxDecoration decoration = input.decoration;
-  final EdgeInsets insets = decoration.border.dimensions;
-  return insets.bottom;
+  final EdgeInsets insets = decoration.border?.dimensions;
+  return insets?.bottom ?? 0.0;
 }
 
 double getHintOpacity(WidgetTester tester) {
