@@ -11,7 +11,6 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
-import 'page_scaffold.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
@@ -69,7 +68,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
+class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
@@ -117,12 +116,11 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
   final Color actionsForegroundColor;
 
   /// True if the navigation bar's background color has no transparency.
-  @override
-  bool get fullObstruction => backgroundColor.alpha == 0xFF;
+  bool get opaque => backgroundColor.alpha == 0xFF;
 
   @override
   Size get preferredSize {
-    return const Size.fromHeight(_kNavBarPersistentHeight);
+    return opaque ? const Size.fromHeight(_kNavBarPersistentHeight) : Size.zero;
   }
 
   @override
