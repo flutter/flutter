@@ -13,6 +13,17 @@ import 'box.dart';
 import 'object.dart';
 import 'proxy_box.dart';
 
+/// Signature of the function returned by [CustomPainter.semanticsBuilder].
+///
+/// Builds semantics information describing the picture drawn by a
+/// [CustomPainter]. Each [CustomPainterSemantics] in the returned list is
+/// converted into a [SemanticsNode] by copying its properties.
+///
+/// The returned list must not be mutated after this function completes. To
+/// change the semantic information, the function must return a new list
+/// instead.
+typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
+
 /// The interface used by [CustomPaint] (in the widgets library) and
 /// [RenderCustomPaint] (in the rendering library).
 ///
@@ -134,9 +145,41 @@ abstract class CustomPainter extends Listenable {
   ///    obtain the correct rendering size.
   void paint(Canvas canvas, Size size);
 
-  List<CustomPainterSemantics> buildSemantics(Size size) {
-    return const <CustomPainterSemantics>[];
-  }
+  /// Returns a function that builds semantic information for the picture drawn
+  /// by this painter.
+  ///
+  /// If the returned function is null, this painter will not contribute new
+  /// [SemanticsNode]s to the semantics tree and the [CustomPaint] corresponding
+  /// to this painter will not create a semantics boundary.
+  ///
+  /// See also:
+  ///
+  /// * [SemanticsConfiguration.isSemanticBoundary], which causes new
+  ///   [SemanticsNode]s to be added to the semantics tree.
+  /// * [RenderCustomPaint], which uses this getter to build semantics.
+  SemanticsBuilderCallback get semanticsBuilder => null;
+
+  /// Called whenever a new instance of the custom painter delegate class is
+  /// provided to the [RenderCustomPaint] object, or any time that a new
+  /// [CustomPaint] object is created with a new instance of the custom painter
+  /// delegate class (which amounts to the same thing, because the latter is
+  /// implemented in terms of the former).
+  ///
+  /// If the new instance would cause [semanticsBuilder] to create different
+  /// semantics information, then this method should return true, otherwise it
+  /// should return false.
+  ///
+  /// If the method returns false, then the [semanticsBuilder] call might be
+  /// optimized away.
+  ///
+  /// It's possible that the [semanticsBuilder] will get called even if
+  /// [shouldRebuildSemantics] would return false. For example, it is called
+  /// when the [CustomPaint] is rendered for the very first time, or when the
+  /// box changes its size.
+  ///
+  /// By default this method delegates to [shouldRepaint] under the assumption
+  /// that in most cases semantics change when something new is drawn.
+  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => shouldRepaint(oldDelegate);
 
   /// Called whenever a new instance of the custom painter delegate class is
   /// provided to the [RenderCustomPaint] object, or any time that a new
@@ -182,20 +225,72 @@ abstract class CustomPainter extends Listenable {
   String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
 }
 
+/// Contains properties describing information drawn in a rectangle contained by
+/// the [Canvas] used by a [CustomPaint].
+///
+/// This information is used, for example, by assistive technologies to improve
+/// the accessibility of applications.
+///
+/// Implement [SemanticsPainter.semanticsBuilder] to build the semantic
+/// description of the whole picture drawn by a [CustomPaint], rather that one
+/// particular rectangle.
+///
+/// See also:
+///
+/// * [SemanticsNode], which is created using the properties of this class.
+/// * [SemanticsPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
+
+  /// Creates semantics information describing a rectangle on a canvas.
+  ///
+  /// Arguments `rect` and `properties` must not be null.
   const CustomPainterSemantics({
     this.key,
     @required this.rect,
     @required this.properties,
     this.transform,
     this.tags,
-  });
+  }) : assert(rect != null),
+       assert(properties != null);
 
+  /// Identifies this object in a list of siblings.
+  ///
+  /// [SemanticsNode] inherits this key, so that when the list of nodes is
+  /// updated, its nodes are updated from [CustomPainterSemantics] with matching
+  /// keys.
+  ///
+  /// If this is null, the update algorithm does not guarantee which
+  /// [SemanticsNode] will be updated using this instance.
+  ///
+  /// This value is assigned to [SemanticsNode.key] during update.
   final Key key;
+
+  /// The location and size of the box on the canvas where this piece of semantic
+  /// information applies.
+  ///
+  /// This value is assigned to [SemanticsNode.rect] during update.
   final Rect rect;
+
+  /// The transform from the canvas' coordinate system to its parent's
+  /// coordinate system.
+  ///
+  /// This value is assigned to [SemanticsNode.transform] during update.
   final Matrix4 transform;
+
+  /// Contains properties that are assigned to the [SemanticsNode] created or
+  /// updated from this object.
+  ///
+  /// See also:
+  ///
+  /// * [Semantics], which is a widget that also uses [SemanticsProperties] to
+  ///   annotate.
   final SemanticsProperties properties;
+
+  /// Tags used by the parent [SemanticsNode] to determine the layout of the
+  /// semantics tree.
+  ///
+  /// This value is assigned to [SemanticsNode.tags] during update.
   final Set<SemanticsTag> tags;
 }
 
@@ -262,6 +357,7 @@ class RenderCustomPaint extends RenderProxyBox {
     final CustomPainter oldPainter = _painter;
     _painter = value;
     _didUpdatePainter(_painter, oldPainter);
+    markNeedsSemanticsUpdate();
   }
 
   /// The foreground custom paint delegate.
@@ -363,6 +459,7 @@ class RenderCustomPaint extends RenderProxyBox {
   @override
   void performResize() {
     size = constraints.constrain(preferredSize);
+    markNeedsSemanticsUpdate();
   }
 
   void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
@@ -426,17 +523,25 @@ class RenderCustomPaint extends RenderProxyBox {
       context.setWillChangeHint();
   }
 
+  /// Builds semantics for the picture drawn by [painter].
+  SemanticsBuilderCallback _backgroundSemanticsBuilder;
+
+  /// Builds semantics for the picture drawn by [foregroundPainter].
+  SemanticsBuilderCallback _foregroundSemanticsBuilder;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
+    _backgroundSemanticsBuilder = painter?.semanticsBuilder;
+    _foregroundSemanticsBuilder = foregroundPainter?.semanticsBuilder;
+    config.isSemanticBoundary = _backgroundSemanticsBuilder != null || _foregroundSemanticsBuilder != null;
   }
 
   /// Describe the semantics of the picture painted by the [painter].
-  List<SemanticsNode> _backgroundSemantics;
+  List<SemanticsNode> _backgroundSemanticsNodes;
 
   /// Describe the semantics of the picture painted by the [foregroundPainter].
-  List<SemanticsNode> _foregroundSemantics;
+  List<SemanticsNode> _foregroundSemanticsNodes;
 
   @override
   void assembleSemanticsNode(
@@ -444,35 +549,57 @@ class RenderCustomPaint extends RenderProxyBox {
     SemanticsConfiguration config,
     Iterable<SemanticsNode> children,
   ) {
-    assert(children.isEmpty);
+    assert(() {
+      if (child == null && children.isNotEmpty) {
+        throw new FlutterError(
+          '$runtimeType does not have a child widget but received a non-empty list of child SemanticsNode:\n'
+          '${children.join('\n')}'
+        );
+      }
+      return true;
+    }());
 
-    final List<CustomPainterSemantics> backgroundSemantics = painter?.buildSemantics(size);
-    _backgroundSemantics = _updateSemanticsChildren(_backgroundSemantics, backgroundSemantics);
+    final List<CustomPainterSemantics> backgroundSemantics = _backgroundSemanticsBuilder != null
+      ? _backgroundSemanticsBuilder(size)
+      : const <CustomPainterSemantics>[];
+    _backgroundSemanticsNodes = _updateSemanticsChildren(_backgroundSemanticsNodes, backgroundSemantics);
 
-    final List<CustomPainterSemantics> foregroundSemantics = foregroundPainter?.buildSemantics(size);
-    _foregroundSemantics = _updateSemanticsChildren(_foregroundSemantics, foregroundSemantics);
+    final List<CustomPainterSemantics> foregroundSemantics = _foregroundSemanticsBuilder != null
+      ? _foregroundSemanticsBuilder(size)
+      : const <CustomPainterSemantics>[];
+    _foregroundSemanticsNodes = _updateSemanticsChildren(_foregroundSemanticsNodes, foregroundSemantics);
 
-    final bool hasBackgroundSemantics = _backgroundSemantics != null && _backgroundSemantics.isNotEmpty;
-    final bool hasForegroundSemantics = _foregroundSemantics != null && _foregroundSemantics.isNotEmpty;
-
-    if (hasBackgroundSemantics && hasForegroundSemantics) {
-      super.assembleSemanticsNode(node, config, <SemanticsNode>[]
-        ..addAll(_backgroundSemantics)
-        ..addAll(_foregroundSemantics));
-    } else if (hasBackgroundSemantics) {
-      super.assembleSemanticsNode(node, config, _backgroundSemantics);
-    } else if (hasForegroundSemantics) {
-      super.assembleSemanticsNode(node, config, _foregroundSemantics);
-    } else {
-      super.assembleSemanticsNode(node, config, const <SemanticsNode>[]);
-    }
+    final bool hasBackgroundSemantics = _backgroundSemanticsNodes != null && _backgroundSemanticsNodes.isNotEmpty;
+    final bool hasForegroundSemantics = _foregroundSemanticsNodes != null && _foregroundSemanticsNodes.isNotEmpty;
+    final List<SemanticsNode> finalChildren = <SemanticsNode>[];
+    if (hasBackgroundSemantics)
+      finalChildren.addAll(_backgroundSemanticsNodes);
+    finalChildren.addAll(children);
+    if (hasForegroundSemantics)
+      finalChildren.addAll(_foregroundSemanticsNodes);
+    super.assembleSemanticsNode(node, config, finalChildren);
   }
 
   /// Updates `semanticsChildren` from `newSemantics`.
   ///
+  /// [SemanticsNode]s that match [CustomPainterSemantics] by [Key]s preserve
+  /// their [SemanticsNode.key] field. If a node with the same key appears in
+  /// a different position in the list, it is moved to the new position, but the
+  /// same object is reused.
+  ///
+  /// [SemanticsNode]s whose `key` is null may be updated from
+  /// [CustomPainterSemantics] whose `key` is also null. However, the algorithm
+  /// does not guarantee it. If your semantics require that specific nodes are
+  /// updated from specific [CustomPainterSemantics], it is recommended to match
+  /// them by specifying non-null keys.
+  ///
   /// The algorithm tries to be as close to [RenderObjectElement.updateChildren]
   /// as possible, deviating only where the concepts diverge between widgets and
-  /// semantics.
+  /// semantics. For example, a [SemanticsNode] can be updated from a
+  /// [CustomPainterSemantics] based on `Key` alone; their types are not
+  /// considered because there is only one type of [SemanticsNode]. There is no
+  /// concept of a "forgotten" node in semantics, deactivated nodes, or global
+  /// keys.
   static List<SemanticsNode> _updateSemanticsChildren(
     List<SemanticsNode> oldSemantics,
     List<CustomPainterSemantics> newChildSemantics,
@@ -480,51 +607,23 @@ class RenderCustomPaint extends RenderProxyBox {
     oldSemantics = oldSemantics ?? const <SemanticsNode>[];
     newChildSemantics = newChildSemantics ?? const <CustomPainterSemantics>[];
 
-    // Diffs the new child semantics list (newChildSemantics) with
-    // the old list (this._semanticsChildren), and update this._semanticsChildren
-    // accordingly.
-
-    // The cases it tries to optimize for are:
-    //  - the old list is empty
-    //  - the lists are identical
-    //  - there is an insertion or removal of one or more child nodes in
-    //    only one place in the list
-    // If a child with a key is in both lists, it will be synced.
-    // Child nodes without keys might be synced but there is no guarantee.
-
-    // The general approach is to sync the entire new list backwards, as follows:
-    // 1. Walk the lists from the top, syncing nodes, until you no longer have
-    //    matching nodes.
-    // 2. Walk the lists from the bottom, without syncing nodes, until you no
-    //    longer have matching nodes. We'll sync these nodes at the end. We
-    //    don't sync them now because we want to sync all the nodes in order
-    //    from beginning to end.
-    // At this point we narrowed the old and new lists to the point
-    // where the nodes no longer match.
-    // 3. Walk the narrowed part of the old list to get the list of
-    //    keys and sync null with non-keyed items.
-    // 4. Walk the narrowed part of the new list forwards:
-    //     * Sync non-keyed items with null
-    //     * Sync keyed items with the source if it exists, else with null.
-    // 5. Walk the bottom of the list again, syncing the nodes.
-    // 6. Sync null with any items in the list of keys that are still
-    //    mounted.
-
     assert(() {
       final Map<Key, int> keys = new HashMap<Key, int>();
       final StringBuffer errors = new StringBuffer();
       for (int i = 0; i < newChildSemantics.length; i += 1) {
         final CustomPainterSemantics child = newChildSemantics[i];
-        if (child.key != null && keys.containsKey(child.key)) {
-          errors.writeln(
-            '- duplicate key ${child.key} found at position $i',
-          );
+        if (child.key != null) {
+          if (keys.containsKey(child.key)) {
+            errors.writeln(
+              '- duplicate key ${child.key} found at position $i',
+            );
+          }
+          keys[child.key] = i;
         }
-        keys[child.key] = i;
       }
 
       if (errors.isNotEmpty) {
-        throw new AssertionError(
+        throw new FlutterError(
           'Failed to update the list of CustomPainterSemantics:\n'
           '$errors'
         );
@@ -538,9 +637,7 @@ class RenderCustomPaint extends RenderProxyBox {
     int newChildrenBottom = newChildSemantics.length - 1;
     int oldChildrenBottom = oldSemantics.length - 1;
 
-    final List<SemanticsNode> newChildren = oldSemantics.length == newChildSemantics.length
-        ? oldSemantics
-        : new List<SemanticsNode>(newChildSemantics.length);
+    final List<SemanticsNode> newChildren = new List<SemanticsNode>(newChildSemantics.length);
 
     // Update the top of the list.
     while ((oldChildrenTop <= oldChildrenBottom) && (newChildrenTop <= newChildrenBottom)) {
@@ -633,11 +730,21 @@ class RenderCustomPaint extends RenderProxyBox {
     return newChildren;
   }
 
+  /// Whether `oldChild` can be updated with properties from `newSemantics`.
+  ///
+  /// If `oldChild` can be updated, it is updated using [_updateSemanticsChild].
+  /// Otherwise, the node is replaced by a new instance of [SemanticsNode].
   static bool _canUpdateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
     return oldChild.key == newSemantics.key;
   }
 
+  /// Updates `oldChild` using the properties of `newSemantics`.
+  ///
+  /// This method requires that `_canUpdateSemanticsChild(oldChild, newSemantics)`
+  /// is true prior to calling it.
   static SemanticsNode _updateSemanticsChild(SemanticsNode oldChild, CustomPainterSemantics newSemantics) {
+    assert(oldChild == null || _canUpdateSemanticsChild(oldChild, newSemantics));
+
     final SemanticsNode newChild = oldChild ?? new SemanticsNode(
       key: newSemantics.key,
     );

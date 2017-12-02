@@ -29,7 +29,7 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
 /// and depending on the presence of a tag the parent can for example decide
-/// how to add the tagged note as a child. Tags are not sent to the engine.
+/// how to add the tagged node as a child. Tags are not sent to the engine.
 ///
 /// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
 /// if a child node should be excluded from the scrollable area for semantic
@@ -444,6 +444,12 @@ class SemanticsProperties extends DiagnosticableTree {
   }
 }
 
+/// In tests use this function to reset the counter used to generate
+/// [SemanticsNode.id].
+void debugResetSemanticsIdCounter() {
+  SemanticsNode._lastIdentifier = 0;
+}
+
 /// A node that represents some semantic data.
 ///
 /// The semantics tree is maintained during the semantics phase of the pipeline
@@ -569,9 +575,44 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Contains the children in inverse hit test order (i.e. paint order).
   List<SemanticsNode> _children;
 
+  /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
+  /// debug mode. It supports the assertion that user does not mutate the list
+  /// of children.
+  List<SemanticsNode> _debugPreviousSnapshot;
+
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
+      if (identical(newChildren, _children)) {
+        final StringBuffer mutationErrors = new StringBuffer();
+        if (newChildren.length != _debugPreviousSnapshot.length) {
+          mutationErrors.writeln(
+            'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
+            'to ${newChildren.length}.'
+          );
+        } else {
+          for (int i = 0; i < newChildren.length; i++) {
+            if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
+              mutationErrors.writeln(
+                'Child node at position $i was replaced:\n'
+                'Previous child: ${newChildren[i]}\n'
+                'New child: ${_debugPreviousSnapshot[i]}\n'
+              );
+            }
+          }
+        }
+        if (mutationErrors.isNotEmpty) {
+          throw new FlutterError(
+            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
+            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
+            'Error details:\n'
+            '$mutationErrors'
+          );
+        }
+      }
+
+      _debugPreviousSnapshot = new List<SemanticsNode>.from(newChildren);
+
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
         ancestor = ancestor.parent;
@@ -637,10 +678,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         }
       }
     }
-    final List<SemanticsNode> oldChildren = _children;
     _children = newChildren;
-    oldChildren?.clear();
-    newChildren = oldChildren;
     if (sawChange)
       _markDirty();
   }
@@ -1242,7 +1280,7 @@ class SemanticsConfiguration {
   /// own [SemanticsNode].
   ///
   /// When set to true semantic information associated with the [RenderObject]
-  /// owner of this configuration or any of its defendants will not leak into
+  /// owner of this configuration or any of its descendants will not leak into
   /// parents. The [SemanticsNode] generated out of this configuration will
   /// act as a boundary.
   ///

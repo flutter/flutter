@@ -217,7 +217,8 @@ class _ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   bool shouldRepaint(_ScrollbarPainter oldDelegate) => false;
 
   @override
-  List<CustomPainterSemantics> buildSemantics(Size size) {
-    return const <CustomPainterSemantics>[];
-  }
+  bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder => null;
 }

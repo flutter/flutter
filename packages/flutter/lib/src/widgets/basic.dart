@@ -348,7 +348,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
     this.size: Size.zero,
     this.isComplex: false,
     this.willChange: false,
-    Widget child
+    Widget child,
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
