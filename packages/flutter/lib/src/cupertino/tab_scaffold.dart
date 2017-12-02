@@ -118,7 +118,8 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// tree [Offstage] and its animations disabled.
   ///
   /// Content can slide under the [tabBar] when it's translucent with a
-  /// [MediaQuery] padding hinting the bottom obstructed area.
+  /// [MediaQuery] padding signaling the bottom obstructed area via
+  /// [MediaQueryData.padding].
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -141,8 +142,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     if (widget.tabBar != null) {
       final MediaQueryData existingMediaQuery = MediaQuery.of(context);
 
-      // TODO(https://github.com/flutter/flutter/issues/12912):
+      // TODO(xster):
       // Use real size after partial layout instead of preferred size.
+      // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding = widget.tabBar.preferredSize.height
           + existingMediaQuery.padding.bottom;
 
