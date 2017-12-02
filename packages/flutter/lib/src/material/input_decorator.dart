@@ -2,19 +2,1274 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'debug.dart';
 import 'theme.dart';
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-// See the InputDecorator.build method, where this is used.
-class _InputDecoratorChildGlobalKey extends GlobalObjectKey {
-  const _InputDecoratorChildGlobalKey(BuildContext value) : super(value);
+class TextFieldBorder extends ShapeBorder {
+  TextFieldBorder({
+    this.borderSide: BorderSide.none,
+    this.borderRadius: BorderRadius.zero,
+    this.textDirection: TextDirection.ltr,
+    this.gapStart, // TBD: a percentage assert(null or between 0 and 1)
+    this.gapExtent,
+  }) : assert(borderSide != null),
+       assert(borderRadius != null),
+       assert(_cornersAreCircular(borderRadius)),
+       assert(gapStart == null || (gapStart >= 0.0 && gapExtent != null));
+
+  static bool _cornersAreCircular(BorderRadius borderRadius) {
+    return borderRadius.topLeft.x ==  borderRadius.topLeft.y
+        && borderRadius.topRight.x ==  borderRadius.topRight.y
+        && borderRadius.bottomLeft.x ==  borderRadius.bottomLeft.y
+        && borderRadius.bottomRight.x ==  borderRadius.bottomRight.y;
+  }
+
+  final BorderSide borderSide;
+  final BorderRadius borderRadius;
+  final TextDirection textDirection;
+  final double gapStart;
+  final double gapExtent;
+
+  @override
+  EdgeInsetsGeometry get dimensions {
+    return new EdgeInsets.all(borderSide.width);
+  }
+
+  @override
+  TextFieldBorder scale(double t) {
+    return new TextFieldBorder(
+      borderSide: borderSide.scale(t),
+      borderRadius: borderRadius * t,
+      textDirection: textDirection,
+      gapStart: gapStart,
+      gapExtent: gapExtent,
+    );
+  }
+
+  @override
+  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
+    return new Path()
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+  }
+
+  Path _gapBorderPath(Canvas canvas, RRect center) {
+    final Rect tlCorner = new Rect.fromLTWH(
+      center.left,
+      center.top,
+      center.tlRadiusX * 2.0,
+      center.tlRadiusY * 2.0,
+    );
+    final Rect trCorner = new Rect.fromLTWH(
+      center.right - center.trRadiusX * 2.0,
+      center.top,
+      center.trRadiusX * 2.0,
+      center.trRadiusY * 2.0,
+    );
+    final Rect brCorner = new Rect.fromLTWH(
+      center.right - center.brRadiusX * 2.0,
+      center.bottom - center.brRadiusY * 2.0,
+      center.brRadiusX * 2.0,
+      center.brRadiusY * 2.0,
+    );
+    final Rect blCorner = new Rect.fromLTWH(
+      center.left,
+      center.bottom - center.brRadiusY * 2.0,
+      center.blRadiusX * 2.0,
+      center.blRadiusY * 2.0,
+    );
+
+    final double cornerArcSweep = math.PI / 2.0;
+    final double tlCornerArcSweep = gapStart < center.tlRadiusX
+      ? math.asin(gapStart / center.tlRadiusX)
+      : math.PI / 2.0;
+
+    final Path path = new Path()
+      ..addArc(tlCorner, math.PI, tlCornerArcSweep)
+      ..moveTo(center.left + center.tlRadiusX, center.top);
+
+    if (gapStart > center.tlRadiusX)
+      path.lineTo(center.left + gapStart, center.top);
+
+    final double trCornerArcStart = (3 * math.PI) / 2.0;
+    final double trCornerArcSweep = cornerArcSweep;
+    if (gapStart + gapExtent < center.width - center.trRadiusX) {
+      path
+        ..relativeMoveTo(gapExtent, 0.0)
+        ..lineTo(center.right - center.trRadiusX, center.top)
+        ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
+    } else if (gapStart + gapExtent < center.width) {
+      final double dx = center.width - (gapStart + gapExtent);
+      final double sweep = math.acos(dx / center.trRadiusX);
+      path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
+    }
+
+    return path
+      ..moveTo(center.right, center.top + center.trRadiusY)
+      ..lineTo(center.right, center.bottom - center.brRadiusY)
+      ..addArc(brCorner, 0.0, cornerArcSweep)
+      ..lineTo(center.left + center.blRadiusX, center.bottom)
+      ..addArc(blCorner, math.PI / 2.0, cornerArcSweep)
+      ..lineTo(center.left, center.top + center.trRadiusY);
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection, }) {
+    switch (borderSide.style) {
+      case BorderStyle.none:
+        break;
+      case BorderStyle.solid: {
+        final Paint paint = borderSide.toPaint();
+        final RRect outer = borderRadius.toRRect(rect);
+        final RRect center = outer.deflate(borderSide.width / 2.0);
+        if (gapStart == null || gapExtent <= 0.0) {
+          canvas.drawRRect(center, paint);
+        } else {
+          final Path path = _gapBorderPath(canvas, center);
+          if (textDirection == TextDirection.ltr) {
+            canvas.drawPath(path, paint);
+          } else {
+            final Matrix4 transform = new Matrix4.identity()
+              ..translate(rect.left + rect.right, 0.0) // TBD: WTF left + right?
+              ..scale(-1.0, 1.0, 1.0);
+            canvas.drawPath(path.transform(transform.storage), paint);
+          }
+        }
+      }
+    }
+  }
+
+  @override
+  ShapeBorder lerpFrom(ShapeBorder a, double t) {
+    if (a is TextFieldBorder) {
+      return new TextFieldBorder(
+        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
+        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        gapStart: gapStart,
+        gapExtent: lerpDouble(a.gapExtent, gapExtent, t),
+      );
+    }
+    return super.lerpFrom(a, t);
+  }
+
+  @override
+  ShapeBorder lerpTo(ShapeBorder b, double t) {
+    if (b is TextFieldBorder) {
+      return new TextFieldBorder(
+        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
+        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        gapStart: gapStart,
+        gapExtent: lerpDouble(gapExtent, b.gapExtent, t),
+      );
+    }
+    return super.lerpTo(b, t);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
+    final TextFieldBorder typedOther = other;
+    return typedOther.borderRadius == borderRadius
+        && typedOther.borderSide == borderSide
+        && typedOther.gapStart == gapStart
+        && typedOther.gapExtent == gapExtent;
+  }
+
+  @override
+  int get hashCode => hashValues(borderSide, borderRadius, gapStart, gapExtent);
+}
+
+
+enum _DecorationSlot {
+  input,
+  label,
+  hint,
+  prefix,
+  suffix,
+  prefixIcon,
+  suffixIcon,
+  error,
+  helper,
+  counter,
+  container,
+}
+
+class _Decoration {
+  const _Decoration({
+    @required this.contentPadding,
+    @required this.floatingLabelHeight,
+    @required this.floatingLabelProgress,
+    this.input,
+    this.label,
+    this.hint,
+    this.prefix,
+    this.suffix,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.error,
+    this.helper,
+    this.counter,
+    this.container,
+  }) : assert(contentPadding != null),
+       assert(floatingLabelHeight != null),
+       assert(floatingLabelProgress != null);
+
+  final EdgeInsets contentPadding;
+  final double floatingLabelHeight;
+  final double floatingLabelProgress;
+  final Widget input;
+  final Widget label;
+  final Widget hint;
+  final Widget prefix;
+  final Widget suffix;
+  final Widget prefixIcon;
+  final Widget suffixIcon;
+  final Widget error;
+  final Widget helper;
+  final Widget counter;
+  final Widget container;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final _Decoration typedOther = other;
+    return typedOther.contentPadding == contentPadding
+        && typedOther.floatingLabelHeight == floatingLabelHeight
+        && typedOther.floatingLabelProgress == floatingLabelProgress
+        && typedOther.input == input
+        && typedOther.label == label
+        && typedOther.hint == hint
+        && typedOther.prefix == prefix
+        && typedOther.suffix == suffix
+        && typedOther.prefixIcon == prefixIcon
+        && typedOther.suffixIcon == suffixIcon
+        && typedOther.error == error
+        && typedOther.helper == helper
+        && typedOther.counter == counter
+        && typedOther.container == container;
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(
+      contentPadding,
+      floatingLabelHeight,
+      floatingLabelProgress,
+      input,
+      label,
+      hint,
+      prefix,
+      suffix,
+      prefixIcon,
+      suffixIcon,
+      error,
+      helper,
+      counter,
+      container,
+    );
+  }
+}
+
+class _RenderDecorationLayout {
+  const _RenderDecorationLayout({
+    this.boxToBaseline,
+    this.inputBaseline,
+    this.subtextBaseline,
+    this.containerHeight,
+    this.subtextHeight,
+  });
+
+  final Map<RenderBox, double> boxToBaseline;
+  final double inputBaseline;
+  final double subtextBaseline;
+  final double containerHeight;
+  final double subtextHeight;
+}
+
+class _RenderDecoration extends RenderBox {
+  _RenderDecoration({
+    _Decoration decoration,
+    TextDirection textDirection,
+  }) : _decoration = decoration,
+       _textDirection = textDirection;
+
+  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild) {
+    if (oldChild != null)
+      dropChild(oldChild);
+    if (newChild != null)
+      adoptChild(newChild);
+    return newChild;
+  }
+
+  RenderBox _input;
+  RenderBox get input => _input;
+  set input(RenderBox value) {
+    _input = _updateChild(_input, value);
+  }
+
+  RenderBox _label;
+  RenderBox get label => _label;
+  set label(RenderBox value) {
+    _label = _updateChild(_label, value);
+  }
+
+  RenderBox _hint;
+  RenderBox get hint => _hint;
+  set hint(RenderBox value) {
+    _hint = _updateChild(_hint, value);
+  }
+
+  RenderBox _prefix;
+  RenderBox get prefix => _prefix;
+  set prefix(RenderBox value) {
+    _prefix = _updateChild(_prefix, value);
+  }
+
+  RenderBox _suffix;
+  RenderBox get suffix => _suffix;
+  set suffix(RenderBox value) {
+    _suffix = _updateChild(_suffix, value);
+  }
+
+  RenderBox _prefixIcon;
+  RenderBox get prefixIcon => _prefixIcon;
+  set prefixIcon(RenderBox value) {
+    _prefixIcon = _updateChild(_prefixIcon, value);
+  }
+
+  RenderBox _suffixIcon;
+  RenderBox get suffixIcon => _suffixIcon;
+  set suffixIcon(RenderBox value) {
+    _suffixIcon = _updateChild(_suffixIcon, value);
+  }
+
+  RenderBox _error;
+  RenderBox get error => _error;
+  set error(RenderBox value) {
+    _error = _updateChild(_error, value);
+  }
+
+  RenderBox _helper;
+  RenderBox get helper => _helper;
+  set helper(RenderBox value) {
+    _helper = _updateChild(_helper, value);
+  }
+
+  RenderBox _counter;
+  RenderBox get counter => _counter;
+  set counter(RenderBox value) {
+    _counter = _updateChild(_counter, value);
+  }
+
+  RenderBox _container;
+  RenderBox get container => _container;
+  set container(RenderBox value) {
+    _container = _updateChild(_container, value);
+  }
+
+  // The returned list is ordered for hit testing.
+  Iterable<RenderBox> get _children sync *{
+    if (input != null)
+      yield input;
+    if (prefixIcon != null)
+      yield prefixIcon;
+    if (suffixIcon != null)
+      yield suffixIcon;
+    if (prefix != null)
+      yield prefix;
+    if (suffix != null)
+      yield suffix;
+    if (label != null)
+      yield label;
+    if (hint != null)
+      yield hint;
+    if (error != null)
+      yield error;
+    if (helper != null)
+      yield helper;
+    if (counter != null)
+      yield counter;
+    if (container != null)
+      yield container;
+  }
+
+  _Decoration get decoration => _decoration;
+  _Decoration _decoration;
+  set decoration(_Decoration value) {
+    if (_decoration == value)
+      return;
+    _decoration = value;
+    markNeedsLayout();
+  }
+
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    if (_textDirection == value)
+      return;
+    _textDirection = value;
+    markNeedsLayout();
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    for (RenderBox child in _children)
+      child.attach(owner);
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    for (RenderBox child in _children)
+      child.detach();
+  }
+
+  @override
+  void redepthChildren() {
+    _children.forEach(redepthChild);
+  }
+
+  @override
+  void visitChildren(RenderObjectVisitor visitor) {
+    _children.forEach(visitor);
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> value = <DiagnosticsNode>[];
+    void add(RenderBox child, String name) {
+      if (child != null)
+        value.add(input.toDiagnosticsNode(name: name));
+    }
+    add(input, 'input');
+    add(label, 'label');
+    add(hint, 'hint');
+    add(prefix, 'prefix');
+    add(suffix, 'suffix');
+    add(prefixIcon, 'prefixIcon');
+    add(suffixIcon, 'suffixIcon');
+    add(error, 'error');
+    add(helper, 'helper');
+    add(counter, 'counter');
+    add(container, 'container');
+    return value;
+  }
+
+  @override
+  bool get sizedByParent => false;
+
+  static double _minWidth(RenderBox box, double height) {
+    return box == null ? 0.0 : box.getMinIntrinsicWidth(height);
+  }
+
+  static double _maxWidth(RenderBox box, double height) {
+    return box == null ? 0.0 : box.getMaxIntrinsicWidth(height);
+  }
+
+  static double _minHeight(RenderBox box, double width) {
+    return box == null ? 0.0 : box.getMinIntrinsicWidth(width);
+  }
+
+  static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
+
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData;
+
+  EdgeInsets get contentPadding => decoration.contentPadding;
+
+  _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+    final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
+    BoxConstraints boxConstraints = layoutConstraints.loosen();
+    double aboveBaseline = 0.0;
+    double belowBaseline = 0.0;
+    void layoutLineBox(RenderBox box) {
+      if (box == null)
+        return;
+      box.layout(boxConstraints, parentUsesSize: true);
+      final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
+      assert(baseline != null && baseline >= 0.0);
+      boxToBaseline[box] = baseline;
+      aboveBaseline = math.max(baseline, aboveBaseline);
+      belowBaseline = math.max(box.size.height - baseline, belowBaseline);
+    }
+
+    layoutLineBox(prefix);
+    layoutLineBox(hint);
+    layoutLineBox(suffix);
+
+    if (prefixIcon != null)
+      prefixIcon.layout(boxConstraints, parentUsesSize: true);
+    if (label != null)
+      label.layout(boxConstraints, parentUsesSize: true);
+    if (suffixIcon != null)
+      suffixIcon.layout(boxConstraints, parentUsesSize: true);
+
+    final double inputWidth = constraints.maxWidth - (
+      contentPadding.left
+      + _boxSize(prefixIcon).width
+      + _boxSize(prefix).width
+      + _boxSize(suffix).width
+      + _boxSize(suffixIcon).width
+      + contentPadding.right);
+    boxConstraints = boxConstraints.tighten(width: inputWidth);
+    layoutLineBox(input);
+
+    double inputBaseline = contentPadding.top + aboveBaseline;
+    double containerHeight = contentPadding.top
+      + aboveBaseline
+      + belowBaseline
+      + contentPadding.bottom;
+
+    if (label != null) {
+      // The vertical gap between the inline elements and the floating label.
+      const double gap = 4.0;
+      containerHeight += gap + decoration.floatingLabelHeight;
+      inputBaseline += gap + decoration.floatingLabelHeight;
+    }
+
+    double subtextBaseline = 0.0;
+    double subtextHeight = 0.0;
+    if (helper != null || error != null || counter != null) {
+      aboveBaseline = 0.0;
+      belowBaseline = 0.0;
+      layoutLineBox(helper);
+      layoutLineBox(error);
+      layoutLineBox(counter);
+
+      const double subtextGap = 8.0;
+      subtextBaseline = containerHeight + subtextGap + aboveBaseline;
+      subtextHeight = subtextGap + aboveBaseline + belowBaseline;
+    }
+
+    return new _RenderDecorationLayout(
+      boxToBaseline: boxToBaseline,
+      containerHeight: containerHeight,
+      inputBaseline: inputBaseline,
+      subtextBaseline: subtextBaseline,
+      subtextHeight: subtextHeight,
+    );
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return contentPadding.left
+      + _minWidth(prefixIcon, height)
+      + _minWidth(prefix, height)
+      + math.max(_minWidth(input, height), _minWidth(hint, height))
+      + _minWidth(suffix, height)
+      + _minWidth(suffixIcon, height)
+      + contentPadding.right;
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return contentPadding.left
+      + _maxWidth(prefixIcon, height)
+      + _maxWidth(prefix, height)
+      + math.max(_maxWidth(input, height), _maxWidth(hint, height))
+      + _maxWidth(suffix, height)
+      + _maxWidth(suffixIcon, height)
+      + contentPadding.right;
+  }
+
+  double _lineHeight(double width, List<RenderBox> boxes) {
+    double height = 0.0;
+    for (RenderBox box in boxes) {
+      if (box == null)
+        continue;
+      height = math.max(_minHeight(box, width), height);
+    }
+    return height;
+    /*
+      TBD: This fails because calls to box.getDistanceToBaseline() asserts
+    double aboveBaseline = 0.0;
+    double belowBaseline = 0.0;
+    for (RenderBox box in boxes) {
+      if (box == null)
+        continue;
+      final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
+      aboveBaseline = math.max(baseline, aboveBaseline);
+      belowBaseline = math.max(_minHeight(box, width) - baseline, belowBaseline);
+    }
+    return aboveBaseline + belowBaseline;
+    */
+  }
+
+  @override
+  double computeMinIntrinsicHeight(double width) {
+    return contentPadding.top
+      + (label == null ? 0.0 : decoration.floatingLabelHeight)
+      + _lineHeight(width, <RenderBox>[prefix, input, suffix])
+      + ((helper ?? error ?? counter) == null ? 0.0 : 8.0)
+      + _lineHeight(width, <RenderBox>[helper, error, counter])
+      + contentPadding.bottom;
+  }
+
+  @override
+  double computeMaxIntrinsicHeight(double width) {
+    return computeMinIntrinsicHeight(width);
+  }
+
+  @override
+  double computeDistanceToActualBaseline(TextBaseline baseline) {
+    // TBD: layout first? Add input.parentData.offset?
+    assert(false);
+    return 0.0;
+  }
+
+  @override
+  void performLayout() {
+    _paintTransform = null;
+    final _RenderDecorationLayout layout = _layout(constraints);
+
+    // TBD: if maxWidth is unconstrained then use intrinsicWidth
+    final double overallWidth = constraints.maxWidth;
+    final double overallHeight = layout.containerHeight + layout.subtextHeight;
+
+    if (container != null) {
+      container.layout(constraints.tighten(height: layout.containerHeight), parentUsesSize: true);
+      _boxParentData(container).offset = Offset.zero;
+    }
+
+    double height;
+    double centerLayout(RenderBox box, double x) {
+      _boxParentData(box).offset = new Offset(x, (height - box.size.height) / 2.0);
+      return box.size.width;
+    }
+
+    double baseline;
+    double baselineLayout(RenderBox box, double x) {
+      _boxParentData(box).offset = new Offset(x, baseline - layout.boxToBaseline[box]);
+      return box.size.width;
+    }
+
+    final double left = contentPadding.left;
+    final double right = overallWidth - contentPadding.right;
+
+    height = layout.containerHeight;
+    baseline = layout.inputBaseline;
+
+    if (textDirection == TextDirection.rtl) {
+      double start = right;
+      double end = left;
+      if (prefixIcon != null)
+        start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
+      if (prefix != null)
+        start -= baselineLayout(prefix, start - prefix.size.width);
+      if (input != null)
+        baselineLayout(input, start - input.size.width);
+      if (hint != null)
+        baselineLayout(hint, start - hint.size.width);
+      if (label != null)
+        centerLayout(label, start - label.size.width);
+      if (suffixIcon != null)
+        end += centerLayout(suffixIcon, end);
+      if (suffix != null)
+        end += baselineLayout(suffix, end);
+    } else {
+      double start = left;
+      double end = right;
+      if (prefixIcon != null)
+        start += centerLayout(prefixIcon, start);
+      if (prefix != null)
+        start += baselineLayout(prefix, start);
+      if (input != null)
+        baselineLayout(input, start);
+      if (hint != null)
+        baselineLayout(hint, start);
+      if (label != null)
+        centerLayout(label, start);
+      if (suffixIcon != null)
+        end -= centerLayout(suffixIcon, end - suffixIcon.size.width);
+      if (suffix != null)
+        end -= baselineLayout(suffix, end - suffix.size.width);
+    }
+
+    if (helper != null || error != null || counter != null) {
+      height = layout.subtextHeight;
+      baseline = layout.subtextBaseline;
+
+      if (textDirection == TextDirection.rtl) {
+        if (helper != null)
+          baselineLayout(helper, right - helper.size.width);
+        if (error != null)
+          baselineLayout(error, right - error.size.width);
+        if (counter != null)
+          baselineLayout(counter, left);
+      } else {
+        if (helper != null)
+          baselineLayout(helper, left);
+        if (error != null)
+          baselineLayout(error, left);
+        if (counter != null)
+          baselineLayout(counter, right - counter.size.width);
+      }
+    }
+
+    size = constraints.constrain(new Size(overallWidth, overallHeight));
+    assert(size.width == constraints.constrainWidth(overallWidth));
+    assert(size.height == constraints.constrainHeight(overallHeight));
+  }
+
+  void _paintLabel(PaintingContext context, Offset offset) {
+    context.paintChild(label, offset);
+  }
+
+  Matrix4 _paintTransform;
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    void doPaint(RenderBox child) {
+      if (child != null)
+        context.paintChild(child, _boxParentData(child).offset + offset);
+    }
+    doPaint(container);
+    if (label != null) {
+      final Offset labelOffset = _boxParentData(label).offset;
+      final double t = decoration.floatingLabelProgress;
+      final double scale = lerpDouble(1.0, 0.75, t);
+      final double floatingY = contentPadding.top;
+      final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
+      _paintTransform = new Matrix4.identity()
+        ..translate(labelOffset.dx, labelOffset.dy + dy)
+        ..scale(scale);
+      context.pushTransform(needsCompositing, offset, _paintTransform, _paintLabel);
+    }
+    doPaint(prefix);
+    doPaint(suffix);
+    doPaint(prefixIcon);
+    doPaint(suffixIcon);
+    doPaint(hint);
+    doPaint(input);
+    doPaint(error ?? helper);
+    doPaint(counter);
+  }
+
+  @override
+  bool hitTestSelf(Offset position) => true;
+
+  @override
+  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+    assert(position != null);
+    for (RenderBox child in _children) {
+      // TBD: label must be handled specially since we've transformed it
+      if (child.hitTest(result, position: position - _boxParentData(child).offset))
+        return true;
+    }
+    return false;
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    if (child == label && _paintTransform != null) {
+      final Offset labelOffset = _boxParentData(label).offset;
+      transform
+        ..multiply(_paintTransform)
+        ..translate(-labelOffset.dx, -labelOffset.dy);
+    }
+    super.applyPaintTransform(child, transform);
+  }
+}
+
+class _RenderDecorationElement extends RenderObjectElement {
+  _RenderDecorationElement(_Decorator widget) : super(widget);
+
+  final Map<_DecorationSlot, Element> _slotToChild = <_DecorationSlot, Element>{};
+  final Map<Element, _DecorationSlot> _childToSlot = <Element, _DecorationSlot>{};
+
+  @override
+  _Decorator get widget => super.widget;
+
+  @override
+  _RenderDecoration get renderObject => super.renderObject;
+
+  @override
+  void visitChildren(ElementVisitor visitor) {
+    _slotToChild.values.forEach(visitor);
+  }
+
+  @override
+  void forgetChild(Element child) {
+    assert(_slotToChild.values.contains(child));
+    assert(_childToSlot.keys.contains(child));
+    final _DecorationSlot slot = _childToSlot[child];
+    _childToSlot.remove(child);
+    _slotToChild.remove(slot);
+  }
+
+  void _mountChild(Widget widget, _DecorationSlot slot) {
+    if (widget == null)
+      return;
+    final Element oldChild = _slotToChild[slot];
+    final Element newChild = updateChild(oldChild, widget, slot);
+    _slotToChild[slot] = newChild;
+    _childToSlot[newChild] = slot;
+  }
+
+  @override
+  void mount(Element parent, dynamic newSlot) {
+    super.mount(parent, newSlot);
+    _mountChild(widget.decoration.input, _DecorationSlot.input);
+    _mountChild(widget.decoration.label, _DecorationSlot.label);
+    _mountChild(widget.decoration.hint, _DecorationSlot.hint);
+    _mountChild(widget.decoration.prefix, _DecorationSlot.prefix);
+    _mountChild(widget.decoration.suffix, _DecorationSlot.suffix);
+    _mountChild(widget.decoration.prefixIcon, _DecorationSlot.prefixIcon);
+    _mountChild(widget.decoration.suffixIcon, _DecorationSlot.suffixIcon);
+    _mountChild(widget.decoration.error, _DecorationSlot.error);
+    _mountChild(widget.decoration.helper, _DecorationSlot.helper);
+    _mountChild(widget.decoration.counter, _DecorationSlot.counter);
+    _mountChild(widget.decoration.container, _DecorationSlot.container);
+  }
+
+  void _updateChild(Widget widget, _DecorationSlot slot) {
+    final Element oldChild = _slotToChild[slot];
+    if (oldChild != null) {
+      _childToSlot.remove(oldChild);
+      _slotToChild.remove(slot);
+    }
+    if (widget != null) {
+      final Element newChild = updateChild(oldChild, widget, slot);
+      _slotToChild[slot] = newChild;
+      _childToSlot[newChild] = slot;
+    }
+  }
+
+  @override
+  void update(_Decorator newWidget) {
+    super.update(newWidget);
+    assert(widget == newWidget);
+    _updateChild(widget.decoration.input, _DecorationSlot.input);
+    _updateChild(widget.decoration.label, _DecorationSlot.label);
+    _updateChild(widget.decoration.hint, _DecorationSlot.hint);
+    _updateChild(widget.decoration.prefix, _DecorationSlot.prefix);
+    _updateChild(widget.decoration.suffix, _DecorationSlot.suffix);
+    _updateChild(widget.decoration.prefixIcon, _DecorationSlot.prefixIcon);
+    _updateChild(widget.decoration.suffixIcon, _DecorationSlot.suffixIcon);
+    _updateChild(widget.decoration.error, _DecorationSlot.error);
+    _updateChild(widget.decoration.helper, _DecorationSlot.helper);
+    _updateChild(widget.decoration.counter, _DecorationSlot.counter);
+    _updateChild(widget.decoration.container, _DecorationSlot.container);
+  }
+
+  @override
+  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+    assert(child is RenderBox);
+    assert(slotValue is _DecorationSlot);
+    final _DecorationSlot slot = slotValue;
+    // TBD: assert that the maps contain this slot and child?
+    switch (slot) {
+      case _DecorationSlot.input:
+        renderObject.input = child;
+        break;
+      case _DecorationSlot.label:
+        renderObject.label = child;
+        break;
+      case _DecorationSlot.hint:
+        renderObject.hint = child;
+        break;
+      case _DecorationSlot.prefix:
+        renderObject.prefix = child;
+        break;
+      case _DecorationSlot.suffix:
+        renderObject.suffix = child;
+        break;
+      case _DecorationSlot.prefixIcon:
+        renderObject.prefixIcon = child;
+        break;
+      case _DecorationSlot.suffixIcon:
+        renderObject.suffixIcon = child;
+        break;
+      case _DecorationSlot.error:
+        renderObject.error = child;
+        break;
+      case _DecorationSlot.helper:
+        renderObject.helper = child;
+        break;
+      case _DecorationSlot.counter:
+        renderObject.counter = child;
+        break;
+      case _DecorationSlot.container:
+        renderObject.container = child;
+        break;
+      default:
+        assert(false);
+    }
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, dynamic slot) {
+    assert(false, 'not implemented');
+  }
+
+  @override
+  void removeChildRenderObject(RenderObject child) {
+    assert(false, 'not implemented');
+    /*
+    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
+    assert(renderObject.child == child);
+    renderObject.child = null;
+    assert(renderObject == this.renderObject);
+    */
+  }
+}
+
+class _Decorator extends RenderObjectWidget {
+  const _Decorator({
+    Key key,
+    this.decoration,
+  }) : super(key: key);
+
+  final _Decoration decoration;
+
+  @override
+  _RenderDecorationElement createElement() => new _RenderDecorationElement(this);
+
+  @override
+  _RenderDecoration createRenderObject(BuildContext context) {
+    return new _RenderDecoration(
+      decoration: decoration,
+      textDirection: Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderDecoration renderObject) {
+    renderObject
+     ..decoration = decoration
+     ..textDirection = Directionality.of(context);
+  }
+}
+
+class InputDecorator extends StatefulWidget {
+  /// Creates a widget that displays labels and other visual elements similar
+  /// to a [TextField].
+  ///
+  /// The [isFocused] and [isEmpty] arguments must not be null.
+  const InputDecorator({
+    Key key,
+    @required this.decoration,
+    this.baseStyle,
+    this.textAlign,
+    this.isFocused: false,
+    this.isEmpty: false,
+    this.child,
+  }) : assert(isFocused != null),
+       assert(isEmpty != null),
+       super(key: key);
+
+  /// The text and styles to use when decorating the child.
+  final InputDecoration decoration;
+
+  /// The style on which to base the label, hint, and error styles if the
+  /// [decoration] does not provide explicit styles.
+  ///
+  /// If null, defaults to a text style from the current [Theme].
+  final TextStyle baseStyle;
+
+  /// How the text in the decoration should be aligned horizontally.
+  final TextAlign textAlign;
+
+  /// Whether the input field has focus.
+  ///
+  /// Determines the position of the label text and the color of the divider.
+  ///
+  /// Defaults to false.
+  final bool isFocused;
+
+  /// Whether the input field is empty.
+  ///
+  /// Determines the position of the label text and whether to display the hint
+  /// text.
+  ///
+  /// Defaults to false.
+  final bool isEmpty;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// Typically an [EditableText], [DropdownButton], or [InkWell].
+  final Widget child;
+
+  bool get labelIsFloating => !isEmpty || isFocused;
+
+  @override
+  _InputDecoratorState createState() => new _InputDecoratorState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
+    description.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
+    description.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
+  }
+}
+
+class _InputDecoratorState extends State<InputDecorator> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+      value: widget.labelIsFloating ? 1.0 : 0.0,
+    );
+    _controller.addListener(_handleChange);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleChange() {
+    setState(() {
+      // The _controller's value has changed
+    });
+  }
+
+  InputDecoration get decoration => widget.decoration;
+  TextAlign get textAlign => widget.textAlign;
+  bool get isFocused => widget.isFocused;
+  bool get isEmpty => widget.isEmpty;
+
+  @override
+  void didUpdateWidget(InputDecorator old) {
+    super.didUpdateWidget(old);
+    if (widget.labelIsFloating != old.labelIsFloating) {
+      if (widget.labelIsFloating)
+        _controller.forward();
+      else
+        _controller.reverse();
+    }
+  }
+
+  Color _getActiveColor(ThemeData themeData) {
+    if (isFocused) {
+      switch (themeData.brightness) {
+        case Brightness.dark:
+          return themeData.accentColor;
+        case Brightness.light:
+          return themeData.primaryColor;
+      }
+    }
+    return themeData.hintColor;
+  }
+
+  Color _getFillColor(ThemeData themeData) {
+    if (!decoration.filled)
+      return null;
+    if (decoration.fillColor != null)
+      return decoration.fillColor;
+
+    // dark theme: 10% white (enabled), 5% white (disabled)
+    // light theme: 4% black (enabled), 2% black (disabled)
+    const Color darkEnabled = const Color(0x1AFFFFFF);
+    const Color darkDisabled = const Color(0x0DFFFFFF);
+    const Color lightEnabled = const Color(0x0A000000);
+    const Color lightDisabled = const Color(0x05000000);
+
+    switch (themeData.brightness) {
+      case Brightness.dark:
+        return decoration.enabled ? darkEnabled : darkDisabled;
+      case Brightness.light:
+        return decoration.enabled ? lightEnabled : lightDisabled;
+    }
+    return lightEnabled;
+  }
+
+  // True if the label will be shown and the hint will not.
+  // If we're not focused, there's no value, and labelText was provided,
+  // then the label appears where the hint would.
+  bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
+
+  // The style for the inline label or hint when they're displayed "inline", i.e.
+  // when they appear in place of the empty text field.
+  TextStyle _getInlineLabelStyle(ThemeData themeData) {
+    return themeData.textTheme.subhead.merge(widget.baseStyle)
+      .copyWith(color: themeData.hintColor)
+      .merge(decoration.hintStyle);
+  }
+
+  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
+    final Color color = decoration.errorText != null
+      ? decoration.errorStyle?.color ?? themeData.errorColor
+      : _getActiveColor(themeData);
+    final TextStyle style = themeData.textTheme.subhead.merge(widget.baseStyle);
+    return style
+      .copyWith(color: color)
+      .merge(decoration.labelStyle);
+  }
+
+  TextStyle _getHelperTextStyle(ThemeData themeData) {
+    return themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
+  }
+
+  TextStyle _getSubtextStyle(ThemeData themeData) {
+    final TextStyle helperStyle = _getHelperTextStyle(themeData);
+    return decoration.errorText != null
+      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
+      : helperStyle;
+  }
+
+  double get _dividerWeight {
+    if (decoration.hideDivider || !decoration.enabled)
+      return 0.0;
+    return isFocused ? 2.0 : 1.0;
+  }
+
+  Color _getDividerColor(ThemeData themeData) {
+    return decoration.errorText == null
+      ? _getActiveColor(themeData)
+      : themeData.errorColor;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+    final TextStyle inlineStyle = _getInlineLabelStyle(themeData);
+
+    final Widget hint = decoration.hintText == null ? null : new AnimatedOpacity(
+      opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
+      child: new Text(
+        decoration.hintText,
+        style: inlineStyle,
+        overflow: TextOverflow.ellipsis,
+        textAlign: textAlign,
+      ),
+    );
+
+    final Widget container = decoration.isCollapsed ? null : new AnimatedContainer(
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
+      decoration: new BoxDecoration(
+        color: _getFillColor(themeData),
+        border: new Border(
+          bottom: new BorderSide(
+            color: _getDividerColor(themeData),
+            width: _dividerWeight,
+          ),
+        ),
+      ),
+    );
+
+    final Widget label = decoration.labelText == null ? null : new Text(
+      decoration.labelText,
+      textAlign: textAlign,
+      style: new TextStyleTween(
+        begin: _getInlineLabelStyle(themeData),
+        end: _getFloatingLabelStyle(themeData),
+      ).evaluate(_controller),
+    );
+
+    final Widget prefix = decoration.prefixText == null ? null :
+      new Text(
+        decoration.prefixText,
+        style: decoration.prefixStyle ?? inlineStyle
+      );
+
+    final Widget suffix = decoration.suffixText == null ? null :
+      new Text(
+        decoration.suffixText,
+        style: decoration.suffixStyle ?? inlineStyle
+      );
+
+    final Color activeColor = _getActiveColor(themeData);
+    final double iconSize = decoration.isDense ? 18.0 : 24.0;
+    final Color iconColor = isFocused ? activeColor : Colors.black45;
+
+    final Widget prefixIcon = decoration.prefixIcon == null ? null :
+      IconTheme.merge(
+        data: new IconThemeData(
+          color: iconColor,
+          size: iconSize,
+        ),
+        child: decoration.prefixIcon,
+      );
+
+    final Widget suffixIcon = decoration.suffixIcon == null ? null :
+      IconTheme.merge(
+        data: new IconThemeData(
+          color: iconColor,
+          size: iconSize,
+        ),
+        child: decoration.suffixIcon,
+      );
+
+    final Widget error = decoration.errorText == null ? null :
+      new Text(
+        decoration.errorText,
+        style: _getSubtextStyle(themeData),
+        textAlign: textAlign,
+        overflow: TextOverflow.ellipsis,
+      );
+
+    final Widget helper = decoration.helperText == null ? null :
+      new Text(
+        decoration.helperText,
+        style: _getSubtextStyle(themeData),
+        textAlign: textAlign,
+        overflow: TextOverflow.ellipsis,
+      );
+
+    final Widget counter = decoration.counterText == null ? null :
+      new Text(
+        decoration.counterText,
+        style: _getHelperTextStyle(themeData).merge(decoration.counterStyle),
+        textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
+        overflow: TextOverflow.ellipsis,
+      );
+
+    final EdgeInsets contentPadding = decoration.isCollapsed ? EdgeInsets.zero :
+      (decoration.isDense
+       ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+       : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+
+    return new _Decorator(
+      decoration: new _Decoration(
+        contentPadding: contentPadding,
+        floatingLabelHeight: 0.75 * inlineStyle.fontSize,
+        floatingLabelProgress: _controller.value,
+        input: widget.child,
+        label: label,
+        hint: hint,
+        prefix: prefix,
+        suffix: suffix,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
+        error: error,
+        helper: helper,
+        counter: counter,
+        container: container,
+      ),
+    );
+  }
 }
 
 /// Text and styles used to label an input field.
@@ -319,9 +1574,9 @@ class InputDecoration {
   @override
   int get hashCode {
     return hashValues(
+      icon,
+      labelText,
       hashList(<Object>[ // Over 20 fields...
-        icon,
-        labelText,
         labelStyle,
         helperText,
         helperStyle,
@@ -389,498 +1644,5 @@ class InputDecoration {
     if (!enabled)
       description.add('enabled: false');
     return 'InputDecoration(${description.join(', ')})';
-  }
-}
-
-/// Displays the visual elements of a Material Design text field around an
-/// arbitrary widget.
-///
-/// Use [InputDecorator] to create widgets that look and behave like a
-/// [TextField] but can be used to input information other than text.
-///
-/// The configuration of this widget is primarily provided in the form of an
-/// [InputDecoration] object.
-///
-/// Requires one of its ancestors to be a [Material] widget.
-///
-/// See also:
-///
-///  * [TextField], which uses an [InputDecorator] to draw labels and other
-///    visual elements around a text entry widget.
-///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
-///    around other widgets.
-class InputDecorator extends StatelessWidget {
-  /// Creates a widget that displays labels and other visual elements similar
-  /// to a [TextField].
-  ///
-  /// The [isFocused] and [isEmpty] arguments must not be null.
-  const InputDecorator({
-    Key key,
-    @required this.decoration,
-    this.baseStyle,
-    this.textAlign,
-    this.isFocused: false,
-    this.isEmpty: false,
-    this.child,
-  }) : assert(isFocused != null),
-       assert(isEmpty != null),
-       super(key: key);
-
-  /// The text and styles to use when decorating the child.
-  final InputDecoration decoration;
-
-  /// The style on which to base the label, hint, and error styles if the
-  /// [decoration] does not provide explicit styles.
-  ///
-  /// If null, defaults to a text style from the current [Theme].
-  final TextStyle baseStyle;
-
-  /// How the text in the decoration should be aligned horizontally.
-  final TextAlign textAlign;
-
-  /// Whether the input field has focus.
-  ///
-  /// Determines the position of the label text and the color of the divider.
-  ///
-  /// Defaults to false.
-  final bool isFocused;
-
-  /// Whether the input field is empty.
-  ///
-  /// Determines the position of the label text and whether to display the hint
-  /// text.
-  ///
-  /// Defaults to false.
-  final bool isEmpty;
-
-  /// The widget below this widget in the tree.
-  ///
-  /// Typically an [EditableText], [DropdownButton], or [InkWell].
-  final Widget child;
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<InputDecoration>('decoration', decoration));
-    description.add(new DiagnosticsProperty<TextStyle>('baseStyle', baseStyle, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('isFocused', isFocused));
-    description.add(new DiagnosticsProperty<bool>('isEmpty', isEmpty));
-  }
-
-  Color _getActiveColor(ThemeData themeData) {
-    if (isFocused) {
-      switch (themeData.brightness) {
-        case Brightness.dark:
-          return themeData.accentColor;
-        case Brightness.light:
-          return themeData.primaryColor;
-      }
-    }
-    return themeData.hintColor;
-  }
-
-  Color _getFillColor(ThemeData themeData) {
-    if (!decoration.filled)
-      return null;
-    if (decoration.fillColor != null)
-      return decoration.fillColor;
-
-    // dark theme: 10% white (enabled), 5% white (disabled)
-    // light theme: 4% black (enabled), 2% black (disabled)
-    const Color darkEnabled = const Color(0x1AFFFFFF);
-    const Color darkDisabled = const Color(0x0DFFFFFF);
-    const Color lightEnabled = const Color(0x0A000000);
-    const Color lightDisabled = const Color(0x05000000);
-
-    switch (themeData.brightness) {
-      case Brightness.dark:
-        return decoration.enabled ? darkEnabled : darkDisabled;
-      case Brightness.light:
-        return decoration.enabled ? lightEnabled : lightDisabled;
-    }
-    return lightEnabled;
-  }
-
-  // The style for the inline label or hint when they're displayed "inline", i.e.
-  // when they appear in place of the empty text field.
-  TextStyle _getInlineLabelStyle(ThemeData themeData) {
-    return themeData.textTheme.subhead.merge(baseStyle)
-      .copyWith(color: themeData.hintColor)
-      .merge(decoration.hintStyle);
-  }
-
-  // The style for the label when it's displayed above the text is the
-  // same as the inline label style except that the font's size is
-  // 75% of the inline size and its color depends on the value of errorText.
-  TextStyle _getFloatingLabelStyle(ThemeData themeData) {
-    final Color color = decoration.errorText != null
-      ? decoration.errorStyle?.color ?? themeData.errorColor
-      : _getActiveColor(themeData);
-    final TextStyle style = themeData.textTheme.subhead.merge(baseStyle);
-    return style
-      .copyWith(color: color, fontSize: style.fontSize * 0.75)
-      .merge(decoration.labelStyle);
-  }
-
-  TextStyle _getHelperTextStyle(ThemeData themeData) {
-    return themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
-  }
-
-  TextStyle _getSubtextStyle(ThemeData themeData) {
-    final TextStyle helperStyle = _getHelperTextStyle(themeData);
-    return decoration.errorText != null
-      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
-      : helperStyle;
-  }
-
-  double get _dividerWeight {
-    if (decoration.hideDivider || !decoration.enabled)
-      return 0.0;
-    return isFocused ? 2.0 : 1.0;
-  }
-
-  // True if the label will be shown and the hint will not.
-  // If we're not focused, there's no value, and labelText was provided,
-  // then the label appears where the hint would.
-  bool get _hasInlineLabel => !isFocused && isEmpty && decoration.labelText != null;
-
-  bool get _hasSubtext {
-    return !decoration.isCollapsed &&
-      (decoration.errorText != null || decoration.helperText != null || decoration.counterText != null);
-  }
-
-
-  // Build a baseline-aligned row, [prefix input/hint suffix], within a container
-  // with the specified topPadding, decoration.fillColor in the background,
-  // and the divider at the bottom.
-  Widget _buildInput(BuildContext context, double topPadding, Widget inputChild) {
-    final ThemeData themeData = Theme.of(context);
-    final TextStyle hintStyle = _getInlineLabelStyle(themeData);
-    final double dividerWeight = _dividerWeight;
-    final Color dividerColor = decoration.errorText == null
-      ? _getActiveColor(themeData)
-      : themeData.errorColor;
-
-    Widget content = inputChild;
-
-    // The hint is stacked on top of the inputChild (which may be "empty")
-    // because they both occupy the same location.
-    if (decoration.hintText != null) {
-      content = new Stack(
-        children: <Widget>[
-          inputChild,
-          new PositionedDirectional(
-            start: 0.0,
-            bottom: 0.0,
-            child: new AnimatedOpacity(
-              opacity: (isEmpty && !_hasInlineLabel) ? 1.0 : 0.0,
-              duration: _kTransitionDuration,
-              curve: _kTransitionCurve,
-              child: new Text(
-                decoration.hintText,
-                style: hintStyle,
-                overflow: TextOverflow.ellipsis,
-                textAlign: textAlign,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    // Add the prefix and suffix widgets
-    if (!_hasInlineLabel && (!isEmpty || decoration.hintText == null)) {
-      final Widget prefix = decoration.prefixText == null ? null :
-        new Text(
-          decoration.prefixText,
-          style: decoration.prefixStyle ?? hintStyle
-        );
-      final Widget suffix = decoration.suffixText == null ? null :
-        new Text(
-          decoration.suffixText,
-          style: decoration.suffixStyle ?? hintStyle
-        );
-      if ((prefix ?? suffix) != null) {
-        final List<Widget> rowChildren = <Widget>[];
-        if (prefix != null)
-          rowChildren.add(prefix);
-        rowChildren.add(new Expanded(child: content));
-        if (suffix != null)
-          rowChildren.add(suffix);
-        content = new Row(
-          crossAxisAlignment: CrossAxisAlignment.baseline,
-          textBaseline: TextBaseline.alphabetic,
-          children: rowChildren
-        );
-      }
-    }
-
-    // Wrap the content in an optionally filled container with the bottom
-    // border serving as the divider.
-    content = new AnimatedContainer(
-      padding: decoration.isCollapsed ? EdgeInsets.zero : new EdgeInsetsDirectional.only(
-        start: 12.0,
-        end: 12.0,
-        top: topPadding,
-        bottom: (decoration.isDense ? 8.0 : 12.0) - dividerWeight,
-      ),
-      duration: _kTransitionDuration,
-      curve: _kTransitionCurve,
-      decoration: new BoxDecoration(
-        color: _getFillColor(themeData),
-        border: new Border(
-          bottom: new BorderSide(
-            color: dividerColor,
-            width: dividerWeight,
-          ),
-        ),
-      ),
-      child: content,
-    );
-
-    return content;
-  }
-
-  List<Widget> _buildLabel(BuildContext context) {
-    if (decoration.labelText == null)
-      return const <Widget>[];
-
-    final ThemeData themeData = Theme.of(context);
-    final bool isFloating = !isEmpty || isFocused;
-
-    EdgeInsets padding;
-    if (isFloating) {
-      padding = decoration.isDense
-        ? const EdgeInsets.only(top: 8.0)
-        : const EdgeInsets.only(top: 12.0);
-    } else {
-      padding = _hasSubtext
-        ? new EdgeInsets.only(bottom: 8.0 + _getSubtextStyle(themeData).fontSize)
-        : EdgeInsets.zero;
-    }
-
-    final Widget label = new PositionedDirectional(
-      start: 12.0,
-      end: 0.0,
-      top: 0.0,
-      bottom: 0.0,
-      child: new AnimatedContainer(
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        alignment: isFloating
-          ? AlignmentDirectional.topStart
-          : AlignmentDirectional.centerStart,
-        padding: padding,
-        child: new _AnimatedLabel(
-          duration: _kTransitionDuration,
-          curve: _kTransitionCurve,
-          text: decoration.labelText,
-          textAlign: textAlign,
-          style: isFloating
-            ? _getFloatingLabelStyle(themeData)
-            : _getInlineLabelStyle(themeData),
-        ),
-      ),
-    );
-
-    return <Widget>[label];
-  }
-
-  // Return widgets that display the error or helper text and the counterText.
-  // The tops of the returned widgets will be aligned with the bottom of
-  // the inputChild (typically a text field) which is also the top of the
-  // divider, if a divider is included.
-  List<Widget> _buildSubtextAndCounter(BuildContext context) {
-    final String helperText = decoration.helperText;
-    final String counterText = decoration.counterText;
-    final String errorText = decoration.errorText;
-    if (errorText == null && helperText == null && counterText == null)
-      return const <Widget>[];
-
-    assert(!decoration.isCollapsed, "Collapsed fields can't have errorText, helperText, or counterText set.");
-
-    final ThemeData themeData = Theme.of(context);
-
-    final Widget errorOrHelp = (errorText ?? helperText) == null ? null :
-      new AnimatedContainer(
-        padding: const EdgeInsetsDirectional.only(start: 12.0, top: 8.0),
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        child: new Text(
-          errorText ?? helperText,
-          style: _getSubtextStyle(themeData),
-          textAlign: textAlign,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
-
-    final Widget counter = counterText == null ? null :
-      new AnimatedContainer(
-        padding: const EdgeInsetsDirectional.only(end: 0.0, top: 8.0),
-        duration: _kTransitionDuration,
-        curve: _kTransitionCurve,
-        child: new Text(
-          counterText,
-          style: _getHelperTextStyle(themeData).merge(decoration.counterStyle),
-          textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
-          overflow: TextOverflow.ellipsis,
-        ),
-      );
-
-    if (counter == null)
-      return <Widget>[errorOrHelp];
-    else if (errorOrHelp == null)
-      return <Widget>[counter];
-    return <Widget>[
-      new Row(
-        children: <Widget>[
-          new Expanded(child: errorOrHelp),
-          counter,
-        ],
-      ),
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    assert(debugCheckHasMaterial(context));
-    final ThemeData themeData = Theme.of(context);
-    final double textScaleFactor = MediaQuery.of(context, nullOk: true)?.textScaleFactor ?? 1.0;
-
-    final bool isDense = decoration.isDense;
-    final bool isCollapsed = decoration.isCollapsed;
-    assert(!isDense || !isCollapsed);
-
-    final Color activeColor = _getActiveColor(themeData);
-    final TextStyle baseStyle = themeData.textTheme.subhead.merge(this.baseStyle);
-
-    double topPadding = isCollapsed ? 0.0 : (isDense ? 8.0 : 12.0);
-    if (decoration.labelText != null) {
-      final double floatingLabelHeight = _getFloatingLabelStyle(themeData).fontSize * textScaleFactor;
-      topPadding += floatingLabelHeight + 4.0; // 4.0 gap between label and text
-    }
-
-    final Widget inputChild = new KeyedSubtree(
-      // It's important that we maintain the state of our child subtree, as it
-      // may be stateful (e.g. containing text selections). Since our build
-      // function risks changing the depth of the tree, we preserve the subtree
-      // using global keys.
-      // GlobalObjectKey(context) will always be the same whenever we are built.
-      // Additionally, we use a subclass of GlobalObjectKey to avoid clashes
-      // with anyone else using our BuildContext as their global object key
-      // value.
-      key: new _InputDecoratorChildGlobalKey(context),
-      child: child,
-    );
-
-    final Widget stack = new Stack(
-      fit: StackFit.passthrough,
-      children: <Widget>[]
-        ..add(
-          // The inputChild and the helper/error text need to be in a column
-          // so that if the inputChild is a multiline input or a non-text widget,
-          // it lays out with the helper/error text below the inputChild.
-          new Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[]
-              ..add(_buildInput(context, topPadding, inputChild))
-              ..addAll(_buildSubtextAndCounter(context))
-          )
-        )
-        ..addAll(_buildLabel(context))
-    );
-
-    if (decoration.icon != null) {
-      assert(!isCollapsed);
-      final double iconSize = isDense ? 18.0 : 24.0;
-      final double entryTextHeight = baseStyle.fontSize * textScaleFactor;
-      final double iconTop = topPadding + (entryTextHeight - iconSize) / 2.0;
-      return new Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new AnimatedContainer(
-            margin: new EdgeInsets.only(top: iconTop),
-            duration: _kTransitionDuration,
-            curve: _kTransitionCurve,
-            width: isDense ? 40.0 : 48.0,
-            child: IconTheme.merge(
-              data: new IconThemeData(
-                color: isFocused ? activeColor : Colors.black45,
-                size: iconSize,
-              ),
-              child: decoration.icon,
-            ),
-          ),
-          new Expanded(child: stack),
-        ],
-      );
-    } else {
-      return new ConstrainedBox(
-        constraints: const BoxConstraints(minWidth: double.INFINITY),
-        child: stack,
-      );
-    }
-  }
-}
-
-// Smoothly animate the label of an InputDecorator as the label
-// transitions between inline and caption.
-class _AnimatedLabel extends ImplicitlyAnimatedWidget {
-  const _AnimatedLabel({
-    Key key,
-    this.text,
-    @required this.style,
-    Curve curve: Curves.linear,
-    @required Duration duration,
-    this.textAlign,
-    this.overflow,
-  }) : assert(style != null),
-       super(key: key, curve: curve, duration: duration);
-
-  final String text;
-  final TextStyle style;
-  final TextAlign textAlign;
-  final TextOverflow overflow;
-
-  @override
-  _AnimatedLabelState createState() => new _AnimatedLabelState();
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder description) {
-    super.debugFillProperties(description);
-    style?.debugFillProperties(description);
-  }
-}
-
-class _AnimatedLabelState extends AnimatedWidgetBaseState<_AnimatedLabel> {
-  TextStyleTween _style;
-
-  @override
-  void forEachTween(TweenVisitor<dynamic> visitor) {
-    _style = visitor(_style, widget.style, (dynamic value) => new TextStyleTween(begin: value));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle style = _style.evaluate(animation);
-    double scale = 1.0;
-    if (style.fontSize != widget.style.fontSize) {
-      // While the fontSize is transitioning, use a scaled Transform as a
-      // fraction of the original fontSize. That way we get a smooth scaling
-      // effect with no snapping between discrete font sizes.
-      scale = style.fontSize / widget.style.fontSize;
-      style = style.copyWith(fontSize: widget.style.fontSize);
-    }
-
-    return new Transform(
-      transform: new Matrix4.identity()..scale(scale),
-      child: new Text(
-        widget.text,
-        style: style,
-        textAlign: widget.textAlign,
-        overflow: widget.overflow,
-      ),
-    );
   }
 }
