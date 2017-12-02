@@ -14,10 +14,10 @@ class DoctorCommand extends FlutterCommand {
       negatable: false,
       help: 'Run the Android SDK manager tool to accept the SDK\'s licenses.',
     );
-    argParser.addFlag('only-fuchsia',
+    argParser.addFlag('fuchsia',
       defaultsTo: false,
       negatable: false,
-      help: 'Run Doctor without testing android & ios platforms.',
+      hide: true
     );
   }
 
@@ -29,7 +29,7 @@ class DoctorCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], onlyFuchsia: argResults['only-fuchsia']);
+    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], onlyFuchsia: argResults['fuchsia']);
     return new FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

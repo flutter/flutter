@@ -44,7 +44,8 @@ class Doctor {
       }
       
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
-      ideValidators.addAll(AndroidStudioValidator.allValidators);
+      if (!runOnlyFuchsia)
+        ideValidators.addAll(AndroidStudioValidator.allValidators);
       ideValidators.addAll(IntelliJValidator.installedValidators);
       if (ideValidators.isNotEmpty)
         _validators.addAll(ideValidators);
