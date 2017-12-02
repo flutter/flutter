@@ -131,21 +131,17 @@ class CupertinoDemoTab1 extends StatelessWidget {
             largeTitle: const Text('Colors'),
             trailing: const ExitButton(),
           ),
-          new SliverPadding(
-            // Top media query padding already consumed by CupertinoSliverNavigationBar.
-            padding: MediaQuery.of(context).removePadding(removeTop: true).padding,
-            sliver: new SliverList(
-              delegate: new SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  return new Tab1RowItem(
-                    index: index,
-                    lastItem: index == 49,
-                    color: colorItems[index],
-                    colorName: colorNameItems[index],
-                  );
-                },
-                childCount: 50,
-              ),
+          new SliverList(
+            delegate: new SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return new Tab1RowItem(
+                  index: index,
+                  lastItem: index == 49,
+                  color: colorItems[index],
+                  colorName: colorNameItems[index],
+                );
+              },
+              childCount: 50,
             ),
           ),
         ],
@@ -275,7 +271,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
       ),
       child: new ListView(
         children: <Widget>[
-          const Padding(padding: const EdgeInsets.only(top: 16.0)),
+          const Padding(padding: const EdgeInsets.only(top: 80.0)),
           new Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: new Row(
@@ -400,6 +396,7 @@ class CupertinoDemoTab2 extends StatelessWidget {
       ),
       child: new ListView(
         children: <Widget>[
+          const Padding(padding: const EdgeInsets.only(top: 60.0)),
           new Tab2Header(),
         ]..addAll(buildTab2Conversation()),
       ),
@@ -667,6 +664,7 @@ List<Widget> buildTab2Conversation() {
     const Tab2ConversationRow(
       text: "What's that?",
     ),
+    const Padding(padding: const EdgeInsets.only(bottom: 80.0)),
   ];
 }
 
@@ -682,7 +680,7 @@ class CupertinoDemoTab3 extends StatelessWidget {
         decoration: const BoxDecoration(color: const Color(0xFFEFEFF4)),
         child: new ListView(
           children: <Widget>[
-            const Padding(padding: const EdgeInsets.only(top: 32.0)),
+            const Padding(padding: const EdgeInsets.only(top: 100.0)),
             new GestureDetector(
               onTap: () {
                 Navigator.of(context, rootNavigator: true).push(
