@@ -357,7 +357,6 @@ class RenderCustomPaint extends RenderProxyBox {
     final CustomPainter oldPainter = _painter;
     _painter = value;
     _didUpdatePainter(_painter, oldPainter);
-    markNeedsSemanticsUpdate();
   }
 
   /// The foreground custom paint delegate.
@@ -386,6 +385,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   void _didUpdatePainter(CustomPainter newPainter, CustomPainter oldPainter) {
+    // Check if we need to repaint.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
       markNeedsPaint();
@@ -397,6 +397,16 @@ class RenderCustomPaint extends RenderProxyBox {
     if (attached) {
       oldPainter?.removeListener(markNeedsPaint);
       newPainter?.addListener(markNeedsPaint);
+    }
+
+    // Check if we need to rebuild semantics.
+    if (newPainter == null) {
+      assert(oldPainter != null); // We should be called only for changes.
+      markNeedsSemanticsUpdate();
+    } else if (oldPainter == null ||
+        newPainter.runtimeType != oldPainter.runtimeType ||
+        newPainter.shouldRebuildSemantics(oldPainter)) {
+      markNeedsSemanticsUpdate();
     }
   }
 

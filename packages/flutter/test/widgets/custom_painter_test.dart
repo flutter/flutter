@@ -14,6 +14,9 @@ void main() {
   group(CustomPainter, () {
     setUp(() {
       debugResetSemanticsIdCounter();
+      _PainterWithSemantics.shouldRebuildSemanticsCallCount = 0;
+      _PainterWithSemantics.buildSemanticsCallCount = 0;
+      _PainterWithSemantics.semanticsBuilderCallCount = 0;
     });
 
     _defineTests();
@@ -368,6 +371,94 @@ void _defineTests() {
       );
     });
   });
+
+  testWidgets('rebuilds semantics upon resize', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    final _PainterWithSemantics painter = new _PainterWithSemantics(
+      semantics: new CustomPainterSemantics(
+        rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+        properties: const SemanticsProperties(
+          label: 'background',
+          textDirection: TextDirection.rtl,
+        ),
+      ),
+    );
+
+    final CustomPaint paint = new CustomPaint(painter: painter);
+
+    await tester.pumpWidget(new SizedBox(
+      height: 20.0,
+      width: 20.0,
+      child: paint,
+    ));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+
+    await tester.pumpWidget(new SizedBox(
+      height: 20.0,
+      width: 20.0,
+      child: paint,
+    ));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+
+    await tester.pumpWidget(new SizedBox(
+      height: 40.0,
+      width: 40.0,
+      child: paint,
+    ));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+
+    semanticsTester.dispose();
+  });
+
+  testWidgets('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
+    final SemanticsTester semanticsTester = new SemanticsTester(tester);
+
+    final CustomPainterSemantics testSemantics = new CustomPainterSemantics(
+      rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      properties: const SemanticsProperties(
+        label: 'background',
+        textDirection: TextDirection.rtl,
+      ),
+    );
+
+    await tester.pumpWidget(new CustomPaint(painter: new _PainterWithSemantics(
+      semantics: testSemantics,
+    )));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+
+    await tester.pumpWidget(new CustomPaint(painter: new _PainterWithSemantics(
+      semantics: testSemantics,
+    )));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+
+    final CustomPainterSemantics testSemantics2 = new CustomPainterSemantics(
+      rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+      properties: const SemanticsProperties(
+        label: 'background',
+        textDirection: TextDirection.rtl,
+      ),
+    );
+
+    await tester.pumpWidget(new CustomPaint(painter: new _PainterWithSemantics(
+      semantics: testSemantics2,
+    )));
+    expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 3);
+
+    semanticsTester.dispose();
+  });
 }
 
 void testDiff(String description, Future<Null> Function(_DiffTester tester) testFunction) {
@@ -495,20 +586,36 @@ class _PainterWithSemantics extends CustomPainter {
 
   final CustomPainterSemantics semantics;
 
+  static int semanticsBuilderCallCount = 0;
+  static int buildSemanticsCallCount = 0;
+  static int shouldRebuildSemanticsCallCount = 0;
+
   @override
   void paint(Canvas canvas, Size size) {
     // We don't test painting.
   }
 
   @override
-  SemanticsBuilderCallback get semanticsBuilder => buildSemantics;
+  SemanticsBuilderCallback get semanticsBuilder {
+    semanticsBuilderCallCount += 1;
+    return buildSemantics;
+  }
 
   List<CustomPainterSemantics> buildSemantics(Size size) {
+    buildSemanticsCallCount += 1;
     return <CustomPainterSemantics>[semantics];
   }
 
   @override
-  bool shouldRepaint(_PainterWithSemantics oldPainter) => true;
+  bool shouldRepaint(_PainterWithSemantics oldPainter) {
+    return true;
+  }
+
+  @override
+  bool shouldRebuildSemantics(_PainterWithSemantics oldPainter) {
+    shouldRebuildSemanticsCallCount += 1;
+    return !identical(oldPainter.semantics, semantics);
+  }
 }
 
 class _PainterWithoutSemantics extends CustomPainter {
