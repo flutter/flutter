@@ -44,6 +44,7 @@ test:../../third_party/dart/third_party/pkg/test/lib/
 typed_data:../../third_party/dart/third_party/pkg/typed_data/lib/
 usage:../../third_party/dart/third_party/pkg/usage/lib/
 utf:../../third_party/dart/third_party/pkg/utf/lib/
+vm:../../third_party/dart/pkg/vm/lib/
 watcher:../../third_party/dart/third_party/pkg/watcher/lib/
 web_socket_channel:../../third_party/dart/third_party/pkg/web_socket_channel/lib/
 when:../../third_party/pkg/when/lib/
