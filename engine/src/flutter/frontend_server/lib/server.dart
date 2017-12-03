@@ -16,13 +16,13 @@ import 'package:front_end/src/api_prototype/compilation_message.dart';
 import 'package:front_end/src/api_prototype/byte_store.dart';
 import 'package:front_end/src/api_prototype/compiler_options.dart';
 import 'package:front_end/src/api_prototype/incremental_kernel_generator.dart';
-import 'package:front_end/src/api_prototype/kernel_generator.dart';
 import 'package:kernel/ast.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:kernel/binary/limited_ast_to_binary.dart';
 import 'package:kernel/target/flutter.dart';
 import 'package:kernel/target/targets.dart';
 import 'package:usage/uuid/uuid.dart';
+import 'package:vm/kernel_front_end.dart' show compileToKernel;
 
 ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
   ..addFlag('train',
@@ -37,6 +37,9 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       help: 'Path to file byte store used to keep incremental compiler state.'
           ' If omitted, then memory byte store is used.',
       defaultsTo: null)
+  ..addFlag('aot',
+      help: 'Run compiler in AOT mode (enables whole-program transformations)',
+      defaultsTo: false)
   ..addFlag('link-platform',
       help: 'When in batch mode, link platform kernel file into result kernel file.'
           ' Intended use is to satisfy different loading strategies implemented'
@@ -177,7 +180,9 @@ class _FrontendCompiler implements CompilerInterface {
           sdkRoot.resolve('platform.dill')
         ];
       }
-      program = await kernelForProgram(Uri.base.resolve(_filename), compilerOptions);
+      program = await compileToKernel(
+          Uri.base.resolve(_filename), compilerOptions,
+          aot: options['aot']);
     }
     if (program != null) {
       final IOSink sink = new File(_kernelBinaryFilename).openWrite();

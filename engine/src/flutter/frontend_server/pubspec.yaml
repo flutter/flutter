@@ -21,6 +21,7 @@ dependencies:
   source_span: any
   typed_data: any
   usage: any
+  vm: any
 
 dev_dependencies:
   analyzer: any
@@ -90,6 +91,8 @@ dependency_overrides:
     path: ../../third_party/dart/third_party/pkg/typed_data
   usage:
     path: ../../third_party/dart/third_party/pkg/usage
+  vm:
+    path: ../../third_party/dart/pkg/vm/
 
   analyzer:
     path: ../../third_party/dart/pkg/analyzer
