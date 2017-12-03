@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 2000);
+const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 enum InputDecoratorBorderType {
@@ -231,6 +231,37 @@ class TextFieldBorder extends ShapeBorder {
   int get hashCode => hashValues(borderType, borderSide, borderRadius);
 }
 
+class _Shaker extends AnimatedWidget {
+  const _Shaker({
+    Key key,
+    Animation<double> animation,
+    this.child,
+  }) : super(key: key, listenable: animation);
+
+  final Widget child;
+
+  Animation<double> get animation => listenable;
+
+  double get translateX {
+    const double shakeDelta = 4.0;
+    final double t = animation.value;
+    if (t <= 0.25)
+      return -t * shakeDelta;
+    else if (t < 0.75)
+      return (t - 0.5) * shakeDelta;
+    else
+      return (1.0 - t) * 4.0 * shakeDelta;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Transform(
+      transform: new Matrix4.translationValues(translateX, 0.0, 0.0),
+      child: child,
+    );
+  }
+}
+
 enum _DecorationSlot {
   input,
   label,
@@ -331,7 +362,8 @@ class _Decoration {
 class _RenderDecorationLayout {
   const _RenderDecorationLayout({
     this.boxToBaseline,
-    this.inputBaseline,
+    this.inputBaseline, // for InputDecoratorBorderType.underline
+    this.outlineBaseline, // for InputDecoratorBorderType.outline
     this.subtextBaseline,
     this.containerHeight,
     this.subtextHeight,
@@ -339,6 +371,7 @@ class _RenderDecorationLayout {
 
   final Map<RenderBox, double> boxToBaseline;
   final double inputBaseline;
+  final double outlineBaseline;
   final double subtextBaseline;
   final double containerHeight;
   final double subtextHeight;
@@ -595,6 +628,12 @@ class _RenderDecoration extends RenderBox {
       inputBaseline += decoration.floatingLabelHeight;
     }
 
+    // Inline text within an outline border is centered within the container
+    // less 8.0 dps at the top to account for the vertical space occupied
+    // by the floating library.
+    final double outlineBaseline = aboveBaseline +
+      (containerHeight - (2.0 + aboveBaseline + belowBaseline)) / 2.0;
+
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
     if (helper != null || error != null || counter != null) {
@@ -613,6 +652,7 @@ class _RenderDecoration extends RenderBox {
       boxToBaseline: boxToBaseline,
       containerHeight: containerHeight,
       inputBaseline: inputBaseline,
+      outlineBaseline: outlineBaseline,
       subtextBaseline: subtextBaseline,
       subtextHeight: subtextHeight,
     );
@@ -718,7 +758,9 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = layout.inputBaseline;
+    baseline = decoration.border.borderType == InputDecoratorBorderType.outline
+      ? layout.outlineBaseline
+      : layout.inputBaseline;
 
     if (textDirection == TextDirection.rtl) {
       double start = right;
@@ -801,15 +843,6 @@ class _RenderDecoration extends RenderBox {
         context.paintChild(child, _boxParentData(child).offset + offset);
     }
 
-    /*
-    if (decoration.border != null && label != null) {
-      final double t = decoration.floatingLabelProgress;
-      final double labelWidth = label.size.width * 0.75;
-      final double labelX = _boxParentData(label).offset.dx;
-      decoration.border.gapStart = lerpDouble(labelX + labelWidth * 0.5, labelX, t);
-      decoration.border.gapExtent = lerpDouble(0.0, labelWidth, t);
-    }
-    */
     doPaint(container);
 
     if (label != null) {
@@ -819,7 +852,7 @@ class _RenderDecoration extends RenderBox {
       final bool isOutlineBorder = decoration.border.borderType == InputDecoratorBorderType.outline;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
-      final double floatingY = isOutlineBorder ? -labelHeight * 0.3 : contentPadding.top;
+      final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
       final double scale = lerpDouble(1.0, 0.75, t);
       _labelTransform = new Matrix4.identity()
@@ -1110,29 +1143,36 @@ class InputDecorator extends StatefulWidget {
   }
 }
 
-class _InputDecoratorState extends State<InputDecorator> with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
+  AnimationController _floatingLabelController;
+  AnimationController _shakingLabelController;
 
   @override
   void initState() {
     super.initState();
-    _controller = new AnimationController(
+    _floatingLabelController = new AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
       value: widget.labelIsFloating ? 1.0 : 0.0,
     );
-    _controller.addListener(_handleChange);
+    _floatingLabelController.addListener(_handleChange);
+
+    _shakingLabelController = new AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+    );
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _floatingLabelController.dispose();
+    _shakingLabelController.dispose();
     super.dispose();
   }
 
   void _handleChange() {
     setState(() {
-      // The _controller's value has changed
+      // The _floatingLabelController's value has changed.
     });
   }
 
@@ -1146,9 +1186,14 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
     super.didUpdateWidget(old);
     if (widget.labelIsFloating != old.labelIsFloating) {
       if (widget.labelIsFloating)
-        _controller.forward();
+        _floatingLabelController.forward();
       else
-        _controller.reverse();
+        _floatingLabelController.reverse();
+    }
+    if (decoration.errorText != null && decoration.errorText != old.decoration.errorText) {
+      _shakingLabelController
+        ..value = 0.0
+        ..forward();
     }
   }
 
@@ -1250,7 +1295,7 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
     );
 
     final TextFieldBorder border = new TextFieldBorder(
-        gapAnimation: _controller.view,
+        gapAnimation: _floatingLabelController.view,
         borderType: decoration.borderType,
         borderRadius: decoration.borderType == InputDecoratorBorderType.outline
           ? new BorderRadius.circular(4.0)
@@ -1270,13 +1315,16 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
       ),
     );
 
-    final Widget label = decoration.labelText == null ? null : new Text(
-      decoration.labelText,
-      textAlign: textAlign,
-      style: new TextStyleTween(
-        begin: _getInlineLabelStyle(themeData),
-        end: _getFloatingLabelStyle(themeData),
-      ).evaluate(_controller),
+    final Widget label = decoration.labelText == null ? null : new _Shaker(
+      animation: _shakingLabelController.view,
+      child: new Text(
+        decoration.labelText,
+        textAlign: textAlign,
+        style: new TextStyleTween(
+          begin: _getInlineLabelStyle(themeData),
+          end: _getFloatingLabelStyle(themeData),
+        ).evaluate(_floatingLabelController),
+      ),
     );
 
     final Widget prefix = decoration.prefixText == null ? null :
@@ -1363,7 +1411,7 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
       decoration: new _Decoration(
         contentPadding: contentPadding,
         floatingLabelHeight: floatingLabelHeight,
-        floatingLabelProgress: _controller.value,
+        floatingLabelProgress: _floatingLabelController.value,
         border: border,
         input: widget.child,
         label: label,
