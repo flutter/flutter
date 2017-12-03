@@ -12,20 +12,26 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
+const Duration _kTransitionDuration = const Duration(milliseconds: 2000);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
+
+enum InputDecoratorBorderType {
+  outline,
+  underline,
+  none,
+}
 
 class TextFieldBorder extends ShapeBorder {
   TextFieldBorder({
+    this.borderType: InputDecoratorBorderType.underline,
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
     this.textDirection: TextDirection.ltr,
-    this.gapStart, // TBD: a percentage assert(null or between 0 and 1)
-    this.gapExtent,
+    this.gapPad: 4.0,
   }) : assert(borderSide != null),
        assert(borderRadius != null),
        assert(_cornersAreCircular(borderRadius)),
-       assert(gapStart == null || (gapStart >= 0.0 && gapExtent != null));
+       assert(gapPad != null);
 
   static bool _cornersAreCircular(BorderRadius borderRadius) {
     return borderRadius.topLeft.x ==  borderRadius.topLeft.y
@@ -34,11 +40,11 @@ class TextFieldBorder extends ShapeBorder {
         && borderRadius.bottomRight.x ==  borderRadius.bottomRight.y;
   }
 
+  final InputDecoratorBorderType borderType;
   final BorderSide borderSide;
   final BorderRadius borderRadius;
   final TextDirection textDirection;
-  final double gapStart;
-  final double gapExtent;
+  final double gapPad;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -51,8 +57,6 @@ class TextFieldBorder extends ShapeBorder {
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
       textDirection: textDirection,
-      gapStart: gapStart,
-      gapExtent: gapExtent,
     );
   }
 
@@ -68,7 +72,7 @@ class TextFieldBorder extends ShapeBorder {
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
-  Path _gapBorderPath(Canvas canvas, RRect center) {
+  Path _gapBorderPath(Canvas canvas, RRect center, double gapStart, double gapExtent) {
     final Rect tlCorner = new Rect.fromLTWH(
       center.left,
       center.top,
@@ -128,40 +132,65 @@ class TextFieldBorder extends ShapeBorder {
       ..lineTo(center.left, center.top + center.trRadiusY);
   }
 
-  @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection, }) {
+  void paintOutline(Canvas canvas, Rect rect, double gapStart, double gapExtent) {
+    final Paint paint = borderSide.toPaint();
+    final RRect outer = borderRadius.toRRect(rect);
+    final RRect center = outer.deflate(borderSide.width / 2.0);
+    if (gapStart == null || gapExtent <= 0.0) {
+      canvas.drawRRect(center, paint);
+    } else {
+      gapExtent += gapPad * 2.0;
+      if (textDirection == TextDirection.ltr) {
+        final Path path = _gapBorderPath(canvas, center, gapStart - gapPad, gapExtent);
+        canvas.drawPath(path, paint);
+      } else {
+        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad, gapExtent);
+        final Matrix4 transform = new Matrix4.identity()
+          ..translate(rect.left + rect.right, 0.0) // TBD: WTF left + right?
+          ..scale(-1.0, 1.0, 1.0);
+        canvas.drawPath(path.transform(transform.storage), paint);
+      }
+    }
+  }
+
+  void paintUnderline(Canvas canvas, Rect rect) {
+    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
+  }
+
+  void paintBorder(Canvas canvas, Rect rect, double gapStart, double gapExtent) {
     switch (borderSide.style) {
       case BorderStyle.none:
         break;
       case BorderStyle.solid: {
-        final Paint paint = borderSide.toPaint();
-        final RRect outer = borderRadius.toRRect(rect);
-        final RRect center = outer.deflate(borderSide.width / 2.0);
-        if (gapStart == null || gapExtent <= 0.0) {
-          canvas.drawRRect(center, paint);
-        } else {
-          final Path path = _gapBorderPath(canvas, center);
-          if (textDirection == TextDirection.ltr) {
-            canvas.drawPath(path, paint);
-          } else {
-            final Matrix4 transform = new Matrix4.identity()
-              ..translate(rect.left + rect.right, 0.0) // TBD: WTF left + right?
-              ..scale(-1.0, 1.0, 1.0);
-            canvas.drawPath(path.transform(transform.storage), paint);
-          }
+        switch(borderType) {
+          case InputDecoratorBorderType.none:
+            return;
+          case InputDecoratorBorderType.outline:
+            paintOutline(canvas, rect, gapStart, gapExtent);
+            break;
+          case InputDecoratorBorderType.underline:
+            paintUnderline(canvas, rect);
+            break;
+          default:
+            assert(false);
         }
       }
     }
   }
 
   @override
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+    paintBorder(canvas, rect, null, 0.0);
+  }
+
+  @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is TextFieldBorder) {
       return new TextFieldBorder(
+        borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        gapStart: gapStart,
-        gapExtent: lerpDouble(a.gapExtent, gapExtent, t),
+        gapPad: a.gapPad,
       );
     }
     return super.lerpFrom(a, t);
@@ -171,10 +200,10 @@ class TextFieldBorder extends ShapeBorder {
   ShapeBorder lerpTo(ShapeBorder b, double t) {
     if (b is TextFieldBorder) {
       return new TextFieldBorder(
+        borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        gapStart: gapStart,
-        gapExtent: lerpDouble(gapExtent, b.gapExtent, t),
+        gapPad: b.gapPad,
       );
     }
     return super.lerpTo(b, t);
@@ -187,14 +216,13 @@ class TextFieldBorder extends ShapeBorder {
     if (runtimeType != other.runtimeType)
       return false;
     final TextFieldBorder typedOther = other;
-    return typedOther.borderRadius == borderRadius
-        && typedOther.borderSide == borderSide
-        && typedOther.gapStart == gapStart
-        && typedOther.gapExtent == gapExtent;
+    return typedOther.borderType == borderType
+        && typedOther.borderRadius == borderRadius
+        && typedOther.borderSide == borderSide;
   }
 
   @override
-  int get hashCode => hashValues(borderSide, borderRadius, gapStart, gapExtent);
+  int get hashCode => hashValues(borderType, borderSide, borderRadius);
 }
 
 
@@ -217,6 +245,7 @@ class _Decoration {
     @required this.contentPadding,
     @required this.floatingLabelHeight,
     @required this.floatingLabelProgress,
+    this.border,
     this.input,
     this.label,
     this.hint,
@@ -235,6 +264,7 @@ class _Decoration {
   final EdgeInsets contentPadding;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
+  final TextFieldBorder border;
   final Widget input;
   final Widget label;
   final Widget hint;
@@ -257,6 +287,7 @@ class _Decoration {
     return typedOther.contentPadding == contentPadding
         && typedOther.floatingLabelHeight == floatingLabelHeight
         && typedOther.floatingLabelProgress == floatingLabelProgress
+        && typedOther.border == border
         && typedOther.input == input
         && typedOther.label == label
         && typedOther.hint == hint
@@ -276,6 +307,7 @@ class _Decoration {
       contentPadding,
       floatingLabelHeight,
       floatingLabelProgress,
+      border,
       input,
       label,
       hint,
@@ -314,78 +346,87 @@ class _RenderDecoration extends RenderBox {
   }) : _decoration = decoration,
        _textDirection = textDirection;
 
-  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild) {
-    if (oldChild != null)
+  final Map<_DecorationSlot, RenderBox> slotToChild = <_DecorationSlot, RenderBox>{};
+  final Map<RenderBox, _DecorationSlot> childToSlot = <RenderBox, _DecorationSlot>{};
+
+  RenderBox _updateChild(RenderBox oldChild, RenderBox newChild, _DecorationSlot slot) {
+    if (oldChild != null) {
       dropChild(oldChild);
-    if (newChild != null)
+      childToSlot.remove(oldChild);
+      slotToChild.remove(slot);
+    }
+    if (newChild != null) {
+      childToSlot[newChild] = slot;
+      slotToChild[slot] = newChild;
       adoptChild(newChild);
+    }
     return newChild;
   }
 
   RenderBox _input;
   RenderBox get input => _input;
   set input(RenderBox value) {
-    _input = _updateChild(_input, value);
+    _input = _updateChild(_input, value, _DecorationSlot.input);
   }
 
   RenderBox _label;
   RenderBox get label => _label;
   set label(RenderBox value) {
-    _label = _updateChild(_label, value);
+    _label = _updateChild(_label, value, _DecorationSlot.label);
   }
 
   RenderBox _hint;
   RenderBox get hint => _hint;
   set hint(RenderBox value) {
-    _hint = _updateChild(_hint, value);
+    _hint = _updateChild(_hint, value, _DecorationSlot.hint);
   }
 
   RenderBox _prefix;
   RenderBox get prefix => _prefix;
   set prefix(RenderBox value) {
-    _prefix = _updateChild(_prefix, value);
+    _prefix = _updateChild(_prefix, value, _DecorationSlot.prefix);
   }
 
   RenderBox _suffix;
   RenderBox get suffix => _suffix;
   set suffix(RenderBox value) {
-    _suffix = _updateChild(_suffix, value);
+    _suffix = _updateChild(_suffix, value, _DecorationSlot.suffix);
   }
 
   RenderBox _prefixIcon;
   RenderBox get prefixIcon => _prefixIcon;
   set prefixIcon(RenderBox value) {
-    _prefixIcon = _updateChild(_prefixIcon, value);
+    _prefixIcon = _updateChild(_prefixIcon, value, _DecorationSlot.prefixIcon);
   }
 
   RenderBox _suffixIcon;
   RenderBox get suffixIcon => _suffixIcon;
   set suffixIcon(RenderBox value) {
-    _suffixIcon = _updateChild(_suffixIcon, value);
+    _suffixIcon = _updateChild(_suffixIcon, value, _DecorationSlot.suffixIcon);
   }
 
   RenderBox _error;
   RenderBox get error => _error;
   set error(RenderBox value) {
-    _error = _updateChild(_error, value);
+    _error = _updateChild(_error, value, _DecorationSlot.error);
   }
 
   RenderBox _helper;
   RenderBox get helper => _helper;
   set helper(RenderBox value) {
-    _helper = _updateChild(_helper, value);
+    _helper = _updateChild(_helper, value, _DecorationSlot.helper);
   }
 
   RenderBox _counter;
   RenderBox get counter => _counter;
   set counter(RenderBox value) {
-    _counter = _updateChild(_counter, value);
+    _counter = _updateChild(_counter, value, _DecorationSlot.counter);
   }
 
   RenderBox _container;
   RenderBox get container => _container;
   set container(RenderBox value) {
-    _container = _updateChild(_container, value);
+    _container = _updateChild(_container, value, _DecorationSlot.container);
   }
 
   // The returned list is ordered for hit testing.
@@ -420,6 +461,7 @@ class _RenderDecoration extends RenderBox {
     if (_decoration == value)
       return;
     _decoration = value;
+    // TBD: if only the border OR floatingLabelProgress changed, then just paint
     markNeedsLayout();
   }
 
@@ -542,10 +584,10 @@ class _RenderDecoration extends RenderBox {
       + contentPadding.bottom;
 
     if (label != null) {
-      // The vertical gap between the inline elements and the floating label.
-      const double gap = 4.0;
-      containerHeight += gap + decoration.floatingLabelHeight;
-      inputBaseline += gap + decoration.floatingLabelHeight;
+      // floatingLabelHeight includes the vertical gap between the inline
+      // elements and the floating label.
+      containerHeight += decoration.floatingLabelHeight;
+      inputBaseline += decoration.floatingLabelHeight;
     }
 
     double subtextBaseline = 0.0;
@@ -746,17 +788,23 @@ class _RenderDecoration extends RenderBox {
         context.paintChild(child, _boxParentData(child).offset + offset);
     }
     doPaint(container);
+
     if (label != null) {
       final Offset labelOffset = _boxParentData(label).offset;
+      final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      final double scale = lerpDouble(1.0, 0.75, t);
-      final double floatingY = contentPadding.top;
+      final bool isOutlineBorder = decoration.border.borderType == InputDecoratorBorderType.outline;
+      // The center of the outline border label ends up a little below the
+      // center of the top border line.
+      final double floatingY = isOutlineBorder ? -labelHeight * 0.3 : contentPadding.top;
       final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
+      final double scale = lerpDouble(1.0, 0.75, t);
       _labelTransform = new Matrix4.identity()
         ..translate(labelOffset.dx, labelOffset.dy + dy)
         ..scale(scale);
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
+
     doPaint(prefix);
     doPaint(suffix);
     doPaint(prefixIcon);
@@ -765,6 +813,21 @@ class _RenderDecoration extends RenderBox {
     doPaint(input);
     doPaint(error ?? helper);
     doPaint(counter);
+
+    if (decoration.border != null) {
+      double gapStart;
+      double gapExtent;
+      if (label != null) {
+        final double t = decoration.floatingLabelProgress;
+        final double labelWidth = label.size.width * 0.75;
+        final double labelX = _boxParentData(label).offset.dx;
+        gapStart = lerpDouble(labelX + labelWidth * 0.5, labelX, t);
+        gapStart = labelX;
+        gapExtent = lerpDouble(0.0, labelWidth, t);
+      }
+      final Rect rect = offset & container.size;
+      decoration.border.paintBorder(context.canvas, rect, gapStart, gapExtent);
+    }
   }
 
   @override
@@ -796,8 +859,8 @@ class _RenderDecoration extends RenderBox {
 class _RenderDecorationElement extends RenderObjectElement {
   _RenderDecorationElement(_Decorator widget) : super(widget);
 
-  final Map<_DecorationSlot, Element> _slotToChild = <_DecorationSlot, Element>{};
-  final Map<Element, _DecorationSlot> _childToSlot = <Element, _DecorationSlot>{};
+  final Map<_DecorationSlot, Element> slotToChild = <_DecorationSlot, Element>{};
+  final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
   _Decorator get widget => super.widget;
@@ -807,25 +870,29 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    _slotToChild.values.forEach(visitor);
+    slotToChild.values.forEach(visitor);
   }
 
   @override
   void forgetChild(Element child) {
-    assert(_slotToChild.values.contains(child));
-    assert(_childToSlot.keys.contains(child));
-    final _DecorationSlot slot = _childToSlot[child];
-    _childToSlot.remove(child);
-    _slotToChild.remove(slot);
+    assert(slotToChild.values.contains(child));
+    assert(childToSlot.keys.contains(child));
+    final _DecorationSlot slot = childToSlot[child];
+    childToSlot.remove(child);
+    slotToChild.remove(slot);
   }
 
   void _mountChild(Widget widget, _DecorationSlot slot) {
-    if (widget == null)
-      return;
-    final Element oldChild = _slotToChild[slot];
+    final Element oldChild = slotToChild[slot];
     final Element newChild = updateChild(oldChild, widget, slot);
-    _slotToChild[slot] = newChild;
-    _childToSlot[newChild] = slot;
+    if (oldChild != null) {
+      slotToChild.remove(slot);
+      childToSlot.remove(oldChild);
+    }
+    if (newChild != null) {
+      slotToChild[slot] = newChild;
+      childToSlot[newChild] = slot;
+    }
   }
 
   @override
@@ -845,15 +912,15 @@ class _RenderDecorationElement extends RenderObjectElement {
   }
 
   void _updateChild(Widget widget, _DecorationSlot slot) {
-    final Element oldChild = _slotToChild[slot];
+    final Element oldChild = slotToChild[slot];
+    final Element newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
-      _childToSlot.remove(oldChild);
-      _slotToChild.remove(slot);
+      childToSlot.remove(oldChild);
+      slotToChild.remove(slot);
     }
-    if (widget != null) {
-      final Element newChild = updateChild(oldChild, widget, slot);
-      _slotToChild[slot] = newChild;
-      _childToSlot[newChild] = slot;
+    if (newChild != null) {
+      slotToChild[slot] = newChild;
+      childToSlot[newChild] = slot;
     }
   }
 
@@ -874,12 +941,7 @@ class _RenderDecorationElement extends RenderObjectElement {
     _updateChild(widget.decoration.container, _DecorationSlot.container);
   }
 
-  @override
-  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
-    assert(child is RenderBox);
-    assert(slotValue is _DecorationSlot);
-    final _DecorationSlot slot = slotValue;
-    // TBD: assert that the maps contain this slot and child?
+  void _updateRenderObject(RenderObject child, _DecorationSlot slot) {
     switch (slot) {
       case _DecorationSlot.input:
         renderObject.input = child;
@@ -915,24 +977,37 @@ class _RenderDecorationElement extends RenderObjectElement {
         renderObject.container = child;
         break;
       default:
-        assert(false);
+        assert(false, 'Unrecognized _DecorationSlot $slot');
     }
   }
 
   @override
-  void moveChildRenderObject(RenderObject child, dynamic slot) {
-    assert(false, 'not implemented');
+  void insertChildRenderObject(RenderObject child, dynamic slotValue) {
+    assert(child is RenderBox);
+    assert(slotValue is _DecorationSlot);
+    final _DecorationSlot slot = slotValue;
+    _updateRenderObject(child, slot);
+    assert(renderObject.childToSlot.keys.contains(child));
+    assert(renderObject.slotToChild.keys.contains(slot));
   }
 
   @override
   void removeChildRenderObject(RenderObject child) {
+    assert(child is RenderBox);
+    assert(renderObject.childToSlot.keys.contains(child));
+    _updateRenderObject(null, renderObject.childToSlot[child]);
+    assert(!renderObject.childToSlot.keys.contains(child));
+    assert(!renderObject.slotToChild.keys.contains(slot));
+  }
+
+  @override
+  void moveChildRenderObject(RenderObject child, dynamic slotValue) {
+    assert(child is RenderBox);
+    assert(slotValue is _DecorationSlot);
+    assert(renderObject.childToSlot.keys.contains(child));
+    //final _DecorationSlot slot = slotValue;
+    // TBD: just move child from renderObject._foo to renderObject._bar?
     assert(false, 'not implemented');
-    /*
-    final RenderObjectWithChildMixin<RenderObject> renderObject = this.renderObject;
-    assert(renderObject.child == child);
-    renderObject.child = null;
-    assert(renderObject == this.renderObject);
-    */
   }
 }
 
@@ -1171,15 +1246,19 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
       curve: _kTransitionCurve,
       decoration: new BoxDecoration(
         color: _getFillColor(themeData),
-        border: (decoration.hideDivider || decoration.isCollapsed) ? null :
-          new Border(
-            bottom: new BorderSide(
-              color: _getDividerColor(themeData),
-              width: _dividerWeight,
-            ),
-          ),
       ),
     );
+
+    // TBD: if isCollapsed then borderType will already be none. ANd get rid of hideDivider
+    final TextFieldBorder border = (decoration.hideDivider || decoration.isCollapsed) ? null :
+      new TextFieldBorder(
+        borderType: decoration.borderType,
+        borderRadius: new BorderRadius.circular(4.0),
+        borderSide: new BorderSide(
+          color: _getDividerColor(themeData),
+          width: _dividerWeight,
+        ),
+      );
 
     final Widget label = decoration.labelText == null ? null : new Text(
       decoration.labelText,
@@ -1248,16 +1327,34 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
         overflow: TextOverflow.ellipsis,
       );
 
-    final EdgeInsets contentPadding = decoration.isCollapsed ? EdgeInsets.zero :
-      (decoration.isDense
-       ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-       : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
+    EdgeInsets contentPadding;
+    double floatingLabelHeight;
+    switch (decoration.borderType) {
+      case InputDecoratorBorderType.none:
+      case InputDecoratorBorderType.underline:
+        // 4.0: the vertical gap between the inline elements and the floating label.
+        floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
+        contentPadding = decoration.isDense
+          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+          break;
+      case InputDecoratorBorderType.outline:
+        floatingLabelHeight = 0.0;
+        contentPadding = decoration.isDense
+          ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+          : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
+          break;
+        break;
+      default:
+        assert(false);
+    }
 
     return new _Decorator(
       decoration: new _Decoration(
         contentPadding: contentPadding,
-        floatingLabelHeight: 0.75 * inlineStyle.fontSize,
+        floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _controller.value,
+        border: border,
         input: widget.child,
         label: label,
         hint: hint,
@@ -1306,7 +1403,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.isDense: false,
-    this.hideDivider: false,
+    this.hideDivider: false, // TBD: remove this, it's redundant vis borderType
     this.prefixIcon,
     this.prefixText,
     this.prefixStyle,
@@ -1317,10 +1414,12 @@ class InputDecoration {
     this.counterStyle,
     this.filled: false,
     this.fillColor,
+    this.borderType: InputDecoratorBorderType.underline,
     this.enabled: true,
   }) : assert(isDense != null),
        assert(hideDivider != null),
        assert(filled != null),
+       assert(borderType != null),
        assert(enabled != null),
        isCollapsed = false;
 
@@ -1335,6 +1434,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
+    this.borderType: InputDecoratorBorderType.underline,
     this.enabled: true,
   }) : assert(filled != null),
        assert(enabled != null),
@@ -1485,6 +1585,8 @@ class InputDecoration {
 
   final Color fillColor;
 
+  final InputDecoratorBorderType borderType;
+
   final bool enabled;
 
   /// Creates a copy of this input decoration but with the given fields replaced
@@ -1513,6 +1615,7 @@ class InputDecoration {
     TextStyle counterStyle,
     bool filled,
     Color fillColor,
+    InputDecoratorBorderType borderType,
     bool enabled,
   }) {
     return new InputDecoration(
@@ -1537,6 +1640,7 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
+      borderType: enabled ?? this.borderType,
       enabled: enabled ?? this.enabled,
     );
   }
@@ -1570,6 +1674,7 @@ class InputDecoration {
         && typedOther.counterStyle == counterStyle
         && typedOther.filled == filled
         && typedOther.fillColor == fillColor
+        && typedOther.borderType == borderType
         && typedOther.enabled == enabled;
   }
 
@@ -1599,6 +1704,7 @@ class InputDecoration {
         counterStyle,
         filled,
         fillColor,
+        borderType,
         enabled,
       ]),
     );
@@ -1643,6 +1749,8 @@ class InputDecoration {
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
+    if (borderType != null)
+      description.add('borderType: $borderType');
     if (!enabled)
       description.add('enabled: false');
     return 'InputDecoration(${description.join(', ')})';
