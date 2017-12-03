@@ -26,8 +26,10 @@ class TextFieldBorder extends ShapeBorder {
     this.borderType: InputDecoratorBorderType.underline,
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
-    this.textDirection: TextDirection.ltr,
+    this.gapStart,
+    this.gapExtent: 0.0,
     this.gapPad: 4.0,
+    this.gapAnimation,
   }) : assert(borderSide != null),
        assert(borderRadius != null),
        assert(_cornersAreCircular(borderRadius)),
@@ -43,8 +45,11 @@ class TextFieldBorder extends ShapeBorder {
   final InputDecoratorBorderType borderType;
   final BorderSide borderSide;
   final BorderRadius borderRadius;
-  final TextDirection textDirection;
   final double gapPad;
+
+  double gapStart;
+  double gapExtent;
+  final Animation<double> gapAnimation;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -56,7 +61,6 @@ class TextFieldBorder extends ShapeBorder {
     return new TextFieldBorder(
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
-      textDirection: textDirection,
     );
   }
 
@@ -72,7 +76,7 @@ class TextFieldBorder extends ShapeBorder {
       ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
   }
 
-  Path _gapBorderPath(Canvas canvas, RRect center, double gapStart, double gapExtent) {
+  Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
     final Rect tlCorner = new Rect.fromLTWH(
       center.left,
       center.top,
@@ -99,26 +103,26 @@ class TextFieldBorder extends ShapeBorder {
     );
 
     final double cornerArcSweep = math.PI / 2.0;
-    final double tlCornerArcSweep = gapStart < center.tlRadiusX
-      ? math.asin(gapStart / center.tlRadiusX)
+    final double tlCornerArcSweep = start < center.tlRadiusX
+      ? math.asin(start / center.tlRadiusX)
       : math.PI / 2.0;
 
     final Path path = new Path()
       ..addArc(tlCorner, math.PI, tlCornerArcSweep)
       ..moveTo(center.left + center.tlRadiusX, center.top);
 
-    if (gapStart > center.tlRadiusX)
-      path.lineTo(center.left + gapStart, center.top);
+    if (start > center.tlRadiusX)
+      path.lineTo(center.left + start, center.top);
 
     final double trCornerArcStart = (3 * math.PI) / 2.0;
     final double trCornerArcSweep = cornerArcSweep;
-    if (gapStart + gapExtent < center.width - center.trRadiusX) {
+    if (start + extent < center.width - center.trRadiusX) {
       path
-        ..relativeMoveTo(gapExtent, 0.0)
+        ..relativeMoveTo(extent, 0.0)
         ..lineTo(center.right - center.trRadiusX, center.top)
         ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
-    } else if (gapStart + gapExtent < center.width) {
-      final double dx = center.width - (gapStart + gapExtent);
+    } else if (start + extent < center.width) {
+      final double dx = center.width - (start + extent);
       final double sweep = math.acos(dx / center.trRadiusX);
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
@@ -132,23 +136,23 @@ class TextFieldBorder extends ShapeBorder {
       ..lineTo(center.left, center.top + center.trRadiusY);
   }
 
-  void paintOutline(Canvas canvas, Rect rect, double gapStart, double gapExtent) {
+  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection) {
     final Paint paint = borderSide.toPaint();
     final RRect outer = borderRadius.toRRect(rect);
     final RRect center = outer.deflate(borderSide.width / 2.0);
     if (gapStart == null || gapExtent <= 0.0) {
       canvas.drawRRect(center, paint);
     } else {
-      gapExtent += gapPad * 2.0;
-      if (textDirection == TextDirection.ltr) {
-        final Path path = _gapBorderPath(canvas, center, gapStart - gapPad, gapExtent);
-        canvas.drawPath(path, paint);
-      } else {
-        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad, gapExtent);
+      final double extent = lerpDouble(0.0, gapExtent + gapPad * 2.0, gapAnimation.value);
+      if (textDirection == TextDirection.rtl) {
+        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad, extent);
         final Matrix4 transform = new Matrix4.identity()
           ..translate(rect.left + rect.right, 0.0) // TBD: WTF left + right?
           ..scale(-1.0, 1.0, 1.0);
         canvas.drawPath(path.transform(transform.storage), paint);
+      } else {
+        final Path path = _gapBorderPath(canvas, center, gapStart - gapPad, extent);
+        canvas.drawPath(path, paint);
       }
     }
   }
@@ -157,7 +161,8 @@ class TextFieldBorder extends ShapeBorder {
     canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
   }
 
-  void paintBorder(Canvas canvas, Rect rect, double gapStart, double gapExtent) {
+  @override
+  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
     switch (borderSide.style) {
       case BorderStyle.none:
         break;
@@ -166,7 +171,7 @@ class TextFieldBorder extends ShapeBorder {
           case InputDecoratorBorderType.none:
             return;
           case InputDecoratorBorderType.outline:
-            paintOutline(canvas, rect, gapStart, gapExtent);
+            paintOutline(canvas, rect, textDirection);
             break;
           case InputDecoratorBorderType.underline:
             paintUnderline(canvas, rect);
@@ -179,17 +184,15 @@ class TextFieldBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
-    paintBorder(canvas, rect, null, 0.0);
-  }
-
-  @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
     if (a is TextFieldBorder) {
       return new TextFieldBorder(
         borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
+        gapStart: a.gapStart,
+        gapExtent: a.gapExtent,
+        gapAnimation: a.gapAnimation,
         gapPad: a.gapPad,
       );
     }
@@ -203,6 +206,9 @@ class TextFieldBorder extends ShapeBorder {
         borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
+        gapStart: b.gapStart,
+        gapExtent: b.gapExtent,
+        gapAnimation: b.gapAnimation,
         gapPad: b.gapPad,
       );
     }
@@ -224,7 +230,6 @@ class TextFieldBorder extends ShapeBorder {
   @override
   int get hashCode => hashValues(borderType, borderSide, borderRadius);
 }
-
 
 enum _DecorationSlot {
   input,
@@ -772,6 +777,14 @@ class _RenderDecoration extends RenderBox {
       }
     }
 
+    if (label != null) {
+      decoration.border.gapStart = _boxParentData(label).offset.dx;
+      decoration.border.gapExtent = label.size.width * 0.75;
+    } else {
+      decoration.border.gapStart = null;
+      decoration.border.gapExtent = 0.0;
+    }
+
     size = constraints.constrain(new Size(overallWidth, overallHeight));
     assert(size.width == constraints.constrainWidth(overallWidth));
     assert(size.height == constraints.constrainHeight(overallHeight));
@@ -787,6 +800,16 @@ class _RenderDecoration extends RenderBox {
       if (child != null)
         context.paintChild(child, _boxParentData(child).offset + offset);
     }
+
+    /*
+    if (decoration.border != null && label != null) {
+      final double t = decoration.floatingLabelProgress;
+      final double labelWidth = label.size.width * 0.75;
+      final double labelX = _boxParentData(label).offset.dx;
+      decoration.border.gapStart = lerpDouble(labelX + labelWidth * 0.5, labelX, t);
+      decoration.border.gapExtent = lerpDouble(0.0, labelWidth, t);
+    }
+    */
     doPaint(container);
 
     if (label != null) {
@@ -813,21 +836,6 @@ class _RenderDecoration extends RenderBox {
     doPaint(input);
     doPaint(error ?? helper);
     doPaint(counter);
-
-    if (decoration.border != null) {
-      double gapStart;
-      double gapExtent;
-      if (label != null) {
-        final double t = decoration.floatingLabelProgress;
-        final double labelWidth = label.size.width * 0.75;
-        final double labelX = _boxParentData(label).offset.dx;
-        gapStart = lerpDouble(labelX + labelWidth * 0.5, labelX, t);
-        gapStart = labelX;
-        gapExtent = lerpDouble(0.0, labelWidth, t);
-      }
-      final Rect rect = offset & container.size;
-      decoration.border.paintBorder(context.canvas, rect, gapStart, gapExtent);
-    }
   }
 
   @override
@@ -1241,24 +1249,26 @@ class _InputDecoratorState extends State<InputDecorator> with SingleTickerProvid
       ),
     );
 
-    final Widget container = new AnimatedContainer(
-      duration: _kTransitionDuration,
-      curve: _kTransitionCurve,
-      decoration: new BoxDecoration(
-        color: _getFillColor(themeData),
-      ),
-    );
-
-    // TBD: if isCollapsed then borderType will already be none. ANd get rid of hideDivider
-    final TextFieldBorder border = (decoration.hideDivider || decoration.isCollapsed) ? null :
-      new TextFieldBorder(
+    final TextFieldBorder border = new TextFieldBorder(
+        gapAnimation: _controller.view,
         borderType: decoration.borderType,
-        borderRadius: new BorderRadius.circular(4.0),
+        borderRadius: decoration.borderType == InputDecoratorBorderType.outline
+          ? new BorderRadius.circular(4.0)
+          : BorderRadius.zero,
         borderSide: new BorderSide(
           color: _getDividerColor(themeData),
           width: _dividerWeight,
         ),
       );
+
+    final Widget container = new AnimatedContainer(
+      duration: _kTransitionDuration,
+      curve: _kTransitionCurve,
+      decoration: new ShapeDecoration(
+        color: _getFillColor(themeData),
+        shape: border,
+      ),
+    );
 
     final Widget label = decoration.labelText == null ? null : new Text(
       decoration.labelText,
