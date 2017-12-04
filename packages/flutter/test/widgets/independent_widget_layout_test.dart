@@ -123,21 +123,8 @@ class TestFocusableState extends State<TestFocusable> {
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return new GestureDetector(
-      onTap: () { FocusScope.of(context).requestFocus(widget.focusNode); },
-      child: new AnimatedBuilder(
-        animation: widget.focusNode,
-        builder: (BuildContext context, Widget child) {
-          return const Text('Test focus node', textDirection: TextDirection.ltr);
-        },
-      ),
-    );
+    return const Text('Test focus node', textDirection: TextDirection.ltr);
   }
 }
 
