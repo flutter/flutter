@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
+const Duration _kTransitionDuration = const Duration(milliseconds: 2000);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 enum InputDecoratorBorderType {
@@ -231,6 +231,8 @@ class TextFieldBorder extends ShapeBorder {
   int get hashCode => hashValues(borderType, borderSide, borderRadius);
 }
 
+// Used to "shake" the floating label to the left to the left and right
+// when the errorText first appears.
 class _Shaker extends AnimatedWidget {
   const _Shaker({
     Key key,
@@ -262,6 +264,9 @@ class _Shaker extends AnimatedWidget {
   }
 }
 
+// Display the helper and error text. When the error text appears
+// it fades and the helper text fades out. The error text also
+// slides upwards a little when it first appears.
 class _HelperError extends StatefulWidget {
   const _HelperError({
     Key key,
@@ -328,8 +333,10 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       if (errorText != null) {
         _error = _buildError();
         _controller.forward();
-      } else {
+      } else if (helperText != null) {
         _helper = _buildHelper();
+        _controller.reverse();
+      } else {
         _controller.reverse();
       }
     }
@@ -337,21 +344,33 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
   Widget _buildHelper() {
     assert(widget.helperText != null);
-    return new Text(
-      widget.helperText,
-      style: widget.helperStyle,
-      textAlign: widget.textAlign,
-      overflow: TextOverflow.ellipsis,
+    return new Opacity(
+      opacity: 1.0 - _controller.value,
+      child: new Text(
+        widget.helperText,
+        style: widget.helperStyle,
+        textAlign: widget.textAlign,
+        overflow: TextOverflow.ellipsis,
+      ),
     );
   }
 
   Widget _buildError() {
     assert(widget.errorText != null);
-    return new Text(
-      widget.errorText,
-      style: widget.errorStyle,
-      textAlign: widget.textAlign,
-      overflow: TextOverflow.ellipsis,
+    return new Opacity(
+      opacity: _controller.value,
+      child: new FractionalTranslation(
+        translation: new Tween<Offset>(
+          begin: const Offset(0.0, 0.25),
+          end: const Offset(0.0, 0.0),
+        ).evaluate(_controller.view),
+        child: new Text(
+          widget.errorText,
+          style: widget.errorStyle,
+          textAlign: widget.textAlign,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 
@@ -359,12 +378,22 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   Widget build(BuildContext context) {
     if (_controller.isDismissed) {
       _error = null;
-      return _buildHelper();
+      if (widget.helperText != null) {
+        return _helper = _buildHelper();
+      } else {
+        _helper = null;
+        return const SizedBox();
+      }
     }
 
     if (_controller.isCompleted) {
       _helper = null;
-      return _buildError();
+      if (widget.errorText != null) {
+        return _error = _buildError();
+      } else {
+        _error = null;
+        return const SizedBox();
+      }
     }
 
     if (_helper == null && widget.errorText != null)
@@ -380,16 +409,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
             opacity: 1.0 - _controller.value,
             child: _helper,
           ),
-          new Opacity(
-            opacity: _controller.value,
-            child: new FractionalTranslation(
-              translation: new Tween<Offset>(
-                begin: const Offset(0.0, 0.25),
-                end: const Offset(0.0, 0.0),
-              ).evaluate(_controller.view),
-              child: _buildError(),
-            ),
-          ),
+          _buildError(),
         ],
       );
     }
@@ -397,10 +417,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
     if (widget.helperText != null) {
       return new Stack(
         children: <Widget>[
-          new Opacity(
-            opacity: 1.0 - _controller.value,
-            child: _buildHelper(),
-          ),
+          _buildHelper(),
           new Opacity(
             opacity: _controller.value,
             child: _error,
