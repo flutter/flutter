@@ -1,4 +1,4 @@
-Signature: 10482740f1ff7f7f20959cd3d98e9ff5
+Signature: 8ad28dca7b9c79b420693499f098e476
 
 UNUSED LICENSES:
 
@@ -4507,7 +4507,6 @@ FILE: ../../../third_party/dart/runtime/vm/instructions_x64.h
 FILE: ../../../third_party/dart/runtime/vm/instructions_x64_test.cc
 FILE: ../../../third_party/dart/runtime/vm/isolate_test.cc
 FILE: ../../../third_party/dart/runtime/vm/json_test.cc
-FILE: ../../../third_party/dart/runtime/vm/libdart_dependency_helper.cc
 FILE: ../../../third_party/dart/runtime/vm/lockers.h
 FILE: ../../../third_party/dart/runtime/vm/megamorphic_cache_table.cc
 FILE: ../../../third_party/dart/runtime/vm/megamorphic_cache_table.h
