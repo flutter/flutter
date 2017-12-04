@@ -224,7 +224,11 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   }
 }
 
-/// Contains properties for a [SemanticsNode].
+/// Contains properties used by assistive technologies to make the application
+/// more accessible.
+///
+/// The properties of this class are used to generate a [SemanticsNode]s in the
+/// semantics tree.
 @immutable
 class SemanticsProperties extends DiagnosticableTree {
   /// Creates a semantic annotation.
@@ -486,6 +490,9 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   }
 
   /// Uniquely identifies this node in the list of sibling nodes.
+  ///
+  /// Keys are used during the construction of the semantics tree. They are not
+  /// transferred to the engine.
   final Key key;
 
   /// The unique identifier for this node.

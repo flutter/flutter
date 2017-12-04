@@ -4700,7 +4700,8 @@ class MetaData extends SingleChildRenderObjectWidget {
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
   ///
-  /// The [container] argument must not be null.
+  /// The [container] argument must not be null. To create a `const` instance
+  /// of [Semantics], use the [new Semantics.fromProperties] constructor.
   Semantics({
     Key key,
     Widget child,
@@ -4749,6 +4750,9 @@ class Semantics extends SingleChildRenderObjectWidget {
     ),
   );
 
+  /// Creates a semantic annotation using [SemanticsProperties].
+  ///
+  /// The [container] and [properties] arguments must not be null.
   const Semantics.fromProperties({
     Key key,
     Widget child,
@@ -4759,6 +4763,8 @@ class Semantics extends SingleChildRenderObjectWidget {
        assert(properties != null),
        super(key: key, child: child);
 
+  /// Contains properties used by assistive technologies to make the application
+  /// more accessible.
   final SemanticsProperties properties;
 
   /// If 'container' is true, this widget will introduce a new
