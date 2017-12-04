@@ -150,7 +150,9 @@ abstract class CustomPainter extends Listenable {
   ///
   /// If the returned function is null, this painter will not contribute new
   /// [SemanticsNode]s to the semantics tree and the [CustomPaint] corresponding
-  /// to this painter will not create a semantics boundary.
+  /// to this painter will not create a semantics boundary. However, if
+  /// [CustomPaint.child] is not null, the child may contribute [SemanticsNode]s
+  /// to the tree.
   ///
   /// See also:
   ///
@@ -231,14 +233,14 @@ abstract class CustomPainter extends Listenable {
 /// This information is used, for example, by assistive technologies to improve
 /// the accessibility of applications.
 ///
-/// Implement [SemanticsPainter.semanticsBuilder] to build the semantic
+/// Implement [CustomPainter.semanticsBuilder] to build the semantic
 /// description of the whole picture drawn by a [CustomPaint], rather that one
 /// particular rectangle.
 ///
 /// See also:
 ///
 /// * [SemanticsNode], which is created using the properties of this class.
-/// * [SemanticsPainter], which creates instances of this class.
+/// * [CustomPainter], which creates instances of this class.
 @immutable
 class CustomPainterSemantics {
 
@@ -590,7 +592,9 @@ class RenderCustomPaint extends RenderProxyBox {
     super.assembleSemanticsNode(node, config, finalChildren);
   }
 
-  /// Updates `semanticsChildren` from `newSemantics`.
+  /// Updates the nodes of `oldSemantics` using data in `newChildSemantics`, and
+  /// returns a new list containing child nodes sorted according to the order
+  /// specified by `newChildSemantics`.
   ///
   /// [SemanticsNode]s that match [CustomPainterSemantics] by [Key]s preserve
   /// their [SemanticsNode.key] field. If a node with the same key appears in
