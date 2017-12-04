@@ -86,12 +86,12 @@ template("flutter_content_handler") {
   }
 }
 
-flutter_content_handler("content_handler") {
-  output_name = "flutter_jit_runner"
-  extra_deps = [ "//third_party/dart/runtime:libdart_jit" ]
-}
-
-flutter_content_handler("aot_content_handler") {
+flutter_content_handler("aot") {
   output_name = "flutter_aot_runner"
   extra_deps = [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
+}
+
+flutter_content_handler("jit") {
+  output_name = "flutter_jit_runner"
+  extra_deps = [ "//third_party/dart/runtime:libdart_jit" ]
 }
