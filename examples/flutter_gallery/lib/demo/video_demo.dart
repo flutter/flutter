@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:device_info/device_info.dart';
 
 // TODO(sigurdm): These should not be stored here.
 const String butterflyUri =
@@ -310,6 +312,12 @@ class VideoDemo extends StatefulWidget {
   _VideoDemoState createState() => new _VideoDemoState();
 }
 
+final DeviceInfoPlugin deviceInfoPlugin = new DeviceInfoPlugin();
+
+Future<bool> isIOSSimulator() async {
+  return Platform.isIOS && !(await deviceInfoPlugin.iosInfo).isPhysicalDevice;
+}
+
 class _VideoDemoState extends State<VideoDemo>
     with SingleTickerProviderStateMixin {
   final VideoPlayerController butterflyController = new VideoPlayerController(
@@ -321,6 +329,7 @@ class _VideoDemoState extends State<VideoDemo>
 
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   final Completer<Null> connectedCompleter = new Completer<Null>();
+  bool unsupported = false;
 
   @override
   void initState() {
@@ -337,6 +346,9 @@ class _VideoDemoState extends State<VideoDemo>
 
     initController(butterflyController);
     initController(beeController);
+    isIOSSimulator().then((bool result) {
+      unsupported = result;
+    });
   }
 
   @override
@@ -353,24 +365,30 @@ class _VideoDemoState extends State<VideoDemo>
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
-      body: new ConnectivityOverlay(
-        child: new ListView(
-          children: <Widget>[
-            new VideoCard(
-              title: 'Butterfly',
-              subtitle: '… flutters by',
-              controller: butterflyController,
+      body: (unsupported)
+          ? const Center(
+              child: const Text(
+                'The video demo is not supported on the iOS Simulator.',
+              ),
+            )
+          : new ConnectivityOverlay(
+              child: new ListView(
+                children: <Widget>[
+                  new VideoCard(
+                    title: 'Butterfly',
+                    subtitle: '… flutters by',
+                    controller: butterflyController,
+                  ),
+                  new VideoCard(
+                    title: 'Bee',
+                    subtitle: '… gently buzzing',
+                    controller: beeController,
+                  ),
+                ],
+              ),
+              connectedCompleter: connectedCompleter,
+              scaffoldKey: scaffoldKey,
             ),
-            new VideoCard(
-              title: 'Bee',
-              subtitle: '… gently buzzing',
-              controller: beeController,
-            ),
-          ],
-        ),
-        connectedCompleter: connectedCompleter,
-        scaffoldKey: scaffoldKey,
-      ),
     );
   }
 }
