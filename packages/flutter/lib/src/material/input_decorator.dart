@@ -262,6 +262,157 @@ class _Shaker extends AnimatedWidget {
   }
 }
 
+class _HelperError extends StatefulWidget {
+  const _HelperError({
+    Key key,
+    this.textAlign,
+    this.helperText,
+    this.helperStyle,
+    this.errorText,
+    this.errorStyle,
+  }) : super(key: key);
+
+  final TextAlign textAlign;
+  final String helperText;
+  final TextStyle helperStyle;
+  final String errorText;
+  final TextStyle errorStyle;
+
+  @override
+  _HelperErrorState createState() => new _HelperErrorState();
+}
+
+class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+  Widget _helper;
+  Widget _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+    );
+    if (widget.errorText != null) {
+      _error = _buildError();
+      _controller.value = 1.0;
+    } else if (widget.helperText != null) {
+      _helper = _buildHelper();
+    }
+    _controller.addListener(_handleChange);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _handleChange() {
+    setState(() {
+      // The _controller's value has changed.
+    });
+  }
+
+  @override
+  void didUpdateWidget(_HelperError old) {
+    super.didUpdateWidget(old);
+
+    final String errorText = widget.errorText;
+    final String helperText = widget.helperText;
+    final String oldErrorText = old.errorText;
+    final String oldHelperText = old.helperText;
+
+    if ((errorText ?? helperText) != (oldErrorText ?? oldHelperText)) {
+      if (errorText != null) {
+        _error = _buildError();
+        _controller.forward();
+      } else {
+        _helper = _buildHelper();
+        _controller.reverse();
+      }
+    }
+  }
+
+  Widget _buildHelper() {
+    assert(widget.helperText != null);
+    return new Text(
+      widget.helperText,
+      style: widget.helperStyle,
+      textAlign: widget.textAlign,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  Widget _buildError() {
+    assert(widget.errorText != null);
+    return new Text(
+      widget.errorText,
+      style: widget.errorStyle,
+      textAlign: widget.textAlign,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_controller.isDismissed) {
+      _error = null;
+      return _buildHelper();
+    }
+
+    if (_controller.isCompleted) {
+      _helper = null;
+      return _buildError();
+    }
+
+    if (_helper == null && widget.errorText != null)
+      return _buildError();
+
+    if (_error == null && widget.helperText != null)
+      return _buildHelper();
+
+    if (widget.errorText != null) {
+      return new Stack(
+        children: <Widget>[
+          new Opacity(
+            opacity: 1.0 - _controller.value,
+            child: _helper,
+          ),
+          new Opacity(
+            opacity: _controller.value,
+            child: new FractionalTranslation(
+              translation: new Tween<Offset>(
+                begin: const Offset(0.0, 0.25),
+                end: const Offset(0.0, 0.0),
+              ).evaluate(_controller.view),
+              child: _buildError(),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (widget.helperText != null) {
+      return new Stack(
+        children: <Widget>[
+          new Opacity(
+            opacity: 1.0 - _controller.value,
+            child: _buildHelper(),
+          ),
+          new Opacity(
+            opacity: _controller.value,
+            child: _error,
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox();
+  }
+}
+
 enum _DecorationSlot {
   input,
   label,
@@ -1190,7 +1341,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       else
         _floatingLabelController.reverse();
     }
-    if (decoration.errorText != null && decoration.errorText != old.decoration.errorText) {
+
+    final String errorText = decoration.errorText;
+    final String oldErrorText = old.decoration.errorText;
+
+    if (_floatingLabelController.isCompleted && errorText != null && errorText != oldErrorText) {
       _shakingLabelController
         ..value = 0.0
         ..forward();
@@ -1254,12 +1409,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       .merge(decoration.labelStyle);
   }
 
-  TextStyle _getHelperTextStyle(ThemeData themeData) {
+  TextStyle _getHelperStyle(ThemeData themeData) {
     return themeData.textTheme.caption.copyWith(color: themeData.hintColor).merge(decoration.helperStyle);
   }
 
+  TextStyle _getErrorStyle(ThemeData themeData) {
+    return themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle);
+  }
+
   TextStyle _getSubtextStyle(ThemeData themeData) {
-    final TextStyle helperStyle = _getHelperTextStyle(themeData);
+    final TextStyle helperStyle = _getHelperStyle(themeData);
     return decoration.errorText != null
       ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
       : helperStyle;
@@ -1361,26 +1520,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         child: decoration.suffixIcon,
       );
 
-    final Widget error = decoration.errorText == null ? null :
-      new Text(
-        decoration.errorText,
-        style: _getSubtextStyle(themeData),
-        textAlign: textAlign,
-        overflow: TextOverflow.ellipsis,
-      );
-
-    final Widget helper = decoration.helperText == null ? null :
-      new Text(
-        decoration.helperText,
-        style: _getSubtextStyle(themeData),
-        textAlign: textAlign,
-        overflow: TextOverflow.ellipsis,
-      );
+    final Widget helperError = new _HelperError(
+      textAlign: textAlign,
+      helperText: decoration.helperText,
+      helperStyle: _getHelperStyle(themeData),
+      errorText: decoration.errorText,
+      errorStyle: _getErrorStyle(themeData),
+    );
 
     final Widget counter = decoration.counterText == null ? null :
       new Text(
         decoration.counterText,
-        style: _getHelperTextStyle(themeData).merge(decoration.counterStyle),
+        style: _getHelperStyle(themeData).merge(decoration.counterStyle),
         textAlign: textAlign == TextAlign.end ? TextAlign.start : TextAlign.end,
         overflow: TextOverflow.ellipsis,
       );
@@ -1420,8 +1571,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffix: suffix,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        error: error,
-        helper: helper,
+        //error: error,
+        helper: helperError,
         counter: counter,
         container: container,
       ),
