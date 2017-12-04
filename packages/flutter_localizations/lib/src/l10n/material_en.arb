@@ -1,7 +1,7 @@
 {
   "scriptCategory": "English-like",
   "@scriptCategory": {
-    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)"
+    "description": "The name of the language's script category (see https://material.io/guidelines/style/typography.html#typography-language-categories-reference)."
   },
 
   "timeOfDayFormat": "h:mm a",
@@ -11,47 +11,52 @@
 
   "openAppDrawerTooltip": "Open navigation menu",
   "@openAppDrawerTooltip": {
-    "description": "The tooltip for the leading AppBar menu (aka 'hamburger') button"
+    "description": "The tooltip for the leading app bar menu (aka 'hamburger') button."
   },
 
   "backButtonTooltip": "Back",
   "@backButtonTooltip": {
-    "description": "The BackButton's tooltip"
+    "description": "The tooltip for the back button, which closes the current page and returns to the previous one."
   },
 
   "closeButtonTooltip": "Close",
   "@closeButtonTooltip": {
-    "description": "The CloseButton's tooltip"
+    "description": "The tooltip for the close button, which closes the current page and returns to the previous one."
+  },
+
+  "deleteButtonTooltip": "Delete",
+  "@deleteButtonTooltip": {
+    "description": "The tooltip for the delete button of chips."
   },
 
   "nextMonthTooltip": "Next month",
   "@nextMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'next month' button."
+    "description": "The tooltip for the month picker's 'next month' button."
   },
 
   "previousMonthTooltip": "Previous month",
   "@previousMonthTooltip": {
-    "description": "The tooltip for the MonthPicker's 'previous month' button."
+    "description": "The tooltip for the month picker's 'previous month' button."
   },
 
   "nextPageTooltip": "Next page",
   "@nextPageTooltip": {
-    "description": "The tooltip for the [PaginatedDataTables]'s 'next page' button."
+    "description": "The tooltip for the button that sends the user to the next page of a paginated data table."
   },
 
   "previousPageTooltip": "Previous page",
   "@previousPageTooltip": {
-    "description": "The tooltip for the PaginatedDataTables's 'previous page' button."
+    "description": "The tooltip for the button that sends the user to the previous page of a paginated data table."
   },
 
   "showMenuTooltip": "Show menu",
   "@showMenuTooltip": {
-    "description": "The default PopupMenuButton tooltip"
+    "description": "The tooltip for the button that shows a popup menu."
   },
 
   "aboutListTileTitle": "About $applicationName",
   "@aboutListTileTitle": {
-    "description": "The default title for AboutListTile. The value of $applicationName is the name of the application, like GMail or Chrome.",
+    "description": "The default title for the drawer item that shows an about page for the application. The value of $applicationName is the name of the application, like GMail or Chrome.",
     "parameters": "applicationName"
   },
 
@@ -62,26 +67,26 @@
 
   "pageRowsInfoTitle": "$firstRow–$lastRow of $rowCount",
   "@pageRowsInfoTitle": {
-    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is known. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
   "@pageRowsInfoTitleApproximate": {
-    "description": "Title for the [PaginatedDataTable]'s row info footer when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
+    "description": "The text shown in the footer of a paginated data table when the exact overall row count is unknown. This message describes an integer range where $firstRow is the index of the start of the range, $lastRow is the index of the end of the range, and $rowCount is the limit of the range. All values are greater than or equal to zero.",
     "parameters": "firstRow, lastRow, rowCount"
   },
 
   "rowsPerPageTitle": "Rows per page:",
   "@rowsPerPageTitle": {
-    "description": "Title for the [PaginatedDataTable]'s 'rows per page' footer."
+    "description": "The caption for the drop-down button on a paginated data table's footer that allows the user to control the number of rows of data per page of the table."
   },
 
   "selectedRowCountTitleZero": "No items selected",
   "selectedRowCountTitleOne": "1 item selected",
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "@selectedRowCountTitle": {
-    "description": "Title for the PaginatedDataTable's selected row count header. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
+    "description": "The title for the header of a paginated data table when the user is selecting rows. The value of $selectedRowCount is an integer which indicates the number of data table row elements that have been selected.",
     "plural": "selectedRowCount"
   },
 
@@ -127,7 +132,7 @@
 
   "viewLicensesButtonLabel": "VIEW LICENSES",
   "@viewLicensesButtonLabel": {
-    "description": "The label for the about box's view licenses button."
+    "description": "The label for the button in the about box that leads the user to a list of all licenses that apply to the application."
   },
 
   "anteMeridiemAbbreviation": "AM",

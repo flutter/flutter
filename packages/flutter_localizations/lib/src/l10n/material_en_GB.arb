@@ -5,6 +5,7 @@
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
   "copyButtonLabel": "COPY",
   "closeButtonTooltip": "Close",
+  "deleteButtonTooltip": "",
   "selectAllButtonLabel": "SELECT ALL",
   "viewLicensesButtonLabel": "VIEW LICENCES",
   "rowsPerPageTitle": "Rows per page:",

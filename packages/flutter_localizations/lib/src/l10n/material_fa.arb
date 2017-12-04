@@ -5,6 +5,7 @@
   "openAppDrawerTooltip": "باز کردن منوی پیمایش",
   "backButtonTooltip": "برگشت",
   "closeButtonTooltip": "بستن",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "ماه بعد",
   "previousMonthTooltip": "ماه قبل",
   "nextPageTooltip": "صفحه بعد",

@@ -236,6 +236,9 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get closeButtonTooltip => _nameToValue['closeButtonTooltip'];
 
   @override
+  String get deleteButtonTooltip => _nameToValue['deleteButtonTooltip'];
+
+  @override
   String get nextMonthTooltip => _nameToValue['nextMonthTooltip'];
 
   @override

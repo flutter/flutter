@@ -219,6 +219,7 @@ void main() {
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 32.0));
   });
+
   testWidgets('Chip supports RTL', (WidgetTester tester) async {
     final Widget test = new Overlay(
       initialEntries: <OverlayEntry>[
@@ -238,17 +239,31 @@ void main() {
     );
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.rtl,
-        child: test,
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: test,
+        ),
       ),
     );
     expect(tester.getCenter(find.text('ABC')).dx, greaterThan(tester.getCenter(find.byType(Icon)).dx));
 
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: test,
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: test,
+        ),
       ),
     );
     expect(tester.getCenter(find.text('ABC')).dx, lessThan(tester.getCenter(find.byType(Icon)).dx));
@@ -411,24 +426,31 @@ void main() {
     final GlobalKey keyA = new GlobalKey();
     final GlobalKey keyB = new GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new Overlay(
-          initialEntries: <OverlayEntry>[
-            new OverlayEntry(
-              builder: (BuildContext context) {
-                return new Material(
-                  child: new Center(
-                    child: new Chip(
-                      avatar: new Placeholder(key: keyA),
-                      label: new Placeholder(key: keyB),
-                      onDeleted: () { },
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new Overlay(
+            initialEntries: <OverlayEntry>[
+              new OverlayEntry(
+                builder: (BuildContext context) {
+                  return new Material(
+                    child: new Center(
+                      child: new Chip(
+                        avatar: new Placeholder(key: keyA),
+                        label: new Placeholder(key: keyB),
+                        onDeleted: () { },
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -444,24 +466,31 @@ void main() {
     final GlobalKey keyA = new GlobalKey();
     final GlobalKey keyB = new GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
-        textDirection: TextDirection.rtl,
-        child: new Overlay(
-          initialEntries: <OverlayEntry>[
-            new OverlayEntry(
-              builder: (BuildContext context) {
-                return new Material(
-                  child: new Center(
-                    child: new Chip(
-                      avatar: new Placeholder(key: keyA),
-                      label: new Placeholder(key: keyB),
-                      onDeleted: () { },
+      new Localizations(
+        locale: const Locale('en', 'US'),
+        delegates: <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Overlay(
+            initialEntries: <OverlayEntry>[
+              new OverlayEntry(
+                builder: (BuildContext context) {
+                  return new Material(
+                    child: new Center(
+                      child: new Chip(
+                        avatar: new Placeholder(key: keyA),
+                        label: new Placeholder(key: keyB),
+                        onDeleted: () { },
+                      ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@
   "openAppDrawerTooltip": "Navigationsmenü öffnen",
   "backButtonTooltip": "Zurück",
   "closeButtonTooltip": "Schließen",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "Nächster Monat",
   "previousMonthTooltip": "Vorheriger Monat",
   "nextPageTooltip": "Nächste Seite",

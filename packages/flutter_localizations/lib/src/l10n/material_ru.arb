@@ -6,6 +6,7 @@
   "openAppDrawerTooltip": "Открыть меню навигации",
   "backButtonTooltip": "Назад",
   "closeButtonTooltip": "Закрыть",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "Следующий месяц",
   "previousMonthTooltip": "Предыдущий месяц",
   "nextPageTooltip": "Следующая страница",
