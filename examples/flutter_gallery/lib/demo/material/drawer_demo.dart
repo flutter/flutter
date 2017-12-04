@@ -89,7 +89,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
         title: const Text('Navigation drawer'),
       ),
       drawer: new Drawer(
-        child: new ListView(
+        child: new Column(
           children: <Widget>[
             new UserAccountsDrawerHeader(
               accountName: const Text('Zach Widget'),
@@ -114,6 +114,7 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   ),
                 ),
               ],
+              margin: EdgeInsets.zero,
               onDetailsPressed: () {
                 _showDrawerContents = !_showDrawerContents;
                 if (_showDrawerContents)
@@ -122,48 +123,58 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   _controller.forward();
               },
             ),
-            new ClipRect(
-              child: new Stack(
-                children: <Widget>[
-                  // The initial contents of the drawer.
-                  new FadeTransition(
-                    opacity: _drawerContentsOpacity,
-                    child: new Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: _drawerContents.map((String id) {
-                        return new ListTile(
-                          leading: new CircleAvatar(child: new Text(id)),
-                          title: new Text('Drawer item $id'),
-                          onTap: _showNotImplementedMessage,
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  // The drawer's "details" view.
-                  new SlideTransition(
-                    position: _drawerDetailsPosition,
-                    child: new FadeTransition(
-                      opacity: new ReverseAnimation(_drawerContentsOpacity),
-                      child: new Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          new ListTile(
-                            leading: const Icon(Icons.add),
-                            title: const Text('Add account'),
-                            onTap: _showNotImplementedMessage,
+            new MediaQuery.removePadding(
+              context: context,
+              // DrawerHeader consumes top MediaQuery padding.
+              removeTop: true,
+              child: new Expanded(
+                child: new ListView(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  children: <Widget>[
+                    new Stack(
+                      children: <Widget>[
+                        // The initial contents of the drawer.
+                        new FadeTransition(
+                          opacity: _drawerContentsOpacity,
+                          child: new Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: _drawerContents.map((String id) {
+                              return new ListTile(
+                                leading: new CircleAvatar(child: new Text(id)),
+                                title: new Text('Drawer item $id'),
+                                onTap: _showNotImplementedMessage,
+                              );
+                            }).toList(),
                           ),
-                          new ListTile(
-                            leading: const Icon(Icons.settings),
-                            title: const Text('Manage accounts'),
-                            onTap: _showNotImplementedMessage,
+                        ),
+                        // The drawer's "details" view.
+                        new SlideTransition(
+                          position: _drawerDetailsPosition,
+                          child: new FadeTransition(
+                            opacity: new ReverseAnimation(_drawerContentsOpacity),
+                            child: new Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: <Widget>[
+                                new ListTile(
+                                  leading: const Icon(Icons.add),
+                                  title: const Text('Add account'),
+                                  onTap: _showNotImplementedMessage,
+                                ),
+                                new ListTile(
+                                  leading: const Icon(Icons.settings),
+                                  title: const Text('Manage accounts'),
+                                  onTap: _showNotImplementedMessage,
+                                ),
+                              ],
+                            ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
