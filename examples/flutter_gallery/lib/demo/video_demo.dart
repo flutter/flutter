@@ -107,19 +107,20 @@ class VideoPlayerLoading extends StatefulWidget {
 }
 
 class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
-  bool initialized;
+  bool _initialized;
 
   @override
   void initState() {
     super.initState();
-    initialized = widget.controller.value.initialized;
+    _initialized = widget.controller.value.initialized;
     widget.controller.addListener(() {
       if (!mounted) {
         return;
       }
-      if (initialized != widget.controller.value.initialized) {
+      final bool controllerInitialized = widget.controller.value.initialized;
+      if (_initialized != controllerInitialized) {
         setState(() {
-          initialized = widget.controller.value.initialized;
+          _initialized = controllerInitialized;
         });
       }
     });
@@ -127,11 +128,20 @@ class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[new VideoPlayer(widget.controller)];
-    if (!initialized) {
-      children.add(const Center(child: const CircularProgressIndicator()));
+    if (_initialized) {
+      return new VideoPlayer(widget.controller);
     }
-    return new Stack(children: children, fit: StackFit.expand);
+    return new Stack(
+      children: <Widget>[
+        new VideoPlayer(widget.controller),
+        new Center(
+          child: new CircularProgressIndicator(
+            key: new GlobalObjectKey(widget.controller),
+          ),
+        ),
+      ],
+      fit: StackFit.expand,
+    );
   }
 }
 
