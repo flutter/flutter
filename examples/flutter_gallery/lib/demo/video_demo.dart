@@ -30,7 +30,7 @@ class VideoCard extends StatelessWidget {
           aspectRatio: 3 / 2,
           child: new Hero(
             tag: controller,
-            child: new VideoPlayer(controller),
+            child: new VideoPlayerLoading(controller),
           ),
         ),
       ),
@@ -97,6 +97,44 @@ class VideoCard extends StatelessWidget {
   }
 }
 
+class VideoPlayerLoading extends StatefulWidget {
+  final VideoPlayerController controller;
+
+  const VideoPlayerLoading(this.controller);
+
+  @override
+  _VideoPlayerLoadingState createState() => new _VideoPlayerLoadingState();
+}
+
+class _VideoPlayerLoadingState extends State<VideoPlayerLoading> {
+  bool initialized;
+
+  @override
+  void initState() {
+    super.initState();
+    initialized = widget.controller.value.initialized;
+    widget.controller.addListener(() {
+      if (!mounted) {
+        return;
+      }
+      if (initialized != widget.controller.value.initialized) {
+        setState(() {
+          initialized = widget.controller.value.initialized;
+        });
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final List<Widget> children = <Widget>[new VideoPlayer(widget.controller)];
+    if (!initialized) {
+      children.add(const Center(child: const CircularProgressIndicator()));
+    }
+    return new Stack(children: children, fit: StackFit.expand);
+  }
+}
+
 class VideoPlayPause extends StatefulWidget {
   final VideoPlayerController controller;
 
@@ -132,37 +170,31 @@ class _VideoPlayPauseState extends State<VideoPlayPause> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> children = <Widget>[
-      new GestureDetector(
-        child: new VideoPlayer(controller),
-        onTap: () {
-          if (!controller.value.initialized) {
-            return;
-          }
-          if (controller.value.isPlaying) {
-            imageFadeAnimation = new FadeAnimation(
-              child: new Icon(Icons.pause, size: 100.0),
-            );
-            controller.pause();
-          } else {
-            imageFadeAnimation = new FadeAnimation(
-              child: new Icon(Icons.play_arrow, size: 100.0),
-            );
-            controller.play();
-          }
-        },
-      ),
-      new Center(child: imageFadeAnimation),
-    ];
-
-    if (!controller.value.initialized) {
-      children.add(new Container());
-    }
-
     return new Stack(
       alignment: Alignment.bottomCenter,
-      fit: StackFit.passthrough,
-      children: children,
+      fit: StackFit.expand,
+      children: <Widget>[
+        new GestureDetector(
+          child: new VideoPlayerLoading(controller),
+          onTap: () {
+            if (!controller.value.initialized) {
+              return;
+            }
+            if (controller.value.isPlaying) {
+              imageFadeAnimation = new FadeAnimation(
+                child: new Icon(Icons.pause, size: 100.0),
+              );
+              controller.pause();
+            } else {
+              imageFadeAnimation = new FadeAnimation(
+                child: new Icon(Icons.play_arrow, size: 100.0),
+              );
+              controller.play();
+            }
+          },
+        ),
+        new Center(child: imageFadeAnimation),
+      ],
     );
   }
 }

@@ -8,7 +8,7 @@ dependencies:
   string_scanner: 1.0.2
   url_launcher: 0.4.2+5
   cupertino_icons: 0.1.1
-  video_player: 0.0.5
+  video_player: 0.0.6
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
