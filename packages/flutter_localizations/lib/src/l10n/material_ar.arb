@@ -9,6 +9,7 @@
   "openAppDrawerTooltip": "فتح قائمة التنقل",
   "backButtonTooltip": "رجوع",
   "closeButtonTooltip": "إغلاق",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "الشهر التالي",
   "previousMonthTooltip": "الشهر السابق",
   "nextPageTooltip": "الصفحة التالية",

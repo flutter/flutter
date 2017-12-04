@@ -5,6 +5,7 @@
   "openAppDrawerTooltip": "ナビゲーション メニューを開く",
   "backButtonTooltip": "戻る",
   "closeButtonTooltip": "閉じる",
+  "deleteButtonTooltip": "",
   "nextMonthTooltip": "来月",
   "previousMonthTooltip": "前月",
   "nextPageTooltip": "次のページ",
