@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
+import 'focus_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
@@ -1852,6 +1853,10 @@ abstract class BuildContext {
   /// The current configuration of the [Element] that is this [BuildContext].
   Widget get widget;
 
+  /// The [BuildOwner] for this context. The [BuildOwner] is in charge of
+  /// managing the rendering pipeline for this context.
+  BuildOwner get owner;
+
   /// The current [RenderObject] for the widget. If the widget is a
   /// [RenderObjectWidget], this is the render object that the widget created
   /// for itself. Otherwise, it is the render object of the first descendant
@@ -2097,6 +2102,14 @@ class BuildOwner {
   final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
+
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
+  /// the [FocusScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusManager] for more details.
+  final FocusManager focusManager = new FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2559,6 +2572,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Widget _widget;
 
   /// The object that manages the lifecycle of this element.
+  @override
   BuildOwner get owner => _owner;
   BuildOwner _owner;
 

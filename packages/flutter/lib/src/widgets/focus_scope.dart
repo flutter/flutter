@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 
@@ -75,7 +74,7 @@ class FocusScope extends StatefulWidget {
   /// given [BuildContext].
   static FocusScopeNode of(BuildContext context) {
     final _FocusScopeMarker scope = context.inheritFromWidgetOfExactType(_FocusScopeMarker);
-    return scope?.node ?? WidgetsBinding.instance.focusManager.rootScope;
+    return scope?.node ?? context.owner.focusManager.rootScope;
   }
 
   @override
