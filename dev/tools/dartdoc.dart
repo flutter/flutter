@@ -65,25 +65,14 @@ dependencies:
   }
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
-  final String flutterRoot = Directory.current.path;
-  final Map<String, String> pubEnvironment = <String, String>{
-    'FLUTTER_ROOT': flutterRoot,
-  };
-
-  // If there's a .pub-cache dir in the flutter root, use that.
-  final String pubCachePath = '$flutterRoot/.pub-cache';
-  if (new Directory(pubCachePath).existsSync()) {
-    pubEnvironment['PUB_CACHE'] = pubCachePath;
-  }
-
-  final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
-
   // Run pub.
   Process process = await Process.start(
-    pubExecutable,
+    '../../bin/cache/dart-sdk/bin/pub',
     <String>['get'],
     workingDirectory: 'dev/docs',
-    environment: pubEnvironment,
+    environment: <String, String>{
+      'FLUTTER_ROOT': Directory.current.path,
+    },
   );
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
@@ -95,10 +84,9 @@ dependencies:
 
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
-    pubExecutable,
+    '../../bin/cache/dart-sdk/bin/pub',
     <String>['global', 'run', 'dartdoc', '--version'],
     workingDirectory: 'dev/docs',
-    environment: pubEnvironment,
   );
   print('\n${result.stdout}');
 
@@ -125,10 +113,9 @@ dependencies:
   }
 
   process = await Process.start(
-    pubExecutable,
+    '../../bin/cache/dart-sdk/bin/pub',
     args,
     workingDirectory: 'dev/docs',
-    environment: pubEnvironment,
   );
   printStream(process.stdout, prefix: 'dartdoc:stdout: ',
     filter: kVerbose ? const <Pattern>[] : <Pattern>[

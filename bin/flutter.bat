@@ -24,7 +24,6 @@ SET script_path=%flutter_tools_dir%\bin\flutter_tools.dart
 SET dart_sdk_path=%cache_dir%\dart-sdk
 SET dart_stamp_path=%cache_dir%\dart-sdk.stamp
 SET dart_version_path=%FLUTTER_ROOT%\bin\internal\dart-sdk.version
-SET pub_cache_path=%FLUTTER_ROOT%\.pub-cache
 
 SET dart=%dart_sdk_path%\bin\dart.exe
 SET pub=%dart_sdk_path%\bin\pub.bat
@@ -107,9 +106,6 @@ GOTO :after_subroutine
         SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_bot
       :not_on_bot
       SET PUB_ENVIRONMENT=%PUB_ENVIRONMENT%:flutter_install
-      IF "%PUB_CACHE%" == "" (
-       IF EXIST "%pub_cache_path%" SET PUB_CACHE=%pub_cache_path%
-      )
       :retry_pub_upgrade
       CALL "%pub%" upgrade --verbosity=error --no-packages-dir
       IF "%ERRORLEVEL%" NEQ "0" (
