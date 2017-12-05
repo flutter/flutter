@@ -52,7 +52,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US')));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
+  return tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
@@ -262,12 +262,12 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
@@ -276,15 +276,15 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
   });
 
   testWidgets('provides semantics information header and footer', (WidgetTester tester) async {
@@ -306,10 +306,8 @@ void _tests() {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
 
-    final dynamic dialPaint = tester.widget(
-        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DialPaint')
-    );
-    final CustomPainter dialPainter = dialPaint.dialPainter;
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
+    final CustomPainter dialPainter = dialPaint.painter;
     final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
 
     painterTester.addLabel('00', 86.0, 12.0, 134.0, 36.0);
@@ -347,10 +345,8 @@ void _tests() {
     await tester.tap(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl'));
     await tester.pumpAndSettle();
 
-    final dynamic dialPaint = tester.widget(
-        find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_DialPaint')
-    );
-    final CustomPainter dialPainter = dialPaint.dialPainter;
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
+    final CustomPainter dialPainter = dialPaint.painter;
     final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
 
     painterTester.addLabel('00', 86.0, 12.0, 134.0, 36.0);

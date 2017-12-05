@@ -664,24 +664,22 @@ class _TimePickerHeader extends StatelessWidget {
   }
 }
 
-List<TextPainter> _buildPainters(TextTheme textTheme, List<String> labels) {
-  final TextStyle style = textTheme.subhead;
-  final List<TextPainter> painters = new List<TextPainter>(labels.length);
-  for (int i = 0; i < painters.length; ++i) {
-    final String label = labels[i];
-    // TODO(abarth): Handle textScaleFactor.
-    // https://github.com/flutter/flutter/issues/5939
-    painters[i] = new TextPainter(
-      text: new TextSpan(style: style, text: label),
-      textDirection: TextDirection.ltr,
-    )..layout();
-  }
-  return painters;
-}
-
 enum _DialRing {
   outer,
   inner,
+}
+
+class _TappableLabel {
+  _TappableLabel({
+    @required this.painter,
+    @required this.onTap,
+  });
+
+  /// Paints the text of the label.
+  final TextPainter painter;
+
+  /// Called when a tap gesture is detected on the label.
+  final VoidCallback onTap;
 }
 
 class _DialPainter extends CustomPainter {
@@ -697,10 +695,10 @@ class _DialPainter extends CustomPainter {
     @required this.textDirection,
   });
 
-  final List<TextPainter> primaryOuterLabels;
-  final List<TextPainter> primaryInnerLabels;
-  final List<TextPainter> secondaryOuterLabels;
-  final List<TextPainter> secondaryInnerLabels;
+  final List<_TappableLabel> primaryOuterLabels;
+  final List<_TappableLabel> primaryInnerLabels;
+  final List<_TappableLabel> secondaryOuterLabels;
+  final List<_TappableLabel> secondaryInnerLabels;
   final Color backgroundColor;
   final Color accentColor;
   final double theta;
@@ -731,15 +729,16 @@ class _DialPainter extends CustomPainter {
                                  -labelRadius * math.sin(theta));
     }
 
-    void paintLabels(List<TextPainter> labels, _DialRing ring) {
+    void paintLabels(List<_TappableLabel> labels, _DialRing ring) {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.PI / 2.0;
 
-      for (TextPainter label in labels) {
-        final Offset labelOffset = new Offset(-label.width / 2.0, -label.height / 2.0);
-        label.paint(canvas, getOffsetForTheta(labelTheta, ring) + labelOffset);
+      for (_TappableLabel label in labels) {
+        final TextPainter labelPainter = label.painter;
+        final Offset labelOffset = new Offset(-labelPainter.width / 2.0, -labelPainter.height / 2.0);
+        labelPainter.paint(canvas, getOffsetForTheta(labelTheta, ring) + labelOffset);
         labelTheta += labelThetaIncrement;
       }
     }
@@ -769,13 +768,15 @@ class _DialPainter extends CustomPainter {
 
   static const double _kSemanticNodeSizeScale = 1.5;
 
+  @override
+  SemanticsBuilderCallback get semanticsBuilder => _buildSemantics;
+
   /// Creates semantics nodes for the hour/minute labels painted on the dial.
   ///
   /// The nodes are positioned on top of the text and their size is
   /// [_kSemanticNodeSizeScale] bigger than those of the text boxes to provide
   /// bigger tap area.
-  List<SemanticsNode> graftSemantics(RenderBox renderBox) {
-    final Size size = renderBox.size;
+  List<CustomPainterSemantics> _buildSemantics(Size size) {
     final double radius = size.shortestSide / 2.0;
     final Offset center = new Offset(size.width / 2.0, size.height / 2.0);
     const double labelPadding = 24.0;
@@ -796,38 +797,36 @@ class _DialPainter extends CustomPainter {
           -labelRadius * math.sin(theta));
     }
 
-    final List<SemanticsNode> nodes = <SemanticsNode>[];
+    final List<CustomPainterSemantics> nodes = <CustomPainterSemantics>[];
 
-    void paintLabels(List<TextPainter> labels, _DialRing ring) {
+    void paintLabels(List<_TappableLabel> labels, _DialRing ring) {
       if (labels == null)
         return;
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.PI / 2.0;
 
-      for (TextPainter label in labels) {
-        final double width = label.width * _kSemanticNodeSizeScale;
-        final double height = label.height * _kSemanticNodeSizeScale;
+      for (_TappableLabel label in labels) {
+        final TextPainter labelPainter = label.painter;
+        final double width = labelPainter.width * _kSemanticNodeSizeScale;
+        final double height = labelPainter.height * _kSemanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + new Offset(-width / 2.0, -height / 2.0);
-        final SemanticsNode node = new SemanticsNode(showOnScreen: renderBox.showOnScreen)
-          ..rect = new Rect.fromLTRB(
+        final CustomPainterSemantics node = new CustomPainterSemantics(
+          rect: new Rect.fromLTRB(
             nodeOffset.dx,
             nodeOffset.dy,
             nodeOffset.dx + width,
             nodeOffset.dy + height
-          )
-          ..updateWith(
-              config: new SemanticsConfiguration()
-                ..label = label.text.text
-                ..textDirection = textDirection
-                ..addAction(SemanticsAction.tap, () {
-                  // The action is sent to the gesture detector surrounding the
-                  // custom painter.
-                })
-          )
-          ..tags = new Set<SemanticsTag>.from(const <SemanticsTag>[
+          ),
+          properties: new SemanticsProperties(
+            label: labelPainter.text.text,
+            textDirection: textDirection,
+            onTap: label.onTap,
+          ),
+          tags: new Set<SemanticsTag>.from(const <SemanticsTag>[
             // Used by tests to find this node.
             const SemanticsTag('dial-label'),
-          ]);
+          ]),
+        );
 
         nodes.add(node);
         labelTheta += labelThetaIncrement;
@@ -947,9 +946,9 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   double _getThetaForTime(TimeOfDay time) {
-    final double fraction = (widget.mode == _TimePickerMode.hour) ?
-        (time.hour / TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerPeriod :
-        (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
+    final double fraction = widget.mode == _TimePickerMode.hour
+      ? (time.hour / TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerPeriod
+      : (time.minute / TimeOfDay.minutesPerHour) % TimeOfDay.minutesPerHour;
     return (math.PI / 2.0 - fraction * _kTwoPi) % _kTwoPi;
   }
 
@@ -1041,6 +1040,40 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _center = null;
   }
 
+  void _selectHour(int hour) {
+    TimeOfDay time;
+    if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
+      _activeRing = hour >= 1 && hour <= 12
+          ? _DialRing.inner
+          : _DialRing.outer;
+      time = new TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
+    } else {
+      _activeRing = _DialRing.outer;
+      if (widget.selectedTime.period == DayPeriod.am) {
+        time = new TimeOfDay(hour: hour, minute: widget.selectedTime.minute);
+      } else {
+        time = new TimeOfDay(hour: hour + TimeOfDay.hoursPerPeriod, minute: widget.selectedTime.minute);
+      }
+    }
+    final double angle = _getThetaForTime(time);
+    _thetaTween
+      ..begin = angle
+      ..end = angle;
+    _notifyOnChangedIfNeeded();
+  }
+
+  void _selectMinute(int minute) {
+    final TimeOfDay time = new TimeOfDay(
+      hour: widget.selectedTime.hour,
+      minute: minute,
+    );
+    final double angle = _getThetaForTime(time);
+    _thetaTween
+      ..begin = angle
+      ..end = angle;
+    _notifyOnChangedIfNeeded();
+  }
+
   static const List<TimeOfDay> _amHours = const <TimeOfDay>[
     const TimeOfDay(hour: 12, minute: 0),
     const TimeOfDay(hour: 1, minute: 0),
@@ -1071,31 +1104,62 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     const TimeOfDay(hour: 23, minute: 0),
   ];
 
-  List<TextPainter> _build24HourInnerRing(TextTheme textTheme) {
-    return _buildPainters(textTheme, _amHours
-        .map((TimeOfDay timeOfDay) {
-      return localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat);
-    })
-        .toList());
+  _TappableLabel _buildTappableLabel(TextTheme textTheme, String label, VoidCallback onTap) {
+    final TextStyle style = textTheme.subhead;
+    // TODO(abarth): Handle textScaleFactor.
+    // https://github.com/flutter/flutter/issues/5939
+    return new _TappableLabel(
+      painter: new TextPainter(
+        text: new TextSpan(style: style, text: label),
+        textDirection: TextDirection.ltr,
+      )..layout(),
+      onTap: onTap,
+    );
   }
 
-  List<TextPainter> _build24HourOuterRing(TextTheme textTheme) {
-    return _buildPainters(textTheme, _pmHours
-        .map((TimeOfDay timeOfDay) {
-      return localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat);
-    })
-        .toList());
+  List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) {
+    final List<_TappableLabel> labels = <_TappableLabel>[];
+    for (TimeOfDay timeOfDay in _amHours) {
+      labels.add(_buildTappableLabel(
+        textTheme,
+        localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
+        () {
+          _selectHour(timeOfDay.hour);
+        },
+      ));
+    }
+    return labels;
   }
 
-  List<TextPainter> _build12HourOuterRing(TextTheme textTheme) {
-    return _buildPainters(textTheme, _amHours
-        .map((TimeOfDay timeOfDay) {
-      return localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat);
-    })
-        .toList());
+  List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) {
+    final List<_TappableLabel> labels = <_TappableLabel>[];
+    for (TimeOfDay timeOfDay in _pmHours) {
+      labels.add(_buildTappableLabel(
+        textTheme,
+        localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
+        () {
+          _selectHour(timeOfDay.hour);
+        },
+      ));
+    }
+    return labels;
   }
 
-  List<TextPainter> _buildMinutes(TextTheme textTheme) {
+  List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) {
+    final List<_TappableLabel> labels = <_TappableLabel>[];
+    for (TimeOfDay timeOfDay in _amHours) {
+      labels.add(_buildTappableLabel(
+        textTheme,
+        localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
+        () {
+          _selectHour(timeOfDay.hour);
+        },
+      ));
+    }
+    return labels;
+  }
+
+  List<_TappableLabel> _buildMinutes(TextTheme textTheme) {
     const List<TimeOfDay> _minuteMarkerValues = const <TimeOfDay>[
       const TimeOfDay(hour: 0, minute: 0),
       const TimeOfDay(hour: 0, minute: 5),
@@ -1111,7 +1175,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       const TimeOfDay(hour: 0, minute: 55),
     ];
 
-    return _buildPainters(textTheme, _minuteMarkerValues.map(localizations.formatMinute).toList());
+    final List<_TappableLabel> labels = <_TappableLabel>[];
+    for (TimeOfDay timeOfDay in _minuteMarkerValues) {
+      labels.add(_buildTappableLabel(
+        textTheme,
+        localizations.formatMinute(timeOfDay),
+        () {
+          _selectMinute(timeOfDay.minute);
+        },
+      ));
+    }
+    return labels;
   }
 
   @override
@@ -1127,10 +1201,10 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
 
     final ThemeData theme = Theme.of(context);
-    List<TextPainter> primaryOuterLabels;
-    List<TextPainter> primaryInnerLabels;
-    List<TextPainter> secondaryOuterLabels;
-    List<TextPainter> secondaryInnerLabels;
+    List<_TappableLabel> primaryOuterLabels;
+    List<_TappableLabel> primaryInnerLabels;
+    List<_TappableLabel> secondaryOuterLabels;
+    List<_TappableLabel> secondaryInnerLabels;
     switch (widget.mode) {
       case _TimePickerMode.hour:
         if (widget.use24HourDials) {
@@ -1152,12 +1226,14 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
 
     return new GestureDetector(
+      excludeFromSemantics: true,
       onPanStart: _handlePanStart,
       onPanUpdate: _handlePanUpdate,
       onPanEnd: _handlePanEnd,
       onTapUp: _handleTapUp,
-      child: new _DialPaint(
-        dialPainter: new _DialPainter(
+      child: new CustomPaint(
+        key: const ValueKey<String>('time-picker-dial'),
+        painter: new _DialPainter(
           primaryOuterLabels: primaryOuterLabels,
           primaryInnerLabels: primaryInnerLabels,
           secondaryOuterLabels: secondaryOuterLabels,
@@ -1170,48 +1246,6 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
         ),
       )
     );
-  }
-}
-
-class _DialPaint extends CustomPaint {
-  const _DialPaint({
-    @required this.dialPainter,
-  }) : super(
-         key: const ValueKey<String>('time-picker-dial'), // used for testing.
-         painter: dialPainter,
-       );
-
-  final _DialPainter dialPainter;
-
-  @override
-  RenderCustomPaint createRenderObject(BuildContext context) {
-    return new _RenderDialPaint(
-      initialDialPainter: dialPainter,
-    );
-  }
-}
-
-class _RenderDialPaint extends RenderCustomPaint {
-  _RenderDialPaint({
-    _DialPainter initialDialPainter,
-  }) : super(painter: initialDialPainter);
-
-  @override
-  void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    super.describeSemanticsConfiguration(config);
-    config.isSemanticBoundary = true;
-  }
-
-  @override
-  void assembleSemanticsNode(
-    SemanticsNode node,
-    SemanticsConfiguration config,
-    Iterable<SemanticsNode> children,
-  ) {
-    assert(children.isEmpty);
-    final _DialPainter dialPainter = painter;
-    children = dialPainter.graftSemantics(this);
-    super.assembleSemanticsNode(node, config, children);
   }
 }
 

@@ -432,7 +432,8 @@ class RenderCustomPaint extends RenderProxyBox {
     // Check if we need to rebuild semantics.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
-      markNeedsSemanticsUpdate();
+      if (attached)
+        markNeedsSemanticsUpdate();
     } else if (oldPainter == null ||
         newPainter.runtimeType != oldPainter.runtimeType ||
         newPainter.shouldRebuildSemantics(oldPainter)) {
