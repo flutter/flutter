@@ -32,7 +32,6 @@
 **/doc/api/
 .flutter-plugins
 .packages
-.pub-cache/
 .pub/
 build/
 flutter_*.png
