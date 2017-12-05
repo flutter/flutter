@@ -12,7 +12,7 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'theme.dart';
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 2000);
+const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
 enum InputDecoratorBorderType {
@@ -145,11 +145,8 @@ class TextFieldBorder extends ShapeBorder {
     } else {
       final double extent = lerpDouble(0.0, gapExtent + gapPad * 2.0, gapAnimation.value);
       if (textDirection == TextDirection.rtl) {
-        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad, extent);
-        final Matrix4 transform = new Matrix4.identity()
-          ..translate(rect.left + rect.right, 0.0) // TBD: WTF left + right?
-          ..scale(-1.0, 1.0, 1.0);
-        canvas.drawPath(path.transform(transform.storage), paint);
+        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad - extent, extent);
+        canvas.drawPath(path, paint);
       } else {
         final Path path = _gapBorderPath(canvas, center, gapStart - gapPad, extent);
         canvas.drawPath(path, paint);
@@ -290,7 +287,7 @@ class _HelperError extends StatefulWidget {
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
   // If the height of this widget and the counter are zero ("empty") at
   // layout time, no space is allocated for the subtext.
-  static const empty = const SizedBox();
+  static Widget const empty = const SizedBox();
 
   AnimationController _controller;
   Widget _helper;
@@ -365,7 +362,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       opacity: _controller.value,
       child: new FractionalTranslation(
         translation: new Tween<Offset>(
-          begin: const Offset(0.0, 0.25),
+          begin: const Offset(0.0, -0.25),
           end: const Offset(0.0, 0.0),
         ).evaluate(_controller.view),
         child: new Text(
@@ -977,7 +974,9 @@ class _RenderDecoration extends RenderBox {
     }
 
     if (label != null) {
-      decoration.border.gapStart = _boxParentData(label).offset.dx;
+      decoration.border.gapStart = textDirection == TextDirection.rtl
+        ? _boxParentData(label).offset.dx + label.size.width
+        : _boxParentData(label).offset.dx;
       decoration.border.gapExtent = label.size.width * 0.75;
     } else {
       decoration.border.gapStart = null;
@@ -1010,10 +1009,13 @@ class _RenderDecoration extends RenderBox {
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
-      final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
       final double scale = lerpDouble(1.0, 0.75, t);
+      final double dx = textDirection == TextDirection.rtl
+        ? labelOffset.dx + label.size.width * (1.0 - scale) // origin is on the right
+        : labelOffset.dx; // origin on the left
+      final double dy = lerpDouble(0.0, floatingY - labelOffset.dy, t);
       _labelTransform = new Matrix4.identity()
-        ..translate(labelOffset.dx, labelOffset.dy + dy)
+        ..translate(dx, labelOffset.dy + dy)
         ..scale(scale);
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
@@ -1452,7 +1454,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         borderType: decoration.borderType,
         borderRadius: decoration.borderType == InputDecoratorBorderType.outline
           ? new BorderRadius.circular(4.0)
-          : BorderRadius.zero,
+          : const BorderRadius.only(
+              topLeft: const Radius.circular(4.0),
+              topRight: const Radius.circular(4.0),
+            ),
         borderSide: new BorderSide(
           color: _getDividerColor(themeData),
           width: _dividerWeight,
