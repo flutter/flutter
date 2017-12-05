@@ -38,6 +38,11 @@ void main() {
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     });
 
+    testUsingContext('report a nice error when a Ticker is left running', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
+    });
+
     testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
