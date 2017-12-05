@@ -346,6 +346,28 @@ class RenderEditable extends RenderBox {
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
+
+    if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
+      config.addAction(SemanticsAction.moveCursorBackardByCharacter, () {
+        final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
+        if (offset == null)
+          return;
+        onSelectionChanged(
+          new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+        );
+      });
+    }
+
+    if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
+      config.addAction(SemanticsAction.moveCursorForwardByCharacter, () {
+        final int offset = _textPainter.getOffsetAfter(_selection.extentOffset);
+        if (offset == null)
+          return;
+        onSelectionChanged(
+          new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+        );
+      });
+    }
   }
 
   @override
