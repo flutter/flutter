@@ -177,8 +177,7 @@ class CalculationManager {
   //
   // Static and global variables are initialized anew in the spawned isolate,
   // in a separate memory space.
-  static void _calculate(Object isolateData) {
-    final CalculationMessage message = isolateData;
+  static void _calculate(CalculationMessage message) {
     final SendPort sender = message.sendPort;
     final Calculator calculator = new Calculator(
       onProgressListener: (double completed, double total) {
