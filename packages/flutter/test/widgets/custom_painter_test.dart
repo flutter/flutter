@@ -394,7 +394,7 @@ void _defineTests() {
     ));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     await tester.pumpWidget(new SizedBox(
       height: 20.0,
@@ -403,7 +403,7 @@ void _defineTests() {
     ));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     await tester.pumpWidget(new SizedBox(
       height: 40.0,
@@ -412,7 +412,7 @@ void _defineTests() {
     ));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     semanticsTester.dispose();
   });
@@ -433,14 +433,14 @@ void _defineTests() {
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 0);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     await tester.pumpWidget(new CustomPaint(painter: new _PainterWithSemantics(
       semantics: testSemantics,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 1);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 2);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     final CustomPainterSemantics testSemantics2 = new CustomPainterSemantics(
       rect: new Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
@@ -455,7 +455,7 @@ void _defineTests() {
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
     expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 3);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 5);
 
     semanticsTester.dispose();
   });
