@@ -2362,7 +2362,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If [isSemanticBoundary] is true, this method is called with the `node`
   /// created for this [RenderObject], the `config` to be applied to that node
-  /// and the `children` [SemanticNode]s that decedents of this RenderObject
+  /// and the `children` [SemanticNode]s that descendants of this RenderObject
   /// have generated.
   ///
   /// By default, the method will annotate `node` with `config` and add the

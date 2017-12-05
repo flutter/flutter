@@ -17,6 +17,7 @@ export 'dart:ui' show hashValues, hashList;
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
+export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
@@ -29,84 +30,6 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
 // KEYS
-
-/// A [Key] is an identifier for [Widget]s and [Element]s.
-///
-/// A new widget will only be used to update an existing element if its key is
-/// the same as the key of the current widget associated with the element.
-///
-/// Keys must be unique amongst the [Element]s with the same parent.
-///
-/// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
-///
-/// See also the discussion at [Widget.key].
-@immutable
-abstract class Key {
-  /// Construct a [ValueKey<String>] with the given [String].
-  ///
-  /// This is the simplest way to create keys.
-  const factory Key(String value) = ValueKey<String>;
-
-  /// Default constructor, used by subclasses.
-  ///
-  /// Useful so that subclasses can call us, because the Key() factory
-  /// constructor shadows the implicit constructor.
-  const Key._();
-}
-
-/// A key that is not a [GlobalKey].
-///
-/// Keys must be unique amongst the [Element]s with the same parent. By
-/// contrast, [GlobalKey]s must be unique across the entire app.
-///
-/// See also the discussion at [Widget.key].
-abstract class LocalKey extends Key {
-  /// Default constructor, used by subclasses.
-  const LocalKey() : super._();
-}
-
-/// A key that uses a value of a particular type to identify itself.
-///
-/// A [ValueKey<T>] is equal to another [ValueKey<T>] if, and only if, their
-/// values are [operator==].
-///
-/// This class can be subclassed to create value keys that will not be equal to
-/// other value keys that happen to use the same value. If the subclass is
-/// private, this results in a value key type that cannot collide with keys from
-/// other sources, which could be useful, for example, if the keys are being
-/// used as fallbacks in the same scope as keys supplied from another widget.
-///
-/// See also the discussion at [Widget.key].
-class ValueKey<T> extends LocalKey {
-  /// Creates a key that delegates its [operator==] to the given value.
-  const ValueKey(this.value);
-
-  /// The value to which this key delegates its [operator==]
-  final T value;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final ValueKey<T> typedOther = other;
-    return value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => hashValues(runtimeType, value);
-
-  @override
-  String toString() {
-    final String valueString = T == String ? '<\'$value\'>' : '<$value>';
-    // The crazy on the next line is a workaround for
-    // https://github.com/dart-lang/sdk/issues/28548
-    if (runtimeType == new _TypeLiteral<ValueKey<T>>().type)
-      return '[$valueString]';
-    return '[$T $valueString]';
-  }
-}
-
-class _TypeLiteral<T> { Type get type => T; }
 
 /// A key that is only equal to itself.
 class UniqueKey extends LocalKey {
@@ -183,7 +106,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// Used by subclasses because the factory constructor shadows the implicit
   /// constructor.
-  const GlobalKey.constructor() : super._();
+  const GlobalKey.constructor() : super.empty();
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
   static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
@@ -4287,9 +4210,10 @@ abstract class RenderObjectElement extends Element {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
     }
 
-    // This attempts to diff the new child list (this.children) with
-    // the old child list (old.children), and update our renderObject
-    // accordingly.
+    // This attempts to diff the new child list (newWidgets) with
+    // the old child list (oldChildren), and produce a new list of elements to
+    // be the new list of child elements of this element. The called of this
+    // method is expected to update this render object accordingly.
 
     // The cases it tries to optimize for are:
     //  - the old list is empty
@@ -4305,13 +4229,13 @@ abstract class RenderObjectElement extends Element {
     // 2. Walk the lists from the bottom, without syncing nodes, until you no
     //    longer have matching nodes. We'll sync these nodes at the end. We
     //    don't sync them now because we want to sync all the nodes in order
-    //    from beginning ot end.
+    //    from beginning to end.
     // At this point we narrowed the old and new lists to the point
     // where the nodes no longer match.
     // 3. Walk the narrowed part of the old list to get the list of
     //    keys and sync null with non-keyed items.
     // 4. Walk the narrowed part of the new list forwards:
-    //     * Sync unkeyed items with null
+    //     * Sync non-keyed items with null
     //     * Sync keyed items with the source if it exists, else with null.
     // 5. Walk the bottom of the list again, syncing the nodes.
     // 6. Sync null with any items in the list of keys that are still
@@ -4378,7 +4302,7 @@ abstract class RenderObjectElement extends Element {
       if (haveOldChildren) {
         final Key key = newWidget.key;
         if (key != null) {
-          oldChild = oldKeyedChildren[newWidget.key];
+          oldChild = oldKeyedChildren[key];
           if (oldChild != null) {
             if (Widget.canUpdate(oldChild.widget, newWidget)) {
               // we found a match!
@@ -4400,7 +4324,7 @@ abstract class RenderObjectElement extends Element {
       newChildrenTop += 1;
     }
 
-    // We've scaned the whole list.
+    // We've scanned the whole list.
     assert(oldChildrenTop == oldChildrenBottom + 1);
     assert(newChildrenTop == newChildrenBottom + 1);
     assert(newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop);
@@ -4423,7 +4347,7 @@ abstract class RenderObjectElement extends Element {
       oldChildrenTop += 1;
     }
 
-    // clean up any of the remaining middle nodes from the old list
+    // Clean up any of the remaining middle nodes from the old list.
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
       for (Element oldChild in oldKeyedChildren.values) {
         if (forgottenChildren == null || !forgottenChildren.contains(oldChild))
