@@ -165,38 +165,33 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  final Finder findDialPaint = find.descendant(
-    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
-  );
-
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false);
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true);
 
-    final CustomPaint dialPaint = tester.widget(findDialPaint);
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
   });
 }

@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -429,7 +428,7 @@ class _CustomPainterSemanticsTester {
           .where((SemanticsNode node) => node.tags?.contains(const SemanticsTag('dial-label')) ?? false);
       expect(dialLabelNodes, hasLength(1), reason: 'Expected exactly one label ${expectation.label}');
       final Rect rect = new Rect.fromLTRB(expectation.left, expectation.top, expectation.right, expectation.bottom);
-      expect(dialLabelNodes.single.rect, within(distance: 0.1, from: rect),
+      expect(dialLabelNodes.single.rect, within(distance: 1.0, from: rect),
         reason: 'This is checking the node rectangle for label ${expectation.label}');
 
       final ui.Paragraph paragraph = paragraphs[i++];
@@ -444,7 +443,7 @@ class _CustomPainterSemanticsTester {
 
       expectedLabels.paragraph(
         paragraph: paragraph,
-        offset: within<Offset>(distance: 0.1, from: topLeft),
+        offset: within<Offset>(distance: 1.0, from: topLeft),
       );
     }
     expect(tester.renderObject(findDialPaint), expectedLabels);
