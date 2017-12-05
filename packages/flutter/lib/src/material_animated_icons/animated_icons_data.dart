@@ -10,7 +10,7 @@
 
 part of material_animated_icons;
 
-class AnimatedIcons {
+abstract class AnimatedIcons {
   static const AnimatedIconData menu_arrow = const _MenuArrowIconData();
 }
 

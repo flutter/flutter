@@ -18,12 +18,6 @@ part 'src/material_animated_icons/animated_icons.dart';
 // Provides a public interface for referring to the private icon
 // implementations.
 part 'src/material_animated_icons/animated_icons_data.dart';
-// Private API - this is the actual implementation of the drawing logic,
-// We keep it private as we do not want to prematurely provide public API for
-// vector graphics.
-// See: https://github.com/flutter/flutter/issues/1831 for the progress of
-// generic vector graphics support in Flutter.
-part 'src/material_animated_icons/animated_icons_private.dart';
 
 // Animated icons data files.
 part 'src/material_animated_icons/data/menu_arrow.g.dart';

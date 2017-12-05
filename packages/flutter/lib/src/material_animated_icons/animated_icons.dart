@@ -14,6 +14,9 @@ part of material_animated_icons;
 /// The available icons are specified in [AnimatedIcons].
 class AnimatedIcon extends StatelessWidget {
 
+  /// Creates an AnimatedIcon.
+  ///
+  /// [progress], [color], and [icon] cannot be null.
   const AnimatedIcon({
     @required this.progress,
     @required this.color,
@@ -21,12 +24,12 @@ class AnimatedIcon extends StatelessWidget {
     this.semanticLabel,
     this.textDirection,
     // TODO(amirh): add a parameter for controlling scaling behavior.
-  }) : assert (progress != null),
-       assert (color != null),
-       assert (icon != null);
+  }) : assert(progress != null),
+       assert(color != null),
+       assert(icon != null);
 
   /// The animation progress for the animated icon.
-  /// The value must be between 0 and 1.
+  /// The value is clamped to be between 0 and 1.
   ///
   /// This determines the actual frame that is displayed.
   final Animation<double> progress;
@@ -78,12 +81,7 @@ class AnimatedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    // TODO(amirh): implement semantics and text direction.
-    return new _AnimatedIcon(
-      progress: progress,
-      color: color,
-      icon: icon,
-    );
+    // TODO(amirh): implement this.
+    return new Container();
   }
 }
