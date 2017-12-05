@@ -60,6 +60,7 @@ Future<String> compile(
     {String sdkRoot,
     String mainPath,
     bool linkPlatformKernelIn : false,
+    bool aot : false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath}) async {
   final String frontendServer = artifacts.getArtifactPath(
@@ -77,6 +78,9 @@ Future<String> compile(
   ];
   if (!linkPlatformKernelIn)
     command.add('--no-link-platform');
+  if (aot) {
+    command.add('--aot');
+  }
   if (incrementalCompilerByteStorePath != null) {
     command.addAll(<String>[
       '--incremental',

@@ -334,6 +334,7 @@ Future<String> _buildAotSnapshot(
       mainPath: mainPath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
+      aot : true,
     );
   }
 
