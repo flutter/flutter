@@ -252,7 +252,6 @@ enum _LogType {
   trace
 }
 
-
 class _AnsiStatus extends Status {
   _AnsiStatus(this.message, this.expectSlowOperation, this.onFinish) {
     stopwatch = new Stopwatch()..start();
