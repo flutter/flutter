@@ -3,6 +3,7 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.14.3
+  device_info: 0.0.5
   intl: 0.15.2
   connectivity: 0.1.0
   string_scanner: 1.0.2
