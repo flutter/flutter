@@ -16,11 +16,11 @@ void main() {
         textDirection: TextDirection.ltr,
         child: new Stack(
           children: <Widget>[
-            const Semantics(),
-            const Semantics(
+            new Semantics(),
+            new Semantics(
               container: true,
             ),
-            const Semantics(
+            new Semantics(
               label: 'label',
               textDirection: TextDirection.ltr,
             ),
@@ -35,11 +35,11 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(),
-              const Semantics(
+              new Semantics(),
+              new Semantics(
                 container: true,
               ),
-              const Semantics(
+              new Semantics(
                 label: 'label',
                 textDirection: TextDirection.ltr,
               ),
@@ -62,14 +62,14 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Positioned(
                 key: key,
                 left: 0.0,
                 top: 0.0,
                 width: 100.0,
                 height: 100.0,
-                child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
               ),
             ],
           ),
@@ -83,7 +83,7 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Semantics(
                 container: true,
                 child: new Stack(
@@ -94,9 +94,9 @@ void main() {
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: const Semantics(label: 'label2', textDirection: TextDirection.ltr),
+                      child: new Semantics(label: 'label2', textDirection: TextDirection.ltr),
                     ),
-                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -112,7 +112,7 @@ void main() {
         child: new SemanticsDebugger(
           child: new Stack(
             children: <Widget>[
-              const Semantics(label: 'label1', textDirection: TextDirection.ltr),
+              new Semantics(label: 'label1', textDirection: TextDirection.ltr),
               new Semantics(
                 container: true,
                 child: new Stack(
@@ -123,9 +123,9 @@ void main() {
                         top: 0.0,
                         width: 100.0,
                         height: 100.0,
-                        child: const Semantics(label: 'label2', textDirection: TextDirection.ltr)),
-                    const Semantics(label: 'label3', textDirection: TextDirection.ltr),
-                    const Semantics(label: 'label4', textDirection: TextDirection.ltr),
+                        child: new Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                    new Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    new Semantics(label: 'label4', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),

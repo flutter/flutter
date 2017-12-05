@@ -14,12 +14,12 @@ void main() {
     final SemanticsTester semantics = new SemanticsTester(tester);
 
     await tester.pumpWidget(
-      const Semantics(
+      new Semantics(
         container: true,
         onTap: dummyTapHandler,
-        child: const Semantics(
+        child: new Semantics(
           onTap: dummyTapHandler,
-          child: const Semantics(
+          child: new Semantics(
             onTap: dummyTapHandler,
             textDirection: TextDirection.ltr,
             label: 'foo',
@@ -54,12 +54,12 @@ void main() {
 
     // This should not throw an assert.
     await tester.pumpWidget(
-      const Semantics(
+      new Semantics(
         container: true,
         onTap: dummyTapHandler,
-        child: const Semantics(
+        child: new Semantics(
           onTap: dummyTapHandler,
-          child: const Semantics(
+          child: new Semantics(
             onTap: dummyTapHandler,
             textDirection: TextDirection.ltr,
             label: 'bar',  // <-- only change

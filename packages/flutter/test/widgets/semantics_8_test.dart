@@ -23,10 +23,10 @@ void main() {
             child: new Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   checked: true,
                 ),
-                const Semantics(
+                new Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 )
@@ -61,11 +61,11 @@ void main() {
             child: new Stack(
               textDirection: TextDirection.ltr,
               children: <Widget>[
-                const Semantics(
+                new Semantics(
                   label: 'label',
                   textDirection: TextDirection.ltr,
                 ),
-                const Semantics(
+                new Semantics(
                   checked: true
                 )
               ]
