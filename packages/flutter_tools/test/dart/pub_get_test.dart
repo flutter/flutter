@@ -245,7 +245,7 @@ class MockDirectory implements Directory {
   final String path;
 
   @override
-  bool existsSync() => findCache && path.endsWith('flutter/.pub-cache');
+  bool existsSync() => findCache && path.endsWith('.pub-cache');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
