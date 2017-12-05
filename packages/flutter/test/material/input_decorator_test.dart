@@ -196,7 +196,6 @@ void main() {
     expect(getDividerWeight(tester), 0.0);
   });
 
-
   // Overall height for this InputDecorator is 40.0dps
   //   12 - top padding
   //   16 - input text (font size 16dps)

@@ -288,6 +288,10 @@ class _HelperError extends StatefulWidget {
 }
 
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
+  // If the height of this widget and the counter are zero ("empty") at
+  // layout time, no space is allocated for the subtext.
+  static const empty = const SizedBox();
+
   AnimationController _controller;
   Widget _helper;
   Widget _error;
@@ -382,7 +386,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         return _helper = _buildHelper();
       } else {
         _helper = null;
-        return const SizedBox();
+        return empty;
       }
     }
 
@@ -392,7 +396,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
         return _error = _buildError();
       } else {
         _error = null;
-        return const SizedBox();
+        return empty;
       }
     }
 
@@ -426,7 +430,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
       );
     }
 
-    return const SizedBox();
+    return empty;
   }
 }
 
@@ -438,8 +442,7 @@ enum _DecorationSlot {
   suffix,
   prefixIcon,
   suffixIcon,
-  error,
-  helper,
+  helperError,
   counter,
   container,
 }
@@ -457,8 +460,7 @@ class _Decoration {
     this.suffix,
     this.prefixIcon,
     this.suffixIcon,
-    this.error,
-    this.helper,
+    this.helperError,
     this.counter,
     this.container,
   }) : assert(contentPadding != null),
@@ -476,8 +478,7 @@ class _Decoration {
   final Widget suffix;
   final Widget prefixIcon;
   final Widget suffixIcon;
-  final Widget error;
-  final Widget helper;
+  final Widget helperError;
   final Widget counter;
   final Widget container;
 
@@ -499,8 +500,7 @@ class _Decoration {
         && typedOther.suffix == suffix
         && typedOther.prefixIcon == prefixIcon
         && typedOther.suffixIcon == suffixIcon
-        && typedOther.error == error
-        && typedOther.helper == helper
+        && typedOther.helperError == helperError
         && typedOther.counter == counter
         && typedOther.container == container;
   }
@@ -519,8 +519,7 @@ class _Decoration {
       suffix,
       prefixIcon,
       suffixIcon,
-      error,
-      helper,
+      helperError,
       counter,
       container,
     );
@@ -540,7 +539,7 @@ class _RenderDecorationLayout {
   final Map<RenderBox, double> boxToBaseline;
   final double inputBaseline;
   final double outlineBaseline;
-  final double subtextBaseline;
+  final double subtextBaseline; // helper/error counter
   final double containerHeight;
   final double subtextHeight;
 }
@@ -611,16 +610,10 @@ class _RenderDecoration extends RenderBox {
     _suffixIcon = _updateChild(_suffixIcon, value, _DecorationSlot.suffixIcon);
   }
 
-  RenderBox _error;
-  RenderBox get error => _error;
-  set error(RenderBox value) {
-    _error = _updateChild(_error, value, _DecorationSlot.error);
-  }
-
-  RenderBox _helper;
-  RenderBox get helper => _helper;
-  set helper(RenderBox value) {
-    _helper = _updateChild(_helper, value, _DecorationSlot.helper);
+  RenderBox _helperError;
+  RenderBox get helperError => _helperError;
+  set helperError(RenderBox value) {
+    _helperError = _updateChild(_helperError, value, _DecorationSlot.helperError);
   }
 
   RenderBox _counter;
@@ -651,10 +644,8 @@ class _RenderDecoration extends RenderBox {
       yield label;
     if (hint != null)
       yield hint;
-    if (error != null)
-      yield error;
-    if (helper != null)
-      yield helper;
+    if (helperError != null)
+      yield helperError;
     if (counter != null)
       yield counter;
     if (container != null)
@@ -718,8 +709,7 @@ class _RenderDecoration extends RenderBox {
     add(suffix, 'suffix');
     add(prefixIcon, 'prefixIcon');
     add(suffixIcon, 'suffixIcon');
-    add(error, 'error');
-    add(helper, 'helper');
+    add(helperError, 'helperError');
     add(counter, 'counter');
     add(container, 'container');
     return value;
@@ -804,16 +794,17 @@ class _RenderDecoration extends RenderBox {
 
     double subtextBaseline = 0.0;
     double subtextHeight = 0.0;
-    if (helper != null || error != null || counter != null) {
+    if (helperError != null || counter != null) {
       aboveBaseline = 0.0;
       belowBaseline = 0.0;
-      layoutLineBox(helper);
-      layoutLineBox(error);
+      layoutLineBox(helperError);
       layoutLineBox(counter);
 
-      const double subtextGap = 8.0;
-      subtextBaseline = containerHeight + subtextGap + aboveBaseline;
-      subtextHeight = subtextGap + aboveBaseline + belowBaseline;
+      if (aboveBaseline + belowBaseline > 0.0) {
+        const double subtextGap = 8.0;
+        subtextBaseline = containerHeight + subtextGap + aboveBaseline;
+        subtextHeight = subtextGap + aboveBaseline + belowBaseline;
+      }
     }
 
     return new _RenderDecorationLayout(
@@ -873,11 +864,13 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeMinIntrinsicHeight(double width) {
+    double subtextHeight = _lineHeight(width, <RenderBox>[helperError, counter]);
+    if (subtextHeight > 0.0)
+      subtextHeight += 8.0;
     return contentPadding.top
       + (label == null ? 0.0 : decoration.floatingLabelHeight)
       + _lineHeight(width, <RenderBox>[prefix, input, suffix])
-      + ((helper ?? error ?? counter) == null ? 0.0 : 8.0)
-      + _lineHeight(width, <RenderBox>[helper, error, counter])
+      + subtextHeight
       + contentPadding.bottom;
   }
 
@@ -966,22 +959,18 @@ class _RenderDecoration extends RenderBox {
         end -= baselineLayout(suffix, end - suffix.size.width);
     }
 
-    if (helper != null || error != null || counter != null) {
+    if (helperError != null || counter != null) {
       height = layout.subtextHeight;
       baseline = layout.subtextBaseline;
 
       if (textDirection == TextDirection.rtl) {
-        if (helper != null)
-          baselineLayout(helper, right - helper.size.width);
-        if (error != null)
-          baselineLayout(error, right - error.size.width);
+        if (helperError != null)
+          baselineLayout(helperError, right - helperError.size.width);
         if (counter != null)
           baselineLayout(counter, left);
       } else {
-        if (helper != null)
-          baselineLayout(helper, left);
-        if (error != null)
-          baselineLayout(error, left);
+        if (helperError != null)
+          baselineLayout(helperError, left);
         if (counter != null)
           baselineLayout(counter, right - counter.size.width);
       }
@@ -1035,7 +1024,7 @@ class _RenderDecoration extends RenderBox {
     doPaint(suffixIcon);
     doPaint(hint);
     doPaint(input);
-    doPaint(error ?? helper);
+    doPaint(helperError);
     doPaint(counter);
   }
 
@@ -1114,8 +1103,7 @@ class _RenderDecorationElement extends RenderObjectElement {
     _mountChild(widget.decoration.suffix, _DecorationSlot.suffix);
     _mountChild(widget.decoration.prefixIcon, _DecorationSlot.prefixIcon);
     _mountChild(widget.decoration.suffixIcon, _DecorationSlot.suffixIcon);
-    _mountChild(widget.decoration.error, _DecorationSlot.error);
-    _mountChild(widget.decoration.helper, _DecorationSlot.helper);
+    _mountChild(widget.decoration.helperError, _DecorationSlot.helperError);
     _mountChild(widget.decoration.counter, _DecorationSlot.counter);
     _mountChild(widget.decoration.container, _DecorationSlot.container);
   }
@@ -1144,8 +1132,7 @@ class _RenderDecorationElement extends RenderObjectElement {
     _updateChild(widget.decoration.suffix, _DecorationSlot.suffix);
     _updateChild(widget.decoration.prefixIcon, _DecorationSlot.prefixIcon);
     _updateChild(widget.decoration.suffixIcon, _DecorationSlot.suffixIcon);
-    _updateChild(widget.decoration.error, _DecorationSlot.error);
-    _updateChild(widget.decoration.helper, _DecorationSlot.helper);
+    _updateChild(widget.decoration.helperError, _DecorationSlot.helperError);
     _updateChild(widget.decoration.counter, _DecorationSlot.counter);
     _updateChild(widget.decoration.container, _DecorationSlot.container);
   }
@@ -1173,11 +1160,8 @@ class _RenderDecorationElement extends RenderObjectElement {
       case _DecorationSlot.suffixIcon:
         renderObject.suffixIcon = child;
         break;
-      case _DecorationSlot.error:
-        renderObject.error = child;
-        break;
-      case _DecorationSlot.helper:
-        renderObject.helper = child;
+      case _DecorationSlot.helperError:
+        renderObject.helperError = child;
         break;
       case _DecorationSlot.counter:
         renderObject.counter = child;
@@ -1434,13 +1418,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle);
   }
 
-  TextStyle _getSubtextStyle(ThemeData themeData) {
-    final TextStyle helperStyle = _getHelperStyle(themeData);
-    return decoration.errorText != null
-      ? themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle)
-      : helperStyle;
-  }
-
   double get _dividerWeight {
     if (decoration.hideDivider || !decoration.enabled)
       return 0.0;
@@ -1493,13 +1470,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     final Widget label = decoration.labelText == null ? null : new _Shaker(
       animation: _shakingLabelController.view,
-      child: new Text(
-        decoration.labelText,
-        textAlign: textAlign,
-        style: new TextStyleTween(
-          begin: _getInlineLabelStyle(themeData),
-          end: _getFloatingLabelStyle(themeData),
-        ).evaluate(_floatingLabelController),
+      child: new AnimatedDefaultTextStyle(
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        style: widget.labelIsFloating
+          ? _getFloatingLabelStyle(themeData)
+          : _getInlineLabelStyle(themeData),
+        child: new Text(
+          decoration.labelText,
+          textAlign: textAlign,
+        ),
       ),
     );
 
@@ -1588,8 +1568,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         suffix: suffix,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
-        //error: error,
-        helper: helperError,
+        helperError: helperError,
         counter: counter,
         container: container,
       ),
