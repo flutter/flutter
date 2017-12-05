@@ -30,7 +30,8 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 /// To implement a custom painter, either subclass or implement this interface
 /// to define your custom paint delegate. [CustomPaint] subclasses must
 /// implement the [paint] and [shouldRepaint] methods, and may optionally also
-/// implement the [hitTest] method.
+/// implement the [hitTest] and [shouldRebuildSemantics] methods, and the
+/// [semanticsBuilder] getter.
 ///
 /// The [paint] method is called whenever the custom object needs to be repainted.
 ///
@@ -49,6 +50,13 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///
 /// The [hitTest] method is called when the user interacts with the underlying
 /// render object, to determine if the user hit the object or missed it.
+///
+/// The [semanticsBuilder] is called whenever the custom object needs to rebuild
+/// its semantics information.
+///
+/// The [shouldRebuildSemantics] method is called when a new instance of the
+/// class is provided, to check if the new instance contains different
+/// information that affects the semantics tree.
 ///
 /// ## Sample code
 ///
@@ -73,14 +81,34 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 ///   }
 ///
 ///   @override
-///   bool shouldRepaint(Sky oldDelegate) {
-///     // Since this Sky painter has no fields, it always paints
-///     // the same thing, and therefore we return false here. If
-///     // we had fields (set from the constructor) then we would
-///     // return true if any of them differed from the same
-///     // fields on the oldDelegate.
-///     return false;
+///   SemanticsBuilderCallback get semanticsBuilder {
+///     return (Size size) {
+///       // Annotate a rectangle containing the picture of the sun
+///       // with the label "Sun". When text to speech feature is enabled on the
+///       // device, a user will be able to locate the sun on this picture by
+///       // touch.
+///       var rect = Offset.zero & size;
+///       var width = size.shortestSide * 0.4;
+///       rect = const Alignment(0.8, -0.9).inscribe(new Size(width, width), rect);
+///       return [
+///         new CustomPainterSemantics(
+///           rect: rect,
+///           properties: new SemanticsProperties(
+///             label: 'Sun',
+///             textDirection: TextDirection.ltr,
+///           ),
+///         ),
+///       ];
+///     };
 ///   }
+///
+///   // Since this Sky painter has no fields, it always paints
+///   // the same thing and semantics information is the same.
+///   // Therefore we return false here. If we had fields (set
+///   // from the constructor) then we would return true if any
+///   // of them differed from the same fields on the oldDelegate.
+///   bool shouldRepaint(Sky oldDelegate) => false;
+///   bool shouldRebuildSemantics(Sky oldDelegate) => false;
 /// }
 /// ```
 ///
