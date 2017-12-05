@@ -14,6 +14,7 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
+final String pubCache = path.join(flutterRoot, '.pub-cache');
 final String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
 final bool hasColor = stdout.supportsAnsiEscapes;
 
@@ -204,7 +205,12 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  return _runCommand(pub, args, workingDirectory: workingDirectory);
+  final Map<String, String> pubEnvironment = <String, String>{};
+  if (new Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
+  return _runCommand(pub, args, workingDirectory: workingDirectory,
+      environment: pubEnvironment);
 }
 
 class EvalResult {

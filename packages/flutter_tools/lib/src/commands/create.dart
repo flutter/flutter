@@ -162,7 +162,7 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('package', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(directory: dirPath);
+        await pubGet(context: 'create_pkg', directory: dirPath);
 
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
@@ -180,7 +180,7 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(directory: dirPath);
+        await pubGet(context: 'create_plugin', directory: dirPath);
 
       if (android_sdk.androidSdk != null)
         gradle.updateLocalProperties(projectPath: dirPath);
@@ -214,10 +214,11 @@ class CreateCommand extends FlutterCommand {
       buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
       hasPlugins: generatePlugin,
+      previewDart2: false,
     );
 
     if (argResults['pub']) {
-      await pubGet(directory: appPath);
+      await pubGet(context: 'create', directory: appPath);
       injectPlugins(directory: appPath);
     }
 
@@ -366,9 +367,10 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!linter_utils.isValidPackageName(projectName))
-    return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
-
+  if (!linter_utils.isValidPackageName(projectName)) {
+    final String packageNameDetails = new package_names.PubPackageNames().details;
+    return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
+  }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
       'package dependencies.';

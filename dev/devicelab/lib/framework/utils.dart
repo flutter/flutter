@@ -13,6 +13,8 @@ import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
 
+import 'adb.dart';
+
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
 
@@ -497,4 +499,37 @@ bool lineContainsServicePort(String line) => line.contains(_kObservatoryRegExp);
 int parseServicePort(String line) {
   final Match match = _kObservatoryRegExp.firstMatch(line);
   return match == null ? null : int.parse(match.group(2));
+}
+
+/// If FLUTTER_ENGINE environment variable is set then we need to pass
+/// correct --local-engine setting too.
+void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
+  if (Platform.environment['FLUTTER_ENGINE'] != null) {
+    if (flavor == null) {
+      // If engine flavor was not specified explicitly then scan options looking
+      // for flags that specify the engine flavor (--release, --profile or
+      // --debug). Default flavor to debug if no flags were found.
+      const Map<String, String> optionToFlavor = const <String, String>{
+        '--release': 'release',
+        '--debug': 'debug',
+        '--profile': 'profile',
+      };
+
+      for (String option in options) {
+        flavor = optionToFlavor[option];
+        if (flavor != null) {
+          break;
+        }
+      }
+
+      flavor ??= 'debug';
+    }
+
+    const Map<DeviceOperatingSystem, String> osNames = const <DeviceOperatingSystem, String>{
+      DeviceOperatingSystem.ios: 'ios',
+      DeviceOperatingSystem.android: 'android',
+    };
+
+    options.add('--local-engine=${osNames[deviceOperatingSystem]}_$flavor');
+  }
 }

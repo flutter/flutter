@@ -1955,7 +1955,6 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
     String name,
     @required this.value,
     @required DiagnosticsTreeStyle style,
-    String emptyBodyDescription,
   }) : assert(value != null),
        super(
          name: name,

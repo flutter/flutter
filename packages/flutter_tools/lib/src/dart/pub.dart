@@ -29,7 +29,10 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   return false;
 }
 
+/// [context] provides extra information to package server requests to
+/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
 Future<Null> pubGet({
+  @required String context,
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
@@ -59,6 +62,7 @@ Future<Null> pubGet({
     try {
       await pub(
         args,
+        context: context,
         directory: directory,
         filter: _filterOverrideWarnings,
         failureMessage: 'pub $command failed',
@@ -84,7 +88,11 @@ typedef String MessageFilter(String message);
 ///
 /// The `--trace` argument is passed to `pub` (by mutating the provided
 /// `arguments` list) unless `showTraceForErrors` is false.
+///
+/// [context] provides extra information to package server requests to
+/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
 Future<Null> pub(List<String> arguments, {
+  @required String context,
   String directory,
   MessageFilter filter,
   String failureMessage: 'pub failed',
@@ -102,7 +110,7 @@ Future<Null> pub(List<String> arguments, {
       _pubCommand(arguments),
       workingDirectory: directory,
       mapFunction: filter,
-      environment: _pubEnvironment,
+      environment: _createPubEnvironment(context),
     );
     if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
@@ -125,7 +133,7 @@ Future<Null> pubInteractively(List<String> arguments, {
   final int code = await runInteractively(
     _pubCommand(arguments),
     workingDirectory: directory,
-    environment: _pubEnvironment,
+    environment: _createPubEnvironment('interactive'),
   );
   if (code != 0)
     throwToolExit('pub finished with exit code $code', exitCode: code);
@@ -137,20 +145,38 @@ List<String> _pubCommand(List<String> arguments) {
 }
 
 /// The full environment used when running pub.
-Map<String, String> get _pubEnvironment => <String, String>{
-  'FLUTTER_ROOT': Cache.flutterRoot,
-  _pubEnvironmentKey: _getPubEnvironmentValue(),
-};
+///
+/// [context] provides extra information to package server requests to
+/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
+Map<String, String> _createPubEnvironment(String context) {
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_ROOT': Cache.flutterRoot,
+    _pubEnvironmentKey: _getPubEnvironmentValue(context),
+  };
+  final String pubCache = _getRootPubCacheIfAvailable();
+  if (pubCache != null) {
+    environment[_pubCacheEnvironmentKey] = pubCache;
+  }
+  return environment;
+}
 
 final RegExp _analyzerWarning = new RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
 
+/// The console environment key used by the pub tool to find the cache directory.
+const String _pubCacheEnvironmentKey = 'PUB_CACHE';
+
+final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
+
 /// Returns the environment value that should be used when running pub.
 ///
 /// Includes any existing environment variable, if one exists.
-String _getPubEnvironmentValue() {
+///
+/// [context] provides extra information to package server requests to
+/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
+String _getPubEnvironmentValue(String pubContext) {
   final List<String> values = <String>[];
 
   final String existing = platform.environment[_pubEnvironmentKey];
@@ -165,7 +191,27 @@ String _getPubEnvironmentValue() {
 
   values.add('flutter_cli');
 
+  if (!_validContext.hasMatch(pubContext)) {
+    throw new ArgumentError.value(pubContext, 'pubContext', 'Must match RegExp ${_validContext.pattern}');
+  }
+  values.add('ctx_$pubContext');
+
   return values.join(':');
+}
+
+String _getRootPubCacheIfAvailable() {
+  if (platform.environment.containsKey(_pubCacheEnvironmentKey)) {
+    return platform.environment[_pubCacheEnvironmentKey];
+  }
+
+  final String cachePath = fs.path.join(Cache.flutterRoot, '.pub-cache');
+  if (fs.directory(cachePath).existsSync()) {
+    printTrace('Using $cachePath for the pub cache.');
+    return cachePath;
+  }
+
+  // Use pub's default location by returning null.
+  return null;
 }
 
 String _filterOverrideWarnings(String message) {

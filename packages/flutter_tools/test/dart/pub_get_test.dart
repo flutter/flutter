@@ -6,8 +6,11 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
@@ -18,11 +21,15 @@ import '../src/context.dart';
 void main() {
   testUsingContext('pub get 69', () async {
     String error;
+
+    final MockProcessManager processMock = context.getVariable(ProcessManager);
+
     new FakeAsync().run((FakeAsync time) {
-      pubGet(checkLastModified: false).then((Null value) {
+      expect(processMock.lastPubEnvironmment, isNull);
+      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
-      }, onError: (dynamic error) {
-        error = 'test failed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 500));
@@ -30,6 +37,8 @@ void main() {
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
       );
+      expect(processMock.lastPubEnvironmment, contains('flutter_cli:ctx_flutter_tests'));
+      expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
         'Running "flutter packages get" in /...\n'
@@ -73,6 +82,61 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => new MockProcessManager(69),
     FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{},
+    ),
+  });
+
+  testUsingContext('pub cache in root is used', () async {
+    String error;
+
+    final MockProcessManager processMock = context.getVariable(ProcessManager);
+
+    new FakeAsync().run((FakeAsync time) {
+      MockDirectory.findCache = true;
+      expect(processMock.lastPubEnvironmment, isNull);
+      expect(processMock.lastPubCache, isNull);
+      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(processMock.lastPubCache, endsWith('flutter/.pub-cache'));
+      expect(error, isNull);
+    });
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => new MockProcessManager(69),
+    FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{},
+    ),
+  });
+
+  testUsingContext('pub cache in environment is used', () async {
+    String error;
+
+    final MockProcessManager processMock = context.getVariable(ProcessManager);
+
+    new FakeAsync().run((FakeAsync time) {
+      MockDirectory.findCache = false;
+      expect(processMock.lastPubEnvironmment, isNull);
+      expect(processMock.lastPubCache, isNull);
+      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic thrownError) {
+        error = 'test failed unexpectedly: $thrownError';
+      });
+      time.elapse(const Duration(milliseconds: 500));
+      expect(processMock.lastPubCache, equals('path/to/pub-cache'));
+      expect(error, isNull);
+    });
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => new MockProcessManager(69),
+    FileSystem: () => new MockFileSystem(),
+    Platform: () => new FakePlatform(
+      environment: <String, String>{'PUB_CACHE': 'path/to/pub-cache'},
+    ),
   });
 }
 
@@ -83,6 +147,9 @@ class MockProcessManager implements ProcessManager {
 
   final int fakeExitCode;
 
+  String lastPubEnvironmment;
+  String lastPubCache;
+
   @override
   Future<Process> start(
     List<dynamic> command, {
@@ -92,6 +159,8 @@ class MockProcessManager implements ProcessManager {
     bool runInShell: false,
     ProcessStartMode mode: ProcessStartMode.NORMAL,
   }) {
+    lastPubEnvironmment = environment['PUB_ENVIRONMENT'];
+    lastPubCache = environment['PUB_CACHE'];
     return new Future<Process>.value(new MockProcess(fakeExitCode));
   }
 
@@ -150,6 +219,11 @@ class MockFileSystem extends MemoryFileSystem {
   File file(dynamic path) {
     return new MockFile();
   }
+
+  @override
+  Directory directory(dynamic path) {
+    return new MockDirectory(path);
+  }
 }
 
 class MockFile implements File {
@@ -163,6 +237,21 @@ class MockFile implements File {
 
   @override
   DateTime lastModifiedSync() => new DateTime(0);
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => null;
+}
+
+class MockDirectory implements Directory {
+  static bool findCache = false;
+
+  MockDirectory(this.path);
+
+  @override
+  final String path;
+
+  @override
+  bool existsSync() => findCache && path.endsWith('.pub-cache');
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;

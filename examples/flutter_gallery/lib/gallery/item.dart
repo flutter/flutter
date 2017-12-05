@@ -54,7 +54,7 @@ List<GalleryItem> _buildGalleryItems() {
     // Demos
     new GalleryItem(
       title: 'Shrine',
-      subtitle:'Basic shopping app',
+      subtitle: 'Basic shopping app',
       category: 'Demos',
       routeName: ShrineDemo.routeName,
       buildRoute: (BuildContext context) => new ShrineDemo(),
@@ -72,6 +72,13 @@ List<GalleryItem> _buildGalleryItems() {
       category: 'Demos',
       routeName: AnimationDemo.routeName,
       buildRoute: (BuildContext context) => const AnimationDemo(),
+    ),
+    new GalleryItem(
+      title: 'Video',
+      subtitle: 'Video playback',
+      category: 'Demos',
+      routeName: VideoDemo.routeName,
+      buildRoute: (BuildContext context) => const VideoDemo(),
     ),
     // Material Components
     new GalleryItem(
@@ -305,6 +312,14 @@ List<GalleryItem> _buildGalleryItems() {
       category: 'Cupertino Components',
       routeName: CupertinoSwitchDemo.routeName,
       buildRoute: (BuildContext context) => new CupertinoSwitchDemo(),
+    ),
+    // Media
+    new GalleryItem(
+      title: 'Animated images',
+      subtitle: 'GIF and WebP animations',
+      category: 'Media',
+      routeName: ImagesDemo.routeName,
+      buildRoute: (BuildContext context) => new ImagesDemo(),
     ),
     // Styles
     new GalleryItem(

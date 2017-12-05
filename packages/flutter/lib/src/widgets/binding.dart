@@ -317,7 +317,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  final FocusManager focusManager = new FocusManager();
+  FocusManager get focusManager => _buildOwner.focusManager;
 
   final List<WidgetsBindingObserver> _observers = <WidgetsBindingObserver>[];
 

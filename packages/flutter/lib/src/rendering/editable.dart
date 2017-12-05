@@ -127,6 +127,7 @@ class RenderEditable extends RenderBox {
        _showCursor = showCursor ?? new ValueNotifier<bool>(false),
        _hasFocus = hasFocus ?? false,
        _maxLines = maxLines,
+       _selectionColor = selectionColor,
        _selection = selection,
        _offset = offset {
     assert(_showCursor != null);

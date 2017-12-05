@@ -40,7 +40,6 @@ tasks:
       Layout sample app for Android from Linux.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   complex_layout_ios__compile:
     description: >
@@ -48,7 +47,6 @@ tasks:
       Layout sample app for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   complex_layout_win__compile:
     description: >
@@ -63,7 +61,6 @@ tasks:
       app for Android from Linux.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
-    flaky: true
 
   basic_material_app_ios__compile:
     description: >
@@ -71,7 +68,6 @@ tasks:
       app for iOS from Mac.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
-    flaky: true
 
   basic_material_app_win__compile:
     description: >
@@ -127,7 +123,6 @@ tasks:
       Checks that external UIs work on Android.
     stage: devicelab
     required_agent_capabilities: ["has-android-device"]
-    flaky: true
 
   platform_interaction_test:
     description: >

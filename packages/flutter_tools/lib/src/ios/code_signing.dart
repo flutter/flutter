@@ -4,7 +4,6 @@
 import 'dart:async';
 import 'dart:convert' show UTF8;
 
-import 'package:quiver/iterables.dart';
 import 'package:quiver/strings.dart';
 
 import '../application_package.dart';
@@ -199,7 +198,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities, b
     printStatus('  a) Abort', emphasis: true);
 
     final String choice = await terminal.promptForCharInput(
-      range(1, count + 1).map((num number) => '$number').toList()
+      new List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,

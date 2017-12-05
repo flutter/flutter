@@ -207,6 +207,12 @@ class ScrollPhysics {
     return parent.carriedMomentum(existingVelocity);
   }
 
+  /// The minimum amount of pixel distance drags must move by to start motion
+  /// the first time or after each time the drag motion stopped.
+  ///
+  /// If null, no minimum threshold is enforced.
+  double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
+
   @override
   String toString() {
     if (parent == null)
@@ -326,6 +332,9 @@ class BouncingScrollPhysics extends ScrollPhysics {
     return existingVelocity.sign *
         math.min(0.000816 * math.pow(existingVelocity.abs(), 1.967).toDouble(), 40000.0);
   }
+
+  @override
+  double get dragStartDistanceMotionThreshold => 3.5; // Eyeballed from observation.
 }
 
 /// Scroll physics for environments that prevent the scroll offset from reaching

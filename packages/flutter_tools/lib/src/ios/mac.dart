@@ -264,7 +264,8 @@ Future<XcodeBuildResult> buildXcodeProject({
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
-    hasPlugins: hasFlutterPlugins
+    hasPlugins: hasFlutterPlugins,
+    previewDart2: buildInfo.previewDart2,
   );
 
   final List<String> commands = <String>[
