@@ -10,5 +10,5 @@ class _MenuArrowIconData implements _AnimatedIconData {
   const _MenuArrowIconData();
 
   @override
-  String get placeHolderIconData => 'menu->arrow';
+  String get _placeHolderIconData => 'menu->arrow';
 }

@@ -13,14 +13,14 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-part '../../lib/src/material_animated_icons/animated_icons_private.dart';
+part '../../lib/src/material_animated_icons/animated_icons.dart';
 part '../../lib/src/material_animated_icons/animated_icons_data.dart';
 part '../../lib/src/material_animated_icons/data/menu_arrow.g.dart';
 
 void main () {
   testWidgets('Can test private API', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new _AnimatedIcon(
+      new AnimatedIcon(
         progress: const AlwaysStoppedAnimation<double>(0.0),
         color: Colors.blue,
         icon: AnimatedIcons.menu_arrow,
