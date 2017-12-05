@@ -329,7 +329,7 @@ class _VideoDemoState extends State<VideoDemo>
 
   final GlobalKey<ScaffoldState> scaffoldKey = new GlobalKey<ScaffoldState>();
   final Completer<Null> connectedCompleter = new Completer<Null>();
-  bool unsupported = false;
+  bool isSupported = true;
 
   @override
   void initState() {
@@ -347,7 +347,7 @@ class _VideoDemoState extends State<VideoDemo>
     initController(butterflyController);
     initController(beeController);
     isIOSSimulator().then((bool result) {
-      unsupported = result;
+      isSupported = !result;
     });
   }
 
@@ -365,13 +365,8 @@ class _VideoDemoState extends State<VideoDemo>
       appBar: new AppBar(
         title: const Text('Videos'),
       ),
-      body: (unsupported)
-          ? const Center(
-              child: const Text(
-                'The video demo is not supported on the iOS Simulator.',
-              ),
-            )
-          : new ConnectivityOverlay(
+      body: (isSupported)
+          ? new ConnectivityOverlay(
               child: new ListView(
                 children: <Widget>[
                   new VideoCard(
@@ -388,6 +383,11 @@ class _VideoDemoState extends State<VideoDemo>
               ),
               connectedCompleter: connectedCompleter,
               scaffoldKey: scaffoldKey,
+            )
+          : const Center(
+              child: const Text(
+                'The video demo is not supported on the iOS Simulator.',
+              ),
             ),
     );
   }
