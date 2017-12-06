@@ -195,33 +195,39 @@ class MatrixUtils {
   /// 1 means looking at the object from infinitely close with an infinitely wide
   /// field of view. Defaults to a sane but arbitrary 0.001.
   ///
-  /// [orientation] is the direction of rotation of the cylinder.
+  /// [orientation] is the direction of the rotation axis.
   static Matrix4 cylindricalProjectionTransform({
     @required double radius,
     @required double angle,
     double perspective: 0.001,
     Axis orientation: Axis.vertical,
   }) {
+    assert(radius != null);
+    assert(angle != null);
+    assert(perspective >= 0 && perspective <= 1.0);
+    assert(orientation != null);
+
     // Simplified projection matrix.
     // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf.
-    final Matrix4 projectionMatrix = new Matrix4.identity()
+    Matrix4 result = new Matrix4.identity()
         ..setEntry(3, 2, -perspective);
 
     // Simplified camera view matrix.
     // Basically re-scales to keep object at original size at angle = 0 at
     // any radius.
-    final Matrix4 viewMatrix = new Matrix4.identity()
+    result *= new Matrix4.identity()
         ..setEntry(2, 3, -radius);
 
     // First translate the object from the origin of the world by radius in the
     // z axis and then rotate against the world.
-    final Matrix4 modelMatrix = (
+    result *= (
         orientation == Axis.horizontal
             ? new Matrix4.rotationY(angle)
             : new Matrix4.rotationX(angle)
     ) * new Matrix4.translationValues(0.0, 0.0, radius);
 
-    return projectionMatrix * viewMatrix * modelMatrix;
+    // Essentially perspective * view * model.
+    return result;
   }
 }
 
