@@ -50,13 +50,13 @@ class PubContext {
       if (!_validContext.hasMatch(extraValue)) {
         print(extraValue);
         throw new ArgumentError.value(
-            _value, 'extraValue', 'Must match RegExp ${_validContext.pattern}');
+            extraValue, 'extraValue', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
 
   static String _friendlyType(Type thing) {
-    final RegExp letter = new RegExp('[a-z]');
+    final RegExp letter = new RegExp('[^a-z]');
     final String value = thing.toString().toLowerCase();
     return value.replaceAll(letter, '');
   }
