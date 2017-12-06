@@ -1,30 +1,45 @@
 # Uncomment this line to define a global platform for your project
 # platform :ios, '9.0'
 
-if ENV['FLUTTER_FRAMEWORK_DIR'] == nil
-  abort('Please set FLUTTER_FRAMEWORK_DIR to the directory containing Flutter.framework')
+def parse_KV_file(file,seperator='=')
+  file_abs_path = File.expand_path(file)
+  puts file_abs_path
+  if !File.exists? file_abs_path
+    puts file_abs_path+"Not exists"
+    return [];
+  end
+  pods_ary = []
+  File.foreach(file_abs_path) { |line|
+      puts line
+      plugin = line.split(pattern=seperator)
+      if plugin.length == 2
+        podname = plugin[0].strip()
+        path = plugin[1].strip()
+        podpath = File.expand_path("#{path}", file_abs_path)
+        pods_ary.push({:name => podname,:path=>podpath});
+      else
+        puts "Invalid plugin specification: #{line}"
+      end
+  }
+  return pods_ary
 end
 
 target 'Runner' do
   # Pods for Runner
 
+  # Pods for Runner
   # Flutter Pods
-  pod 'Flutter', :path => ENV['FLUTTER_FRAMEWORK_DIR']
+  flutter_pods_ary = parse_KV_file(".flutter-framework")
+    flutter_pods_ary.map{ |p|
+    pod p[:name], :path => p[:path]
+  }
 
-  if File.exists? '../.flutter-plugins'
-    flutter_root = File.expand_path('..')
-    File.foreach('../.flutter-plugins') { |line|
-      plugin = line.split(pattern='=')
-      if plugin.length == 2
-        name = plugin[0].strip()
-        path = plugin[1].strip()
-        resolved_path = File.expand_path("#{path}/ios", flutter_root)
-        pod name, :path => resolved_path
-      else
-        puts "Invalid plugin specification: #{line}"
-      end
-    }
-  end
+  # Plugin Pods
+  plugin_pods_ary = parse_KV_file("../.flutter-plugins")
+  plugin_pods_ary.map{ |p|
+    puts p
+    pod p[:name], :path => File.expand_path("ios",p[:path])
+  }
 end
 
 post_install do |installer|

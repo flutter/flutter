@@ -50,7 +50,6 @@ void main() {
     () async {
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
       );
       expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Objective-C podfile template');
       verify(mockProcessManager.run(
@@ -70,7 +69,6 @@ void main() {
     () async {
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
         isSwift: true,
       );
       expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Swift podfile template');
@@ -94,7 +92,6 @@ void main() {
         ..writeAsString('Existing Podfile');
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
-        iosEngineDir: 'engine/path',
       );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
@@ -115,7 +112,6 @@ void main() {
       try {
         await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
-          iosEngineDir: 'engine/path',
         );
         fail('Expected tool error');
       } catch (ToolExit) {
@@ -165,7 +161,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       try {
         await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
-          iosEngineDir: 'engine/path',
         );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
         fail('Exception expected');
       } catch (ToolExit) {
