@@ -86,7 +86,6 @@ class TestTextInput {
   void enterText(String text) {
     updateEditingValue(new TextEditingValue(
       text: text,
-      composing: new TextRange(start: 0, end: text.length),
     ));
   }
 
