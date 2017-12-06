@@ -27,10 +27,10 @@ class PubContext {
   static final PubContext create = new PubContext._(<String>['create']);
   static final PubContext createPackage = new PubContext._(<String>['create_pkg']);
   static final PubContext createPlugin = new PubContext._(<String>['create_plugin']);
-  static final PubContext get = new PubContext._(<String>['get']);
   static final PubContext interactive = new PubContext._(<String>['interactive']);
+  static final PubContext pubGet = new PubContext._(<String>['get']);
+  static final PubContext pubUpgrade = new PubContext._(<String>['upgrade']);
   static final PubContext runTest = new PubContext._(<String>['run_test']);
-  static final PubContext upgrade = new PubContext._(<String>['upgrade']);
 
   static final PubContext flutterTests = new PubContext._(<String>['flutter_tests']);
   static final PubContext updatePackages = new PubContext._(<String>['update_packages']);

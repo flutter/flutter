@@ -69,7 +69,7 @@ class PackagesGetCommand extends FlutterCommand {
       );
     }
 
-    await pubGet(context: PubContext.get,
+    await pubGet(context: PubContext.pubGet,
       directory: target,
       upgrade: upgrade,
       offline: argResults['offline'],
