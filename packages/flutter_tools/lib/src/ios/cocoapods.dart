@@ -146,7 +146,8 @@ class CocoaPods {
   //4.The Pods/manifest.lock doesn't exists
   //5.The podfile.lock doesn't match Pods/manifest.lock.
   bool _checkIfSkipPodInstall(String appDir, bool pluginOrFlutterPodChanged) {
-    if (pluginOrFlutterPodChanged) return false;
+    if (pluginOrFlutterPodChanged)
+      return false;
     //Check if podfile.lock and Pods/Manifest.lock exists and matches.
     final File podfileLockFile = fs.file(fs.path.join(appDir, 'Podfile.lock'));
     final File manifestLockFile =
@@ -154,7 +155,8 @@ class CocoaPods {
     if (!podfileLockFile.existsSync() ||
         !manifestLockFile.existsSync() ||
         podfileLockFile.readAsStringSync() !=
-            manifestLockFile.readAsStringSync()) return false;
+            manifestLockFile.readAsStringSync())
+      return false;
     return true;
   }
 
