@@ -35,20 +35,23 @@ void main() {
   });
 
   testWidgets('Active and inactive colors', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
-      items: <BottomNavigationBarItem>[
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 1'),
-        ),
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 2'),
-        ),
-      ],
-      currentIndex: 1,
-      activeColor: const Color(0xFF123456),
-      inactiveColor: const Color(0xFF654321),
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(),
+      child: new CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 1'),
+          ),
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 2'),
+          ),
+        ],
+        currentIndex: 1,
+        activeColor: const Color(0xFF123456),
+        inactiveColor: const Color(0xFF654321),
+      ),
     ));
 
     final RichText actualInactive = tester.widget(find.descendant(
@@ -64,34 +67,79 @@ void main() {
     expect(actualActive.text.style.color, const Color(0xFF123456));
   });
 
-  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
-    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
+  testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
+    final CupertinoTabBar tabBar = new CupertinoTabBar(
       items: <BottomNavigationBarItem>[
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 1'),
+          title: const Text('Aka'),
         ),
         const BottomNavigationBarItem(
           icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 2'),
+          title: const Text('Shiro'),
         ),
       ],
+    );
+
+    // Verify height with no bottom padding.
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(),
+      child: new CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
+
+    // Verify height with bottom padding.
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 40.0)),
+      child: new CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 90.0);
+  });
+
+  testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(),
+      child: new CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 1'),
+          ),
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 2'),
+          ),
+        ],
+      ),
     ));
 
     expect(find.byType(BackdropFilter), findsOneWidget);
 
-    await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
-      items: <BottomNavigationBarItem>[
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 1'),
-        ),
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 2'),
-        ),
-      ],
-      backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
+    await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+      data: const MediaQueryData(),
+      child: new CupertinoTabBar(
+        items: <BottomNavigationBarItem>[
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 1'),
+          ),
+          const BottomNavigationBarItem(
+            icon: const ImageIcon(const TestImageProvider(24, 24)),
+            title: const Text('Tab 2'),
+          ),
+        ],
+        backgroundColor: const Color(0xFFFFFFFF), // Opaque white.
+      ),
     ));
 
     expect(find.byType(BackdropFilter), findsNothing);
@@ -100,19 +148,22 @@ void main() {
   testWidgets('Tap callback', (WidgetTester tester) async {
     int callbackTab;
 
-      await pumpWidgetWithBoilerplate(tester, new CupertinoTabBar(
-      items: <BottomNavigationBarItem>[
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 1'),
+      await pumpWidgetWithBoilerplate(tester, new MediaQuery(
+        data: const MediaQueryData(),
+        child: new CupertinoTabBar(
+          items: <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              icon: const ImageIcon(const TestImageProvider(24, 24)),
+              title: const Text('Tab 1'),
+            ),
+            const BottomNavigationBarItem(
+              icon: const ImageIcon(const TestImageProvider(24, 24)),
+              title: const Text('Tab 2'),
+            ),
+          ],
+          currentIndex: 1,
+          onTap: (int tab) { callbackTab = tab; },
         ),
-        const BottomNavigationBarItem(
-          icon: const ImageIcon(const TestImageProvider(24, 24)),
-          title: const Text('Tab 2'),
-        ),
-      ],
-      currentIndex: 1,
-      onTap: (int tab) { callbackTab = tab; },
     ));
 
     await tester.tap(find.text('Tab 1'));
