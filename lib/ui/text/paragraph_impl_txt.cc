@@ -64,11 +64,11 @@ void ParagraphImplTxt::paint(Canvas* canvas, double x, double y) {
 std::vector<TextBox> ParagraphImplTxt::getRectsForRange(unsigned start,
                                                         unsigned end) {
   std::vector<TextBox> result;
-  std::vector<SkRect> rects = m_paragraph->GetRectsForRange(start, end);
-  for (size_t i = 0; i < rects.size(); ++i) {
-    result.push_back(TextBox(
-        rects[i], static_cast<TextDirection>(
-                      m_paragraph->GetParagraphStyle().text_direction)));
+  std::vector<txt::Paragraph::TextBox> boxes =
+      m_paragraph->GetRectsForRange(start, end);
+  for (const txt::Paragraph::TextBox& box : boxes) {
+    result.emplace_back(box.rect,
+                        static_cast<blink::TextDirection>(box.direction));
   }
   return result;
 }
@@ -76,14 +76,14 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(unsigned start,
 Dart_Handle ParagraphImplTxt::getPositionForOffset(double dx, double dy) {
   Dart_Handle result = Dart_NewList(2);
   txt::Paragraph::PositionWithAffinity pos =
-      m_paragraph->GetGlyphPositionAtCoordinate(dx, dy, true);
+      m_paragraph->GetGlyphPositionAtCoordinate(dx, dy);
   Dart_ListSetAt(result, 0, ToDart(pos.position));
   Dart_ListSetAt(result, 1, ToDart(static_cast<int>(pos.affinity)));
   return result;
 }
 
 Dart_Handle ParagraphImplTxt::getWordBoundary(unsigned offset) {
-  txt::Paragraph::Range point = m_paragraph->GetWordBoundary(offset);
+  txt::Paragraph::Range<size_t> point = m_paragraph->GetWordBoundary(offset);
   Dart_Handle result = Dart_NewList(2);
   Dart_ListSetAt(result, 0, ToDart(point.start));
   Dart_ListSetAt(result, 1, ToDart(point.end));
