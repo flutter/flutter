@@ -31,18 +31,37 @@ class PubContext {
   static final PubContext interactive = new PubContext._('interactive');
   static final PubContext runTest = new PubContext._('run_test');
   static final PubContext upgrade = new PubContext._('upgrade');
-  static final PubContext verify = new PubContext._('verify');
 
   static final PubContext flutterTests = new PubContext._('flutter_tests');
   static final PubContext updatePackages = new PubContext._('update_packages');
 
   final String _value;
+  final String _extraValue;
 
-  PubContext._(this._value) {
+  PubContext._(String value, {String extraValue})
+      : this._value = value,
+        this._extraValue = extraValue {
     if (!_validContext.hasMatch(_value)) {
-      throw new ArgumentError.value(_value, 'pubContext', 'Must match RegExp ${_validContext.pattern}');
+      throw new ArgumentError.value(
+          _value, 'value', 'Must match RegExp ${_validContext.pattern}');
+    }
+
+    if (extraValue != null) {
+      if (!_validContext.hasMatch(extraValue)) {
+        print(extraValue);
+        throw new ArgumentError.value(
+            _value, 'extraValue', 'Must match RegExp ${_validContext.pattern}');
+      }
     }
   }
+
+  static String _friendlyType(Type thing) {
+    final RegExp letter = new RegExp('[a-z]');
+    final String value = thing.toString().toLowerCase();
+    return value.replaceAll(letter, '');
+  }
+
+  static PubContext verify(Type commandType) => new PubContext._('verify', extraValue: _friendlyType(commandType));
 
   @override
   String toString() => 'PubContext: $_value';
@@ -224,6 +243,10 @@ String _getPubEnvironmentValue(PubContext pubContext) {
   values.add('flutter_cli');
 
   values.add('ctx_${pubContext._value}');
+
+  if (pubContext._extraValue != null) {
+    values.add(pubContext._extraValue);
+  }
 
   return values.join(':');
 }
