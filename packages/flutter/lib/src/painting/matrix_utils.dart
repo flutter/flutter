@@ -169,6 +169,59 @@ class MatrixUtils {
     transform = new Matrix4.copy(transform)..invert();
     return transformRect(transform, rect);
   }
+
+  /// Create a transformation matrix which mimics the effects of wrapping the
+  /// plane on which this transform is applied around a cylinder and then
+  /// looking at the cylinder from a point outside the cylinder.
+  ///
+  /// [radius] simulates the radius of the cylinder the plane is being wrapped
+  /// onto. If the transformation is applied to a 0-dimensional dot instead of
+  /// a plane, the dot would simply translate by +/- [radius] pixels along the
+  /// [orientation] [Axis] when rotating from 0 to +/- 90 degrees.
+  ///
+  /// A positive radius means the object is closest at 0 [angle] and a negative
+  /// radius means the object is closest at [pi] [angle].
+  ///
+  /// [angle] is the difference in angle in radians between the object and the
+  /// viewing point. A positive [angle] on a positive [radius] moves the object
+  /// up when [orientation] is vertical and right when horizontal.
+  ///
+  /// The transformation is always done such that a 0 [angle] keeps the
+  /// transformed object at exactly the same size as before regardless of
+  /// [radius] and [perspective].
+  ///
+  /// [perspective] is a number between 0 and 1 where 0 means looking at the
+  /// object from infinitely far with an infinitely narrow field of view and
+  /// 1 means looking at the object from infinitely close with an infinitely wide
+  /// field of view.
+  ///
+  /// [orientation] is the direction of rotation of the cylinder.
+  static Matrix4 cylindricalProjectionTransform(
+    double radius,
+    double angle, {
+      double perspective: 0.001,
+      Axis orientation: Axis.vertical,
+    }
+  ) {
+    // Simplified projection matrix.
+    // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf.
+    final Matrix4 projectionMatrix = new Matrix4.identity()
+        ..setEntry(3, 2, -perspective);
+
+    // Simplified camera view matrix.
+    final Matrix4 viewMatrix = new Matrix4.identity()
+        ..setEntry(2, 3, -radius);
+
+    // First translate the object from the origin of the world and then
+    // rotate against the world.
+    final Matrix4 modelMatrix = (
+        orientation == Axis.horizontal
+            ? new Matrix4.rotationY(angle)
+            : new Matrix4.rotationX(angle)
+    ) * new Matrix4.translationValues(0.0, 0.0, radius);
+
+    return projectionMatrix * viewMatrix * modelMatrix;
+  }
 }
 
 /// Returns a list of strings representing the given transform in a format
