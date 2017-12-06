@@ -24,28 +24,33 @@ import 'sdk.dart';
 class PubContext {
   static final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
 
-  static final PubContext create = new PubContext._('create');
-  static final PubContext createPackage = new PubContext._('create_pkg');
-  static final PubContext createPlugin = new PubContext._('create_plugin');
-  static final PubContext get = new PubContext._('get');
-  static final PubContext interactive = new PubContext._('interactive');
-  static final PubContext runTest = new PubContext._('run_test');
-  static final PubContext upgrade = new PubContext._('upgrade');
-  static final PubContext verify = new PubContext._('verify');
+  static final PubContext create = new PubContext._(<String>['create']);
+  static final PubContext createPackage = new PubContext._(<String>['create_pkg']);
+  static final PubContext createPlugin = new PubContext._(<String>['create_plugin']);
+  static final PubContext get = new PubContext._(<String>['get']);
+  static final PubContext interactive = new PubContext._(<String>['interactive']);
+  static final PubContext runTest = new PubContext._(<String>['run_test']);
+  static final PubContext upgrade = new PubContext._(<String>['upgrade']);
 
-  static final PubContext flutterTests = new PubContext._('flutter_tests');
-  static final PubContext updatePackages = new PubContext._('update_packages');
+  static final PubContext flutterTests = new PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages = new PubContext._(<String>['update_packages']);
 
-  final String _value;
+  final List<String> _values;
 
-  PubContext._(this._value) {
-    if (!_validContext.hasMatch(_value)) {
-      throw new ArgumentError.value(_value, 'pubContext', 'Must match RegExp ${_validContext.pattern}');
+  PubContext._(this._values) {
+    for (String item in _values) {
+      if (!_validContext.hasMatch(item)) {
+        throw new ArgumentError.value(
+            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+      }
     }
   }
 
+  static PubContext getVerifyContext(String commandName) =>
+      new PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+
   @override
-  String toString() => 'PubContext: $_value';
+  String toString() => 'PubContext: ${_values.join(':')}';
 }
 
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
@@ -222,8 +227,7 @@ String _getPubEnvironmentValue(PubContext pubContext) {
   }
 
   values.add('flutter_cli');
-
-  values.add('ctx_${pubContext._value}');
+  values.addAll(pubContext._values);
 
   return values.join(':');
 }
