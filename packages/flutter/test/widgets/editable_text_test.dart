@@ -323,4 +323,37 @@ void main() {
       value: value2,
     ));
   });
+
+  testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
+    const String value1 = 'Hello World';
+
+    controller.text = value1;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        selectionControls: materialTextSelectionControls,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    // Simulate selection change via tap to show handles.
+    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 4), render, SelectionChangedCause.tap);
+
+    await tester.pumpAndSettle();
+    final EditableTextState textState = tester.state(find.byType(EditableText));
+
+    expect(textState.selectionOverlay.handlesAreVisible, isTrue);
+    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
+
+    // Simulate selection change via keyboard and expect handles to disappear.
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render, SelectionChangedCause.keyboard);
+    await tester.pumpAndSettle();
+
+    expect(textState.selectionOverlay.handlesAreVisible, isFalse);
+    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
+  });
 }
