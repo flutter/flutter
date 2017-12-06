@@ -188,7 +188,7 @@ class MatrixUtils {
   ///
   /// The transformation is always done such that a 0 [angle] keeps the
   /// transformed object at exactly the same size as before regardless of
-  /// [radius] and [perspective].
+  /// [radius] and [perspective] when [radius] is positive.
   ///
   /// [perspective] is a number between 0 and 1 where 0 means looking at the
   /// object from infinitely far with an infinitely narrow field of view and
