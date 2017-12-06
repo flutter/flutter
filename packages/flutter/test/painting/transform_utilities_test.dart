@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/painting.dart';
 import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
@@ -38,5 +40,35 @@ void main() {
     expect(MatrixUtils.getAsTranslation(test), equals(const Offset(2.0, -2.0)));
     test.translate(4.0, 8.0);
     expect(MatrixUtils.getAsTranslation(test), equals(const Offset(6.0, 6.0)));
+  });
+
+  test('cylindricalProjectionTransform identity', () {
+    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+      radius: 0.0,
+      angle: 0.0,
+      perspective: 0.0,
+    );
+
+    expect(initialState, new Matrix4.identity());
+  });
+
+  test('cylindricalProjectionTransform rotate with no radius', () {
+    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+      radius: 0.0,
+      angle: pi / 2.0,
+      perspective: 0.0,
+    );
+
+    expect(initialState, new Matrix4.rotationX(pi / 2.0));
+  });
+
+  test('cylindricalProjectionTransform radius does not change scale', () {
+    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+      radius: 1000000.0,
+      angle: 0.0,
+      perspective: 0.0,
+    );
+
+    expect(initialState, new Matrix4.identity());
   });
 }
