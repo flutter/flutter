@@ -77,6 +77,17 @@ List<Plugin> _findPlugins(String directory) {
   return plugins;
 }
 
+/// Read the content of .fluter-plugins and return as string.
+String readFlutterPluginsList({String directory}) {
+  directory ??= fs.currentDirectory.path;
+  String pluginManifest;
+  final File pluginsProperties =
+      fs.file(fs.path.join(directory, '.flutter-plugins'));
+  if (pluginsProperties.existsSync())
+    pluginManifest = pluginsProperties.readAsStringSync();
+  return pluginManifest;
+}
+
 void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
   final String pluginManifest =

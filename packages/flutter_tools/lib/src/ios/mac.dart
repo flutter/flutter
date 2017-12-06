@@ -251,15 +251,23 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
+  final String priorFlutterPluginsContent = readFlutterPluginsList();
   final bool hasFlutterPlugins = injectPlugins();
+  final String curFlutterPluginsContent = readFlutterPluginsList();
 
   if (hasFlutterPlugins) {
     final String iosEngineDir = flutterFrameworkDir(buildInfo.mode);
+    final String priorFlutterFrameworkContent =
+        readFlutterFrameworkPath(app.appDirectory);
     _injectFlutterPodWrapper(iosEngineDir, appDirectory.path);
+    final String curFlutterFrameworkContent =
+        readFlutterFrameworkPath(app.appDirectory);
     await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      isSwift: app.isSwift,
-    );
+        appIosDir: appDirectory,
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged:
+            !(priorFlutterPluginsContent == curFlutterPluginsContent &&
+                priorFlutterFrameworkContent == curFlutterFrameworkContent));
   }
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -355,18 +363,29 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 //Write the flutter_framework path to appPath/ios/.flutter_framework, which will be read by the podfile later.
 //All dependencies, including the flutter_framework will be managed by podfile, which is a standard flow,therefore, user can run pod install from the ios project directly.
-void _injectFlutterPodWrapper(String iosEngineDir,String appPath){
-  final String flutterPodspecPath = fs.path.join(iosEngineDir,'Flutter.podspec');
-  final String flutterPodWrapperPath = fs.path.join(fs.currentDirectory.path,appPath,'.flutter-framework');
-  if(fs.file(flutterPodspecPath).existsSync()){
+void _injectFlutterPodWrapper(String iosEngineDir, String appPath) {
+  final String flutterPodspecPath =
+      fs.path.join(iosEngineDir, 'Flutter.podspec');
+  final String flutterPodWrapperPath =
+      fs.path.join(fs.currentDirectory.path, appPath, '.flutter-framework');
+  if (fs.file(flutterPodspecPath).existsSync()) {
     final String content = 'Flutter=$iosEngineDir';
     fs.file(flutterPodWrapperPath).writeAsStringSync(content);
-  }
-  else
+  } else
     throwToolExit('Ensure that Flutter.framework exists in $iosEngineDir.');
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+String readFlutterFrameworkPath(String appPath) {
+  String flutterFrameworkPath;
+  final String flutterPodWrapperPath =
+      fs.path.join(fs.currentDirectory.path, appPath, '.flutter-framework');
+  if (fs.file(flutterPodWrapperPath).existsSync())
+    flutterFrameworkPath = fs.file(flutterPodWrapperPath).readAsStringSync();
+  return flutterFrameworkPath;
+}
+
+Future<Null> diagnoseXcodeBuildFailure(
+    XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
