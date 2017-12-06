@@ -193,16 +193,15 @@ class MatrixUtils {
   /// [perspective] is a number between 0 and 1 where 0 means looking at the
   /// object from infinitely far with an infinitely narrow field of view and
   /// 1 means looking at the object from infinitely close with an infinitely wide
-  /// field of view.
+  /// field of view. Defaults to a sane but arbitrary 0.001.
   ///
   /// [orientation] is the direction of rotation of the cylinder.
-  static Matrix4 cylindricalProjectionTransform(
-    double radius,
-    double angle, {
-      double perspective: 0.001,
-      Axis orientation: Axis.vertical,
-    }
-  ) {
+  static Matrix4 cylindricalProjectionTransform({
+    @required double radius,
+    @required double angle,
+    double perspective: 0.001,
+    Axis orientation: Axis.vertical,
+  }) {
     // Simplified projection matrix.
     // http://web.iitd.ac.in/~hegde/cad/lecture/L9_persproj.pdf.
     final Matrix4 projectionMatrix = new Matrix4.identity()
