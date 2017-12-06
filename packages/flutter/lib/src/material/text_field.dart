@@ -331,8 +331,8 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _onSelectionChanged(BuildContext context, bool longPress) {
-    if (longPress)
+  void _onSelectionChanged(BuildContext context, SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
   }
 
@@ -365,7 +365,7 @@ class _TextFieldState extends State<TextField> {
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
+        onSelectionChanged: (TextSelection _, SelectionChangedCause cause) => _onSelectionChanged(context, cause),
         inputFormatters: formatters,
       ),
     );
