@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -16,9 +17,14 @@ import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.flutterRoot = getFlutterRoot();
+  });
+
   testUsingContext('pub get 69', () async {
     String error;
 
@@ -91,6 +97,7 @@ void main() {
     String error;
 
     final MockProcessManager processMock = context.getVariable(ProcessManager);
+    final MockFileSystem fsMock = context.getVariable(FileSystem);
 
     new FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -102,7 +109,7 @@ void main() {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(processMock.lastPubCache, endsWith('flutter/.pub-cache'));
+      expect(processMock.lastPubCache, equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
@@ -119,7 +126,7 @@ void main() {
     final MockProcessManager processMock = context.getVariable(ProcessManager);
 
     new FakeAsync().run((FakeAsync time) {
-      MockDirectory.findCache = false;
+      MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironmment, isNull);
       expect(processMock.lastPubCache, isNull);
       pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
@@ -128,14 +135,14 @@ void main() {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(processMock.lastPubCache, equals('path/to/pub-cache'));
+      expect(processMock.lastPubCache, equals('custom/pub-cache/path'));
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
     ProcessManager: () => new MockProcessManager(69),
     FileSystem: () => new MockFileSystem(),
     Platform: () => new FakePlatform(
-      environment: <String, String>{'PUB_CACHE': 'path/to/pub-cache'},
+      environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
     ),
   });
 }
