@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
@@ -72,7 +73,8 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   Future<Null> _downloadCoverageData() async {
     final Status status = logger.startProgress('Downloading lcov data for package:flutter...', expectSlowOperation: true);
-    final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
+    final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+    final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
     fs.file(fs.path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)

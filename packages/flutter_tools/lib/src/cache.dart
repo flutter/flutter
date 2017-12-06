@@ -231,6 +231,7 @@ abstract class CachedArtifact {
 
   Directory get location => cache.getArtifactDirectory(name);
   String get version => cache.getVersionFor(name);
+  Uri get versionToUri => Uri.parse(_expandUrl(version));
 
   bool isUpToDate() {
     if (!location.existsSync())
@@ -253,6 +254,14 @@ abstract class CachedArtifact {
 
   /// Template method to perform artifact update.
   Future<Null> updateInner();
+
+  String get _storageBaseUrl =>
+      platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+
+  static const String _storageBasePattern = r'${FLUTTER_STORAGE_BASE_URL}';
+
+  String _expandUrl(String url) =>
+      url.replaceAll(_storageBasePattern, _storageBaseUrl);
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -262,7 +271,7 @@ class MaterialFonts extends CachedArtifact {
   @override
   Future<Null> updateInner() {
     final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(version), location).then<Null>((_) {
+    return _downloadZipArchive(versionToUri, location).then<Null>((_) {
       status.stop();
     }).whenComplete(status.cancel);
   }
@@ -358,7 +367,7 @@ class FlutterEngine extends CachedArtifact {
 
   @override
   Future<Null> updateInner() async {
-    final String url = 'https://storage.googleapis.com/flutter_infra/flutter/$version/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
@@ -412,7 +421,7 @@ class GradleWrapper extends CachedArtifact {
   Future<Null> updateInner() {
     final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
 
-    return _downloadZippedTarball(Uri.parse(version), location).then<Null>((_) {
+    return _downloadZippedTarball(versionToUri, location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.

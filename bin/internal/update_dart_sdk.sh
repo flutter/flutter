@@ -47,7 +47,8 @@ if [ ! -f "$DART_SDK_STAMP_PATH" ] || [ "$DART_SDK_VERSION" != `cat "$DART_SDK_S
     DART_CHANNEL="be"
   fi
 
-  DART_SDK_URL="https://storage.googleapis.com/dart-archive/channels/$DART_CHANNEL/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
+  DART_SDK_BASE_URL="${FLUTTER_STORAGE_BASE_URL:-https://storage.googleapis.com}"
+  DART_SDK_URL="$DART_SDK_BASE_URL/dart-archive/channels/$DART_CHANNEL/raw/$DART_SDK_VERSION/sdk/$DART_ZIP_NAME"
 
   # if the sdk path exists, copy it to a temporary location
   if [ -d "$DART_SDK_PATH" ]; then
