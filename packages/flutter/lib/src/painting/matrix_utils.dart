@@ -170,9 +170,9 @@ class MatrixUtils {
     return transformRect(transform, rect);
   }
 
-  /// Create a transformation matrix which mimics the effects of wrapping the
-  /// plane on which this transform is applied around a cylinder and then
-  /// looking at the cylinder from a point outside the cylinder.
+  /// Create a transformation matrix which mimics the effects of tangentially
+  /// wrapping the plane on which this transform is applied around a cylinder
+  /// and then looking at the cylinder from a point outside the cylinder.
   ///
   /// [radius] simulates the radius of the cylinder the plane is being wrapped
   /// onto. If the transformation is applied to a 0-dimensional dot instead of
