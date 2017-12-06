@@ -197,6 +197,11 @@ class MatrixUtils {
   /// infinitely wide field of view. Defaults to a sane but arbitrary 0.001.
   ///
   /// The `orientation` is the direction of the rotation axis.
+  ///
+  /// Because the viewing position is a point, it's never possible to see the
+  /// outer side of the cylinder at or past +/- π / 2 or 90 degrees and it's
+  /// almost always possible to end up seeing the inner side of the cylinder
+  /// or the back side of the transformed plane before π / 2 when perspective > 0.
   static Matrix4 createCylindricalProjectionTransform({
     @required double radius,
     @required double angle,
