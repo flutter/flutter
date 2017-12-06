@@ -85,3 +85,26 @@ class AnimatedIcon extends StatelessWidget {
     return new Container();
   }
 }
+
+// Interpolates a point given a set of points equally spaced in time.
+//
+// Assuming [points] are equally spaced on the interval 0..1, interpolates the
+// point value at [progress].
+//
+// This is currently done with linear interpolation between every 2 consecutive 
+// points. Linear interpolation was smooth enough with the limited set of
+// animations we have tested, so we use it for simplicity. If we find this to
+// not be smooth enough we can try applying spline instead.
+//
+// [progress] must be between 0 and 1.
+Point<double> _interpolatePoint(List<Point<double>> points, double progress) {
+  assert(progress >= 0.0);
+  assert(progress <= 1.0);
+  if (points.length == 1)
+    return points[0];
+  final double targetIdx = lerpDouble(0, points.length -1, progress);
+  final int lowIdx = targetIdx.floor();
+  final int highIdx = targetIdx.ceil();
+  final double t = targetIdx - lowIdx;
+  return lerpDoublePoint(points[lowIdx], points[highIdx], t);
+}

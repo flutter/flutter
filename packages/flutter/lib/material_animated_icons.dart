@@ -7,7 +7,11 @@
 /// To use, import `package:flutter/material_animated_icons.dart`.
 library material_animated_icons;
 
+import 'dart:math';
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:meta/meta.dart';
 
 // This package is split into multiple parts to enable a private API that is
