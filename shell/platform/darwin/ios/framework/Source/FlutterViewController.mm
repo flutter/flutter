@@ -656,17 +656,19 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
   NSDictionary* info = [notification userInfo];
   CGFloat bottom = CGRectGetHeight([[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue]);
   CGFloat scale = [UIScreen mainScreen].scale;
-  // TODO(cbracken): Once framework has been updated to use view insets, keyboard should change
-  // insets rather than padding.
-  // _viewportMetrics.physical_view_inset_bottom = bottom * scale;
+  _viewportMetrics.physical_view_inset_bottom = bottom * scale;
+
+  // TODO(cbracken): Once framework has been updated to use view insets for keyboard padding,
+  // eliminate this line.
   _viewportMetrics.physical_padding_bottom = bottom * scale;
   [self updateViewportMetrics];
 }
 
 - (void)keyboardWillBeHidden:(NSNotification*)notification {
-  // TODO(cbracken): Once framework has been updated to use view insets, keyboard should change
-  // insets rather than padding.
-  // _viewportMetrics.physical_view_inset_bottom = 0;
+  _viewportMetrics.physical_view_inset_bottom = 0;
+
+  // TODO(cbracken): Once framework has been updated to use view insets for keyboard padding,
+  // eliminate this line.
   _viewportMetrics.physical_padding_bottom = 0;
   [self updateViewportMetrics];
 }
