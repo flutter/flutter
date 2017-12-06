@@ -287,7 +287,7 @@ class _HelperError extends StatefulWidget {
 class _HelperErrorState extends State<_HelperError> with SingleTickerProviderStateMixin {
   // If the height of this widget and the counter are zero ("empty") at
   // layout time, no space is allocated for the subtext.
-  static Widget const empty = const SizedBox();
+  static const Widget empty = const SizedBox();
 
   AnimationController _controller;
   Widget _helper;
