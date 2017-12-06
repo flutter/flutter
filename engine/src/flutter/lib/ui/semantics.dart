@@ -18,6 +18,8 @@ class SemanticsAction {
   static const int _kIncreaseIndex = 1 << 6;
   static const int _kDecreaseIndex = 1 << 7;
   static const int _kShowOnScreen = 1 << 8;
+  static const int _kMoveCursorForwardByCharacter = 1 << 9;
+  static const int _kMoveCursorBackwardByCharacter = 1 << 10;
 
   /// The numerical value for this action.
   ///
@@ -76,6 +78,17 @@ class SemanticsAction {
   /// is partially off screen to bring it on screen.
   static const SemanticsAction showOnScreen = const SemanticsAction._(_kShowOnScreen);
 
+
+  /// Move the cursor forward by one character.
+  ///
+  /// This is for example used by the cursor control in text fields.
+  static const SemanticsAction moveCursorForwardByCharacter = const SemanticsAction._(_kMoveCursorForwardByCharacter);
+
+  /// Move the cursor backward by one character.
+  ///
+  /// This is for example used by the cursor control in text fields.
+  static const SemanticsAction moveCursorBackardByCharacter = const SemanticsAction._(_kMoveCursorBackwardByCharacter);
+
   /// The possible semantics actions.
   ///
   /// The map's key is the [index] of the action and the value is the action
@@ -90,6 +103,8 @@ class SemanticsAction {
     _kIncreaseIndex: increase,
     _kDecreaseIndex: decrease,
     _kShowOnScreen: showOnScreen,
+    _kMoveCursorForwardByCharacter: moveCursorForwardByCharacter,
+    _kMoveCursorBackwardByCharacter: moveCursorBackardByCharacter,
   };
 
   @override
@@ -113,6 +128,10 @@ class SemanticsAction {
         return 'SemanticsAction.decrease';
       case _kShowOnScreen:
         return 'SemanticsAction.showOnScreen';
+      case _kMoveCursorForwardByCharacter:
+        return 'SemanticsAction.moveCursorForwardByCharacter';
+      case _kMoveCursorBackwardByCharacter:
+        return 'SemanticsAction.moveCursorBackardByCharacter';
     }
     return null;
   }
