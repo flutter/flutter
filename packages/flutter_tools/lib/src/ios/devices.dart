@@ -43,16 +43,10 @@ class IOSDevice extends Device {
   IOSDevice(String id, { this.name, String sdkVersion }) : _sdkVersion = sdkVersion, super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
-    _pusherPath = _checkForCommand(
-      'ios-deploy',
-      'To copy files to iOS devices, please install ios-deploy. To install, run:\n'
-      'brew install ios-deploy'
-    );
   }
 
   String _installerPath;
   String _iproxyPath;
-  String _pusherPath;
 
   final String _sdkVersion;
 
@@ -160,7 +154,6 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
     bool ipv6: false,
@@ -300,25 +293,6 @@ class IOSDevice extends Device {
   Future<bool> stopApp(ApplicationPackage app) async {
     // Currently we don't have a way to stop an app running on iOS.
     return false;
-  }
-
-  Future<bool> pushFile(ApplicationPackage app, String localFile, String targetFile) async {
-    if (platform.isMacOS) {
-      runSync(<String>[
-        _pusherPath,
-        '-t',
-        '1',
-        '--bundle_id',
-        app.id,
-        '--upload',
-        localFile,
-        '--to',
-        targetFile
-      ]);
-      return true;
-    } else {
-      return false;
-    }
   }
 
   @override

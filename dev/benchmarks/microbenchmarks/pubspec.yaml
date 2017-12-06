@@ -37,7 +37,7 @@ dependencies:
   petitparser: 1.6.1 # TRANSITIVE DEPENDENCY
   pool: 1.3.3 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
-  quiver: 0.26.0 # TRANSITIVE DEPENDENCY
+  quiver: 0.26.2 # TRANSITIVE DEPENDENCY
   shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
   shelf_static: 0.2.6 # TRANSITIVE DEPENDENCY

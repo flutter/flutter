@@ -705,11 +705,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// [showModalBottomSheet] function.
   ///
   /// Returns a controller that can be used to close and otherwise manipulate the
-  /// button sheet.
+  /// bottom sheet.
+  ///
+  /// To rebuild the bottom sheet (e.g. if it is stateful), call
+  /// [PersistentBottomSheetController.setState] on the value returned from this
+  /// method.
   ///
   /// See also:
   ///
   ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [showBottomSheet], which calls this method given a [BuildContext].
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].

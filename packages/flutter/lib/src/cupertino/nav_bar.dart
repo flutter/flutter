@@ -376,7 +376,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
               ? new Container(
                 height: _kNavBarPersistentHeight,
                 width: _kNavBarBackButtonTapWidth,
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: const Icon(CupertinoIcons.back, size: 34.0,)
               )
               : const Text('Close'),
@@ -394,10 +394,10 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
           size: 22.0,
         ),
         child: new Padding(
-          padding: new EdgeInsets.only(
+          padding: new EdgeInsetsDirectional.only(
             top: MediaQuery.of(context).padding.top,
-            left: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
-            right: _kNavBarEdgePadding,
+            start: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
+            end: _kNavBarEdgePadding,
           ),
           child: new MediaQuery.removePadding(
             context: context,

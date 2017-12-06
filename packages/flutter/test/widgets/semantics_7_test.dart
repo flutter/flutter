@@ -37,7 +37,7 @@ void main() {
               child: new Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  const Semantics(
+                  new Semantics(
                     checked: true,
                   ),
                   new Semantics(
@@ -93,7 +93,7 @@ void main() {
               child: new Stack(
                 fit: StackFit.expand,
                 children: <Widget>[
-                  const Semantics(
+                  new Semantics(
                     checked: true,
                   ),
                   new Semantics(

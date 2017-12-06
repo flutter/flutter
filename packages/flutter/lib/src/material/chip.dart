@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'icons.dart';
+import 'material_localizations.dart';
 import 'tooltip.dart';
 
 /// A material design chip.
@@ -146,9 +147,7 @@ class Chip extends StatelessWidget {
       children.add(new GestureDetector(
         onTap: Feedback.wrapForTap(onDeleted, context),
         child: new Tooltip(
-          // TODO(gspencer): Internationalize this text.
-          // https://github.com/flutter/flutter/issues/12378
-          message: deleteButtonTooltipMessage ?? 'Delete "$label"',
+          message: deleteButtonTooltipMessage ?? MaterialLocalizations.of(context).deleteButtonTooltip,
           child: new Container(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: new Icon(

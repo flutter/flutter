@@ -30,7 +30,7 @@ void main() {
 
     // Initial render does semantics.
     expect(semanticsUpdateCount, 1);
-    expect(testRender.describeSemanticsConfigurationCallCount, isNot(0));
+    expect(testRender.describeSemanticsConfigurationCallCount, isPositive);
 
     testRender.describeSemanticsConfigurationCallCount = 0;
     semanticsUpdateCount = 0;
@@ -41,7 +41,7 @@ void main() {
 
     // Object is asked for semantics, but no update is sent.
     expect(semanticsUpdateCount, 0);
-    expect(testRender.describeSemanticsConfigurationCallCount, 1);
+    expect(testRender.describeSemanticsConfigurationCallCount, isPositive);
 
     testRender.describeSemanticsConfigurationCallCount = 0;
     semanticsUpdateCount = 0;
@@ -53,7 +53,7 @@ void main() {
 
     // Object is asked for semantics, and update is sent.
     expect(semanticsUpdateCount, 1);
-    expect(testRender.describeSemanticsConfigurationCallCount, 1);
+    expect(testRender.describeSemanticsConfigurationCallCount, isPositive);
 
     semanticsHandle.dispose();
   });

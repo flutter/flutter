@@ -25,7 +25,7 @@ dependencies:
   platform: 2.1.1
   plugin: 0.2.0+2
   process: 2.0.6
-  quiver: 0.26.0
+  quiver: 0.26.2
   stack_trace: 1.9.0
   stream_channel: 1.6.2
   usage: 3.3.0

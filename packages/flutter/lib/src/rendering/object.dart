@@ -649,7 +649,7 @@ class PipelineOwner {
   /// duplicate calls quickly.
   final VoidCallback onNeedVisualUpdate;
 
-  /// Called whenever this pipeline owner creates as semantics object.
+  /// Called whenever this pipeline owner creates a semantics object.
   ///
   /// Typical implementations will schedule the creation of the initial
   /// semantics tree.
@@ -703,7 +703,7 @@ class PipelineOwner {
     Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
     _debugDoingLayout = true;
     try {
-      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themeselves
+      // TODO(ianh): assert that we're not allowing previously dirty nodes to redirty themselves
       while (_nodesNeedingLayout.isNotEmpty) {
         final List<RenderObject> dirtyNodes = _nodesNeedingLayout;
         _nodesNeedingLayout = <RenderObject>[];
@@ -797,8 +797,8 @@ class PipelineOwner {
   /// The object that is managing semantics for this pipeline owner, if any.
   ///
   /// An owner is created by [ensureSemantics]. The owner is valid for as long
-  /// there are [SemanticsHandle] returned by [ensureSemantics] that have not
-  /// yet be disposed. Once the last handle has been disposed, the
+  /// there are [SemanticsHandle]s returned by [ensureSemantics] that have not
+  /// yet been disposed. Once the last handle has been disposed, the
   /// [semanticsOwner] field will revert to null, and the previous owner will be
   /// disposed.
   ///
@@ -972,7 +972,7 @@ class PipelineOwner {
 ///
 /// ### Layout interactions between render objects
 ///
-/// In general, the layout of a render box should only depend on the output of
+/// In general, the layout of a render object should only depend on the output of
 /// its child's layout, and then only if `parentUsesSize` is set to true in the
 /// [layout] call. Furthermore, if it is set to true, the parent must call the
 /// child's [layout] if the child is to be rendered, because otherwise the
@@ -1086,6 +1086,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// Used in debug messages.
   dynamic debugCreator;
+
   void _debugReportException(String method, dynamic exception, StackTrace stack) {
     FlutterError.reportError(new FlutterErrorDetailsForRendering(
       exception: exception,
@@ -2200,81 +2201,53 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
   /// Mark this node as needing an update to its semantics description.
   ///
-  /// `onlyLocalUpdates` should be set to true to reduce cost if the semantics
-  /// update does not in any way change the shape of the semantics tree (e.g.
-  /// [SemanticsNode]s will neither be added/removed from the tree nor be moved
-  /// within the tree). In other words, with `onlyLocalUpdates` the
-  /// [RenderObject] can indicate that it only wants to perform updates on the
-  /// local [SemanticsNode] (e.g. changing a label or flag) without affecting
-  /// other nodes in the tree.
-  ///
-  /// `onlyLocalUpdates` has to be set to false in the following cases as they
-  /// will change the shape of the tree:
-  ///
-  /// 1. [isSemanticBoundary] changed its value.
-  /// 2. [semanticsAnnotator] changed from or to returning null and
-  ///    [isSemanticBoundary] isn't true.
-  ///
-  /// If `onlyLocalUpdates` is incorrectly set to true, asserts
-  /// might throw or the computed semantics tree might be out-of-date without
-  /// warning.
-  void markNeedsSemanticsUpdate({ bool onlyLocalUpdates: false }) {
+  /// This must be called whenever the semantics configuration of this
+  /// [RenderObject] as annotated by [describeSemanticsConfiguration] changes in
+  /// any way to update the semantics tree.
+  void markNeedsSemanticsUpdate() {
     assert(!attached || !owner._debugDoingSemantics);
-    _cachedSemanticsConfiguration = null;
     if ((attached && owner._semanticsOwner == null))
       return;
-    if (onlyLocalUpdates) {
-      // The shape of the tree didn't change, but the details did.
-      // If we have our own SemanticsNode (our _semantics isn't null)
-      // then mark ourselves dirty. If we don't then we are using an
-      // ancestor's; mark all the nodes up to that one dirty.
-      RenderObject node = this;
-      while (node._semantics == null && node.parent is RenderObject) {
-        if (node._needsSemanticsUpdate)
-          return;
+
+    // Dirty the semantics tree starting at `this` until we have reached a
+    // RenderObject that is a semantics boundary. All semantics past this
+    // RenderObject are still up-to date. Therefore, we will later only rebuild
+    // the semantics subtree starting at th identified semantics boundary.
+
+    final bool wasSemanticsBoundary = _cachedSemanticsConfiguration?.isSemanticBoundary == true;
+    _cachedSemanticsConfiguration = null;
+    bool isEffectiveSemanticsBoundary = _semanticsConfiguration.isSemanticBoundary && wasSemanticsBoundary;
+    RenderObject node = this;
+
+    while (!isEffectiveSemanticsBoundary && node.parent is RenderObject) {
+      if (node != this && node._needsSemanticsUpdate)
+        break;
+      node._needsSemanticsUpdate = true;
+
+      node = node.parent;
+      node._cachedSemanticsConfiguration = null;
+      isEffectiveSemanticsBoundary = node._semanticsConfiguration.isSemanticBoundary;
+    }
+    if (node != this && _semantics != null && _needsSemanticsUpdate) {
+      // If `this` node has already been added to [owner._nodesNeedingSemantics]
+      // remove it as it is no longer guaranteed that its semantics
+      // node will continue to be in the tree. If it still is in the tree, the
+      // ancestor `node` added to [owner._nodesNeedingSemantics] at the end of
+      // this block will ensure that the semantics of `this` node actually get
+      // updated.
+      // (See semantics_10_test.dart for an example why this is required).
+      owner._nodesNeedingSemantics.remove(this);
+    }
+    if (!node._needsSemanticsUpdate) {
+      if (node != this) {
+        // Reset for `this` happened above already.
         node._cachedSemanticsConfiguration = null;
-        node._needsSemanticsUpdate = true;
-        node = node.parent;
       }
-      if (!node._needsSemanticsUpdate) {
-        node._needsSemanticsUpdate = true;
-        node._cachedSemanticsConfiguration = null;
-        if (owner != null) {
-          owner._nodesNeedingSemantics.add(node);
-          owner.requestVisualUpdate();
-        }
-      }
-    } else {
-      // The shape of the semantics tree around us may have changed.
-      // The worst case is that we may have removed a branch of the
-      // semantics tree, because when that happens we have to go up
-      // and dirty the nearest _semantics-laden ancestor of the
-      // affected node to rebuild the tree.
-      RenderObject node = this;
-      do {
-        if (node.parent is! RenderObject)
-          break;
-        node._needsSemanticsUpdate = true;
-        node._cachedSemanticsConfiguration = null;
-        node = node.parent;
-      } while (node._semantics == null);
-      if (node != this && _semantics != null && _needsSemanticsUpdate) {
-        // If [this] node has already been added to [owner._nodesNeedingSemantics]
-        // remove it as it is no longer guaranteed that its semantics
-        // node will continue to be in the tree. If it still is in the tree, the
-        // ancestor [node] added to [owner._nodesNeedingSemantics] at the end of
-        // this block will ensure that the semantics of [this] node actually get
-        // updated.
-        // (See semantics_10_test.dart for an example why this is required).
-        owner._nodesNeedingSemantics.remove(this);
-      }
-      if (!node._needsSemanticsUpdate) {
-        node._cachedSemanticsConfiguration = null;
-        node._needsSemanticsUpdate = true;
-        if (owner != null) {
-          owner._nodesNeedingSemantics.add(node);
-          owner.requestVisualUpdate();
-        }
+      node._needsSemanticsUpdate = true;
+      if (owner != null) {
+        assert(node._semanticsConfiguration.isSemanticBoundary || node.parent is! RenderObject);
+        owner._nodesNeedingSemantics.add(node);
+        owner.requestVisualUpdate();
       }
     }
   }
@@ -2389,7 +2362,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If [isSemanticBoundary] is true, this method is called with the `node`
   /// created for this [RenderObject], the `config` to be applied to that node
-  /// and the `children` [SemanticNode]s that decedents of this RenderObject
+  /// and the `children` [SemanticNode]s that descendants of this RenderObject
   /// have generated.
   ///
   /// By default, the method will annotate `node` with `config` and add the

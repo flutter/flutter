@@ -1,5 +1,5 @@
 name: flutter_driver
-version: 0.0.16
+version: 0.0.18-dev
 description: Integration and performance test API for Flutter applications
 homepage: http://flutter.io
 author: Flutter Authors <flutter-dev@googlegroups.com>
@@ -22,7 +22,7 @@ dependencies:
 dev_dependencies:
   test: 0.12.26
   mockito: 2.2.0
-  quiver: 0.26.0
+  quiver: 0.26.2
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
