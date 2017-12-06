@@ -984,12 +984,23 @@ Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
 }
 
 Paragraph::Range<size_t> Paragraph::GetWordBoundary(size_t offset) const {
-  // TODO(garyq): Consider punctuation as separate words.
   if (text_.size() == 0)
     return Range<size_t>(0, 0);
-  return Range<size_t>(
-      minikin::getPrevWordBreakForCache(text_.data(), offset + 1, text_.size()),
-      minikin::getNextWordBreakForCache(text_.data(), offset, text_.size()));
+
+  UErrorCode status = U_ZERO_ERROR;
+  std::unique_ptr<icu::BreakIterator> break_iter(
+      icu::BreakIterator::createWordInstance(icu::Locale(), status));
+  if (!U_SUCCESS(status))
+    return Range<size_t>(0, 0);
+  break_iter->setText(icu::UnicodeString(false, text_.data(), text_.size()));
+
+  int32_t prev_boundary = break_iter->preceding(offset);
+  if (prev_boundary == icu::BreakIterator::DONE)
+    prev_boundary = offset;
+  int32_t next_boundary = break_iter->next();
+  if (next_boundary == icu::BreakIterator::DONE)
+    next_boundary = offset;
+  return Range<size_t>(prev_boundary, next_boundary);
 }
 
 size_t Paragraph::GetLineCount() const {
