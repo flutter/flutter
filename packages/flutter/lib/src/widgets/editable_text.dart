@@ -20,10 +20,11 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 
 export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
+export 'package:flutter/rendering.dart' show SelectionChangedCause;
 
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
-typedef void SelectionChangedCallback(TextSelection selection, bool longPress);
+typedef void SelectionChangedCallback(TextSelection selection, SelectionChangedCause cause);
 
 const Duration _kCursorBlinkHalfPeriod = const Duration(milliseconds: 500);
 
@@ -490,7 +491,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, bool longPress) {
+  void _handleSelectionChanged(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause) {
     widget.controller.selection = selection;
 
     // This will show the keyboard for all selection changes on the
@@ -509,12 +510,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         onSelectionOverlayChanged: _handleSelectionOverlayChanged,
         selectionControls: widget.selectionControls,
       );
-      if (_value.text.isNotEmpty || longPress)
+      final bool longPress = cause == SelectionChangedCause.longPress;
+      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
         _selectionOverlay.showHandles();
       if (longPress)
         _selectionOverlay.showToolbar();
       if (widget.onSelectionChanged != null)
-        widget.onSelectionChanged(selection, longPress);
+        widget.onSelectionChanged(selection, cause);
     }
   }
 
@@ -565,6 +567,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   /// value (half on, half off).
   @visibleForTesting
   Duration get cursorBlinkInterval => _kCursorBlinkHalfPeriod;
+
+  /// The current status of the text selection handles.
+  @visibleForTesting
+  TextSelectionOverlay get selectionOverlay => _selectionOverlay;
 
   int _obscureShowCharTicksPending = 0;
   int _obscureLatestCharIndex;
