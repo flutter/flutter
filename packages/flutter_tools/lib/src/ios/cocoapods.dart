@@ -57,7 +57,6 @@ class CocoaPods {
 
   Future<Null> processPods({
     @required Directory appIosDir,
-    @required String iosEngineDir,
     bool isSwift: false,
   }) async {
     if (await _checkPodCondition()) {
@@ -65,7 +64,7 @@ class CocoaPods {
         await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
 
-      await _runPodInstall(appIosDir, iosEngineDir);
+      await _runPodInstall(appIosDir);
     } else {
       throwToolExit('CocoaPods not available for project using Flutter plugins');
     }
@@ -110,13 +109,12 @@ class CocoaPods {
     podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
   }
 
-  Future<Null> _runPodInstall(Directory bundle, String engineDirectory) async {
+  Future<Null> _runPodInstall(Directory bundle) async {
     final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: bundle.path,
       environment: <String, String>{
-        'FLUTTER_FRAMEWORK_DIR': engineDirectory,
         // See https://github.com/flutter/flutter/issues/10873.
         // CocoaPods analytics adds a lot of latency.
         'COCOAPODS_DISABLE_STATS': 'true',

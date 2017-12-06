@@ -253,13 +253,14 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
   final bool hasFlutterPlugins = injectPlugins();
 
-  if (hasFlutterPlugins)
+  if (hasFlutterPlugins) {
+    final String iosEngineDir = flutterFrameworkDir(buildInfo.mode);
+    _injectFlutterPodWrapper(iosEngineDir, appDirectory.path);
     await cocoaPods.processPods(
       appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
       isSwift: app.isSwift,
     );
-
+  }
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
@@ -350,6 +351,19 @@ Future<XcodeBuildResult> buildXcodeProject({
     }
     return new XcodeBuildResult(success: true, output: outputDir);
   }
+}
+
+//Write the flutter_framework path to appPath/ios/.flutter_framework, which will be read by the podfile later.
+//All dependencies, including the flutter_framework will be managed by podfile, which is a standard flow,therefore, user can run pod install from the ios project directly.
+void _injectFlutterPodWrapper(String iosEngineDir,String appPath){
+  final String flutterPodspecPath = fs.path.join(iosEngineDir,'Flutter.podspec');
+  final String flutterPodWrapperPath = fs.path.join(fs.currentDirectory.path,appPath,'.flutter-framework');
+  if(fs.file(flutterPodspecPath).existsSync()){
+    final String content = 'Flutter=$iosEngineDir';
+    fs.file(flutterPodWrapperPath).writeAsStringSync(content);
+  }
+  else
+    throwToolExit('Ensure that Flutter.framework exists in $iosEngineDir.');
 }
 
 Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
