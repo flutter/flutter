@@ -242,7 +242,7 @@ abstract class FlutterCommand extends Command<Null> {
       await cache.updateAll();
 
     if (shouldRunPub)
-      await pubGet(context: 'verify');
+      await pubGet(context: PubContext.getVerifyContext(name));
 
     setupApplicationPackages();
 
