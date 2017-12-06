@@ -16,6 +16,43 @@ import '../cache.dart';
 import '../globals.dart';
 import 'sdk.dart';
 
+/// Represents Flutter-specific data that is added to the `PUB_ENVIRONMENT`
+/// environment variable and allows understanding the type of requests made to
+/// the package site on Flutter's behalf.
+// DO NOT update without contacting kevmoo.
+// We have server-side tooling that assumes the values are consistent.
+class PubContext {
+  static final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
+
+  static final PubContext create = new PubContext._(<String>['create']);
+  static final PubContext createPackage = new PubContext._(<String>['create_pkg']);
+  static final PubContext createPlugin = new PubContext._(<String>['create_plugin']);
+  static final PubContext interactive = new PubContext._(<String>['interactive']);
+  static final PubContext pubGet = new PubContext._(<String>['get']);
+  static final PubContext pubUpgrade = new PubContext._(<String>['upgrade']);
+  static final PubContext runTest = new PubContext._(<String>['run_test']);
+
+  static final PubContext flutterTests = new PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages = new PubContext._(<String>['update_packages']);
+
+  final List<String> _values;
+
+  PubContext._(this._values) {
+    for (String item in _values) {
+      if (!_validContext.hasMatch(item)) {
+        throw new ArgumentError.value(
+            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+      }
+    }
+  }
+
+  static PubContext getVerifyContext(String commandName) =>
+      new PubContext._(<String>['verify', commandName.replaceAll('-', '_')]);
+
+  @override
+  String toString() => 'PubContext: ${_values.join(':')}';
+}
+
 bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (!dotPackages.existsSync())
     return true;
@@ -30,9 +67,9 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
 }
 
 /// [context] provides extra information to package server requests to
-/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
+/// understand usage.
 Future<Null> pubGet({
-  @required String context,
+  @required PubContext context,
   String directory,
   bool skipIfAbsent: false,
   bool upgrade: false,
@@ -90,9 +127,9 @@ typedef String MessageFilter(String message);
 /// `arguments` list) unless `showTraceForErrors` is false.
 ///
 /// [context] provides extra information to package server requests to
-/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
+/// understand usage.
 Future<Null> pub(List<String> arguments, {
-  @required String context,
+  @required PubContext context,
   String directory,
   MessageFilter filter,
   String failureMessage: 'pub failed',
@@ -133,7 +170,7 @@ Future<Null> pubInteractively(List<String> arguments, {
   final int code = await runInteractively(
     _pubCommand(arguments),
     workingDirectory: directory,
-    environment: _createPubEnvironment('interactive'),
+    environment: _createPubEnvironment(PubContext.interactive),
   );
   if (code != 0)
     throwToolExit('pub finished with exit code $code', exitCode: code);
@@ -147,8 +184,8 @@ List<String> _pubCommand(List<String> arguments) {
 /// The full environment used when running pub.
 ///
 /// [context] provides extra information to package server requests to
-/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
-Map<String, String> _createPubEnvironment(String context) {
+/// understand usage.
+Map<String, String> _createPubEnvironment(PubContext context) {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     _pubEnvironmentKey: _getPubEnvironmentValue(context),
@@ -168,15 +205,15 @@ const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
 /// The console environment key used by the pub tool to find the cache directory.
 const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 
-final RegExp _validContext = new RegExp('[a-z][a-z_]*[a-z]');
-
 /// Returns the environment value that should be used when running pub.
 ///
 /// Includes any existing environment variable, if one exists.
 ///
 /// [context] provides extra information to package server requests to
-/// understand usage. It must match the regular expression `[a-z][a-z_]*[a-z]`.
-String _getPubEnvironmentValue(String pubContext) {
+/// understand usage.
+String _getPubEnvironmentValue(PubContext pubContext) {
+  // DO NOT update this function without contacting kevmoo.
+  // We have server-side tooling that assumes the values are consistent.
   final List<String> values = <String>[];
 
   final String existing = platform.environment[_pubEnvironmentKey];
@@ -190,11 +227,7 @@ String _getPubEnvironmentValue(String pubContext) {
   }
 
   values.add('flutter_cli');
-
-  if (!_validContext.hasMatch(pubContext)) {
-    throw new ArgumentError.value(pubContext, 'pubContext', 'Must match RegExp ${_validContext.pattern}');
-  }
-  values.add('ctx_$pubContext');
+  values.addAll(pubContext._values);
 
   return values.join(':');
 }
