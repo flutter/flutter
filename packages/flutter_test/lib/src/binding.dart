@@ -984,8 +984,9 @@ class TestViewConfiguration extends ViewConfiguration {
       super(size: size);
 
   static Matrix4 _getMatrix(Size size, double devicePixelRatio) {
-    final double actualWidth = ui.window.physicalSize.width;
-    final double actualHeight = ui.window.physicalSize.height;
+    final double inverseRatio = devicePixelRatio / ui.window.devicePixelRatio;
+    final double actualWidth = ui.window.physicalSize.width * inverseRatio;
+    final double actualHeight = ui.window.physicalSize.height * inverseRatio;
     final double desiredWidth = size.width;
     final double desiredHeight = size.height;
     double scale, shiftX, shiftY;
@@ -1020,8 +1021,6 @@ class TestViewConfiguration extends ViewConfiguration {
   ///
   /// This is useful because pointers are described in logical pixels, as
   /// opposed to graphics which are expressed in physical pixels.
-  // TODO(ianh): We should make graphics and pointers use the same coordinate space.
-  //             See: https://github.com/flutter/flutter/issues/1360
   Matrix4 toHitTestMatrix() => _hitTestMatrix.clone();
 
   @override
