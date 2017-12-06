@@ -4,8 +4,8 @@
 
 import 'dart:math';
 
+import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/painting.dart';
-import 'package:test/test.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 void main() {
@@ -43,7 +43,7 @@ void main() {
   });
 
   test('cylindricalProjectionTransform identity', () {
-    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+    final Matrix4 initialState = MatrixUtils.createCylindricalProjectionTransform(
       radius: 0.0,
       angle: 0.0,
       perspective: 0.0,
@@ -53,22 +53,37 @@ void main() {
   });
 
   test('cylindricalProjectionTransform rotate with no radius', () {
-    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+    final Matrix4 simpleRotate = MatrixUtils.createCylindricalProjectionTransform(
       radius: 0.0,
       angle: pi / 2.0,
       perspective: 0.0,
     );
 
-    expect(initialState, new Matrix4.rotationX(pi / 2.0));
+    expect(simpleRotate, new Matrix4.rotationX(pi / 2.0));
   });
 
   test('cylindricalProjectionTransform radius does not change scale', () {
-    final Matrix4 initialState = MatrixUtils.cylindricalProjectionTransform(
+    final Matrix4 noRotation = MatrixUtils.createCylindricalProjectionTransform(
       radius: 1000000.0,
       angle: 0.0,
       perspective: 0.0,
     );
 
-    expect(initialState, new Matrix4.identity());
+    expect(noRotation, new Matrix4.identity());
+  });
+
+  test('cylindricalProjectionTransform calculation spot check', () {
+    final Matrix4 actual = MatrixUtils.createCylindricalProjectionTransform(
+      radius: 100.0,
+      angle: pi / 3.0,
+      perspective: 0.001,
+    );
+
+    expect(actual.storage, <dynamic>[
+      1.0, 0.0, 0.0, 0.0,
+      0.0, moreOrLessEquals(0.5), moreOrLessEquals(0.8660254037844386), moreOrLessEquals(-0.0008660254037844386),
+      0.0, moreOrLessEquals(-0.8660254037844386), moreOrLessEquals(0.5), moreOrLessEquals(-0.0005),
+      0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
+    ]);
   });
 }
