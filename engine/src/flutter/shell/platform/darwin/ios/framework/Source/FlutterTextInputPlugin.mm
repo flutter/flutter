@@ -206,6 +206,14 @@ static UITextAutocapitalizationType ToUITextAutocapitalizationType(NSString* inp
     [self.inputDelegate selectionDidChange:self];
   }
 
+  NSInteger composingBase = [state[@"composingBase"] intValue];
+  NSInteger composingExtent = [state[@"composingExtent"] intValue];
+  NSRange composingRange = [self clampSelection:NSMakeRange(MIN(composingBase, composingExtent),
+                                                            ABS(composingBase - composingExtent))
+                                        forText:self.text];
+  self.markedTextRange =
+      composingRange.length > 0 ? [FlutterTextRange rangeWithNSRange:composingRange] : nil;
+
   if (textChanged) {
     [self.inputDelegate textDidChange:self];
 
