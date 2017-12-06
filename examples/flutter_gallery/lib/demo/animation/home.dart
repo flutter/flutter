@@ -216,12 +216,8 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
       final Rect cardRect = _interpolateRect(columnCardRect, rowCardRect).shift(offset);
       final String cardId = 'card$index';
       if (hasChild(cardId)) {
-        // Add a small horizontal gap between the cards.
-        final Rect insetRect = new Rect.fromLTWH(
-          cardRect.left + 0.5, cardRect.top, cardRect.width - 1.0, cardRect.height
-        );
-        layoutChild(cardId, new BoxConstraints.tight(insetRect.size));
-        positionChild(cardId, insetRect.topLeft);
+        layoutChild(cardId, new BoxConstraints.tight(cardRect.size));
+        positionChild(cardId, cardRect.topLeft);
       }
 
       // Layout the title for index.
@@ -549,7 +545,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     final double screenHeight = mediaQueryData.size.height;
     final double appBarMaxHeight = screenHeight - statusBarHeight;
 
-    // The scrolloffset that reveals the appBarMidHeight appbar.
+    // The scroll offset that reveals the appBarMidHeight appbar.
     final double appBarMidScrollOffset = statusBarHeight + appBarMaxHeight - _kAppBarMidHeight;
 
     return new SizedBox.expand(

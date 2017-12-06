@@ -19,27 +19,23 @@ class SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Padding(
-      padding: const EdgeInsets.only(bottom: 1.0),
-      child: new DecoratedBox(
-        decoration: new BoxDecoration(
-          borderRadius: new BorderRadius.circular(4.0),
-          gradient: new LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: <Color>[
-              section.leftColor,
-              section.rightColor,
-            ],
-          ),
+    return new DecoratedBox(
+      decoration: new BoxDecoration(
+        gradient: new LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: <Color>[
+            section.leftColor,
+            section.rightColor,
+          ],
         ),
-        child: new Image.asset(
-          section.backgroundAsset,
-          package: section.backgroundAssetPackage,
-          color: const Color.fromRGBO(255, 255, 255, 0.075),
-          colorBlendMode: BlendMode.modulate,
-          fit: BoxFit.cover,
-        ),
+      ),
+      child: new Image.asset(
+        section.backgroundAsset,
+        package: section.backgroundAssetPackage,
+        color: const Color.fromRGBO(255, 255, 255, 0.075),
+        colorBlendMode: BlendMode.modulate,
+        fit: BoxFit.cover,
       ),
     );
   }
