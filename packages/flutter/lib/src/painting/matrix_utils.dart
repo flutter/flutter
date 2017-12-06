@@ -208,11 +208,13 @@ class MatrixUtils {
         ..setEntry(3, 2, -perspective);
 
     // Simplified camera view matrix.
+    // Basically re-scales to keep object at original size at angle = 0 at
+    // any radius.
     final Matrix4 viewMatrix = new Matrix4.identity()
         ..setEntry(2, 3, -radius);
 
-    // First translate the object from the origin of the world and then
-    // rotate against the world.
+    // First translate the object from the origin of the world by radius in the
+    // z axis and then rotate against the world.
     final Matrix4 modelMatrix = (
         orientation == Axis.horizontal
             ? new Matrix4.rotationY(angle)
