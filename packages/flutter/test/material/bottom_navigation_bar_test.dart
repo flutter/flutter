@@ -65,6 +65,35 @@ void main() {
     expect(find.text('Alarm'), findsOneWidget);
   });
 
+  testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 40.0)),
+          child: new Scaffold(
+            bottomNavigationBar: new BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                const BottomNavigationBarItem(
+                  icon: const Icon(Icons.ac_unit),
+                  title: const Text('AC')
+                ),
+                const BottomNavigationBarItem(
+                  icon: const Icon(Icons.access_alarm),
+                  title: const Text('Alarm')
+                )
+              ]
+            )
+          )
+        )
+      )
+    );
+
+    const double labelBottomMargin = 8.0; // _kBottomMargin in implementation.
+    const double additionalPadding = 40.0 - labelBottomMargin;
+    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
+  });
+
   testWidgets('BottomNavigationBar action size test', (WidgetTester tester) async {
     await tester.pumpWidget(
       new MaterialApp(
