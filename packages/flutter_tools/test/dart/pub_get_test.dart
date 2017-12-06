@@ -26,7 +26,7 @@ void main() {
 
     new FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironmment, isNull);
-      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -37,7 +37,7 @@ void main() {
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
       );
-      expect(processMock.lastPubEnvironmment, contains('flutter_cli:ctx_flutter_tests'));
+      expect(processMock.lastPubEnvironmment, contains('flutter_cli:flutter_tests'));
       expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
@@ -96,7 +96,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironmment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -122,7 +122,7 @@ void main() {
       MockDirectory.findCache = false;
       expect(processMock.lastPubEnvironmment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: 'flutter_tests', checkLastModified: false).then((Null value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((Null value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
