@@ -741,10 +741,10 @@ public class FlutterView extends SurfaceView
     private boolean mTouchExplorationEnabled = false;
     private TouchExplorationListener mTouchExplorationListener;
 
-    protected void dispatchSemanticsAction(int id, int action) {
+    protected void dispatchSemanticsAction(int id, AccessibilityBridge.Action action) {
         if (!isAttached())
             return;
-        nativeDispatchSemanticsAction(mNativeView.get(), id, action);
+        nativeDispatchSemanticsAction(mNativeView.get(), id, action.value);
     }
 
     @Override
