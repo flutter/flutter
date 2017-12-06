@@ -323,7 +323,7 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Provides a brief textual description of the result of an action performed
   /// on the widget.
   ///
-  /// If a hint is provided, there must either by an ambient [Directionality]
+  /// If a hint is provided, there must either be an ambient [Directionality]
   /// or an explicit [textDirection] should be provided.
   ///
   /// See also:

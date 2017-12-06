@@ -286,7 +286,17 @@ void _tests() {
     expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
   });
 
-  testWidgets('provides semantics information header and footer', (WidgetTester tester) async {
+  testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, false);
+
+    expect(semantics, includesNodeWith(label: 'AM', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'PM', actions: <SemanticsAction>[SemanticsAction.tap]));
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for header and footer', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
     await mediaQueryBoilerplate(tester, true);
 
@@ -297,6 +307,10 @@ void _tests() {
         reason: '07 appears once in the header, then again in the dial');
     expect(semantics, includesNodeWith(label: 'CANCEL'));
     expect(semantics, includesNodeWith(label: 'OK'));
+
+    // In 24-hour mode we don't have AM/PM control.
+    expect(semantics, isNot(includesNodeWith(label: 'AM')));
+    expect(semantics, isNot(includesNodeWith(label: 'PM')));
 
     semantics.dispose();
   });

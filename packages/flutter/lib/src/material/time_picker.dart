@@ -184,9 +184,26 @@ class _DayPeriodControl extends StatelessWidget {
 
   final _TimePickerFragmentContext fragmentContext;
 
-  void _handleChangeDayPeriod() {
+  void _togglePeriod() {
     final int newHour = (fragmentContext.selectedTime.hour + TimeOfDay.hoursPerPeriod) % TimeOfDay.hoursPerDay;
-    fragmentContext.onTimeChange(fragmentContext.selectedTime.replacing(hour: newHour));
+    final TimeOfDay newTime = fragmentContext.selectedTime.replacing(hour: newHour);
+    fragmentContext.onTimeChange(newTime);
+  }
+
+  void _setAm(BuildContext context) {
+    if (fragmentContext.selectedTime.period == DayPeriod.am) {
+      return;
+    }
+    _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+    _togglePeriod();
+  }
+
+  void _setPm(BuildContext context) {
+    if (fragmentContext.selectedTime.period == DayPeriod.pm) {
+      return;
+    }
+    _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+    _togglePeriod();
   }
 
   @override
@@ -196,25 +213,47 @@ class _DayPeriodControl extends StatelessWidget {
     final TimeOfDay selectedTime = fragmentContext.selectedTime;
     final Color activeColor = fragmentContext.activeColor;
     final Color inactiveColor = fragmentContext.inactiveColor;
-
+    final bool amSelected = selectedTime.period == DayPeriod.am;
     final TextStyle amStyle = headerTextTheme.subhead.copyWith(
-        color: selectedTime.period == DayPeriod.am ? activeColor: inactiveColor
+      color: amSelected ? activeColor: inactiveColor
     );
     final TextStyle pmStyle = headerTextTheme.subhead.copyWith(
-        color: selectedTime.period == DayPeriod.pm ? activeColor: inactiveColor
+      color: !amSelected ? activeColor: inactiveColor
     );
 
-    return new GestureDetector(
-      onTap: Feedback.wrapForTap(_handleChangeDayPeriod, context),
-      behavior: HitTestBehavior.opaque,
-      child: new Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          new Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
-          const SizedBox(width: 0.0, height: 4.0),  // Vertical spacer
-          new Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle),
-        ],
-      ),
+    return new Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        new GestureDetector(
+          excludeFromSemantics: true,
+          onTap: Feedback.wrapForTap(() {
+            _setAm(context);
+          }, context),
+          behavior: HitTestBehavior.opaque,
+          child: new Semantics(
+            selected: amSelected,
+            onTap: () {
+              _setAm(context);
+            },
+            child: new Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
+          ),
+        ),
+        const SizedBox(width: 0.0, height: 4.0),  // Vertical spacer
+        new GestureDetector(
+          excludeFromSemantics: true,
+          onTap: Feedback.wrapForTap(() {
+            _setPm(context);
+          }, context),
+          behavior: HitTestBehavior.opaque,
+          child: new Semantics(
+            selected: !amSelected,
+            onTap: () {
+              _setPm(context);
+            },
+            child: new Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -236,13 +275,18 @@ class _HourControl extends StatelessWidget {
     final TextStyle hourStyle = fragmentContext.mode == _TimePickerMode.hour
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
+    final String formattedHour = localizations.formatHour(
+      fragmentContext.selectedTime,
+      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+    );
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
-      child: new Text(localizations.formatHour(
-        fragmentContext.selectedTime,
-        alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
-      ), style: hourStyle),
+      child: new Semantics(
+        selected: fragmentContext.mode == _TimePickerMode.hour,
+        hint: localizations.timePickerHourModeAnnouncement,
+        child: new Text(formattedHour, style: hourStyle),
+      ),
     );
   }
 }
@@ -284,7 +328,11 @@ class _MinuteControl extends StatelessWidget {
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
-      child: new Text(localizations.formatMinute(fragmentContext.selectedTime), style: minuteStyle),
+      child: new Semantics(
+        selected: fragmentContext.mode == _TimePickerMode.minute,
+        hint: localizations.timePickerMinuteModeAnnouncement,
+        child: new Text(localizations.formatMinute(fragmentContext.selectedTime), style: minuteStyle),
+      ),
     );
   }
 }
@@ -671,9 +719,13 @@ enum _DialRing {
 
 class _TappableLabel {
   _TappableLabel({
+    @required this.value,
     @required this.painter,
     @required this.onTap,
   });
+
+  /// The value this label is displaying.
+  final int value;
 
   /// Paints the text of the label.
   final TextPainter painter;
@@ -693,6 +745,7 @@ class _DialPainter extends CustomPainter {
     @required this.theta,
     @required this.activeRing,
     @required this.textDirection,
+    @required this.selectedValue,
   });
 
   final List<_TappableLabel> primaryOuterLabels;
@@ -704,6 +757,7 @@ class _DialPainter extends CustomPainter {
   final double theta;
   final _DialRing activeRing;
   final TextDirection textDirection;
+  final int selectedValue;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -818,6 +872,7 @@ class _DialPainter extends CustomPainter {
             nodeOffset.dy + height
           ),
           properties: new SemanticsProperties(
+            selected: label.value == selectedValue,
             label: labelPainter.text.text,
             textDirection: textDirection,
             onTap: label.onTap,
@@ -974,12 +1029,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _notifyOnChangedIfNeeded() {
-    if (widget.onChanged == null)
-      return;
+  TimeOfDay _notifyOnChangedIfNeeded() {
     final TimeOfDay current = _getTimeForTheta(_theta.value);
+    if (widget.onChanged == null)
+      return current;
     if (current != widget.selectedTime)
       widget.onChanged(current);
+    return current;
   }
 
   void _updateThetaForPan() {
@@ -1033,7 +1089,16 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
-    _notifyOnChangedIfNeeded();
+    final TimeOfDay newTime = _notifyOnChangedIfNeeded();
+    if (widget.mode == _TimePickerMode.hour) {
+      if (widget.use24HourDials) {
+        _announceToAccessibility(context, localizations.formatDecimal(newTime.hour));
+      } else {
+        _announceToAccessibility(context, localizations.formatDecimal(newTime.hourOfPeriod));
+      }
+    } else {
+      _announceToAccessibility(context, localizations.formatDecimal(newTime.minute));
+    }
     _animateTo(_getThetaForTime(_getTimeForTheta(_theta.value)));
     _dragging = false;
     _position = null;
@@ -1041,6 +1106,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _selectHour(int hour) {
+    _announceToAccessibility(context, localizations.formatDecimal(hour));
     TimeOfDay time;
     if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
       _activeRing = hour >= 1 && hour <= 12
@@ -1063,6 +1129,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _selectMinute(int minute) {
+    _announceToAccessibility(context, localizations.formatDecimal(minute));
     final TimeOfDay time = new TimeOfDay(
       hour: widget.selectedTime.hour,
       minute: minute,
@@ -1104,11 +1171,12 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     const TimeOfDay(hour: 23, minute: 0),
   ];
 
-  _TappableLabel _buildTappableLabel(TextTheme textTheme, String label, VoidCallback onTap) {
+  _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
     final TextStyle style = textTheme.subhead;
     // TODO(abarth): Handle textScaleFactor.
     // https://github.com/flutter/flutter/issues/5939
     return new _TappableLabel(
+      value: value,
       painter: new TextPainter(
         text: new TextSpan(style: style, text: label),
         textDirection: TextDirection.ltr,
@@ -1122,6 +1190,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     for (TimeOfDay timeOfDay in _amHours) {
       labels.add(_buildTappableLabel(
         textTheme,
+        timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
@@ -1136,6 +1205,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     for (TimeOfDay timeOfDay in _pmHours) {
       labels.add(_buildTappableLabel(
         textTheme,
+        timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
@@ -1150,6 +1220,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     for (TimeOfDay timeOfDay in _amHours) {
       labels.add(_buildTappableLabel(
         textTheme,
+        timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
@@ -1179,6 +1250,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     for (TimeOfDay timeOfDay in _minuteMarkerValues) {
       labels.add(_buildTappableLabel(
         textTheme,
+        timeOfDay.minute,
         localizations.formatMinute(timeOfDay),
         () {
           _selectMinute(timeOfDay.minute);
@@ -1205,19 +1277,23 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     List<_TappableLabel> primaryInnerLabels;
     List<_TappableLabel> secondaryOuterLabels;
     List<_TappableLabel> secondaryInnerLabels;
+    int selectedDialValue;
     switch (widget.mode) {
       case _TimePickerMode.hour:
         if (widget.use24HourDials) {
+          selectedDialValue = widget.selectedTime.hour;
           primaryOuterLabels = _build24HourOuterRing(theme.textTheme);
           secondaryOuterLabels = _build24HourOuterRing(theme.accentTextTheme);
           primaryInnerLabels = _build24HourInnerRing(theme.textTheme);
           secondaryInnerLabels = _build24HourInnerRing(theme.accentTextTheme);
         } else {
+          selectedDialValue = widget.selectedTime.hourOfPeriod;
           primaryOuterLabels = _build12HourOuterRing(theme.textTheme);
           secondaryOuterLabels = _build12HourOuterRing(theme.accentTextTheme);
         }
         break;
       case _TimePickerMode.minute:
+        selectedDialValue = widget.selectedTime.minute;
         primaryOuterLabels = _buildMinutes(theme.textTheme);
         primaryInnerLabels = null;
         secondaryOuterLabels = _buildMinutes(theme.accentTextTheme);
@@ -1234,6 +1310,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       child: new CustomPaint(
         key: const ValueKey<String>('time-picker-dial'),
         painter: new _DialPainter(
+          selectedValue: selectedDialValue,
           primaryOuterLabels: primaryOuterLabels,
           primaryInnerLabels: primaryInnerLabels,
           secondaryOuterLabels: secondaryOuterLabels,
