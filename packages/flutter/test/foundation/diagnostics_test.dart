@@ -670,16 +670,6 @@ void main() {
     expect(describeEnum(ExampleEnum.deferToChild), equals('deferToChild'));
   });
 
-  test('toHyphenedName test', () {
-    expect(camelCaseToHyphenatedName(''), equals(''));
-    expect(camelCaseToHyphenatedName('hello'), equals('hello'));
-    expect(camelCaseToHyphenatedName('Hello'), equals('hello'));
-    expect(camelCaseToHyphenatedName('HELLO'), equals('h-e-l-l-o'));
-    expect(camelCaseToHyphenatedName('deferToChild'), equals('defer-to-child'));
-    expect(camelCaseToHyphenatedName('DeferToChild'), equals('defer-to-child'));
-    expect(camelCaseToHyphenatedName('helloWorld'), equals('hello-world'));
-  });
-
   test('string property test', () {
     expect(
       new StringProperty('name', 'value', quoted: false).toString(),
@@ -1087,7 +1077,7 @@ void main() {
 
     expect(deferToChild.level, equals(DiagnosticLevel.info));
     expect(deferToChild.value, equals(ExampleEnum.deferToChild));
-    expect(deferToChild.toString(), equals('name: defer-to-child'));
+    expect(deferToChild.toString(), equals('name: deferToChild'));
     validatePropertyJsonSerialization(deferToChild);
 
     expect(nullEnum.level, equals(DiagnosticLevel.info));
