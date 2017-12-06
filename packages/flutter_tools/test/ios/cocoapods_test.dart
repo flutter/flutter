@@ -41,7 +41,7 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
     )).thenReturn(exitsHappy);
   });
 
@@ -55,7 +55,7 @@ void main() {
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -75,7 +75,7 @@ void main() {
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -96,7 +96,7 @@ void main() {
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -118,7 +118,7 @@ void main() {
         verifyNever(mockProcessManager.run(
           <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
-          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+          environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
         ));
       }
     },
@@ -138,7 +138,7 @@ void main() {
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
       )).thenReturn(new ProcessResult(
         1,
         1,
