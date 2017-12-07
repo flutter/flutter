@@ -87,22 +87,35 @@ class AnimatedIcon extends AnimatedWidget {
     final _AnimatedIconData iconData = icon;
     return new CustomPaint(
       size: iconData.size,
-      painter: new _AnimatedIconPainter(iconData.paths, progress.value, color),
+      painter: new _AnimatedIconPainter(
+        iconData.paths,
+        progress.value,
+        color,
+        () => new ui.Path(),
+      ),
     );
   }
 }
 
+typedef ui.Path _UiPathFactory();
+
 class _AnimatedIconPainter extends CustomPainter {
-  final List<_Path> paths;
+  final List<_PathFrames> paths;
   final double progress;
   final Color color;
+  final _UiPathFactory uiPathFactory;
 
-  const _AnimatedIconPainter(this.paths, this.progress, this.color);
+  const _AnimatedIconPainter(
+    this.paths,
+    this.progress,
+    this.color,
+    this.uiPathFactory
+  );
 
   @override
   void paint(ui.Canvas canvas, Size size) {
-    for (_Path path in paths)
-      path.paint(canvas, color, progress);
+    for (_PathFrames path in paths)
+      path.paint(canvas, color, uiPathFactory, progress);
   }
 
   @override
@@ -112,18 +125,22 @@ class _AnimatedIconPainter extends CustomPainter {
 
 }
 
-class _Path {
-  const _Path({@required this.commands, @required this.opacities});
+
+class _PathFrames {
+  const _PathFrames({
+    @required this.commands,
+    @required this.opacities
+  });
 
   final List<_PathCommand> commands;
   final List<double> opacities;
 
-  void paint(ui.Canvas canvas, Color color, double progress) {
+  void paint(ui.Canvas canvas, Color color, _UiPathFactory uiPathFactory, double progress) {
     final double opacity = _interpolate(opacities, progress, lerpDouble);
     final ui.Paint paint = new ui.Paint()
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(opacity);
-    final ui.Path path = new ui.Path();
+    final ui.Path path = uiPathFactory();
     for (_PathCommand command in commands)
       command.apply(path, progress);
     canvas.drawPath(path, paint);

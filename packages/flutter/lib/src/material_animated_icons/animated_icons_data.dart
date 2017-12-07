@@ -12,7 +12,6 @@ part of material_animated_icons;
 
 abstract class AnimatedIcons {
   static const AnimatedIconData menu_arrow = _$menu_arrow;
-  static const AnimatedIconData bow  = _$bow;
 }
 
 abstract class AnimatedIconData {
@@ -23,5 +22,5 @@ class _AnimatedIconData extends AnimatedIconData {
   const _AnimatedIconData(this.size, this.paths);
 
   final Size size;
-  final List<_Path> paths;
+  final List<_PathFrames> paths;
 }

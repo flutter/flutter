@@ -17,12 +17,14 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
+import 'package:mockito/mockito.dart';
 
 part '../../lib/src/material_animated_icons/animated_icons.dart';
 part '../../lib/src/material_animated_icons/animated_icons_data.dart';
 part '../../lib/src/material_animated_icons/data/menu_arrow.g.dart';
+
+class MockCanvas extends Mock implements ui.Canvas {}
+class MockPath extends Mock implements ui.Path {}
 
 void main () {
   group('Interpolate points', () {
@@ -61,104 +63,120 @@ void main () {
 
   group('_AnimatedIconPainter', () {
     final Size size = const Size(48.0, 48.0);
+    final MockCanvas mockCanvas = new MockCanvas();
+    List<MockPath> generatedPaths;
+    final _UiPathFactory pathFactory = () {
+      final MockPath path = new MockPath();
+      generatedPaths.add(path);
+      return path;
+    };
+
+    setUp(() {
+      generatedPaths = <MockPath> [];
+    });
+
     test('progress 0', () {
-      final _AnimatedIconPainter painter = new
-        _AnimatedIconPainter(movingBar.paths, 0.0, const Color(0xFF00FF00));
-      expect(
-        (Canvas canvas) {
-          painter.paint(canvas, size);
-        },
-        paints
-          ..path(
-            includes: <Offset>[
-              const Offset(0.0, 0.0),
-              const Offset(48.0, 0.0),
-              const Offset(48.0, 10.0),
-              const Offset(0.0, 10.0),
-            ],
-            excludes: <Offset>[
-              const Offset(24.0, 11.0),
-            ],
-            color: const Color(0xFF00FF00),
-          )
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        0.0,
+        const Color(0xFF00FF00),
+        pathFactory
       );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 0.0),
+        generatedPaths[0].lineTo(48.0, 0.0),
+        generatedPaths[0].lineTo(48.0, 10.0),
+        generatedPaths[0].lineTo(0.0, 10.0),
+        generatedPaths[0].lineTo(0.0, 0.0),
+        generatedPaths[0].close(),
+      ]);
     });
 
     test('progress 1', () {
-      final _AnimatedIconPainter painter = new
-        _AnimatedIconPainter(movingBar.paths, 1.0, const Color(0xFF00FF00));
-      expect(
-        (Canvas canvas) {
-          painter.paint(canvas, size);
-        },
-        paints
-          ..path(
-            includes: <Offset>[
-              const Offset(0.0, 38.0),
-              const Offset(48.0, 38.0),
-              const Offset(48.0, 48.0),
-              const Offset(0.0, 48.0),
-            ],
-            excludes: <Offset>[
-              const Offset(24.0, 37.0),
-            ],
-            color: const Color(0x3300FF00),
-          )
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        1.0,
+        const Color(0xFF00FF00),
+        pathFactory
       );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 38.0),
+        generatedPaths[0].lineTo(48.0, 38.0),
+        generatedPaths[0].lineTo(48.0, 48.0),
+        generatedPaths[0].lineTo(0.0, 48.0),
+        generatedPaths[0].lineTo(0.0, 38.0),
+        generatedPaths[0].close(),
+      ]);
     });
 
     test('interpolated frame', () {
-      final _AnimatedIconPainter painter = new
-        _AnimatedIconPainter(movingBar.paths, 0.5, const Color(0xFF00FF00));
-      expect(
-        (Canvas canvas) {
-          painter.paint(canvas, size);
-        },
-        paints
-          ..path(
-            includes: <Offset>[
-              const Offset(0.0, 19.0),
-              const Offset(48.0, 19.0),
-              const Offset(48.0, 29.0),
-              const Offset(0.0, 29.0),
-            ],
-            excludes: <Offset>[
-              const Offset(24.0, 37.0),
-            ],
-            color: const Color(0x9900FF00),
-          )
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        0.5,
+        const Color(0xFF00FF00),
+        pathFactory
       );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 19.0),
+        generatedPaths[0].lineTo(48.0, 19.0),
+        generatedPaths[0].lineTo(48.0, 29.0),
+        generatedPaths[0].lineTo(0.0, 29.0),
+        generatedPaths[0].lineTo(0.0, 19.0),
+        generatedPaths[0].close(),
+      ]);
     });
 
     test('curved frame', () {
-      final _AnimatedIconPainter painter = new
-        _AnimatedIconPainter(bow.paths, 1.0, const Color(0xFFFF0000));
-      expect(
-        (Canvas canvas) {
-          painter.paint(canvas, size);
-        },
-        paints
-          ..path(
-            includes: <Offset>[
-              const Offset(0.0, 24.0),
-              const Offset(48.0, 24.0),
-              const Offset(24.0, 30.0),
-            ],
-            excludes: <Offset>[
-              const Offset(48.0, 48.0),
-            ],
-            color: const Color(0xFFFF0000),
-          )
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        bow.paths,
+        1.0,
+        const Color(0xFF00FF00),
+        pathFactory
       );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 24.0),
+        generatedPaths[0].cubicTo(16.0, 48.0, 32.0, 48.0, 48.0, 24.0),
+        generatedPaths[0].lineTo(0.0, 24.0),
+        generatedPaths[0].close(),
+      ]);
     });
 
+    test('interpolated curved frame', () {
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        bow.paths,
+        0.25,
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 24.0),
+        generatedPaths[0].cubicTo(16.0, 17.0, 32.0, 17.0, 48.0, 24.0),
+        generatedPaths[0].lineTo(0.0, 24.0),
+        generatedPaths[0].close(),
+      ]);
+    });
   });
 }
 
 const _AnimatedIconData movingBar = const _AnimatedIconData(
   const Size(48.0, 48.0),
-  const <_Path> [
-    const _Path(
+  const <_PathFrames> [
+    const _PathFrames(
       opacities: const <double> [1.0, 0.2],
       commands: const <_PathCommand> [
         const _PathMoveTo(
@@ -187,7 +205,7 @@ const _AnimatedIconData movingBar = const _AnimatedIconData(
         ),
         const _PathLineTo(
           const <Point<double>> [
-            const Point<double>(0.0, 00.0),
+            const Point<double>(0.0, 0.0),
             const Point<double>(0.0, 38.0),
           ],
         ),
@@ -199,8 +217,8 @@ const _AnimatedIconData movingBar = const _AnimatedIconData(
 
 const _AnimatedIconData bow = const _AnimatedIconData(
   const Size(48.0, 48.0),
-  const <_Path> [
-    const _Path(
+  const <_PathFrames> [
+    const _PathFrames(
       opacities: const <double> [1.0, 1.0],
       commands: const <_PathCommand> [
         const _PathMoveTo(

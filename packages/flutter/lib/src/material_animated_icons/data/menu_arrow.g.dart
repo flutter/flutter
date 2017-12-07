@@ -9,8 +9,8 @@ part of material_animated_icons;
 
 const _AnimatedIconData _$menu_arrow = const _AnimatedIconData(
   const Size(48.0, 48.0),
-  const <_Path> [
-    const _Path(
+  const <_PathFrames> [
+    const _PathFrames(
       opacities: const <double> [1.0, 0.2],
       commands: const <_PathCommand> [
         const _PathMoveTo(
