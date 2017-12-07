@@ -24,6 +24,7 @@ import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
+import '../common/text.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -83,11 +84,16 @@ typedef Finder FinderConstructor(SerializableFinder finder);
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
+  final TestTextInput _testTextInput = new TestTextInput();
+
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler) {
+    _testTextInput.register();
+
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
+      'enter_text': _enterText,
       'get_text': _getText,
       'request_data': _requestData,
       'scroll': _scroll,
@@ -103,6 +109,7 @@ class FlutterDriverExtension {
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => new GetHealth.deserialize(params),
       'get_render_tree': (Map<String, String> params) => new GetRenderTree.deserialize(params),
+      'enter_text': (Map<String, String> params) => new EnterText.deserialize(params),
       'get_text': (Map<String, String> params) => new GetText.deserialize(params),
       'request_data': (Map<String, String> params) => new RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
@@ -323,6 +330,12 @@ class FlutterDriverExtension {
     // TODO(yjbanov): support more ways to read text
     final Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
+  }
+
+  Future<EnterTextResult> _enterText(Command command) async {
+    final EnterText enterTextCommand = command;
+    _testTextInput.enterText(enterTextCommand.text);
+    return new EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
