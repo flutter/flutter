@@ -15,11 +15,8 @@ Future<Null> main() async {
   final Directory iosDirectory = dir(
     '${flutterDirectory.path}/examples/flutter_view/ios',
   );
-  final Stopwatch stopwatch = new Stopwatch()..start();
   await inDirectory(iosDirectory, () async {
     await exec('pod', <String>['install']);
   });
-
-  print('pod install executed in ${stopwatch.elapsed}');
   await task(createFlutterViewStartupTest());
 }
