@@ -345,6 +345,10 @@ class FlutterDriverExtension {
   }
 
   Future<EnterTextResult> _enterText(Command command) async {
+    if (!_testTextInput.isRegistered) {
+      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
+            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+    }
     final EnterText enterTextCommand = command;
     _testTextInput.enterText(enterTextCommand.text);
     return new EnterTextResult();
