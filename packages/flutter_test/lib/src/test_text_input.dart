@@ -65,7 +65,11 @@ class TestTextInput {
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
   void updateEditingValue(TextEditingValue value) {
-    expect(_client, isNonZero);
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0) {
+      throw new TestFailure('_client must be non-zero');
+    }
     BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -82,7 +86,6 @@ class TestTextInput {
   void enterText(String text) {
     updateEditingValue(new TextEditingValue(
       text: text,
-      composing: new TextRange(start: 0, end: text.length),
     ));
   }
 
