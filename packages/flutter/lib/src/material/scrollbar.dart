@@ -45,7 +45,7 @@ class Scrollbar extends StatefulWidget {
   @override
   _ScrollbarState createState() => new _ScrollbarState();
 
-  static ScrollbarPainter buildMaterialScrollbarPainter(TickerProvider vsync) {
+  static ScrollbarPainter _buildMaterialScrollbarPainter(TickerProvider vsync) {
     return new ScrollbarPainter(
         vsync: vsync,
         thickness: _kScrollbarThickness,
@@ -78,7 +78,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_currentPlatform == TargetPlatform.iOS) {
       _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
     } else {
-      _painter ??= Scrollbar.buildMaterialScrollbarPainter(this);
+      _painter ??= Scrollbar._buildMaterialScrollbarPainter(this);
       _painter.color = theme.highlightColor.withOpacity(1.0);
     }
     _painter.textDirection = Directionality.of(context);

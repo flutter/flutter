@@ -47,6 +47,7 @@ class CupertinoScrollbar extends StatefulWidget {
   @override
   _CupertinoScrollbarState createState() => new _CupertinoScrollbarState();
 
+  /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
   static ScrollbarPainter buildCupertinoScrollbarPainter(TickerProvider vsync) {
     return new ScrollbarPainter(
       vsync: vsync,

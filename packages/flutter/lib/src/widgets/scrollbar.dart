@@ -25,6 +25,7 @@ const Duration _kDefaultTimeToFade = const Duration(milliseconds: 600);
 ///  * [CupertinoScrollbar] for a widget showing a scrollbar around a
 ///    [Scrollable] in the iOS style.
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
+  /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
     @required TickerProvider vsync,
     @required this.thickness,
@@ -67,11 +68,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// null.
   double minLength;
 
-  /// Duration the scrollbar is immobile before starting to fade out. Mustn't be
+  /// [Duration] the scrollbar is immobile before starting to fade out. Mustn't be
   /// null.
   Duration timeToFadeout;
 
-  /// Duration of the fade out animation once started. Mustn't be null.
+  /// [Duration] of the fade out animation once started. Mustn't be null.
   Duration fadeoutDuration;
 
   // Animation of the main axis direction.
@@ -81,6 +82,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   // Fade-out timer.
   Timer _fadeOut;
 
+  /// [Color] of the thumb.
   Color get color => _color;
   Color _color;
   set color(Color value) {
@@ -91,6 +93,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     notifyListeners();
   }
 
+  /// Directionality of the text which affects the side of the screen the
+  /// scrollbar is positioned.
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
@@ -111,6 +115,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
 
+  /// Update with new [ScrollMetrics]. The scrollbar will show and redraw itself
+  /// based on these new metrics.
+  ///
+  /// The scrollbar will remain on screen.
   void update(
     ScrollMetrics metrics,
     AxisDirection axisDirection,
@@ -125,12 +133,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     _fadeOut?.cancel();
   }
 
+  /// Signal that the scrollbar can start to fade after the specified [timeToFadeout].
   void scheduleFade() {
     _fadeOut?.cancel();
-    _fadeOut = new Timer(timeToFadeout, startFadeOut);
+    _fadeOut = new Timer(timeToFadeout, _startFadeOut);
   }
 
-  void startFadeOut() {
+  void _startFadeOut() {
     _fadeOut = null;
     _fadeController.reverse();
   }
