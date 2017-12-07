@@ -77,8 +77,7 @@ dependencies:
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
   final int code = await process.exitCode;
-  if (code != 0)
-    exit(code);
+  if (code != 0) exit(code);
 
   createFooter('dev/docs/lib/footer.html');
 
@@ -91,18 +90,32 @@ dependencies:
   print('\n${result.stdout}');
 
   // Generate the documentation.
-  final List<String> args = <String>[
-    'global', 'run', 'dartdoc',
-    '--header', 'styles.html',
-    '--header', 'analytics.html',
-    '--footer-text', 'lib/footer.html',
-    '--exclude', 'temp_doc',
+  final List<String> args = <String>['global', 'run'];
+
+  if (Platform.environment.containsKey('DARTDOC_CHECKED') &&
+      Platform.environment['DARTDOC_CHECKED'] != '') {
+    args.add('-c');
+  }
+
+  args.addAll(<String>[
+    'dartdoc',
+    '--header',
+    'styles.html',
+    '--header',
+    'analytics.html',
+    '--footer-text',
+    'lib/footer.html',
+    '--exclude-packages',
+    'analyzer,args,barback,cli_util,csslib,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+    '--exclude',
+    'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,pacakge:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
     '--use-categories',
-    '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
+    '--category-order',
+    'flutter,Dart Core,flutter_test,flutter_driver',
     '--show-warnings',
     '--auto-include-dependencies',
-  ];
+  ]);
 
   // Explicitly list all the packages in //flutter/packages/* that are
   // not listed 'nodoc' in their pubspec.yaml.
@@ -116,22 +129,32 @@ dependencies:
     args,
     workingDirectory: 'dev/docs',
   );
-  printStream(process.stdout, prefix: 'dartdoc:stdout: ',
-    filter: kVerbose ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^generating docs for library '), // unnecessary verbosity
-      new RegExp(r'^pars'), // unnecessary verbosity
-    ],
+  printStream(
+    process.stdout,
+    prefix: 'dartdoc:stdout: ',
+    filter: kVerbose
+        ? const <Pattern>[]
+        : <Pattern>[
+            new RegExp(
+                r'^generating docs for library '), // unnecessary verbosity
+            new RegExp(r'^pars'), // unnecessary verbosity
+          ],
   );
-  printStream(process.stderr, prefix: 'dartdoc:stderr: ',
-    filter: kVerbose ? const <Pattern>[] : <Pattern>[
-      new RegExp(r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
-      new RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
-    ],
+  printStream(
+    process.stderr,
+    prefix: 'dartdoc:stderr: ',
+    filter: kVerbose
+        ? const <Pattern>[]
+        : <Pattern>[
+            new RegExp(
+                r'^ warning: generic type handled as HTML:'), // https://github.com/dart-lang/dartdoc/issues/1475
+            new RegExp(
+                r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
+          ],
   );
   final int exitCode = await process.exitCode;
 
-  if (exitCode != 0)
-    exit(exitCode);
+  if (exitCode != 0) exit(exitCode);
 
   sanityCheckDocs();
 
@@ -141,16 +164,20 @@ dependencies:
 void createFooter(String footerPath) {
   const int kGitRevisionLength = 10;
 
-  final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
-  String gitRevision = (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
-  gitRevision = gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
+  final ProcessResult gitResult =
+      Process.runSync('git', <String>['rev-parse', 'HEAD']);
+  String gitRevision =
+      (gitResult.exitCode == 0) ? gitResult.stdout.trim() : 'unknown';
+  gitRevision = gitRevision.length > kGitRevisionLength
+      ? gitRevision.substring(0, kGitRevisionLength)
+      : gitRevision;
 
-  final String timestamp = new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
+  final String timestamp =
+      new DateFormat('yyyy-MM-dd HH:mm').format(new DateTime.now());
 
-  new File(footerPath).writeAsStringSync(
-    '• </span class="no-break">$timestamp<span> '
-    '• </span class="no-break">$gitRevision</span>'
-  );
+  new File(footerPath)
+      .writeAsStringSync('• </span class="no-break">$timestamp<span> '
+          '• </span class="no-break">$gitRevision</span>');
 }
 
 void sanityCheckDocs() {
@@ -178,11 +205,11 @@ void sanityCheckDocs() {
       break;
     }
   }
-  if (oldMissing)
-    canaries.addAll(newSdkCanaries);
+  if (oldMissing) canaries.addAll(newSdkCanaries);
   for (String canary in canaries) {
     if (!new File(canary).existsSync())
-      throw new Exception('Missing "$canary", which probably means the documentation failed to build correctly.');
+      throw new Exception(
+          'Missing "$canary", which probably means the documentation failed to build correctly.');
   }
 }
 
@@ -226,40 +253,39 @@ void addHtmlBaseToIndex() {
     'href="/javadoc/"',
   );
   indexContents = indexContents.replaceAll(
-      'href="iOS/iOS-library.html"',
-      'href="/objcdoc/"',
+    'href="iOS/iOS-library.html"',
+    'href="/objcdoc/"',
   );
 
   indexFile.writeAsStringSync(indexContents);
 }
 
 void putRedirectInOldIndexLocation() {
-  final String metaTag = '<meta http-equiv="refresh" content="0;URL=../index.html">';
+  final String metaTag =
+      '<meta http-equiv="refresh" content="0;URL=../index.html">';
   new File('$kDocRoot/flutter/index.html').writeAsStringSync(metaTag);
 }
 
 List<String> findPackageNames() {
-  return findPackages().map((Directory dir) => path.basename(dir.path)).toList();
+  return findPackages()
+      .map((Directory dir) => path.basename(dir.path))
+      .toList();
 }
 
 /// Finds all packages in the Flutter SDK
 List<Directory> findPackages() {
-  return new Directory('packages')
-    .listSync()
-    .where((FileSystemEntity entity) {
-      if (entity is! Directory)
-        return false;
-      final File pubspec = new File('${entity.path}/pubspec.yaml');
-      // TODO(ianh): Use a real YAML parser here
-      return !pubspec.readAsStringSync().contains('nodoc: true');
-    })
-    .toList();
+  return new Directory('packages').listSync().where((FileSystemEntity entity) {
+    if (entity is! Directory) return false;
+    final File pubspec = new File('${entity.path}/pubspec.yaml');
+    // TODO(ianh): Use a real YAML parser here
+    return !pubspec.readAsStringSync().contains('nodoc: true');
+  }).toList();
 }
 
 /// Returns import or on-disk paths for all libraries in the Flutter SDK.
 ///
 /// diskPath toggles between import paths vs. disk paths.
-Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
+Iterable<String> libraryRefs({bool diskPath: false}) sync* {
   for (Directory dir in findPackages()) {
     final String dirName = path.basename(dir.path);
     for (FileSystemEntity file in new Directory('${dir.path}/lib').listSync()) {
@@ -268,7 +294,7 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
           yield '$dirName/lib/${path.basename(file.path)}';
         else
           yield '$dirName/${path.basename(file.path)}';
-       }
+      }
     }
   }
 
@@ -282,14 +308,15 @@ Iterable<String> libraryRefs({ bool diskPath: false }) sync* {
   }
 }
 
-void printStream(Stream<List<int>> stream, { String prefix: '', List<Pattern> filter: const <Pattern>[] }) {
+void printStream(Stream<List<int>> stream,
+    {String prefix: '', List<Pattern> filter: const <Pattern>[]}) {
   assert(prefix != null);
   assert(filter != null);
   stream
-    .transform(UTF8.decoder)
-    .transform(const LineSplitter())
-    .listen((String line) {
-      if (!filter.any((Pattern pattern) => line.contains(pattern)))
-        print('$prefix$line'.trim());
-    });
+      .transform(UTF8.decoder)
+      .transform(const LineSplitter())
+      .listen((String line) {
+    if (!filter.any((Pattern pattern) => line.contains(pattern)))
+      print('$prefix$line'.trim());
+  });
 }
