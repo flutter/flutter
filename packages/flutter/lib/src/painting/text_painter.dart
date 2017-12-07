@@ -401,7 +401,8 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
-  /// Returns the offset for the character after `offset`.
+  /// Returns the closest offset after `offset` at which the inout cursor can be
+  /// positioned.
   int getOffsetAfter(int offset) {
     final int nextCodeUnit = _text.codeUnitAt(offset);
     if (nextCodeUnit == null)
@@ -410,7 +411,8 @@ class TextPainter {
     return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
-  /// Returns the offset for the character before `offset`.
+  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// be positioned.
   int getOffsetBefore(int offset) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
