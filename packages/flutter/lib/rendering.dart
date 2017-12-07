@@ -35,6 +35,7 @@ export 'src/rendering/animated_size.dart';
 export 'src/rendering/binding.dart';
 export 'src/rendering/box.dart';
 export 'src/rendering/custom_layout.dart';
+export 'src/rendering/custom_paint.dart';
 export 'src/rendering/debug.dart';
 export 'src/rendering/debug_overflow_indicator.dart';
 export 'src/rendering/editable.dart';

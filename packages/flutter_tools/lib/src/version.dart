@@ -65,9 +65,10 @@ class FlutterVersion {
 
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.dartSdkVersion.split(' ')[0];
+  String get dartSdkVersion => Cache.instance.dartSdkVersion.split(' ')[0];
+  String get engineDartVersion => Cache.instance.engineDartVersion.split(' ')[0];
 
-  String get engineRevision => Cache.engineRevision;
+  String get engineRevision => Cache.instance.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   String _runGit(String command) => runSync(command.split(' '), workingDirectory: Cache.flutterRoot);

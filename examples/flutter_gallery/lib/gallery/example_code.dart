@@ -227,3 +227,12 @@ new GridView.count(
 // END
   }
 }
+
+
+class AnimatedImage {
+  void animatedImage() {
+// START animated_image
+new Image.network('https://example.com/animated-image.gif');
+// END
+  }
+}

@@ -335,23 +335,23 @@ class Alignment extends AlignmentGeometry {
 
   static String _stringify(double x, double y) {
     if (x == -1.0 && y == -1.0)
-      return 'Alignment.topLeft';
+      return 'topLeft';
     if (x == 0.0 && y == -1.0)
-      return 'Alignment.topCenter';
+      return 'topCenter';
     if (x == 1.0 && y == -1.0)
-      return 'Alignment.topRight';
+      return 'topRight';
     if (x == -1.0 && y == 0.0)
-      return 'Alignment.centerLeft';
+      return 'centerLeft';
     if (x == 0.0 && y == 0.0)
-      return 'Alignment.center';
+      return 'center';
     if (x == 1.0 && y == 0.0)
-      return 'Alignment.centerRight';
+      return 'centerRight';
     if (x == -1.0 && y == 1.0)
-      return 'Alignment.bottomLeft';
+      return 'bottomLeft';
     if (x == 0.0 && y == 1.0)
-      return 'Alignment.bottomCenter';
+      return 'bottomCenter';
     if (x == 1.0 && y == 1.0)
-      return 'Alignment.bottomRight';
+      return 'bottomRight';
     return 'Alignment(${x.toStringAsFixed(1)}, '
                      '${y.toStringAsFixed(1)})';
   }

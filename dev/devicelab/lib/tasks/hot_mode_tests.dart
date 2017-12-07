@@ -26,6 +26,7 @@ TaskFunction createHotModeTest({ bool isPreviewDart2: false }) {
     ];
     if (isPreviewDart2)
       options.add('--preview-dart-2');
+    setLocalEngineOptionIfNecessary(options);
     int hotReloadCount = 0;
     await inDirectory(flutterDirectory, () async {
       rmTree(_editedFlutterGalleryDir);

@@ -163,16 +163,16 @@ class TestGesture {
   final TestPointer _pointer;
 
   /// Send a move event moving the pointer by the given offset.
-  Future<Null> moveBy(Offset offset) {
+  Future<Null> moveBy(Offset offset, { Duration timeStamp: Duration.ZERO }) {
     assert(_pointer._isDown);
-    return moveTo(_pointer.location + offset);
+    return moveTo(_pointer.location + offset, timeStamp: timeStamp);
   }
 
   /// Send a move event moving the pointer to the given location.
-  Future<Null> moveTo(Offset location) {
+  Future<Null> moveTo(Offset location, { Duration timeStamp: Duration.ZERO }) {
     return TestAsyncUtils.guard(() {
       assert(_pointer._isDown);
-      return _dispatcher(_pointer.move(location), _result);
+      return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
     });
   }
 

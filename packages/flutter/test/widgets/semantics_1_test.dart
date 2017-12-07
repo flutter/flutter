@@ -50,7 +50,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -58,9 +58,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: true,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child1',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -92,7 +92,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -100,9 +100,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: false,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -146,7 +146,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -154,9 +154,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: true,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,
@@ -188,7 +188,7 @@ void main() {
           children: <Widget>[
             new Container(
               height: 10.0,
-              child: const Semantics(
+              child: new Semantics(
                 label: 'child1',
                 textDirection: TextDirection.ltr,
                 selected: true,
@@ -196,9 +196,9 @@ void main() {
             ),
             new Container(
               height: 10.0,
-              child: const IgnorePointer(
+              child: new IgnorePointer(
                 ignoring: false,
-                child: const Semantics(
+                child: new Semantics(
                   label: 'child2',
                   textDirection: TextDirection.ltr,
                   selected: true,

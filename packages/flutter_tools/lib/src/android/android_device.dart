@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/apk.dart';
@@ -49,6 +51,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices() async => getAdbDevices();
+
+  @override
+  Future<List<String>> getDiagnostics() async => getAdbDeviceDiagnostics();
 }
 
 class AndroidDevice extends Device {
@@ -530,30 +535,49 @@ Map<String, String> parseAdbDeviceProperties(String str) {
   return properties;
 }
 
+/// Return the list of connected ADB devices.
+List<AndroidDevice> getAdbDevices() {
+  final String adbPath = getAdbPath(androidSdk);
+  if (adbPath == null)
+    return <AndroidDevice>[];
+  final String text = runSync(<String>[adbPath, 'devices', '-l']);
+  final List<AndroidDevice> devices = <AndroidDevice>[];
+  parseADBDeviceOutput(text, devices: devices);
+  return devices;
+}
+
+/// Get diagnostics about issues with any connected devices.
+Future<List<String>> getAdbDeviceDiagnostics() async {
+  final String adbPath = getAdbPath(androidSdk);
+  if (adbPath == null)
+    return <String>[];
+
+  final RunResult result = await runAsync(<String>[adbPath, 'devices', '-l']);
+  if (result.exitCode != 0) {
+    return <String>[];
+  } else {
+    final String text = result.stdout;
+    final List<String> diagnostics = <String>[];
+    parseADBDeviceOutput(text, diagnostics: diagnostics);
+    return diagnostics;
+  }
+}
+
 // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
 final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
-/// Return the list of connected ADB devices.
-///
-/// [mockAdbOutput] is public for testing.
-List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
-  final List<AndroidDevice> devices = <AndroidDevice>[];
-  String text;
-
-  if (mockAdbOutput == null) {
-    final String adbPath = getAdbPath(androidSdk);
-    printTrace('Listing devices using $adbPath');
-    if (adbPath == null)
-      return <AndroidDevice>[];
-    text = runSync(<String>[adbPath, 'devices', '-l']);
-  } else {
-    text = mockAdbOutput;
-  }
-
+/// Parse the given `adb devices` output in [text], and fill out the given list
+/// of devices and possible device issue diagnostics. Either argument can be null,
+/// in which case information for that parameter won't be populated.
+@visibleForTesting
+void parseADBDeviceOutput(String text, {
+  List<AndroidDevice> devices,
+  List<String> diagnostics
+}) {
   // Check for error messages from adb
   if (!text.contains('List of devices')) {
-    printError(text);
-    return <AndroidDevice>[];
+    diagnostics?.add(text);
+    return;
   }
 
   for (String line in text.trim().split('\n')) {
@@ -563,7 +587,7 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
 
     // Skip lines about adb server and client version not matching
     if (line.startsWith(new RegExp(r'adb server (version|is out of date)'))) {
-      printStatus(line);
+      diagnostics?.add(line);
       continue;
     }
 
@@ -592,14 +616,14 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
         info['model'] = cleanAdbDeviceName(info['model']);
 
       if (deviceState == 'unauthorized') {
-        printError(
+        diagnostics?.add(
           'Device $deviceID is not authorized.\n'
           'You might need to check your device for an authorization dialog.'
         );
       } else if (deviceState == 'offline') {
-        printError('Device $deviceID is offline.');
+        diagnostics?.add('Device $deviceID is offline.');
       } else {
-        devices.add(new AndroidDevice(
+        devices?.add(new AndroidDevice(
           deviceID,
           productID: info['product'],
           modelID: info['model'] ?? deviceID,
@@ -607,14 +631,12 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
         ));
       }
     } else {
-      printError(
+      diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
         'Please report a bug at https://github.com/flutter/flutter/issues/new');
     }
   }
-
-  return devices;
 }
 
 /// A log reader that logs from `adb logcat`.

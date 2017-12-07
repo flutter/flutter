@@ -214,7 +214,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
     _position
       ..curve = Curves.ease
       ..reverseCurve = Curves.ease.flipped;

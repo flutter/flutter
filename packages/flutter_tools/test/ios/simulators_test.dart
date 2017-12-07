@@ -18,8 +18,29 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 
 void main() {
-  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
-  osx.operatingSystem = 'macos';
+  FakePlatform osx;
+
+  setUp(() {
+    osx = new FakePlatform.fromPlatform(const LocalPlatform());
+    osx.operatingSystem = 'macos';
+  });
+
+  group('logFilePath', () {
+    testUsingContext('defaults to rooted from HOME', () {
+      osx.environment['HOME'] = '/foo/bar';
+      expect(new IOSSimulator('123').logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    }, testOn: 'posix');
+
+    testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
+      osx.environment['HOME'] = '/foo/bar';
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      expect(new IOSSimulator('456').logFilePath, '/baz/qux/456/system.log');
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    });
+  });
 
   group('compareIosVersions', () {
     test('compares correctly', () {

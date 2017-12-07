@@ -705,11 +705,16 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// [showModalBottomSheet] function.
   ///
   /// Returns a controller that can be used to close and otherwise manipulate the
-  /// button sheet.
+  /// bottom sheet.
+  ///
+  /// To rebuild the bottom sheet (e.g. if it is stateful), call
+  /// [PersistentBottomSheetController.setState] on the value returned from this
+  /// method.
   ///
   /// See also:
   ///
   ///  * [BottomSheet], which is the widget typically returned by the `builder`.
+  ///  * [showBottomSheet], which calls this method given a [BuildContext].
   ///  * [showModalBottomSheet], which can be used to display a modal bottom
   ///    sheet.
   ///  * [Scaffold.of], for information about how to obtain the [ScaffoldState].
@@ -829,6 +834,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets viewInsets = MediaQuery.of(context).viewInsets;
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -1033,7 +1039,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             children: children,
             delegate: new _ScaffoldLayout(
               statusBarHeight: padding.top,
-              bottomPadding: widget.resizeToAvoidBottomPadding ? padding.bottom : 0.0,
+              bottomPadding: widget.resizeToAvoidBottomPadding ? math.max(padding.bottom, viewInsets.bottom) : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
             ),

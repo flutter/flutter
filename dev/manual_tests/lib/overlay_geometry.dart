@@ -152,7 +152,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   }
 
   bool handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification && notification.depth == 1) {
+    if (notification is ScrollUpdateNotification && notification.depth == 0) {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;

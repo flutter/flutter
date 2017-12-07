@@ -12,6 +12,7 @@ void main() {
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
+    expect(localizations.deleteButtonTooltip, isNotNull);
     expect(localizations.nextMonthTooltip, isNotNull);
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);

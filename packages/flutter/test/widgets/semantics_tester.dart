@@ -196,7 +196,7 @@ class TestSemantics {
     final SemanticsData nodeData = node.getSemanticsData();
 
     bool fail(String message) {
-      matchState[TestSemantics] = '$message\n$_matcherHelp';
+      matchState[TestSemantics] = '$message';
       return false;
     }
 
@@ -246,8 +246,29 @@ class TestSemantics {
   }
 
   @override
-  String toString() {
-    return 'node $id, flags=$flags, actions=$actions, label="$label", textDirection=$textDirection, rect=$rect, transform=$transform, ${children.length} child${ children.length == 1 ? "" : "ren" }';
+  String toString([int indentAmount = 0]) {
+    final String indent = '  ' * indentAmount;
+    final StringBuffer buf = new StringBuffer();
+    buf.writeln('$indent$runtimeType {');
+    if (id != null)
+      buf.writeln('$indent  id: $id');
+    buf.writeln('$indent  flags: $flags');
+    buf.writeln('$indent  actions: $actions');
+    if (label != null)
+      buf.writeln('$indent  label: "$label"');
+    if (textDirection != null)
+      buf.writeln('$indent  textDirection: $textDirection');
+    if (rect != null)
+      buf.writeln('$indent  rect: $rect');
+    if (transform != null)
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')}');
+    buf.writeln('$indent  children: [');
+    for (TestSemantics child in children) {
+      buf.writeln(child.toString(indentAmount + 2));
+    }
+    buf.writeln('$indent  ]');
+    buf.write('$indent}');
+    return buf.toString();
   }
 }
 
@@ -295,12 +316,17 @@ class _HasSemantics extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('semantics node matching: $_semantics');
+    return description.add('semantics node matching:\n$_semantics');
   }
 
   @override
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    return mismatchDescription.add(matchState[TestSemantics]);
+    return mismatchDescription
+        .add('${matchState[TestSemantics]}\n')
+        .add(
+          'Current SemanticsNode tree:\n'
+        )
+        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest));
   }
 }
 

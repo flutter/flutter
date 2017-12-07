@@ -35,9 +35,9 @@ final DecorationTween _kGradientShadowTween = new DecorationTween(
   end: const _CupertinoEdgeShadowDecoration(
     edgeGradient: const LinearGradient(
       // Spans 5% of the page.
-      begin: const Alignment(0.90, 0.0),
-      end: Alignment.centerRight,
-      // Eyeballed gradient used to mimic a drop shadow on the left side only.
+      begin: const AlignmentDirectional(0.90, 0.0),
+      end: AlignmentDirectional.centerEnd,
+      // Eyeballed gradient used to mimic a drop shadow on the start side only.
       colors: const <Color>[
         const Color(0x00000000),
         const Color(0x04000000),
@@ -293,31 +293,31 @@ class CupertinoPageTransition extends StatelessWidget {
     @required Animation<double> primaryRouteAnimation,
     @required Animation<double> secondaryRouteAnimation,
     @required this.child,
-    bool linearTransition,
-  }) :
-      _primaryPositionAnimation = linearTransition
-        ? _kRightMiddleTween.animate(primaryRouteAnimation)
-        : _kRightMiddleTween.animate(
-            new CurvedAnimation(
-              parent: primaryRouteAnimation,
-              curve: Curves.easeOut,
-              reverseCurve: Curves.easeIn,
-            )
-          ),
-      _secondaryPositionAnimation = _kMiddleLeftTween.animate(
-        new CurvedAnimation(
-          parent: secondaryRouteAnimation,
-          curve: Curves.easeOut,
-          reverseCurve: Curves.easeIn,
-        )
-      ),
-      _primaryShadowAnimation = _kGradientShadowTween.animate(
-        new CurvedAnimation(
-          parent: primaryRouteAnimation,
-          curve: Curves.easeOut,
-        )
-      ),
-      super(key: key);
+    @required bool linearTransition,
+  }) : assert(linearTransition != null),
+       _primaryPositionAnimation = linearTransition
+         ? _kRightMiddleTween.animate(primaryRouteAnimation)
+         : _kRightMiddleTween.animate(
+             new CurvedAnimation(
+               parent: primaryRouteAnimation,
+               curve: Curves.easeOut,
+               reverseCurve: Curves.easeIn,
+             )
+           ),
+       _secondaryPositionAnimation = _kMiddleLeftTween.animate(
+         new CurvedAnimation(
+           parent: secondaryRouteAnimation,
+           curve: Curves.easeOut,
+           reverseCurve: Curves.easeIn,
+         )
+       ),
+       _primaryShadowAnimation = _kGradientShadowTween.animate(
+         new CurvedAnimation(
+           parent: primaryRouteAnimation,
+           curve: Curves.easeOut,
+         )
+       ),
+       super(key: key);
 
   // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
@@ -330,12 +330,16 @@ class CupertinoPageTransition extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+    final TextDirection textDirection = Directionality.of(context);
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     // but not while being controlled by a gesture.
     return new SlideTransition(
       position: _secondaryPositionAnimation,
+      textDirection: textDirection,
       child: new SlideTransition(
         position: _primaryPositionAnimation,
+        textDirection: textDirection,
         child: new DecoratedBoxTransition(
           decoration: _primaryShadowAnimation,
           child: child,
@@ -382,6 +386,9 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
 /// This widget provides a gesture recognizer which, when it determines the
 /// route can be closed with a back gesture, creates the controller and
 /// feeds it the input from the gesture recognizer.
+///
+/// The gesture data is converted from absolute coordinates to logical
+/// coordinates by this widget.
 class _CupertinoBackGestureDetector extends StatefulWidget {
   const _CupertinoBackGestureDetector({
     Key key,
@@ -433,13 +440,13 @@ class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDete
   void _handleDragUpdate(DragUpdateDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
-    _backGestureController.dragUpdate(details.primaryDelta / context.size.width);
+    _backGestureController.dragUpdate(_convertToLogical(details.primaryDelta / context.size.width));
   }
 
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
-    _backGestureController.dragEnd(details.velocity.pixelsPerSecond.dx / context.size.width);
+    _backGestureController.dragEnd(_convertToLogical(details.velocity.pixelsPerSecond.dx / context.size.width));
     _backGestureController = null;
   }
 
@@ -456,14 +463,25 @@ class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDete
       _recognizer.addPointer(event);
   }
 
+  double _convertToLogical(double value) {
+    switch (Directionality.of(context)) {
+      case TextDirection.rtl:
+        return -value;
+      case TextDirection.ltr:
+        return value;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
     return new Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
         widget.child,
-        new Positioned(
-          left: 0.0,
+        new PositionedDirectional(
+          start: 0.0,
           width: _kBackGestureWidth,
           top: 0.0,
           bottom: 0.0,
@@ -484,6 +502,9 @@ class _CupertinoBackGestureDetectorState extends State<_CupertinoBackGestureDete
 /// by a [_CupertinoBackGestureDetector] widget, which then also feeds it input
 /// from the gesture. It controls the animation controller owned by the route,
 /// based on the input provided by the gesture detector.
+///
+/// This class works entirely in logical coordinates (0.0 is new page dismissed,
+/// 1.0 is new page on top).
 class _CupertinoBackGestureController {
   /// Creates a controller for an iOS-style back gesture.
   ///
@@ -553,9 +574,15 @@ class _CupertinoBackGestureController {
   }
 }
 
-/// A custom [Decoration] used to paint an extra shadow on the left edge of the
-/// box it's decorating. It's like a [BoxDecoration] with only a gradient except
-/// it paints to the left of the box instead of behind the box.
+// A custom [Decoration] used to paint an extra shadow on the start edge of the
+// box it's decorating. It's like a [BoxDecoration] with only a gradient except
+// it paints on the start side of the box instead of behind the box.
+//
+// The [edgeGradient] will be given a [TextDirection] when its shader is
+// created, and so can be direction-sensitive; in this file we set it to a
+// gradient that uses an AlignmentDirectional to position the gradient on the
+// end edge of the gradient's box (which will be the edge adjacent to the start
+// edge of the actual box we're supposed to paint in).
 class _CupertinoEdgeShadowDecoration extends Decoration {
   const _CupertinoEdgeShadowDecoration({ this.edgeGradient });
 
@@ -604,18 +631,14 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != _CupertinoEdgeShadowDecoration)
+    if (runtimeType != other.runtimeType)
       return false;
     final _CupertinoEdgeShadowDecoration typedOther = other;
     return edgeGradient == typedOther.edgeGradient;
   }
 
   @override
-  int get hashCode {
-    return edgeGradient.hashCode;
-  }
+  int get hashCode => edgeGradient.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -628,7 +651,7 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 class _CupertinoEdgeShadowPainter extends BoxPainter {
   _CupertinoEdgeShadowPainter(
     this._decoration,
-    VoidCallback onChange
+    VoidCallback onChange,
   ) : assert(_decoration != null),
       super(onChange);
 
@@ -640,11 +663,21 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     if (gradient == null)
       return;
     // The drawable space for the gradient is a rect with the same size as
-    // its parent box one box width to the left of the box.
-    final Rect rect =
-        (offset & configuration.size).translate(-configuration.size.width, 0.0);
+    // its parent box one box width on the start side of the box.
+    final TextDirection textDirection = configuration.textDirection;
+    assert(textDirection != null);
+    double deltaX;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        deltaX = configuration.size.width;
+        break;
+      case TextDirection.ltr:
+        deltaX = -configuration.size.width;
+        break;
+    }
+    final Rect rect = (offset & configuration.size).translate(deltaX, 0.0);
     final Paint paint = new Paint()
-      ..shader = gradient.createShader(rect);
+      ..shader = gradient.createShader(rect, textDirection: textDirection);
 
     canvas.drawRect(rect, paint);
   }

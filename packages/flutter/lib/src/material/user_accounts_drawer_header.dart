@@ -68,18 +68,18 @@ class _AccountDetails extends StatelessWidget {
   final bool isOpen;
 
   Widget addDropdownIcon(Widget line) {
-    final Widget icon = new Expanded(
-      child: new Align(
-        alignment: AlignmentDirectional.centerEnd,
-        child: new Icon(
-          isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-          color: Colors.white
-        ),
-      ),
+    final Widget icon = new Icon(
+      isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+      color: Colors.white
     );
-    return new Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: line == null ? <Widget>[icon] : <Widget>[line, icon],
+    return new Expanded(
+      child: new Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: line == null ? <Widget>[icon] : <Widget>[
+          new Expanded(child: line),
+          icon,
+        ],
+      ),
     );
   }
 
@@ -88,10 +88,12 @@ class _AccountDetails extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
       style: theme.primaryTextTheme.body2,
+      overflow: TextOverflow.ellipsis,
       child: accountName,
     );
     Widget accountEmailLine = accountEmail == null ? null : new DefaultTextStyle(
       style: theme.primaryTextTheme.body1,
+      overflow: TextOverflow.ellipsis,
       child: accountEmail,
     );
     if (onTap != null) {

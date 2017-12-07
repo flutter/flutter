@@ -13,7 +13,7 @@ import '../ios/mac.dart';
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
-  BuildIOSCommand() {
+  BuildIOSCommand({bool verboseHelp: false}) {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -29,6 +29,8 @@ class BuildIOSCommand extends BuildSubCommand {
     argParser.addFlag('simulator', help: 'Build for the iOS simulator instead of the device.');
     argParser.addFlag('codesign', negatable: true, defaultsTo: true,
         help: 'Codesign the application bundle (only available on device builds).');
+    argParser.addFlag('preview-dart-2', negatable: false,
+        hide: !verboseHelp);
   }
 
   @override
@@ -70,7 +72,7 @@ class BuildIOSCommand extends BuildSubCommand {
       buildInfo: buildInfo,
       target: targetFile,
       buildForDevice: !forSimulator,
-      codesign: shouldCodesign
+      codesign: shouldCodesign,
     );
 
     if (!result.success) {

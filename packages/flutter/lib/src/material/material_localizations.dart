@@ -10,6 +10,31 @@ import 'package:flutter/widgets.dart';
 import 'time.dart';
 import 'typography.dart';
 
+// ADDING A NEW STRING
+//
+// If you (someone contributing to the Flutter framework) want to add a new
+// string to the MaterialLocalizations object (e.g. because you've added a new
+// widget and it has a tooltip), follow these steps:
+//
+// 1. Add the new getter to MaterialLocalizations below.
+//
+// 2. Implement a default value in DefaultMaterialLocalizations below.
+//
+// 3. Add a test to test/material/localizations_test.dart that verifies that
+//    this new value is implemented.
+//
+// 4. Update the flutter_localizations package. To add a new string to the
+//    flutter_localizations package, you must first add it to the English
+//    translations (lib/src/l10n/material_en.arb), including a description, then
+//    you must add it to every other language (all the other *.arb files in that
+//    same directory), including a best guess as to the translation, e.g.
+//    obtained by optimistic use of Google Translate
+//    (https://translate.google.com/). There is a README file with further
+//    information in the lib/src/l10n/ directory.
+//
+// 5. If you are a Google employee, you should then also follow the instructions
+//    at go/flutter-l10n. If you're not, don't worry about it.
+
 /// Defines the localized resource values used by the Material widgets.
 ///
 /// See also:
@@ -27,6 +52,9 @@ abstract class MaterialLocalizations {
 
   /// The [CloseButton]'s tooltip.
   String get closeButtonTooltip;
+
+  /// The tooltip for the delete button on a [Chip].
+  String get deleteButtonTooltip;
 
   /// The tooltip for the [MonthPicker]'s "next month" button.
   String get nextMonthTooltip;
@@ -229,7 +257,6 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   const DefaultMaterialLocalizations();
 
-
   // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
   static const List<String>_shortWeekdays = const <String>[
     'Mon',
@@ -398,6 +425,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get closeButtonTooltip => 'Close';
+
+  @override
+  String get deleteButtonTooltip => 'Delete';
 
   @override
   String get nextMonthTooltip => 'Next month';

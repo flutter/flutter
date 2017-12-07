@@ -81,8 +81,8 @@ void main() {
 
     localizations = new GlobalMaterialLocalizations(const Locale('es', ''));
     expect(localizations.selectedRowCountTitle(0), 'No se han seleccionado elementos');
-    expect(localizations.selectedRowCountTitle(1), '1 artículo seleccionado');
-    expect(localizations.selectedRowCountTitle(2), '2 artículos seleccionados');
-    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 artículos seleccionados');
+    expect(localizations.selectedRowCountTitle(1), '1 elemento seleccionado');
+    expect(localizations.selectedRowCountTitle(2), '2 elementos seleccionados');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elementos seleccionados');
   });
 }

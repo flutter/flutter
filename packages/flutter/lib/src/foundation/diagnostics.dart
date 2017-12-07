@@ -743,6 +743,33 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
+  /// Serialize the node excluding its descendents to a JSON map.
+  ///
+  /// Subclasses should override if they have additional properties that are
+  /// useful for the GUI tools that consume this JSON.
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetInspectorService], which forms the bridge between JSON returned
+  ///    by this method and interactive tree views in the Flutter IntelliJ
+  ///    plugin.
+  @mustCallSuper
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> data = <String, Object>{
+      'name': name,
+      'showSeparator': showSeparator,
+      'description': toDescription(),
+      'level': describeEnum(level),
+      'showName': showName,
+      'emptyBodyDescription': emptyBodyDescription,
+      'style': describeEnum(style),
+      'valueToString': value.toString(),
+      'type': runtimeType.toString(),
+      'hasChildren': getChildren().isNotEmpty,
+    };
+    return data;
+  }
+
   /// Returns a string representation of this diagnostic that is compatible with
   /// the style of the parent if the node is not the root.
   ///
@@ -1055,6 +1082,13 @@ class StringProperty extends DiagnosticsProperty<String> {
   final bool quoted;
 
   @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    json['quoted'] = quoted;
+    return json;
+  }
+
+  @override
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     String text = _description ?? value;
     if (parentConfiguration != null &&
@@ -1114,6 +1148,15 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
     level: level,
   );
 
+  @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    if (unit != null)
+      json['unit'] = unit;
+
+    json['numberToString'] = numberToString();
+    return json;
+  }
 
   /// Optional unit the [value] is measured in.
   ///
@@ -1326,6 +1369,17 @@ class FlagProperty extends DiagnosticsProperty<bool> {
          level: level,
        );
 
+  @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    if (ifTrue != null)
+      json['ifTrue'] = ifTrue;
+    if (ifFalse != null)
+      json['ifFalse'] = ifFalse;
+
+    return json;
+  }
+
   /// Description to use if the property [value] is true.
   ///
   /// If not specified and [value] equals true the property's priority [level]
@@ -1443,12 +1497,21 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
       return DiagnosticLevel.fine;
     return super.level;
   }
+
+  @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    if (value != null) {
+      json['values'] = value.map<String>((T value) => value.toString()).toList();
+    }
+    return json;
+  }
 }
 
 /// An property than displays enum values tersely.
 ///
-/// The enum value is converted to a hyphen-separated string. For example:
-/// [HitTestBehavior.deferToChild] is shown as `defer-to-child`.
+/// The enum value is displayed with the class name stripped. For example:
+/// [HitTestBehavior.deferToChild] is shown as `deferToChild`.
 ///
 /// See also:
 ///
@@ -1473,7 +1536,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
-    return camelCaseToHyphenatedName(describeEnum(value));
+    return describeEnum(value);
   }
 }
 
@@ -1581,6 +1644,14 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
 
     return super.level;
   }
+
+  @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    if (ifPresent != null)
+      json['ifPresent'] = ifPresent;
+    return json;
+  }
 }
 
 /// Signature for computing the value of a property.
@@ -1682,6 +1753,28 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
        );
 
   final String _description;
+
+  @override
+  Map<String, Object> toJsonMap() {
+    final Map<String, Object> json = super.toJsonMap();
+    if (defaultValue != kNoDefaultValue)
+      json['defaultValue'] = defaultValue.toString();
+    if (ifEmpty != null)
+      json['ifEmpty'] = ifEmpty;
+    if (ifNull != null)
+      json['ifNull'] = ifNull;
+    if (tooltip != null)
+      json['tooltip'] = tooltip;
+    json['missingIfNull'] = missingIfNull;
+    if (exception != null)
+      json['exception'] = exception.toString();
+    json['propertyType'] = propertyType.toString();
+    json['valueToString'] = valueToString();
+    json['defaultLevel'] = describeEnum(_defaultLevel);
+    if (T is Diagnosticable)
+      json['isDiagnosticableValue'] = true;
+    return json;
+  }
 
   /// Returns a string representation of the property value.
   ///
@@ -1862,7 +1955,6 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
     String name,
     @required this.value,
     @required DiagnosticsTreeStyle style,
-    String emptyBodyDescription,
   }) : assert(value != null),
        super(
          name: name,
@@ -1962,32 +2054,6 @@ String describeEnum(Object enumEntry) {
   final int indexOfDot = description.indexOf('.');
   assert(indexOfDot != -1 && indexOfDot < description.length - 1);
   return description.substring(indexOfDot + 1);
-}
-
-/// Returns a lowercase hyphen-separated version of a camel case name.
-///
-/// ## Sample code
-///
-/// ```dart
-/// validateCamelCaseToHyphenatedName() {
-///   assert(camelCaseToHyphenatedName('deferToChild') == 'defer-to-child');
-///   assert(camelCaseToHyphenatedName('Monday') == 'monday');
-///   assert(camelCaseToHyphenatedName('monday') == 'monday');
-/// }
-/// ```
-String camelCaseToHyphenatedName(String word) {
-  final String lowerWord = word.toLowerCase();
-  if (word == lowerWord)
-    return word;
-
-  final StringBuffer buffer = new StringBuffer();
-  for (int i = 0; i < word.length; i++) {
-    final String lower = lowerWord[i];
-    if (word[i] != lower && i > 0)
-      buffer.write('-');
-    buffer.write(lower);
-  }
-  return buffer.toString();
 }
 
 /// Builder to accumulate properties and configuration used to assemble a

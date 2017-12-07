@@ -24,6 +24,7 @@ import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
+import '../common/text.dart';
 
 const String _extensionMethodName = 'driver';
 const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
@@ -83,17 +84,23 @@ typedef Finder FinderConstructor(SerializableFinder finder);
 /// calling [enableFlutterDriverExtension].
 @visibleForTesting
 class FlutterDriverExtension {
+  final TestTextInput _testTextInput = new TestTextInput();
+
   /// Creates an object to manage a Flutter Driver connection.
   FlutterDriverExtension(this._requestDataHandler) {
+    _testTextInput.register();
+
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
       'get_render_tree': _getRenderTree,
+      'enter_text': _enterText,
       'get_text': _getText,
       'request_data': _requestData,
       'scroll': _scroll,
       'scrollIntoView': _scrollIntoView,
       'set_frame_sync': _setFrameSync,
       'set_semantics': _setSemantics,
+      'set_text_entry_emulation': _setTextEntryEmulation,
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
@@ -103,12 +110,14 @@ class FlutterDriverExtension {
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => new GetHealth.deserialize(params),
       'get_render_tree': (Map<String, String> params) => new GetRenderTree.deserialize(params),
+      'enter_text': (Map<String, String> params) => new EnterText.deserialize(params),
       'get_text': (Map<String, String> params) => new GetText.deserialize(params),
       'request_data': (Map<String, String> params) => new RequestData.deserialize(params),
       'scroll': (Map<String, String> params) => new Scroll.deserialize(params),
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
       'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
       'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
+      'set_text_entry_emulation': (Map<String, String> params) => new SetTextEntryEmulation.deserialize(params),
       'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
@@ -323,6 +332,26 @@ class FlutterDriverExtension {
     // TODO(yjbanov): support more ways to read text
     final Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
+  }
+
+  Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
+    final SetTextEntryEmulation setTextEntryEmulationCommand = command;
+    if (setTextEntryEmulationCommand.enabled) {
+      _testTextInput.register();
+    } else {
+      _testTextInput.unregister();
+    }
+    return new SetTextEntryEmulationResult();
+  }
+
+  Future<EnterTextResult> _enterText(Command command) async {
+    if (!_testTextInput.isRegistered) {
+      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
+            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+    }
+    final EnterText enterTextCommand = command;
+    _testTextInput.enterText(enterTextCommand.text);
+    return new EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {

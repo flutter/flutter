@@ -28,10 +28,7 @@ import '../version.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
-    argParser.addFlag('pub',
-      defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.'
-    );
+    usesPubOption();
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
@@ -161,8 +158,8 @@ class CreateCommand extends FlutterCommand {
       templateContext['description'] = description;
       generatedCount += _renderTemplate('package', dirPath, templateContext);
 
-      if (argResults['pub'])
-        await pubGet(directory: dirPath);
+      if (shouldRunPub)
+        await pubGet(context: PubContext.createPackage, directory: dirPath);
 
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
@@ -179,8 +176,8 @@ class CreateCommand extends FlutterCommand {
       templateContext['description'] = description;
       generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
-      if (argResults['pub'])
-        await pubGet(directory: dirPath);
+      if (shouldRunPub)
+        await pubGet(context: PubContext.createPlugin, directory: dirPath);
 
       if (android_sdk.androidSdk != null)
         gradle.updateLocalProperties(projectPath: dirPath);
@@ -214,10 +211,11 @@ class CreateCommand extends FlutterCommand {
       buildInfo: BuildInfo.debug,
       target: flx.defaultMainPath,
       hasPlugins: generatePlugin,
+      previewDart2: false,
     );
 
-    if (argResults['pub']) {
-      await pubGet(directory: appPath);
+    if (shouldRunPub) {
+      await pubGet(context: PubContext.create, directory: appPath);
       injectPlugins(directory: appPath);
     }
 
@@ -366,9 +364,10 @@ final Set<String> _packageDependencies = new Set<String>.from(<String>[
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!linter_utils.isValidPackageName(projectName))
-    return '"$projectName" is not a valid Dart package name.\n\n${package_names.details}';
-
+  if (!linter_utils.isValidPackageName(projectName)) {
+    final String packageNameDetails = new package_names.PubPackageNames().details;
+    return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
+  }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "
       'package dependencies.';

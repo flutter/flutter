@@ -354,9 +354,9 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets that match the given window padding.
   ///
-  /// If you need the current system padding in the context of a widget,
-  /// consider using [MediaQuery.of] to obtain the current padding rather than
-  /// using the value from [dart:ui.window], so that you get notified when it
+  /// If you need the current system padding or view insets in the context of a
+  /// widget, consider using [MediaQuery.of] to obtain these values rather than
+  /// using the value from [dart:ui.window], so that you get notified of
   /// changes.
   EdgeInsets.fromWindowPadding(ui.WindowPadding padding, double devicePixelRatio)
     : left = padding.left / devicePixelRatio,

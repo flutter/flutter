@@ -67,4 +67,28 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
+  testWidgets('showBottomSheet()', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+    await tester.pumpWidget(new MaterialApp(
+      home: new Scaffold(
+        body: new Placeholder(key: key),
+      )
+    ));
+
+    int buildCount = 0;
+    showBottomSheet<Null>(
+      context: key.currentContext,
+      builder: (BuildContext context) {
+        return new Builder(
+          builder: (BuildContext context) {
+            buildCount += 1;
+            return new Container(height: 200.0);
+          }
+        );
+      },
+    );
+    await tester.pump();
+    expect(buildCount, equals(1));
+  });
+
 }
