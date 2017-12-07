@@ -2,13 +2,49 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This file is a temporary placeholder for generated animated icon data files,
-// just to demonstrate the proposed package structure.
+// This file is a temporary reference implementation for a generated icon data.
+// This does not currently show the menu->arrow icon, and will be replaced
+// by a generated file.
 part of material_animated_icons;
 
-class _MenuArrowIconData implements _AnimatedIconData {
-  const _MenuArrowIconData();
-
-  @override
-  String get _placeHolderIconData => 'menu->arrow';
-}
+const _AnimatedIconData _$menu_arrow = const _AnimatedIconData(
+  const Size(48.0, 48.0),
+  const <_Path> [
+    const _Path(
+      opacities: const <double> [1.0, 0.2],
+      commands: const <_PathCommand> [
+        const _PathMoveTo(
+          const <Point<double>> [
+            const Point<double>(0.0, 0.0),
+            const Point<double>(0.0, 38.0),
+          ],
+        ),
+        const _PathLineTo(
+          const <Point<double>> [
+            const Point<double>(48.0, 0.0),
+            const Point<double>(48.0, 38.0),
+          ],
+        ),
+        const _PathLineTo(
+          const <Point<double>> [
+            const Point<double>(48.0, 10.0),
+            const Point<double>(48.0, 48.0),
+          ],
+        ),
+        const _PathLineTo(
+          const <Point<double>> [
+            const Point<double>(0.0, 10.0),
+            const Point<double>(0.0, 48.0),
+          ],
+        ),
+        const _PathLineTo(
+          const <Point<double>> [
+            const Point<double>(0.0, 00.0),
+            const Point<double>(0.0, 38.0),
+          ],
+        ),
+        const _PathClose(),
+      ],
+    ),
+  ],
+);

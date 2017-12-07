@@ -9,6 +9,7 @@ library material_animated_icons;
 
 import 'dart:math';
 import 'dart:ui' show lerpDouble;
+import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';

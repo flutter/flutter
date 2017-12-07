@@ -12,13 +12,14 @@ part of material_animated_icons;
 /// Shows an animated icon at a given animation [progress].
 ///
 /// The available icons are specified in [AnimatedIcons].
-class AnimatedIcon extends StatelessWidget {
+class AnimatedIcon extends AnimatedWidget {
 
   /// Creates an AnimatedIcon.
   ///
   /// [progress], [color], and [icon] cannot be null.
   const AnimatedIcon({
-    @required this.progress,
+    Key key,
+    @required Animation<double> progress,
     @required this.color,
     @required this.icon,
     this.semanticLabel,
@@ -26,13 +27,14 @@ class AnimatedIcon extends StatelessWidget {
     // TODO(amirh): add a parameter for controlling scaling behavior.
   }) : assert(progress != null),
        assert(color != null),
-       assert(icon != null);
+       assert(icon != null),
+       super(key: key, listenable: progress);
 
   /// The animation progress for the animated icon.
   /// The value is clamped to be between 0 and 1.
   ///
   /// This determines the actual frame that is displayed.
-  final Animation<double> progress;
+  Animation<double> get progress => listenable;
 
   /// The color to use when drawing the icon.
   ///
@@ -81,15 +83,116 @@ class AnimatedIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO(amirh): implement this.
-    return new Container();
+    // TODO(amirh): implement semantics, text direction, scaling.
+    final _AnimatedIconData iconData = icon;
+    return new CustomPaint(
+      size: iconData.size,
+      painter: new _AnimatedIconPainter(iconData.paths, progress.value, color),
+    );
   }
 }
 
-// Interpolates a point given a set of points equally spaced in time.
+class _AnimatedIconPainter extends CustomPainter {
+  final List<_Path> paths;
+  final double progress;
+  final Color color;
+
+  const _AnimatedIconPainter(this.paths, this.progress, this.color);
+
+  @override
+  void paint(ui.Canvas canvas, Size size) {
+    for (_Path path in paths)
+      path.paint(canvas, color, progress);
+  }
+
+  @override
+  bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
+    return oldDelegate.progress != progress;
+  }
+
+}
+
+class _Path {
+  const _Path({@required this.commands, @required this.opacities});
+
+  final List<_PathCommand> commands;
+  final List<double> opacities;
+
+  void paint(ui.Canvas canvas, Color color, double progress) {
+    final double opacity = _interpolate(opacities, progress, lerpDouble);
+    final ui.Paint paint = new ui.Paint()
+      ..style = PaintingStyle.fill
+      ..color = color.withOpacity(opacity);
+    final ui.Path path = new ui.Path();
+    for (_PathCommand command in commands)
+      command.apply(path, progress);
+    canvas.drawPath(path, paint);
+  }
+}
+
+abstract class _PathCommand {
+  const _PathCommand();
+
+  void apply(ui.Path path, double progress);
+}
+
+class _PathMoveTo extends _PathCommand {
+  const _PathMoveTo(this.points);
+
+  final List<Point<double>> points;
+
+  @override
+  void apply(Path path, double progress) {
+    final Point<double> point = _interpolate(points, progress, lerpDoublePoint);
+    path.moveTo(point.x, point.y);
+  }
+}
+
+class _PathCubicTo extends _PathCommand {
+  const _PathCubicTo(this.controlPoints1, this.controlPoints2, this.targetPoints);
+
+  final List<Point<double>> controlPoints2;
+  final List<Point<double>> controlPoints1;
+  final List<Point<double>> targetPoints;
+
+  @override
+  void apply(Path path, double progress) {
+    final Point<double> controlPoint1 = _interpolate(controlPoints1, progress, lerpDoublePoint);
+    final Point<double> controlPoint2 = _interpolate(controlPoints2, progress, lerpDoublePoint);
+    final Point<double> targetPoint = _interpolate(targetPoints, progress, lerpDoublePoint);
+    path.cubicTo(
+      controlPoint1.x, controlPoint1.y,
+      controlPoint2.x, controlPoint2.y,
+      targetPoint.x, targetPoint.y
+    );
+  }
+}
+
+class _PathLineTo extends _PathCommand {
+  const _PathLineTo(this.points);
+
+  final List<Point<double>> points;
+
+  @override
+  void apply(Path path, double progress) {
+    final Point<double> point = _interpolate(points, progress, lerpDoublePoint);
+    path.lineTo(point.x, point.y);
+  }
+}
+
+class _PathClose extends _PathCommand {
+  const _PathClose();
+
+  @override
+  void apply(Path path, double progress) {
+    path.close();
+  }
+}
+
+// Interpolates a value given a set of values equally spaced in time.
 //
-// Assuming [points] are equally spaced on the interval 0..1, interpolates the
-// point value at [progress].
+// [interpolator] is the interpolation function used to  interpolate between 2
+// points of type T.
 //
 // This is currently done with linear interpolation between every 2 consecutive 
 // points. Linear interpolation was smooth enough with the limited set of
@@ -97,14 +200,16 @@ class AnimatedIcon extends StatelessWidget {
 // not be smooth enough we can try applying spline instead.
 //
 // [progress] must be between 0 and 1.
-Point<double> _interpolatePoint(List<Point<double>> points, double progress) {
+T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
   assert(progress >= 0.0);
   assert(progress <= 1.0);
-  if (points.length == 1)
-    return points[0];
-  final double targetIdx = lerpDouble(0, points.length -1, progress);
+  if (values.length == 1)
+    return values[0];
+  final double targetIdx = lerpDouble(0, values.length -1, progress);
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;
-  return lerpDoublePoint(points[lowIdx], points[highIdx], t);
+  return interpolator(values[lowIdx], values[highIdx], t);
 }
+
+typedef T _Interpolator<T>(T a, T b, double progress);

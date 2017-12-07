@@ -11,11 +11,17 @@
 part of material_animated_icons;
 
 abstract class AnimatedIcons {
-  static const AnimatedIconData menu_arrow = const _MenuArrowIconData();
+  static const AnimatedIconData menu_arrow = _$menu_arrow;
+  static const AnimatedIconData bow  = _$bow;
 }
 
-abstract class AnimatedIconData {}
+abstract class AnimatedIconData {
+  const AnimatedIconData();
+}
 
-abstract class _AnimatedIconData extends AnimatedIconData {
-  String get placeHolderIconData;
+class _AnimatedIconData extends AnimatedIconData {
+  const _AnimatedIconData(this.size, this.paths);
+
+  final Size size;
+  final List<_Path> paths;
 }
