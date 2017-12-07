@@ -93,6 +93,20 @@ class DeviceManager {
       }
     }
   }
+
+  /// Whether we're capable of listing any devices given the current environment configuration.
+  bool get canListAnything {
+    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
+  }
+
+  /// Get diagnostics about issues with any connected devices.
+  Future<List<String>> getDeviceDiagnostics() async {
+    final List<String> diagnostics = <String>[];
+    for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      diagnostics.addAll(await discoverer.getDiagnostics());
+    }
+    return diagnostics;
+  }
 }
 
 /// An abstract class to discover and enumerate a specific type of devices.
@@ -104,6 +118,10 @@ abstract class DeviceDiscovery {
   bool get canListAnything;
 
   Future<List<Device>> get devices;
+
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices (will be an empty list if there are no issues).
+  Future<List<String>> getDiagnostics() => new Future<List<String>>.value(<String>[]);
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
