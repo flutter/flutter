@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/apk.dart';
@@ -545,22 +547,32 @@ List<AndroidDevice> getAdbDevices() {
 }
 
 /// Get diagnostics about issues with any connected devices.
-List<String> getAdbDeviceDiagnostics() {
+Future<List<String>> getAdbDeviceDiagnostics() async {
   final String adbPath = getAdbPath(androidSdk);
   if (adbPath == null)
     return <String>[];
-  final String text = runSync(<String>[adbPath, 'devices', '-l']);
-  final List<String> diagnostics = <String>[];
-  parseADBDeviceOutput(text, diagnostics: diagnostics);
-  return diagnostics;
+
+  final RunResult result = await runAsync(<String>[adbPath, 'devices', '-l']);
+  if (result.exitCode != 0) {
+    return <String>[];
+  } else {
+    final String text = result.stdout;
+    final List<String> diagnostics = <String>[];
+    parseADBDeviceOutput(text, diagnostics: diagnostics);
+    return diagnostics;
+  }
 }
 
 // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
 final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
-// Public for testing.
+/// Parse the given `adb devices` output in [text], and fill out the given list
+/// of devices and possible device issue diagnostics. Either argument can be null,
+/// in which case information for that parameter won't be returned.
+@visibleForTesting
 void parseADBDeviceOutput(String text, {
-  List<AndroidDevice> devices, List<String> diagnostics
+  List<AndroidDevice> devices,
+  List<String> diagnostics
 }) {
   // Check for error messages from adb
   if (!text.contains('List of devices')) {

@@ -96,7 +96,7 @@ class DeviceManager {
 
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers.every((DeviceDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
   }
 
   /// Get diagnostics about issues with any connected devices.
@@ -119,7 +119,8 @@ abstract class DeviceDiscovery {
 
   Future<List<Device>> get devices;
 
-  /// Get diagnostics about issues with any connected devices.
+  /// Gets a list of diagnostic messages pertaining to issues with any connected
+  /// devices (will be an empty list if there are no issues).
   Future<List<String>> getDiagnostics() => new Future<List<String>>.value(<String>[]);
 }
 
