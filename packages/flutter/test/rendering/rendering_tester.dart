@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart' show EnginePhase;
 export 'package:flutter_test/flutter_test.dart' show EnginePhase;
 
-class TestRenderingFlutterBinding extends BindingBase with SchedulerBinding, ServicesBinding, RendererBinding, GestureBinding {
+class TestRenderingFlutterBinding extends BindingBase with ServicesBinding, GestureBinding, SchedulerBinding, PaintingBinding, RendererBinding {
   EnginePhase phase = EnginePhase.composite;
 
   @override

@@ -3,12 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'edge_insets.dart';
-
-export 'package:flutter/services.dart' show ImageConfiguration;
+import 'image_provider.dart';
 
 // This group of classes is intended for painting in cartesian coordinates.
 

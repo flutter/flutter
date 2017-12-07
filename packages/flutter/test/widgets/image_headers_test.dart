@@ -10,7 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http;
 import 'package:flutter/services.dart' show createHttpClient;
 
-import '../services/image_data.dart';
+import '../painting/image_data.dart';
 
 void main() {
   testWidgets('Headers', (WidgetTester tester) async {

@@ -86,7 +86,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   with SchedulerBinding,
        GestureBinding,
        RendererBinding,
-       // Services binding omitted to avoid dragging in the licenses code.
+       ServicesBinding,
+       PaintingBinding,
        WidgetsBinding {
 
   /// Constructor for [TestWidgetsFlutterBinding].
@@ -148,6 +149,12 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     };
     _testTextInput = new TestTextInput()..register();
     super.initInstances();
+  }
+
+  @override
+  void initLicenses() {
+    // Do not include any licenses, because we're a test, and the LICENSE file
+    // doesn't get generated for tests.
   }
 
   /// Whether there is currently a test executing.

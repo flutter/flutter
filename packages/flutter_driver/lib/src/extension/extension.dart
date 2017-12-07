@@ -35,7 +35,7 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 /// eventually completes to a string response.
 typedef Future<String> DataHandler(String message);
 
-class _DriverBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
+class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, RendererBinding, WidgetsBinding {
   _DriverBinding(this._handler);
 
   final DataHandler _handler;

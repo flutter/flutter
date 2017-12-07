@@ -5,12 +5,13 @@
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_fit.dart';
+import 'image_provider.dart';
+import 'image_stream.dart';
 
 /// How to paint any portions of a box not covered by an image.
 enum ImageRepeat {

@@ -5,16 +5,16 @@
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'border_radius.dart';
 import 'box_border.dart';
 import 'box_shadow.dart';
 import 'decoration.dart';
+import 'decoration_image.dart';
 import 'edge_insets.dart';
 import 'gradient.dart';
-import 'images.dart';
+import 'image_provider.dart';
 
 /// An immutable description of how to paint a box.
 ///
