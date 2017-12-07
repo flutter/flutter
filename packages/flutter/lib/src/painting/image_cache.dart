@@ -89,9 +89,3 @@ class ImageCache {
     return result;
   }
 }
-
-/// The singleton that implements the Flutter framework's image cache.
-///
-/// The cache is used internally by [ImageProvider] and should generally not be
-/// accessed directly.
-final ImageCache imageCache = new ImageCache();
