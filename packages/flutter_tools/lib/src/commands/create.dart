@@ -28,7 +28,10 @@ import '../version.dart';
 
 class CreateCommand extends FlutterCommand {
   CreateCommand() {
-    usesPubOption();
+    argParser.addFlag('pub',
+      defaultsTo: true,
+      help: 'Whether to run "flutter packages get" after the project has been created.'
+    );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
@@ -158,7 +161,7 @@ class CreateCommand extends FlutterCommand {
       templateContext['description'] = description;
       generatedCount += _renderTemplate('package', dirPath, templateContext);
 
-      if (shouldRunPub)
+      if (argResults['pub'])
         await pubGet(context: PubContext.createPackage, directory: dirPath);
 
       final String relativePath = fs.path.relative(dirPath);
@@ -176,7 +179,7 @@ class CreateCommand extends FlutterCommand {
       templateContext['description'] = description;
       generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
-      if (shouldRunPub)
+      if (argResults['pub'])
         await pubGet(context: PubContext.createPlugin, directory: dirPath);
 
       if (android_sdk.androidSdk != null)
@@ -214,7 +217,7 @@ class CreateCommand extends FlutterCommand {
       previewDart2: false,
     );
 
-    if (shouldRunPub) {
+    if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: appPath);
       injectPlugins(directory: appPath);
     }
