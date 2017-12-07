@@ -202,7 +202,7 @@ void main() {
           '   parentData: MISSING\n'
           '   constraints: MISSING\n'
           '   size: MISSING\n'
-          '   alignment: Alignment.center\n'
+          '   alignment: center\n'
           '   textDirection: ltr\n'),
     );
   });
