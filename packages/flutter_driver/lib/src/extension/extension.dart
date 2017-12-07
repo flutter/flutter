@@ -100,6 +100,7 @@ class FlutterDriverExtension {
       'scrollIntoView': _scrollIntoView,
       'set_frame_sync': _setFrameSync,
       'set_semantics': _setSemantics,
+      'set_text_entry_emulation': _setTextEntryEmulation,
       'tap': _tap,
       'waitFor': _waitFor,
       'waitForAbsent': _waitForAbsent,
@@ -116,6 +117,7 @@ class FlutterDriverExtension {
       'scrollIntoView': (Map<String, String> params) => new ScrollIntoView.deserialize(params),
       'set_frame_sync': (Map<String, String> params) => new SetFrameSync.deserialize(params),
       'set_semantics': (Map<String, String> params) => new SetSemantics.deserialize(params),
+      'set_text_entry_emulation': (Map<String, String> params) => new SetTextEntryEmulation.deserialize(params),
       'tap': (Map<String, String> params) => new Tap.deserialize(params),
       'waitFor': (Map<String, String> params) => new WaitFor.deserialize(params),
       'waitForAbsent': (Map<String, String> params) => new WaitForAbsent.deserialize(params),
@@ -330,6 +332,16 @@ class FlutterDriverExtension {
     // TODO(yjbanov): support more ways to read text
     final Text text = target.evaluate().single.widget;
     return new GetTextResult(text.data);
+  }
+
+  Future<SetTextEntryEmulationResult> _setTextEntryEmulation(Command command) async {
+    final SetTextEntryEmulation setTextEntryEmulationCommand = command;
+    if (setTextEntryEmulationCommand.enabled) {
+      _testTextInput.register();
+    } else {
+      _testTextInput.unregister();
+    }
+    return new SetTextEntryEmulationResult();
   }
 
   Future<EnterTextResult> _enterText(Command command) async {
