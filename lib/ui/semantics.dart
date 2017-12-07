@@ -87,7 +87,7 @@ class SemanticsAction {
   /// Move the cursor backward by one character.
   ///
   /// This is for example used by the cursor control in text fields.
-  static const SemanticsAction moveCursorBackardByCharacter = const SemanticsAction._(_kMoveCursorBackwardByCharacter);
+  static const SemanticsAction moveCursorBackwardByCharacter = const SemanticsAction._(_kMoveCursorBackwardByCharacter);
 
   /// The possible semantics actions.
   ///
@@ -104,7 +104,7 @@ class SemanticsAction {
     _kDecreaseIndex: decrease,
     _kShowOnScreen: showOnScreen,
     _kMoveCursorForwardByCharacter: moveCursorForwardByCharacter,
-    _kMoveCursorBackwardByCharacter: moveCursorBackardByCharacter,
+    _kMoveCursorBackwardByCharacter: moveCursorBackwardByCharacter,
   };
 
   @override
@@ -131,7 +131,7 @@ class SemanticsAction {
       case _kMoveCursorForwardByCharacter:
         return 'SemanticsAction.moveCursorForwardByCharacter';
       case _kMoveCursorBackwardByCharacter:
-        return 'SemanticsAction.moveCursorBackardByCharacter';
+        return 'SemanticsAction.moveCursorBackwardByCharacter';
     }
     return null;
   }
