@@ -348,7 +348,7 @@ class RenderEditable extends RenderBox {
       ..isFocused = hasFocus
       ..isTextField = true;
 
-    if (selection.isValid) {
+    if (_selection?.isValid == true) {
       if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
         config.addAction(SemanticsAction.moveCursorBackwardByCharacter, () {
           final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
