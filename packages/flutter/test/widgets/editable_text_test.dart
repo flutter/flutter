@@ -435,7 +435,7 @@ void main() {
     ));
 
     final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
-    final semanticsId = render.debugSemantics.id;
+    final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
