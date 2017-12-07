@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'framework.dart';
