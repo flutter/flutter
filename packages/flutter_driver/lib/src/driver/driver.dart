@@ -451,6 +451,15 @@ class FlutterDriver {
     await _sendCommand(new EnterText(text, timeout: timeout));
   }
 
+  /// If `enabled` is true, enables text entry emulation via [enterText]. If
+  /// `enabled` is false, disables it.
+  ///
+  /// By default text entry emulation is enabled.
+  Future<Null> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
+    assert(enabled != null);
+    await _sendCommand(new SetTextEntryEmulation(enabled, timeout: timeout));
+  }
+
   /// Sends a string and returns a string.
   ///
   /// This enables generic communication between the driver and the application.

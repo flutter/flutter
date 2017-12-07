@@ -24,6 +24,15 @@ class TestTextInput {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
   }
 
+  /// Removes this object as a mock handler for [SystemChannels.textInput].
+  ///
+  /// After calling this method, the channel will exchange messages with the
+  /// Flutter engine. Use this with [FlutterDriver] tests that need to display
+  /// on-screen keyboard provided by the operating system.
+  void unregister() {
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+  }
+
   int _client = 0;
 
   /// Arguments supplied to the TextInput.setClient method call.

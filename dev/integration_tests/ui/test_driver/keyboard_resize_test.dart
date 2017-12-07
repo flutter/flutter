@@ -21,6 +21,7 @@ void main() {
     });
 
     test('Ensure keyboard dismissal resizes the view to original size', () async {
+      await driver.setTextEntryEmulation(enabled: false);
       final SerializableFinder heightText = find.byValueKey(keys.kHeightText);
       await driver.waitFor(heightText);
 
