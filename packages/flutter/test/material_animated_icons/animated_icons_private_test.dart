@@ -9,13 +9,11 @@
 // material_animated_icons, this give the test access to the private APIs.
 library material_animated_icons;
 
-import 'dart:math';
 import 'dart:ui' show lerpDouble;
 import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -29,35 +27,35 @@ class MockPath extends Mock implements ui.Path {}
 void main () {
   group('Interpolate points', () {
     test('- single point', () {
-      final List<Point<double>> points = const <Point<double>>[
-        const Point<double>(25.0, 1.0),
+      final List<Offset> points = const <Offset>[
+        const Offset(25.0, 1.0),
       ];
-      expect(_interpolate(points, 0.0, lerpDoublePoint), const Point<double>(25.0, 1.0));
-      expect(_interpolate(points, 0.5, lerpDoublePoint), const Point<double>(25.0, 1.0));
-      expect(_interpolate(points, 1.0, lerpDoublePoint), const Point<double>(25.0, 1.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(25.0, 1.0));
     });
 
     test('- two points', () {
-      final List<Point<double>> points = const <Point<double>>[
-        const Point<double>(25.0, 1.0),
-        const Point<double>(12.0, 12.0),
+      final List<Offset> points = const <Offset>[
+        const Offset(25.0, 1.0),
+        const Offset(12.0, 12.0),
       ];
-      expect(_interpolate(points, 0.0, lerpDoublePoint), const Point<double>(25.0, 1.0));
-      expect(_interpolate(points, 0.5, lerpDoublePoint), const Point<double>(18.5, 6.5));
-      expect(_interpolate(points, 1.0, lerpDoublePoint), const Point<double>(12.0, 12.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(18.5, 6.5));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(12.0, 12.0));
     });
 
     test('- three points', () {
-      final List<Point<double>> points = const <Point<double>>[
-        const Point<double>(25.0, 1.0),
-        const Point<double>(12.0, 12.0),
-        const Point<double>(23.0, 9.0),
+      final List<Offset> points = const <Offset>[
+        const Offset(25.0, 1.0),
+        const Offset(12.0, 12.0),
+        const Offset(23.0, 9.0),
       ];
-      expect(_interpolate(points, 0.0, lerpDoublePoint), const Point<double>(25.0, 1.0));
-      expect(_interpolate(points, 0.25, lerpDoublePoint), const Point<double>(18.5, 6.5));
-      expect(_interpolate(points, 0.5, lerpDoublePoint), const Point<double>(12.0, 12.0));
-      expect(_interpolate(points, 0.75, lerpDoublePoint), const Point<double>(17.5, 10.5));
-      expect(_interpolate(points, 1.0, lerpDoublePoint), const Point<double>(23.0, 9.0));
+      expect(_interpolate(points, 0.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 0.25, Offset.lerp), const Offset(18.5, 6.5));
+      expect(_interpolate(points, 0.5, Offset.lerp), const Offset(12.0, 12.0));
+      expect(_interpolate(points, 0.75, Offset.lerp), const Offset(17.5, 10.5));
+      expect(_interpolate(points, 1.0, Offset.lerp), const Offset(23.0, 9.0));
     });
   });
 
@@ -180,33 +178,33 @@ const _AnimatedIconData movingBar = const _AnimatedIconData(
       opacities: const <double> [1.0, 0.2],
       commands: const <_PathCommand> [
         const _PathMoveTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 0.0),
-            const Point<double>(0.0, 38.0),
+          const <Offset> [
+            const Offset(0.0, 0.0),
+            const Offset(0.0, 38.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(48.0, 0.0),
-            const Point<double>(48.0, 38.0),
+          const <Offset> [
+            const Offset(48.0, 0.0),
+            const Offset(48.0, 38.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(48.0, 10.0),
-            const Point<double>(48.0, 48.0),
+          const <Offset> [
+            const Offset(48.0, 10.0),
+            const Offset(48.0, 48.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 10.0),
-            const Point<double>(0.0, 48.0),
+          const <Offset> [
+            const Offset(0.0, 10.0),
+            const Offset(0.0, 48.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 0.0),
-            const Point<double>(0.0, 38.0),
+          const <Offset> [
+            const Offset(0.0, 0.0),
+            const Offset(0.0, 38.0),
           ],
         ),
         const _PathClose(),
@@ -222,34 +220,34 @@ const _AnimatedIconData bow = const _AnimatedIconData(
       opacities: const <double> [1.0, 1.0],
       commands: const <_PathCommand> [
         const _PathMoveTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 24.0),
-            const Point<double>(0.0, 24.0),
-            const Point<double>(0.0, 24.0),
+          const <Offset> [
+            const Offset(0.0, 24.0),
+            const Offset(0.0, 24.0),
+            const Offset(0.0, 24.0),
           ],
         ),
         const _PathCubicTo(
-          const <Point<double>> [
-            const Point<double>(16.0, 24.0),
-            const Point<double>(16.0, 10.0),
-            const Point<double>(16.0, 48.0),
+          const <Offset> [
+            const Offset(16.0, 24.0),
+            const Offset(16.0, 10.0),
+            const Offset(16.0, 48.0),
           ],
-          const <Point<double>> [
-            const Point<double>(32.0, 24.0),
-            const Point<double>(32.0, 10.0),
-            const Point<double>(32.0, 48.0),
+          const <Offset> [
+            const Offset(32.0, 24.0),
+            const Offset(32.0, 10.0),
+            const Offset(32.0, 48.0),
           ],
-          const <Point<double>> [
-            const Point<double>(48.0, 24.0),
-            const Point<double>(48.0, 24.0),
-            const Point<double>(48.0, 24.0),
+          const <Offset> [
+            const Offset(48.0, 24.0),
+            const Offset(48.0, 24.0),
+            const Offset(48.0, 24.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 24.0),
-            const Point<double>(0.0, 24.0),
-            const Point<double>(0.0, 24.0),
+          const <Offset> [
+            const Offset(0.0, 24.0),
+            const Offset(0.0, 24.0),
+            const Offset(0.0, 24.0),
           ],
         ),
         const _PathClose(),

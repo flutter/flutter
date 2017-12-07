@@ -14,33 +14,33 @@ const _AnimatedIconData _$menu_arrow = const _AnimatedIconData(
       opacities: const <double> [1.0, 0.2],
       commands: const <_PathCommand> [
         const _PathMoveTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 0.0),
-            const Point<double>(0.0, 38.0),
+          const <Offset> [
+            const Offset(0.0, 0.0),
+            const Offset(0.0, 38.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(48.0, 0.0),
-            const Point<double>(48.0, 38.0),
+          const <Offset> [
+            const Offset(48.0, 0.0),
+            const Offset(48.0, 38.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(48.0, 10.0),
-            const Point<double>(48.0, 48.0),
+          const <Offset> [
+            const Offset(48.0, 10.0),
+            const Offset(48.0, 48.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 10.0),
-            const Point<double>(0.0, 48.0),
+          const <Offset> [
+            const Offset(0.0, 10.0),
+            const Offset(0.0, 48.0),
           ],
         ),
         const _PathLineTo(
-          const <Point<double>> [
-            const Point<double>(0.0, 00.0),
-            const Point<double>(0.0, 38.0),
+          const <Offset> [
+            const Offset(0.0, 00.0),
+            const Offset(0.0, 38.0),
           ],
         ),
         const _PathClose(),

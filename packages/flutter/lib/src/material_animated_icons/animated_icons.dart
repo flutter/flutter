@@ -125,7 +125,6 @@ class _AnimatedIconPainter extends CustomPainter {
 
 }
 
-
 class _PathFrames {
   const _PathFrames({
     @required this.commands,
@@ -156,31 +155,31 @@ abstract class _PathCommand {
 class _PathMoveTo extends _PathCommand {
   const _PathMoveTo(this.points);
 
-  final List<Point<double>> points;
+  final List<Offset> points;
 
   @override
   void apply(Path path, double progress) {
-    final Point<double> point = _interpolate(points, progress, lerpDoublePoint);
-    path.moveTo(point.x, point.y);
+    final Offset offset = _interpolate(points, progress, Offset.lerp);
+    path.moveTo(offset.dx, offset.dy);
   }
 }
 
 class _PathCubicTo extends _PathCommand {
   const _PathCubicTo(this.controlPoints1, this.controlPoints2, this.targetPoints);
 
-  final List<Point<double>> controlPoints2;
-  final List<Point<double>> controlPoints1;
-  final List<Point<double>> targetPoints;
+  final List<Offset> controlPoints2;
+  final List<Offset> controlPoints1;
+  final List<Offset> targetPoints;
 
   @override
   void apply(Path path, double progress) {
-    final Point<double> controlPoint1 = _interpolate(controlPoints1, progress, lerpDoublePoint);
-    final Point<double> controlPoint2 = _interpolate(controlPoints2, progress, lerpDoublePoint);
-    final Point<double> targetPoint = _interpolate(targetPoints, progress, lerpDoublePoint);
+    final Offset controlPoint1 = _interpolate(controlPoints1, progress, Offset.lerp);
+    final Offset controlPoint2 = _interpolate(controlPoints2, progress, Offset.lerp);
+    final Offset targetPoint = _interpolate(targetPoints, progress, Offset.lerp);
     path.cubicTo(
-      controlPoint1.x, controlPoint1.y,
-      controlPoint2.x, controlPoint2.y,
-      targetPoint.x, targetPoint.y
+      controlPoint1.dx, controlPoint1.dy,
+      controlPoint2.dx, controlPoint2.dy,
+      targetPoint.dx, targetPoint.dy
     );
   }
 }
@@ -188,12 +187,12 @@ class _PathCubicTo extends _PathCommand {
 class _PathLineTo extends _PathCommand {
   const _PathLineTo(this.points);
 
-  final List<Point<double>> points;
+  final List<Offset> points;
 
   @override
   void apply(Path path, double progress) {
-    final Point<double> point = _interpolate(points, progress, lerpDoublePoint);
-    path.lineTo(point.x, point.y);
+    final Offset point = _interpolate(points, progress, Offset.lerp);
+    path.lineTo(point.dx, point.dy);
   }
 }
 
