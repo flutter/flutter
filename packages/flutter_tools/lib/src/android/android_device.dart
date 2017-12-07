@@ -568,7 +568,7 @@ final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
 /// Parse the given `adb devices` output in [text], and fill out the given list
 /// of devices and possible device issue diagnostics. Either argument can be null,
-/// in which case information for that parameter won't be returned.
+/// in which case information for that parameter won't be populated.
 @visibleForTesting
 void parseADBDeviceOutput(String text, {
   List<AndroidDevice> devices,
