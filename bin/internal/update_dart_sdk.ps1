@@ -28,9 +28,13 @@ if ((Test-Path $dartSdkStampPath) -and ($dartSdkVersion -eq (Get-Content $dartSd
 }
 
 Write-Host "Downloading Dart SDK $dartSdkVersion..."
+$dartSdkBaseUrl = $Env:FLUTTER_STORAGE_BASE_URL
+if (-not $dartSdkBaseUrl) {
+    $dartSdkBaseUrl = "https://storage.googleapis.com"
+}
 $dartZipName = "dartsdk-windows-x64-release.zip"
 $dartChannel = if ($dartSdkVersion.Contains("-dev.")) {"dev"} else {if ($dartSdkVersion.Contains("hash/")) {"be"} else {"stable"}}
-$dartSdkUrl = "https://storage.googleapis.com/dart-archive/channels/$dartChannel/raw/$dartSdkVersion/sdk/$dartZipName"
+$dartSdkUrl = "$dartSdkBaseUrl/dart-archive/channels/$dartChannel/raw/$dartSdkVersion/sdk/$dartZipName"
 
 if (Test-Path $dartSdkPath) {
     # Move old SDK to a new location instead of deleting it in case it is still in use (e.g. by IntelliJ).
