@@ -631,7 +631,7 @@ void main() {
             ),
             bottomNavigationBar: new SizedBox(
               key: bottomNavigationBar,
-              height: 55.0,
+              height: 85.0,
               child: new SafeArea(
                 child: new Placeholder(key: insideBottomNavigationBar),
               ),
@@ -646,17 +646,17 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(tester.getRect(find.byKey(appBar)), new Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 368.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 275.0, 113.0, 352.0));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(28.0, 377.0, 128.0, 467.0));
+    expect(tester.getRect(find.byKey(body)), new Rect.fromLTRB(0.0, 43.0, 800.0, 338.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), new Rect.fromLTRB(36.0, 245.0, 113.0, 322.0));
+    expect(tester.getRect(find.byKey(persistentFooterButton)), new Rect.fromLTRB(28.0, 347.0, 128.0, 437.0));
     expect(tester.getRect(find.byKey(drawer)), new Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(bottomNavigationBar)), new Rect.fromLTRB(0.0, 475.0, 800.0, 530.0));
+    expect(tester.getRect(find.byKey(bottomNavigationBar)), new Rect.fromLTRB(0.0, 445.0, 800.0, 530.0));
     expect(tester.getRect(find.byKey(insideAppBar)), new Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 368.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 275.0, 113.0, 352.0));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 377.0, 128.0, 467.0));
+    expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 338.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 245.0, 113.0, 322.0));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 347.0, 128.0, 437.0));
     expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 530.0));
-    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 475.0, 750.0, 530.0));
+    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 445.0, 750.0, 530.0));
   });
 
   testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
