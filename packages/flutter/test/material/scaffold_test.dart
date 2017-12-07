@@ -59,6 +59,41 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
+  testWidgets('Scaffold bottom padding is the greater of window padding or view inset', (WidgetTester tester) async {
+    final Key bodyKey = new UniqueKey();
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(bottom: 50.0),
+          viewInsets: const EdgeInsets.only(bottom: 100.0),
+        ),
+        child: new Scaffold(
+          body: new Container(key: bodyKey),
+        ),
+      ),
+    ));
+
+    final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
+    expect(bodyBox.size, equals(const Size(800.0, 500.0)));
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(bottom: 200.0),
+          viewInsets: const EdgeInsets.only(bottom: 100.0),
+        ),
+        child: new Scaffold(
+          body: new Container(key: bodyKey),
+        ),
+      ),
+    ));
+
+    expect(bodyBox.size, equals(const Size(800.0, 400.0)));
+  });
+
+
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Directionality(

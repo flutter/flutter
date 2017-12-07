@@ -834,6 +834,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
     final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets viewInsets = MediaQuery.of(context).viewInsets;
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -1038,7 +1039,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             children: children,
             delegate: new _ScaffoldLayout(
               statusBarHeight: padding.top,
-              bottomPadding: widget.resizeToAvoidBottomPadding ? padding.bottom : 0.0,
+              bottomPadding: widget.resizeToAvoidBottomPadding ? math.max(padding.bottom, viewInsets.bottom) : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
             ),
