@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   args: ^1.2.0
+  xml: ^2.6.0
 
 dev_dependencies:
   test: ^0.12.0
