@@ -389,9 +389,9 @@ class _TextFieldState extends State<TextField> {
 
     return new Semantics(
       onTap: () {
-        _requestKeyboard();
         if (!_controller.selection.isValid)
           _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
+        _requestKeyboard();
       },
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
