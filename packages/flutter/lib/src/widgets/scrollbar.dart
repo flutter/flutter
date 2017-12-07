@@ -222,4 +222,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   bool shouldRepaint(ScrollbarPainter oldDelegate) => false;
+
+  @override
+  bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder => null;
 }
