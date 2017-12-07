@@ -76,7 +76,7 @@ void main () {
     test('progress 0', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         movingBar.paths,
-        0.0,
+        const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         pathFactory
       );
@@ -96,7 +96,7 @@ void main () {
     test('progress 1', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         movingBar.paths,
-        1.0,
+        const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
         pathFactory
       );
@@ -116,7 +116,7 @@ void main () {
     test('interpolated frame', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         movingBar.paths,
-        0.5,
+        const AlwaysStoppedAnimation<double>(0.5),
         const Color(0xFF00FF00),
         pathFactory
       );
@@ -136,7 +136,7 @@ void main () {
     test('curved frame', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         bow.paths,
-        1.0,
+        const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
         pathFactory
       );
@@ -154,7 +154,7 @@ void main () {
     test('interpolated curved frame', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         bow.paths,
-        0.25,
+        const AlwaysStoppedAnimation<double>(0.25),
         const Color(0xFF00FF00),
         pathFactory
       );

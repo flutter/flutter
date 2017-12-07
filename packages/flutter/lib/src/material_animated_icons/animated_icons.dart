@@ -12,14 +12,14 @@ part of material_animated_icons;
 /// Shows an animated icon at a given animation [progress].
 ///
 /// The available icons are specified in [AnimatedIcons].
-class AnimatedIcon extends AnimatedWidget {
+class AnimatedIcon extends StatelessWidget {
 
   /// Creates an AnimatedIcon.
   ///
   /// [progress], [color], and [icon] cannot be null.
   const AnimatedIcon({
     Key key,
-    @required Animation<double> progress,
+    @required this.progress,
     @required this.color,
     @required this.icon,
     this.semanticLabel,
@@ -27,14 +27,13 @@ class AnimatedIcon extends AnimatedWidget {
     // TODO(amirh): add a parameter for controlling scaling behavior.
   }) : assert(progress != null),
        assert(color != null),
-       assert(icon != null),
-       super(key: key, listenable: progress);
+       assert(icon != null);
 
   /// The animation progress for the animated icon.
   /// The value is clamped to be between 0 and 1.
   ///
   /// This determines the actual frame that is displayed.
-  Animation<double> get progress => listenable;
+  final Animation<double> progress;
 
   /// The color to use when drawing the icon.
   ///
@@ -89,7 +88,7 @@ class AnimatedIcon extends AnimatedWidget {
       size: iconData.size,
       painter: new _AnimatedIconPainter(
         iconData.paths,
-        progress.value,
+        progress,
         color,
         () => new ui.Path(),
       ),
@@ -99,29 +98,40 @@ class AnimatedIcon extends AnimatedWidget {
 
 typedef ui.Path _UiPathFactory();
 
-class _AnimatedIconPainter extends CustomPainter {
-  final List<_PathFrames> paths;
-  final double progress;
-  final Color color;
-  final _UiPathFactory uiPathFactory;
-
-  const _AnimatedIconPainter(
+class _AnimatedIconPainter extends ChangeNotifier implements CustomPainter {
+  _AnimatedIconPainter(
     this.paths,
     this.progress,
     this.color,
     this.uiPathFactory
-  );
+  ) {
+    progress.addListener(notifyListeners);
+  }
+
+  final List<_PathFrames> paths;
+  final Animation<double> progress;
+  final Color color;
+  final _UiPathFactory uiPathFactory;
 
   @override
   void paint(ui.Canvas canvas, Size size) {
     for (_PathFrames path in paths)
-      path.paint(canvas, color, uiPathFactory, progress);
+      path.paint(canvas, color, uiPathFactory, progress.value);
   }
 
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+    return oldDelegate.progress.value != progress.value;
   }
+
+  @override
+  bool hitTest(Offset position) => null;
+
+  @override
+  bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;
+
+  @override
+  SemanticsBuilderCallback get semanticsBuilder => null;
 }
 
 class _PathFrames {
