@@ -23,6 +23,7 @@ import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
+import '../common/text.dart';
 import 'common.dart';
 import 'timeline.dart';
 
@@ -417,6 +418,39 @@ class FlutterDriver {
     return GetTextResult.fromJson(await _sendCommand(new GetText(finder, timeout: timeout))).text;
   }
 
+  /// Enters `text` into the currently focused text input, such as the
+  /// [EditableText] widget.
+  ///
+  /// This method does not use the operating system keyboard to enter text.
+  /// Instead it emulates text entry by sending events identical to those sent
+  /// by the operating system keyboard (the "TextInputClient.updateEditingState"
+  /// method channel call).
+  ///
+  /// Generally the behavior is dependent on the implementation of the widget
+  /// receiving the input. Usually, editable widgets, such as [EditableText] and
+  /// those built on top of it would replace the currently entered text with the
+  /// provided `text`.
+  ///
+  /// It is assumed that the widget receiving text input is focused prior to
+  /// calling this method. Typically, a test would activate a widget, e.g. using
+  /// [tap], then call this method.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// test('enters text in a text field', () async {
+  ///  var textField = find.byValueKey('enter-text-field');
+  ///  await driver.tap(textField);  // acquire focus
+  ///  await driver.enterText('Hello!');  // enter text
+  ///  await driver.waitFor(find.text('Hello!'));  // verify text appears on UI
+  ///  await driver.enterText('World!');  // enter another piece of text
+  ///  await driver.waitFor(find.text('World!'));  // verify new text appears
+  /// });
+  /// ```
+  Future<Null> enterText(String text, { Duration timeout }) async {
+    await _sendCommand(new EnterText(text, timeout: timeout));
+  }
+
   /// Sends a string and returns a string.
   ///
   /// This enables generic communication between the driver and the application.
@@ -694,7 +728,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] widgets containing string equal to [text].
+  /// Finds [Text] and [EditableText] widgets containing string equal to [text].
   SerializableFinder text(String text) => new ByText(text);
 
   /// Finds widgets by [key]. Only [String] and [int] values can be used.
