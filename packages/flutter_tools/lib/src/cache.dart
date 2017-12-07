@@ -270,8 +270,10 @@ bool _hasWarnedAboutStorageOverride = false;
 void _maybeWarnAboutStorageOverride(String overrideUrl) {
   if (_hasWarnedAboutStorageOverride)
     return;
-  logger.printStatus('Flutter assets will be downloaded from $overrideUrl. '
-      'Make sure you trust this source!', emphasis: true);
+  logger.printStatus(
+    'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
+    emphasis: true,
+  );
   _hasWarnedAboutStorageOverride = true;
 }
 
