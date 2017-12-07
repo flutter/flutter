@@ -29,6 +29,6 @@
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
   "postMeridiemAbbreviation": "NACHM.",
-  "timePickerHourModeAnnouncement": "Wählen Sie Stunden",
-  "timePickerMinuteModeAnnouncement": "Wählen Sie Minuten"
+  "timePickerHourModeAnnouncement": "Stunde auswählen",
+  "timePickerMinuteModeAnnouncement": "Minute auswählen"
 }

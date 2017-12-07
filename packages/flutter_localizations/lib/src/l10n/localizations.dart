@@ -79,8 +79,8 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'LIZENZEN ANZEIGEN',
     'anteMeridiemAbbreviation': r'VORM.',
     'postMeridiemAbbreviation': r'NACHM.',
-    'timePickerHourModeAnnouncement': r'Wählen Sie Stunden',
-    'timePickerMinuteModeAnnouncement': r'Wählen Sie Minuten',
+    'timePickerHourModeAnnouncement': r'Stunde auswählen',
+    'timePickerMinuteModeAnnouncement': r'Minute auswählen',
   },
   'de_CH': const <String, String>{
     'scriptCategory': r'English-like',
@@ -144,8 +144,8 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VIEW LICENSES',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
-    'timePickerHourModeAnnouncement': r'Select hours.',
-    'timePickerMinuteModeAnnouncement': r'Select minutes.',
+    'timePickerHourModeAnnouncement': r'Select hours',
+    'timePickerMinuteModeAnnouncement': r'Select minutes',
   },
   'en_AU': const <String, String>{
     'scriptCategory': r'English-like',
@@ -604,7 +604,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'ライセンスを表示',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
-    'timePickerHourModeAnnouncement': r'時間の選択',
+    'timePickerHourModeAnnouncement': r'時を選択',
     'timePickerMinuteModeAnnouncement': r'分を選択',
   },
   'ps': const <String, String>{
