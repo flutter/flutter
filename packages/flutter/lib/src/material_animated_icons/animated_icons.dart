@@ -122,7 +122,6 @@ class _AnimatedIconPainter extends CustomPainter {
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
     return oldDelegate.progress != progress;
   }
-
 }
 
 class _PathFrames {
