@@ -32,7 +32,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+        data: const MediaQueryData(viewInsets: const EdgeInsets.only(bottom: 100.0)),
         child: new Scaffold(
           appBar: new AppBar(title: const Text('Title')),
           body: new Container(key: bodyKey),
@@ -46,7 +46,7 @@ void main() {
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
-        data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 100.0)),
+        data: const MediaQueryData(viewInsets: const EdgeInsets.only(bottom: 100.0)),
         child: new Scaffold(
           appBar: new AppBar(title: const Text('Title')),
           body: new Container(key: bodyKey),
@@ -59,48 +59,13 @@ void main() {
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
   });
 
-  testWidgets('Scaffold bottom padding is the greater of window padding or view inset', (WidgetTester tester) async {
-    final Key bodyKey = new UniqueKey();
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(
-          padding: const EdgeInsets.only(bottom: 50.0),
-          viewInsets: const EdgeInsets.only(bottom: 100.0),
-        ),
-        child: new Scaffold(
-          body: new Container(key: bodyKey),
-        ),
-      ),
-    ));
-
-    final RenderBox bodyBox = tester.renderObject(find.byKey(bodyKey));
-    expect(bodyBox.size, equals(const Size(800.0, 500.0)));
-
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(
-          padding: const EdgeInsets.only(bottom: 200.0),
-          viewInsets: const EdgeInsets.only(bottom: 100.0),
-        ),
-        child: new Scaffold(
-          body: new Container(key: bodyKey),
-        ),
-      ),
-    ));
-
-    expect(bodyBox.size, equals(const Size(800.0, 400.0)));
-  });
-
-
   testWidgets('Scaffold large bottom padding test', (WidgetTester tester) async {
     final Key bodyKey = new UniqueKey();
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(bottom: 700.0),
+          viewInsets: const EdgeInsets.only(bottom: 700.0),
         ),
         child: new Scaffold(
           body: new Container(key: bodyKey),
@@ -115,7 +80,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(bottom: 500.0),
+          viewInsets: const EdgeInsets.only(bottom: 500.0),
         ),
         child: new Scaffold(
           body: new Container(key: bodyKey),
@@ -129,7 +94,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: new MediaQuery(
         data: const MediaQueryData(
-          padding: const EdgeInsets.only(bottom: 580.0),
+          viewInsets: const EdgeInsets.only(bottom: 580.0),
         ),
         child: new Scaffold(
           appBar: new AppBar(
@@ -185,7 +150,7 @@ void main() {
         textDirection: textDirection,
         child: const MediaQuery(
           data: const MediaQueryData(
-            padding: const EdgeInsets.only(bottom: 200.0),
+            viewInsets: const EdgeInsets.only(bottom: 200.0),
           ),
           child: const Scaffold(
             floatingActionButton: const FloatingActionButton(
@@ -585,8 +550,9 @@ void main() {
               left: 20.0,
               top: 30.0,
               right: 50.0,
-              bottom: 70.0,
+              bottom: 60.0,
             ),
+            viewInsets: const EdgeInsets.only(bottom: 70.0),
           ),
           child: new Scaffold(
             appBar: new PreferredSize(
@@ -655,8 +621,8 @@ void main() {
     expect(tester.getRect(find.byKey(insideBody)), new Rect.fromLTRB(20.0, 43.0, 750.0, 338.0));
     expect(tester.getRect(find.byKey(insideFloatingActionButton)), new Rect.fromLTRB(36.0, 245.0, 113.0, 322.0));
     expect(tester.getRect(find.byKey(insidePersistentFooterButton)), new Rect.fromLTRB(28.0, 347.0, 128.0, 437.0));
-    expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 530.0));
-    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 445.0, 750.0, 530.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), new Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), new Rect.fromLTRB(20.0, 445.0, 750.0, 470.0));
   });
 
   testWidgets('Simultaneous drawers on either side', (WidgetTester tester) async {
