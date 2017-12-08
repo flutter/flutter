@@ -91,4 +91,46 @@ void main() {
     expect(buildCount, equals(1));
   });
 
+  testWidgets('Scaffold removes top MediaQuery padding', (WidgetTester tester) async {
+    BuildContext scaffoldContext;
+    BuildContext bottomSheetContext;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Scaffold(
+          resizeToAvoidBottomPadding: false,
+          body: new Builder(
+            builder: (BuildContext context) {
+              scaffoldContext = context;
+              return new Container();
+            }
+          ),
+        ),
+      )
+    ));
+
+    await tester.pump();
+
+    showBottomSheet<Null>(
+      context: scaffoldContext,
+      builder: (BuildContext context) {
+        bottomSheetContext = context;
+        return new Container();
+      },
+    );
+
+    await tester.pump();
+
+    expect(
+      MediaQuery.of(bottomSheetContext).padding,
+      const EdgeInsets.only(
+        bottom: 50.0,
+        left: 50.0,
+        right: 50.0,
+      ),
+    );
+  });
 }

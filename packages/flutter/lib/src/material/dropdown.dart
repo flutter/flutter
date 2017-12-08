@@ -335,14 +335,25 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
-    return new CustomSingleChildLayout(
-      delegate: new _DropdownMenuRouteLayout<T>(
-        buttonRect: buttonRect,
-        menuTop: menuTop,
-        menuHeight: menuHeight,
-        textDirection: Directionality.of(context),
+    return new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: new Builder(
+        builder: (BuildContext context) {
+          return new CustomSingleChildLayout(
+            delegate: new _DropdownMenuRouteLayout<T>(
+              buttonRect: buttonRect,
+              menuTop: menuTop,
+              menuHeight: menuHeight,
+              textDirection: Directionality.of(context),
+            ),
+            child: menu,
+          );
+        },
       ),
-      child: menu,
     );
   }
 
