@@ -57,6 +57,15 @@ void main () {
       expect(_interpolate(points, 0.75, Offset.lerp), const Offset(17.5, 10.5));
       expect(_interpolate(points, 1.0, Offset.lerp), const Offset(23.0, 9.0));
     });
+
+    test('- clamp progress to [0,1]', () {
+      final List<Offset> points = const <Offset>[
+        const Offset(25.0, 1.0),
+        const Offset(12.0, 12.0),
+      ];
+      expect(_interpolate(points, -1.0, Offset.lerp), const Offset(25.0, 1.0));
+      expect(_interpolate(points, 1.5, Offset.lerp), const Offset(12.0, 12.0));
+    });
   });
 
   group('_AnimatedIconPainter', () {
@@ -97,6 +106,26 @@ void main () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         movingBar.paths,
         const AlwaysStoppedAnimation<double>(1.0),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+      painter.paint(mockCanvas,  size);
+      expect(generatedPaths.length, 1);
+
+      verifyInOrder(<dynamic>[
+        generatedPaths[0].moveTo(0.0, 38.0),
+        generatedPaths[0].lineTo(48.0, 38.0),
+        generatedPaths[0].lineTo(48.0, 48.0),
+        generatedPaths[0].lineTo(0.0, 48.0),
+        generatedPaths[0].lineTo(0.0, 38.0),
+        generatedPaths[0].close(),
+      ]);
+    });
+
+    test('clamped progress', () {
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        const AlwaysStoppedAnimation<double>(1.5),
         const Color(0xFF00FF00),
         pathFactory
       );

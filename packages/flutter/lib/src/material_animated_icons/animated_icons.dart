@@ -224,13 +224,12 @@ class _PathClose extends _PathCommand {
 // animations we have tested, so we use it for simplicity. If we find this to
 // not be smooth enough we can try applying spline instead.
 //
-// [progress] must be between 0 and 1.
+// [progress] is clamped to be between 0 and 1.
 T _interpolate<T>(List<T> values, double progress, _Interpolator<T> interpolator) {
-  assert(progress >= 0.0);
-  assert(progress <= 1.0);
+  final double clampedProgress = progress.clamp(0.0, 1.0);
   if (values.length == 1)
     return values[0];
-  final double targetIdx = lerpDouble(0, values.length -1, progress);
+  final double targetIdx = lerpDouble(0, values.length -1, clampedProgress);
   final int lowIdx = targetIdx.floor();
   final int highIdx = targetIdx.ceil();
   final double t = targetIdx - lowIdx;
