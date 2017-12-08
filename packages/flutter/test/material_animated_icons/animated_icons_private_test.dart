@@ -197,6 +197,79 @@ void main () {
         generatedPaths[0].close(),
       ]);
     });
+
+    test('should not repaint same values', () {
+      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+
+      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+
+      expect(painter1.shouldRepaint(painter2), false);
+    });
+
+    test('should repaint on progress change', () {
+      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+
+      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.1),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+
+      expect(painter1.shouldRepaint(painter2), true);
+    });
+
+    test('should repaint on color change', () {
+      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        pathFactory
+      );
+
+      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFFFF0000),
+        pathFactory
+      );
+
+      expect(painter1.shouldRepaint(painter2), true);
+    });
+
+    test('should repaint on paths change', () {
+      final _AnimatedIconPainter painter1 = new _AnimatedIconPainter(
+        bow.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF0000FF),
+        pathFactory
+      );
+
+      final _AnimatedIconPainter painter2 = new _AnimatedIconPainter(
+        const <_PathFrames> [],
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF0000FF),
+        pathFactory
+      );
+
+      expect(painter1.shouldRepaint(painter2), true);
+    });
+
   });
 }
 

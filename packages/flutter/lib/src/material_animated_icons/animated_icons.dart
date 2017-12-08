@@ -108,6 +108,8 @@ class _AnimatedIconPainter extends ChangeNotifier implements CustomPainter {
     progress.addListener(notifyListeners);
   }
 
+  // This list is assumed to be immutable, changes to the contents of the list
+  // will not trigger a redraw as shouldRepaint will keep returning false.
   final List<_PathFrames> paths;
   final Animation<double> progress;
   final Color color;
@@ -121,7 +123,11 @@ class _AnimatedIconPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
-    return oldDelegate.progress.value != progress.value;
+    return oldDelegate.progress.value != progress.value
+      || oldDelegate.color != color
+      // We are comparing the paths list by reference, assuming the list is
+      // treated as immutable to be more efficient.
+      || oldDelegate.paths != paths;
   }
 
   @override
