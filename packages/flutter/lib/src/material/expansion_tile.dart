@@ -97,7 +97,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _controller = new AnimationController(duration: _kExpand, vsync: this);
     _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _borderColor = new ColorTween(begin: Colors.transparent);
+    _borderColor = new ColorTween();
     _headerColor = new ColorTween();
     _iconColor = new ColorTween();
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
@@ -132,7 +132,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget _buildChildren(BuildContext context, Widget child) {
-    final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation);
+    final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation) ?? Colors.transparent;
     final Color titleColor = _headerColor.evaluate(_easeInAnimation);
 
     return new Container(
