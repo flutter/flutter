@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -27,12 +28,14 @@ void main() {
     Directory temp;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
+    LoggingProcessManager loggingProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
     });
 
     setUp(() {
+      loggingProcessManager = new LoggingProcessManager();
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
       projectDir = temp.childDirectory('flutter_project');
       mockFlutterVersion = new MockFlutterVersion();
@@ -299,6 +302,23 @@ void main() {
         throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
       );
     });
+
+    testUsingContext('invokes pub offline', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', projectDir.path]);
+      final List<String> commands = loggingProcessManager.commands;
+      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(commands, contains('--offline'));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
   });
 }
 
@@ -359,3 +379,29 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+
+/// A ProcessManager that invokes a real process manager, but keeps
+/// the last commands sent to it.
+class LoggingProcessManager extends LocalProcessManager {
+  List<String> commands;
+
+  @override
+  Future<Process> start(
+    List<dynamic> command, {
+      String workingDirectory,
+      Map<String, String> environment,
+      bool includeParentEnvironment: true,
+      bool runInShell: false,
+      ProcessStartMode mode: ProcessStartMode.NORMAL,
+    }) {
+    commands = command;
+    return super.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+}
