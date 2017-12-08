@@ -2583,8 +2583,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// purposes.
   ///
   /// If this tag is used, the first "outer" semantics node is the regular node
-  /// of this object. The second "inner" node is introduces as a child to that
-  /// node. All scrollable children are now a child of the inner node, which has
+  /// of this object. The second "inner" node is introduced as a child to that
+  /// node. All scrollable children become children of the inner node, which has
   /// the semantic scrolling logic enabled. All children that have been
   /// excluded from scrolling with [excludeFromScrolling] are turned into
   /// children of the outer node.
@@ -3204,6 +3204,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 

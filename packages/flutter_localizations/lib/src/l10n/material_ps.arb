@@ -26,5 +26,7 @@
   "okButtonLabel": "سمه ده",
   "pasteButtonLabel": "پیټ کړئ",
   "selectAllButtonLabel": "غوره کړئ",
-  "viewLicensesButtonLabel": "لیدلس وګورئ"
+  "viewLicensesButtonLabel": "لیدلس وګورئ",
+  "timePickerHourModeAnnouncement": "وختونه وټاکئ",
+  "timePickerMinuteModeAnnouncement": "منې غوره کړئ"
 }

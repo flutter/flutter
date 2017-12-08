@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +11,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+import '../rendering/recording_canvas.dart';
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
@@ -47,7 +51,7 @@ Future<Offset> startPicker(WidgetTester tester, ValueChanged<TimeOfDay> onChange
   await tester.pumpWidget(new _TimePickerLauncher(onChanged: onChanged, locale: const Locale('en', 'US')));
   await tester.tap(find.text('X'));
   await tester.pumpAndSettle(const Duration(seconds: 1));
-  return tester.getCenter(find.byKey(const Key('time-picker-dial')));
+  return tester.getCenter(find.byKey(const ValueKey<String>('time-picker-dial')));
 }
 
 Future<Null> finishPicker(WidgetTester tester) async {
@@ -57,6 +61,12 @@ Future<Null> finishPicker(WidgetTester tester) async {
 }
 
 void main() {
+  group('Time picker', () {
+    _tests();
+  });
+}
+
+void _tests() {
   testWidgets('tap-select an hour', (WidgetTester tester) async {
     TimeOfDay result;
 
@@ -210,7 +220,8 @@ void main() {
   const List<String> labels12To11TwoDigit = const <String>['12', '01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11'];
   const List<String> labels00To23 = const <String>['00', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23'];
 
-  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat) async {
+  Future<Null> mediaQueryBoilerplate(WidgetTester tester, bool alwaysUse24HourFormat,
+      { TimeOfDay initialTime: const TimeOfDay(hour: 7, minute: 0) }) async {
     await tester.pumpWidget(
       new Localizations(
         locale: const Locale('en', 'US'),
@@ -220,57 +231,235 @@ void main() {
         ],
         child: new MediaQuery(
           data: new MediaQueryData(alwaysUse24HourFormat: alwaysUse24HourFormat),
-          child: new Directionality(
-            textDirection: TextDirection.ltr,
-            child: new Navigator(
-              onGenerateRoute: (RouteSettings settings) {
-                return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
-                  showTimePicker(context: context, initialTime: const TimeOfDay(hour: 7, minute: 0));
-                  return new Container();
-                });
-              },
+          child: new Material(
+            child: new Directionality(
+              textDirection: TextDirection.ltr,
+              child: new Navigator(
+                onGenerateRoute: (RouteSettings settings) {
+                  return new MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+                    return new FlatButton(
+                      onPressed: () {
+                        showTimePicker(context: context, initialTime: initialTime);
+                      },
+                      child: const Text('X'),
+                    );
+                  });
+                },
+              ),
             ),
           ),
         ),
       ),
     );
-    // Pump once, because the dialog shows up asynchronously.
-    await tester.pump();
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
   }
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == false', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, false);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
   testWidgets('respects MediaQueryData.alwaysUse24HourFormat == true', (WidgetTester tester) async {
     await mediaQueryBoilerplate(tester, true);
 
-    final CustomPaint dialPaint = tester.widget(find.descendant(
-      of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
-      matching: find.byType(CustomPaint),
-    ));
+    final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<TextPainter> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
 
-    final List<TextPainter> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map((TextPainter tp) => tp.text.text), labels00To23);
-    final List<TextPainter> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map((TextPainter tp) => tp.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
   });
+
+  testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, false);
+
+    expect(semantics, includesNodeWith(label: 'AM', actions: <SemanticsAction>[SemanticsAction.tap]));
+    expect(semantics, includesNodeWith(label: 'PM', actions: <SemanticsAction>[SemanticsAction.tap]));
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for header and footer', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, true);
+
+    expect(semantics, isNot(includesNodeWith(label: ':')));
+    expect(semantics.nodesWith(label: '00'), hasLength(2),
+        reason: '00 appears once in the header, then again in the dial');
+    expect(semantics.nodesWith(label: '07'), hasLength(2),
+        reason: '07 appears once in the header, then again in the dial');
+    expect(semantics, includesNodeWith(label: 'CANCEL'));
+    expect(semantics, includesNodeWith(label: 'OK'));
+
+    // In 24-hour mode we don't have AM/PM control.
+    expect(semantics, isNot(includesNodeWith(label: 'AM')));
+    expect(semantics, isNot(includesNodeWith(label: 'PM')));
+
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for hours', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, true);
+
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
+    final CustomPainter dialPainter = dialPaint.painter;
+    final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
+
+    painterTester.addLabel('00', 86.0, 12.0, 134.0, 36.0);
+    painterTester.addLabel('13', 129.0, 23.5, 177.0, 47.5);
+    painterTester.addLabel('14', 160.5, 55.0, 208.5, 79.0);
+    painterTester.addLabel('15', 172.0, 98.0, 220.0, 122.0);
+    painterTester.addLabel('16', 160.5, 141.0, 208.5, 165.0);
+    painterTester.addLabel('17', 129.0, 172.5, 177.0, 196.5);
+    painterTester.addLabel('18', 86.0, 184.0, 134.0, 208.0);
+    painterTester.addLabel('19', 43.0, 172.5, 91.0, 196.5);
+    painterTester.addLabel('20', 11.5, 141.0, 59.5, 165.0);
+    painterTester.addLabel('21', 0.0, 98.0, 48.0, 122.0);
+    painterTester.addLabel('22', 11.5, 55.0, 59.5, 79.0);
+    painterTester.addLabel('23', 43.0, 23.5, 91.0, 47.5);
+    painterTester.addLabel('12', 86.0, 48.0, 134.0, 72.0);
+    painterTester.addLabel('01', 111.0, 54.7, 159.0, 78.7);
+    painterTester.addLabel('02', 129.3, 73.0, 177.3, 97.0);
+    painterTester.addLabel('03', 136.0, 98.0, 184.0, 122.0);
+    painterTester.addLabel('04', 129.3, 123.0, 177.3, 147.0);
+    painterTester.addLabel('05', 111.0, 141.3, 159.0, 165.3);
+    painterTester.addLabel('06', 86.0, 148.0, 134.0, 172.0);
+    painterTester.addLabel('07', 61.0, 141.3, 109.0, 165.3);
+    painterTester.addLabel('08', 42.7, 123.0, 90.7, 147.0);
+    painterTester.addLabel('09', 36.0, 98.0, 84.0, 122.0);
+    painterTester.addLabel('10', 42.7, 73.0, 90.7, 97.0);
+    painterTester.addLabel('11', 61.0, 54.7, 109.0, 78.7);
+
+    painterTester.assertExpectations();
+    semantics.dispose();
+  });
+
+  testWidgets('provides semantics information for minutes', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await mediaQueryBoilerplate(tester, true);
+    await tester.tap(find.byWidgetPredicate((Widget widget) => '${widget.runtimeType}' == '_MinuteControl'));
+    await tester.pumpAndSettle();
+
+    final CustomPaint dialPaint = tester.widget(find.byKey(const ValueKey<String>('time-picker-dial')));
+    final CustomPainter dialPainter = dialPaint.painter;
+    final _CustomPainterSemanticsTester painterTester = new _CustomPainterSemanticsTester(tester, dialPainter, semantics);
+
+    painterTester.addLabel('00', 86.0, 12.0, 134.0, 36.0);
+    painterTester.addLabel('05', 129.0, 23.5, 177.0, 47.5);
+    painterTester.addLabel('10', 160.5, 55.0, 208.5, 79.0);
+    painterTester.addLabel('15', 172.0, 98.0, 220.0, 122.0);
+    painterTester.addLabel('20', 160.5, 141.0, 208.5, 165.0);
+    painterTester.addLabel('25', 129.0, 172.5, 177.0, 196.5);
+    painterTester.addLabel('30', 86.0, 184.0, 134.0, 208.0);
+    painterTester.addLabel('35', 43.0, 172.5, 91.0, 196.5);
+    painterTester.addLabel('40', 11.5, 141.0, 59.5, 165.0);
+    painterTester.addLabel('45', 0.0, 98.0, 48.0, 122.0);
+    painterTester.addLabel('50', 11.5, 55.0, 59.5, 79.0);
+    painterTester.addLabel('55', 43.0, 23.5, 91.0, 47.5);
+
+    painterTester.assertExpectations();
+    semantics.dispose();
+  });
+
+  testWidgets('picks the right dial ring from widget configuration', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 12, minute: 0));
+    dynamic dialPaint = tester.widget(findDialPaint);
+    expect('${dialPaint.painter.activeRing}', '_DialRing.inner');
+
+    await tester.pumpWidget(new Container());  // make sure previous state isn't reused
+
+    await mediaQueryBoilerplate(tester, true, initialTime: const TimeOfDay(hour: 0, minute: 0));
+    dialPaint = tester.widget(findDialPaint);
+    expect('${dialPaint.painter.activeRing}', '_DialRing.outer');
+  });
+}
+
+final Finder findDialPaint = find.descendant(
+  of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_Dial'),
+  matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+);
+
+class _SemanticsNodeExpectation {
+  final String label;
+  final double left;
+  final double top;
+  final double right;
+  final double bottom;
+
+  _SemanticsNodeExpectation(this.label, this.left, this.top, this.right, this.bottom);
+}
+
+class _CustomPainterSemanticsTester {
+  _CustomPainterSemanticsTester(this.tester, this.painter, this.semantics);
+
+  final WidgetTester tester;
+  final CustomPainter painter;
+  final SemanticsTester semantics;
+  final PaintPattern expectedLabels = paints;
+  final List<_SemanticsNodeExpectation> expectedNodes = <_SemanticsNodeExpectation>[];
+
+  void addLabel(String label, double left, double top, double right, double bottom) {
+    expectedNodes.add(new _SemanticsNodeExpectation(label, left, top, right, bottom));
+  }
+
+  void assertExpectations() {
+    final TestRecordingCanvas canvasRecording = new TestRecordingCanvas();
+    painter.paint(canvasRecording, const Size(220.0, 220.0));
+    final List<ui.Paragraph> paragraphs = canvasRecording.invocations
+      .where((RecordedInvocation recordedInvocation) {
+        return recordedInvocation.invocation.memberName == #drawParagraph;
+      })
+      .map<ui.Paragraph>((RecordedInvocation recordedInvocation) {
+        return recordedInvocation.invocation.positionalArguments.first;
+      })
+      .toList();
+
+    final PaintPattern expectedLabels = paints;
+    int i = 0;
+
+    for (_SemanticsNodeExpectation expectation in expectedNodes) {
+      expect(semantics, includesNodeWith(label: expectation.label));
+      final Iterable<SemanticsNode> dialLabelNodes = semantics
+          .nodesWith(label: expectation.label)
+          .where((SemanticsNode node) => node.tags?.contains(const SemanticsTag('dial-label')) ?? false);
+      expect(dialLabelNodes, hasLength(1), reason: 'Expected exactly one label ${expectation.label}');
+      final Rect rect = new Rect.fromLTRB(expectation.left, expectation.top, expectation.right, expectation.bottom);
+      expect(dialLabelNodes.single.rect, within(distance: 1.0, from: rect),
+        reason: 'This is checking the node rectangle for label ${expectation.label}');
+
+      final ui.Paragraph paragraph = paragraphs[i++];
+
+      // The label text paragraph and the semantics node share the same center,
+      // but have different sizes.
+      final Offset center = dialLabelNodes.single.rect.center;
+      final Offset topLeft = center.translate(
+        -paragraph.width / 2.0,
+        -paragraph.height / 2.0,
+      );
+
+      expectedLabels.paragraph(
+        paragraph: paragraph,
+        offset: within<Offset>(distance: 1.0, from: topLeft),
+      );
+    }
+    expect(tester.renderObject(findDialPaint), expectedLabels);
+  }
 }

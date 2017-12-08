@@ -299,6 +299,47 @@ class SemanticsTester {
 
   @override
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
+
+  Iterable<SemanticsNode> nodesWith({
+    String label,
+    String value,
+    TextDirection textDirection,
+    List<SemanticsAction> actions,
+    List<SemanticsFlags> flags,
+  }) {
+    bool checkNode(SemanticsNode node) {
+      if (label != null && node.label != label)
+        return false;
+      if (value != null && node.value != value)
+        return false;
+      if (textDirection != null && node.textDirection != textDirection)
+        return false;
+      if (actions != null) {
+        final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
+        final int actualActions = node.getSemanticsData().actions;
+        if (expectedActions != actualActions)
+          return false;
+      }
+      if (flags != null) {
+        final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
+        final int actualFlags = node.getSemanticsData().flags;
+        if (expectedFlags != actualFlags)
+          return false;
+      }
+      return true;
+    }
+
+    final List<SemanticsNode> result = <SemanticsNode>[];
+    bool visit(SemanticsNode node) {
+      if (checkNode(node)) {
+        result.add(node);
+      }
+      node.visitChildren(visit);
+      return true;
+    }
+    visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
+    return result;
+  }
 }
 
 class _HasSemantics extends Matcher {
@@ -354,41 +395,13 @@ class _IncludesNodeWith extends Matcher {
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    bool result = false;
-    SemanticsNodeVisitor visitor;
-    visitor = (SemanticsNode node) {
-      if (checkNode(node)) {
-        result = true;
-      } else {
-        node.visitChildren(visitor);
-      }
-      return !result;
-    };
-    final SemanticsNode root = item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
-    visitor(root);
-    return result;
-  }
-
-  bool checkNode(SemanticsNode node) {
-    if (label != null && node.label != label)
-      return false;
-    if (value != null && node.value != value)
-      return false;
-    if (textDirection != null && node.textDirection != textDirection)
-      return false;
-    if (actions != null) {
-      final int expectedActions = actions.fold(0, (int value, SemanticsAction action) => value | action.index);
-      final int actualActions = node.getSemanticsData().actions;
-      if (expectedActions != actualActions)
-        return false;
-    }
-    if (flags != null) {
-      final int expectedFlags = flags.fold(0, (int value, SemanticsFlags flag) => value | flag.index);
-      final int actualFlags = node.getSemanticsData().flags;
-      if (expectedFlags != actualFlags)
-        return false;
-    }
-    return true;
+    return item.nodesWith(
+      label: label,
+      value: value,
+      textDirection: textDirection,
+      actions: actions,
+      flags: flags,
+    ).isNotEmpty;
   }
 
   @override
