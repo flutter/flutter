@@ -80,7 +80,7 @@ void main() {
     expect(find.text('Eclair (0)'), findsOneWidget);
     expect(find.text('Gingerbread (0)'), findsNothing);
 
-    await tester.tap(find.icon(Icons.chevron_left));
+    await tester.tap(find.byIcon(Icons.chevron_left));
 
     expect(log, <String>['page-changed: 0']);
     log.clear();
@@ -91,7 +91,7 @@ void main() {
     expect(find.text('Eclair (0)'), findsNothing);
     expect(find.text('Gingerbread (0)'), findsNothing);
 
-    await tester.tap(find.icon(Icons.chevron_left));
+    await tester.tap(find.byIcon(Icons.chevron_left));
 
     expect(log, isEmpty);
 
@@ -188,7 +188,7 @@ void main() {
     expect(find.text('Gingerbread (1)'), findsNothing);
     expect(find.text('Gingerbread (2)'), findsOneWidget);
 
-    await tester.tap(find.icon(Icons.adjust));
+    await tester.tap(find.byIcon(Icons.adjust));
     expect(log, <String>['action: adjust']);
     log.clear();
   });

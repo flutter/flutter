@@ -34,17 +34,6 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder text(String text, { bool skipOffstage: true }) => new _TextFinder(text, skipOffstage: skipOffstage);
 
-  /// Finds [Icon] widgets containing icon data equal to the `icon`
-  /// argument.
-  ///
-  /// Example:
-  ///
-  ///     expect(find.icon(Icons.chevron_left), findsOneWidget);
-  ///
-  /// If the `skipOffstage` argument is true (the default), then this skips
-  /// nodes that are [Offstage] or that are from inactive [Route]s.
-  Finder icon(IconData icon, { bool skipOffstage: true }) => new _IconFinder(icon, skipOffstage: skipOffstage);
-
   /// Looks for widgets that contain a [Text] descendant with `text`
   /// in it.
   ///
@@ -90,7 +79,8 @@ class CommonFinders {
   /// nodes that are [Offstage] or that are from inactive [Route]s.
   Finder byType(Type type, { bool skipOffstage: true }) => new _WidgetTypeFinder(type, skipOffstage: skipOffstage);
 
-  /// Finds widgets by searching for widgets with a particular icon data.
+  /// Finds [Icon] widgets containing icon data equal to the `icon`
+  /// argument.
   ///
   /// Example:
   ///
@@ -418,23 +408,6 @@ class _TextFinder extends MatchFinder {
       return editable.controller.text == text;
     }
     return false;
-  }
-}
-
-class _IconFinder extends MatchFinder {
-  _IconFinder(this.icon, { bool skipOffstage: true }) : super(skipOffstage: skipOffstage);
-
-  final IconData icon;
-
-  @override
-  String get description => 'icon "$icon"';
-
-  @override
-  bool matches(Element candidate) {
-    if (candidate.widget is! Icon)
-      return false;
-    final Icon iconWidget = candidate.widget;
-    return iconWidget.icon == icon;
   }
 }
 

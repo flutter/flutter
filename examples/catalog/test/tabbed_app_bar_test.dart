@@ -11,11 +11,11 @@ final int choiceCount = tabbed_app_bar_sample.choices.length;
 IconData iconAt(int index) => tabbed_app_bar_sample.choices[index].icon;
 
 Finder findChoiceCard(IconData icon) {
-  return find.descendant(of: find.byType(Card), matching: find.icon(icon));
+  return find.descendant(of: find.byType(Card), matching: find.byIcon(icon));
 }
 
 Finder findTab(IconData icon) {
-  return find.descendant(of: find.byType(Tab), matching: find.icon(icon));
+  return find.descendant(of: find.byType(Tab), matching: find.byIcon(icon));
 }
 
 void main() {

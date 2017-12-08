@@ -11,7 +11,7 @@ final int choiceCount = app_bar_bottom_sample.choices.length;
 IconData iconAt(int index) => app_bar_bottom_sample.choices[index].icon;
 
 Finder findChoiceCard(IconData icon) {
-  return find.descendant(of: find.byType(Card), matching: find.icon(icon));
+  return find.descendant(of: find.byType(Card), matching: find.byIcon(icon));
 }
 
 void main() {
