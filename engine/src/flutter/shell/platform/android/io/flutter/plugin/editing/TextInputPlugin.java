@@ -140,8 +140,8 @@ public class TextInputPlugin implements MethodCallHandler {
         outAttrs.imeOptions |= enterAction;
 
         InputConnectionAdaptor connection = new InputConnectionAdaptor(view, mClient, mFlutterChannel, mEditable);
-        outAttrs.initialSelStart = Math.max(Selection.getSelectionStart(mEditable), 0);
-        outAttrs.initialSelEnd = Math.max(Selection.getSelectionEnd(mEditable), 0);
+        outAttrs.initialSelStart = Selection.getSelectionStart(mEditable);
+        outAttrs.initialSelEnd = Selection.getSelectionEnd(mEditable);
 
         return connection;
     }
