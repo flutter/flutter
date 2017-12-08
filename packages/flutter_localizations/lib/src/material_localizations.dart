@@ -316,6 +316,12 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   String get postMeridiemAbbreviation => _nameToValue['postMeridiemAbbreviation'];
 
+  @override
+  String get timePickerHourModeAnnouncement => _nameToValue['timePickerHourModeAnnouncement'];
+
+  @override
+  String get timePickerMinuteModeAnnouncement => _nameToValue['timePickerMinuteModeAnnouncement'];
+
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
   ///

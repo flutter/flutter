@@ -4922,7 +4922,7 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
 /// When [excluding] is true, this widget (and its subtree) is excluded from
 /// the semantics tree.
 ///
-/// This can be used to hide subwidgets that would otherwise be
+/// This can be used to hide descendant widgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
