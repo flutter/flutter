@@ -38,9 +38,10 @@ class CupertinoPageScaffold extends StatelessWidget {
 
   /// Widget to show in the main content area.
   ///
-  /// Content can slide under the [navigationBar] when they're translucent with
-  /// a [MediaQuery] padding signaling the top obstructed area via
-  /// [MediaQueryData.padding].
+  /// Content can slide under the [navigationBar] when they're translucent.
+  /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
+  /// top padding indicating the area of obstructing overlap from the
+  /// [navigationBar].
   final Widget child;
 
   @override
@@ -51,8 +52,7 @@ class CupertinoPageScaffold extends StatelessWidget {
     if (navigationBar != null) {
       final MediaQueryData existingMediaQuery = MediaQuery.of(context);
 
-      // TODO(xster):
-      // Use real size after partial layout instead of preferred size.
+      // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double topPadding = navigationBar.preferredSize.height
           + existingMediaQuery.padding.top;

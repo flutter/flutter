@@ -491,6 +491,10 @@ abstract class BoxScrollView extends ScrollView {
 /// [CustomScrollView.slivers] property instead of the list itself, and having
 /// the [SliverList] instead be a child of the [SliverPadding].
 ///
+/// By default, [ListView] will automatically pad the list's scrollable
+/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
+/// padding. To avoid this behavior, override with a zero [padding] property.
+///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
@@ -767,6 +771,10 @@ class ListView extends BoxScrollView {
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the grid itself, and having
 /// the [SliverGrid] instead be a child of the [SliverPadding].
+///
+/// By default, [ListView] will automatically pad the list's scrollable
+/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
+/// padding. To avoid this behavior, override with a zero [padding] property.
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]

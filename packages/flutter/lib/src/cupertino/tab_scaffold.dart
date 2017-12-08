@@ -117,9 +117,10 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// When the tab becomes inactive, its content is still cached in the widget
   /// tree [Offstage] and its animations disabled.
   ///
-  /// Content can slide under the [tabBar] when it's translucent with a
-  /// [MediaQuery] padding signaling the bottom obstructed area via
-  /// [MediaQueryData.padding].
+  /// Content can slide under the [tabBar] when they're translucent.
+  /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
+  /// bottom padding indicating the area of obstructing overlap from the
+  /// [tabBar].
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -142,8 +143,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     if (widget.tabBar != null) {
       final MediaQueryData existingMediaQuery = MediaQuery.of(context);
 
-      // TODO(xster):
-      // Use real size after partial layout instead of preferred size.
+      // TODO(xster): Use real size after partial layout instead of preferred size.
       // https://github.com/flutter/flutter/issues/12912
       final double bottomPadding = widget.tabBar.preferredSize.height
           + existingMediaQuery.padding.bottom;
