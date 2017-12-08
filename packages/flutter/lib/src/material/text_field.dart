@@ -387,10 +387,18 @@ class _TextFieldState extends State<TextField> {
       );
     }
 
-    return new GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _requestKeyboard,
-      child: child,
+    return new Semantics(
+      onTap: () {
+        if (!_controller.selection.isValid)
+          _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
+        _requestKeyboard();
+      },
+      child: new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _requestKeyboard,
+        child: child,
+        excludeFromSemantics: true,
+      ),
     );
   }
 }

@@ -1510,8 +1510,8 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
 
 /// An property than displays enum values tersely.
 ///
-/// The enum value is converted to a hyphen-separated string. For example:
-/// [HitTestBehavior.deferToChild] is shown as `defer-to-child`.
+/// The enum value is displayed with the class name stripped. For example:
+/// [HitTestBehavior.deferToChild] is shown as `deferToChild`.
 ///
 /// See also:
 ///
@@ -1536,7 +1536,7 @@ class EnumProperty<T> extends DiagnosticsProperty<T> {
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     if (value == null)
       return value.toString();
-    return camelCaseToHyphenatedName(describeEnum(value));
+    return describeEnum(value);
   }
 }
 
@@ -2054,32 +2054,6 @@ String describeEnum(Object enumEntry) {
   final int indexOfDot = description.indexOf('.');
   assert(indexOfDot != -1 && indexOfDot < description.length - 1);
   return description.substring(indexOfDot + 1);
-}
-
-/// Returns a lowercase hyphen-separated version of a camel case name.
-///
-/// ## Sample code
-///
-/// ```dart
-/// validateCamelCaseToHyphenatedName() {
-///   assert(camelCaseToHyphenatedName('deferToChild') == 'defer-to-child');
-///   assert(camelCaseToHyphenatedName('Monday') == 'monday');
-///   assert(camelCaseToHyphenatedName('monday') == 'monday');
-/// }
-/// ```
-String camelCaseToHyphenatedName(String word) {
-  final String lowerWord = word.toLowerCase();
-  if (word == lowerWord)
-    return word;
-
-  final StringBuffer buffer = new StringBuffer();
-  for (int i = 0; i < word.length; i++) {
-    final String lower = lowerWord[i];
-    if (word[i] != lower && i > 0)
-      buffer.write('-');
-    buffer.write(lower);
-  }
-  return buffer.toString();
 }
 
 /// Builder to accumulate properties and configuration used to assemble a

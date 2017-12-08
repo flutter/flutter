@@ -388,6 +388,8 @@ void main() {
         onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
         onIncrease: () => performedActions.add(SemanticsAction.increase),
         onDecrease: () => performedActions.add(SemanticsAction.decrease),
+        onMoveCursorForwardByCharacter: () => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: () => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
       )
     );
 

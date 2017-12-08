@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, TextBox, lerpDouble;
 
-import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 
 import 'alignment.dart';
@@ -14,6 +13,7 @@ import 'basic_types.dart';
 import 'box_fit.dart';
 import 'decoration.dart';
 import 'edge_insets.dart';
+import 'image_provider.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
 import 'text_style.dart';

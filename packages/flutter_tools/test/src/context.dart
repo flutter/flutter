@@ -189,6 +189,12 @@ class MockDeviceManager implements DeviceManager {
   }
 
   void addDevice(Device device) => devices.add(device);
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
 class MockDoctor extends Doctor {

@@ -252,6 +252,8 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onScrollDown,
     this.onIncrease,
     this.onDecrease,
+    this.onMoveCursorForwardByCharacter,
+    this.onMoveCursorBackwardByCharacter,
   });
 
   /// If non-null, indicates that this subtree represents a checkbox
@@ -435,6 +437,24 @@ class SemanticsProperties extends DiagnosticableTree {
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
   final VoidCallback onDecrease;
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field forward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume up key while the
+  /// input focus is in a text field.
+  final VoidCallback onMoveCursorForwardByCharacter;
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final VoidCallback onMoveCursorBackwardByCharacter;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {

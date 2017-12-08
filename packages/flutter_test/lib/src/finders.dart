@@ -23,8 +23,8 @@ final CommonFinders find = const CommonFinders._();
 class CommonFinders {
   const CommonFinders._();
 
-  /// Finds [Text] widgets containing string equal to the `text`
-  /// argument.
+  /// Finds [Text] and [EditableText] widgets containing string equal to the
+  /// `text` argument.
   ///
   /// Example:
   ///
@@ -410,10 +410,14 @@ class _TextFinder extends MatchFinder {
 
   @override
   bool matches(Element candidate) {
-    if (candidate.widget is! Text)
-      return false;
-    final Text textWidget = candidate.widget;
-    return textWidget.data == text;
+    if (candidate.widget is Text) {
+      final Text textWidget = candidate.widget;
+      return textWidget.data == text;
+    } else if (candidate.widget is EditableText) {
+      final EditableText editable = candidate.widget;
+      return editable.controller.text == text;
+    }
+    return false;
   }
 }
 
