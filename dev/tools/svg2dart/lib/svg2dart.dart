@@ -6,6 +6,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart' as xml show parse;
 import 'package:xml/xml.dart' hide parse;
 
@@ -29,24 +30,38 @@ FrameData interpretSvg(String svgFilePath) {
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
   final double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
 
-  final List<SvgPath> paths = _interpretSvgGroup(svgElement.children);
+  final List<SvgPath> paths =
+    _interpretSvgGroup(svgElement.children, new _Transform());
   return new FrameData(new Point<double>(width, height), paths);
 }
 
-List<SvgPath> _interpretSvgGroup(List<XmlNode> children) {
+List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
   final List<SvgPath> paths = <SvgPath>[];
   for (XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
     final XmlElement element = node;
 
-    // TODO(amirh): recrusively parse groups and apply transforms
     if (element.name.local == 'path') {
-      paths.add(SvgPath.fromElement(element));
+      // TODO(amirh): convert relative commands to absolute
+      paths.add(SvgPath.fromElement(element).applyTransform(transform));
     }
 
     if (element.name.local == 'g') {
-      paths.addAll(_interpretSvgGroup(element.children));
+      double opacity = transform.opacity;
+      if (_hasAttr(element, 'opacity'))
+        opacity *= double.parse(_extractAttr(element, 'opacity'));
+
+      Matrix3 transformMatrix = transform.transformMatrix;
+      if (_hasAttr(element, 'transform'))
+        transformMatrix = transformMatrix.multiplied(
+            _parseSvgTransform(_extractAttr(element, 'transform')));
+
+      final _Transform subtreeTransform = new _Transform(
+        transformMatrix: transformMatrix,
+        opacity: opacity
+      );
+      paths.addAll(_interpretSvgGroup(element.children, subtreeTransform));
     }
   }
   return paths;
@@ -105,10 +120,11 @@ class FrameData {
 
 /// Represents an SVG path element.
 class SvgPath {
-  const SvgPath(this.id, this.commands);
+  const SvgPath(this.id, this.commands, {this.opacity = 1.0});
 
   final String id;
   final List<SvgPathCommand> commands;
+  final double opacity;
 
   static final RegExp _pathCommandMatcher = new RegExp(r'([MmLlQqCcAZz]) *([\-\.0-9 ,]*)');
 
@@ -125,24 +141,33 @@ class SvgPath {
     return new SvgPath(id, commands);
   }
 
+  SvgPath applyTransform(_Transform transform) {
+    final List<SvgPathCommand> transformedCommands =
+      commands.map((SvgPathCommand c) => c.applyTransform(transform)).toList();
+    return new SvgPath(id, transformedCommands, opacity: opacity * transform.opacity);
+  }
+
   @override
   bool operator ==(Object other) =>
       identical(this, other) || (
           other is SvgPath &&
           runtimeType == other.runtimeType &&
           id == other.id &&
-          const ListEquality<SvgPathCommand>().equals(commands, other.commands)
+          const ListEquality<SvgPathCommand>().equals(commands, other.commands) &&
+          opacity == other.opacity
       );
 
   @override
   int get hashCode =>
       id.hashCode ^
-      commands.hashCode;
+      commands.hashCode ^
+      opacity.hashCode;
 
   @override
   String toString() {
-    return 'SvgPath(id: $id, commands: $commands)';
+    return 'SvgPath(id: $id, opacity: $opacity, commands: $commands)';
   }
+
 }
 
 /// Represents a single SVG path command from an SVG d element.
@@ -164,6 +189,15 @@ class SvgPathCommand {
   /// List of points used by this command.
   final List<Point<double>> points;
 
+  SvgPathCommand applyTransform(_Transform transform) {
+    final List<Point<double>> transformedPoints =
+    _vector3ArrayToPoints(
+        transform.transformMatrix.applyToVector3Array(
+            _pointsToVector3Array(points)
+        )
+    );
+    return new SvgPathCommand(type, transformedPoints);
+  }
 
   @override
   bool operator ==(Object other) =>
@@ -180,8 +214,102 @@ class SvgPathCommand {
 
   @override
   String toString() {
-    return 'SvgPathCommand{command: $type, points: $points}';
+    return 'SvgPathCommand{type: $type, points: $points}';
   }
+}
+
+List<double> _pointsToVector3Array(List<Point<double>> points) {
+  final List<double> result = new List<double>(points.length * 3);
+  for (int i = 0; i < points.length; i += 1) {
+    result[i * 3] = points[i].x;
+    result[i * 3 + 1] = points[i].y;
+    result[i * 3 + 2] = 1.0;
+  }
+  return result;
+}
+
+List<Point<double>> _vector3ArrayToPoints(List<double> vector) {
+  final int numPoints = (vector.length / 3).floor();
+  final List<Point<double>> points = new List<Point<double>>(numPoints);
+  for (int i = 0; i < numPoints; i += 1) {
+    points[i] = new Point<double>(vector[i*3], vector[i*3 + 1]);
+  }
+  return points;
+}
+
+/// Represents a transformation to apply on an SVG subtree.
+///
+/// This includes more transforms than the ones described by the SVG transform
+/// attribute, e.g opacity.
+class _Transform {
+
+  /// Constructs a new _Transform, default arguments create a no-op transform.
+  _Transform({Matrix3 transformMatrix, this.opacity = 1.0}) :
+      this.transformMatrix = transformMatrix ?? new Matrix3.identity();
+
+  final Matrix3 transformMatrix;
+  final double opacity;
+
+  _Transform applyTransform(_Transform transform) {
+    return new _Transform(
+        transformMatrix: transform.transformMatrix.multiplied(transformMatrix),
+        opacity: transform.opacity * opacity,
+    );
+  }
+}
+
+final RegExp _transformCommand = new RegExp(' *(translate|scale|rotate)\\(([^)]*)\\)');
+
+Matrix3 _parseSvgTransform(String transform){
+  final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
+  Matrix3 result = new Matrix3.identity();
+  for (Match m in matches) {
+    final String command = m.group(1);
+    final String params = m.group(2);
+    if (command == 'translate') {
+      result = _parseSvgTranslate(params).multiplied(result);
+      continue;
+    }
+    if (command == 'scale') {
+      result = _parseSvgScale(params).multiplied(result);
+      continue;
+    }
+    if (command == 'rotate') {
+      result = _parseSvgRotate(params).multiplied(result);
+      continue;
+    }
+    throw new Exception('unimplemented transform: $command');
+  }
+  return result;
+}
+
+Matrix3 _parseSvgTranslate(String paramsStr) {
+  final List<String> params = paramsStr.split(',');
+  assert(params.isNotEmpty);
+  assert(params.length <= 2);
+  final double x = double.parse(params[0]);
+  final double y = params.length < 2 ? 0 : double.parse(params[1]);
+  return _matrix(1.0, 0.0, 0.0, 1.0, x, y);
+}
+
+Matrix3 _parseSvgScale(String paramsStr) {
+  final List<String> params = paramsStr.split(',');
+  assert(params.isNotEmpty);
+  assert(params.length <= 2);
+  final double x = double.parse(params[0]);
+  final double y = params.length < 2 ? 0 : double.parse(params[1]);
+  return _matrix(x, 0.0, 0.0, y, 0.0, 0.0);
+}
+
+Matrix3 _parseSvgRotate(String paramsStr) {
+  final List<String> params = paramsStr.split(',');
+  assert(params.length == 1);
+  final double a = radians(double.parse(params[0]));
+  return _matrix(cos(a), sin(a), -sin(a), cos(a), 0.0, 0.0);
+}
+
+Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
+  return new Matrix3(a, b, 0.0, c, d, 0.0, e, f, 1.0);
 }
 
 // Matches a pixels expression e.g "14px".
@@ -206,6 +334,10 @@ String _extractAttr(XmlElement element, String name) {
         'attributes were: ${element.attributes}'
     );
   }
+}
+
+bool _hasAttr(XmlElement element, String name) {
+  return element.attributes.where((XmlAttribute a) => a.name.local == name).isNotEmpty;
 }
 
 XmlElement _extractSvgElement(XmlDocument document) {

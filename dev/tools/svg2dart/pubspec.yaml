@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   args: ^1.2.0
+  vector_math: ^2.0.5
   xml: ^2.6.0
 
 dev_dependencies:

@@ -69,25 +69,132 @@ void main() {
     });
 
     test('SVG group', () {
-      FrameData frameData = interpretSvg(testAsset('bars_group.svg'));
-      expect(frameData.paths, [
+      final FrameData frameData = interpretSvg(testAsset('bars_group.svg'));
+      expect(frameData.paths, const <SvgPath> [
         const SvgPath('path_1', const<SvgPathCommand> [
-          const SvgPathCommand('M', const [const Point<double>(0.0, 19.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 19.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 29.0)]),
-          const SvgPathCommand('L', const [const Point<double>(0.0, 29.0)]),
-          const SvgPathCommand('Z', const []),
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 29.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 29.0)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
         ]),
         const SvgPath('path_2', const<SvgPathCommand> [
-          const SvgPathCommand('M', const [const Point<double>(0.0, 34.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 34.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 44.0)]),
-          const SvgPathCommand('L', const [const Point<double>(0.0, 44.0)]),
-          const SvgPathCommand('Z', const []),
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 34.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 34.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 44.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 44.0)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
         ]),
       ]);
     });
+
+    test('SVG group translate', () {
+      final FrameData frameData = interpretSvg(testAsset('bar_group_translate.svg'));
+      expect(frameData.paths, const <SvgPath> [
+        const SvgPath('path_1', const<SvgPathCommand> [
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 34.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 34.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 44.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 44.0)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
+        ]),
+      ]);
+    });
+
+    test('SVG group scale', () {
+      final FrameData frameData = interpretSvg(testAsset('bar_group_scale.svg'));
+      expect(frameData.paths, const <SvgPath> [
+        const SvgPath(
+            'path_1', const<SvgPathCommand> [
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 9.5)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(24.0, 9.5)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(24.0, 14.5)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 14.5)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
+        ]),
+      ]);
+    });
+
+    test('SVG group rotate scale', () {
+      final FrameData frameData = interpretSvg(testAsset('bar_group_rotate_scale.svg'));
+      expect(frameData.paths, const <PathMatcher> [
+        const PathMatcher(
+            const SvgPath(
+                'path_1', const<SvgPathCommand> [
+              const SvgPathCommand('L', const <Point<double>> [const Point<double>(29.0, 0.0)]),
+              const SvgPathCommand('L', const <Point<double>> [const Point<double>(29.0, 48.0)]),
+              const SvgPathCommand('L', const <Point<double>> [const Point<double>(19.0, 48.0)]),
+              const SvgPathCommand('M', const <Point<double>> [const Point<double>(19.0, 0.0)]),
+              const SvgPathCommand('Z', const <Point<double>> []),
+            ]),
+            margin: 0.000000001
+        )
+      ]);
+    });
+
+    test('SVG group opacity', () {
+      final FrameData frameData = interpretSvg(testAsset('bar_group_opacity.svg'));
+      expect(frameData.paths, const <SvgPath> [
+        const SvgPath(
+          'path_1',
+          const<SvgPathCommand> [
+            const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 19.0)]),
+            const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 19.0)]),
+            const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 29.0)]),
+            const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 29.0)]),
+            const SvgPathCommand('Z', const <Point<double>> []),
+          ],
+          opacity: 0.5,
+        ),
+      ]);
+    });
   });
+}
+
+// Matches all path commands' points within an error margin.
+class PathMatcher extends Matcher {
+  const PathMatcher(this.actual, {this.margin = 0.0});
+
+  final SvgPath actual;
+  final double margin;
+
+  @override
+  Description describe(Description description) => description.add('$actual (±$margin)');
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item == null || actual == null)
+      return item == actual;
+
+    if (item.runtimeType != actual.runtimeType)
+      return false;
+
+    final SvgPath other = item;
+    if (other.id != actual.id || other.opacity != actual.opacity)
+      return false;
+
+    if (other.commands.length != actual.commands.length)
+      return false;
+
+    for (int i = 0; i < other.commands.length; i += 1) {
+      if (!commandsMatch(actual.commands[i], other.commands[i]))
+        return false;
+    }
+    return true;
+  }
+
+  bool commandsMatch(SvgPathCommand actual, SvgPathCommand other) {
+    if (other.points.length != actual.points.length)
+      return false;
+
+    for (int i = 0; i < other.points.length; i += 1) {
+      if ((other.points[i].x - actual.points[i].x).abs() > margin)
+        return false;
+      if ((other.points[i].y - actual.points[i].y).abs() > margin)
+        return false;
+    }
+    return true;
+  }
 }
 
 String testAsset(String name) {
