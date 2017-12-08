@@ -67,6 +67,26 @@ void main() {
         ]),
       ]);
     });
+
+    test('SVG group', () {
+      FrameData frameData = interpretSvg(testAsset('bars_group.svg'));
+      expect(frameData.paths, [
+        const SvgPath('path_1', const<SvgPathCommand> [
+          const SvgPathCommand('M', const [const Point<double>(0.0, 19.0)]),
+          const SvgPathCommand('L', const [const Point<double>(48.0, 19.0)]),
+          const SvgPathCommand('L', const [const Point<double>(48.0, 29.0)]),
+          const SvgPathCommand('L', const [const Point<double>(0.0, 29.0)]),
+          const SvgPathCommand('Z', const []),
+        ]),
+        const SvgPath('path_2', const<SvgPathCommand> [
+          const SvgPathCommand('M', const [const Point<double>(0.0, 34.0)]),
+          const SvgPathCommand('L', const [const Point<double>(48.0, 34.0)]),
+          const SvgPathCommand('L', const [const Point<double>(48.0, 44.0)]),
+          const SvgPathCommand('L', const [const Point<double>(0.0, 44.0)]),
+          const SvgPathCommand('Z', const []),
+        ]),
+      ]);
+    });
   });
 }
 

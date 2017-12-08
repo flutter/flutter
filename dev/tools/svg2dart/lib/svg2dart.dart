@@ -29,18 +29,27 @@ FrameData interpretSvg(String svgFilePath) {
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
   final double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
 
+  final List<SvgPath> paths = _interpretSvgGroup(svgElement.children);
+  return new FrameData(new Point<double>(width, height), paths);
+}
+
+List<SvgPath> _interpretSvgGroup(List<XmlNode> children) {
   final List<SvgPath> paths = <SvgPath>[];
-  for (XmlNode child in svgElement.children) {
-    if (child.nodeType != XmlNodeType.ELEMENT)
+  for (XmlNode node in children) {
+    if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
-    final XmlElement childElement = child;
+    final XmlElement element = node;
 
     // TODO(amirh): recrusively parse groups and apply transforms
-    if (childElement.name.local == 'path') {
-      paths.add(SvgPath.fromElement(childElement));
+    if (element.name.local == 'path') {
+      paths.add(SvgPath.fromElement(element));
+    }
+
+    if (element.name.local == 'g') {
+      paths.addAll(_interpretSvgGroup(element.children));
     }
   }
-  return new FrameData(new Point<double>(width, height), paths);
+  return paths;
 }
 
 // Given a points list in the form e.g: "25.0, 1.0 12.0, 12.0 23.0, 9.0" matches
