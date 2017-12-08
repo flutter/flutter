@@ -148,6 +148,21 @@ void main() {
         ),
       ]);
     });
+
+    test('horizontal bar relative', () {
+      // This asset uses the relative 'l' command instead of 'L'.
+      final FrameData frameData = interpretSvg(testAsset('horizontal_bar_relative.svg'));
+      expect(frameData.paths, const <SvgPath> [
+        const SvgPath(
+            'path_1', const<SvgPathCommand> [
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 29.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 29.0)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
+        ]),
+      ]);
+    });
   });
 }
 

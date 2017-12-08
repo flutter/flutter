@@ -133,10 +133,11 @@ class SvgPath {
     final String id = _extractAttr(pathElement, 'id');
     final String dAttr = _extractAttr(pathElement, 'd');
     final List<SvgPathCommand> commands = <SvgPathCommand> [];
+    final SvgPathCommandBuilder commandsBuilder = new SvgPathCommandBuilder();
     for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
       final String pointStr = match.group(2);
-      commands.add(new SvgPathCommand(commandType, parsePoints(pointStr)));
+      commands.add(commandsBuilder.build(commandType, parsePoints(pointStr)));
     }
     return new SvgPath(id, commands);
   }
@@ -215,6 +216,36 @@ class SvgPathCommand {
   @override
   String toString() {
     return 'SvgPathCommand{type: $type, points: $points}';
+  }
+}
+
+class SvgPathCommandBuilder {
+  static const Map<String, Null> kRelativeCommands = const <String, Null> {
+    'c': null,
+    'l': null,
+    'm': null,
+    't': null,
+    's': null
+  };
+
+  Point<double> lastPoint = const Point<double>(0.0, 0.0);
+
+  SvgPathCommand build(String type, List<Point<double>> points) {
+    List<Point<double>> absPoints = points;
+    if (_isRelativeCommand(type)) {
+      absPoints = points.map((Point<double> p) => p + lastPoint).toList();
+    }
+
+    // closePath commands are always last in the path, so we don't need to track
+    // last point.
+    if (type != 'Z' && type != 'z')
+      lastPoint = absPoints.last;
+
+    return new SvgPathCommand(type.toUpperCase(), absPoints);
+  }
+
+  static bool _isRelativeCommand(String type) {
+    return kRelativeCommands.containsKey(type);
   }
 }
 
