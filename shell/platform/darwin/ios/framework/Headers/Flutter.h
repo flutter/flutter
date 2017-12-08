@@ -5,6 +5,12 @@
 #ifndef FLUTTER_FLUTTER_H_
 #define FLUTTER_FLUTTER_H_
 
+/**
+ BREAKING CHANGES:
+
+ November 29, 2017: Added a BREAKING CHANGES section.
+ */
+
 #include "FlutterAppDelegate.h"
 #include "FlutterBinaryMessenger.h"
 #include "FlutterChannels.h"
