@@ -39,13 +39,13 @@ enum _ScaffoldSlot {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
-    @required this.bottomPadding,
+    @required this.bottomViewInset,
     @required this.endPadding, // for floating action button
     @required this.textDirection,
   });
 
   final double statusBarHeight;
-  final double bottomPadding;
+  final double bottomViewInset;
   final double endPadding;
   final TextDirection textDirection;
 
@@ -59,7 +59,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = math.max(0.0, size.height - bottomPadding);
+    final double bottom = math.max(0.0, size.height - bottomViewInset);
     double contentTop = 0.0;
     double contentBottom = bottom;
 
@@ -161,7 +161,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.statusBarHeight != statusBarHeight
-        || oldDelegate.bottomPadding != bottomPadding
+        || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.endPadding != endPadding
         || oldDelegate.textDirection != textDirection;
   }
@@ -1043,7 +1043,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             children: children,
             delegate: new _ScaffoldLayout(
               statusBarHeight: mediaQuery.padding.top,
-              bottomPadding: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
+              bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
             ),
