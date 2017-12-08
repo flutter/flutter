@@ -5,7 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-/// Create a new [http.Client] object.
+/// (Deprecated, use [dart:io.HttpClientOverrides]) Create a new [http.Client] object.
+///
+/// We recommend [dart:io.HttpClientOverrides] instead of this function. Flutter
+/// will soon use [dart:io.HttpClient].
 ///
 /// This can be set to a new function to override the default logic for creating
 /// HTTP clients, for example so that all logic in the framework that triggers
