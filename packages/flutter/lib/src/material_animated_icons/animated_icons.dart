@@ -80,6 +80,8 @@ class AnimatedIcon extends StatelessWidget {
   /// specified, either directly using this property or using [Directionality].
   final TextDirection textDirection;
 
+  static final _UiPathFactory _pathFactory = () => new ui.Path();
+
   @override
   Widget build(BuildContext context) {
     // TODO(amirh): implement semantics, text direction, scaling.
@@ -90,7 +92,7 @@ class AnimatedIcon extends StatelessWidget {
         iconData.paths,
         progress,
         color,
-        () => new ui.Path(),
+        _pathFactory,
       ),
     );
   }
@@ -98,15 +100,13 @@ class AnimatedIcon extends StatelessWidget {
 
 typedef ui.Path _UiPathFactory();
 
-class _AnimatedIconPainter extends ChangeNotifier implements CustomPainter {
+class _AnimatedIconPainter extends CustomPainter {
   _AnimatedIconPainter(
     this.paths,
     this.progress,
     this.color,
-    this.uiPathFactory
-  ) {
-    progress.addListener(notifyListeners);
-  }
+    this.uiPathFactory,
+  ) : super(repaint: progress);
 
   // This list is assumed to be immutable, changes to the contents of the list
   // will not trigger a redraw as shouldRepaint will keep returning false.
