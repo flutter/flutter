@@ -159,10 +159,10 @@ class CachedArtifacts extends Artifacts {
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.flutterTester:
-        if (platform == TargetPlatform.windows_x64)
-          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
-        continue fallThrough;
-      fallThrough:
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String platformDirName = getNameForTargetPlatform(platform);
+        String path = fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact));
+        return (platform == TargetPlatform.windows_x64) ? (path + '.exe') : path;
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -283,6 +283,8 @@ class LocalEngineArtifacts extends Artifacts {
       return fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
       return fs.path.join(engineOutPath, 'flutter_tester');
+    } else if (getCurrentHostPlatform() == HostPlatform.windows_x64) {
+      return fs.path.join(engineOutPath, 'flutter_tester.exe');
     }
     throw new Exception('Unsupported platform $platform.');
   }
