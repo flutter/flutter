@@ -229,4 +229,40 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Dialogs removes MediaQuery padding', (WidgetTester tester) async {
+    BuildContext scaffoldContext;
+    BuildContext dialogContext;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Builder(
+          builder: (BuildContext context) {
+            scaffoldContext = context;
+            return new Container();
+          }
+        ),
+      )
+    ));
+
+    await tester.pump();
+
+    showDialog<Null>(
+      context: scaffoldContext,
+      barrierDismissible: false,
+      child: new Builder(
+        builder: (BuildContext context) {
+          dialogContext = context;
+          return new Container();
+        },
+      ),
+    );
+
+    await tester.pump();
+
+    expect(MediaQuery.of(dialogContext).padding, EdgeInsets.zero);
+  });
 }
