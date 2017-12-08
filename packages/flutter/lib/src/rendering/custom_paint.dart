@@ -845,6 +845,12 @@ class RenderCustomPaint extends RenderProxyBox {
     if (properties.onDecrease != null) {
       config.addAction(SemanticsAction.decrease, properties.onDecrease);
     }
+    if (properties.onMoveCursorForwardByCharacter != null) {
+      config.addAction(SemanticsAction.moveCursorForwardByCharacter, properties.onMoveCursorForwardByCharacter);
+    }
+    if (properties.onMoveCursorBackwardByCharacter != null) {
+      config.addAction(SemanticsAction.moveCursorBackwardByCharacter, properties.onMoveCursorBackwardByCharacter);
+    }
 
     newChild.updateWith(
       config: config,
