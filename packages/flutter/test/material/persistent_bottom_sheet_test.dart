@@ -91,4 +91,43 @@ void main() {
     expect(buildCount, equals(1));
   });
 
+  testWidgets('Bottom sheet removes top MediaQuery padding', (WidgetTester tester) async {
+    BuildContext scaffoldContext;
+    BuildContext bottomSheetContext;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Builder(
+          builder: (BuildContext context) {
+            scaffoldContext = context;
+            return new Container();
+          }
+        ),
+      )
+    ));
+
+    await tester.pump();
+
+    showBottomSheet<Null>(
+      context: scaffoldContext,
+      builder: (BuildContext context) {
+        bottomSheetContext = context;
+        return new Container();
+      },
+    );
+
+    expect(
+      MediaQuery.of(bottomSheetContext).padding,
+      const EdgeInsets.only(
+        bottom: 50.0,
+        left: 50.0,
+        right: 50.0,
+      ),
+    );
+    // There's the original and a trimmed MediaQuery widget now.
+    expect(find.byType(MediaQuery).evaluate().length, 2);
+  });
 }

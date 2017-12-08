@@ -591,17 +591,24 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     if (theme != null)
       menu = new Theme(data: theme, child: menu);
 
-    return new Builder(
-      builder: (BuildContext context) {
-        return new CustomSingleChildLayout(
-          delegate: new _PopupMenuRouteLayout(
-            position,
-            selectedItemOffset,
-            Directionality.of(context),
-          ),
-          child: menu,
-        );
-      },
+    return new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: new Builder(
+        builder: (BuildContext context) {
+          return new CustomSingleChildLayout(
+            delegate: new _PopupMenuRouteLayout(
+              position,
+              selectedItemOffset,
+              Directionality.of(context),
+            ),
+            child: menu,
+          );
+        },
+      ),
     );
   }
 }

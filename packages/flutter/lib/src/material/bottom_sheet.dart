@@ -234,10 +234,18 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    Widget bottomSheet = new _ModalBottomSheet<T>(route: this);
-    if (theme != null)
-      bottomSheet = new Theme(data: theme, child: bottomSheet);
-    return bottomSheet;
+    return new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: new Builder(
+        builder: (BuildContext context) {
+          Widget bottomSheet = new _ModalBottomSheet<T>(route: this);
+          if (theme != null)
+            bottomSheet = new Theme(data: theme, child: bottomSheet);
+          return bottomSheet;
+        },
+      ),
+    );
   }
 }
 
