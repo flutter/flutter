@@ -833,8 +833,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
-    final EdgeInsets viewInsets = MediaQuery.of(context).viewInsets;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -865,7 +864,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     );
 
     if (widget.appBar != null) {
-      final double topPadding = widget.primary ? padding.top : 0.0;
+      final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
       final double extent = widget.appBar.preferredSize.height + topPadding;
       assert(extent >= 0.0 && extent.isFinite);
       _addIfNonNull(
@@ -1021,10 +1020,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double endPadding;
     switch (textDirection) {
       case TextDirection.rtl:
-        endPadding = padding.left;
+        endPadding = mediaQuery.padding.left;
         break;
       case TextDirection.ltr:
-        endPadding = padding.right;
+        endPadding = mediaQuery.padding.right;
         break;
     }
     assert(endPadding != null);
@@ -1038,8 +1037,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: new CustomMultiChildLayout(
             children: children,
             delegate: new _ScaffoldLayout(
-              statusBarHeight: padding.top,
-              bottomPadding: widget.resizeToAvoidBottomPadding ? math.max(padding.bottom, viewInsets.bottom) : 0.0,
+              statusBarHeight: mediaQuery.padding.top,
+              // TODO(cbracken): this should use viewInsets.bottom only.
+              bottomPadding: widget.resizeToAvoidBottomPadding
+                ? math.max(mediaQuery.padding.bottom, mediaQuery.viewInsets.bottom)
+                : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
             ),
