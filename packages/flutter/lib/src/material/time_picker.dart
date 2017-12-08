@@ -69,6 +69,7 @@ class _TimePickerFragmentContext {
     @required this.inactiveStyle,
     @required this.onTimeChange,
     @required this.onModeChange,
+    @required this.targetPlatform,
   }) : assert(headerTextTheme != null),
        assert(textDirection != null),
        assert(selectedTime != null),
@@ -78,7 +79,8 @@ class _TimePickerFragmentContext {
        assert(inactiveColor != null),
        assert(inactiveStyle != null),
        assert(onTimeChange != null),
-       assert(onModeChange != null);
+       assert(onModeChange != null),
+       assert(targetPlatform != null);
 
   final TextTheme headerTextTheme;
   final TextDirection textDirection;
@@ -90,6 +92,7 @@ class _TimePickerFragmentContext {
   final TextStyle inactiveStyle;
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
+  final TargetPlatform targetPlatform;
 }
 
 /// Contains the [widget] and layout properties of an atom of time information,
@@ -194,7 +197,9 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.am) {
       return;
     }
-    _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+    if (fragmentContext.targetPlatform == TargetPlatform.android) {
+      _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
+    }
     _togglePeriod();
   }
 
@@ -202,7 +207,9 @@ class _DayPeriodControl extends StatelessWidget {
     if (fragmentContext.selectedTime.period == DayPeriod.pm) {
       return;
     }
-    _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+    if (fragmentContext.targetPlatform == TargetPlatform.android) {
+      _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
+    }
     _togglePeriod();
   }
 
@@ -687,6 +694,7 @@ class _TimePickerHeader extends StatelessWidget {
       inactiveStyle: baseHeaderStyle.copyWith(color: inactiveColor),
       onTimeChange: onChanged,
       onModeChange: _handleChangeMode,
+      targetPlatform: themeData.platform,
     );
 
     final _TimePickerHeaderFormat format = _buildHeaderFormat(timeOfDayFormat, fragmentContext);
