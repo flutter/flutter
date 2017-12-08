@@ -4726,6 +4726,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    VoidCallback onMoveCursorForwardByCharacter,
+    VoidCallback onMoveCursorBackwardByCharacter,
   }) : this.fromProperties(
     key: key,
     child: child,
@@ -4749,6 +4751,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: onScrollDown,
       onIncrease: onIncrease,
       onDecrease: onDecrease,
+      onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
+      onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
     ),
   );
 
@@ -4814,6 +4818,8 @@ class Semantics extends SingleChildRenderObjectWidget {
       onScrollDown: properties.onScrollDown,
       onIncrease: properties.onIncrease,
       onDecrease: properties.onDecrease,
+      onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
+      onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
     );
   }
 
@@ -4849,7 +4855,9 @@ class Semantics extends SingleChildRenderObjectWidget {
       ..onScrollUp = properties.onScrollUp
       ..onScrollDown = properties.onScrollDown
       ..onIncrease = properties.onIncrease
-      ..onDecrease = properties.onDecrease;
+      ..onDecrease = properties.onDecrease
+      ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
   }
 
   @override
