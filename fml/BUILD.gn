@@ -6,7 +6,6 @@ source_set("fml") {
   sources = [
     "icu_util.cc",
     "icu_util.h",
-    "mapping.cc",
     "mapping.h",
     "memory/weak_ptr.h",
     "memory/weak_ptr_internal.cc",
@@ -98,9 +97,14 @@ source_set("fml") {
 
   if (is_win) {
     sources += [
+      "platform/win/mapping_win.cc",
       "platform/win/message_loop_win.cc",
       "platform/win/message_loop_win.h",
       "platform/win/paths_win.cc",
+    ]
+  } else {
+    sources += [
+      "platform/posix/mapping_posix.cc",
     ]
   }
 }

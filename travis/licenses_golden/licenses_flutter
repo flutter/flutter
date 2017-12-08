@@ -1088,7 +1088,6 @@ FILE: ../../../flutter/flow/texture.cc
 FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/fml/icu_util.cc
 FILE: ../../../flutter/fml/icu_util.h
-FILE: ../../../flutter/fml/mapping.cc
 FILE: ../../../flutter/fml/mapping.h
 FILE: ../../../flutter/fml/message_loop.cc
 FILE: ../../../flutter/fml/message_loop.h
@@ -1122,6 +1121,8 @@ FILE: ../../../flutter/fml/platform/linux/message_loop_linux.h
 FILE: ../../../flutter/fml/platform/linux/paths_linux.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.cc
 FILE: ../../../flutter/fml/platform/linux/timerfd.h
+FILE: ../../../flutter/fml/platform/posix/mapping_posix.cc
+FILE: ../../../flutter/fml/platform/win/mapping_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.cc
 FILE: ../../../flutter/fml/platform/win/message_loop_win.h
 FILE: ../../../flutter/fml/platform/win/paths_win.cc
