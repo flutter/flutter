@@ -401,6 +401,26 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  /// Returns the closest offset after `offset` at which the inout cursor can be
+  /// positioned.
+  int getOffsetAfter(int offset) {
+    final int nextCodeUnit = _text.codeUnitAt(offset);
+    if (nextCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle flag emojis (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+  }
+
+  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// be positioned.
+  int getOffsetBefore(int offset) {
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    if (prevCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle flag emojis (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+  }
+
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
