@@ -265,4 +265,32 @@ void main() {
     expect(delegate.log, equals(<String>['didFinishLayout firstIndex=2 lastIndex=5']));
     delegate.log.clear();
   });
+
+  testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
+    EdgeInsets innerMediaQueryPadding;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.all(30.0),
+          ),
+          child: new ListView(
+            children: <Widget>[
+              const Text('top', textDirection: TextDirection.ltr),
+              new Builder(builder: (BuildContext context) {
+                innerMediaQueryPadding = MediaQuery.of(context).padding;
+                return new Container();
+              }),
+            ],
+          ),
+        ),
+      ),
+    );
+    // Automatically apply the top/bottom padding into sliver.
+    expect(tester.getTopLeft(find.text('top')).dy, 30.0);
+    // Leave left/right padding as is for children.
+    expect(innerMediaQueryPadding, const EdgeInsets.symmetric(horizontal: 30.0));
+  });
 }
