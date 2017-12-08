@@ -176,7 +176,6 @@ class CachedArtifacts extends Artifacts {
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
-    return null;
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
