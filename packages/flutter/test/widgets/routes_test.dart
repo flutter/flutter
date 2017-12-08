@@ -80,7 +80,26 @@ class TestRoute extends LocalHistoryRoute<String> {
     routes.remove(this);
     super.dispose();
   }
+}
 
+class TestPopupRoute extends PopupRoute<Null> {
+  TestPopupRoute(this.builder);
+
+  WidgetBuilder builder;
+
+  @override
+  Color get barrierColor => null;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return builder(context);
+  }
+
+  @override
+  Duration get transitionDuration => const Duration(seconds: 1);
 }
 
 Future<Null> runNavigatorTest(
@@ -418,6 +437,58 @@ void main() {
       <String>[
       ]
     );
+  });
+
+  testWidgets('Route MediaQuery paddings kept for fullscreen routes', (WidgetTester tester) async {
+    MediaQueryData mediaQueryDataUnderTest;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.all(50.0),
+          ),
+          child: new Navigator(
+            onGenerateRoute: (_) => new PageRouteBuilder<Null>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                mediaQueryDataUnderTest = MediaQuery.of(context);
+                return new Container();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(mediaQueryDataUnderTest.padding, const EdgeInsets.all(50.0));
+    // Don't insert additional pointless MediaQueries.
+    expect(find.byType(MediaQuery).evaluate().length, 1);
+  });
+
+  testWidgets('Route MediaQuery paddings removed for non-fullscreen routes', (WidgetTester tester) async {
+    MediaQueryData mediaQueryDataUnderTest;
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.all(50.0),
+          ),
+          child: new Navigator(
+            onGenerateRoute: (_) => new TestPopupRoute(
+              (BuildContext context) {
+                mediaQueryDataUnderTest = MediaQuery.of(context);
+                return new Container();
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(mediaQueryDataUnderTest.padding, EdgeInsets.zero);
+    // There's an original and an automatically trimmed MediaQuery now.
+    expect(find.byType(MediaQuery).evaluate().length, 2);
   });
 
   group('PageRouteObserver', () {

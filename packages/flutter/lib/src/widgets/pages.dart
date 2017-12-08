@@ -28,7 +28,10 @@ abstract class PageRoute<T> extends ModalRoute<T> {
   bool get opaque => true;
 
   @override
-  bool get barrierDismissible => false;
+  bool get fullscreen => true;
+
+  @override
+  bool get barrierDismissible => true;
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) => nextRoute is PageRoute;

@@ -10,6 +10,7 @@ import 'basic.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'modal_barrier.dart';
 import 'navigator.dart';
 import 'overlay.dart';
@@ -735,6 +736,17 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // The API for subclasses to override - used by this class
 
+  /// Whether the route should cover the entire screen.
+  ///
+  /// Non-fullscreen routes' contents that won't intersect with [MediaQuery]
+  /// padding won't receive paddings in its [BuildContext].
+  ///
+  /// See also:
+  ///
+  ///  * [PageRoute], a common fullscreen route.
+  ///  * [PopupRoute], a common non-fullscreen route.
+  bool get fullscreen;
+
   /// Whether you can dismiss this route by tapping the modal barrier.
   ///
   /// The modal barrier is the scrim that is rendered behind each route, which
@@ -743,6 +755,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
+  ///
+  /// Only used when [fullscreen] is false.
   ///
   /// If [barrierDismissible] is true, then tapping this barrier will cause the
   /// current route to be popped (see [Navigator.pop]) with null as the value.
@@ -973,7 +987,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   // one of the builders
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null && !offstage) {
+    if (!fullscreen && barrierColor != null && !offstage) {
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = new ColorTween(
         begin: _kTransparent,
@@ -987,7 +1001,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         dismissible: barrierDismissible
       );
     } else {
-      barrier = new ModalBarrier(dismissible: barrierDismissible);
+      barrier = new ModalBarrier(dismissible: !fullscreen && barrierDismissible);
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(
@@ -998,10 +1012,29 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   // one of the builders
   Widget _buildModalScope(BuildContext context) {
+    Widget page;
+
+    if (!fullscreen) {
+      page = new MediaQuery.removePadding(
+        context: context,
+        removeTop: true,
+        removeBottom: true,
+        removeLeft: true,
+        removeRight: true,
+        child: new Builder(
+          builder: (BuildContext context) {
+            return buildPage(context, animation, secondaryAnimation);
+          },
+        ) ,
+      );
+    } else {
+      page = buildPage(context, animation, secondaryAnimation);
+    }
+
     return new _ModalScope(
       key: _scopeKey,
       route: this,
-      page: buildPage(context, animation, secondaryAnimation)
+      page: page,
       // _ModalScope calls buildTransitions(), defined above
     );
   }
@@ -1020,6 +1053,9 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 abstract class PopupRoute<T> extends ModalRoute<T> {
   @override
   bool get opaque => false;
+
+  @override
+  bool get fullscreen => false;
 
   @override
   bool get maintainState => true;
