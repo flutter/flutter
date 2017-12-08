@@ -27,5 +27,7 @@
   "selectAllButtonLabel": "すべて選択",
   "viewLicensesButtonLabel": "ライセンスを表示",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "timePickerHourModeAnnouncement": "時を選択",
+  "timePickerMinuteModeAnnouncement": "分を選択"
 }

@@ -28,5 +28,7 @@
   "selectAllButtonLabel": "TOUT SÉLECTIONNER",
   "viewLicensesButtonLabel": "AFFICHER LES LICENCES",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "timePickerHourModeAnnouncement": "Sélectionnez les heures",
+  "timePickerMinuteModeAnnouncement": "Sélectionnez les minutes"
 }

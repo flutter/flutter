@@ -822,7 +822,8 @@ class PipelineOwner {
   /// objects for a given [PipelineOwner] are closed, the [PipelineOwner] stops
   /// maintaining the semantics tree.
   SemanticsHandle ensureSemantics({ VoidCallback listener }) {
-    if (_outstandingSemanticsHandle++ == 0) {
+    _outstandingSemanticsHandle += 1;
+    if (_outstandingSemanticsHandle == 1) {
       assert(_semanticsOwner == null);
       _semanticsOwner = new SemanticsOwner();
       if (onSemanticsOwnerCreated != null)
@@ -833,7 +834,8 @@ class PipelineOwner {
 
   void _didDisposeSemanticsHandle() {
     assert(_semanticsOwner != null);
-    if (--_outstandingSemanticsHandle == 0) {
+    _outstandingSemanticsHandle -= 1;
+    if (_outstandingSemanticsHandle == 0) {
       _semanticsOwner.dispose();
       _semanticsOwner = null;
       if (onSemanticsOwnerDisposed != null)

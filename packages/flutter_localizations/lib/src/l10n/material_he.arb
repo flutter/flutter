@@ -29,5 +29,7 @@
   "selectAllButtonLabel": "בחירת הכול",
   "viewLicensesButtonLabel": "הצגת הרישיונות",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "timePickerHourModeAnnouncement": "בחר שעות",
+  "timePickerMinuteModeAnnouncement": "בחר דקות"
 }
