@@ -16,6 +16,12 @@
 namespace fml {
 namespace icu {
 
+#if OS_WIN
+static constexpr char kPathSeparator = '\\';
+#else
+static constexpr char kPathSeparator = '/';
+#endif
+
 static constexpr char kIcuDataFileName[] = "icudtl.dat";
 
 class ICUContext {
@@ -53,8 +59,8 @@ class ICUContext {
 
     // FIXME(chinmaygarde): There is no Path::Join in FXL. So a non-portable
     // version is used here. Patch FXL and update.
-    auto file = std::make_unique<FileMapping>(directory.second + "/" +
-                                              kIcuDataFileName);
+    auto file = std::make_unique<FileMapping>(
+        directory.second + kPathSeparator + kIcuDataFileName);
     if (file->GetSize() != 0) {
       mapping_ = std::move(file);
       return true;

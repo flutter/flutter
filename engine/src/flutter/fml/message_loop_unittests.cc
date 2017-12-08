@@ -75,7 +75,7 @@ TEST(MessageLoop, NonDelayedTasksAreRunInOrder) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t current = 0;
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask([&terminated, i, &current]() {
+      loop.GetTaskRunner()->PostTask([&terminated, i, &current, count]() {
         ASSERT_EQ(current, i);
         current++;
         if (count == i + 1) {
@@ -105,7 +105,7 @@ TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder) {
         fxl::TimePoint::Now() + fxl::TimeDelta::FromMilliseconds(2);
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTaskForTime(
-          [&terminated, i, &current]() {
+          [&terminated, i, &current, count]() {
             ASSERT_EQ(current, i);
             current++;
             if (count == i + 1) {
@@ -187,13 +187,13 @@ TEST(MessageLoop, TIME_SENSITIVE(SingleDelayedTaskForTime)) {
 TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
   const auto count = 10;
   int checked = false;
-  std::thread thread([&checked]() {
+  std::thread thread([&checked, count]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();
     for (int target_ms = 0 + 2; target_ms < count + 2; target_ms++) {
       auto begin = fxl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked]() {
+          [begin, target_ms, &checked, count]() {
             auto delta = fxl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);
@@ -214,13 +214,13 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
 TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
   const auto count = 10;
   int checked = false;
-  std::thread thread([&checked]() {
+  std::thread thread([&checked, count]() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();
     for (int target_ms = count + 2; target_ms > 0 + 2; target_ms--) {
       auto begin = fxl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked]() {
+          [begin, target_ms, &checked, count]() {
             auto delta = fxl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);
@@ -263,9 +263,9 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    CustomTaskObserver obs([&obs_count]() { obs_count++; });
+    CustomTaskObserver obs([&obs_count, count]() { obs_count++; });
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask([&terminated, i, &task_count]() {
+      loop.GetTaskRunner()->PostTask([&terminated, i, &task_count, count]() {
         ASSERT_EQ(task_count, i);
         task_count++;
         if (count == i + 1) {
