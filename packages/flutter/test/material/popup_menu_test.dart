@@ -315,6 +315,47 @@ void main() {
     await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, new Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
     await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, new Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
+
+  testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {
+    BuildContext popupContext;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Material(
+          child: new PopupMenuButton<int>(
+            itemBuilder: (BuildContext context) {
+              popupContext = context;
+              return <PopupMenuItem<int>>[
+                new PopupMenuItem<int>(
+                  value: 1,
+                  child: new Builder(
+                    builder: (BuildContext context) {
+                      popupContext = context;
+                      return const Text('AAA');
+                    },
+                  ),
+                ),
+              ];
+            },
+            child: const SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: const Text('XXX'),
+            ),
+          ),
+        ),
+      )
+    ));
+
+    await tester.tap(find.text('XXX'));
+
+    await tester.pump();
+
+    expect(MediaQuery.of(popupContext).padding, EdgeInsets.zero);
+  });
 }
 
 class TestApp extends StatefulWidget {
