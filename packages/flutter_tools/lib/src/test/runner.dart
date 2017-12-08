@@ -11,6 +11,7 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -61,7 +62,7 @@ Future<int> runTests(
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!fs.isFileSync(shellPath))
+  if (!processManager.canRun(shellPath))
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
   final InternetAddressType serverType =
