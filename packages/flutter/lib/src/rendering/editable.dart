@@ -316,6 +316,7 @@ class RenderEditable extends RenderBox {
     _selection = value;
     _selectionRects = null;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The offset at which the text should be painted.
@@ -346,6 +347,30 @@ class RenderEditable extends RenderBox {
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
+
+    if (_selection?.isValid == true) {
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
+        config.addAction(SemanticsAction.moveCursorBackwardByCharacter, () {
+          final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
+          if (offset == null)
+            return;
+          onSelectionChanged(
+            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+          );
+        });
+      }
+
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
+        config.addAction(SemanticsAction.moveCursorForwardByCharacter, () {
+          final int offset = _textPainter.getOffsetAfter(_selection.extentOffset);
+          if (offset == null)
+            return;
+          onSelectionChanged(
+            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+          );
+        });
+      }
+    }
   }
 
   @override

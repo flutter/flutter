@@ -22,6 +22,7 @@ class TestTextInput {
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+    _isRegistered = true;
   }
 
   /// Removes this object as a mock handler for [SystemChannels.textInput].
@@ -31,7 +32,14 @@ class TestTextInput {
   /// on-screen keyboard provided by the operating system.
   void unregister() {
     SystemChannels.textInput.setMockMethodCallHandler(null);
+    _isRegistered = false;
   }
+
+  /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
+  ///
+  /// Use [register] and [unregister] methods to control this value.
+  bool get isRegistered => _isRegistered;
+  bool _isRegistered = false;
 
   int _client = 0;
 

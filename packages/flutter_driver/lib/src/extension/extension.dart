@@ -35,7 +35,7 @@ const String _extensionMethod = 'ext.flutter.$_extensionMethodName';
 /// eventually completes to a string response.
 typedef Future<String> DataHandler(String message);
 
-class _DriverBinding extends BindingBase with SchedulerBinding, GestureBinding, ServicesBinding, RendererBinding, WidgetsBinding {
+class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding, GestureBinding, PaintingBinding, RendererBinding, WidgetsBinding {
   _DriverBinding(this._handler);
 
   final DataHandler _handler;
@@ -345,6 +345,10 @@ class FlutterDriverExtension {
   }
 
   Future<EnterTextResult> _enterText(Command command) async {
+    if (!_testTextInput.isRegistered) {
+      throw 'Unable to fulfill `FlutterDriver.enterText`. Text emulation is '
+            'disabled. You can enable it using `FlutterDriver.setTextEntryEmulation`.';
+    }
     final EnterText enterTextCommand = command;
     _testTextInput.enterText(enterTextCommand.text);
     return new EnterTextResult();

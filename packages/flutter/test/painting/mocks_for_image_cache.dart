@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/painting.dart';
 
 class TestImageInfo implements ImageInfo {
   const TestImageInfo(this.value, { this.image, this.scale });

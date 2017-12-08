@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'borders.dart';
@@ -12,9 +11,10 @@ import 'box_decoration.dart';
 import 'box_shadow.dart';
 import 'circle_border.dart';
 import 'decoration.dart';
+import 'decoration_image.dart';
 import 'edge_insets.dart';
 import 'gradient.dart';
-import 'images.dart';
+import 'image_provider.dart';
 import 'rounded_rectangle_border.dart';
 
 /// An immutable description of how to paint an arbitrary shape.

@@ -8,8 +8,8 @@ import 'dart:convert';
 import 'dart:ui' show hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
-import 'asset_bundle.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestFileName = 'AssetManifest.json';

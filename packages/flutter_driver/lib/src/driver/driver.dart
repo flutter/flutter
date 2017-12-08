@@ -435,6 +435,9 @@ class FlutterDriver {
   /// calling this method. Typically, a test would activate a widget, e.g. using
   /// [tap], then call this method.
   ///
+  /// For this method to work, text emulation must be enabled (see
+  /// [setTextEntryEmulation]). Text emulation is enabled by default.
+  ///
   /// Example:
   ///
   /// ```dart
@@ -452,9 +455,17 @@ class FlutterDriver {
   }
 
   /// If `enabled` is true, enables text entry emulation via [enterText]. If
-  /// `enabled` is false, disables it.
+  /// `enabled` is false, disables it. By default text entry emulation is
+  /// enabled.
   ///
-  /// By default text entry emulation is enabled.
+  /// When disabled, [enterText] will fail with a [DriverError]. When an
+  /// [EditableText] is focused, the operating system's configured keyboard
+  /// method is invoked, such as an on-screen keyboard on a phone or a tablet.
+  ///
+  /// When enabled, the operating system's configured keyboard will not be
+  /// invoked when the widget is focused, as the [SystemChannels.textInput]
+  /// channel will be mocked out. In disabled mode [enterText] can be used to
+  /// emulate text entry.
   Future<Null> setTextEntryEmulation({ @required bool enabled, Duration timeout }) async {
     assert(enabled != null);
     await _sendCommand(new SetTextEntryEmulation(enabled, timeout: timeout));

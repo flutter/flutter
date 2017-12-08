@@ -253,6 +253,28 @@ abstract class CachedArtifact {
 
   /// Template method to perform artifact update.
   Future<Null> updateInner();
+
+  String get _storageBaseUrl {
+    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl == null)
+      return 'https://storage.googleapis.com';
+    _maybeWarnAboutStorageOverride(overrideUrl);
+    return overrideUrl;
+  }
+
+  Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
+}
+
+bool _hasWarnedAboutStorageOverride = false;
+
+void _maybeWarnAboutStorageOverride(String overrideUrl) {
+  if (_hasWarnedAboutStorageOverride)
+    return;
+  logger.printStatus(
+    'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
+    emphasis: true,
+  );
+  _hasWarnedAboutStorageOverride = true;
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -261,8 +283,9 @@ class MaterialFonts extends CachedArtifact {
 
   @override
   Future<Null> updateInner() {
+    final Uri archiveUri = _toStorageUri(version);
     final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(version), location).then<Null>((_) {
+    return _downloadZipArchive(archiveUri, location).then<Null>((_) {
       status.stop();
     }).whenComplete(status.cancel);
   }
@@ -358,7 +381,7 @@ class FlutterEngine extends CachedArtifact {
 
   @override
   Future<Null> updateInner() async {
-    final String url = 'https://storage.googleapis.com/flutter_infra/flutter/$version/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
@@ -410,9 +433,10 @@ class GradleWrapper extends CachedArtifact {
 
   @override
   Future<Null> updateInner() {
+    final Uri archiveUri = _toStorageUri(version);
     final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
 
-    return _downloadZippedTarball(Uri.parse(version), location).then<Null>((_) {
+    return _downloadZippedTarball(archiveUri, location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
