@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'media_query.dart';
 import 'primary_scroll_controller.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
@@ -372,8 +373,33 @@ abstract class BoxScrollView extends ScrollView {
   @override
   List<Widget> buildSlivers(BuildContext context) {
     Widget sliver = buildChildLayout(context);
-    if (padding != null)
-      sliver = new SliverPadding(padding: padding, sliver: sliver);
+    EdgeInsetsGeometry effectivePadding = padding;
+    if (padding == null) {
+      final MediaQueryData mediaQuery = MediaQuery.of(context, nullOk: true);
+      if (mediaQuery != null) {
+        // Automatically pad sliver with padding from MediaQuery.
+        final EdgeInsets mediaQueryHorizontalPadding =
+            mediaQuery.padding.copyWith(top: 0.0, bottom: 0.0);
+        final EdgeInsets mediaQueryVerticalPadding =
+            mediaQuery.padding.copyWith(left: 0.0, right: 0.0);
+        // Consume the main axis padding with SliverPadding.
+        effectivePadding = scrollDirection == Axis.vertical
+            ? mediaQueryVerticalPadding
+            : mediaQueryHorizontalPadding;
+        // Leave behind the cross axis padding.
+        sliver = new MediaQuery(
+          data: mediaQuery.copyWith(
+            padding: scrollDirection == Axis.vertical
+                ? mediaQueryHorizontalPadding
+                : mediaQueryVerticalPadding,
+          ),
+          child: sliver,
+        );
+      }
+    }
+
+    if (effectivePadding != null)
+      sliver = new SliverPadding(padding: effectivePadding, sliver: sliver);
     return <Widget>[ sliver ];
   }
 
@@ -464,6 +490,10 @@ abstract class BoxScrollView extends ScrollView {
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the list itself, and having
 /// the [SliverList] instead be a child of the [SliverPadding].
+///
+/// By default, [ListView] will automatically pad the list's scrollable
+/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
+/// padding. To avoid this behavior, override with a zero [padding] property.
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
@@ -741,6 +771,10 @@ class ListView extends BoxScrollView {
 /// The [padding] property corresponds to having a [SliverPadding] in the
 /// [CustomScrollView.slivers] property instead of the grid itself, and having
 /// the [SliverGrid] instead be a child of the [SliverPadding].
+///
+/// By default, [ListView] will automatically pad the list's scrollable
+/// extremities to avoid partial obstructions indicated by [MediaQuery]'s
+/// padding. To avoid this behavior, override with a zero [padding] property.
 ///
 /// Once code has been ported to use [CustomScrollView], other slivers, such as
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]

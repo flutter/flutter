@@ -7,11 +7,11 @@ import 'dart:ui' as ui show Image, ColorFilter;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:quiver/testing/async.dart';
-
 import 'package:test/test.dart';
-import '../services/mocks_for_image_cache.dart';
+
+import '../painting/mocks_for_image_cache.dart';
+import '../rendering/rendering_tester.dart';
 
 class TestCanvas implements Canvas {
   TestCanvas([this.invocations]);
@@ -90,6 +90,8 @@ class TestImage extends ui.Image {
 }
 
 void main() {
+  new TestRenderingFlutterBinding(); // initializes the imageCache
+
   test('Decoration.lerp()', () {
     final BoxDecoration a = const BoxDecoration(color: const Color(0xFFFFFFFF));
     final BoxDecoration b = const BoxDecoration(color: const Color(0x00000000));

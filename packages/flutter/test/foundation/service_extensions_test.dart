@@ -16,9 +16,10 @@ import 'package:flutter/widgets.dart';
 import 'package:test/test.dart';
 
 class TestServiceExtensionsBinding extends BindingBase
-  with SchedulerBinding,
-       ServicesBinding,
+  with ServicesBinding,
        GestureBinding,
+       SchedulerBinding,
+       PaintingBinding,
        RendererBinding,
        WidgetsBinding {
 
@@ -39,9 +40,11 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   int reassembled = 0;
+  bool pendingReassemble = false;
   @override
   Future<Null> performReassemble() {
     reassembled += 1;
+    pendingReassemble = true;
     return super.performReassemble();
   }
 
@@ -57,6 +60,17 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
+  }
+
+  @override
+  void scheduleForcedFrame() {
+    expect(true, isFalse);
+  }
+
+  @override
+  void scheduleWarmUpFrame() {
+    expect(pendingReassemble, isTrue);
+    pendingReassemble = false;
   }
 
   Future<Null> flushMicrotasks() {

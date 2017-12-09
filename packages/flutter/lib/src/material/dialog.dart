@@ -427,7 +427,18 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return theme != null ? new Theme(data: theme, child: child) : child;
+    return new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: new Builder(
+        builder: (BuildContext context) {
+          return theme != null ? new Theme(data: theme, child: child) : child;
+        }
+      ),
+    );
   }
 
   @override

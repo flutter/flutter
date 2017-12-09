@@ -93,5 +93,14 @@ void main() {
       await driver.tap(a);
       await driver.waitForAbsent(menu);
     });
+
+    test('enters text in a text field', () async {
+      final SerializableFinder textField = find.byValueKey('enter-text-field');
+      await driver.tap(textField);
+      await driver.enterText('Hello!');
+      await driver.waitFor(find.text('Hello!'));
+      await driver.enterText('World!');
+      await driver.waitFor(find.text('World!'));
+    });
   });
 }

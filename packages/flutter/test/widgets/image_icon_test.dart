@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../services/mocks_for_image_cache.dart';
+import '../painting/mocks_for_image_cache.dart';
 
 const ImageProvider _kImage = const TestImageProvider(21, 42);
 

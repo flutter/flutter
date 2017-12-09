@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart' show ValueGetter;
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart' as http;
 
-import '../../../packages/flutter/test/services/image_data.dart';
+import '../../../packages/flutter/test/painting/image_data.dart';
 
 // Returns a mock HTTP client that responds with an image to all requests.
 ValueGetter<http.Client> createMockImageHttpClient = () {

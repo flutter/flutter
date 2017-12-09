@@ -69,7 +69,7 @@ void main() {
         ],
       ).toString(),
       equals(
-        'LinearGradient(Alignment.topLeft, Alignment.bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
+        'LinearGradient(topLeft, bottomLeft, [Color(0x33333333), Color(0x66666666)], null, TileMode.clamp)',
       ),
     );
   });

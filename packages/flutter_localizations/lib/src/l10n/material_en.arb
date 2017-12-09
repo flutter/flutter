@@ -143,5 +143,15 @@
   "postMeridiemAbbreviation": "PM",
   "@postMeridiemAbbreviation": {
     "description": "The abbreviation for post meridiem (after noon) shown in the time picker. Translations for this abbreviation will only be provided for locales that support it."
+  },
+
+  "timePickerHourModeAnnouncement": "Select hours",
+  "@timePickerHourModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to hour mode."
+  },
+
+  "timePickerMinuteModeAnnouncement": "Select minutes",
+  "@timePickerMinuteModeAnnouncement": {
+    "description": "The audio announcement made when the time picker dialog is set to minute mode."
   }
 }

@@ -7,6 +7,7 @@ import 'dart:io' show File;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 
 import 'basic.dart';
@@ -15,13 +16,16 @@ import 'localizations.dart';
 import 'media_query.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show
-  ImageProvider,
+export 'package:flutter/painting.dart' show
   AssetImage,
   ExactAssetImage,
+  FileImage,
+  ImageConfiguration,
+  ImageInfo,
+  ImageStream,
+  ImageProvider,
   MemoryImage,
-  NetworkImage,
-  FileImage;
+  NetworkImage;
 
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
