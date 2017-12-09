@@ -101,9 +101,21 @@ class Ticker {
   /// A ticker that is [muted] can be active (see [isActive]) yet not be
   /// ticking. In that case, the ticker will not call its callback, and
   /// [isTicking] will be false, but time will still be progressing.
-  // TODO(ianh): we should teach the scheduler binding about the lifecycle events
-  // and then this could return an accurate view of the actual scheduler.
-  bool get isTicking => _future != null && !muted;
+  ///
+  /// This will return false if the [Scheduler.lifecycleState] is one that
+  /// indicates the application is not currently visible (e.g. if the device's
+  /// screen is turned off).
+  bool get isTicking {
+    if (_future == null)
+      return false;
+    if (muted)
+      return false;
+    if (SchedulerBinding.instance.framesEnabled)
+      return true;
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.idle)
+      return true; // for example, we might be in a warm-up frame or forced frame
+    return false;
+  }
 
   /// Whether time is elapsing for this [Ticker]. Becomes true when [start] is
   /// called and false when [stop] is called.

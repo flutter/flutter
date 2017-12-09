@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('Ticker mute control test', (WidgetTester tester) async {
     int tickCount = 0;
     void handleTick(Duration duration) {
-      ++tickCount;
+      tickCount += 1;
     }
 
     final Ticker ticker = new Ticker(handleTick);
@@ -80,5 +81,26 @@ void main() {
 
     expect(ticker, hasOneLineDescription);
     expect(ticker.toString(debugIncludeStack: true), contains('testFunction'));
+  });
+
+  testWidgets('Ticker stops ticking when application is paused', (WidgetTester tester) async {
+    int tickCount = 0;
+    void handleTick(Duration duration) {
+      tickCount += 1;
+    }
+
+    final Ticker ticker = new Ticker(handleTick);
+    ticker.start();
+
+    expect(ticker.isTicking, isTrue);
+    expect(ticker.isActive, isTrue);
+    expect(tickCount, equals(0));
+
+    final ByteData message = const StringCodec().encodeMessage('AppLifecycleState.paused');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(ticker.isTicking, isFalse);
+    expect(ticker.isActive, isTrue);
+
+    ticker.stop();
   });
 }

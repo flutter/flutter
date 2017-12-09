@@ -583,6 +583,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     handleBeginFrame(null);
     _fakeAsync.flushMicrotasks();
     handleDrawFrame();
+    _fakeAsync.flushMicrotasks();
   }
 
   @override
@@ -827,6 +828,13 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
       return; // In benchmark mode, don't actually schedule any engine frames.
     super.scheduleFrame();
+  }
+
+  @override
+  void scheduleForcedFrame() {
+    if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
+      return; // In benchmark mode, don't actually schedule any engine frames.
+    super.scheduleForcedFrame();
   }
 
   bool _doDrawThisFrame;

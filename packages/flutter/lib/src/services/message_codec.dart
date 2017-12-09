@@ -8,6 +8,8 @@ import 'package:flutter/foundation.dart';
 
 import 'platform_channel.dart';
 
+export 'dart:typed_data' show ByteData;
+
 /// A message encoding/decoding mechanism.
 ///
 /// Both operations throw an exception, if conversion fails. Such situations
