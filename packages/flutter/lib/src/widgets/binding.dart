@@ -231,7 +231,7 @@ abstract class WidgetsBindingObserver {
 }
 
 /// The glue between the widgets layer and the Flutter engine.
-abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererBinding {
+abstract class WidgetsBinding extends BindingBase with SchedulerBinding, GestureBinding, RendererBinding {
   // This class is intended to be used as a mixin, and should not be
   // extended directly.
   factory WidgetsBinding._() => null;
@@ -243,7 +243,6 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     buildOwner.onBuildScheduled = _handleBuildScheduled;
     ui.window.onLocaleChanged = handleLocaleChanged;
     SystemChannels.navigation.setMethodCallHandler(_handleNavigationInvocation);
-    SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     SystemChannels.system.setMessageHandler(_handleSystemMessage);
   }
 
@@ -369,6 +368,8 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   /// Calls [dispatchLocaleChanged] to notify the binding observers.
   ///
   /// See [Window.onLocaleChanged].
+  @protected
+  @mustCallSuper
   void handleLocaleChanged() {
     dispatchLocaleChanged(ui.window.locale);
   }
@@ -379,6 +380,8 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///
   /// This is called by [handleLocaleChanged] when the [Window.onLocaleChanged]
   /// notification is received.
+  @protected
+  @mustCallSuper
   void dispatchLocaleChanged(Locale locale) {
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeLocale(locale);
@@ -398,6 +401,7 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///
   /// This method exposes the `popRoute` notification from
   /// [SystemChannels.navigation].
+  @protected
   Future<Null> handlePopRoute() async {
     for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
@@ -416,6 +420,8 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
   ///
   /// This method exposes the `pushRoute` notification from
   /// [SystemChannels.navigation].
+  @protected
+  @mustCallSuper
   Future<Null> handlePushRoute(String route) async {
     for (WidgetsBindingObserver observer in new List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
@@ -433,33 +439,11 @@ abstract class WidgetsBinding extends BindingBase with GestureBinding, RendererB
     return new Future<Null>.value();
   }
 
-  /// Called when the application lifecycle state changes.
-  ///
-  /// Notifies all the observers using
-  /// [WidgetsBindingObserver.didChangeAppLifecycleState].
-  ///
-  /// This method exposes notifications from [SystemChannels.lifecycle].
+  @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
+    super.handleAppLifecycleStateChanged(state);
     for (WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
-  }
-
-  Future<String> _handleLifecycleMessage(String message) async {
-    switch (message) {
-      case 'AppLifecycleState.paused':
-        handleAppLifecycleStateChanged(AppLifecycleState.paused);
-        break;
-      case 'AppLifecycleState.resumed':
-        handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-        break;
-      case 'AppLifecycleState.inactive':
-        handleAppLifecycleStateChanged(AppLifecycleState.inactive);
-        break;
-      case 'AppLifecycleState.suspending':
-        handleAppLifecycleStateChanged(AppLifecycleState.suspending);
-        break;
-    }
-    return null;
   }
 
   /// Called when the operating system notifies the application of a memory

@@ -105,8 +105,8 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     );
 
     registerSignalServiceExtension(
-        name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
-        callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
+      name: 'debugDumpSemanticsTreeInInverseHitTestOrder',
+      callback: () { debugDumpSemanticsTree(DebugSemanticsDumpOrder.inverseHitTest); return debugPrintDone; }
     );
   }
 
@@ -139,14 +139,17 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
   /// Called when the system metrics change.
   ///
   /// See [Window.onMetricsChanged].
+  @protected
   void handleMetricsChanged() {
     assert(renderView != null);
     renderView.configuration = createViewConfiguration();
+    scheduleForcedFrame();
   }
 
   /// Called when the platform text scale factor changes.
   ///
   /// See [Window.onTextScaleFactorChanged].
+  @protected
   void handleTextScaleFactorChanged() { }
 
   /// Returns a [ViewConfiguration] configured for the [RenderView] based on the
@@ -264,26 +267,6 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     pipelineOwner.flushPaint();
     renderView.compositeFrame(); // this sends the bits to the GPU
     pipelineOwner.flushSemantics(); // this also sends the semantics to the OS.
-  }
-
-  /// Schedule a frame to run as soon as possible, rather than waiting for
-  /// the engine to request a frame.
-  ///
-  /// This is used during application startup so that the first frame (which is
-  /// likely to be quite expensive) gets a few extra milliseconds to run.
-  void scheduleWarmUpFrame() {
-    // We use timers here to ensure that microtasks flush in between.
-    //
-    // We call resetEpoch after this frame so that, in the hot reload case, the
-    // very next frame pretends to have occurred immediately after this warm-up
-    // frame. The warm-up frame's timestamp will typically be far in the past
-    // (the time of the last real frame), so if we didn't reset the epoch we
-    // would see a sudden jump from the old time in the warm-up frame to the new
-    // time in the "real" frame. The biggest problem with this is that implicit
-    // animations end up being triggered at the old time and then skipping every
-    // frame and finishing in the new time.
-    Timer.run(() { handleBeginFrame(null); });
-    Timer.run(() { handleDrawFrame(); resetEpoch(); });
   }
 
   @override
