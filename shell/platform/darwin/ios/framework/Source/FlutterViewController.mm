@@ -803,10 +803,18 @@ static inline blink::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* to
 constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 - (void)handleStatusBarTouches:(UIEvent*)event {
+  CGFloat standardStatusBarHeight = kStandardStatusBarHeight;
+  if (_platformSupportsSafeAreaInsets) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+    standardStatusBarHeight = self.view.safeAreaInsets.top;
+#pragma clang diagnostic pop
+  }
+
   // If the status bar is double-height, don't handle status bar taps. iOS
   // should open the app associated with the status bar.
   CGRect statusBarFrame = [UIApplication sharedApplication].statusBarFrame;
-  if (statusBarFrame.size.height != kStandardStatusBarHeight) {
+  if (statusBarFrame.size.height != standardStatusBarHeight) {
     return;
   }
 
