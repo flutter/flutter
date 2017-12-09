@@ -61,22 +61,22 @@ void main() {
     Container getContainer(Key key) => tester.firstWidget(find.descendant(
       of: find.byKey(key),
       matching: find.byType(Container),
-    )) as Container;
-    Color dividerColor = Theme.of(tester.element(find.text('Collapsed'))).dividerColor;
+    ));
+    final Color dividerColor = Theme.of(tester.element(find.text('Collapsed'))).dividerColor;
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
     expect(getHeight(topKey), getHeight(defaultKey) - 2.0);
 
-    Container expandedContainer = getContainer(expandedKey);
-    expect(expandedContainer.decoration.color, Colors.red);
-    expect(expandedContainer.decoration.border.top.color, dividerColor);
-    expect(expandedContainer.decoration.border.bottom.color, dividerColor);
+    BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration;
+    expect(expandedContainerDecoration.color, Colors.red);
+    expect(expandedContainerDecoration.border.top.color, dividerColor);
+    expect(expandedContainerDecoration.border.bottom.color, dividerColor);
 
-    Container collapsedContainer = getContainer(collapsedKey);
-    expect(collapsedContainer.decoration.color, Colors.transparent);
-    expect(collapsedContainer.decoration.border.top.color, Colors.transparent);
-    expect(collapsedContainer.decoration.border.bottom.color, Colors.transparent);
+    BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration;
+    expect(collapsedContainerDecoration.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.top.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.bottom.color, Colors.transparent);
 
     await tester.tap(find.text('Expanded'));
     await tester.tap(find.text('Collapsed'));
@@ -90,15 +90,15 @@ void main() {
     expect(getHeight(topKey), getHeight(defaultKey) - getHeight(tileKey) - 2.0);
 
     // Expanded should be collapsed now.
-    expandedContainer = getContainer(expandedKey);
-    expect(expandedContainer.decoration.color, Colors.transparent);
-    expect(expandedContainer.decoration.border.top.color, Colors.transparent);
-    expect(expandedContainer.decoration.border.bottom.color, Colors.transparent);
+    expandedContainerDecoration = getContainer(expandedKey).decoration;
+    expect(expandedContainerDecoration.color, Colors.transparent);
+    expect(expandedContainerDecoration.border.top.color, Colors.transparent);
+    expect(expandedContainerDecoration.border.bottom.color, Colors.transparent);
 
     // Collapsed should be expanded now.
-    collapsedContainer = getContainer(collapsedKey);
-    expect(collapsedContainer.decoration.color, Colors.transparent);
-    expect(collapsedContainer.decoration.border.top.color, dividerColor);
-    expect(collapsedContainer.decoration.border.bottom.color, dividerColor);
+    collapsedContainerDecoration = getContainer(collapsedKey).decoration;
+    expect(collapsedContainerDecoration.color, Colors.transparent);
+    expect(collapsedContainerDecoration.border.top.color, dividerColor);
+    expect(collapsedContainerDecoration.border.bottom.color, dividerColor);
   });
 }
