@@ -68,7 +68,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   final Color backgroundColor;
-  
+
   /// A widget to display instead of a rotating arrow icon.
   final Widget trailing;
 
@@ -137,7 +137,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
     return new Container(
       decoration: new BoxDecoration(
-        color: _backgroundColor.evaluate(_easeOutAnimation),
+        color: _backgroundColor.evaluate(_easeOutAnimation) ?? Colors.transparent,
         border: new Border(
           top: new BorderSide(color: borderSideColor),
           bottom: new BorderSide(color: borderSideColor),
@@ -182,9 +182,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColor
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
-    _backgroundColor
-      ..begin = Colors.transparent
-      ..end = widget.backgroundColor ?? Colors.transparent;
+    _backgroundColor.end = widget.backgroundColor;
 
     final bool closed = !_isExpanded && _controller.isDismissed;
     return new AnimatedBuilder(

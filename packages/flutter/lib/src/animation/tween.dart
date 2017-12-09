@@ -204,7 +204,12 @@ class ColorTween extends Tween<Color> {
   /// Creates a [Color] tween.
   ///
   /// The [begin] and [end] properties may be null; the null value
-  /// is treated as transparent black.
+  /// is treated as transparent.
+  ///
+  /// We recommend that you do not pass [Colors.transparent] as [begin]
+  /// or [end] if you want the effect of fading in or out of transparent.
+  /// Instead prefer null. [Colors.transparent] refers to black transparent and
+  /// thus will fade out of or into black which is likely unwanted.
   ColorTween({ Color begin, Color end }) : super(begin: begin, end: end);
 
   /// Returns the value this variable has at the given animation clock value.
