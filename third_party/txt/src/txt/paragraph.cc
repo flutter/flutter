@@ -268,8 +268,8 @@ bool Paragraph::ComputeBidiRuns() {
                              ? UBIDI_DEFAULT_RTL
                              : UBIDI_DEFAULT_LTR;
   UErrorCode status = U_ZERO_ERROR;
-  ubidi_setPara(bidi.get(), text_.data(), text_.size(), paraLevel, nullptr,
-                &status);
+  ubidi_setPara(bidi.get(), reinterpret_cast<const UChar*>(text_.data()),
+                text_.size(), paraLevel, nullptr, &status);
   if (!U_SUCCESS(status))
     return false;
 
@@ -939,9 +939,11 @@ Paragraph::PositionWithAffinity Paragraph::GetGlyphPositionAtCoordinate(
   const std::vector<GlyphPosition>& line_glyph_position =
       glyph_lines_[y_index].positions;
   if (line_glyph_position.empty()) {
-    int line_start_index = std::accumulate(
-        glyph_lines_.begin(), glyph_lines_.begin() + y_index, 0,
-        [](const int a, const GlyphLine& b) { return a + b.total_code_units; });
+    int line_start_index =
+        std::accumulate(glyph_lines_.begin(), glyph_lines_.begin() + y_index, 0,
+                        [](const int a, const GlyphLine& b) {
+                          return a + static_cast<int>(b.total_code_units);
+                        });
     return PositionWithAffinity(line_start_index, DOWNSTREAM);
   }
 
