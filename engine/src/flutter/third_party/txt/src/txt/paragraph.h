@@ -206,6 +206,7 @@ class Paragraph {
   std::vector<PaintRecord> records_;
 
   std::vector<double> line_heights_;
+  std::vector<double> line_baselines_;
   bool did_exceed_max_lines_;
 
   struct GlyphPosition {
@@ -232,12 +233,14 @@ class Paragraph {
     Range<size_t> code_units;
     Range<double> x_pos;
     size_t line_number;
+    SkPaint::FontMetrics font_metrics;
     TextDirection direction;
 
     CodeUnitRun(std::vector<GlyphPosition>&& p,
                 Range<size_t> cu,
                 Range<double> x,
                 size_t line,
+                const SkPaint::FontMetrics& metrics,
                 TextDirection dir);
   };
 
