@@ -294,6 +294,12 @@ class TextSelectionOverlay implements TextSelectionDelegate {
     _toolbar?.markNeedsBuild();
   }
 
+  /// Whether the handles are currently visible.
+  bool get handlesAreVisible => _handles != null;
+
+  /// Whether the toolbar is currently visible.
+  bool get toolbarIsVisible => _toolbar != null;
+
   /// Hides the overlay.
   void hide() {
     if (_handles != null) {

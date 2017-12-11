@@ -68,7 +68,7 @@ class ExpansionTile extends StatefulWidget {
 
   /// The color to display behind the sublist when expanded.
   final Color backgroundColor;
-  
+
   /// A widget to display instead of a rotating arrow icon.
   final Widget trailing;
 
@@ -97,7 +97,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _controller = new AnimationController(duration: _kExpand, vsync: this);
     _easeOutAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeOut);
     _easeInAnimation = new CurvedAnimation(parent: _controller, curve: Curves.easeIn);
-    _borderColor = new ColorTween(begin: Colors.transparent);
+    _borderColor = new ColorTween();
     _headerColor = new ColorTween();
     _iconColor = new ColorTween();
     _iconTurns = new Tween<double>(begin: 0.0, end: 0.5).animate(_easeInAnimation);
@@ -132,12 +132,12 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
   }
 
   Widget _buildChildren(BuildContext context, Widget child) {
-    final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation);
+    final Color borderSideColor = _borderColor.evaluate(_easeOutAnimation) ?? Colors.transparent;
     final Color titleColor = _headerColor.evaluate(_easeInAnimation);
 
     return new Container(
       decoration: new BoxDecoration(
-        color: _backgroundColor.evaluate(_easeOutAnimation),
+        color: _backgroundColor.evaluate(_easeOutAnimation) ?? Colors.transparent,
         border: new Border(
           top: new BorderSide(color: borderSideColor),
           bottom: new BorderSide(color: borderSideColor),
@@ -182,9 +182,7 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
     _iconColor
       ..begin = theme.unselectedWidgetColor
       ..end = theme.accentColor;
-    _backgroundColor
-      ..begin = Colors.transparent
-      ..end = widget.backgroundColor ?? Colors.transparent;
+    _backgroundColor.end = widget.backgroundColor;
 
     final bool closed = !_isExpanded && _controller.isDismissed;
     return new AnimatedBuilder(

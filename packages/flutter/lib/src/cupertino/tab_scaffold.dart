@@ -117,7 +117,10 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// When the tab becomes inactive, its content is still cached in the widget
   /// tree [Offstage] and its animations disabled.
   ///
-  /// Content can slide under the [tabBar] when it's translucent.
+  /// Content can slide under the [tabBar] when they're translucent.
+  /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
+  /// bottom padding indicating the area of obstructing overlap from the
+  /// [tabBar].
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -131,17 +134,42 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
 
-    // The main content being at the bottom is added to the stack first.
-    stacked.add(
-      new Padding(
-        padding: new EdgeInsets.only(bottom: widget.tabBar.opaque ? widget.tabBar.preferredSize.height : 0.0),
-        child: new _TabView(
-          currentTabIndex: _currentPage,
-          tabNumber: widget.tabBar.items.length,
-          tabBuilder: widget.tabBuilder,
-        )
-      ),
+    Widget content = new _TabView(
+      currentTabIndex: _currentPage,
+      tabNumber: widget.tabBar.items.length,
+      tabBuilder: widget.tabBuilder,
     );
+
+    if (widget.tabBar != null) {
+      final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+
+      // TODO(xster): Use real size after partial layout instead of preferred size.
+      // https://github.com/flutter/flutter/issues/12912
+      final double bottomPadding = widget.tabBar.preferredSize.height
+          + existingMediaQuery.padding.bottom;
+
+      // If tab bar opaque, directly stop the main content higher. If
+      // translucent, let main content draw behind the tab bar but hint the
+      // obstructed area.
+      if (widget.tabBar.opaque) {
+        content = new Padding(
+          padding: new EdgeInsets.only(bottom: bottomPadding),
+          child: content,
+        );
+      } else {
+        content = new MediaQuery(
+          data: existingMediaQuery.copyWith(
+            padding: existingMediaQuery.padding.copyWith(
+              bottom: bottomPadding,
+            ),
+          ),
+          child: content,
+        );
+      }
+    }
+
+    // The main content being at the bottom is added to the stack first.
+    stacked.add(content);
 
     if (widget.tabBar != null) {
       stacked.add(new Align(

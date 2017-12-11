@@ -954,31 +954,35 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
     final double collapsedHeight = (widget.pinned && widget.floating && widget.bottom != null)
       ? widget.bottom.preferredSize.height + topPadding : null;
 
-    return new SliverPersistentHeader(
-      floating: widget.floating,
-      pinned: widget.pinned,
-      delegate: new _SliverAppBarDelegate(
-        leading: widget.leading,
-        automaticallyImplyLeading: widget.automaticallyImplyLeading,
-        title: widget.title,
-        actions: widget.actions,
-        flexibleSpace: widget.flexibleSpace,
-        bottom: widget.bottom,
-        elevation: widget.elevation,
-        forceElevated: widget.forceElevated,
-        backgroundColor: widget.backgroundColor,
-        brightness: widget.brightness,
-        iconTheme: widget.iconTheme,
-        textTheme: widget.textTheme,
-        primary: widget.primary,
-        centerTitle: widget.centerTitle,
-        titleSpacing: widget.titleSpacing,
-        expandedHeight: widget.expandedHeight,
-        collapsedHeight: collapsedHeight,
-        topPadding: topPadding,
+    return new MediaQuery.removePadding(
+      context: context,
+      removeBottom: true,
+      child: new SliverPersistentHeader(
         floating: widget.floating,
         pinned: widget.pinned,
-        snapConfiguration: _snapConfiguration,
+        delegate: new _SliverAppBarDelegate(
+          leading: widget.leading,
+          automaticallyImplyLeading: widget.automaticallyImplyLeading,
+          title: widget.title,
+          actions: widget.actions,
+          flexibleSpace: widget.flexibleSpace,
+          bottom: widget.bottom,
+          elevation: widget.elevation,
+          forceElevated: widget.forceElevated,
+          backgroundColor: widget.backgroundColor,
+          brightness: widget.brightness,
+          iconTheme: widget.iconTheme,
+          textTheme: widget.textTheme,
+          primary: widget.primary,
+          centerTitle: widget.centerTitle,
+          titleSpacing: widget.titleSpacing,
+          expandedHeight: widget.expandedHeight,
+          collapsedHeight: collapsedHeight,
+          topPadding: topPadding,
+          floating: widget.floating,
+          pinned: widget.pinned,
+          snapConfiguration: _snapConfiguration,
+        ),
       ),
     );
   }

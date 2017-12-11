@@ -84,4 +84,56 @@ void main() {
 
     WidgetsBinding.instance.removeObserver(observer);
   });
+
+  testWidgets('Application lifecycle affects frame scheduling', (WidgetTester tester) async {
+    ByteData message;
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.paused');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.resumed');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.paused');
+    await BinaryMessages.handlePlatformMessage('flutter/lifecycle', message, (_) {});
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    tester.binding.scheduleFrame();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    tester.binding.scheduleForcedFrame();
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.pump();
+    expect(tester.binding.hasScheduledFrame, isFalse);
+
+    int frameCount = 0;
+    tester.binding.addPostFrameCallback((Duration duration) { frameCount += 1; });
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    await tester.pump(const Duration(milliseconds: 1));
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    expect(frameCount, 0);
+
+    tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    expect(frameCount, 1);
+  });
 }

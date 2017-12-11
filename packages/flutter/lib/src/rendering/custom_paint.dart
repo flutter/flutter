@@ -432,7 +432,8 @@ class RenderCustomPaint extends RenderProxyBox {
     // Check if we need to rebuild semantics.
     if (newPainter == null) {
       assert(oldPainter != null); // We should be called only for changes.
-      markNeedsSemanticsUpdate();
+      if (attached)
+        markNeedsSemanticsUpdate();
     } else if (oldPainter == null ||
         newPainter.runtimeType != oldPainter.runtimeType ||
         newPainter.shouldRebuildSemantics(oldPainter)) {
@@ -844,6 +845,12 @@ class RenderCustomPaint extends RenderProxyBox {
     }
     if (properties.onDecrease != null) {
       config.addAction(SemanticsAction.decrease, properties.onDecrease);
+    }
+    if (properties.onMoveCursorForwardByCharacter != null) {
+      config.addAction(SemanticsAction.moveCursorForwardByCharacter, properties.onMoveCursorForwardByCharacter);
+    }
+    if (properties.onMoveCursorBackwardByCharacter != null) {
+      config.addAction(SemanticsAction.moveCursorBackwardByCharacter, properties.onMoveCursorBackwardByCharacter);
     }
 
     newChild.updateWith(

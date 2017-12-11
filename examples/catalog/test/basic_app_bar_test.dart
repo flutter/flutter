@@ -12,11 +12,11 @@ IconData iconAt(int index) => basic_app_bar_sample.choices[index].icon;
 String titleAt(int index) => basic_app_bar_sample.choices[index].title;
 
 Finder findAppBarIcon(IconData icon) {
-  return find.descendant(of: find.byType(AppBar), matching: find.icon(icon));
+  return find.descendant(of: find.byType(AppBar), matching: find.byIcon(icon));
 }
 
 Finder findChoiceCard(IconData icon) {
-  return find.descendant(of: find.byType(Card), matching: find.icon(icon));
+  return find.descendant(of: find.byType(Card), matching: find.byIcon(icon));
 }
 
 void main() {

@@ -22,7 +22,26 @@ const double _kCaretWidth = 1.0; // pixels
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
-typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, bool longPress);
+typedef void SelectionChangedHandler(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+
+/// Indicates what triggered the change in selected text (including changes to
+/// the cursor location).
+enum SelectionChangedCause {
+  /// The user tapped on the text and that caused the selection (or the location
+  /// of the cursor) to change.
+  tap,
+
+  /// The user long-pressed the text and that caused the selection (or the
+  /// location of the cursor) to change.
+  longPress,
+
+  /// The user used the keyboard to change the selection or the location of the
+  /// cursor.
+  ///
+  /// Keyboard-triggered selection changes may be caused by the IME as well as
+  /// by accessibility tools (e.g. TalkBack on Android).
+  keyboard,
+}
 
 /// Signature for the callback that reports when the caret location changes.
 ///
@@ -297,6 +316,7 @@ class RenderEditable extends RenderBox {
     _selection = value;
     _selectionRects = null;
     markNeedsPaint();
+    markNeedsSemanticsUpdate();
   }
 
   /// The offset at which the text should be painted.
@@ -327,6 +347,30 @@ class RenderEditable extends RenderBox {
       ..textDirection = textDirection
       ..isFocused = hasFocus
       ..isTextField = true;
+
+    if (_selection?.isValid == true) {
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
+        config.addAction(SemanticsAction.moveCursorBackwardByCharacter, () {
+          final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
+          if (offset == null)
+            return;
+          onSelectionChanged(
+            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+          );
+        });
+      }
+
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
+        config.addAction(SemanticsAction.moveCursorForwardByCharacter, () {
+          final int offset = _textPainter.getOffsetAfter(_selection.extentOffset);
+          if (offset == null)
+            return;
+          onSelectionChanged(
+            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
+          );
+        });
+      }
+    }
   }
 
   @override
@@ -523,7 +567,7 @@ class RenderEditable extends RenderBox {
     _lastTapDownPosition = null;
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
-      onSelectionChanged(new TextSelection.fromPosition(position), this, false);
+      onSelectionChanged(new TextSelection.fromPosition(position), this, SelectionChangedCause.tap);
     }
   }
 
@@ -539,7 +583,7 @@ class RenderEditable extends RenderBox {
     _longPressPosition = null;
     if (onSelectionChanged != null) {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(globalPosition));
-      onSelectionChanged(_selectWordAtOffset(position), this, true);
+      onSelectionChanged(_selectWordAtOffset(position), this, SelectionChangedCause.longPress);
     }
   }
 

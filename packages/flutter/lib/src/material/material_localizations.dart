@@ -119,6 +119,14 @@ abstract class MaterialLocalizations {
   /// The abbreviation for post meridiem (after noon) shown in the time picker.
   String get postMeridiemAbbreviation;
 
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the hour picker mode.
+  String get timePickerHourModeAnnouncement;
+
+  /// The text-to-speech announcement made when a time picker invoked using
+  /// [showTimePicker] is set to the minute picker mode.
+  String get timePickerMinuteModeAnnouncement;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -504,6 +512,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get postMeridiemAbbreviation => 'PM';
+
+  @override
+  String get timePickerHourModeAnnouncement => 'Select hours';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => 'Select minutes';
 
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {

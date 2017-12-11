@@ -5,8 +5,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../painting/mocks_for_image_cache.dart';
 import '../rendering/rendering_tester.dart';
-import '../services/mocks_for_image_cache.dart';
 
 List<int> selectedTabs;
 

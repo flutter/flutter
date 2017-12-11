@@ -92,6 +92,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double bottomPadding = MediaQuery.of(context).padding.bottom;
     Widget result = new DecoratedBox(
       decoration: new BoxDecoration(
         border: const Border(
@@ -105,7 +106,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       // TODO(xster): allow icons-only versions of the tab bar too.
       child: new SizedBox(
-        height: _kTabBarHeight,
+        height: _kTabBarHeight + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: new IconThemeData(
             color: inactiveColor,
@@ -119,10 +120,13 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
               fontWeight: FontWeight.w500,
               color: inactiveColor,
             ),
-            child: new Row(
-              // Align bottom since we want the labels to be aligned.
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: _buildTabItems(),
+            child: new Padding(
+              padding: new EdgeInsets.only(bottom: bottomPadding),
+              child: new Row(
+                // Align bottom since we want the labels to be aligned.
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: _buildTabItems(),
+              ),
             ),
           ),
         ),

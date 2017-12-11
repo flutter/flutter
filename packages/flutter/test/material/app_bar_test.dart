@@ -1145,4 +1145,34 @@ void main() {
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(420.0, 100.0));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(4.0, 100.0));
   });
+
+  testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
+    const MediaQueryData topPadding100 = const MediaQueryData(padding: const EdgeInsets.only(top: 100.0, bottom: 50.0));
+
+    final Key leadingKey = new UniqueKey();
+    final Key titleKey = new UniqueKey();
+    final Key trailingKey = new UniqueKey();
+
+    await tester.pumpWidget(
+      new Directionality(
+        textDirection: TextDirection.rtl,
+        child: new MediaQuery(
+          data: topPadding100,
+          child: new CustomScrollView(
+            primary: true,
+            slivers: <Widget>[
+              new SliverAppBar(
+                leading: new Placeholder(key: leadingKey),
+                title: new Placeholder(key: titleKey),
+                actions: <Widget>[ new Placeholder(key: trailingKey) ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getRect(find.byType(AppBar)), new Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(leadingKey)), new Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(trailingKey)), new Rect.fromLTRB(4.0, 100.0, 400.0 + 4.0, 100.0 + 56.0));
+  });
 }

@@ -27,5 +27,7 @@
   "nextMonthTooltip": "下个月",
   "previousMonthTooltip": "上个月",
   "anteMeridiemAbbreviation": "上午",
-  "postMeridiemAbbreviation": "下午"
+  "postMeridiemAbbreviation": "下午",
+  "timePickerHourModeAnnouncement": "选择小时",
+  "timePickerMinuteModeAnnouncement": "选择分钟"
 }

@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -306,12 +307,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (event is PointerDownEvent) {
       final RenderObject innerTarget = result.path.firstWhere(
         (HitTestEntry candidate) => candidate.target is RenderObject,
-        orElse: () => null
-      )?.target;
-      if (innerTarget == null)
-        return null;
-      final Element innerTargetElement = collectAllElementsFrom(binding.renderViewElement, skipOffstage: true)
-        .lastWhere((Element element) => element.renderObject == innerTarget);
+      ).target;
+      final Element innerTargetElement = collectAllElementsFrom(
+        binding.renderViewElement,
+        skipOffstage: true,
+      ).lastWhere(
+        (Element element) => element.renderObject == innerTarget,
+        orElse: () => null,
+      );
+      if (innerTargetElement == null) {
+        debugPrint('No widgets found at ${binding.globalToLocal(event.position)}.');
+        return;
+      }
       final List<Element> candidates = <Element>[];
       innerTargetElement.visitAncestorElements((Element element) {
         candidates.add(element);
@@ -324,9 +331,18 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int totalNumber = 0;
       debugPrint('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
       for (Element element in candidates) {
-        if (totalNumber > 10)
+        if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
-        totalNumber += 1;
+        totalNumber += 1; // optimistically assume we'll be able to describe it
+
+        if (element.widget is Tooltip) {
+          final Tooltip widget = element.widget;
+          final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
+          if (matches.length == 1) {
+            debugPrint('  find.byTooltip(\'${widget.message}\')');
+            continue;
+          }
+        }
 
         if (element.widget is Text) {
           assert(descendantText == null);
@@ -347,7 +363,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
                key is ValueKey<bool>)) {
             keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
-            keyLabel = 'const ${element.widget.key.runtimeType}(\'${key.value}\')';
+            keyLabel = 'const Key(\'${key.value}\')';
           }
           if (keyLabel != null) {
             final Iterable<Element> matches = find.byKey(key).evaluate();

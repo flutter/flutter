@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -2584,8 +2583,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// purposes.
   ///
   /// If this tag is used, the first "outer" semantics node is the regular node
-  /// of this object. The second "inner" node is introduces as a child to that
-  /// node. All scrollable children are now a child of the inner node, which has
+  /// of this object. The second "inner" node is introduced as a child to that
+  /// node. All scrollable children become children of the inner node, which has
   /// the semantic scrolling logic enabled. All children that have been
   /// excluded from scrolling with [excludeFromScrolling] are turned into
   /// children of the outer node.
@@ -2831,6 +2830,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    VoidCallback onMoveCursorForwardByCharacter,
+    VoidCallback onMoveCursorBackwardByCharacter,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -2851,6 +2852,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onScrollDown = onScrollDown,
        _onIncrease = onIncrease,
        _onDecrease = onDecrease,
+       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
+       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3163,8 +3166,45 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
+  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field forward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume up key while the
+  /// input focus is in a text field.
+  VoidCallback get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  VoidCallback _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(VoidCallback handler) {
+    if (_onMoveCursorForwardByCharacter == handler)
+      return;
+    final bool hadValue = _onMoveCursorForwardByCharacter != null;
+    _onMoveCursorForwardByCharacter = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  VoidCallback get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  VoidCallback _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(VoidCallback handler) {
+    if (_onMoveCursorBackwardByCharacter == handler)
+      return;
+    final bool hadValue = _onMoveCursorBackwardByCharacter != null;
+    _onMoveCursorBackwardByCharacter = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
+    super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
@@ -3205,6 +3245,10 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       config.addAction(SemanticsAction.increase, _performIncrease);
     if (onDecrease != null)
       config.addAction(SemanticsAction.decrease, _performDecrease);
+    if (onMoveCursorForwardByCharacter != null)
+      config.addAction(SemanticsAction.moveCursorForwardByCharacter, _performMoveCursorForwardByCharacter);
+    if (onMoveCursorBackwardByCharacter != null)
+      config.addAction(SemanticsAction.moveCursorBackwardByCharacter, _performMoveCursorBackwardByCharacter);
   }
 
   void _performTap() {
@@ -3245,6 +3289,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   void _performDecrease() {
     if (onDecrease != null)
       onDecrease();
+  }
+
+  void _performMoveCursorForwardByCharacter() {
+    if (onMoveCursorForwardByCharacter != null)
+      onMoveCursorForwardByCharacter();
+  }
+
+  void _performMoveCursorBackwardByCharacter() {
+    if (onMoveCursorBackwardByCharacter != null)
+      onMoveCursorBackwardByCharacter();
   }
 }
 
