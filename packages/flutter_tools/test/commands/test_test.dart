@@ -82,7 +82,7 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-  }, skip: io.Platform.isWindows); // TODO(goderbauer): enable when sky_shell is available
+  });
 }
 
 Future<Null> _testFile(String testName, String workingDirectory, String testDirectory) async {
