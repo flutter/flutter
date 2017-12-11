@@ -343,7 +343,6 @@ Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
   return new Matrix3(a, b, 0.0, c, d, 0.0, e, f, 1.0);
 }
 
-
 // Matches a pixels expression e.g "14px".
 // First group is just the number.
 final RegExp _pixelsExp = new RegExp('^([0-9]+)px\$');
