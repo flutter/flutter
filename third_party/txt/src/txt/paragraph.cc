@@ -157,11 +157,13 @@ Paragraph::CodeUnitRun::CodeUnitRun(std::vector<GlyphPosition>&& p,
                                     Range<size_t> cu,
                                     Range<double> x,
                                     size_t line,
+                                    const SkPaint::FontMetrics& metrics,
                                     TextDirection dir)
     : positions(std::move(p)),
       code_units(cu),
       x_pos(x),
       line_number(line),
+      font_metrics(metrics),
       direction(dir) {}
 
 Paragraph::Paragraph() {
@@ -484,7 +486,6 @@ void Paragraph::Layout(double width, bool force) {
         blob_start += blob_len;
       }
 
-      std::vector<GlyphPosition> glyph_positions;
       size_t code_unit_index;
       if (run.is_rtl()) {
         code_unit_index = text_count;
@@ -496,6 +497,8 @@ void Paragraph::Layout(double width, bool force) {
 
       // Build a Skia text blob from each group of glyphs.
       for (const Range<size_t>& glyph_blob : glyph_blobs) {
+        std::vector<GlyphPosition> glyph_positions;
+
         paint.setTypeface(GetTypefaceForGlyph(layout, glyph_blob.start));
         const SkTextBlobBuilder::RunBuffer& blob_buffer =
             builder.allocRunPos(paint, glyph_blob.end - glyph_blob.start);
@@ -578,23 +581,23 @@ void Paragraph::Layout(double width, bool force) {
         paint_records.emplace_back(run.style, SkPoint::Make(run_x_offset, 0),
                                    builder.make(), metrics, line_number,
                                    layout.getAdvance());
+
+        line_glyph_positions.insert(line_glyph_positions.end(),
+                                    glyph_positions.begin(),
+                                    glyph_positions.end());
+
+        // Add a record of glyph positions sorted by code unit index.
+        std::vector<GlyphPosition> code_unit_positions(glyph_positions);
+        std::sort(code_unit_positions.begin(), code_unit_positions.end(),
+                  [](const GlyphPosition& a, const GlyphPosition& b) {
+                    return a.code_units.start < b.code_units.start;
+                  });
+        code_unit_runs_.emplace_back(
+            std::move(code_unit_positions), Range<size_t>(run.start, run.end),
+            Range<double>(glyph_positions.front().x_pos.start,
+                          glyph_positions.back().x_pos.end),
+            line_number, metrics, run.direction);
       }
-
-      line_glyph_positions.insert(line_glyph_positions.end(),
-                                  glyph_positions.begin(),
-                                  glyph_positions.end());
-
-      // Add a record of glyph positions sorted by code unit index.
-      std::vector<GlyphPosition> code_unit_positions(glyph_positions);
-      std::sort(code_unit_positions.begin(), code_unit_positions.end(),
-                [](const GlyphPosition& a, const GlyphPosition& b) {
-                  return a.code_units.start < b.code_units.start;
-                });
-      code_unit_runs_.emplace_back(
-          std::move(code_unit_positions), Range<size_t>(run.start, run.end),
-          Range<double>(glyph_positions.front().x_pos.start,
-                        glyph_positions.back().x_pos.end),
-          line_number, run.direction);
 
       run_x_offset += layout.getAdvance();
     }
@@ -625,6 +628,7 @@ void Paragraph::Layout(double width, bool force) {
 
     line_heights_.push_back((line_heights_.empty() ? 0 : line_heights_.back()) +
                             round(max_line_spacing + max_descent));
+    line_baselines_.push_back(line_heights_.back() - max_descent);
     y_offset += round(max_line_spacing + prev_max_descent);
     prev_max_descent = max_descent;
 
@@ -897,9 +901,9 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(size_t start,
     if (run.code_units.end <= start)
       continue;
 
-    SkScalar top =
-        (run.line_number > 0) ? line_heights_[run.line_number - 1] : 0;
-    SkScalar bottom = line_heights_[run.line_number];
+    double baseline = line_baselines_[run.line_number];
+    SkScalar top = baseline + run.font_metrics.fAscent;
+    SkScalar bottom = baseline + run.font_metrics.fDescent;
 
     SkScalar left, right;
     if (run.code_units.start >= start && run.code_units.end <= end) {

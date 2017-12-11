@@ -968,7 +968,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 28.417969);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
@@ -979,7 +979,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 56.835938);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 177.44922);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
@@ -990,7 +990,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 177);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 506.08984);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
@@ -1001,14 +1001,14 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 4ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 210.83594);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 59);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 59.40625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 463.44922);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 118);
 
   // TODO(garyq): The following set of vals are definetly wrong and
   // end of paragraph handling needs to be fixed in a later patch.
   EXPECT_FLOAT_EQ(boxes[3].rect.left(), 0);
-  EXPECT_FLOAT_EQ(boxes[3].rect.top(), 236);
+  EXPECT_FLOAT_EQ(boxes[3].rect.top(), 236.40625);
   EXPECT_FLOAT_EQ(boxes[3].rect.right(), 142.08984);
   EXPECT_FLOAT_EQ(boxes[3].rect.bottom(), 295);
 
@@ -1019,7 +1019,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 449.25391);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 0.40625);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 519.44922);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 59);
 
