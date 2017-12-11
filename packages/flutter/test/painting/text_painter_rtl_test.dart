@@ -379,7 +379,7 @@ void main() {
         const TextBox.fromLTRBD( 0.0,  8.0, 50.0, 18.0, TextDirection.ltr),
         const TextBox.fromLTRBD(50.0,  0.0, 90.0, 20.0, TextDirection.rtl),
         const TextBox.fromLTRBD( 0.0, 20.0, 40.0, 40.0, TextDirection.rtl),
-        const TextBox.fromLTRBD(60.0, 28.0, 90.0, 38.0, TextDirection.ltr),
+        const TextBox.fromLTRBD(40.0, 28.0, 90.0, 38.0, TextDirection.ltr),
       ],
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
