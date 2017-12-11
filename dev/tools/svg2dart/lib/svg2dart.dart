@@ -9,12 +9,16 @@ import 'package:collection/collection.dart';
 import 'package:xml/xml.dart' as xml show parse;
 import 'package:xml/xml.dart' hide parse;
 
-/// Interprets an SVG file.
+/// Interprets some subset of an SVG* file.
 ///
 /// Recursively goes over the SVG tree, applying transforms and opacities,
 /// and build a FrameData which is a flat representation of the paths in the SVG
 /// file, after applying transformations and converting relative coordinates to
 /// absolute.
+///
+/// * Note that this does not support the SVG specification, but is just built to
+/// support SVG files exported by a specific tool the motion design team is
+/// using.
 FrameData interpretSvg(String svgFilePath) {
   File file = new File(svgFilePath);
   if (!file.existsSync()) {
@@ -114,11 +118,12 @@ class SvgPath {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
+      identical(this, other) || (
           other is SvgPath &&
-              runtimeType == other.runtimeType &&
-              id == other.id &&
-              const ListEquality<SvgPathCommand>().equals(commands, other.commands);
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          const ListEquality<SvgPathCommand>().equals(commands, other.commands)
+      );
 
   @override
   int get hashCode =>
@@ -127,7 +132,7 @@ class SvgPath {
 
   @override
   String toString() {
-    return 'SvgPath{id: $id, commands: $commands}';
+    return 'SvgPath(id: $id, commands: $commands)';
   }
 }
 
