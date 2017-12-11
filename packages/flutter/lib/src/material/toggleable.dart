@@ -288,7 +288,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive)
-      config.addAction(SemanticsAction.tap, _handleTap);
+      config.onTap = _handleTap;
     config.isChecked = _value;
   }
 

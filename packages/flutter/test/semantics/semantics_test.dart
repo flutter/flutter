@@ -65,19 +65,19 @@ void main() {
 
       TestRender middle;
       final TestRender root = new TestRender(
-        action: SemanticsAction.tap,
+        tapAction: true,
         isSemanticBoundary: true,
         child: new TestRender(
-          action: SemanticsAction.longPress,
+          longPressAction: true,
           isSemanticBoundary: false,
           child: middle = new TestRender(
-            action: SemanticsAction.scrollLeft,
+            scrollLeftAction: true,
             isSemanticBoundary: false,
             child: new TestRender(
-              action: SemanticsAction.scrollRight,
+              scrollRightAction: true,
               isSemanticBoundary: false,
               child: new TestRender(
-                action: SemanticsAction.scrollUp,
+                scrollUpAction: true,
                 isSemanticBoundary: true,
               )
             )
@@ -91,7 +91,9 @@ void main() {
       int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
 
-      middle.action = SemanticsAction.scrollDown;
+      middle
+        ..scrollLeftAction = false
+        ..scrollDownAction = true;
       middle.markNeedsSemanticsUpdate();
 
       pumpFrame(phase: EnginePhase.flushSemantics);
@@ -204,9 +206,8 @@ void main() {
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
       ..isMergingSemanticsOfDescendants = true
-      ..addAction(SemanticsAction.scrollUp, () { })
-      ..addAction(SemanticsAction.longPress, () { })
-      ..addAction(SemanticsAction.showOnScreen, () { })
+      ..onScrollUp = () { }
+      ..onLongPress = () { }
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
@@ -218,11 +219,11 @@ void main() {
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = new SemanticsNode()
@@ -241,18 +242,42 @@ void main() {
 
 class TestRender extends RenderProxyBox {
 
-  TestRender({ this.action, this.isSemanticBoundary, RenderObject child }) : super(child);
+  TestRender({
+    this.tapAction: false,
+    this.longPressAction: false,
+    this.scrollLeftAction: false,
+    this.scrollRightAction: false,
+    this.scrollUpAction: false,
+    this.scrollDownAction: false,
+    this.isSemanticBoundary,
+    RenderObject child
+  }) : super(child);
 
-  final bool isSemanticBoundary;
+  bool tapAction;
+  bool longPressAction;
+  bool scrollLeftAction;
+  bool scrollRightAction;
+  bool scrollUpAction;
+  bool scrollDownAction;
+  bool isSemanticBoundary;
 
-  SemanticsAction action;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config
-      ..isSemanticBoundary = isSemanticBoundary
-      ..addAction(action, () { });
+    config.isSemanticBoundary = isSemanticBoundary;
+    if (tapAction)
+      config.onTap = () { };
+    if (longPressAction)
+      config.onLongPress = () { };
+    if (scrollLeftAction)
+      config.onScrollLeft = () { };
+    if (scrollRightAction)
+      config.onScrollRight = () { };
+    if (scrollUpAction)
+      config.onScrollUp = () { };
+    if (scrollDownAction)
+      config.onScrollDown = () { };
   }
 }
