@@ -253,8 +253,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   await _addServicesToBundle(appDirectory);
   final InjectPluginsResult injectionResult = injectPlugins();
   final bool hasFlutterPlugins = injectionResult.anyPlugin;
-  final String priorGeneratedXCConfig =
-  readGeneratedXCConfig(app.appDirectory);
+  final String priorGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -265,7 +264,6 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   if(hasFlutterPlugins){
-    final String iosEngineDir = flutterFrameworkDir(buildInfo.mode);
     final String curGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
     await cocoaPods.processPods(
         appIosDir: appDirectory,

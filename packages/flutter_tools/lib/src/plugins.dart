@@ -79,7 +79,7 @@ List<Plugin> _findPlugins(String directory) {
 
 // Return true if .flutter-plugins has changed, otherwise return false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
-  File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
+  final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
   final String priorFlutterPlugins = (pluginsProperties.existsSync()?pluginsProperties.readAsStringSync():null);
   final String pluginManifest =
     plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
@@ -213,7 +213,7 @@ class InjectPluginsResult{
 InjectPluginsResult injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
-  bool hasPluginsChanged = _writeFlutterPluginsList(directory, plugins);
+  final bool hasPluginsChanged = _writeFlutterPluginsList(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
     _writeAndroidPluginRegistry(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
