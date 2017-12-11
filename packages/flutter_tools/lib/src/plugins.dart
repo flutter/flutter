@@ -77,19 +77,10 @@ List<Plugin> _findPlugins(String directory) {
   return plugins;
 }
 
-/// Read the content of .fluter-plugins and return as string.
-String readFlutterPluginsList({String directory}) {
-  directory ??= fs.currentDirectory.path;
-  String pluginManifest;
-  final File pluginsProperties =
-      fs.file(fs.path.join(directory, '.flutter-plugins'));
-  if (pluginsProperties.existsSync())
-    pluginManifest = pluginsProperties.readAsStringSync();
-  return pluginManifest;
-}
-
-void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
-  final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
+// Return true if .flutter-plugins has changed, otherwise return false.
+bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
+  File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
+  final String priorFlutterPlugins = (pluginsProperties.existsSync()?pluginsProperties.readAsStringSync():null);
   final String pluginManifest =
     plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
@@ -99,6 +90,8 @@ void _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
       pluginsProperties.deleteSync();
     }
   }
+  final String curFlutterPlugins = (pluginsProperties.existsSync()?pluginsProperties.readAsStringSync():null);
+  return curFlutterPlugins != priorFlutterPlugins;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -205,17 +198,25 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
 
 }
 
+class InjectPluginsResult{
+  // True if any flutter plugin exists, otherwise false.
+  bool anyPlugin;
+  // True if plugins have changed.
+  bool hasChanged;
+  InjectPluginsResult({this.anyPlugin = false,this.hasChanged=false});
+}
+
 /// Finds Flutter plugins in the pubspec.yaml, creates platform injection
 /// registries classes and add them to the build dependencies.
 ///
 /// Returns whether any Flutter plugins are added.
-bool injectPlugins({String directory}) {
+InjectPluginsResult injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);
-  _writeFlutterPluginsList(directory, plugins);
+  bool hasPluginsChanged = _writeFlutterPluginsList(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'android')))
     _writeAndroidPluginRegistry(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
     _writeIOSPluginRegistry(directory, plugins);
-  return plugins.isNotEmpty;
+  return new InjectPluginsResult(anyPlugin: plugins.isNotEmpty,hasChanged:hasPluginsChanged);
 }
