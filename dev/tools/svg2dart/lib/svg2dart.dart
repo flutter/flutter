@@ -6,9 +6,110 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:vector_math/vector_math_64.dart';
 import 'package:xml/xml.dart' as xml show parse;
 import 'package:xml/xml.dart' hide parse;
+
+/// Represents an entire animation.
+class Animation {
+  const Animation(this.size, this.paths);
+
+  factory Animation.fromFrameData(List<FrameData> frames) {
+    _validateFramesData(frames);
+    final Point<double> size = frames[0].size;
+    final List<PathAnimation> paths = <PathAnimation>[];
+    for (int i = 0; i < frames[0].paths.length; i += 1) {
+      paths.add(new PathAnimation.fromFrameData(frames, i));
+    }
+    return new Animation(size, paths);
+  }
+
+  /// The size of the animation (width, height) in pixels.
+  final Point<double> size;
+
+  /// List of paths in the animation.
+  final List<PathAnimation> paths;
+
+  static void _validateFramesData(List<FrameData> frames) {
+    final Point<double> size = frames[0].size;
+    final int numPaths = frames[0].paths.length;
+    for (int i = 0; i < frames.length; i += 1) {
+      final FrameData frame = frames[i];
+      if (size != frame.size)
+        throw new Exception(
+            'All animation frames must have the same size, '
+                'first frame size was: (${size.x}, ${size.y}) '
+                'frame $i size was: (${frame.size.x}, ${frame.size.y}) '
+        );
+      if (numPaths != frame.paths.length)
+        throw new Exception(
+            'All animation frames must have the same number of paths, '
+                'first frame has $numPaths paths'
+                'frame $i has ${frame.paths.length} paths'
+        );
+    }
+  }
+}
+
+/// Represents the animation of a single path.
+class PathAnimation {
+  const PathAnimation(this.commands, {@required this.opacities});
+
+  factory PathAnimation.fromFrameData(List<FrameData> frames, int pathIdx) {
+    if (frames.isEmpty)
+      return const PathAnimation(const <PathCommandAnimation> [], opacities: const <double> []);
+
+    final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
+    final List<double> opacities = <double>[];
+    for (int commandIdx = 0; commandIdx < frames[0].paths[0].commands.length; commandIdx++) {
+      final List<List<Point<double>>> points = <List<Point<double>>>[];
+      final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
+      for (int i = 0; i < frames.length; i++) {
+        final FrameData frame = frames[i];
+        final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
+        if (commandType != currentCommandType)
+          throw new Exception(
+              'Paths must be built from the same commands in all frames'
+              'command $commandIdx at frame 0 was of type \'$commandType\''
+              'command $commandIdx at frame $i was of type \'$currentCommandType\''
+          );
+        points.add(new List<Point<double>>.from(frame.paths[pathIdx].commands[commandIdx].points));
+        opacities.add(frame.paths[pathIdx].opacity);
+      }
+      commands.add(new PathCommandAnimation(commandType, points));
+    }
+    return new PathAnimation(commands, opacities: opacities);
+  }
+
+  /// List of commands for drawing the path.
+  final List<PathCommandAnimation> commands;
+  /// The path opacity for each animation frame.
+  final List<double> opacities;
+
+  @override
+  String toString() {
+    return 'PathAnimation(commands: $commands, opacities: $opacities)';
+  }
+}
+
+/// Represents the animation of a single path command.
+class PathCommandAnimation {
+  const PathCommandAnimation(this.type, this.points);
+
+  /// The command type.
+  final String type;
+
+  /// A matrix with the command's points in different frames.
+  ///
+  /// points[i][j] is the j-th point of the command at frame i.
+  final List<List<Point<double>>> points;
+
+  @override
+  String toString() {
+    return 'PathCommandAnimation(type: $type, points: $points)';
+  }
+}
 
 /// Interprets some subset of an SVG* file.
 ///

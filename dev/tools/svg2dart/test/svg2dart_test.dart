@@ -4,6 +4,7 @@
 
 import 'dart:math';
 
+import 'package:collection/collection.dart';
 import 'package:svg2dart/svg2dart.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
@@ -164,6 +165,139 @@ void main() {
       ]);
     });
   });
+
+  group('create PathAnimation', () {
+    test('multiple paths', () {
+      final List<FrameData> frameData = const <FrameData>[
+        const FrameData(
+          const Point<double>(10.0, 10.0),
+          const <SvgPath> [
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 0.0)]),
+              ],
+            ),
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(5.0, 6.0)]),
+              ],
+            ),
+          ],
+        ),
+      ];
+      expect(new PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(0.0, 0.0)],
+                ])
+              ],
+              opacities: const <double> [1.0]
+          ))
+      );
+
+      expect(new PathAnimation.fromFrameData(frameData, 1),
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(5.0, 6.0)],
+                ])
+              ],
+              opacities: const <double> [1.0]
+          ))
+      );
+    });
+
+    test('multiple frames', () {
+      final List<FrameData> frameData = const <FrameData>[
+        const FrameData(
+          const Point<double>(10.0, 10.0),
+          const <SvgPath> [
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 0.0)])
+              ],
+              opacity: 0.5,
+            ),
+          ],
+        ),
+        const FrameData(
+          const Point<double>(10.0, 10.0),
+          const <SvgPath> [
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(10.0, 10.0)])
+              ],
+            ),
+          ],
+        ),
+      ];
+      expect(new PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(0.0, 0.0)],
+                  const <Point<double>> [const Point<double>(10.0, 10.0)],
+                ]),
+              ],
+              opacities: const <double> [0.5, 1.0]
+          ))
+      );
+    });
+  });
+
+  group('create Animation', () {
+    test('multiple paths', () {
+      final List<FrameData> frameData = const <FrameData>[
+        const FrameData(
+          const Point<double>(10.0, 10.0),
+          const <SvgPath> [
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 0.0)]),
+              ],
+            ),
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(5.0, 6.0)]),
+              ],
+            ),
+          ],
+        ),
+      ];
+      final Animation animation = new Animation.fromFrameData(frameData);
+      expect(animation.paths[0],
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(0.0, 0.0)],
+                ])
+              ],
+              opacities: const <double> [1.0]
+          ))
+      );
+
+      expect(animation.paths[1],
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(5.0, 6.0)],
+                ])
+              ],
+              opacities: const <double> [1.0]
+          ))
+      );
+
+      expect(animation.size, const Point<double>(10.0, 10.0));
+    });
+
+  });
 }
 
 // Matches all path commands' points within an error margin.
@@ -208,6 +342,49 @@ class PathMatcher extends Matcher {
       if ((other.points[i].y - actual.points[i].y).abs() > margin)
         return false;
     }
+    return true;
+  }
+}
+
+class PathAnimationMatcher extends Matcher {
+  const PathAnimationMatcher(this.expected);
+
+  final PathAnimation expected;
+
+  @override
+  Description describe(Description description) => description.add('$expected');
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
+    if (item == null || expected == null)
+      return item == expected;
+
+    if (item.runtimeType != expected.runtimeType)
+      return false;
+
+    final PathAnimation other = item;
+
+    if (!const ListEquality<double>().equals(other.opacities, expected.opacities))
+      return false;
+
+    if (other.commands.length != expected.commands.length)
+      return false;
+
+    for (int i = 0; i < other.commands.length; i += 1) {
+      if (!commandsMatch(expected.commands[i], other.commands[i]))
+        return false;
+    }
+    return true;
+  }
+
+  bool commandsMatch(PathCommandAnimation expected, PathCommandAnimation other) {
+    if (other.points.length != expected.points.length)
+      return false;
+
+    for (int i = 0; i < other.points.length; i += 1)
+      if (!const ListEquality<Point<double>>().equals(other.points[i], expected.points[i]))
+        return false;
+
     return true;
   }
 }
