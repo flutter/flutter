@@ -1542,6 +1542,19 @@ class SemanticsConfiguration {
     _addArgumentlessAction(SemanticsAction.decrease, handler);
   }
 
+  /// The handler for [SemanticsAction.showOnScreen].
+  ///
+  /// A request to fully show the semantics node on screen. For example, this
+  /// action might be send to a node in a scrollable list that is partially off
+  /// screen to bring it on screen.
+  ///
+  /// For elements in a scrollable list the framework provides a default
+  /// implementation for this action and it is not advised to provide a
+  /// custom one via this setter.
+  set onShowOnScreen(VoidCallback handler) {
+    _addArgumentlessAction(SemanticsAction.showOnScreen, handler);
+  }
+
   /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
   ///
   /// This handler is invoked when the user wants to move the cursor in a

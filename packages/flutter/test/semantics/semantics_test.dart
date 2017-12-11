@@ -208,6 +208,7 @@ void main() {
       ..isMergingSemanticsOfDescendants = true
       ..onScrollUp = () { }
       ..onLongPress = () { }
+      ..onShowOnScreen = () { }
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
@@ -219,11 +220,11 @@ void main() {
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
       allProperties.toStringDeep(),
-      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
+      'SemanticsNode#17(STALE, owner: null, leaf merge, Rect.fromLTRB(60.0, 20.0, 80.0, 50.0), actions: [longPress, scrollUp, showOnScreen], unchecked, selected, button, label: "Use all the properties", textDirection: rtl)\n',
     );
     expect(
       allProperties.getSemanticsData().toString(),
-      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
+      'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [1.0,0.0,0.0,10.0; 0.0,1.0,0.0,10.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0], actions: [longPress, scrollUp, showOnScreen], flags: [hasCheckedState, isSelected, isButton], label: "Use all the properties", textDirection: rtl)',
     );
 
     final SemanticsNode scaled = new SemanticsNode()
