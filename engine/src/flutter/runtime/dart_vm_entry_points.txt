@@ -1,3 +1,4 @@
+dart:_internal,::,_printClosure
 dart:async,::,_setScheduleImmediateClosure
 dart:io,::,_setupHooks
 dart:io,_Platform,set:_nativeScript
@@ -10,6 +11,7 @@ dart:ui,::,_dispatchPointerDataPacket
 dart:ui,::,_dispatchSemanticsAction
 dart:ui,::,_drawFrame
 dart:ui,::,_getGetBaseURLClosure
+dart:ui,::,_baseURL
 dart:ui,::,_getMainClosure
 dart:ui,::,_getPrintClosure
 dart:ui,::,_getScheduleMicrotaskClosure
