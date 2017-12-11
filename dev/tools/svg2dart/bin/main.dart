@@ -1,26 +1,26 @@
 import 'package:args/args.dart';
 
 void main(List<String> args) {
-  ArgParser parser = new ArgParser();
+  final ArgParser parser = new ArgParser();
 
   parser.addFlag(
       'help',
       abbr: 'h',
       negatable: false,
-      help: 'Display the tool\'s usage instructions and quit');
+      help: 'Display the tool\'s usage instructions and quit.');
 
   parser.addOption(
       'output',
       abbr: 'o',
-      help: 'Target path to write the generated Dart file to');
+      help: 'Target path to write the generated Dart file to.');
 
   parser.addOption(
       'asset_name',
       abbr: 'n',
-      help: 'Name to be used ');
+      help: 'Name to be used for the the generated const.');
 
 
-  ArgResults argResults = parser.parse(args);
+  final ArgResults argResults = parser.parse(args);
 
   if (argResults['help']) {
     printUsage(parser);
