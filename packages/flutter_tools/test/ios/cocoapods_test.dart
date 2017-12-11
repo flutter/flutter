@@ -172,6 +172,62 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       ProcessManager: () => mockProcessManager,
     },
   );
+
+  testUsingContext(
+    'Run pod install if plugins or flutter framework changes.',
+        () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+      fs.file(fs.path.join('project', 'ios', 'Podfile.lock'))
+        ..createSync()
+        ..writeAsString('Existing lock files.');
+      fs.file(fs.path.join('project', 'ios', 'Pods','Manifest.lock'))
+        ..createSync(recursive: true)
+        ..writeAsString('Existing lock files.');
+      await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          pluginOrFlutterPodChanged: true
+      );
+      verify(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+      ));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
+
+  testUsingContext(
+    'Skip pod install if plugins and flutter framework remains unchanged.',
+        () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+      fs.file(fs.path.join('project', 'ios', 'Podfile.lock'))
+        ..createSync()
+        ..writeAsString('Existing lock files.');
+      fs.file(fs.path.join('project', 'ios', 'Pods','Manifest.lock'))
+        ..createSync(recursive: true)
+        ..writeAsString('Existing lock files.');
+      await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          pluginOrFlutterPodChanged: false
+      );
+      verifyNever(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+      ));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
