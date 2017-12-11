@@ -56,14 +56,14 @@ void main() {
     });
 
     test('horizontal bar', () {
-      FrameData frameData = interpretSvg(testAsset('horizontal_bar.svg'));
-      expect(frameData.paths, [
+      final FrameData frameData = interpretSvg(testAsset('horizontal_bar.svg'));
+      expect(frameData.paths, <SvgPath>[
         const SvgPath('path_1', const<SvgPathCommand> [
-          const SvgPathCommand('M', const [const Point<double>(0.0, 19.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 19.0)]),
-          const SvgPathCommand('L', const [const Point<double>(48.0, 29.0)]),
-          const SvgPathCommand('L', const [const Point<double>(0.0, 29.0)]),
-          const SvgPathCommand('Z', const []),
+          const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 19.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(48.0, 29.0)]),
+          const SvgPathCommand('L', const <Point<double>> [const Point<double>(0.0, 29.0)]),
+          const SvgPathCommand('Z', const <Point<double>> []),
         ]),
       ]);
     });

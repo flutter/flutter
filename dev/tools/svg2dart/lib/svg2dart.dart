@@ -20,20 +20,20 @@ import 'package:xml/xml.dart' hide parse;
 /// support SVG files exported by a specific tool the motion design team is
 /// using.
 FrameData interpretSvg(String svgFilePath) {
-  File file = new File(svgFilePath);
+  final File file = new File(svgFilePath);
   if (!file.existsSync()) {
     throw new ArgumentError('$file does not exist');
   }
-  String fileData = file.readAsStringSync();
+  final String fileData = file.readAsStringSync();
   final XmlElement svgElement = _extractSvgElement(xml.parse(fileData));
-  double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
-  double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
+  final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
+  final double height = parsePixels(_extractAttr(svgElement, 'height')).toDouble();
 
-  List<SvgPath> paths = <SvgPath>[];
+  final List<SvgPath> paths = <SvgPath>[];
   for (XmlNode child in svgElement.children) {
     if (child.nodeType != XmlNodeType.ELEMENT)
       continue;
-    XmlElement childElement = child;
+    final XmlElement childElement = child;
 
     // TODO(amirh): recrusively parse groups and apply transforms
     if (childElement.name.local == 'path') {
@@ -56,10 +56,10 @@ final RegExp _pointMatcher = new RegExp(r' *([\-\.0-9]+) *, *([\-\.0-9]+)(.*)');
 /// [Point(25.0, 1.0), Point(12.0, 12.0), Point(23.0, 9.0)].
 List<Point<double>> parsePoints(String points) {
   String unParsed = points;
-  List<Point<double>> result = [];
+  final List<Point<double>> result = <Point<double>>[];
   while(unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
-    Match m = _pointMatcher.firstMatch(unParsed);
-    result.add(new Point(
+    final Match m = _pointMatcher.firstMatch(unParsed);
+    result.add(new Point<double>(
         double.parse(m.group(1)),
         double.parse(m.group(2))
     ));
@@ -105,12 +105,12 @@ class SvgPath {
 
   static SvgPath fromElement(XmlElement pathElement) {
     assert(pathElement.name.local == 'path');
-    String id = _extractAttr(pathElement, 'id');
-    String dAttr = _extractAttr(pathElement, 'd');
-    List<SvgPathCommand> commands = <SvgPathCommand> [];
+    final String id = _extractAttr(pathElement, 'id');
+    final String dAttr = _extractAttr(pathElement, 'd');
+    final List<SvgPathCommand> commands = <SvgPathCommand> [];
     for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
-      String commandType = match.group(1);
-      String pointStr = match.group(2);
+      final String commandType = match.group(1);
+      final String pointStr = match.group(2);
       commands.add(new SvgPathCommand(commandType, parsePoints(pointStr)));
     }
     return new SvgPath(id, commands);
@@ -189,19 +189,19 @@ int parsePixels(String pixels) {
 
 String _extractAttr(XmlElement element, String name) {
   try {
-    return element.attributes.singleWhere((x) => x.name.local == name)
+    return element.attributes.singleWhere((XmlAttribute x) => x.name.local == name)
         .value;
   } catch (e) {
     throw new ArgumentError(
         'Can\'t find a single \'$name\' attributes in ${element.name}, '
-        + 'attributes were: ${element.attributes}'
+        'attributes were: ${element.attributes}'
     );
   }
 }
 
 XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
-          (node) => node.nodeType  == XmlNodeType.ELEMENT
+          (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT
           && _asElement(node).name.local == 'svg'
   );
 }
