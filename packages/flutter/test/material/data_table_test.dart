@@ -98,4 +98,116 @@ void main() {
     expect(log, <String>['row-selected: KitKat']);
     log.clear();
   });
+
+  testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new DataTable(
+            columns: <DataColumn>[
+              new DataColumn(
+                label: new Text('X' * 2000),
+              ),
+            ],
+            rows: const <DataRow>[
+              const DataRow(
+                cells: const <DataCell>[
+                  const DataCell(
+                    const Text('X'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, greaterThan(800.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
+    expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
+  });
+
+  testWidgets('DataTable overflow test - header with spaces', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new DataTable(
+            columns: <DataColumn>[
+              new DataColumn(
+                label: new Text('X ' * 2000), // has soft wrap points, but they should be ignored
+              ),
+            ],
+            rows: const <DataRow>[
+              const DataRow(
+                cells: const <DataCell>[
+                  const DataCell(
+                    const Text('X'),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, greaterThan(800.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
+    expect(tester.takeException(), isNull); // column overflows table, but text doesn't overflow cell
+  }, skip: true); // https://github.com/flutter/flutter/issues/13512
+
+  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new DataTable(
+            columns: const <DataColumn>[
+              const DataColumn(
+                label: const Text('X'),
+              ),
+            ],
+            rows: <DataRow>[
+              new DataRow(
+                cells: <DataCell>[
+                  new DataCell(
+                    new Text('X' * 2000),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, lessThan(800.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, greaterThan(800.0));
+    expect(tester.takeException(), isNull); // cell overflows table, but text doesn't overflow cell
+  });
+
+  testWidgets('DataTable overflow test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new Material(
+          child: new DataTable(
+            columns: const <DataColumn>[
+              const DataColumn(
+                label: const Text('X'),
+              ),
+            ],
+            rows: <DataRow>[
+              new DataRow(
+                cells: <DataCell>[
+                  new DataCell(
+                    new Text('X ' * 2000), // wraps
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byType(Text).first).size.width, lessThan(800.0));
+    expect(tester.renderObject<RenderBox>(find.byType(Row).first).size.width, lessThan(800.0));
+    expect(tester.takeException(), isNull);
+  });
 }
