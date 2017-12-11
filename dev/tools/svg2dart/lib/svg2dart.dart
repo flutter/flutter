@@ -62,8 +62,11 @@ class PathAnimation {
 
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
     final List<double> opacities = <double>[];
-    for (int commandIdx = 0; commandIdx < frames[0].paths[0].commands.length; commandIdx++) {
-      final List<List<Point<double>>> points = <List<Point<double>>>[];
+    for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx++) {
+      final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
+      final List<List<Point<double>>> points = new List<List<Point<double>>>(numPointsInCommand);
+      for (int j = 0; j < numPointsInCommand; j++)
+        points[j] = <Point<double>>[];
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
       for (int i = 0; i < frames.length; i++) {
         final FrameData frame = frames[i];
@@ -74,7 +77,8 @@ class PathAnimation {
               'command $commandIdx at frame 0 was of type \'$commandType\''
               'command $commandIdx at frame $i was of type \'$currentCommandType\''
           );
-        points.add(new List<Point<double>>.from(frame.paths[pathIdx].commands[commandIdx].points));
+        for (int j = 0; j < numPointsInCommand; j++)
+          points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
         opacities.add(frame.paths[pathIdx].opacity);
       }
       commands.add(new PathCommandAnimation(commandType, points));
@@ -102,7 +106,7 @@ class PathCommandAnimation {
 
   /// A matrix with the command's points in different frames.
   ///
-  /// points[i][j] is the j-th point of the command at frame i.
+  /// points[i][j] is the i-th point of the command at frame j.
   final List<List<Point<double>>> points;
 
   @override

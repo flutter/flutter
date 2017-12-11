@@ -240,8 +240,10 @@ void main() {
           const PathAnimationMatcher(const PathAnimation(
               const <PathCommandAnimation> [
                 const PathCommandAnimation('M', const <List<Point<double>>> [
-                  const <Point<double>> [const Point<double>(0.0, 0.0)],
-                  const <Point<double>> [const Point<double>(10.0, 10.0)],
+                  const <Point<double>> [
+                    const Point<double>(0.0, 0.0),
+                    const Point<double>(10.0, 10.0),
+                  ],
                 ]),
               ],
               opacities: const <double> [0.5, 1.0]
