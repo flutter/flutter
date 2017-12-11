@@ -323,4 +323,155 @@ void main() {
       value: value2,
     ));
   });
+
+  testWidgets('changing selection with keyboard does not show handles', (WidgetTester tester) async {
+    const String value1 = 'Hello World';
+
+    controller.text = value1;
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        selectionControls: materialTextSelectionControls,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    // Simulate selection change via tap to show handles.
+    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 4), render, SelectionChangedCause.tap);
+
+    await tester.pumpAndSettle();
+    final EditableTextState textState = tester.state(find.byType(EditableText));
+
+    expect(textState.selectionOverlay.handlesAreVisible, isTrue);
+    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 4));
+
+    // Simulate selection change via keyboard and expect handles to disappear.
+    render.onSelectionChanged(const TextSelection.collapsed(offset: 10), render, SelectionChangedCause.keyboard);
+    await tester.pumpAndSettle();
+
+    expect(textState.selectionOverlay.handlesAreVisible, isFalse);
+    expect(textState.selectionOverlay.textEditingValue.selection, const TextSelection.collapsed(offset: 10));
+  });
+
+  testWidgets('exposes correct cursor movement semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    controller.text = 'test';
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(semantics, includesNodeWith(
+      value: 'test',
+    ));
+
+    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+    await tester.pumpAndSettle();
+
+    // At end, can only go backwards.
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+      ],
+    ));
+
+    controller.selection = new TextSelection.collapsed(offset: controller.text.length - 2);
+    await tester.pumpAndSettle();
+
+    // Somewhere in the middle, can go in both directions.
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    controller.selection = const TextSelection.collapsed(offset: 0);
+    await tester.pumpAndSettle();
+
+    // At beginning, can only go forward.
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    semantics.dispose();
+  });
+
+  testWidgets('can move cursor with a11y means', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    controller.text = 'test';
+    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+      ],
+    ));
+
+    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final int semanticsId = render.debugSemantics.id;
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 4);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 3);
+    expect(controller.selection.extentOffset, 3);
+
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 0);
+
+    await tester.pumpAndSettle();
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    semantics.dispose();
+  });
 }

@@ -39,13 +39,13 @@ enum _ScaffoldSlot {
 class _ScaffoldLayout extends MultiChildLayoutDelegate {
   _ScaffoldLayout({
     @required this.statusBarHeight,
-    @required this.bottomPadding,
+    @required this.bottomViewInset,
     @required this.endPadding, // for floating action button
     @required this.textDirection,
   });
 
   final double statusBarHeight;
-  final double bottomPadding;
+  final double bottomViewInset;
   final double endPadding;
   final TextDirection textDirection;
 
@@ -59,7 +59,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
     // so the app bar's shadow is drawn on top of the body.
 
     final BoxConstraints fullWidthConstraints = looseConstraints.tighten(width: size.width);
-    final double bottom = math.max(0.0, size.height - bottomPadding);
+    final double bottom = math.max(0.0, size.height - bottomViewInset);
     double contentTop = 0.0;
     double contentBottom = bottom;
 
@@ -161,7 +161,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
   @override
   bool shouldRelayout(_ScaffoldLayout oldDelegate) {
     return oldDelegate.statusBarHeight != statusBarHeight
-        || oldDelegate.bottomPadding != bottomPadding
+        || oldDelegate.bottomViewInset != bottomViewInset
         || oldDelegate.endPadding != endPadding
         || oldDelegate.textDirection != textDirection;
   }
@@ -810,7 +810,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     @required bool removeLeftPadding,
     @required bool removeTopPadding,
     @required bool removeRightPadding,
-    bool removeBottomPadding, // defaults to widget.resizeToAvoidBottomPadding
+    @required bool removeBottomPadding,
   }) {
     if (child != null) {
       children.add(
@@ -821,7 +821,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
             removeLeft: removeLeftPadding,
             removeTop: removeTopPadding,
             removeRight: removeRightPadding,
-            removeBottom: removeBottomPadding ?? widget.resizeToAvoidBottomPadding,
+            removeBottom: removeBottomPadding,
             child: child,
           ),
         ),
@@ -833,7 +833,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasDirectionality(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
     final ThemeData themeData = Theme.of(context);
     final TextDirection textDirection = Directionality.of(context);
 
@@ -861,10 +861,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       removeLeftPadding: false,
       removeTopPadding: widget.appBar != null,
       removeRightPadding: false,
+      removeBottomPadding: widget.bottomNavigationBar != null,
     );
 
     if (widget.appBar != null) {
-      final double topPadding = widget.primary ? padding.top : 0.0;
+      final double topPadding = widget.primary ? mediaQuery.padding.top : 0.0;
       final double extent = widget.appBar.preferredSize.height + topPadding;
       assert(extent >= 0.0 && extent.isFinite);
       _addIfNonNull(
@@ -892,6 +893,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
+        removeBottomPadding: widget.resizeToAvoidBottomPadding,
       );
     }
 
@@ -918,6 +920,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
+        removeBottomPadding: widget.resizeToAvoidBottomPadding,
       );
     }
 
@@ -929,6 +932,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
+        removeBottomPadding: false,
       );
     }
 
@@ -949,6 +953,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
+        removeBottomPadding: widget.resizeToAvoidBottomPadding,
       );
     }
 
@@ -1020,10 +1025,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     double endPadding;
     switch (textDirection) {
       case TextDirection.rtl:
-        endPadding = padding.left;
+        endPadding = mediaQuery.padding.left;
         break;
       case TextDirection.ltr:
-        endPadding = padding.right;
+        endPadding = mediaQuery.padding.right;
         break;
     }
     assert(endPadding != null);
@@ -1037,8 +1042,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: new CustomMultiChildLayout(
             children: children,
             delegate: new _ScaffoldLayout(
-              statusBarHeight: padding.top,
-              bottomPadding: widget.resizeToAvoidBottomPadding ? padding.bottom : 0.0,
+              statusBarHeight: mediaQuery.padding.top,
+              bottomViewInset: widget.resizeToAvoidBottomPadding ? mediaQuery.viewInsets.bottom : 0.0,
               endPadding: endPadding,
               textDirection: textDirection,
             ),

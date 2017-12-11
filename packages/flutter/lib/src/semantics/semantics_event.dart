@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-/// An event that can be send by the application to notify interested listeners
-/// that something happened to the user interface (e.g. a view scrolled).
+/// An event sent by the application to notify interested listeners that
+/// something happened to the user interface (e.g. a view scrolled).
 ///
 /// These events are usually interpreted by assistive technologies to give the
 /// user additional clues about the current state of the UI.

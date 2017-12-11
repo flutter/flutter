@@ -9,11 +9,10 @@ import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 
-import 'asset_bundle.dart';
-import 'http_client.dart';
-import 'image_cache.dart';
+import 'binding.dart';
 import 'image_stream.dart';
 
 /// Configuration information passed to the [ImageProvider.resolve] method to
@@ -262,7 +261,7 @@ abstract class ImageProvider<T> {
     T obtainedKey;
     obtainKey(configuration).then<Null>((T key) {
       obtainedKey = key;
-      stream.setCompleter(imageCache.putIfAbsent(key, () => load(key)));
+      stream.setCompleter(PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key)));
     }).catchError(
       (dynamic exception, StackTrace stack) async {
         FlutterError.reportError(new FlutterErrorDetails(

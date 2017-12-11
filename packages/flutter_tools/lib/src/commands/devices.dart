@@ -34,6 +34,13 @@ class DevicesCommand extends FlutterCommand {
         'No devices detected.\n\n'
         'If you expected your device to be detected, please run "flutter doctor" to diagnose\n'
         'potential issues, or visit https://flutter.io/setup/ for troubleshooting tips.');
+      final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
+      if (diagnostics.isNotEmpty) {
+        printStatus('');
+        for (String diagnostic in diagnostics) {
+          printStatus('• ${diagnostic.replaceAll('\n', '\n  ')}');
+        }        
+      }
     } else {
       printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);

@@ -4,8 +4,9 @@
 
 import 'dart:async';
 import 'dart:ui';
+
+import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class FakeFrameInfo extends FrameInfo {
