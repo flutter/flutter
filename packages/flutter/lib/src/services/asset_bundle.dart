@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -216,20 +215,11 @@ class PlatformAssetBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async {
     final Uint8List encoded = UTF8.encoder.convert(key);
-    final ByteData assetPath =
+    final ByteData asset =
         await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
-
-    ByteData data;
-    if (assetPath != null) {
-      final File assetFile = new File(UTF8.decode(assetPath.buffer.asUint8List()));
-      final List<int> bytes = await assetFile.readAsBytes();
-      assert(bytes is Uint8List);
-      Uint8List uInt8list = bytes;
-      data = uInt8list.buffer.asByteData();
-    }
-    if (data == null)
+    if (asset == null)
       throw new FlutterError('Unable to load asset: $key');
-    return data;
+    return asset;
   }
 }
 
