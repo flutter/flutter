@@ -118,7 +118,7 @@ class _AnimatedIconPainter extends CustomPainter {
   @override
   void paint(ui.Canvas canvas, Size size) {
     for (_PathFrames path in paths)
-      path.paint(canvas, color, uiPathFactory, progress.value);
+      path.paint(canvas, color, uiPathFactory, progress.value.clamp(0.0, 1.0));
   }
 
   @override
@@ -127,7 +127,8 @@ class _AnimatedIconPainter extends CustomPainter {
       || oldDelegate.color != color
       // We are comparing the paths list by reference, assuming the list is
       // treated as immutable to be more efficient.
-      || oldDelegate.paths != paths;
+      || oldDelegate.paths != paths
+      || oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
