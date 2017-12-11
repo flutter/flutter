@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': 'a38ac7cf127f4611c873c2f2d523c06ce06b1342',
+  'dart_revision': 'd8ae797298c3a6cf8dc9f4558707bd2672224d3e',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.0',
@@ -48,7 +48,7 @@ vars = {
   'dart_csslib_tag': '0.14.1',
   'dart_dart2js_info_tag': '0.5.5+1',
   'dart_dart_style_tag': '1.0.7',
-  'dart_dartdoc_tag': 'v0.14.1',
+  'dart_dartdoc_tag': 'v0.15.0+1',
   'dart_fixnum_tag': '0.10.5',
   'dart_glob_tag': '1.1.5',
   'dart_html_tag': '0.13.2',
@@ -61,17 +61,17 @@ vars = {
   'dart_json_rpc_2_tag': '2.0.4',
   'dart_linter_tag': '0.1.40',
   'dart_logging_tag': '0.11.3+1',
-  'dart_markdown_tag': '0.11.4',
+  'dart_markdown_tag': '1.0.0',
   'dart_matcher_tag': '0.12.1+4',
   'dart_mime_tag': '0.9.4',
   'dart_mockito_tag': '2.0.2',
-  'dart_mustache4dart_tag': 'v1.1.0',
+  'dart_mustache4dart_tag': 'v2.1.0',
   'dart_oauth2_tag': '1.1.0',
   'dart_observatory_pub_packages_rev': '4c282bb240b68f407c8c7779a65c68eeb0139dc6',
   'dart_package_config_tag': '1.0.3',
   'dart_package_resolver_tag': '1.0.2+1',
   'dart_path_tag': '1.4.2',
-  'dart_plugin_tag': '0.2.0',
+  'dart_plugin_tag': '0.2.0+2',
   'dart_pool_tag': '1.3.3',
   'dart_protobuf_tag': '0.5.4',
   'dart_pub_rev': 'cde958f157d3662bf968bcbed05580d5c0355e89',
@@ -81,8 +81,8 @@ vars = {
   'dart_root_certificates_rev': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
   'dart_shelf_packages_handler_tag': '1.0.3',
   'dart_shelf_static_tag': '0.2.5',
-  'dart_shelf_tag': '0.6.8',
-  'dart_shelf_web_socket_tag': '0.2.1',
+  'dart_shelf_tag': '0.7.1',
+  'dart_shelf_web_socket_tag': '0.2.2',
   'dart_source_map_stack_trace_tag': '1.1.4',
   'dart_source_maps_tag': '0.10.4',
   'dart_source_span_tag': '1.4.0',
@@ -96,7 +96,7 @@ vars = {
   'dart_utf_tag': '0.9.0+3',
   'dart_watcher_tag': '0.9.7+4',
   'dart_web_socket_channel_tag': '1.0.6',
-  'dart_yaml_tag': '2.1.12',
+  'dart_yaml_tag': '2.1.13',
 
   # Build bot tooling for iOS
   'ios_tools_revision': '69b7c1b160e7107a6a98d948363772dc9caea46f',
