@@ -349,10 +349,10 @@ class RenderEditable extends RenderBox {
       ..isTextField = true;
 
     if (_selection?.isValid == true) {
-      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
-        config.onMoveCursorForwardByCharacter = (bool extentSelection) {
-          final int extentOffset = _textPainter.getOffsetAfter(_selection.extentOffset);
-          if (offset == null)
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
+        config.onMoveCursorBackwardByCharacter = (bool extentSelection) {
+          final int extentOffset = _textPainter.getOffsetBefore(_selection.extentOffset);
+          if (extentOffset == null)
             return;
           final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
           onSelectionChanged(
@@ -360,11 +360,10 @@ class RenderEditable extends RenderBox {
           );
         };
       }
-
-      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
-        config.onMoveCursorBackwardByCharacter = (bool extentSelection) {
-          final int extentOffset = _textPainter.getOffsetBefore(_selection.extentOffset);
-          if (offset == null)
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
+        config.onMoveCursorForwardByCharacter = (bool extentSelection) {
+          final int extentOffset = _textPainter.getOffsetAfter(_selection.extentOffset);
+          if (extentOffset == null)
             return;
           final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
           onSelectionChanged(

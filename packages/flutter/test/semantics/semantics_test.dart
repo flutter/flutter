@@ -65,19 +65,19 @@ void main() {
 
       TestRender middle;
       final TestRender root = new TestRender(
-        tapAction: true,
+        hasTapAction: true,
         isSemanticBoundary: true,
         child: new TestRender(
-          longPressAction: true,
+          hasLongPressAction: true,
           isSemanticBoundary: false,
           child: middle = new TestRender(
-            scrollLeftAction: true,
+            hasScrollLeftAction: true,
             isSemanticBoundary: false,
             child: new TestRender(
-              scrollRightAction: true,
+              hasScrollRightAction: true,
               isSemanticBoundary: false,
               child: new TestRender(
-                scrollUpAction: true,
+                hasScrollUpAction: true,
                 isSemanticBoundary: true,
               )
             )
@@ -92,8 +92,8 @@ void main() {
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
 
       middle
-        ..scrollLeftAction = false
-        ..scrollDownAction = true;
+        ..hasScrollLeftAction = false
+        ..hasScrollDownAction = true;
       middle.markNeedsSemanticsUpdate();
 
       pumpFrame(phase: EnginePhase.flushSemantics);
@@ -243,22 +243,22 @@ void main() {
 class TestRender extends RenderProxyBox {
 
   TestRender({
-    this.tapAction: false,
-    this.longPressAction: false,
-    this.scrollLeftAction: false,
-    this.scrollRightAction: false,
-    this.scrollUpAction: false,
-    this.scrollDownAction: false,
+    this.hasTapAction: false,
+    this.hasLongPressAction: false,
+    this.hasScrollLeftAction: false,
+    this.hasScrollRightAction: false,
+    this.hasScrollUpAction: false,
+    this.hasScrollDownAction: false,
     this.isSemanticBoundary,
     RenderObject child
   }) : super(child);
 
-  bool tapAction;
-  bool longPressAction;
-  bool scrollLeftAction;
-  bool scrollRightAction;
-  bool scrollUpAction;
-  bool scrollDownAction;
+  bool hasTapAction;
+  bool hasLongPressAction;
+  bool hasScrollLeftAction;
+  bool hasScrollRightAction;
+  bool hasScrollUpAction;
+  bool hasScrollDownAction;
   bool isSemanticBoundary;
 
 
@@ -267,17 +267,17 @@ class TestRender extends RenderProxyBox {
     super.describeSemanticsConfiguration(config);
 
     config.isSemanticBoundary = isSemanticBoundary;
-    if (tapAction)
+    if (hasTapAction)
       config.onTap = () { };
-    if (longPressAction)
+    if (hasLongPressAction)
       config.onLongPress = () { };
-    if (scrollLeftAction)
+    if (hasScrollLeftAction)
       config.onScrollLeft = () { };
-    if (scrollRightAction)
+    if (hasScrollRightAction)
       config.onScrollRight = () { };
-    if (scrollUpAction)
+    if (hasScrollUpAction)
       config.onScrollUp = () { };
-    if (scrollDownAction)
+    if (hasScrollDownAction)
       config.onScrollDown = () { };
   }
 }

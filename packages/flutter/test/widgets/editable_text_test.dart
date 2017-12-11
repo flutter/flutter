@@ -414,7 +414,7 @@ void main() {
 
   testWidgets('can move cursor with a11y means', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    final bool doNotExtendSelection = false;
+    const bool doNotExtendSelection = false;
 
     controller.text = 'test';
     controller.selection = new TextSelection.collapsed(offset: controller.text.length);
@@ -484,8 +484,8 @@ void main() {
 
   testWidgets('can extend selection with a11y means', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
-    final bool extendSelection = true;
-    final bool doNotExtendSelection = false;
+    const bool extendSelection = true;
+    const bool doNotExtendSelection = false;
 
     controller.text = 'test';
     controller.selection = new TextSelection.collapsed(offset: controller.text.length);

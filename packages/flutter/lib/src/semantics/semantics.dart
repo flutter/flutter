@@ -27,7 +27,7 @@ typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
 /// Signature for [SemanticsAction]s that move the cursor.
 ///
-/// If `extendSelection` is set to true the cursor movement should extent the
+/// If `extendSelection` is set to true the cursor movement should extend the
 /// current selection or (if nothing is currently selected) start a selection.
 typedef void MoveCursorHandler(bool extendSelection);
 
@@ -1241,6 +1241,9 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
+  ///
+  /// If the given `action` requires arguments they need to be passed in via
+  /// the `args` parameter.
   void performAction(int id, SemanticsAction action, [dynamic args]) {
     assert(action != null);
     final _SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
@@ -1288,6 +1291,9 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
+  ///
+  /// If the given `action` requires arguments they need to be passed in via
+  /// the `args` parameter.
   void performActionAt(Offset position, SemanticsAction action, [dynamic args]) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
@@ -1400,7 +1406,8 @@ class SemanticsConfiguration {
 
   /// Adds an `action` to the semantics tree.
   ///
-  /// Whenever the user performs `action` the provided `handler` is called.
+  /// The provided `handler` is called to respond to the user triggered
+  /// `action`.
   void _addAction(SemanticsAction action, _SemanticsActionHandler handler) {
     assert(handler != null);
     _actions[action] = handler;
@@ -1411,7 +1418,8 @@ class SemanticsConfiguration {
   /// Adds an `action` to the semantics tree, whose `handler` does not expect
   /// any arguments.
   ///
-  /// Whenever the user performs `action` the provided `handler` is called.
+  /// The provided `handler` is called to respond to the user triggered
+  /// `action`.
   void _addArgumentlessAction(SemanticsAction action, VoidCallback handler) {
     assert(handler != null);
     _addAction(action, (dynamic args) {
