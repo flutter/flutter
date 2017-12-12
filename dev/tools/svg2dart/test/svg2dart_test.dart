@@ -167,6 +167,36 @@ void main() {
   });
 
   group('create PathAnimation', () {
+    test('single path', () {
+      final List<FrameData> frameData = const <FrameData>[
+        const FrameData(
+          const Point<double>(10.0, 10.0),
+          const <SvgPath> [
+            const SvgPath(
+              'path_1',
+              const <SvgPathCommand> [
+                const SvgPathCommand('M', const <Point<double>> [const Point<double>(0.0, 0.0)]),
+                const SvgPathCommand('L', const <Point<double>> [const Point<double>(10.0, 10.0)]),
+              ],
+            ),
+          ],
+        ),
+      ];
+      expect(new PathAnimation.fromFrameData(frameData, 0),
+          const PathAnimationMatcher(const PathAnimation(
+              const <PathCommandAnimation> [
+                const PathCommandAnimation('M', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(0.0, 0.0)],
+                ]),
+                const PathCommandAnimation('L', const <List<Point<double>>> [
+                  const <Point<double>> [const Point<double>(10.0, 10.0)],
+                ]),
+              ],
+              opacities: const <double> [1.0]
+          ))
+      );
+    });
+
     test('multiple paths', () {
       final List<FrameData> frameData = const <FrameData>[
         const FrameData(
@@ -179,7 +209,7 @@ void main() {
               ],
             ),
             const SvgPath(
-              'path_1',
+              'path_2',
               const <SvgPathCommand> [
                 const SvgPathCommand('M', const <Point<double>> [const Point<double>(5.0, 6.0)]),
               ],

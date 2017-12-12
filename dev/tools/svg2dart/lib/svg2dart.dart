@@ -75,7 +75,6 @@ class PathAnimation {
       return const PathAnimation(const <PathCommandAnimation> [], opacities: const <double> []);
 
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
-    final List<double> opacities = <double>[];
     for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx++) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
       final List<List<Point<double>>> points = new List<List<Point<double>>>(numPointsInCommand);
@@ -93,10 +92,13 @@ class PathAnimation {
           );
         for (int j = 0; j < numPointsInCommand; j++)
           points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
-        opacities.add(frame.paths[pathIdx].opacity);
       }
       commands.add(new PathCommandAnimation(commandType, points));
     }
+
+    final List<double> opacities =
+      frames.map<double>((FrameData d) => d.paths[pathIdx].opacity).toList();
+
     return new PathAnimation(commands, opacities: opacities);
   }
 
