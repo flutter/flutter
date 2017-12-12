@@ -298,7 +298,224 @@ void main() {
 
       expect(animation.size, const Point<double>(10.0, 10.0));
     });
+  });
 
+  group('toDart', () {
+    test('_PathMoveTo', () {
+      final PathCommandAnimation command = const PathCommandAnimation(
+        'M',
+        const <List<Point<double>>> [
+          const <Point<double>> [
+            const Point<double>(1.0, 2.0),
+            const Point<double>(3.0, 4.0),
+          ],
+        ],
+      );
+
+      expect(command.toDart(),
+          '        const _PathMoveTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(1.0, 2.0),\n'
+          '            const Offset(3.0, 4.0),\n'
+          '          ],\n'
+          '        ),\n'
+
+      );
+    });
+
+    test('_PathLineTo', () {
+      final PathCommandAnimation command = const PathCommandAnimation(
+        'L',
+        const <List<Point<double>>> [
+          const <Point<double>> [
+            const Point<double>(1.0, 2.0),
+            const Point<double>(3.0, 4.0),
+          ],
+        ],
+      );
+
+      expect(command.toDart(),
+          '        const _PathLineTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(1.0, 2.0),\n'
+          '            const Offset(3.0, 4.0),\n'
+          '          ],\n'
+          '        ),\n'
+
+      );
+    });
+
+    test('_PathCubicTo', () {
+      final PathCommandAnimation command = const PathCommandAnimation(
+        'C',
+        const <List<Point<double>>> [
+          const <Point<double>> [
+            const Point<double>(16.0, 24.0),
+            const Point<double>(16.0, 10.0),
+          ],
+          const <Point<double>> [
+            const Point<double>(16.0, 25.0),
+            const Point<double>(16.0, 11.0),
+          ],
+          const <Point<double>> [
+            const Point<double>(40.0, 40.0),
+            const Point<double>(40.0, 40.0),
+          ],
+        ],
+      );
+
+      expect(command.toDart(),
+          '        const _PathCubicTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(16.0, 24.0),\n'
+          '            const Offset(16.0, 10.0),\n'
+          '          ],\n'
+          '          const <Offset> [\n'
+          '            const Offset(16.0, 25.0),\n'
+          '            const Offset(16.0, 11.0),\n'
+          '          ],\n'
+          '          const <Offset> [\n'
+          '            const Offset(40.0, 40.0),\n'
+          '            const Offset(40.0, 40.0),\n'
+          '          ],\n'
+          '        ),\n'
+
+      );
+    });
+
+    test('_PathClose', () {
+      final PathCommandAnimation command = const PathCommandAnimation(
+        'Z',
+        const <List<Point<double>>> [],
+      );
+
+      expect(command.toDart(),
+          '        const _PathClose(\n'
+          '        ),\n'
+
+      );
+    });
+
+    test('_PathFrames', () {
+      final PathAnimation pathAnimation = const PathAnimation(
+          const <PathCommandAnimation> [
+            const PathCommandAnimation('M', const <List<Point<double>>> [
+              const <Point<double>> [
+                const Point<double>(0.0, 0.0),
+                const Point<double>(10.0, 10.0),
+              ],
+            ]),
+            const PathCommandAnimation('L', const <List<Point<double>>> [
+              const <Point<double>> [
+                const Point<double>(48.0, 10.0),
+                const Point<double>(0.0, 0.0),
+              ],
+            ]),
+          ],
+          opacities: const <double> [0.5, 1.0]
+      );
+
+      expect(pathAnimation.toDart(),
+          '    const _PathFrames(\n'
+          '      opacities: const <double> [\n'
+          '        0.5,\n'
+          '        1.0,\n'
+          '      ],\n'
+          '      commands: const <_PathCommand> [\n'
+          '        const _PathMoveTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(0.0, 0.0),\n'
+          '            const Offset(10.0, 10.0),\n'
+          '          ],\n'
+          '        ),\n'
+          '        const _PathLineTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(48.0, 10.0),\n'
+          '            const Offset(0.0, 0.0),\n'
+          '          ],\n'
+          '        ),\n'
+          '      ],\n'
+          '    ),\n'
+      );
+    });
+
+    test('Animation', () {
+      final Animation animation = const Animation(
+          const Point<double>(48.0, 48.0),
+          const <PathAnimation> [
+            const PathAnimation(
+                const <PathCommandAnimation> [
+                  const PathCommandAnimation('M', const <List<Point<double>>> [
+                    const <Point<double>> [
+                      const Point<double>(0.0, 0.0),
+                      const Point<double>(10.0, 10.0),
+                    ],
+                  ]),
+                  const PathCommandAnimation('L', const <List<Point<double>>> [
+                    const <Point<double>> [
+                      const Point<double>(48.0, 10.0),
+                      const Point<double>(0.0, 0.0),
+                    ],
+                  ]),
+                ],
+                opacities: const <double> [0.5, 1.0]
+            ),
+
+            const PathAnimation(
+                const <PathCommandAnimation> [
+                  const PathCommandAnimation('M', const <List<Point<double>>> [
+                    const <Point<double>> [
+                      const Point<double>(0.0, 0.0),
+                      const Point<double>(10.0, 10.0),
+                    ],
+                  ]),
+                ],
+                opacities: const <double> [0.5, 1.0]
+            ),
+          ]);
+
+      expect(animation.toDart('_AnimatedIconData', '_\$data1'),
+          'const _AnimatedIconData _\$data1 = const _AnimatedIconData(\n'
+          '  const Size(48.0, 48.0),\n'
+          '  const <_PathFrames> [\n'
+          '    const _PathFrames(\n'
+          '      opacities: const <double> [\n'
+          '        0.5,\n'
+          '        1.0,\n'
+          '      ],\n'
+          '      commands: const <_PathCommand> [\n'
+          '        const _PathMoveTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(0.0, 0.0),\n'
+          '            const Offset(10.0, 10.0),\n'
+          '          ],\n'
+          '        ),\n'
+          '        const _PathLineTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(48.0, 10.0),\n'
+          '            const Offset(0.0, 0.0),\n'
+          '          ],\n'
+          '        ),\n'
+          '      ],\n'
+          '    ),\n'
+          '    const _PathFrames(\n'
+          '      opacities: const <double> [\n'
+          '        0.5,\n'
+          '        1.0,\n'
+          '      ],\n'
+          '      commands: const <_PathCommand> [\n'
+          '        const _PathMoveTo(\n'
+          '          const <Offset> [\n'
+          '            const Offset(0.0, 0.0),\n'
+          '            const Offset(10.0, 10.0),\n'
+          '          ],\n'
+          '        ),\n'
+          '      ],\n'
+          '    ),\n'
+          '  ],\n'
+          ');'
+      );
+    });
   });
 }
 

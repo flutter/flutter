@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
+import 'package:svg2dart/svg2dart.dart';
 
 void main(List<String> args) {
   final ArgParser parser = new ArgParser();
@@ -27,7 +30,14 @@ void main(List<String> args) {
     return;
   }
 
-  printUsage(parser);
+  final List<FrameData> frames = <FrameData>[];
+  for (String filePath in argResults.rest) {
+    final FrameData data = interpretSvg(filePath);
+    frames.add(data);
+  }
+  final Animation animation = new Animation.fromFrameData(frames);
+  final File outFile = new File(argResults['output']);
+  outFile.writeAsStringSync(animation.toDart('_AnimatedIconData', argResults['asset_name']));
 }
 
 void printUsage(ArgParser parser) {
