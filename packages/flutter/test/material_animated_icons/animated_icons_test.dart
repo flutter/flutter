@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math show pi;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material_animated_icons.dart';
@@ -118,6 +120,77 @@ void main() {
     );
 
     expect(semantics, includesNodeWith(label: 'a label'));
+  });
+
+  testWidgets('Inherited text direction rtl', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.rtl,
+        child: const IconTheme(
+          data: const IconThemeData(
+            color: const Color(0xFF666666),
+          ),
+          child: const AnimatedIcon(
+            progress: const AlwaysStoppedAnimation<double>(0.0),
+            icon: AnimatedIcons.arrow_menu,
+          )
+        ),
+      ),
+    );
+    final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
+    final MockCanvas canvas = new MockCanvas();
+    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    verifyInOrder(<dynamic>[
+      canvas.rotate(math.pi),
+      canvas.translate(-48.0, -48.0)
+    ]);
+  });
+
+  testWidgets('Inherited text direction ltr', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const IconTheme(
+          data: const IconThemeData(
+            color: const Color(0xFF666666),
+          ),
+          child: const AnimatedIcon(
+            progress: const AlwaysStoppedAnimation<double>(0.0),
+            icon: AnimatedIcons.arrow_menu,
+          )
+        ),
+      ),
+    );
+    final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
+    final MockCanvas canvas = new MockCanvas();
+    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    verifyNever(canvas.rotate(any));
+    verifyNever(canvas.translate(any, any));
+  });
+
+  testWidgets('Inherited text direction overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const IconTheme(
+          data: const IconThemeData(
+            color: const Color(0xFF666666),
+          ),
+          child: const AnimatedIcon(
+            progress: const AlwaysStoppedAnimation<double>(0.0),
+            icon: AnimatedIcons.arrow_menu,
+            textDirection: TextDirection.rtl,
+          )
+        ),
+      ),
+    );
+    final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
+    final MockCanvas canvas = new MockCanvas();
+    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    verifyInOrder(<dynamic>[
+      canvas.rotate(math.pi),
+      canvas.translate(-48.0, -48.0)
+    ]);
   });
 }
 

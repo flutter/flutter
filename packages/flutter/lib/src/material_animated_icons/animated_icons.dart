@@ -77,15 +77,8 @@ class AnimatedIcon extends StatelessWidget {
   ///
   /// If this is null, the ambient [Directionality] is used instead.
   ///
-  /// Some icons follow the reading direction. For example, "back" buttons point
-  /// left in left-to-right environments and right in right-to-left
-  /// environments. Such icons have their [IconData.matchTextDirection] field
-  /// set to true, and the [Icon] widget uses the [textDirection] to determine
-  /// the orientation in which to draw the icon.
-  ///
-  /// This property has no effect if the [icon]'s [IconData.matchTextDirection]
-  /// field is false, but for consistency a text direction value must always be
-  /// specified, either directly using this property or using [Directionality].
+  /// If the text diection is [TextDirection.rtl], the icon will be mirrored
+  /// horizontally (e.g back arrow will point right).
   final TextDirection textDirection;
 
   static final _UiPathFactory _pathFactory = () => new ui.Path();
@@ -96,6 +89,7 @@ class AnimatedIcon extends StatelessWidget {
     final _AnimatedIconData iconData = icon;
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
+    final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
     return new Semantics(
       label: semanticLabel,
       child: new CustomPaint(
@@ -105,6 +99,7 @@ class AnimatedIcon extends StatelessWidget {
           progress,
           color ?? iconTheme.color,
           iconSize / iconData.size.bottomRight(const Offset(0.0, 0.0)).dx,
+          textDirection == TextDirection.rtl,
           _pathFactory,
         ),
       ),
@@ -120,6 +115,7 @@ class _AnimatedIconPainter extends CustomPainter {
     this.progress,
     this.color,
     this.scale,
+    this.shouldMirror,
     this.uiPathFactory,
   ) : super(repaint: progress);
 
@@ -129,11 +125,17 @@ class _AnimatedIconPainter extends CustomPainter {
   final Animation<double> progress;
   final Color color;
   final double scale;
+  /// If this is true the image will be mirrored horizontally.
+  final bool shouldMirror;
   final _UiPathFactory uiPathFactory;
 
   @override
   void paint(ui.Canvas canvas, Size size) {
     canvas.scale(scale, scale);
+    if (shouldMirror) {
+      canvas.rotate(math.pi);
+      canvas.translate(-size.width, -size.height);
+    }
 
     for (_PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, progress.value.clamp(0.0, 1.0));

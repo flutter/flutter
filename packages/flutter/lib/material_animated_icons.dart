@@ -7,8 +7,9 @@
 /// To use, import `package:flutter/material_animated_icons.dart`.
 library material_animated_icons;
 
-import 'dart:ui' show lerpDouble;
+import 'dart:math' as math show pi;
 import 'dart:ui' as ui show Paint, Path, Canvas;
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';

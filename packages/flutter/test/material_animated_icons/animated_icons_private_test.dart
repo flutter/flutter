@@ -9,6 +9,7 @@
 // material_animated_icons, this give the test access to the private APIs.
 library material_animated_icons;
 
+import 'dart:math' as math show pi;
 import 'dart:ui' show lerpDouble;
 import 'dart:ui' as ui show Paint, Path, Canvas;
 
@@ -88,6 +89,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -109,6 +111,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -130,6 +133,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(1.5),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -151,10 +155,27 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         0.5,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
       verify(mockCanvas.scale(0.5, 0.5));
+    });
+
+    test('mirror', () {
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        1.0,
+        true,
+        pathFactory
+      );
+      painter.paint(mockCanvas,  size);
+      verifyInOrder(<dynamic>[
+        mockCanvas.rotate(math.pi),
+        mockCanvas.translate(-48.0, -48.0)
+      ]);
     });
 
     test('interpolated frame', () {
@@ -163,6 +184,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.5),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -184,6 +206,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -203,6 +226,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.25),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -222,6 +246,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
 
@@ -230,6 +255,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
 
@@ -242,6 +268,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
 
@@ -250,6 +277,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.1),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
 
@@ -262,6 +290,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
         1.0,
+        false,
         pathFactory
       );
 
@@ -270,6 +299,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFFFF0000),
         1.0,
+        false,
         pathFactory
       );
 
@@ -282,6 +312,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF0000FF),
         1.0,
+        false,
         pathFactory
       );
 
@@ -290,6 +321,7 @@ void main () {
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF0000FF),
         1.0,
+        false,
         pathFactory
       );
 
