@@ -139,7 +139,7 @@ class CocoaPods {
   }
 
   // Check if you need to run pod install.
-  // The pod install will run if any of below if true.
+  // The pod install will run if any of below is true.
   // 1.Any plugins changed (add/update/delete)
   // 2.The flutter.framework has changed (debug/release/profile)
   // 3.The podfile.lock doesn't exists

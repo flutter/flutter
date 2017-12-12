@@ -80,7 +80,7 @@ List<Plugin> _findPlugins(String directory) {
 // Return true if .flutter-plugins has changed, otherwise return false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  final String priorFlutterPlugins = (pluginsProperties.existsSync()?pluginsProperties.readAsStringSync():null);
+  final String priorFlutterPlugins = (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
   final String pluginManifest =
     plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
@@ -90,8 +90,8 @@ bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
       pluginsProperties.deleteSync();
     }
   }
-  final String curFlutterPlugins = (pluginsProperties.existsSync()?pluginsProperties.readAsStringSync():null);
-  return curFlutterPlugins != priorFlutterPlugins;
+  final String currentFlutterPlugins = (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
+  return currentFlutterPlugins != priorFlutterPlugins;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -211,11 +211,11 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
 }
 
 class InjectPluginsResult{
-  // True if any flutter plugin exists, otherwise false.
-  bool anyPlugin;
-  // True if plugins have changed.
-  bool hasChanged;
-  InjectPluginsResult({this.anyPlugin = false,this.hasChanged=false});
+  InjectPluginsResult({this.hasPlugin : false, this.hasChanged : false});
+  /// True if any flutter plugin exists, otherwise false.
+  final bool hasPlugin;
+  /// True if plugins have changed since last build.
+  final bool hasChanged;
 }
 
 /// Finds Flutter plugins in the pubspec.yaml, creates platform injection
@@ -230,5 +230,5 @@ InjectPluginsResult injectPlugins({String directory}) {
     _writeAndroidPluginRegistry(directory, plugins);
   if (fs.isDirectorySync(fs.path.join(directory, 'ios')))
     _writeIOSPluginRegistry(directory, plugins);
-  return new InjectPluginsResult(anyPlugin: plugins.isNotEmpty,hasChanged:hasPluginsChanged);
+  return new InjectPluginsResult(hasPlugin: plugins.isNotEmpty, hasChanged: hasPluginsChanged);
 }
