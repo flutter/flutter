@@ -264,12 +264,13 @@ class FrameData {
   final List<SvgPath> paths;
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is FrameData &&
-              runtimeType == other.runtimeType &&
-              size == other.size &&
-              const ListEquality<SvgPath>().equals(paths, other.paths);
+  bool operator ==(Object other){
+    if (runtimeType != other.runtimeType)
+      return false;
+    final FrameData typedOther = other;
+    return size == typedOther.size
+        && const ListEquality<SvgPath>().equals(paths, typedOther.paths);
+  }
 
   @override
   int get hashCode =>
@@ -278,7 +279,7 @@ class FrameData {
 
   @override
   String toString() {
-    return 'FrameData{size: $size, paths: $paths}';
+    return 'FrameData(size: $size, paths: $paths)';
   }
 }
 
@@ -313,14 +314,14 @@ class SvgPath {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) || (
-          other is SvgPath &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          const ListEquality<SvgPathCommand>().equals(commands, other.commands) &&
-          opacity == other.opacity
-      );
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType)
+      return false;
+    final SvgPath typedOther = other;
+    return id == typedOther.id
+        && opacity == typedOther.opacity
+        && const ListEquality<SvgPathCommand>().equals(commands, typedOther.commands);
+  }
 
   @override
   int get hashCode =>
@@ -365,12 +366,13 @@ class SvgPathCommand {
   }
 
   @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is SvgPathCommand &&
-              runtimeType == other.runtimeType &&
-              type == other.type &&
-              const ListEquality<Point<double>>().equals(points, other.points);
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType)
+      return false;
+    final SvgPathCommand typedOther = other;
+    return type == typedOther.type
+        && const ListEquality<Point<double>>().equals(points, typedOther.points);
+  }
 
   @override
   int get hashCode =>
@@ -379,7 +381,7 @@ class SvgPathCommand {
 
   @override
   String toString() {
-    return 'SvgPathCommand{type: $type, points: $points}';
+    return 'SvgPathCommand(type: $type, points: $points)';
   }
 }
 
