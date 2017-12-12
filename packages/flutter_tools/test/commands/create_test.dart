@@ -303,7 +303,24 @@ void main() {
       );
     });
 
-    testUsingContext('invokes pub offline', () async {
+    testUsingContext('invokes pub offline when requested', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+      final List<String> commands = loggingProcessManager.commands;
+      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(commands, contains('--offline'));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
+
+    testUsingContext('invokes pub online when offline not requested', () async {
       Cache.flutterRoot = '../..';
 
       final CreateCommand command = new CreateCommand();
@@ -312,7 +329,7 @@ void main() {
       await runner.run(<String>['create', '--pub', projectDir.path]);
       final List<String> commands = loggingProcessManager.commands;
       expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(commands, contains('--offline'));
+      expect(commands, isNot(contains('--offline')));
     },
       timeout: allowForCreateFlutterProject,
       overrides: <Type, Generator>{
