@@ -55,12 +55,13 @@ void PlatformView::DispatchPlatformMessage(
 }
 
 void PlatformView::DispatchSemanticsAction(int32_t id,
-                                           blink::SemanticsAction action) {
+                                           blink::SemanticsAction action,
+                                           std::vector<uint8_t> args) {
   blink::Threads::UI()->PostTask(
-      [ engine = engine_->GetWeakPtr(), id, action ] {
+      [ engine = engine_->GetWeakPtr(), id, action, args = std::move(args) ] {
         if (engine) {
           engine->DispatchSemanticsAction(
-              id, static_cast<blink::SemanticsAction>(action));
+              id, static_cast<blink::SemanticsAction>(action), std::move(args));
         }
       });
 }
