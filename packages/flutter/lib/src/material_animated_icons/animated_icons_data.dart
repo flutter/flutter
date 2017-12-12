@@ -11,6 +11,7 @@
 part of material_animated_icons;
 
 abstract class AnimatedIcons {
+  static const AnimatedIconData arrow_menu = _$arrow_menu;
   static const AnimatedIconData menu_arrow = _$menu_arrow;
 }
 

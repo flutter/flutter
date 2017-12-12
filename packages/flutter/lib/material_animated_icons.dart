@@ -23,4 +23,5 @@ part 'src/material_animated_icons/animated_icons.dart';
 part 'src/material_animated_icons/animated_icons_data.dart';
 
 // Animated icons data files.
+part 'src/material_animated_icons/data/arrow_menu.g.dart';
 part 'src/material_animated_icons/data/menu_arrow.g.dart';
