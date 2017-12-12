@@ -41,9 +41,7 @@ class PlatformView : public std::enable_shared_from_this<PlatformView> {
   virtual void Attach() = 0;
 
   void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
-  void DispatchSemanticsAction(int32_t id,
-                               blink::SemanticsAction action,
-                               std::vector<uint8_t> args);
+  void DispatchSemanticsAction(int32_t id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
 
   void NotifyCreated(std::unique_ptr<Surface> surface);

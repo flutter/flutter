@@ -42,9 +42,7 @@ class RuntimeController : public WindowClient, public IsolateClient {
 
   void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
-  void DispatchSemanticsAction(int32_t id,
-                               SemanticsAction action,
-                               std::vector<uint8_t> args);
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action);
 
   Dart_Port GetMainPort();
   std::string GetIsolateName();

@@ -85,13 +85,12 @@ void _dispatchPointerDataPacket(ByteData packet) {
     _invoke1<PointerDataPacket>(window.onPointerDataPacket, window._onPointerDataPacketZone, _unpackPointerDataPacket(packet));
 }
 
-void _dispatchSemanticsAction(int id, int action, ByteData args) {
-  _invoke3<int, SemanticsAction, ByteData>(
+void _dispatchSemanticsAction(int id, int action) {
+  _invoke2<int, SemanticsAction>(
     window.onSemanticsAction,
     window._onSemanticsActionZone,
     id,
     SemanticsAction.values[action],
-    args,
   );
 }
 
