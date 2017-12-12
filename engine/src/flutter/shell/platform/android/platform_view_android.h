@@ -79,7 +79,11 @@ class PlatformViewAndroid : public PlatformView {
   void InvokePlatformMessageEmptyResponseCallback(JNIEnv* env,
                                                   jint response_id);
 
-  void DispatchSemanticsAction(jint id, jint action);
+  void DispatchSemanticsAction(JNIEnv* env,
+                               jint id,
+                               jint action,
+                               jobject args,
+                               jint args_position);
 
   void SetSemanticsEnabled(jboolean enabled);
 

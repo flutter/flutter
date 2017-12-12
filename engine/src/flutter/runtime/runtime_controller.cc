@@ -106,10 +106,11 @@ void RuntimeController::DispatchPointerDataPacket(
 }
 
 void RuntimeController::DispatchSemanticsAction(int32_t id,
-                                                SemanticsAction action) {
+                                                SemanticsAction action,
+                                                std::vector<uint8_t> args) {
   TRACE_EVENT1("flutter", "RuntimeController::DispatchSemanticsAction", "mode",
                "basic");
-  GetWindow()->DispatchSemanticsAction(id, action);
+  GetWindow()->DispatchSemanticsAction(id, action, std::move(args));
 }
 
 Window* RuntimeController::GetWindow() {
