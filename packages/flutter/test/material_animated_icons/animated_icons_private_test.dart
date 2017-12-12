@@ -87,6 +87,7 @@ void main () {
         movingBar.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -107,6 +108,7 @@ void main () {
         movingBar.paths,
         const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -127,6 +129,7 @@ void main () {
         movingBar.paths,
         const AlwaysStoppedAnimation<double>(1.5),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -142,11 +145,24 @@ void main () {
       ]);
     });
 
+    test('scale', () {
+      final _AnimatedIconPainter painter = new _AnimatedIconPainter(
+        movingBar.paths,
+        const AlwaysStoppedAnimation<double>(0.0),
+        const Color(0xFF00FF00),
+        0.5,
+        pathFactory
+      );
+      painter.paint(mockCanvas,  size);
+      verify(mockCanvas.scale(0.5, 0.5));
+    });
+
     test('interpolated frame', () {
       final _AnimatedIconPainter painter = new _AnimatedIconPainter(
         movingBar.paths,
         const AlwaysStoppedAnimation<double>(0.5),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -167,6 +183,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(1.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -185,6 +202,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.25),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
       painter.paint(mockCanvas,  size);
@@ -203,6 +221,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
 
@@ -210,6 +229,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
 
@@ -221,6 +241,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
 
@@ -228,6 +249,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.1),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
 
@@ -239,6 +261,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF00FF00),
+        1.0,
         pathFactory
       );
 
@@ -246,6 +269,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFFFF0000),
+        1.0,
         pathFactory
       );
 
@@ -257,6 +281,7 @@ void main () {
         bow.paths,
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF0000FF),
+        1.0,
         pathFactory
       );
 
@@ -264,6 +289,7 @@ void main () {
         const <_PathFrames> [],
         const AlwaysStoppedAnimation<double>(0.0),
         const Color(0xFF0000FF),
+        1.0,
         pathFactory
       );
 

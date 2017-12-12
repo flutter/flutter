@@ -17,12 +17,13 @@ class AnimatedIcon extends StatelessWidget {
   /// Creates an AnimatedIcon.
   ///
   /// [progress], and [icon] cannot be null.
-  /// [color] default to the value given by the current [IconTheme].
+  /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
     Key key,
     @required this.progress,
     @required this.icon,
     this.color,
+    this.size,
     this.semanticLabel,
     this.textDirection,
     // TODO(amirh): add a parameter for controlling scaling behavior.
@@ -50,6 +51,13 @@ class AnimatedIcon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   final Color color;
+
+  /// The size of the icon in logical pixels.
+  ///
+  /// Icons occupy a square with width and height equal to size.
+  ///
+  /// Defaults to the current [IconTheme] size.
+  final double size;
 
   /// The icon to display. Available icons are listed in [AnimatedIcons].
   final AnimatedIconData icon;
@@ -86,12 +94,15 @@ class AnimatedIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(amirh): implement semantics, text direction, scaling.
     final _AnimatedIconData iconData = icon;
+    final IconThemeData iconTheme = IconTheme.of(context);
+    final double iconSize = size ?? iconTheme.size;
     return new CustomPaint(
-      size: iconData.size,
+      size: new Size(iconSize, iconSize),
       painter: new _AnimatedIconPainter(
         iconData.paths,
         progress,
-        color ?? IconTheme.of(context).color,
+        color ?? iconTheme.color,
+        iconSize / iconData.size.bottomRight(const Offset(0.0, 0.0)).dx,
         _pathFactory,
       ),
     );
@@ -105,6 +116,7 @@ class _AnimatedIconPainter extends CustomPainter {
     this.paths,
     this.progress,
     this.color,
+    this.scale,
     this.uiPathFactory,
   ) : super(repaint: progress);
 
@@ -113,13 +125,17 @@ class _AnimatedIconPainter extends CustomPainter {
   final List<_PathFrames> paths;
   final Animation<double> progress;
   final Color color;
+  final double scale;
   final _UiPathFactory uiPathFactory;
 
   @override
   void paint(ui.Canvas canvas, Size size) {
+    canvas.scale(scale, scale);
+
     for (_PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, progress.value.clamp(0.0, 1.0));
   }
+
 
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
@@ -128,6 +144,7 @@ class _AnimatedIconPainter extends CustomPainter {
       // We are comparing the paths list by reference, assuming the list is
       // treated as immutable to be more efficient.
       || oldDelegate.paths != paths
+      || oldDelegate.scale != scale
       || oldDelegate.uiPathFactory != uiPathFactory;
   }
 
