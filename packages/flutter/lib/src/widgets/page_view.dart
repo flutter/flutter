@@ -76,7 +76,17 @@ class PageController extends ScrollController {
   final double viewportFraction;
 
   /// The current page displayed in the controlled [PageView].
+  ///
+  /// There are circumstances that this [PageController] can't know the current
+  /// page. Mainly when no [PageView]s are attached. Reading [page] will throw
+  /// an [AssertionError] in the following cases:
+  ///
+  /// 1. Zero [PageView] attached.
+  ///
   double get page {
+    // If the controller has never been attached yet, return the initial page.
+    // if (!hasClients)
+    //   return initialPage.toDouble();
     final _PagePosition position = this.position;
     return position.page;
   }

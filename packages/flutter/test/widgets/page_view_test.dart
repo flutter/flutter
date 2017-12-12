@@ -695,4 +695,34 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('PageController can get page before attaching', (WidgetTester tester) async {
+    final PageController pageController = new PageController(
+      initialPage: 10,
+    );
+
+    // Shouldn't crash.
+    expect(pageController.page, 10.0);
+
+    // Attach to page view.
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new PageView(
+          controller: pageController,
+          children: new List<Widget>.generate(20, (int i) {
+            return new Text('Page $i');
+          })
+        ),
+    ));
+
+    expect(pageController.page, 10.0);
+
+    pageController.nextPage(
+      curve: Curves.linear,
+      duration: const Duration(milliseconds: 100),
+    );
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(pageController.page, 11.0);
+  });
 }
