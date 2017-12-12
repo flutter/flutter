@@ -57,7 +57,24 @@ void _tests() {
       .map((String line) => line.trim())
       .join('\n')
       .trim() + ',';
-    String expectedCode = new File('test/widgets/generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart').readAsStringSync();
+
+    File findThisTestFile(Directory directory) {
+      for (FileSystemEntity entity in directory.listSync()) {
+        if (entity is Directory) {
+          final File childSearch = findThisTestFile(entity);
+          if (childSearch != null) {
+            return childSearch;
+          }
+        } else if (entity is File && entity.path.endsWith('generateTestSemanticsExpressionForCurrentSemanticsTree_test.dart')) {
+          return entity;
+        }
+      }
+      return null;
+    }
+
+    final File thisTestFile = findThisTestFile(Directory.current);
+    expect(thisTestFile, isNotNull);
+    String expectedCode = thisTestFile.readAsStringSync();
     expectedCode = expectedCode.substring(
       expectedCode.indexOf('>' * 12) + 12,
       expectedCode.indexOf('<' * 12) - 3,
