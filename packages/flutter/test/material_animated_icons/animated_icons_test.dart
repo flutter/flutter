@@ -7,6 +7,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material_animated_icons.dart';
 import 'package:mockito/mockito.dart';
 
+import '../widgets/semantics_tester.dart';
+
 class MockCanvas extends Mock implements Canvas {}
 
 void main() {
@@ -98,6 +100,24 @@ void main() {
     customPaint.painter.paint(canvas, const Size(12.0, 12.0));
     // arrow_menu default size is 48x48 so we expect it to be scaled by 2.
     verify(canvas.scale(2.0, 2.0));
+  });
+
+  testWidgets('Semantic label', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const AnimatedIcon(
+          progress: const AlwaysStoppedAnimation<double>(0.0),
+          icon: AnimatedIcons.arrow_menu,
+          size: 96.0,
+          semanticLabel: 'a label',
+        ),
+      ),
+    );
+
+    expect(semantics, includesNodeWith(label: 'a label'));
   });
 }
 

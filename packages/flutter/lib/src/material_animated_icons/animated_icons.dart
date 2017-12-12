@@ -96,14 +96,17 @@ class AnimatedIcon extends StatelessWidget {
     final _AnimatedIconData iconData = icon;
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
-    return new CustomPaint(
-      size: new Size(iconSize, iconSize),
-      painter: new _AnimatedIconPainter(
-        iconData.paths,
-        progress,
-        color ?? iconTheme.color,
-        iconSize / iconData.size.bottomRight(const Offset(0.0, 0.0)).dx,
-        _pathFactory,
+    return new Semantics(
+      label: semanticLabel,
+      child: new CustomPaint(
+        size: new Size(iconSize, iconSize),
+        painter: new _AnimatedIconPainter(
+          iconData.paths,
+          progress,
+          color ?? iconTheme.color,
+          iconSize / iconData.size.bottomRight(const Offset(0.0, 0.0)).dx,
+          _pathFactory,
+        ),
       ),
     );
   }
