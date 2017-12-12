@@ -336,6 +336,13 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.modeName, apkFileName));
   if (apkFile.existsSync())
     return apkFile;
+  if (buildInfo.flavor != null) {
+    // Android Studio Gradle plugin v3 adds flavor to path.
+    apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.flavor, buildInfo.modeName, apkFileName));
+    if (apkFile.existsSync()) {
+      return apkFile;
+    }
+  }
   return null;
 }
 
