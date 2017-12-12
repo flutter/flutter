@@ -177,20 +177,23 @@ void main() {
     test('onSemanticsAction preserves callback zone', () {
       Zone innerZone;
       Zone runZone;
+      int id;
       int action;
 
       runZoned(() {
         innerZone = Zone.current;
-        window.onSemanticsAction = (int value, _) {
+        window.onSemanticsAction = (int i, SemanticsAction a, ByteData _) {
           runZone = Zone.current;
-          action = value;
+          action = a.index;
+          id = i;
         };
       });
 
-      _dispatchSemanticsAction(1234, 0);
+      _dispatchSemanticsAction(1234, 4, null);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
-      expect(action, equals(1234));
+      expect(id, equals(1234));
+      expect(action, equals(4));
     });
 
     test('onPlatformMessage preserves callback zone', () {

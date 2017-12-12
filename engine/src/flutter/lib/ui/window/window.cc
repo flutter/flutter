@@ -223,14 +223,22 @@ void Window::DispatchPointerDataPacket(const PointerDataPacket& packet) {
                   {data_handle});
 }
 
-void Window::DispatchSemanticsAction(int32_t id, SemanticsAction action) {
+void Window::DispatchSemanticsAction(int32_t id,
+                                     SemanticsAction action,
+                                     std::vector<uint8_t> args) {
   tonic::DartState* dart_state = library_.dart_state().get();
   if (!dart_state)
     return;
   tonic::DartState::Scope scope(dart_state);
 
-  DartInvokeField(library_.value(), "_dispatchSemanticsAction",
-                  {ToDart(id), ToDart(static_cast<int32_t>(action))});
+  Dart_Handle args_handle = (args.empty()) ? Dart_Null() : ToByteData(args);
+
+  if (Dart_IsError(args_handle))
+    return;
+
+  DartInvokeField(
+      library_.value(), "_dispatchSemanticsAction",
+      {ToDart(id), ToDart(static_cast<int32_t>(action)), args_handle});
 }
 
 void Window::BeginFrame(fxl::TimePoint frameTime) {

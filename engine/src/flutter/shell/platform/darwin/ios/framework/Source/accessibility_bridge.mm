@@ -423,7 +423,8 @@ void AccessibilityBridge::UpdateSemantics(std::vector<blink::SemanticsNode> node
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, blink::SemanticsAction action) {
-  platform_view_->DispatchSemanticsAction(uid, action);
+  std::vector<uint8_t> args;
+  platform_view_->DispatchSemanticsAction(uid, action, args);
 }
 
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid) {
