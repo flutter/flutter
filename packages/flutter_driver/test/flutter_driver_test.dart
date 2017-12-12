@@ -40,8 +40,8 @@ void main() {
       when(mockClient.getVM()).thenReturn(mockVM);
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
-      when(mockIsolate.invokeExtension(any, any))
-          .thenReturn(makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
+          (_) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
         return new Future<VMServiceClientConnection>.value(
           new VMServiceClientConnection(mockClient, mockPeer)
@@ -78,7 +78,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenReturn(new Future<Null>.value());
+      when(mockIsolate.resume()).thenAnswer((_) => new Future<Null>.value());
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -124,14 +124,14 @@ void main() {
     });
 
     test('checks the health of the driver extension', () async {
-      when(mockIsolate.invokeExtension(any, any)).thenReturn(
-          makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      when(mockIsolate.invokeExtension(any, any)).thenAnswer(
+          (_) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       final Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenReturn(new Future<Null>.value());
+      when(mockClient.close()).thenAnswer((_) => new Future<Null>.value());
       await driver.close();
     });
 

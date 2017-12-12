@@ -279,7 +279,7 @@ void main() {
       testUsingContext('uses existing simulator', () async {
         withMockDevice();
         when(mockDevice.name).thenReturn('mock-simulator');
-        when(mockDevice.isLocalEmulator).thenReturn(new Future<bool>.value(true));
+        when(mockDevice.isLocalEmulator).thenAnswer((_) => new Future<bool>.value(true));
 
         final Device device = await findTargetDevice();
         expect(device.name, 'mock-simulator');

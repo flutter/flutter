@@ -27,17 +27,18 @@ void main() {
       mockFrontendServerStdIn = new MockStdIn();
       mockFrontendServerStdErr = new MockStream();
 
-      when(mockFrontendServer.stderr).thenReturn(mockFrontendServerStdErr);
+      when(mockFrontendServer.stderr).thenAnswer((_) => mockFrontendServerStdErr);
       final StreamController<String> stdErrStreamController = new StreamController<String>();
       when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
-      when(mockProcessManager.start(any)).thenReturn(new Future<Process>.value(mockFrontendServer));
+      when(mockProcessManager.start(any)).thenAnswer(
+          (_) => new Future<Process>.value(mockFrontendServer));
       when(mockFrontendServer.exitCode).thenReturn(0);
     });
 
     testUsingContext('single dart successful compilation', () async {
       final BufferLogger logger = context[Logger];
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+      when(mockFrontendServer.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
         ))
@@ -55,7 +56,7 @@ void main() {
     testUsingContext('single dart failed compilation', () async {
       final BufferLogger logger = context[Logger];
 
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+      when(mockFrontendServer.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'result abc\nline1\nline2\nabc'
         ))
@@ -88,12 +89,13 @@ void main() {
       mockFrontendServerStdErr = new MockStream();
 
       when(mockFrontendServer.stdin).thenReturn(mockFrontendServerStdIn);
-      when(mockFrontendServer.stderr).thenReturn(mockFrontendServerStdErr);
+      when(mockFrontendServer.stderr).thenAnswer((_) => mockFrontendServerStdErr);
       stdErrStreamController = new StreamController<String>();
-      when(mockFrontendServerStdErr.transform<String>(any)).thenReturn(stdErrStreamController.stream);
+      when(mockFrontendServerStdErr.transform<String>(any))
+          .thenAnswer((_) => stdErrStreamController.stream);
 
-      when(mockProcessManager.start(any)).thenReturn(
-          new Future<Process>.value(mockFrontendServer)
+      when(mockProcessManager.start(any)).thenAnswer(
+          (_) => new Future<Process>.value(mockFrontendServer)
       );
       when(mockFrontendServer.exitCode).thenReturn(0);
     });
@@ -101,7 +103,7 @@ void main() {
     testUsingContext('single dart compile', () async {
       final BufferLogger logger = context[Logger];
 
-      when(mockFrontendServer.stdout).thenReturn(new Stream<List<int>>.fromFuture(
+      when(mockFrontendServer.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'result abc\nline1\nline2\nabc /path/to/main.dart.dill'
         ))
@@ -122,7 +124,7 @@ void main() {
       final BufferLogger logger = context[Logger];
 
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
-      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      when(mockFrontendServer.stdout).thenAnswer((_) => streamController.stream);
       streamController.add(UTF8.encode('result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'));
       await generator.recompile('/path/to/main.dart', null /* invalidatedFiles */);
       expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
@@ -144,7 +146,7 @@ void main() {
       final BufferLogger logger = context[Logger];
 
       final StreamController<List<int>> streamController = new StreamController<List<int>>();
-      when(mockFrontendServer.stdout).thenReturn(streamController.stream);
+      when(mockFrontendServer.stdout).thenAnswer((_) => streamController.stream);
       streamController.add(UTF8.encode(
         'result abc\nline0\nline1\nabc /path/to/main.dart.dill\n'
       ));
