@@ -554,15 +554,17 @@ public class FlutterView extends SurfaceView
 
     @Override
     public final WindowInsets onApplyWindowInsets(WindowInsets insets) {
-        // On Android, we do not differentiate between 'safe areas' and view insets.
+        // Status bar, left/right system insets partially obscure content (padding).
         mMetrics.physicalPaddingTop = insets.getSystemWindowInsetTop();
         mMetrics.physicalPaddingRight = insets.getSystemWindowInsetRight();
-        mMetrics.physicalPaddingBottom = insets.getSystemWindowInsetBottom();
+        mMetrics.physicalPaddingBottom = 0;
         mMetrics.physicalPaddingLeft = insets.getSystemWindowInsetLeft();
-        mMetrics.physicalViewInsetTop = insets.getSystemWindowInsetTop();
-        mMetrics.physicalViewInsetRight = insets.getSystemWindowInsetRight();
+
+        // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
+        mMetrics.physicalViewInsetTop = 0;
+        mMetrics.physicalViewInsetRight = 0;
         mMetrics.physicalViewInsetBottom = insets.getSystemWindowInsetBottom();
-        mMetrics.physicalViewInsetLeft = insets.getSystemWindowInsetLeft();
+        mMetrics.physicalViewInsetLeft = 0;
         updateViewportMetrics();
         return super.onApplyWindowInsets(insets);
     }
@@ -571,15 +573,17 @@ public class FlutterView extends SurfaceView
     @SuppressWarnings("deprecation")
     protected boolean fitSystemWindows(Rect insets) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            // On Android, we do not differentiate between 'safe areas' and view insets.
+            // Status bar, left/right system insets partially obscure content (padding).
             mMetrics.physicalPaddingTop = insets.top;
             mMetrics.physicalPaddingRight = insets.right;
-            mMetrics.physicalPaddingBottom = insets.bottom;
+            mMetrics.physicalPaddingBottom = 0;
             mMetrics.physicalPaddingLeft = insets.left;
-            mMetrics.physicalViewInsetTop = insets.top;
-            mMetrics.physicalViewInsetRight = insets.right;
+
+            // Bottom system inset (keyboard) should adjust scrollable bottom edge (inset).
+            mMetrics.physicalViewInsetTop = 0;
+            mMetrics.physicalViewInsetRight = 0;
             mMetrics.physicalViewInsetBottom = insets.bottom;
-            mMetrics.physicalViewInsetLeft = insets.left;
+            mMetrics.physicalViewInsetLeft = 0;
             updateViewportMetrics();
             return true;
         } else {
