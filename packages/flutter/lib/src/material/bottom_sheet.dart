@@ -234,7 +234,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    Widget bottomSheet = new _ModalBottomSheet<T>(route: this);
+    // By definition, the bottom sheet is aligned to the bottom of the page
+    // and isn't exposed to the top padding of the MediaQuery.
+    Widget bottomSheet = new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      child: new _ModalBottomSheet<T>(route: this),
+    );
     if (theme != null)
       bottomSheet = new Theme(data: theme, child: bottomSheet);
     return bottomSheet;
