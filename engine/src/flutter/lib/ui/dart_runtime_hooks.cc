@@ -112,16 +112,20 @@ static void InitDartAsync(Dart_Handle builtin_library,
                                &schedule_microtask));
 }
 
-static void InitDartIO(const std::string& script_uri) {
+static void InitDartIO(Dart_Handle builtin_library,
+                       const std::string& script_uri) {
+  Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
+  DART_CHECK_VALID(io_lib);
+  Dart_Handle platform_type =
+      Dart_GetType(io_lib, ToDart("_Platform"), 0, nullptr);
+  DART_CHECK_VALID(platform_type);
   if (!script_uri.empty()) {
-    Dart_Handle io_lib = Dart_LookupLibrary(ToDart("dart:io"));
-    DART_CHECK_VALID(io_lib);
-    Dart_Handle platform_type =
-        Dart_GetType(io_lib, ToDart("_Platform"), 0, nullptr);
-    DART_CHECK_VALID(platform_type);
     DART_CHECK_VALID(Dart_SetField(platform_type, ToDart("_nativeScript"),
                                    ToDart(script_uri)));
   }
+  Dart_Handle locale_closure = GetClosure(builtin_library, "_getLocaleClosure");
+  DART_CHECK_VALID(
+      Dart_SetField(platform_type, ToDart("_localeClosure"), locale_closure));
 }
 
 void DartRuntimeHooks::Install(IsolateType isolate_type,
@@ -131,7 +135,7 @@ void DartRuntimeHooks::Install(IsolateType isolate_type,
   InitDartInternal(builtin, isolate_type);
   InitDartCore(builtin, script_uri);
   InitDartAsync(builtin, isolate_type);
-  InitDartIO(script_uri);
+  InitDartIO(builtin, script_uri);
 }
 
 // Implementation of native functions which are used for some
