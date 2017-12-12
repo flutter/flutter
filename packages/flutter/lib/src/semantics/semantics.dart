@@ -1380,7 +1380,7 @@ class SemanticsConfiguration {
   bool _isMergingDescendantsIntoOneNode = false;
   set isMergingDescendantsIntoOneNode(bool value) {
     assert(isSemanticBoundary);
-    _isMergingDescendantsIntoOneNode = isMergingDescendantsIntoOneNode;
+    _isMergingDescendantsIntoOneNode = value;
   }
 
   // SEMANTIC ANNOTATIONS
@@ -1436,8 +1436,11 @@ class SemanticsConfiguration {
   ///
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen while an element is focused.
-  set onTap(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.tap, handler);
+  VoidCallback get onTap => _onTap;
+  VoidCallback _onTap;
+  set onTap(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.tap, value);
+    _onTap = value;
   }
 
   /// The handler for [SemanticsAction.longPress].
@@ -1448,8 +1451,11 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS and TalkBack users on Android can trigger this
   /// action by double-tapping the screen without lifting the finger after the
   /// second tap.
-  set onLongPress(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.longPress, handler);
+  VoidCallback get onLongPress => _onLongPress;
+  VoidCallback _onLongPress;
+  set onLongPress(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.longPress, value);
+    _onLongPress = value;
   }
 
   /// The handler for [SemanticsAction.scrollLeft].
@@ -1463,8 +1469,11 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  set onScrollLeft(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.scrollLeft, handler);
+  VoidCallback get onScrollLeft => _onScrollLeft;
+  VoidCallback _onScrollLeft;
+  set onScrollLeft(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollLeft, value);
+    _onScrollLeft = value;
   }
 
   /// The handler for [SemanticsAction.scrollRight].
@@ -1478,8 +1487,11 @@ class SemanticsConfiguration {
   /// left and then right in one motion path.  On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  set onScrollRight(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.scrollRight, handler);
+  VoidCallback get onScrollRight => _onScrollRight;
+  VoidCallback _onScrollRight;
+  set onScrollRight(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollRight, value);
+    _onScrollRight = value;
   }
 
   /// The handler for [SemanticsAction.scrollUp].
@@ -1493,8 +1505,11 @@ class SemanticsConfiguration {
   /// right and then left in one motion path. On Android, [onScrollUp] and
   /// [onScrollLeft] share the same gesture. Therefore, only on of them should
   /// be provided.
-  set onScrollUp(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.scrollUp, handler);
+  VoidCallback get onScrollUp => _onScrollUp;
+  VoidCallback _onScrollUp;
+  set onScrollUp(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollUp, value);
+    _onScrollUp = value;
   }
 
   /// The handler for [SemanticsAction.scrollDown].
@@ -1508,8 +1523,11 @@ class SemanticsConfiguration {
   /// left and then right in one motion path. On Android, [onScrollDown] and
   /// [onScrollRight] share the same gesture. Therefore, only on of them should
   /// be provided.
-  set onScrollDown(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.scrollDown, handler);
+  VoidCallback get onScrollDown => _onScrollDown;
+  VoidCallback _onScrollDown;
+  set onScrollDown(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollDown, value);
+    _onScrollDown = value;
   }
 
   /// The handler for [SemanticsAction.increase].
@@ -1523,8 +1541,11 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping up with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume up button.
-  set onIncrease(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.increase, handler);
+  VoidCallback get onIncrease => _onIncrease;
+  VoidCallback _onIncrease;
+  set onIncrease(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.increase, value);
+    _onIncrease = value;
   }
 
   /// The handler for [SemanticsAction.decrease].
@@ -1538,8 +1559,11 @@ class SemanticsConfiguration {
   /// VoiceOver users on iOS can trigger this action by swiping down with one
   /// finger. TalkBack users on Android can trigger this action by pressing the
   /// volume down button.
-  set onDecrease(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.decrease, handler);
+  VoidCallback get onDecrease => _onDecrease;
+  VoidCallback _onDecrease;
+  set onDecrease(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.decrease, value);
+    _onDecrease = value;
   }
 
   /// The handler for [SemanticsAction.showOnScreen].
@@ -1551,8 +1575,11 @@ class SemanticsConfiguration {
   /// For elements in a scrollable list the framework provides a default
   /// implementation for this action and it is not advised to provide a
   /// custom one via this setter.
-  set onShowOnScreen(VoidCallback handler) {
-    _addArgumentlessAction(SemanticsAction.showOnScreen, handler);
+  VoidCallback get onShowOnScreen => _onShowOnScreen;
+  VoidCallback _onShowOnScreen;
+  set onShowOnScreen(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.showOnScreen, value);
+    _onShowOnScreen = value;
   }
 
   /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
@@ -1562,13 +1589,16 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  set onMoveCursorForwardByCharacter(MoveCursorHandler handler) {
-    assert(handler != null);
+  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
+    assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
-      handler(extentSelection);
+      value(extentSelection);
     });
+    _onMoveCursorForwardByCharacter = value;
   }
 
   /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
@@ -1578,13 +1608,16 @@ class SemanticsConfiguration {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  set onMoveCursorBackwardByCharacter(MoveCursorHandler handler) {
-    assert(handler != null);
+  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
+    assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
       final bool extentSelection = args;
       assert(extentSelection != null);
-      handler(extentSelection);
+      value(extentSelection);
     });
+    _onMoveCursorBackwardByCharacter = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -1703,6 +1736,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
+  bool get isSelected => _hasFlag(SemanticsFlags.isSelected);
   set isSelected(bool value) {
     _setFlag(SemanticsFlags.isSelected, value);
   }
@@ -1712,22 +1746,26 @@ class SemanticsConfiguration {
   ///
   /// Do not set this to any value if the owning [RenderObject] doesn't have
   /// Booleans state that can be controlled by the user.
+  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) && _hasFlag(SemanticsFlags.isChecked);
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
+  bool get isFocused => _hasFlag(SemanticsFlags.isFocused);
   set isFocused(bool value) {
     _setFlag(SemanticsFlags.isFocused, value);
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
+  bool get isButton => _hasFlag(SemanticsFlags.isButton);
   set isButton(bool value) {
     _setFlag(SemanticsFlags.isButton, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.
+  bool get isTextField => _hasFlag(SemanticsFlags.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlags.isTextField, value);
   }
@@ -1775,6 +1813,8 @@ class SemanticsConfiguration {
     }
     _hasBeenAnnotated = true;
   }
+
+  bool _hasFlag(SemanticsFlags flag) => (_flags & flag.index) != 0;
 
   // CONFIGURATION COMBINATION LOGIC
 
