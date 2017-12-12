@@ -39,6 +39,12 @@ void _updateWindowMetrics(double devicePixelRatio,
   _invoke(window.onMetricsChanged, window._onMetricsChangedZone);
 }
 
+typedef String LocaleClosure();
+
+String _localeClosure() => window._locale.toString();
+
+LocaleClosure _getLocaleClosure() => _localeClosure;
+
 void _updateLocale(String languageCode, String countryCode) {
   window._locale = new Locale(languageCode, countryCode);
   _invoke(window.onLocaleChanged, window._onLocaleChangedZone);
