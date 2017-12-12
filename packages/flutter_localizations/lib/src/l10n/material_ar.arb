@@ -31,5 +31,7 @@
   "selectAllButtonLabel": "اختيار الكل",
   "viewLicensesButtonLabel": "الاطّلاع على التراخيص",
   "anteMeridiemAbbreviation": "ص",
-  "postMeridiemAbbreviation": "م"
+  "postMeridiemAbbreviation": "م",
+  "timePickerHourModeAnnouncement": "حدد ساعات",
+  "timePickerMinuteModeAnnouncement": "حدد دقائق"
 }

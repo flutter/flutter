@@ -27,5 +27,7 @@
   "selectAllButtonLabel": "سبھی منتخب کریں",
   "viewLicensesButtonLabel": "لائسنسز دیکھیں",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "timePickerHourModeAnnouncement": "گھنٹے منتخب کریں",
+  "timePickerMinuteModeAnnouncement": "منٹ منتخب کریں"
 }

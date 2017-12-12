@@ -32,6 +32,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: true,
       help: 'Whether to run "flutter packages get" after the project has been created.'
     );
+    argParser.addFlag('offline',
+      defaultsTo: false,
+      help: 'When "flutter packages get" is run by the create command, this indicates '
+        'whether to run it in offline mode or not. In offline mode, it will need to '
+        'have all dependencies already available in the pub cache to succeed.'
+    );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
@@ -162,7 +168,11 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('package', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(context: 'create_pkg', directory: dirPath);
+        await pubGet(
+          context: PubContext.createPackage,
+          directory: dirPath,
+          offline: argResults['offline'],
+        );
 
       final String relativePath = fs.path.relative(dirPath);
       printStatus('Wrote $generatedCount files.');
@@ -180,7 +190,11 @@ class CreateCommand extends FlutterCommand {
       generatedCount += _renderTemplate('plugin', dirPath, templateContext);
 
       if (argResults['pub'])
-        await pubGet(context: 'create_plugin', directory: dirPath);
+        await pubGet(
+          context: PubContext.createPlugin,
+          directory: dirPath,
+          offline: argResults['offline'],
+        );
 
       if (android_sdk.androidSdk != null)
         gradle.updateLocalProperties(projectPath: dirPath);
@@ -218,7 +232,7 @@ class CreateCommand extends FlutterCommand {
     );
 
     if (argResults['pub']) {
-      await pubGet(context: 'create', directory: appPath);
+      await pubGet(context: PubContext.create, directory: appPath, offline: argResults['offline']);
       injectPlugins(directory: appPath);
     }
 

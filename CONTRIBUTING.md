@@ -281,3 +281,13 @@ few steps:
    see the new dependency. As part of landing this change, you should make
    whatever other changes are needed in this repository to account for your
    breaking change.
+
+Build infrastructure
+--------------------
+
+We build and test Flutter on:
+
+- Travis ([details](.travis.yml))
+- AppVeyor ([details](appveyor.yml))
+- Chromebots (a.k.a. "recipes", [details](dev/bots/README.md))
+- Devicelab (a.k.a. "cocoon", [details](dev/devicelab/README.md))

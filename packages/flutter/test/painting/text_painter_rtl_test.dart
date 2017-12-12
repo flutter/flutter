@@ -287,7 +287,6 @@ void main() {
     expect( // between A and Alef, before the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.downstream), Rect.zero),
       const Offset(10.0, 10.0),
-      skip: skipExpectsWithKnownBugs, // this ends up on the wrong line currently - this is a major bug
     );
 
     expect( // after the Alef
@@ -318,7 +317,7 @@ void main() {
         const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  }, skip: skipTestsWithKnownBugs);
+  });
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()
@@ -380,7 +379,7 @@ void main() {
         const TextBox.fromLTRBD( 0.0,  8.0, 50.0, 18.0, TextDirection.ltr),
         const TextBox.fromLTRBD(50.0,  0.0, 90.0, 20.0, TextDirection.rtl),
         const TextBox.fromLTRBD( 0.0, 20.0, 40.0, 40.0, TextDirection.rtl),
-        const TextBox.fromLTRBD(60.0, 28.0, 90.0, 38.0, TextDirection.ltr),
+        const TextBox.fromLTRBD(40.0, 28.0, 90.0, 38.0, TextDirection.ltr),
       ],
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );

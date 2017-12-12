@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
-import 'nav_bar.dart';
 
 /// Implements a single iOS application page's layout.
 ///
@@ -32,41 +31,54 @@ class CupertinoPageScaffold extends StatelessWidget {
   ///
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's top margin will be offset by its height.
+  ///
+  /// The scaffold assumes the nav bar will consume the [MediaQuery] top padding.
   // TODO(xster): document its page transition animation when ready
-  final PreferredSizeWidget navigationBar;
+  final ObstructingPreferredSizeWidget navigationBar;
 
   /// Widget to show in the main content area.
   ///
   /// Content can slide under the [navigationBar] when they're translucent.
+  /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
+  /// top padding indicating the area of obstructing overlap from the
+  /// [navigationBar].
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> stacked = <Widget>[];
-    Widget childWithMediaQuery = child;
 
-    double topPadding = 0.0;
+    Widget paddedContent = child;
     if (navigationBar != null) {
-      topPadding += navigationBar.preferredSize.height;
-      // If the navigation bar has a preferred size, pad it and the OS status
-      // bar as well. Otherwise, let the content extend to the complete top
-      // of the page.
-      if (topPadding > 0.0) {
-        final EdgeInsets mediaQueryPadding = MediaQuery.of(context).padding;
-        topPadding += mediaQueryPadding.top;
-        childWithMediaQuery = new MediaQuery.removePadding(
-          context: context,
-          removeTop: true,
+      final MediaQueryData existingMediaQuery = MediaQuery.of(context);
+
+      // TODO(xster): Use real size after partial layout instead of preferred size.
+      // https://github.com/flutter/flutter/issues/12912
+      final double topPadding = navigationBar.preferredSize.height
+          + existingMediaQuery.padding.top;
+
+      // If nav bar is opaquely obstructing, directly shift the main content
+      // down. If translucent, let main content draw behind nav bar but hint the
+      // obstructed area.
+      if (navigationBar.fullObstruction) {
+        paddedContent = new Padding(
+          padding: new EdgeInsets.only(top: topPadding),
+          child: child,
+        );
+      } else {
+        paddedContent = new MediaQuery(
+          data: existingMediaQuery.copyWith(
+            padding: existingMediaQuery.padding.copyWith(
+              top: topPadding,
+            ),
+          ),
           child: child,
         );
       }
     }
 
     // The main content being at the bottom is added to the stack first.
-    stacked.add(new Padding(
-      padding: new EdgeInsets.only(top: topPadding),
-      child: childWithMediaQuery,
-    ));
+    stacked.add(paddedContent);
 
     if (navigationBar != null) {
       stacked.add(new Positioned(
@@ -84,4 +96,17 @@ class CupertinoPageScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Widget that has a preferred size and reports whether it fully obstructs
+/// widgets behind it.
+///
+/// Used by [CupertinoPageScaffold] to either shift away fully obstructed content
+/// or provide a padding guide to partially obstructed content.
+abstract class ObstructingPreferredSizeWidget extends PreferredSizeWidget {
+  /// If true, this widget fully obstructs widgets behind it by the specified
+  /// size.
+  ///
+  /// If false, this widget partially obstructs.
+  bool get fullObstruction;
 }

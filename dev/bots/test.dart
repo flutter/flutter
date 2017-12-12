@@ -15,7 +15,7 @@ final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutt
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
 final String pubCache = path.join(flutterRoot, '.pub-cache');
-final String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
+final List<String> flutterTestArgs = <String>[];
 final bool hasColor = stdout.supportsAnsiEscapes;
 
 final String bold = hasColor ? '\x1B[1m' : '';
@@ -32,17 +32,19 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'coverage': _runCoverage,
 };
 
-/// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
+/// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
-/// script using FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt to
+/// script with the parameter --local-engine=host_debug_unopt to
 /// use your own build of the engine.
 ///
 /// To run the analysis part, run it with SHARD=analyze
 ///
 /// For example:
 /// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-Future<Null> main() async {
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+Future<Null> main(List<String> args) async {
+  flutterTestArgs.addAll(args);
+
   final String shard = Platform.environment['SHARD'] ?? 'tests';
   if (!_kShards.containsKey(shard))
     throw new ArgumentError('Invalid shard: $shard');
@@ -317,7 +319,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.add(flutterTestArgs);
+    args.addAll(flutterTestArgs);
   if (script != null)
     args.add(script);
   return _runCommand(flutter, args,

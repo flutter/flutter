@@ -30,5 +30,7 @@
   "selectAllButtonLabel": "ВЫБРАТЬ ВСЕ",
   "viewLicensesButtonLabel": "ЛИЦЕНЗИИ",
   "anteMeridiemAbbreviation": "АМ",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "timePickerHourModeAnnouncement": "ВЫБРАТЬ ЧАСЫ",
+  "timePickerMinuteModeAnnouncement": "ВЫБРАТЬ МИНУТЫ"
 }

@@ -4,9 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:test/test.dart';
 
-class TestSchedulerBinding extends BindingBase with SchedulerBinding { }
+class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
 
 class TestStrategy {
   int allowedPriority = 10000;
@@ -32,20 +33,20 @@ void main() {
 
     strategy.allowedPriority = 100;
     for (int i = 0; i < 3; i += 1)
-      scheduler.handleEventLoopCallback();
+      expect(scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks.isEmpty, isTrue);
 
     strategy.allowedPriority = 50;
     for (int i = 0; i < 3; i += 1)
-      scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(1));
+      expect(scheduler.handleEventLoopCallback(), i == 0 ? isTrue : isFalse);
+    expect(executedTasks, hasLength(1));
     expect(executedTasks.single, equals(80));
     executedTasks.clear();
 
     strategy.allowedPriority = 20;
     for (int i = 0; i < 3; i += 1)
-      scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(2));
+      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(23));
     expect(executedTasks[1], equals(23));
     executedTasks.clear();
@@ -55,32 +56,32 @@ void main() {
     scheduleAddingTask(5);
     scheduleAddingTask(97);
     for (int i = 0; i < 3; i += 1)
-      scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(2));
+      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(99));
     expect(executedTasks[1], equals(97));
     executedTasks.clear();
 
     strategy.allowedPriority = 10;
     for (int i = 0; i < 3; i += 1)
-      scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(2));
+      expect(scheduler.handleEventLoopCallback(), i < 2 ? isTrue : isFalse);
+    expect(executedTasks, hasLength(2));
     expect(executedTasks[0], equals(19));
     expect(executedTasks[1], equals(11));
     executedTasks.clear();
 
     strategy.allowedPriority = 1;
     for (int i = 0; i < 4; i += 1)
-      scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(3));
+      expect(scheduler.handleEventLoopCallback(), i < 3 ? isTrue : isFalse);
+    expect(executedTasks, hasLength(3));
     expect(executedTasks[0], equals(5));
     expect(executedTasks[1], equals(3));
     expect(executedTasks[2], equals(2));
     executedTasks.clear();
 
     strategy.allowedPriority = 0;
-    scheduler.handleEventLoopCallback();
-    expect(executedTasks.length, equals(1));
+    expect(scheduler.handleEventLoopCallback(), isFalse);
+    expect(executedTasks, hasLength(1));
     expect(executedTasks[0], equals(0));
   });
 }
