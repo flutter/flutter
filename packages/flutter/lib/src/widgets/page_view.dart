@@ -85,7 +85,7 @@ class PageController extends ScrollController {
   /// position will be derived:
   ///
   ///   * First, based on the attached [PageView]'s [BuildContext] and the
-  ///     position saved at that context's [PageStorage].
+  ///     position saved at that context's [PageStorage] if [keepPage] is true.
   ///   * Second, from the [PageController]'s [initialPage].
   ///
   /// 2. More than one [PageView] attached to the same [PageController].
