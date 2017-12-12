@@ -312,16 +312,17 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
     boolean performCursorMoveAction(SemanticsObject object, int virtualViewId, Bundle arguments, boolean forward) {
         final int granularity = arguments.getInt(
             AccessibilityNodeInfo.ACTION_ARGUMENT_MOVEMENT_GRANULARITY_INT);
-        final boolean extendSelection = arguments.getBoolean(
-            AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
+        // TODO(goderbauer): support extending selections.
+        // final boolean extendSelection = arguments.getBoolean(
+        //     AccessibilityNodeInfo.ACTION_ARGUMENT_EXTEND_SELECTION_BOOLEAN);
         switch (granularity) {
             case AccessibilityNodeInfo.MOVEMENT_GRANULARITY_CHARACTER: {
                 if (forward && object.hasAction(Action.MOVE_CURSOR_FORWARD_BY_CHARACTER)) {
-                    mOwner.dispatchSemanticsAction(virtualViewId, Action.MOVE_CURSOR_FORWARD_BY_CHARACTER, extendSelection);
+                    mOwner.dispatchSemanticsAction(virtualViewId, Action.MOVE_CURSOR_FORWARD_BY_CHARACTER);
                     return true;
                 }
                 if (!forward && object.hasAction(Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER)) {
-                    mOwner.dispatchSemanticsAction(virtualViewId, Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER, extendSelection);
+                    mOwner.dispatchSemanticsAction(virtualViewId, Action.MOVE_CURSOR_BACKWARD_BY_CHARACTER);
                     return true;
                 }
             }

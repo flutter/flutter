@@ -49,9 +49,7 @@ class Window {
   void UpdateSemanticsEnabled(bool enabled);
   void DispatchPlatformMessage(fxl::RefPtr<PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
-  void DispatchSemanticsAction(int32_t id,
-                               SemanticsAction action,
-                               std::vector<uint8_t> args);
+  void DispatchSemanticsAction(int32_t id, SemanticsAction action);
   void BeginFrame(fxl::TimePoint frameTime);
 
   void CompletePlatformMessageResponse(int response_id,

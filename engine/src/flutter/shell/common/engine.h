@@ -72,9 +72,7 @@ class Engine : public blink::RuntimeDelegate {
   void SetViewportMetrics(const blink::ViewportMetrics& metrics);
   void DispatchPlatformMessage(fxl::RefPtr<blink::PlatformMessage> message);
   void DispatchPointerDataPacket(const PointerDataPacket& packet);
-  void DispatchSemanticsAction(int id,
-                               blink::SemanticsAction action,
-                               std::vector<uint8_t> args);
+  void DispatchSemanticsAction(int id, blink::SemanticsAction action);
   void SetSemanticsEnabled(bool enabled);
   void ScheduleFrame(bool regenerate_layer_tree = true) override;
 
