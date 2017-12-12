@@ -16,17 +16,17 @@ class AnimatedIcon extends StatelessWidget {
 
   /// Creates an AnimatedIcon.
   ///
-  /// [progress], [color], and [icon] cannot be null.
+  /// [progress], and [icon] cannot be null.
+  /// [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
     Key key,
     @required this.progress,
-    @required this.color,
     @required this.icon,
+    this.color,
     this.semanticLabel,
     this.textDirection,
     // TODO(amirh): add a parameter for controlling scaling behavior.
   }) : assert(progress != null),
-       assert(color != null),
        assert(icon != null);
 
   /// The animation progress for the animated icon.
@@ -91,7 +91,7 @@ class AnimatedIcon extends StatelessWidget {
       painter: new _AnimatedIconPainter(
         iconData.paths,
         progress,
-        color,
+        color ?? IconTheme.of(context).color,
         _pathFactory,
       ),
     );
