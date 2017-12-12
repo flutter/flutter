@@ -153,4 +153,47 @@ void main() {
 
     expect(find.text('BottomSheet'), findsNothing);
   });
+
+  testWidgets('modal BottomSheet has no top MediaQuery', (WidgetTester tester) async {
+    BuildContext outerContext;
+    BuildContext innerContext;
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Navigator(
+          onGenerateRoute: (_) {
+            return new PageRouteBuilder<Null>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                outerContext = context;
+                return new Container();
+              },
+            );
+          },
+        ),
+      ),
+    ));
+
+    showModalBottomSheet<Null>(
+      context: outerContext,
+      builder: (BuildContext context) {
+        innerContext = context;
+        return new Container();
+      },
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(
+      MediaQuery.of(outerContext).padding,
+      const EdgeInsets.all(50.0),
+    );
+    expect(
+      MediaQuery.of(innerContext).padding,
+      const EdgeInsets.only(left: 50.0, right: 50.0, bottom: 50.0),
+    );
+  });
 }
