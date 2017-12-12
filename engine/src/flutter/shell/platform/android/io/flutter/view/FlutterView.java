@@ -588,11 +588,12 @@ public class FlutterView extends SurfaceView
     }
 
     private boolean isAttached() {
-        return mNativeView.isAttached();
+        return mNativeView != null && mNativeView.isAttached();
     }
 
     void assertAttached() {
-        mNativeView.assertAttached();
+        if (!isAttached())
+            throw new AssertionError("Platform view is not attached");
     }
 
     private void preRun() {
@@ -857,11 +858,15 @@ public class FlutterView extends SurfaceView
 
     @Override
     public void send(String channel, ByteBuffer message) {
-        mNativeView.send(channel, message);
+        send(channel, message, null);
     }
 
     @Override
     public void send(String channel, ByteBuffer message, BinaryReply callback) {
+        if (!isAttached()) {
+            Log.d(TAG, "FlutterView.send called on a detached view, channel=" + channel);
+            return;
+        }
         mNativeView.send(channel, message, callback);
     }
 
