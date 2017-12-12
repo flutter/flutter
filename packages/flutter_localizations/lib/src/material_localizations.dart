@@ -76,14 +76,18 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
     if (intl.DateFormat.localeExists(_localeName)) {
       _fullYearFormat = new intl.DateFormat.y(_localeName);
       _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, _localeName);
+      _longDateFormat = new intl.DateFormat.yMMMMEEEEd(_localeName);
       _yearMonthFormat = new intl.DateFormat('yMMMM', _localeName);
     } else if (intl.DateFormat.localeExists(locale.languageCode)) {
       _fullYearFormat = new intl.DateFormat.y(locale.languageCode);
       _mediumDateFormat = new intl.DateFormat(kMediumDatePattern, locale.languageCode);
+
+      _longDateFormat = new intl.DateFormat.yMMMMEEEEd(locale.languageCode);
       _yearMonthFormat = new intl.DateFormat('yMMMM', locale.languageCode);
     } else {
       _fullYearFormat = new intl.DateFormat.y();
       _mediumDateFormat = new intl.DateFormat(kMediumDatePattern);
+      _longDateFormat = new intl.DateFormat.yMMMMEEEEd();
       _yearMonthFormat = new intl.DateFormat('yMMMM');
     }
 
@@ -114,6 +118,8 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   intl.DateFormat _fullYearFormat;
 
   intl.DateFormat _mediumDateFormat;
+
+  intl.DateFormat _longDateFormat;
 
   intl.DateFormat _yearMonthFormat;
 
@@ -167,6 +173,11 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   String formatMediumDate(DateTime date) {
     return _mediumDateFormat.format(date);
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    return _longDateFormat.format(date);
   }
 
   @override

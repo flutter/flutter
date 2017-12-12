@@ -340,6 +340,54 @@ class SemanticsTester {
     visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
     return result;
   }
+
+  /// Generates an expression that creates a [TestSemantics] reflecting the
+  /// current tree of [SemanticsNode]s.
+  ///
+  /// Use this method to generate code for unit tests.
+  String generateTestSemanticsExpressionForCurrentSemanticsTree() {
+    final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
+    return _generateSemanticsTestForNode(node, 0);
+  }
+
+  /// Recursively generates [TestSemantics] code for [node] and its children,
+  /// indenting the expression by `indentAmount`.
+  String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
+    final String indent = '  ' * indentAmount;
+    final StringBuffer buf = new StringBuffer();
+    final SemanticsData nodeData = node.getSemanticsData();
+    buf.writeln('new TestSemantics(');
+    if (nodeData.flags != 0)
+      buf.writeln('  flags: ${nodeData.flags},');
+    if (nodeData.actions != 0)
+      buf.writeln('  actions: ${nodeData.actions},');
+    if (node.label != null && node.label.isNotEmpty)
+      buf.writeln('  label: r\'${node.label}\',');
+    if (node.value != null && node.value.isNotEmpty)
+      buf.writeln('  value: r\'${node.value}\',');
+    if (node.increasedValue != null && node.increasedValue.isNotEmpty)
+      buf.writeln('  increasedValue: r\'${node.increasedValue}\',');
+    if (node.decreasedValue != null && node.decreasedValue.isNotEmpty)
+      buf.writeln('  decreasedValue: r\'${node.decreasedValue}\',');
+    if (node.hint != null && node.hint.isNotEmpty)
+      buf.writeln('  hint: r\'${node.hint}\',');
+    if (node.textDirection != null)
+      buf.writeln('  textDirection: ${node.textDirection},');
+
+    if (node.hasChildren) {
+      buf.writeln('  children: <TestSemantics>[');
+      node.visitChildren((SemanticsNode child) {
+        buf
+          ..write(_generateSemanticsTestForNode(child, 2))
+          ..writeln(',');
+        return true;
+      });
+      buf.writeln('  ],');
+    }
+
+    buf.write(')');
+    return buf.toString().split('\n').map((String l) => '$indent$l').join('\n');
+  }
 }
 
 class _HasSemantics extends Matcher {
