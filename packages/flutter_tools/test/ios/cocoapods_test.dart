@@ -174,7 +174,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
   );
 
   testUsingContext(
-    'Run pod install if plugins or flutter framework changes.',
+    'Run pod install if plugins or flutter framework have changes.',
         () async {
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
@@ -202,7 +202,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
   );
 
   testUsingContext(
-    'Skip pod install if plugins and flutter framework remains unchanged.',
+    'Skip pod install if plugins and flutter framework remain unchanged.',
         () async {
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()

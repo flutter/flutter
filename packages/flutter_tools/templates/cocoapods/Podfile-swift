@@ -4,7 +4,7 @@
 def parse_KV_file(file,seperator='=')
   file_abs_path = File.expand_path(file)
   if !File.exists? file_abs_path
-    puts file_abs_path+"Not exists"
+    puts "Generated.xcconfig or .flutter-plugins expected but not present. If you're running pod install manually, make sure flutter build or flutter run is executed once first."
     return [];
   end
   pods_ary = []
@@ -23,17 +23,18 @@ def parse_KV_file(file,seperator='=')
 end
 
 target 'Runner' do
+  use_frameworks!
   # Flutter Pods
-  flutter_pods_ary = parse_KV_file("./Flutter/Generated.xcconfig")
-    flutter_pods_ary.map{ |p|
+  generated_xcode_build_settings = parse_KV_file("./Flutter/Generated.xcconfig")
+    generated_xcode_build_settings.map{ |p|
     if p[:name]=='FLUTTER_FRAMEWORK_DIR'
       pod 'Flutter', :path => p[:path]
     end
   }
 
   # Plugin Pods
-  plugin_pods_ary = parse_KV_file("../.flutter-plugins")
-  plugin_pods_ary.map{ |p|
+  plugin_pods = parse_KV_file("../.flutter-plugins")
+  plugin_pods.map{ |p|
     pod p[:name], :path => File.expand_path("ios",p[:path])
   }
 end
