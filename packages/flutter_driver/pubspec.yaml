@@ -21,7 +21,7 @@ dependencies:
 
 dev_dependencies:
   test: 0.12.26
-  mockito: 2.2.0
+  mockito: 3.0.0
   quiver: 0.26.2
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
