@@ -5,6 +5,7 @@
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'mock_canvas.dart';
 import 'rendering_tester.dart';
 
 RenderBox sizedBox(double width, double height) {
@@ -174,5 +175,33 @@ void main() {
     pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
+  });
+
+  test('Table border painting', () {
+    final RenderTable table = new RenderTable(
+      textDirection: TextDirection.rtl,
+      border: new TableBorder.all(),
+    );
+    layout(table);
+    table.setFlatChildren(1, <RenderBox>[ ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path());
+    table.setFlatChildren(1, <RenderBox>[ new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path());
+    table.setFlatChildren(1, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path());
+    table.setFlatChildren(2, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path());
+    table.setFlatChildren(2, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox(),
+                                          new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path()..path());
+    table.setFlatChildren(3, <RenderBox>[ new RenderPositionedBox(), new RenderPositionedBox(), new RenderPositionedBox(),
+                                          new RenderPositionedBox(), new RenderPositionedBox(), new RenderPositionedBox() ]);
+    pumpFrame();
+    expect(table, paints..path()..path()..path()..path()..path()..path());
   });
 }
