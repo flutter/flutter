@@ -14,7 +14,7 @@ typedef void FrameCallback(Duration duration);
 typedef void PointerDataPacketCallback(PointerDataPacket packet);
 
 /// Signature for [Window.onSemanticsAction].
-typedef void SemanticsActionCallback(int id, SemanticsAction action);
+typedef void SemanticsActionCallback(int id, SemanticsAction action, ByteData args);
 
 /// Signature for responses to platform messages.
 ///
@@ -439,7 +439,7 @@ class Window {
 
   /// The setting indicating whether time should always be shown in the 24-hour
   /// format.
-  /// 
+  ///
   /// This option is used by [showTimePicker].
   bool get alwaysUse24HourFormat => _alwaysUse24HourFormat;
   bool _alwaysUse24HourFormat = false;

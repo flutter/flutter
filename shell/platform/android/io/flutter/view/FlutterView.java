@@ -686,7 +686,7 @@ public class FlutterView extends SurfaceView
         ByteBuffer buffer, int position);
 
     private static native void nativeDispatchSemanticsAction(long nativePlatformViewAndroid, int id,
-        int action);
+        int action, ByteBuffer args, int argsPosition);
 
     private static native void nativeSetSemanticsEnabled(long nativePlatformViewAndroid,
         boolean enabled);
@@ -747,9 +747,19 @@ public class FlutterView extends SurfaceView
     private TouchExplorationListener mTouchExplorationListener;
 
     protected void dispatchSemanticsAction(int id, AccessibilityBridge.Action action) {
+        dispatchSemanticsAction(id, action, null);
+    }
+
+    protected void dispatchSemanticsAction(int id, AccessibilityBridge.Action action, Object args) {
         if (!isAttached())
             return;
-        nativeDispatchSemanticsAction(mNativeView.get(), id, action.value);
+        ByteBuffer encodedArgs = null;
+        int position = 0;
+        if (args != null) {
+            encodedArgs = StandardMessageCodec.INSTANCE.encodeMessage(args);
+            position = encodedArgs.position();
+        }
+        nativeDispatchSemanticsAction(mNativeView.get(), id, action.value, encodedArgs, position);
     }
 
     @Override

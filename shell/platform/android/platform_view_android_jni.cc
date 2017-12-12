@@ -236,8 +236,11 @@ static void DispatchSemanticsAction(JNIEnv* env,
                                     jobject jcaller,
                                     jlong platform_view,
                                     jint id,
-                                    jint action) {
-  return PLATFORM_VIEW->DispatchSemanticsAction(id, action);
+                                    jint action,
+                                    jobject args,
+                                    jint args_position) {
+  return PLATFORM_VIEW->DispatchSemanticsAction(env, id, action, args,
+                                                args_position);
 }
 
 static void SetSemanticsEnabled(JNIEnv* env,
@@ -413,7 +416,7 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       },
       {
           .name = "nativeDispatchSemanticsAction",
-          .signature = "(JII)V",
+          .signature = "(JIILjava/nio/ByteBuffer;I)V",
           .fnPtr = reinterpret_cast<void*>(&shell::DispatchSemanticsAction),
       },
       {
