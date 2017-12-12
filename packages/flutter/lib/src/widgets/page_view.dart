@@ -81,12 +81,26 @@ class PageController extends ScrollController {
   /// page. Mainly when no [PageView]s are attached. Reading [page] will throw
   /// an [AssertionError] in the following cases:
   ///
-  /// 1. Zero [PageView] attached.
+  /// 1. Zero [PageView] attached. On attaching or re-attaching, the new [page]
+  /// position will be derived:
   ///
+  ///   * First, based on the attached [PageView]'s [BuildContext] and the
+  ///     position saved at that context's [PageStorage].
+  ///   * Second, from the [PageController]'s [initialPage].
+  ///
+  /// 2. More than one [PageView] attached to the same [PageController].
+  ///
+  /// [hasClients] can be used to check if a [PageView] is attached prior to
+  /// accessing [page].
   double get page {
-    // If the controller has never been attached yet, return the initial page.
-    // if (!hasClients)
-    //   return initialPage.toDouble();
+    assert(
+      positions.isNotEmpty,
+      'PageController.page cannot be accessed before a PageView is built with it',
+    );
+    assert(
+      positions.length == 1,
+      'Multiple PageViews cannot be attached to the same PageController',
+    );
     final _PagePosition position = this.position;
     return position.page;
   }

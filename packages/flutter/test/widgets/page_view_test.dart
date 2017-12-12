@@ -594,6 +594,15 @@ void main() {
   testWidgets('PageView can restore page',
       (WidgetTester tester) async {
     final PageController controller = new PageController();
+    try {
+      controller.page;
+      fail('Accessing page before attaching should fail');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it',
+      );
+    }
     final PageStorageBucket bucket = new PageStorageBucket();
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -620,7 +629,15 @@ void main() {
         child: new Container(),
       ),
     );
-    expect(() => controller.page, throwsAssertionError);
+    try {
+      controller.page;
+      fail('Accessing page after detaching all PageViews should fail');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it',
+      );
+    }
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new PageStorage(
@@ -694,35 +711,5 @@ void main() {
     expect(semantics, includesNodeWith(label: 'Page #2'));
 
     semantics.dispose();
-  });
-
-  testWidgets('PageController can get page before attaching', (WidgetTester tester) async {
-    final PageController pageController = new PageController(
-      initialPage: 10,
-    );
-
-    // Shouldn't crash.
-    expect(pageController.page, 10.0);
-
-    // Attach to page view.
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new PageView(
-          controller: pageController,
-          children: new List<Widget>.generate(20, (int i) {
-            return new Text('Page $i');
-          })
-        ),
-    ));
-
-    expect(pageController.page, 10.0);
-
-    pageController.nextPage(
-      curve: Curves.linear,
-      duration: const Duration(milliseconds: 100),
-    );
-
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(pageController.page, 11.0);
   });
 }
