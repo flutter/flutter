@@ -32,6 +32,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: true,
       help: 'Whether to run "flutter packages get" after the project has been created.'
     );
+    argParser.addFlag('offline',
+      defaultsTo: false,
+      help: 'When "flutter packages get" is run by the create command, this indicates '
+        'whether to run it in offline mode or not. In offline mode, it will need to '
+        'have all dependencies already available in the pub cache to succeed.'
+    );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
@@ -165,7 +171,7 @@ class CreateCommand extends FlutterCommand {
         await pubGet(
           context: PubContext.createPackage,
           directory: dirPath,
-          offline: true,
+          offline: argResults['offline'],
         );
 
       final String relativePath = fs.path.relative(dirPath);
@@ -187,7 +193,7 @@ class CreateCommand extends FlutterCommand {
         await pubGet(
           context: PubContext.createPlugin,
           directory: dirPath,
-          offline: true,
+          offline: argResults['offline'],
         );
 
       if (android_sdk.androidSdk != null)
@@ -226,7 +232,7 @@ class CreateCommand extends FlutterCommand {
     );
 
     if (argResults['pub']) {
-      await pubGet(context: PubContext.create, directory: appPath, offline: true);
+      await pubGet(context: PubContext.create, directory: appPath, offline: argResults['offline']);
       injectPlugins(directory: appPath);
     }
 
