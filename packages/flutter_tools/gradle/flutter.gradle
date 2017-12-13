@@ -19,9 +19,12 @@ import org.gradle.api.tasks.bundling.Jar
 buildscript {
     repositories {
         jcenter()
+        maven {
+            url 'https://maven.google.com'
+        }
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.3'
+        classpath 'com.android.tools.build:gradle:3.0.1'
     }
 }
 
@@ -101,7 +104,11 @@ class FlutterPlugin implements Plugin<Project> {
             localEngineSrcPath = engineOut.parentFile.parent
 
             project.dependencies {
-                compile project.files(flutterJar)
+                if (project.getConfigurations().findByName("implementation")) {
+                    implementation project.files(flutterJar)
+                } else {
+                    compile project.files(flutterJar)
+                }
             }
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
@@ -131,10 +138,10 @@ class FlutterPlugin implements Plugin<Project> {
                     into "lib/x86_64"
                 }
             }
-            // Add flutter.jar dependencies to all <buildType>Compile configurations, including custom ones
+            // Add flutter.jar dependencies to all <buildType>Implementation configurations, including custom ones
             // added after applying the Flutter plugin.
-            project.android.buildTypes.each { addFlutterJarCompileDependency(project, it) }
-            project.android.buildTypes.whenObjectAdded { addFlutterJarCompileDependency(project, it) }
+            project.android.buildTypes.each { addFlutterJarImplementationDependency(project, it) }
+            project.android.buildTypes.whenObjectAdded { addFlutterJarImplementationDependency(project, it) }
         }
 
         project.extensions.create("flutter", FlutterExtension)
@@ -147,37 +154,56 @@ class FlutterPlugin implements Plugin<Project> {
             def pluginProject = project.rootProject.findProject(":$name")
             if (pluginProject != null) {
                 project.dependencies {
-                    compile pluginProject
+                    if (project.getConfigurations().findByName("implementation")) {
+                        implementation pluginProject
+                    } else {
+                        compile pluginProject
+                    }
                 }
-                pluginProject.afterEvaluate this.&addFlutterJarProvidedDependency
+                pluginProject.afterEvaluate this.&addFlutterJarCompileOnlyDependency
             } else {
                 project.logger.error("Plugin project :$name not found. Please update settings.gradle.")
             }
         }
     }
 
-    private void addFlutterJarProvidedDependency(Project project) {
+    private void addFlutterJarCompileOnlyDependency(Project project) {
         if (project.state.failure) {
             return
         }
         project.dependencies {
             if (flutterJar != null) {
-                provided project.files(flutterJar)
+                if (project.getConfigurations().findByName("compileOnly")) {
+                    compileOnly project.files(flutterJar)
+                } else {
+                    provided project.files(flutterJar)
+                }
             } else {
-                debugProvided project.files(debugFlutterJar)
-                releaseProvided project.files(releaseFlutterJar)
+                if (project.getConfigurations().findByName("debugCompileOnly")) {
+                    debugCompileOnly project.files(debugFlutterJar)
+                    releaseCompileOnly project.files(releaseFlutterJar)
+                } else {
+                    debugProvided project.files(debugFlutterJar)
+                    releaseProvided project.files(releaseFlutterJar)
+                }
             }
         }
     }
 
     /**
-     * Adds suitable flutter.jar compile dependencies to the specified buildType.
+     * Adds suitable flutter.jar implementation dependencies to the specified buildType.
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarCompileDependency(Project project, buildType) {
+    private void addFlutterJarImplementationDependency(Project project, buildType) {
         project.dependencies {
-            add(buildType.name + "Compile", project.files {
+            String configuration;
+            if (project.getConfigurations().findByName("implementation")) {
+                configuration = buildType.name + "Implementation";
+            } else {
+                configuration = buildType.name + "Compile";
+            }
+            add(configuration, project.files {
                 String buildMode = buildModeFor(buildType)
                 if (buildMode == "debug") {
                     [flutterX86Jar, debugFlutterJar]
@@ -244,6 +270,10 @@ class FlutterPlugin implements Plugin<Project> {
             String flutterBuildMode = buildModeFor(variant.buildType)
             if (flutterBuildMode == 'debug' && project.tasks.findByName('flutterBuildX86Jar')) {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
+                if (task) {
+                    task.dependsOn project.flutterBuildX86Jar
+                }
+                task = project.tasks.findByName("compile${variant.name.capitalize()}Kotlin")
                 if (task) {
                     task.dependsOn project.flutterBuildX86Jar
                 }
