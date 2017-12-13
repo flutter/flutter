@@ -414,6 +414,7 @@ void main() {
 
   testWidgets('can move cursor with a11y means', (WidgetTester tester) async {
     final SemanticsTester semantics = new SemanticsTester(tester);
+    const bool doNotExtendSelection = false;
 
     controller.text = 'test';
     controller.selection = new TextSelection.collapsed(offset: controller.text.length);
@@ -440,7 +441,7 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 4);
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 3);
@@ -454,11 +455,11 @@ void main() {
       ],
     ));
 
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter);
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, doNotExtendSelection);
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 0);
@@ -471,6 +472,89 @@ void main() {
         SemanticsAction.moveCursorForwardByCharacter,
       ],
     ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection.extentOffset, 1);
+
+    semantics.dispose();
+  });
+
+  testWidgets('can extend selection with a11y means', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    const bool extendSelection = true;
+    const bool doNotExtendSelection = false;
+
+    controller.text = 'test';
+    controller.selection = new TextSelection.collapsed(offset: controller.text.length);
+
+    await tester.pumpWidget(new MaterialApp(
+      home: new EditableText(
+        controller: controller,
+        focusNode: focusNode,
+        style: textStyle,
+        cursorColor: cursorColor,
+      ),
+    ));
+
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+      ],
+    ));
+
+    final RenderEditable render = tester.allRenderObjects.firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final int semanticsId = render.debugSemantics.id;
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 4);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 3);
+
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorBackwardByCharacter,
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorBackwardByCharacter, extendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 4);
+    expect(controller.selection.extentOffset, 0);
+
+    await tester.pumpAndSettle();
+    expect(semantics, includesNodeWith(
+      value: 'test',
+      actions: <SemanticsAction>[
+        SemanticsAction.moveCursorForwardByCharacter,
+      ],
+    ));
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, doNotExtendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection.extentOffset, 1);
+
+    tester.binding.pipelineOwner.semanticsOwner.performAction(semanticsId, SemanticsAction.moveCursorForwardByCharacter, extendSelection);
+    await tester.pumpAndSettle();
+
+    expect(controller.selection.baseOffset, 1);
+    expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
   });

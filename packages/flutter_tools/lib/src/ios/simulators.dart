@@ -321,7 +321,7 @@ class IOSSimulator extends Device {
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
-        '--flx=${fs.path.absolute(fs.path.join(getBuildDirectory(), 'app.flx'))}',
+        '--flutter-assets-dir=${fs.path.absolute(getAssetBuildDirectory())}',
         '--dart-main=${fs.path.absolute(mainPath)}',
         '--packages=${fs.path.absolute('.packages')}',
       ]);

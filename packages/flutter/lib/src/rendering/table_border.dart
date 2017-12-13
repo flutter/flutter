@@ -79,8 +79,8 @@ class TableBorder {
     return new EdgeInsets.fromLTRB(left.width, top.width, right.width, bottom.width);
   }
 
-  /// Whether all four sides of the border are identical. Uniform borders are
-  /// typically more efficient to paint.
+  /// Whether all the sides of the border (outside and inside) are identical.
+  /// Uniform borders are typically more efficient to paint.
   bool get isUniform {
     assert(top != null);
     assert(right != null);
@@ -191,47 +191,52 @@ class TableBorder {
     assert(canvas != null);
     assert(rect != null);
     assert(rows != null);
-    assert(rows.isEmpty || (rows.first > 0.0 && rows.last < rect.height));
+    assert(rows.isEmpty || (rows.first >= 0.0 && rows.last <= rect.height));
     assert(columns != null);
-    assert(columns.isEmpty || (columns.first > 0.0 && columns.last < rect.width));
+    assert(columns.isEmpty || (columns.first >= 0.0 && columns.last <= rect.width));
 
-    final Paint paint = new Paint();
-    final Path path = new Path();
+    if (columns.isNotEmpty || rows.isNotEmpty) {
+      final Paint paint = new Paint();
+      final Path path = new Path();
 
-    switch (verticalInside.style) {
-      case BorderStyle.solid:
-        paint
-          ..color = verticalInside.color
-          ..strokeWidth = verticalInside.width
-          ..style = PaintingStyle.stroke;
-        path.reset();
-        for (double x in columns) {
-          path.moveTo(rect.left + x, rect.top);
-          path.lineTo(rect.left + x, rect.bottom);
+      if (columns.isNotEmpty) {
+        switch (verticalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = verticalInside.color
+              ..strokeWidth = verticalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
+            for (double x in columns) {
+              path.moveTo(rect.left + x, rect.top);
+              path.lineTo(rect.left + x, rect.bottom);
+            }
+            canvas.drawPath(path, paint);
+            break;
+          case BorderStyle.none:
+            break;
         }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
-    }
+      }
 
-    switch (horizontalInside.style) {
-      case BorderStyle.solid:
-        paint
-          ..color = horizontalInside.color
-          ..strokeWidth = horizontalInside.width
-          ..style = PaintingStyle.stroke;
-        path.reset();
-        for (double y in rows) {
-          path.moveTo(rect.left, rect.top + y);
-          path.lineTo(rect.right, rect.top + y);
+      if (rows.isNotEmpty) {
+        switch (horizontalInside.style) {
+          case BorderStyle.solid:
+            paint
+              ..color = horizontalInside.color
+              ..strokeWidth = horizontalInside.width
+              ..style = PaintingStyle.stroke;
+            path.reset();
+            for (double y in rows) {
+              path.moveTo(rect.left, rect.top + y);
+              path.lineTo(rect.right, rect.top + y);
+            }
+            canvas.drawPath(path, paint);
+            break;
+          case BorderStyle.none:
+            break;
         }
-        canvas.drawPath(path, paint);
-        break;
-      case BorderStyle.none:
-        break;
+      }
     }
-
     paintBorder(canvas, rect, top: top, right: right, bottom: bottom, left: left);
   }
 

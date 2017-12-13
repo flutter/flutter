@@ -159,10 +159,6 @@ class CachedArtifacts extends Artifacts {
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.flutterTester:
-        if (platform == TargetPlatform.windows_x64)
-          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
-        continue fallThrough;
-      fallThrough:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -180,8 +176,6 @@ class CachedArtifacts extends Artifacts {
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
-    assert(false, 'Artifact $artifact not available for platform $platform.');
-    return null;
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
