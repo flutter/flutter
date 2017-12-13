@@ -9,6 +9,11 @@
 #include "lib/fxl/synchronization/waitable_event.h"
 
 #define TIME_SENSITIVE(x) TimeSensitiveTest_##x
+#if OS_WIN
+#define PLATFORM_SPECIFIC_CAPTURE(...) [ __VA_ARGS__, count ]
+#else
+#define PLATFORM_SPECIFIC_CAPTURE(...) [__VA_ARGS__]
+#endif
 
 TEST(MessageLoop, GetCurrent) {
   std::thread thread([]() {
@@ -75,19 +80,15 @@ TEST(MessageLoop, NonDelayedTasksAreRunInOrder) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t current = 0;
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask([&terminated, i, &current
-#if OS_WIN
-                                      ,
-                                      count
-#endif
-      ]() {
-        ASSERT_EQ(current, i);
-        current++;
-        if (count == i + 1) {
-          fml::MessageLoop::GetCurrent().Terminate();
-          terminated = true;
-        }
-      });
+      loop.GetTaskRunner()->PostTask(
+          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
+            ASSERT_EQ(current, i);
+            current++;
+            if (count == i + 1) {
+              fml::MessageLoop::GetCurrent().Terminate();
+              terminated = true;
+            }
+          });
     }
     loop.Run();
     ASSERT_EQ(current, count);
@@ -110,12 +111,7 @@ TEST(MessageLoop, DelayedTasksAtSameTimeAreRunInOrder) {
         fxl::TimePoint::Now() + fxl::TimeDelta::FromMilliseconds(2);
     for (size_t i = 0; i < count; i++) {
       loop.GetTaskRunner()->PostTaskForTime(
-          [&terminated, i, &current
-#if OS_WIN
-           ,
-           count
-#endif
-      ]() {
+          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &current)() {
             ASSERT_EQ(current, i);
             current++;
             if (count == i + 1) {
@@ -197,23 +193,13 @@ TEST(MessageLoop, TIME_SENSITIVE(SingleDelayedTaskForTime)) {
 TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
   const auto count = 10;
   int checked = false;
-  std::thread thread([&checked
-#if OS_WIN
-                      ,
-                      count
-#endif
-  ]() {
+  std::thread thread(PLATFORM_SPECIFIC_CAPTURE(&checked)() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();
     for (int target_ms = 0 + 2; target_ms < count + 2; target_ms++) {
       auto begin = fxl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked
-#if OS_WIN
-           ,
-           count
-#endif
-      ]() {
+          PLATFORM_SPECIFIC_CAPTURE(begin, target_ms, &checked)() {
             auto delta = fxl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);
@@ -234,23 +220,13 @@ TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithIncreasingDeltas)) {
 TEST(MessageLoop, TIME_SENSITIVE(MultipleDelayedTasksWithDecreasingDeltas)) {
   const auto count = 10;
   int checked = false;
-  std::thread thread([&checked
-#if OS_WIN
-                      ,
-                      count
-#endif
-  ]() {
+  std::thread thread(PLATFORM_SPECIFIC_CAPTURE(&checked)() {
     fml::MessageLoop::EnsureInitializedForCurrentThread();
     auto& loop = fml::MessageLoop::GetCurrent();
     for (int target_ms = count + 2; target_ms > 0 + 2; target_ms--) {
       auto begin = fxl::TimePoint::Now();
       loop.GetTaskRunner()->PostDelayedTask(
-          [begin, target_ms, &checked
-#if OS_WIN
-           ,
-           count
-#endif
-      ]() {
+          PLATFORM_SPECIFIC_CAPTURE(begin, target_ms, &checked)() {
             auto delta = fxl::TimePoint::Now() - begin;
             auto ms = delta.ToMillisecondsF();
             ASSERT_GE(ms, target_ms - 2);
@@ -293,26 +269,18 @@ TEST(MessageLoop, TaskObserverFire) {
     auto& loop = fml::MessageLoop::GetCurrent();
     size_t task_count = 0;
     size_t obs_count = 0;
-    CustomTaskObserver obs([&obs_count
-#if OS_WIN
-                            ,
-                            count
-#endif
-    ]() { obs_count++; });
+    CustomTaskObserver obs(
+        PLATFORM_SPECIFIC_CAPTURE(&obs_count)() { obs_count++; });
     for (size_t i = 0; i < count; i++) {
-      loop.GetTaskRunner()->PostTask([&terminated, i, &task_count
-#if OS_WIN
-                                      ,
-                                      count
-#endif
-      ]() {
-        ASSERT_EQ(task_count, i);
-        task_count++;
-        if (count == i + 1) {
-          fml::MessageLoop::GetCurrent().Terminate();
-          terminated = true;
-        }
-      });
+      loop.GetTaskRunner()->PostTask(
+          PLATFORM_SPECIFIC_CAPTURE(&terminated, i, &task_count)() {
+            ASSERT_EQ(task_count, i);
+            task_count++;
+            if (count == i + 1) {
+              fml::MessageLoop::GetCurrent().Terminate();
+              terminated = true;
+            }
+          });
     }
     loop.AddTaskObserver(&obs);
     loop.Run();
