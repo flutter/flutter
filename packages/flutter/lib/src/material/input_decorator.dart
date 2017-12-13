@@ -21,14 +21,84 @@ enum InputBorderType {
   none,
 }
 
-class _BorderContainer extends StatefulWidget {
-  _BorderContainer({
-    Key key,
-    this.decoration,
-    this.child
-  }) : assert(decoration != null), super(key: key);
+class _InputBorderGap extends ChangeNotifier {
+  double _start;
+  double get start => _start;
+  set start(double value) {
+    if (value != _start) {
+      _start = value;
+      notifyListeners();
+    }
+  }
 
-  final Decoration decoration;
+  double _extent = 0.0;
+  double get extent => _extent;
+  set extent(double value) {
+    if (value != _extent) {
+      _extent = value;
+      notifyListeners();
+    }
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (runtimeType != other.runtimeType)
+      return false;
+    final _InputBorderGap typedOther = other;
+    return typedOther.start == start && typedOther.extent == extent;
+  }
+
+  @override
+  int get hashCode => hashValues(start, extent);
+}
+
+class _InputBorderPainter extends CustomPainter {
+  _InputBorderPainter({
+    Listenable repaint,
+    this.animation,
+    this.border,
+    this.gap,
+    this.textDirection,
+  }) : super(repaint: repaint);
+
+  final Animation<double> animation;
+  final _InputBorderTween border;
+  final _InputBorderGap gap;
+  final TextDirection textDirection;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    border.evaluate(animation).paint(
+      canvas,
+      Offset.zero & size,
+      gapStart: gap.start,
+      gapExtent: gap.extent,
+      textDirection: textDirection,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_InputBorderPainter oldPainter) {
+    return border != oldPainter.border
+      || gap != oldPainter.gap
+      || textDirection != oldPainter.textDirection;
+  }
+}
+
+class _BorderContainer extends StatefulWidget {
+  const _BorderContainer({
+    Key key,
+    @required this.border,
+    @required this.gap,
+    this.child
+  }) : assert(border != null),
+       assert(gap != null),
+       super(key: key);
+
+  final InputBorder border;
+  final _InputBorderGap gap;
   final Widget child;
 
   @override
@@ -38,7 +108,7 @@ class _BorderContainer extends StatefulWidget {
 class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
   AnimationController _controller;
   Animation<double> _animation;
-  DecorationTween _decoration;
+  _InputBorderTween _border;
 
   @override
   void initState() {
@@ -46,10 +116,14 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
     _controller = new AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-    )..addListener(_handleAnimationChanged);
+    );
     _animation = new CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
+    );
+    _border = new _InputBorderTween(
+      begin: widget.border,
+      end: widget.border,
     );
   }
 
@@ -62,10 +136,10 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   @override
   void didUpdateWidget(_BorderContainer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.decoration != oldWidget.decoration) {
-      _decoration = new DecorationTween(
-        begin: oldWidget.decoration,
-        end: widget.decoration,
+    if (widget.border != oldWidget.border) {
+      _border = new _InputBorderTween(
+        begin: oldWidget.border,
+        end: widget.border,
       );
       _controller
         ..value = 0.0
@@ -73,17 +147,17 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
     }
   }
 
-  void _handleAnimationChanged() {
-    setState(() {
-      // The controller's value has changed.
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return new Container(
+    return new CustomPaint(
+      painter: new _InputBorderPainter(
+        repaint: new Listenable.merge(<Listenable>[_animation, widget.gap]),
+        animation: _animation,
+        border: _border,
+        gap: widget.gap,
+        textDirection: Directionality.of(context),
+      ),
       child: widget.child,
-      decoration: _decoration?.evaluate(_animation) ?? widget.decoration,
     );
   }
 }
@@ -93,8 +167,6 @@ class InputBorder extends ShapeBorder {
     this.borderType: InputBorderType.underline,
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
-    this.gapStart,
-    this.gapExtent: 0.0,
     this.gapPad: 4.0,
     this.gapAnimation,
   }) : assert(borderSide != null),
@@ -113,9 +185,6 @@ class InputBorder extends ShapeBorder {
   final BorderSide borderSide;
   final BorderRadius borderRadius;
   final double gapPad;
-
-  double gapStart;
-  double gapExtent;
   final Animation<double> gapAnimation;
 
   @override
@@ -128,6 +197,8 @@ class InputBorder extends ShapeBorder {
     return new InputBorder(
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
+      gapPad: gapPad * t,
+      gapAnimation: gapAnimation,
     );
   }
 
@@ -203,7 +274,7 @@ class InputBorder extends ShapeBorder {
       ..lineTo(center.left, center.top + center.trRadiusY);
   }
 
-  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection) {
+  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection, double gapStart, double gapExtent) {
     final Paint paint = borderSide.toPaint();
     final RRect outer = borderRadius.toRRect(rect);
     final RRect center = outer.deflate(borderSide.width / 2.0);
@@ -226,7 +297,7 @@ class InputBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, { double gapStart, double gapExtent: 0.0, TextDirection textDirection }) {
     switch (borderSide.style) {
       case BorderStyle.none:
         break;
@@ -235,7 +306,7 @@ class InputBorder extends ShapeBorder {
           case InputBorderType.none:
             return;
           case InputBorderType.outline:
-            paintOutline(canvas, rect, textDirection);
+            paintOutline(canvas, rect, textDirection, gapStart, gapExtent);
             break;
           case InputBorderType.underline:
             paintUnderline(canvas, rect);
@@ -254,8 +325,6 @@ class InputBorder extends ShapeBorder {
         borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        gapStart: a.gapStart,
-        gapExtent: a.gapExtent,
         gapAnimation: a.gapAnimation,
         gapPad: a.gapPad,
       );
@@ -270,8 +339,6 @@ class InputBorder extends ShapeBorder {
         borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        gapStart: b.gapStart,
-        gapExtent: b.gapExtent,
         gapAnimation: b.gapAnimation,
         gapPad: b.gapPad,
       );
@@ -288,12 +355,22 @@ class InputBorder extends ShapeBorder {
     final InputBorder typedOther = other;
     return typedOther.borderType == borderType
         && typedOther.borderRadius == borderRadius
-        && typedOther.borderSide == borderSide;
+        && typedOther.borderSide == borderSide
+        && typedOther.gapPad == gapPad
+        && typedOther.gapAnimation == gapAnimation;
   }
 
   @override
-  int get hashCode => hashValues(borderType, borderSide, borderRadius);
+  int get hashCode => hashValues(borderType, borderSide, borderRadius, gapPad, gapAnimation);
 }
+
+class _InputBorderTween extends Tween<InputBorder> {
+  _InputBorderTween({ InputBorder begin, InputBorder end }) : super(begin: begin, end: end);
+
+  @override
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
+}
+
 
 // Used to "shake" the floating label to the left to the left and right
 // when the errorText first appears.
@@ -516,7 +593,8 @@ class _Decoration {
     @required this.contentPadding,
     @required this.floatingLabelHeight,
     @required this.floatingLabelProgress,
-    this.border,
+    this.borderType,
+    this.borderGap,
     this.input,
     this.label,
     this.hint,
@@ -534,7 +612,8 @@ class _Decoration {
   final EdgeInsets contentPadding;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
-  final InputBorder border;
+  final InputBorderType borderType;
+  final _InputBorderGap borderGap;
   final Widget input;
   final Widget label;
   final Widget hint;
@@ -556,7 +635,8 @@ class _Decoration {
     return typedOther.contentPadding == contentPadding
         && typedOther.floatingLabelHeight == floatingLabelHeight
         && typedOther.floatingLabelProgress == floatingLabelProgress
-        && typedOther.border == border
+        && typedOther.borderType == borderType
+        && typedOther.borderGap == borderGap
         && typedOther.input == input
         && typedOther.label == label
         && typedOther.hint == hint
@@ -575,7 +655,8 @@ class _Decoration {
       contentPadding,
       floatingLabelHeight,
       floatingLabelProgress,
-      border,
+      borderType,
+      borderGap,
       input,
       label,
       hint,
@@ -983,7 +1064,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.border.borderType == InputBorderType.outline
+    baseline = decoration.borderType == InputBorderType.outline
       ? layout.outlineBaseline
       : layout.inputBaseline;
 
@@ -1041,13 +1122,13 @@ class _RenderDecoration extends RenderBox {
     }
 
     if (label != null) {
-      decoration.border.gapStart = textDirection == TextDirection.rtl
+      decoration.borderGap.start = textDirection == TextDirection.rtl
         ? _boxParentData(label).offset.dx + label.size.width
         : _boxParentData(label).offset.dx;
-      decoration.border.gapExtent = label.size.width * 0.75;
+      decoration.borderGap.extent = label.size.width * 0.75;
     } else {
-      decoration.border.gapStart = null;
-      decoration.border.gapExtent = 0.0;
+      decoration.borderGap.start = null;
+      decoration.borderGap.extent = 0.0;
     }
 
     size = constraints.constrain(new Size(overallWidth, overallHeight));
@@ -1072,7 +1153,7 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      final bool isOutlineBorder = decoration.border.borderType == InputBorderType.outline;
+      final bool isOutlineBorder = decoration.borderType == InputBorderType.outline;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
@@ -1367,6 +1448,7 @@ class InputDecorator extends StatefulWidget {
 class _InputDecoratorState extends State<InputDecorator> with TickerProviderStateMixin {
   AnimationController _floatingLabelController;
   AnimationController _shakingLabelController;
+  final _InputBorderGap _borderGap = new _InputBorderGap();
 
   @override
   void initState() {
@@ -1532,9 +1614,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       );
 
     final Widget container = new _BorderContainer(
-      decoration: new ShapeDecoration(
-        color: _getFillColor(themeData),
-        shape: border,
+      border: border,
+      gap: _borderGap,
+      child: new DecoratedBox(
+        decoration: new BoxDecoration(
+          color: _getFillColor(themeData),
+        ),
       ),
     );
 
@@ -1630,7 +1715,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _floatingLabelController.value,
-        border: border,
+        borderType: border.borderType,
+        borderGap: _borderGap,
         input: widget.child,
         label: label,
         hint: hint,
