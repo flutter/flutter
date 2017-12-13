@@ -2685,27 +2685,26 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     config.explicitChildNodes = onHorizontalDragUpdate != null
         || onVerticalDragUpdate != null;
 
-    final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
-    if (onTap != null)
-      actions[SemanticsAction.tap] = onTap;
-    if (onLongPress != null)
-      actions[SemanticsAction.longPress] = onLongPress;
+    if (onTap != null && _isValidAction(SemanticsAction.tap))
+      config.onTap = onTap;
+    if (onLongPress != null && _isValidAction(SemanticsAction.longPress))
+      config.onLongPress = onLongPress;
     if (onHorizontalDragUpdate != null) {
-      actions[SemanticsAction.scrollRight] = _performSemanticScrollRight;
-      actions[SemanticsAction.scrollLeft] = _performSemanticScrollLeft;
+      if (_isValidAction(SemanticsAction.scrollRight))
+        config.onScrollRight = _performSemanticScrollRight;
+      if (_isValidAction(SemanticsAction.scrollLeft))
+        config.onScrollLeft = _performSemanticScrollLeft;
     }
     if (onVerticalDragUpdate != null) {
-      actions[SemanticsAction.scrollUp] = _performSemanticScrollUp;
-      actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
+      if (_isValidAction(SemanticsAction.scrollUp))
+        config.onScrollUp = _performSemanticScrollUp;
+      if (_isValidAction(SemanticsAction.scrollDown))
+        config.onScrollDown = _performSemanticScrollDown;
     }
+  }
 
-    final Iterable<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
-
-    for (SemanticsAction action in actionsToAdd) {
-      final VoidCallback handler = actions[action];
-      if (handler != null)
-        config.addAction(action, handler);
-    }
+  bool _isValidAction(SemanticsAction action) {
+    return validActions == null || validActions.contains(action);
   }
 
   SemanticsNode _innerNode;
@@ -2830,8 +2829,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
-    VoidCallback onMoveCursorForwardByCharacter,
-    VoidCallback onMoveCursorBackwardByCharacter,
+    MoveCursorHandler onMoveCursorForwardByCharacter,
+    MoveCursorHandler onMoveCursorBackwardByCharacter,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3173,9 +3172,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume up key while the
   /// input focus is in a text field.
-  VoidCallback get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
-  VoidCallback _onMoveCursorForwardByCharacter;
-  set onMoveCursorForwardByCharacter(VoidCallback handler) {
+  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(MoveCursorHandler handler) {
     if (_onMoveCursorForwardByCharacter == handler)
       return;
     final bool hadValue = _onMoveCursorForwardByCharacter != null;
@@ -3191,9 +3190,9 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   ///
   /// TalkBack users can trigger this by pressing the volume down key while the
   /// input focus is in a text field.
-  VoidCallback get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
-  VoidCallback _onMoveCursorBackwardByCharacter;
-  set onMoveCursorBackwardByCharacter(VoidCallback handler) {
+  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler handler) {
     if (_onMoveCursorBackwardByCharacter == handler)
       return;
     final bool hadValue = _onMoveCursorBackwardByCharacter != null;
@@ -3230,25 +3229,25 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
     if (onTap != null)
-      config.addAction(SemanticsAction.tap, _performTap);
+      config.onTap = _performTap;
     if (onLongPress != null)
-      config.addAction(SemanticsAction.longPress, _performLongPress);
+      config.onLongPress = _performLongPress;
     if (onScrollLeft != null)
-      config.addAction(SemanticsAction.scrollLeft, _performScrollLeft);
+      config.onScrollLeft = _performScrollLeft;
     if (onScrollRight != null)
-      config.addAction(SemanticsAction.scrollRight, _performScrollRight);
+      config.onScrollRight = _performScrollRight;
     if (onScrollUp != null)
-      config.addAction(SemanticsAction.scrollUp, _performScrollUp);
+      config.onScrollUp = _performScrollUp;
     if (onScrollDown != null)
-      config.addAction(SemanticsAction.scrollDown, _performScrollDown);
+      config.onScrollDown = _performScrollDown;
     if (onIncrease != null)
-      config.addAction(SemanticsAction.increase, _performIncrease);
+      config.onIncrease = _performIncrease;
     if (onDecrease != null)
-      config.addAction(SemanticsAction.decrease, _performDecrease);
+      config.onDecrease = _performDecrease;
     if (onMoveCursorForwardByCharacter != null)
-      config.addAction(SemanticsAction.moveCursorForwardByCharacter, _performMoveCursorForwardByCharacter);
+      config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
     if (onMoveCursorBackwardByCharacter != null)
-      config.addAction(SemanticsAction.moveCursorBackwardByCharacter, _performMoveCursorBackwardByCharacter);
+      config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
   }
 
   void _performTap() {
@@ -3291,14 +3290,14 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
       onDecrease();
   }
 
-  void _performMoveCursorForwardByCharacter() {
+  void _performMoveCursorForwardByCharacter(bool extendSelection) {
     if (onMoveCursorForwardByCharacter != null)
-      onMoveCursorForwardByCharacter();
+      onMoveCursorForwardByCharacter(extendSelection);
   }
 
-  void _performMoveCursorBackwardByCharacter() {
+  void _performMoveCursorBackwardByCharacter(bool extendSelection) {
     if (onMoveCursorBackwardByCharacter != null)
-      onMoveCursorBackwardByCharacter();
+      onMoveCursorBackwardByCharacter(extendSelection);
   }
 }
 

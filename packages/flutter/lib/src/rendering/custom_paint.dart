@@ -823,34 +823,34 @@ class RenderCustomPaint extends RenderProxyBox {
       config.textDirection = properties.textDirection;
     }
     if (properties.onTap != null) {
-      config.addAction(SemanticsAction.tap, properties.onTap);
+      config.onTap = properties.onTap;
     }
     if (properties.onLongPress != null) {
-      config.addAction(SemanticsAction.longPress, properties.onLongPress);
+      config.onLongPress = properties.onLongPress;
     }
     if (properties.onScrollLeft != null) {
-      config.addAction(SemanticsAction.scrollLeft, properties.onScrollLeft);
+      config.onScrollLeft = properties.onScrollLeft;
     }
     if (properties.onScrollRight != null) {
-      config.addAction(SemanticsAction.scrollRight, properties.onScrollRight);
+      config.onScrollRight = properties.onScrollRight;
     }
     if (properties.onScrollUp != null) {
-      config.addAction(SemanticsAction.scrollUp, properties.onScrollUp);
+      config.onScrollUp = properties.onScrollUp;
     }
     if (properties.onScrollDown != null) {
-      config.addAction(SemanticsAction.scrollDown, properties.onScrollDown);
+      config.onScrollDown = properties.onScrollDown;
     }
     if (properties.onIncrease != null) {
-      config.addAction(SemanticsAction.increase, properties.onIncrease);
+      config.onIncrease = properties.onIncrease;
     }
     if (properties.onDecrease != null) {
-      config.addAction(SemanticsAction.decrease, properties.onDecrease);
+      config.onDecrease = properties.onDecrease;
     }
     if (properties.onMoveCursorForwardByCharacter != null) {
-      config.addAction(SemanticsAction.moveCursorForwardByCharacter, properties.onMoveCursorForwardByCharacter);
+      config.onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter;
     }
     if (properties.onMoveCursorBackwardByCharacter != null) {
-      config.addAction(SemanticsAction.moveCursorBackwardByCharacter, properties.onMoveCursorBackwardByCharacter);
+      config.onMoveCursorBackwardByCharacter = properties.onMoveCursorBackwardByCharacter;
     }
 
     newChild.updateWith(
