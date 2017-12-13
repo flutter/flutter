@@ -136,7 +136,7 @@ BuildApp() {
     --output-file="${derived_dir}/app.flx"                                \
     --snapshot="${build_dir}/snapshot_blob.bin"                           \
     --depfile="${build_dir}/snapshot_blob.bin.d"                          \
-    --working-dir="${build_dir}/flx"                                      \
+    --working-dir="${derived_dir}/flutter_assets"                         \
     ${precompilation_flag}                                                \
     ${local_engine_flag}                                                  \
     ${preview_dart_2_flag}                                                \
