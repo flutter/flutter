@@ -29,6 +29,7 @@ void main() {
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
     expect(localizations.viewLicensesButtonLabel, isNotNull);
+    expect(localizations.modalBarrierDismissLabel, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

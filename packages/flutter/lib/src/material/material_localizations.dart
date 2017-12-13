@@ -127,6 +127,10 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
 
+  /// Accessibility label used for dismissible barriers to indicate that
+  /// tapping on the barrier dismisses it.
+  String get modalBarrierDismissLabel;
+
   /// The format used to lay out the time picker.
   ///
   /// The documentation for [TimeOfDayFormat] enum values provides details on
@@ -518,6 +522,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
+
+  @override
+  String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {

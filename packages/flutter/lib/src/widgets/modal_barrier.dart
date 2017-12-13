@@ -30,7 +30,8 @@ class ModalBarrier extends StatelessWidget {
   const ModalBarrier({
     Key key,
     this.color,
-    this.dismissible: true
+    this.dismissible: true,
+    this.semanticsLabel,
   }) : super(key: key);
 
   /// If non-null, fill the barrier with this color.
@@ -49,20 +50,30 @@ class ModalBarrier extends StatelessWidget {
   ///    [ModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Semantics label used for the barrier if it is [dismissable].
+  ///
+  /// See also:
+  ///
+  ///  * [ModalRoute.barrierLabel], which controls this property for the
+  ///    [ModalBarrier] built by [ModalRoute] pages.
+  final String semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
+    final bool canBeDismissed = dismissible && defaultTargetPlatform != TargetPlatform.android;
     return new BlockSemantics(
       child: new ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal.
-        excluding: !dismissible || defaultTargetPlatform == TargetPlatform.android,
-        child: new Semantics(
-          container: true,
-          child: new GestureDetector(
-            onTapDown: (TapDownDetails details) {
-              if (dismissible)
-                Navigator.pop(context);
-            },
-            behavior: HitTestBehavior.opaque,
+        excluding: !canBeDismissed,
+        child: new GestureDetector(
+          onTapDown: (TapDownDetails details) {
+            if (dismissible)
+              Navigator.pop(context);
+          },
+          behavior: HitTestBehavior.opaque,
+          child: new Semantics(
+            label: canBeDismissed ? semanticsLabel : null,
+            textDirection: canBeDismissed ? Directionality.of(context) : null,
             child: new ConstrainedBox(
               constraints: const BoxConstraints.expand(),
               child: color == null ? null : new DecoratedBox(
@@ -70,7 +81,7 @@ class ModalBarrier extends StatelessWidget {
                   color: color
                 )
               )
-            )
+            ),
           )
         )
       )
@@ -99,7 +110,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
   const AnimatedModalBarrier({
     Key key,
     Animation<Color> color,
-    this.dismissible: true
+    this.dismissible: true,
+    this.semanticsLabel,
   }) : super(key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
@@ -118,11 +130,20 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
   final bool dismissible;
 
+  /// Semantics label used for the barrier if it is [dismissable].
+  ///
+  /// See also:
+  ///
+  ///  * [ModalRoute.barrierLabel], which controls this property for the
+  ///    [ModalBarrier] built by [ModalRoute] pages.
+  final String semanticsLabel;
+
   @override
   Widget build(BuildContext context) {
     return new ModalBarrier(
       color: color?.value,
       dismissible: dismissible,
+      semanticsLabel: semanticsLabel,
     );
   }
 }

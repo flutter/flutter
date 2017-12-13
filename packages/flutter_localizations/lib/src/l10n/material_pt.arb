@@ -28,5 +28,6 @@
   "selectAllButtonLabel": "SELECIONAR TUDO",
   "viewLicensesButtonLabel": "VER LICENÇAS",
   "timePickerHourModeAnnouncement": "Selecione horários",
-  "timePickerMinuteModeAnnouncement": "Selecione Minutos"
+  "timePickerMinuteModeAnnouncement": "Selecione Minutos",
+  "modalBarrierDismissLabel": "Dispensar"
 }

@@ -154,4 +154,9 @@
   "@timePickerMinuteModeAnnouncement": {
     "description": "The audio announcement made when the time picker dialog is set to minute mode."
   }
+
+  "modalBarrierDismissLabel": "Dismiss",
+  "@modalBarrierDismissLabel": {
+    "description": "Accessibility label used to annotate a dismissible modal barriers."
+  }
 }

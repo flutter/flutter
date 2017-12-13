@@ -17,6 +17,9 @@ class TestRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
 
   @override
+  String get barrierLabel => null;
+
+  @override
   bool get maintainState => false;
 
   @override

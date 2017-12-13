@@ -27,5 +27,6 @@
   "selectAllButtonLabel": "SELECT ALL",
   "viewLicensesButtonLabel": "VIEW LICENCES",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "modalBarrierDismissLabel": "Dismiss"
 }
