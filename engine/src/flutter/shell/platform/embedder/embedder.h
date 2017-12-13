@@ -105,9 +105,9 @@ typedef void (*FlutterPlatformMessageCallback)(
 typedef struct {
   // The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
-  // The path to the FLX file containing project assets. The string can be
-  // collected after the call to |FlutterEngineRun| returns. The string must be
-  // NULL terminated.
+  // The path to the Flutter assets directory containing project assets. The
+  // string can be collected after the call to |FlutterEngineRun| returns. The
+  // string must be NULL terminated.
   const char* assets_path;
   // The path to the Dart file containing the |main| entry point. The string can
   // be collected after the call to |FlutterEngineRun| returns. The string must

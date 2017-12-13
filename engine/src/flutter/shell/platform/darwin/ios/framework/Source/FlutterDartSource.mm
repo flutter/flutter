@@ -8,26 +8,26 @@
 
 @synthesize dartMain = _dartMain;
 @synthesize packages = _packages;
-@synthesize flxArchive = _flxArchive;
-@synthesize archiveContainsScriptSnapshot = _archiveContainsScriptSnapshot;
+@synthesize flutterAssets = _flutterAssets;
+@synthesize assetsDirContainsScriptSnapshot = _assetsDirContainsScriptSnapshot;
 
 #pragma mark - Convenience Initializers
 
 - (instancetype)init {
-  return [self initWithDartMain:nil packages:nil flxArchive:nil];
+  return [self initWithDartMain:nil packages:nil flutterAssets:nil];
 }
 
 #pragma mark - Designated Initializers
 
 - (instancetype)initWithDartMain:(NSURL*)dartMain
                         packages:(NSURL*)packages
-                      flxArchive:(NSURL*)flxArchive {
+                   flutterAssets:(NSURL*)flutterAssets {
   self = [super init];
 
   if (self) {
     _dartMain = [dartMain copy];
     _packages = [packages copy];
-    _flxArchive = [flxArchive copy];
+    _flutterAssets = [flutterAssets copy];
 
     NSFileManager* fileManager = [NSFileManager defaultManager];
 
@@ -35,21 +35,21 @@
     const BOOL packagesExists = [fileManager fileExistsAtPath:packages.absoluteURL.path];
 
     if (!dartMainExists || !packagesExists) {
-      // We cannot actually verify this without opening up the archive. This is
+      // We cannot actually verify this without opening up the directory. This is
       // just an assumption.
-      _archiveContainsScriptSnapshot = YES;
+      _assetsDirContainsScriptSnapshot = YES;
     }
   }
 
   return self;
 }
 
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)flxArchive {
+- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssets {
   self = [super init];
 
   if (self) {
-    _flxArchive = [flxArchive copy];
-    _archiveContainsScriptSnapshot = YES;
+    _flutterAssets = [flutterAssets copy];
+    _assetsDirContainsScriptSnapshot = YES;
   }
 
   return self;
@@ -79,9 +79,9 @@ static BOOL CheckDartProjectURL(NSMutableString* log, NSURL* url, NSString* logL
 
   BOOL isValid = YES;
 
-  isValid &= CheckDartProjectURL(log, _flxArchive, @"FLX archive");
+  isValid &= CheckDartProjectURL(log, _flutterAssets, @"Flutter assets");
 
-  if (!_archiveContainsScriptSnapshot) {
+  if (!_assetsDirContainsScriptSnapshot) {
     isValid &= CheckDartProjectURL(log, _dartMain, @"Dart main");
     isValid &= CheckDartProjectURL(log, _packages, @"Dart packages");
   }
@@ -92,7 +92,7 @@ static BOOL CheckDartProjectURL(NSMutableString* log, NSURL* url, NSString* logL
 - (void)dealloc {
   [_dartMain release];
   [_packages release];
-  [_flxArchive release];
+  [_flutterAssets release];
 
   [super dealloc];
 }

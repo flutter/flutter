@@ -33,14 +33,15 @@ void PlatformViewMac::Attach() {
 
 void PlatformViewMac::SetupAndLoadDart() {
   if (AttemptLaunchFromCommandLineSwitches(&engine())) {
-    // This attempts launching from an FLX bundle that does not contain a
-    // dart snapshot.
+    // This attempts launching from a Flutter assets directory that does not
+    // contain a dart snapshot.
     return;
   }
 
   const auto& command_line = shell::Shell::Shared().GetCommandLine();
 
-  std::string bundle_path = command_line.GetOptionValueWithDefault(FlagForSwitch(Switch::FLX), "");
+  std::string bundle_path =
+      command_line.GetOptionValueWithDefault(FlagForSwitch(Switch::FlutterAssetsDir), "");
   if (!bundle_path.empty()) {
     blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), bundle_path ] {
       if (engine)

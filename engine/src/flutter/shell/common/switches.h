@@ -62,6 +62,9 @@ DEF_SWITCH(EnableTxt,
            "enable-txt",
            "Enable libtxt as the text shaping library instead of Blink.")
 DEF_SWITCH(FLX, "flx", "Specify the FLX path.")
+DEF_SWITCH(FlutterAssetsDir,
+           "flutter-assets-dir",
+           "Path to the Flutter assets directory.")
 DEF_SWITCH(Help, "help", "Display this help text.")
 DEF_SWITCH(LogTag, "log-tag", "Tag associated with log messages.")
 DEF_SWITCH(MainDartFile, "dart-main", "The path to the main Dart file.")

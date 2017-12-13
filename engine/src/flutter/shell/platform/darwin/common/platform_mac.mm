@@ -115,21 +115,21 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
 
   const auto& command_line = shell::Shell::Shared().GetCommandLine();
 
-  if (command_line.HasOption(FlagForSwitch(Switch::FLX)) ||
+  if (command_line.HasOption(FlagForSwitch(Switch::FlutterAssetsDir)) ||
       command_line.HasOption(FlagForSwitch(Switch::MainDartFile)) ||
       command_line.HasOption(FlagForSwitch(Switch::Packages))) {
-    // The main dart file, flx bundle and the package root must be specified in
-    // one go. We dont want to end up in a situation where we take one value
-    // from the command line and the others from user defaults. In case, any
-    // new flags are specified, forget about all the old ones.
-    [defaults removeObjectForKey:@(FlagForSwitch(Switch::FLX).data())];
+    // The main dart file, Flutter assets directory and the package root must be
+    // specified in one go. We dont want to end up in a situation where we take
+    // one value from the command line and the others from user defaults. In
+    // case, any new flags are specified, forget about all the old ones.
+    [defaults removeObjectForKey:@(FlagForSwitch(Switch::FlutterAssetsDir).data())];
     [defaults removeObjectForKey:@(FlagForSwitch(Switch::MainDartFile).data())];
     [defaults removeObjectForKey:@(FlagForSwitch(Switch::Packages).data())];
 
     [defaults synchronize];
   }
 
-  std::string bundle_path = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::FLX));
+  std::string bundle_path = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::FlutterAssetsDir));
   std::string main = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::MainDartFile));
   std::string packages = ResolveCommandLineLaunchFlag(FlagForSwitch(Switch::Packages));
 
@@ -140,7 +140,8 @@ bool AttemptLaunchFromCommandLineSwitches(Engine* engine) {
   // Save the newly resolved dart main file and the package root to user
   // defaults so that the next time the user launches the application in the
   // simulator without the tooling, the application boots up.
-  [defaults setObject:@(bundle_path.c_str()) forKey:@(FlagForSwitch(Switch::FLX).data())];
+  [defaults setObject:@(bundle_path.c_str())
+               forKey:@(FlagForSwitch(Switch::FlutterAssetsDir).data())];
   [defaults setObject:@(main.c_str()) forKey:@(FlagForSwitch(Switch::MainDartFile).data())];
   [defaults setObject:@(packages.c_str()) forKey:@(FlagForSwitch(Switch::Packages).data())];
 
