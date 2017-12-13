@@ -60,7 +60,7 @@ void main() {
           'flutter_project.iml',
         ],
       );
-      return _runFlutterTest(projectDir.path);
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift project', () async {
@@ -83,7 +83,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('package project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=package'],
         <String>[
@@ -107,6 +107,7 @@ void main() {
           'test/widget_test.dart',
         ],
       );
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
@@ -127,7 +128,7 @@ void main() {
         ],
         plugin: true,
       );
-      return _runFlutterTest('${projectDir.path}/example');
+      return _runFlutterTest(projectDir.childDirectory('example'));
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift plugin project', () async {
@@ -214,7 +215,7 @@ void main() {
       // TODO(pq): enable when sky_shell is available
       if (!io.Platform.isWindows) {
         // Verify that the sample widget test runs cleanly.
-        await _runFlutterTest(projectDir.path, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
+        await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
       }
 
       // Generated Xcode settings
@@ -385,7 +386,7 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
   expect(exec.exitCode, 0);
 }
 
-Future<Null> _runFlutterTest(String workingDir, {String target}) async {
+Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
   final String flutterToolsPath = fs.path.absolute(fs.path.join(
     'bin',
     'flutter_tools.dart',
@@ -402,7 +403,7 @@ Future<Null> _runFlutterTest(String workingDir, {String target}) async {
   final ProcessResult exec = await Process.run(
     '$dartSdkPath/bin/dart',
     args,
-    workingDirectory: workingDir,
+    workingDirectory: workingDir.path,
   );
   if (exec.exitCode != 0) {
     print(exec.stdout);
