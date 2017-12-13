@@ -15,15 +15,82 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-enum InputDecoratorBorderType {
+enum InputBorderType {
   outline,
   underline,
   none,
 }
 
-class TextFieldBorder extends ShapeBorder {
-  TextFieldBorder({
-    this.borderType: InputDecoratorBorderType.underline,
+class _BorderContainer extends StatefulWidget {
+  _BorderContainer({
+    Key key,
+    this.decoration,
+    this.child
+  }) : assert(decoration != null), super(key: key);
+
+  final Decoration decoration;
+  final Widget child;
+
+  @override
+  _BorderContainerState createState() => new _BorderContainerState();
+}
+
+class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
+  AnimationController _controller;
+  Animation<double> _animation;
+  DecorationTween _decoration;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = new AnimationController(
+      duration: _kTransitionDuration,
+      vsync: this,
+    )..addListener(_handleAnimationChanged);
+    _animation = new CurvedAnimation(
+      parent: _controller,
+      curve: _kTransitionCurve,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_BorderContainer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.decoration != oldWidget.decoration) {
+      _decoration = new DecorationTween(
+        begin: oldWidget.decoration,
+        end: widget.decoration,
+      );
+      _controller
+        ..value = 0.0
+        ..forward();
+    }
+  }
+
+  void _handleAnimationChanged() {
+    setState(() {
+      // The controller's value has changed.
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new Container(
+      child: widget.child,
+      decoration: _decoration?.evaluate(_animation) ?? widget.decoration,
+    );
+  }
+}
+
+class InputBorder extends ShapeBorder {
+  InputBorder({
+    this.borderType: InputBorderType.underline,
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
     this.gapStart,
@@ -42,7 +109,7 @@ class TextFieldBorder extends ShapeBorder {
         && borderRadius.bottomRight.x ==  borderRadius.bottomRight.y;
   }
 
-  final InputDecoratorBorderType borderType;
+  final InputBorderType borderType;
   final BorderSide borderSide;
   final BorderRadius borderRadius;
   final double gapPad;
@@ -57,8 +124,8 @@ class TextFieldBorder extends ShapeBorder {
   }
 
   @override
-  TextFieldBorder scale(double t) {
-    return new TextFieldBorder(
+  InputBorder scale(double t) {
+    return new InputBorder(
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
     );
@@ -165,12 +232,12 @@ class TextFieldBorder extends ShapeBorder {
         break;
       case BorderStyle.solid: {
         switch(borderType) {
-          case InputDecoratorBorderType.none:
+          case InputBorderType.none:
             return;
-          case InputDecoratorBorderType.outline:
+          case InputBorderType.outline:
             paintOutline(canvas, rect, textDirection);
             break;
-          case InputDecoratorBorderType.underline:
+          case InputBorderType.underline:
             paintUnderline(canvas, rect);
             break;
           default:
@@ -182,8 +249,8 @@ class TextFieldBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    if (a is TextFieldBorder) {
-      return new TextFieldBorder(
+    if (a is InputBorder) {
+      return new InputBorder(
         borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
@@ -198,8 +265,8 @@ class TextFieldBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is TextFieldBorder) {
-      return new TextFieldBorder(
+    if (b is InputBorder) {
+      return new InputBorder(
         borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
@@ -218,7 +285,7 @@ class TextFieldBorder extends ShapeBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final TextFieldBorder typedOther = other;
+    final InputBorder typedOther = other;
     return typedOther.borderType == borderType
         && typedOther.borderRadius == borderRadius
         && typedOther.borderSide == borderSide;
@@ -467,7 +534,7 @@ class _Decoration {
   final EdgeInsets contentPadding;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
-  final TextFieldBorder border;
+  final InputBorder border;
   final Widget input;
   final Widget label;
   final Widget hint;
@@ -526,8 +593,8 @@ class _Decoration {
 class _RenderDecorationLayout {
   const _RenderDecorationLayout({
     this.boxToBaseline,
-    this.inputBaseline, // for InputDecoratorBorderType.underline
-    this.outlineBaseline, // for InputDecoratorBorderType.outline
+    this.inputBaseline, // for InputBorderType.underline
+    this.outlineBaseline, // for InputBorderType.outline
     this.subtextBaseline,
     this.containerHeight,
     this.subtextHeight,
@@ -916,7 +983,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.border.borderType == InputDecoratorBorderType.outline
+    baseline = decoration.border.borderType == InputBorderType.outline
       ? layout.outlineBaseline
       : layout.inputBaseline;
 
@@ -1005,7 +1072,7 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      final bool isOutlineBorder = decoration.border.borderType == InputDecoratorBorderType.outline;
+      final bool isOutlineBorder = decoration.border.borderType == InputBorderType.outline;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
@@ -1449,10 +1516,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final TextFieldBorder border = new TextFieldBorder(
+    final InputBorder border = new InputBorder(
         gapAnimation: _floatingLabelController.view,
         borderType: decoration.borderType,
-        borderRadius: decoration.borderType == InputDecoratorBorderType.outline
+        borderRadius: decoration.borderType == InputBorderType.outline
           ? new BorderRadius.circular(4.0)
           : const BorderRadius.only(
               topLeft: const Radius.circular(4.0),
@@ -1464,9 +1531,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         ),
       );
 
-    final Widget container = new AnimatedContainer(
-      duration: _kTransitionDuration,
-      curve: _kTransitionCurve,
+    final Widget container = new _BorderContainer(
       decoration: new ShapeDecoration(
         color: _getFillColor(themeData),
         shape: border,
@@ -1541,15 +1606,15 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     EdgeInsets contentPadding;
     double floatingLabelHeight;
     switch (decoration.borderType) {
-      case InputDecoratorBorderType.none:
-      case InputDecoratorBorderType.underline:
+      case InputBorderType.none:
+      case InputBorderType.underline:
         // 4.0: the vertical gap between the inline elements and the floating label.
         floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
         contentPadding = decoration.isDense
           ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
           : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
           break;
-      case InputDecoratorBorderType.outline:
+      case InputBorderType.outline:
         floatingLabelHeight = 0.0;
         contentPadding = decoration.isDense
           ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
@@ -1624,7 +1689,7 @@ class InputDecoration {
     this.counterStyle,
     this.filled: false,
     this.fillColor,
-    this.borderType: InputDecoratorBorderType.underline,
+    this.borderType: InputBorderType.underline,
     this.enabled: true,
   }) : assert(isDense != null),
        assert(hideDivider != null),
@@ -1644,7 +1709,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
-    this.borderType: InputDecoratorBorderType.underline,
+    this.borderType: InputBorderType.underline,
     this.enabled: true,
   }) : assert(filled != null),
        assert(enabled != null),
@@ -1795,7 +1860,7 @@ class InputDecoration {
 
   final Color fillColor;
 
-  final InputDecoratorBorderType borderType;
+  final InputBorderType borderType;
 
   final bool enabled;
 
@@ -1825,7 +1890,7 @@ class InputDecoration {
     TextStyle counterStyle,
     bool filled,
     Color fillColor,
-    InputDecoratorBorderType borderType,
+    InputBorderType borderType,
     bool enabled,
   }) {
     return new InputDecoration(
