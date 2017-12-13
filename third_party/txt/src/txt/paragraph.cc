@@ -991,17 +991,20 @@ Paragraph::Range<size_t> Paragraph::GetWordBoundary(size_t offset) const {
   if (text_.size() == 0)
     return Range<size_t>(0, 0);
 
-  UErrorCode status = U_ZERO_ERROR;
-  std::unique_ptr<icu::BreakIterator> break_iter(
-      icu::BreakIterator::createWordInstance(icu::Locale(), status));
-  if (!U_SUCCESS(status))
-    return Range<size_t>(0, 0);
-  break_iter->setText(icu::UnicodeString(false, text_.data(), text_.size()));
+  if (!word_breaker_) {
+    UErrorCode status = U_ZERO_ERROR;
+    word_breaker_.reset(
+        icu::BreakIterator::createWordInstance(icu::Locale(), status));
+    if (!U_SUCCESS(status))
+      return Range<size_t>(0, 0);
+  }
 
-  int32_t prev_boundary = break_iter->preceding(offset);
+  word_breaker_->setText(icu::UnicodeString(false, text_.data(), text_.size()));
+
+  int32_t prev_boundary = word_breaker_->preceding(offset + 1);
+  int32_t next_boundary = word_breaker_->next();
   if (prev_boundary == icu::BreakIterator::DONE)
     prev_boundary = offset;
-  int32_t next_boundary = break_iter->next();
   if (next_boundary == icu::BreakIterator::DONE)
     next_boundary = offset;
   return Range<size_t>(prev_boundary, next_boundary);
