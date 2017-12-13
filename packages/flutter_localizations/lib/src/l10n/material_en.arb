@@ -157,6 +157,6 @@
 
   "modalBarrierDismissLabel": "Dismiss",
   "@modalBarrierDismissLabel": {
-    "description": "Accessibility label used to annotate a dismissible modal barriers."
+    "description": "Accessibility label used to annotate a dismissible modal barrier."
   }
 }

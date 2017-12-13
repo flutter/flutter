@@ -60,11 +60,11 @@ class ModalBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool canBeDismissed = dismissible && defaultTargetPlatform != TargetPlatform.android;
+    final bool semanticsDismissable = dismissible && defaultTargetPlatform != TargetPlatform.android;
     return new BlockSemantics(
       child: new ExcludeSemantics(
         // On Android, the back button is used to dismiss a modal.
-        excluding: !canBeDismissed,
+        excluding: !semanticsDismissable,
         child: new GestureDetector(
           onTapDown: (TapDownDetails details) {
             if (dismissible)
@@ -72,8 +72,8 @@ class ModalBarrier extends StatelessWidget {
           },
           behavior: HitTestBehavior.opaque,
           child: new Semantics(
-            label: canBeDismissed ? semanticsLabel : null,
-            textDirection: canBeDismissed ? Directionality.of(context) : null,
+            label: semanticsDismissable ? semanticsLabel : null,
+            textDirection: semanticsDismissable ? Directionality.of(context) : null,
             child: new ConstrainedBox(
               constraints: const BoxConstraints.expand(),
               child: color == null ? null : new DecoratedBox(
@@ -81,7 +81,7 @@ class ModalBarrier extends StatelessWidget {
                   color: color
                 )
               )
-            ),
+            )
           )
         )
       )
