@@ -4726,8 +4726,8 @@ class Semantics extends SingleChildRenderObjectWidget {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
-    VoidCallback onMoveCursorForwardByCharacter,
-    VoidCallback onMoveCursorBackwardByCharacter,
+    MoveCursorHandler onMoveCursorForwardByCharacter,
+    MoveCursorHandler onMoveCursorBackwardByCharacter,
   }) : this.fromProperties(
     key: key,
     child: child,

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:developer';
+import 'dart:typed_data';
 import 'dart:ui' as ui show window;
 
 import 'package:flutter/foundation.dart';
@@ -187,8 +188,12 @@ abstract class RendererBinding extends BindingBase with ServicesBinding, Schedul
     }
   }
 
-  void _handleSemanticsAction(int id, SemanticsAction action) {
-    _pipelineOwner.semanticsOwner?.performAction(id, action);
+  void _handleSemanticsAction(int id, SemanticsAction action, ByteData args) {
+    _pipelineOwner.semanticsOwner?.performAction(
+      id,
+      action,
+      args != null ? const StandardMessageCodec().decodeMessage(args) : null,
+    );
   }
 
   void _handleSemanticsOwnerCreated() {

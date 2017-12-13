@@ -349,28 +349,31 @@ class RenderEditable extends RenderBox {
       ..isTextField = true;
 
     if (_selection?.isValid == true) {
-      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null) {
-        config.addAction(SemanticsAction.moveCursorBackwardByCharacter, () {
-          final int offset = _textPainter.getOffsetBefore(_selection.extentOffset);
-          if (offset == null)
-            return;
-          onSelectionChanged(
-            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
-          );
-        });
-      }
-
-      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null) {
-        config.addAction(SemanticsAction.moveCursorForwardByCharacter, () {
-          final int offset = _textPainter.getOffsetAfter(_selection.extentOffset);
-          if (offset == null)
-            return;
-          onSelectionChanged(
-            new TextSelection.collapsed(offset: offset), this, SelectionChangedCause.keyboard,
-          );
-        });
-      }
+      if (_textPainter.getOffsetBefore(_selection.extentOffset) != null)
+        config.onMoveCursorBackwardByCharacter = _handleMoveCursorBackwardByCharacter;
+      if (_textPainter.getOffsetAfter(_selection.extentOffset) != null)
+        config.onMoveCursorForwardByCharacter = _handleMoveCursorForwardByCharacter;
     }
+  }
+
+  void _handleMoveCursorForwardByCharacter(bool extentSelection) {
+    final int extentOffset = _textPainter.getOffsetAfter(_selection.extentOffset);
+    if (extentOffset == null)
+      return;
+    final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
+    onSelectionChanged(
+      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    );
+  }
+
+  void _handleMoveCursorBackwardByCharacter(bool extentSelection) {
+    final int extentOffset = _textPainter.getOffsetBefore(_selection.extentOffset);
+    if (extentOffset == null)
+      return;
+    final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
+    onSelectionChanged(
+      new TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    );
   }
 
   @override
