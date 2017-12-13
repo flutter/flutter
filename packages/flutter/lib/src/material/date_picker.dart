@@ -306,7 +306,6 @@ class DayPicker extends StatelessWidget {
     for (int i = localizations.firstDayOfWeekIndex; true; i = (i + 1) % 7) {
       final String weekday = localizations.narrowWeekdays[i];
       result.add(new ExcludeSemantics(
-        excluding: true,
         child: new Center(child: new Text(weekday, style: headerStyle)),
       ));
       if (i == (localizations.firstDayOfWeekIndex - 1) % 7)
@@ -432,7 +431,6 @@ class DayPicker extends StatelessWidget {
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
               selected: isSelectedDay,
               child: new ExcludeSemantics(
-                excluding: true,
                 child: new Text(localizations.formatDecimal(day), style: itemStyle),
               ),
             ),
@@ -461,7 +459,6 @@ class DayPicker extends StatelessWidget {
             height: _kDayPickerRowHeight,
             child: new Center(
               child: new ExcludeSemantics(
-                excluding: true,
                 child: new Text(
                   localizations.formatMonthYear(displayedMonth),
                   style: themeData.textTheme.subhead,

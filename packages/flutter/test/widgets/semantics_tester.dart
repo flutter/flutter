@@ -344,7 +344,50 @@ class SemanticsTester {
   /// Generates an expression that creates a [TestSemantics] reflecting the
   /// current tree of [SemanticsNode]s.
   ///
-  /// Use this method to generate code for unit tests.
+  /// Use this method to generate code for unit tests. It works similar to
+  /// screenshot testing. The very first time you add semantics to a widget you
+  /// verify manually that the widget behaves correctly. You then use ths method
+  /// to generate test code for this widget.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
+  ///   var semantics = new SemanticsTester(tester);
+  ///   await tester.pumpWidget(new MyWidget());
+  ///   print(semantics.generateTestSemanticsExpressionForCurrentSemanticsTree());
+  ///   semantics.dispose();
+  /// });
+  /// ```
+  ///
+  /// You can now copy the code printed to the console into a unit test:
+  ///
+  /// ```dart
+  /// testWidgets('generate code for MyWidget', (WidgetTester tester) async {
+  ///   var semantics = new SemanticsTester(tester);
+  ///   await tester.pumpWidget(new MyWidget());
+  ///   expect(semantics, hasSemantics(
+  ///     // Generated code:
+  ///     new TestSemantics(
+  ///       ... properties and child nodes ...
+  ///     ),
+  ///     ignoreRect: true,
+  ///     ignoreTransform: true,
+  ///     ignoreId: true,
+  ///   ));
+  ///   semantics.dispose();
+  /// });
+  ///
+  /// At this point the unit test should automatically pass because it was
+  /// generated from the actual [SemanticsNode]s. Next time the semantics tree
+  /// changes, the test code may either be updated manually, or regenerated and
+  /// replaced using this method again.
+  ///
+  /// Avoid submitting huge piles of generated test code. This will make test
+  /// code hard to review and it will make it tempting to regenerate test code
+  /// every time and ignore potential regressions. Make sure you do not
+  /// over-test. Prefer breaking your widgets into smaller widgets and test them
+  /// individually.
   String generateTestSemanticsExpressionForCurrentSemanticsTree() {
     final SemanticsNode node = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     return _generateSemanticsTestForNode(node, 0);
