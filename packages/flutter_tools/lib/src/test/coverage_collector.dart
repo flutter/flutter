@@ -55,9 +55,9 @@ class CoverageCollector extends TestWatcher {
     final Map<String, dynamic> data = await coverage
         .collect(observatoryUri, false, false)
         .timeout(
-          const Duration(seconds: 30),
+          const Duration(minutes: 2),
           onTimeout: () {
-            throw new Exception('Failed to collect coverage, it took more than thirty seconds.');
+            throw new Exception('Timed out while collecting coverage.');
           },
         );
     printTrace(() {
