@@ -2140,7 +2140,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///   void describeSemanticsConfiguration(SemanticsConfiguration config) {
   ///     super.describeSemanticsConfiguration(config);
   ///     config
-  ///       ..addAction(SemanticsAction.tap, _handleTap)
+  ///       ..onTap = _handleTap
   ///       ..label = 'I am a button'
   ///       ..isButton = true;
   ///   }

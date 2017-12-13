@@ -713,8 +713,8 @@ class _RenderSlider extends RenderBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
-      config.addAction(SemanticsAction.increase, _increaseAction);
-      config.addAction(SemanticsAction.decrease, _decreaseAction);
+      config.onIncrease = _increaseAction;
+      config.onDecrease = _decreaseAction;
     }
   }
 

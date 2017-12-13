@@ -388,8 +388,8 @@ void main() {
         onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
         onIncrease: () => performedActions.add(SemanticsAction.increase),
         onDecrease: () => performedActions.add(SemanticsAction.decrease),
-        onMoveCursorForwardByCharacter: () => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
-        onMoveCursorBackwardByCharacter: () => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
+        onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
       )
     );
 
@@ -412,7 +412,14 @@ void main() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     int expectedLength = 1;
     for (SemanticsAction action in allActions) {
-      semanticsOwner.performAction(expectedId, action);
+      switch (action) {
+        case SemanticsAction.moveCursorBackwardByCharacter:
+        case SemanticsAction.moveCursorForwardByCharacter:
+          semanticsOwner.performAction(expectedId, action, true);
+          break;
+        default:
+          semanticsOwner.performAction(expectedId, action);
+      }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
       expectedLength += 1;
