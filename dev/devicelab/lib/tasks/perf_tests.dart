@@ -274,7 +274,7 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        File apk = file('$cwd/build/app/outputs/apk/release/app-release.apk');
+        File apk = file('$cwd/build/app/outputs/apk/app.apk');
         if (!apk.existsSync()) {
           // Pre Android SDK 26 path
           apk = file('$cwd/build/app/outputs/apk/app-release.apk');
