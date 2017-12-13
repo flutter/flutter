@@ -7,6 +7,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  final Color _dividerColor = const Color(0x1f333333);
+
   testWidgets('ExpansionTile initial state', (WidgetTester tester) async {
     final Key topKey = new UniqueKey();
     final Key expandedKey = const PageStorageKey<String>('expanded');
@@ -16,6 +18,10 @@ void main() {
     final Key tileKey = new UniqueKey();
 
     await tester.pumpWidget(new MaterialApp(
+      theme: new ThemeData(
+        platform: TargetPlatform.iOS,
+        dividerColor: _dividerColor,
+      ),
       home: new Material(
         child: new SingleChildScrollView(
           child: new Column(
@@ -62,7 +68,6 @@ void main() {
       of: find.byKey(key),
       matching: find.byType(Container),
     ));
-    final Color dividerColor = Theme.of(tester.element(find.text('Collapsed'))).dividerColor;
 
     expect(getHeight(topKey), getHeight(expandedKey) - getHeight(tileKey) - 2.0);
     expect(getHeight(topKey), getHeight(collapsedKey) - 2.0);
@@ -70,8 +75,8 @@ void main() {
 
     BoxDecoration expandedContainerDecoration = getContainer(expandedKey).decoration;
     expect(expandedContainerDecoration.color, Colors.red);
-    expect(expandedContainerDecoration.border.top.color, dividerColor);
-    expect(expandedContainerDecoration.border.bottom.color, dividerColor);
+    expect(expandedContainerDecoration.border.top.color, _dividerColor);
+    expect(expandedContainerDecoration.border.bottom.color, _dividerColor);
 
     BoxDecoration collapsedContainerDecoration = getContainer(collapsedKey).decoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
@@ -83,6 +88,16 @@ void main() {
     await tester.tap(find.text('Default'));
 
     await tester.pump();
+
+    // Pump to the middle of the animation for expansion.
+    await tester.pump(const Duration(milliseconds: 100));
+    final BoxDecoration collapsingContainerDecoration = getContainer(collapsedKey).decoration;
+    expect(collapsingContainerDecoration.color, Colors.transparent);
+    // Opacity should change but color component should remain the same.
+    expect(collapsingContainerDecoration.border.top.color, const Color(0x15333333));
+    expect(collapsingContainerDecoration.border.bottom.color, const Color(0x15333333));
+
+    // Pump all the way to the end now.
     await tester.pump(const Duration(seconds: 1));
 
     expect(getHeight(topKey), getHeight(expandedKey) - 2.0);
@@ -98,7 +113,7 @@ void main() {
     // Collapsed should be expanded now.
     collapsedContainerDecoration = getContainer(collapsedKey).decoration;
     expect(collapsedContainerDecoration.color, Colors.transparent);
-    expect(collapsedContainerDecoration.border.top.color, dividerColor);
-    expect(collapsedContainerDecoration.border.bottom.color, dividerColor);
+    expect(collapsedContainerDecoration.border.top.color, _dividerColor);
+    expect(collapsedContainerDecoration.border.bottom.color, _dividerColor);
   });
 }
