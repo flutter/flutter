@@ -127,6 +127,7 @@ android {
     buildScript.openWrite(mode: FileMode.APPEND).write('''
 
 android {
+    flavorDimensions "mode"
     productFlavors {
         $name {
             applicationIdSuffix ".$name"
