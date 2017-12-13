@@ -480,24 +480,24 @@ void _printProgress(String action, String workingDir, String command) {
 }
 
 Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
-  Directory flutterRootDir = new Directory(flutterRoot);
+  final Directory flutterRootDir = new Directory(flutterRoot);
 
-  Map<String, List<File>> packageToRegistrants = {};
+  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
 
   for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
     if (entity is! File)
       continue;
     if (_isGeneratedPluginRegistrant(entity)) {
-      String package = _getPackageFor(entity, flutterRootDir);
-      List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+      final String package = _getPackageFor(entity, flutterRootDir);
+      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
       registrants.add(entity);
     }
   }
 
-  Set<String> outOfDate = new Set();
+  final Set<String> outOfDate = new Set<String>();
 
   for (String package in packageToRegistrants.keys) {
-    Map<File, String> fileToContent = new Map.fromIterable(packageToRegistrants[package],
+    final Map<File, String> fileToContent = new Map<File, String>.fromIterable(packageToRegistrants[package],
       key: (File f) => f,
       value: (File f) => f.readAsStringSync(),
     );
@@ -533,7 +533,7 @@ String _getPackageFor(File entity, Directory flutterRootDir) {
 }
 
 bool _isGeneratedPluginRegistrant(File file) {
-  String filename = path.basename(file.path);
+  final String filename = path.basename(file.path);
   return filename == 'GeneratedPluginRegistrant.java' ||
       filename == 'GeneratedPluginRegistrant.h' ||
       filename == 'GeneratedPluginRegistrant.m';
