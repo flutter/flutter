@@ -58,15 +58,6 @@ void main () {
       expect(_interpolate(points, 0.75, Offset.lerp), const Offset(17.5, 10.5));
       expect(_interpolate(points, 1.0, Offset.lerp), const Offset(23.0, 9.0));
     });
-
-    test('- clamp progress to [0,1]', () {
-      final List<Offset> points = const <Offset>[
-        const Offset(25.0, 1.0),
-        const Offset(12.0, 12.0),
-      ];
-      expect(_interpolate(points, -1.0, Offset.lerp), const Offset(25.0, 1.0));
-      expect(_interpolate(points, 1.5, Offset.lerp), const Offset(12.0, 12.0));
-    });
   });
 
   group('_AnimatedIconPainter', () {
