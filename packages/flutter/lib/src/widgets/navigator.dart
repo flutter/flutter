@@ -552,7 +552,10 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
+  @optionalTypeArgs
   static Future<T> push<T>(BuildContext context, Route<T> route) {
+    // TODO(leafp): Remove the explicit instantiations of `push<dynamic>` when
+    // https://github.com/dart-lang/linter/issues/851 is fixed.
     return Navigator.of(context).push(route);
   }
 

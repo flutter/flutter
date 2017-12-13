@@ -80,8 +80,7 @@ final ArgParser _argParser = new ArgParser()
         ' - the path to a Dart file corresponding to a task, which resides in bin/tasks. Example: bin/tasks/complex_layout__start_up.dart.\n'
         '\n'
         'This option may be repeated to specify multiple tasks.',
-    callback: (Object parsed) {
-      final List<String> value = parsed;
+    callback: (List<String> value) {
       for (String nameOrPath in value) {
         final List<String> fragments = path.split(nameOrPath);
         final bool isDartFile = fragments.last.endsWith('.dart');
@@ -114,8 +113,7 @@ final ArgParser _argParser = new ArgParser()
     hide: true,
     allowMultiple: true,
     splitCommas: true,
-    callback: (Object parsed) {
-      final List<String> value = parsed;
+    callback: (List<String> value) {
       if (value.isNotEmpty) {
         throw const FormatException(
           'Invalid option --test. Did you mean --task (-t)?',
