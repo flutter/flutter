@@ -10,6 +10,7 @@
 #include <sys/types.h>
 
 #if defined(OS_WIN)
+#include <io.h>
 #include <windows.h>
 #undef ERROR
 
