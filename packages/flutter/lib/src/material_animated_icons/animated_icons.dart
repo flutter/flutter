@@ -222,6 +222,7 @@ class _PathCubicTo extends _PathCommand {
   }
 }
 
+// ignore: unused_element
 class _PathLineTo extends _PathCommand {
   const _PathLineTo(this.points);
 
