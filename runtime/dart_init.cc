@@ -12,6 +12,14 @@
 #if defined(OS_WIN)
 #include <windows.h>
 #undef ERROR
+
+#define access _access
+#define R_OK 0x4
+
+#ifndef S_ISDIR
+#define S_ISDIR(mode) (((mode)&S_IFMT) == S_IFDIR)
+#endif
+
 #else
 #include <unistd.h>
 #endif
