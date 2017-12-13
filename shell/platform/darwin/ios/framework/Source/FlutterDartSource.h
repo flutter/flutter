@@ -13,14 +13,15 @@ typedef void (^ValidationResult)(BOOL result, NSString* message);
 
 @property(nonatomic, readonly) NSURL* dartMain;
 @property(nonatomic, readonly) NSURL* packages;
-@property(nonatomic, readonly) NSURL* flxArchive;
-@property(nonatomic, readonly) BOOL archiveContainsScriptSnapshot;
+@property(nonatomic, readonly) NSURL* flutterAssets;
+@property(nonatomic, readonly) BOOL assetsDirContainsScriptSnapshot;
 
 - (instancetype)initWithDartMain:(NSURL*)dartMain
                         packages:(NSURL*)packages
-                      flxArchive:(NSURL*)flxArchive NS_DESIGNATED_INITIALIZER;
+                   flutterAssets:(NSURL*)flutterAssets NS_DESIGNATED_INITIALIZER;
 
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)flxArchive NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssets
+    NS_DESIGNATED_INITIALIZER;
 
 - (void)validate:(ValidationResult)result;
 

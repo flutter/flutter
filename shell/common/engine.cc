@@ -289,9 +289,17 @@ void Engine::Init(const std::string& bundle_path) {
 #error Unknown OS
 #endif
 
+  std::string flx_path = bundle_path;
+  struct stat stat_result = {};
+  if (::stat(flx_path.c_str(), &stat_result) == 0) {
+    if (S_ISDIR(stat_result.st_mode)) {
+      flx_path = files::GetDirectoryName(bundle_path) + "/app.flx";
+    }
+  }
+
   blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                      default_isolate_snapshot_data,
-                     default_isolate_snapshot_instr, bundle_path);
+                     default_isolate_snapshot_instr, flx_path);
 }
 
 const std::string Engine::main_entrypoint_ = "main";
@@ -579,18 +587,18 @@ void Engine::ConfigureAssetBundle(const std::string& path) {
     return;
   }
 
+  std::string flx_path;
   if (S_ISDIR(stat_result.st_mode)) {
     directory_asset_bundle_ =
         std::make_unique<blink::DirectoryAssetBundle>(path);
-    return;
+    flx_path = files::GetDirectoryName(path) + "/app.flx";
+  } else if (S_ISREG(stat_result.st_mode)) {
+    flx_path = path;
   }
 
-  if (S_ISREG(stat_result.st_mode)) {
+  if (PathExists(flx_path)) {
     asset_store_ = fxl::MakeRefCounted<blink::ZipAssetStore>(
-        blink::GetUnzipperProviderForPath(path));
-    directory_asset_bundle_ = std::make_unique<blink::DirectoryAssetBundle>(
-        files::GetDirectoryName(path));
-    return;
+        blink::GetUnzipperProviderForPath(flx_path));
   }
 }
 
@@ -689,6 +697,7 @@ void Engine::HandleAssetPlatformMessage(
   const auto& data = message->data();
   std::string asset_name(reinterpret_cast<const char*>(data.data()),
                          data.size());
+
   std::vector<uint8_t> asset_data;
   if (GetAssetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));

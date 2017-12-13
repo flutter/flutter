@@ -17,8 +17,10 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 
@@ -48,37 +50,40 @@ class ResourceExtractor {
             try {
                 byte[] buffer = null;
                 final String[] assets = manager.list("");
-                for (String asset : assets) {
+                LinkedList<String> assetList = new LinkedList<>(Arrays.asList(assets));
+                while(!assetList.isEmpty()) {
+                    String asset = assetList.pop();
                     if (!mResources.contains(asset))
                         continue;
+
+		    if (manager.list(asset).length > 0) {
+			// The asset is a directory
+			for (String a: manager.list(asset)) {
+			    assetList.add(asset + File.separator + a);
+			    mResources.add(asset + File.separator + a);
+			}
+			continue;
+		    }
+
                     final File output = new File(dataDir, asset);
                     if (output.exists())
                         continue;
-                    InputStream is = null;
-                    OutputStream os = null;
-                    try {
-                        is = manager.open(asset);
-                        os = new FileOutputStream(output);
-                        if (buffer == null) {
-                            buffer = new byte[BUFFER_SIZE];
-                        }
-
-                        int count = 0;
-                        while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
-                            os.write(buffer, 0, count);
-                        }
-                        os.flush();
-                    } finally {
-                        try {
-                            if (is != null) {
-                                is.close();
-                            }
-                        } finally {
-                            if (os != null) {
-                                os.close();
-                            }
-                        }
+                    if (output.getParentFile() != null) {
+                        output.getParentFile().mkdirs();
                     }
+                    try (InputStream is = manager.open(asset)) {
+                        try (OutputStream os = new FileOutputStream(output)) {
+                            if (buffer == null) {
+                                buffer = new byte[BUFFER_SIZE];
+                             }
+
+                            int count = 0;
+                            while ((count = is.read(buffer, 0, BUFFER_SIZE)) != -1) {
+                                os.write(buffer, 0, count);
+                            }
+                            os.flush();
+			}
+		    }
                 }
             } catch (IOException e) {
                 Log.w(TAG, "Exception unpacking resources: " + e.getMessage());
@@ -179,10 +184,18 @@ class ResourceExtractor {
 
     private void deleteFiles() {
         final File dataDir = new File(PathUtils.getDataDirectory(mContext));
-        for (String resource : mResources) {
+        LinkedList<String> files = new LinkedList<>(mResources);
+        while (!files.isEmpty()) {
+            String resource = files.pop();
             final File file = new File(dataDir, resource);
             if (file.exists()) {
-                file.delete();
+                if (file.isFile()) {
+                    file.delete();
+                } else {
+		    for (String f : file.list()) {
+			files.add(resource + File.separator + f);
+		    }
+                }
             }
         }
         for (String timestamp : getExistingTimestamps(dataDir)) {

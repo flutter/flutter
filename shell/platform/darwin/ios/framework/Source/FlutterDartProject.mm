@@ -43,7 +43,7 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
 #pragma mark - Override base class designated initializers
 
 - (instancetype)init {
-  return [self initWithFLXArchive:nil dartMain:nil packages:nil];
+  return [self initWithFlutterAssets:nil dartMain:nil packages:nil];
 }
 
 #pragma mark - Designated initializers
@@ -63,12 +63,22 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
 - (instancetype)initWithFLXArchive:(NSURL*)archiveURL
                           dartMain:(NSURL*)dartMainURL
                           packages:(NSURL*)dartPackages {
+  return nil;
+}
+
+- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL {
+  return nil;
+}
+
+- (instancetype)initWithFlutterAssets:(NSURL*)flutterAssetsURL
+                             dartMain:(NSURL*)dartMainURL
+                             packages:(NSURL*)dartPackages {
   self = [super init];
 
   if (self) {
     _dartSource = [[FlutterDartSource alloc] initWithDartMain:dartMainURL
                                                      packages:dartPackages
-                                                   flxArchive:archiveURL];
+                                                flutterAssets:flutterAssetsURL];
 
     [self checkReadiness];
   }
@@ -76,11 +86,12 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
   return self;
 }
 
-- (instancetype)initWithFLXArchiveWithScriptSnapshot:(NSURL*)archiveURL {
+- (instancetype)initWithFlutterAssetsWithScriptSnapshot:(NSURL*)flutterAssetsURL {
   self = [super init];
 
   if (self) {
-    _dartSource = [[FlutterDartSource alloc] initWithFLXArchiveWithScriptSnapshot:archiveURL];
+    _dartSource =
+        [[FlutterDartSource alloc] initWithFlutterAssetsWithScriptSnapshot:flutterAssetsURL];
 
     [self checkReadiness];
   }
@@ -100,19 +111,19 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
     // Load directly from sources if the appropriate command line flags are
     // specified. If not, try loading from a script snapshot in the framework
     // bundle.
-    NSURL* flxURL = URLForSwitch(shell::FlagForSwitch(shell::Switch::FLX));
+    NSURL* flutterAssetsURL = URLForSwitch(shell::FlagForSwitch(shell::Switch::FlutterAssetsDir));
 
-    if (flxURL == nil) {
+    if (flutterAssetsURL == nil) {
       // If the URL was not specified on the command line, look inside the
       // FlutterApplication bundle.
-      NSString* flxPath = [self pathForFLXFromBundle:bundle];
-      if (flxPath != nil) {
-        flxURL = [NSURL fileURLWithPath:flxPath isDirectory:NO];
+      NSString* flutterAssetsPath = [self pathForFlutterAssetsFromBundle:bundle];
+      if (flutterAssetsPath != nil) {
+        flutterAssetsURL = [NSURL fileURLWithPath:flutterAssetsPath isDirectory:NO];
       }
     }
 
-    if (flxURL == nil) {
-      NSLog(@"Error: FLX file not present in bundle; unable to start app.");
+    if (flutterAssetsURL == nil) {
+      NSLog(@"Error: flutterAssets directory not present in bundle; unable to start app.");
       [self release];
       return nil;
     }
@@ -120,7 +131,8 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
     NSURL* dartMainURL = URLForSwitch(shell::FlagForSwitch(shell::Switch::MainDartFile));
     NSURL* dartPackagesURL = URLForSwitch(shell::FlagForSwitch(shell::Switch::Packages));
 
-    return [self initWithFLXArchive:flxURL dartMain:dartMainURL packages:dartPackagesURL];
+    return
+        [self initWithFlutterAssets:flutterAssetsURL dartMain:dartMainURL packages:dartPackagesURL];
   }
 
   NSAssert(NO, @"Unreachable");
@@ -142,14 +154,14 @@ static NSURL* URLForSwitch(const fxl::StringView name) {
   }
 }
 
-- (NSString*)pathForFLXFromBundle:(NSBundle*)bundle {
-  NSString* flxName = [bundle objectForInfoDictionaryKey:@"FLTFlxName"];
-  if (flxName == nil) {
-    // Default to "app.flx"
-    flxName = @"app";
+- (NSString*)pathForFlutterAssetsFromBundle:(NSBundle*)bundle {
+  NSString* flutterAssetsName = [bundle objectForInfoDictionaryKey:@"FLTAssetsPath"];
+  if (flutterAssetsName == nil) {
+    // Default to "flutter_assets"
+    flutterAssetsName = @"flutter_assets";
   }
 
-  return [bundle pathForResource:flxName ofType:@"flx"];
+  return [bundle pathForResource:flutterAssetsName ofType:nil];
 }
 
 #pragma mark - Launching the project in a preconfigured engine.
@@ -257,10 +269,10 @@ static NSString* NSStringFromVMType(VMType type) {
     return;
   }
 
-  NSString* path = [self pathForFLXFromBundle:_precompiledDartBundle];
+  NSString* path = [self pathForFlutterAssetsFromBundle:_precompiledDartBundle];
   if (path.length == 0) {
     NSString* message = [NSString stringWithFormat:
-                                      @"Could not find the 'app.flx' archive in "
+                                      @"Could not find the 'flutter_assets' dir in "
                                       @"the precompiled Dart bundle with ID '%@'",
                                       _precompiledDartBundle.bundleIdentifier];
     result(NO, message);
@@ -293,9 +305,9 @@ static NSString* NSStringFromVMType(VMType type) {
       return result(NO, message);
     }
 
-    std::string bundle_path = _dartSource.flxArchive.absoluteURL.path.UTF8String;
+    std::string bundle_path = _dartSource.flutterAssets.absoluteURL.path.UTF8String;
 
-    if (_dartSource.archiveContainsScriptSnapshot) {
+    if (_dartSource.assetsDirContainsScriptSnapshot) {
       blink::Threads::UI()->PostTask([
         engine = engine->GetWeakPtr(), bundle_path,
         entrypoint = std::string([entrypoint UTF8String])
