@@ -140,6 +140,10 @@ Future<List<String>> assemble({
   ensureDirectoryExists(outputPath);
 
   printTrace('Encoding zip file to $outputPath');
+
+  // TODO(zarah): Remove the zipBuilder and write the files directly once FLX
+  // is deprecated.
+
   await zipBuilder.createZip(fs.file(outputPath), fs.directory(workingDirPath));
 
   printTrace('Built $outputPath.');
