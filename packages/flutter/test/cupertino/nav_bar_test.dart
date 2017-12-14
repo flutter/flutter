@@ -118,7 +118,9 @@ void main() {
 
   testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
+    final Key leadingKey = new GlobalKey();
     final Key middleKey = new GlobalKey();
+    final Key trailingKey = new GlobalKey();
     final Key titleKey = new GlobalKey();
     await tester.pumpWidget(
       new WidgetsApp(
@@ -141,8 +143,10 @@ void main() {
                     controller: scrollController,
                     slivers: <Widget>[
                       new CupertinoSliverNavigationBar(
-                        middle: new Text('Not-large Title', key: middleKey),
+                        leading: new Placeholder(key: leadingKey),
+                        middle: new Placeholder(key: middleKey),
                         largeTitle: new Text('Large Title', key: titleKey),
+                        trailing: new Placeholder(key: trailingKey),
                       ),
                       new SliverToBoxAdapter(
                         child: new Container(
@@ -159,8 +163,10 @@ void main() {
       ),
     );
 
-    // Top padding is applied to middle.
-    expect(tester.getTopLeft(find.byKey(middleKey)), const Offset(277.5, 13.5 + 10.0));
+    // Media padding applied to leading (T,L), middle (T), trailing (T, R).
+    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(16.0 + 20.0, 10.0));
+    expect(tester.getRect(find.byKey(middleKey)).top, 10.0);
+    expect(tester.getTopRight(find.byKey(trailingKey)), const Offset(800.0 - 16.0 - 40.0, 10.0));
 
     // Top and left padding is applied to large title.
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 58.0 + 10.0));
