@@ -82,7 +82,7 @@ File _getSkiaResource(String fileName) {
   // This is fragile and should be changed once the Platform.script issue is
   // resolved.
   String assetPath =
-    path.join('third_party', 'skia', 'resources', fileName);
+    path.join('third_party', 'skia', 'resources', 'images', fileName);
   return new File(assetPath);
 }
 
