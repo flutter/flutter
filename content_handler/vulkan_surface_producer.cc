@@ -121,18 +121,16 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
         std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>
         surfaces) {
   TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
-  std::vector<GrBackendSemaphore> semaphores;
-  semaphores.reserve(surfaces.size());
-  for (auto& surface : surfaces) {
-    auto vk_surface = static_cast<VulkanSurface*>(surface.get());
-    semaphores.push_back(vk_surface->GetAcquireSemaphore());
-  }
 
   // Do a single flush for all canvases derived from the context.
   {
     TRACE_EVENT0("flutter", "GrContext::flushAndSignalSemaphores");
-    context_->flushAndSignalSemaphores(semaphores.size(), semaphores.data());
+    context_->flush();
   }
+
+  if (!TransitionSurfacesToExternal(surfaces))
+    FXL_LOG(ERROR) << "TransitionSurfacesToExternal failed";
+
   // Submit surface
   for (auto& surface : surfaces) {
     SubmitSurface(std::move(surface));
@@ -140,6 +138,57 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
 
   // Buffer management.
   surface_pool_->AgeAndCollectOldBuffers();
+}
+
+bool VulkanSurfaceProducer::TransitionSurfacesToExternal(
+    const std::vector<
+        std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>&
+        surfaces) {
+  for (auto& surface : surfaces) {
+    auto vk_surface = static_cast<VulkanSurface*>(surface.get());
+
+    vulkan::VulkanCommandBuffer* command_buffer =
+        vk_surface->GetCommandBuffer(logical_device_->GetCommandPool());
+    if (!command_buffer->Begin())
+      return false;
+
+    GrVkImageInfo* imageInfo;
+    vk_surface->GetSkiaSurface()->getRenderTargetHandle(
+        reinterpret_cast<GrBackendObject*>(&imageInfo),
+        SkSurface::kFlushRead_BackendHandleAccess);
+
+    VkImageMemoryBarrier image_barrier = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,
+        .pNext = nullptr,
+        .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+        .dstAccessMask = 0,
+        .oldLayout = imageInfo->fImageLayout,
+        .newLayout = VK_IMAGE_LAYOUT_GENERAL,
+        .srcQueueFamilyIndex = 0,
+        .dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR,
+        .image = vk_surface->GetVkImage(),
+        .subresourceRange = {VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1}};
+
+    if (!command_buffer->InsertPipelineBarrier(
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+            VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+            0,           // dependencyFlags
+            0, nullptr,  // memory barriers
+            0, nullptr,  // buffer barriers
+            1, &image_barrier))
+      return false;
+
+    imageInfo->updateImageLayout(image_barrier.newLayout);
+
+    if (!command_buffer->End())
+      return false;
+
+    if (!logical_device_->QueueSubmit(
+            {}, {}, {vk_surface->GetAcquireVkSemaphore()},
+            {command_buffer->Handle()}, vk_surface->GetCommandBufferFence()))
+      return false;
+  }
+  return true;
 }
 
 std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>

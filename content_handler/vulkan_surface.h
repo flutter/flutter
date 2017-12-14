@@ -6,6 +6,7 @@
 
 #include <memory>
 #include "flutter/flow/scene_update_context.h"
+#include "flutter/vulkan/vulkan_command_buffer.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
 #include "flutter/vulkan/vulkan_provider.h"
@@ -50,11 +51,23 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   // |flow::SceneUpdateContext::SurfaceProducerSurface|
   sk_sp<SkSurface> GetSkiaSurface() const override;
 
-  // This transfers ownership of the GrBackendSemaphore but not the underlying
-  // VkSemaphore (i.e. it is ok to let the returned GrBackendSemaphore go out of
-  // scope but it is not ok to call VkDestroySemaphore on the underlying
-  // VkSemaphore)
-  GrBackendSemaphore GetAcquireSemaphore() const;
+  const vulkan::VulkanHandle<VkImage>& GetVkImage() { return vk_image_; }
+
+  const vulkan::VulkanHandle<VkSemaphore>& GetAcquireVkSemaphore() {
+    return acquire_semaphore_;
+  }
+
+  vulkan::VulkanCommandBuffer* GetCommandBuffer(
+      const vulkan::VulkanHandle<VkCommandPool>& pool) {
+    if (!command_buffer_)
+      command_buffer_ = std::make_unique<vulkan::VulkanCommandBuffer>(
+          vulkan_provider_.vk(), vulkan_provider_.vk_device(), pool);
+    return command_buffer_.get();
+  }
+
+  const vulkan::VulkanHandle<VkFence>& GetCommandBufferFence() {
+    return command_buffer_fence_;
+  }
 
  private:
   vulkan::VulkanProvider& vulkan_provider_;
@@ -62,10 +75,12 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   scenic_lib::Session* session_;
   vulkan::VulkanHandle<VkImage> vk_image_;
   vulkan::VulkanHandle<VkDeviceMemory> vk_memory_;
+  vulkan::VulkanHandle<VkFence> command_buffer_fence_;
   sk_sp<SkSurface> sk_surface_;
   std::unique_ptr<scenic_lib::Image> session_image_;
   zx::event acquire_event_;
   vulkan::VulkanHandle<VkSemaphore> acquire_semaphore_;
+  std::unique_ptr<vulkan::VulkanCommandBuffer> command_buffer_;
   zx::event release_event_;
   fsl::MessageLoop::HandlerKey event_handler_key_ = 0;
   std::function<void(void)> pending_on_writes_committed_;

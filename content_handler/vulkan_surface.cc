@@ -70,12 +70,6 @@ SkISize VulkanSurface::GetSize() const {
   return SkISize::Make(sk_surface_->width(), sk_surface_->height());
 }
 
-GrBackendSemaphore VulkanSurface::GetAcquireSemaphore() const {
-  GrBackendSemaphore gr_semaphore;
-  gr_semaphore.initVulkan(acquire_semaphore_);
-  return gr_semaphore;
-}
-
 vulkan::VulkanHandle<VkSemaphore> VulkanSurface::SemaphoreFromEvent(
     const zx::event& event) const {
   VkResult result;
@@ -135,6 +129,8 @@ bool VulkanSurface::CreateFences() {
   if (zx::event::create(0, &release_event_) != ZX_OK) {
     return false;
   }
+
+  command_buffer_fence_ = vulkan_provider_.CreateFence();
 
   return true;
 }
@@ -374,6 +370,17 @@ void VulkanSurface::Reset() {
     FXL_DLOG(ERROR)
         << "Could not reset fences. The surface is no longer valid.";
   }
+
+  VkFence fence = command_buffer_fence_;
+
+  if (command_buffer_) {
+    VK_CALL_LOG_ERROR(vulkan_provider_.vk().WaitForFences(
+        vulkan_provider_.vk_device(), 1, &fence, VK_TRUE, UINT64_MAX));
+    command_buffer_.reset();
+  }
+
+  VK_CALL_LOG_ERROR(vulkan_provider_.vk().ResetFences(
+      vulkan_provider_.vk_device(), 1, &fence));
 
   // Need to make a new  acquire semaphore every frame or else validation layers
   // get confused about why no one is waiting on it in this VkInstance

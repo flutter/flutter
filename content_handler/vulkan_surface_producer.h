@@ -50,6 +50,11 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer,
     return logical_device_->GetHandle();
   }
 
+  bool TransitionSurfacesToExternal(
+      const std::vector<
+          std::unique_ptr<flow::SceneUpdateContext::SurfaceProducerSurface>>&
+          surfaces);
+
   // Note: the order here is very important. The proctable must be destroyed
   // last because it contains the function pointers for VkDestroyDevice and
   // VkDestroyInstance. The backend context owns the VkDevice and the
