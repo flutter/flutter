@@ -18,7 +18,7 @@ dependencies:
   intl: 0.15.2
   json_rpc_2: 2.0.4
   json_schema: 1.0.6
-  linter: 0.1.40
+  linter: 0.1.41
   meta: 1.1.1
   mustache: 1.0.0
   package_config: 1.0.3
