@@ -78,16 +78,6 @@ class Paragraph {
     }
   };
 
-  struct BidiRun {
-    BidiRun(size_t s, size_t e, TextDirection d, const TextStyle& st)
-        : start(s), end(e), direction(d), style(st) {}
-    size_t start, end;
-    TextDirection direction;
-    const TextStyle& style;
-
-    bool is_rtl() const { return direction == TextDirection::rtl; }
-  };
-
   // Minikin Layout doLayout() and LineBreaker addStyleRun() has an
   // O(N^2) (according to benchmarks) time complexity where N is the total
   // number of characters. However, this is not significant for reasonably sized
@@ -188,7 +178,6 @@ class Paragraph {
   // Starting data to layout.
   std::vector<uint16_t> text_;
   StyledRuns runs_;
-  std::vector<BidiRun> bidi_runs_;
   ParagraphStyle paragraph_style_;
   std::shared_ptr<FontCollection> font_collection_;
 
@@ -209,6 +198,17 @@ class Paragraph {
   std::vector<double> line_heights_;
   std::vector<double> line_baselines_;
   bool did_exceed_max_lines_;
+
+  struct BidiRun {
+    BidiRun(size_t s, size_t e, TextDirection d, const TextStyle& st)
+        : start(s), end(e), direction(d), style(st) {}
+
+    const size_t start, end;
+    const TextDirection direction;
+    const TextStyle& style;
+
+    bool is_rtl() const { return direction == TextDirection::rtl; }
+  };
 
   struct GlyphPosition {
     Range<size_t> code_units;
@@ -284,7 +284,7 @@ class Paragraph {
   bool ComputeLineBreaks();
 
   // Break the text into runs based on LTR/RTL text direction.
-  bool ComputeBidiRuns();
+  bool ComputeBidiRuns(std::vector<BidiRun>* result);
 
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.

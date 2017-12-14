@@ -257,9 +257,7 @@ bool Paragraph::ComputeLineBreaks() {
   return true;
 }
 
-bool Paragraph::ComputeBidiRuns() {
-  bidi_runs_.clear();
-
+bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
   auto ubidi_closer = [](UBiDi* b) { ubidi_close(b); };
   std::unique_ptr<UBiDi, decltype(ubidi_closer)> bidi(ubidi_open(),
                                                       ubidi_closer);
@@ -267,8 +265,8 @@ bool Paragraph::ComputeBidiRuns() {
     return false;
 
   UBiDiLevel paraLevel = (paragraph_style_.text_direction == TextDirection::rtl)
-                             ? UBIDI_DEFAULT_RTL
-                             : UBIDI_DEFAULT_LTR;
+                             ? UBIDI_RTL
+                             : UBIDI_LTR;
   UErrorCode status = U_ZERO_ERROR;
   ubidi_setPara(bidi.get(), reinterpret_cast<const UChar*>(text_.data()),
                 text_.size(), paraLevel, nullptr, &status);
@@ -326,8 +324,8 @@ bool Paragraph::ComputeBidiRuns() {
       styled_run_iter--;
       const StyledRuns::Run& styled_run = styled_run_iter->second;
       size_t chunk_end = std::min(bidi_run_end, styled_run.end);
-      bidi_runs_.emplace_back(chunk_start, chunk_end, text_direction,
-                              styled_run.style);
+      result->emplace_back(chunk_start, chunk_end, text_direction,
+                           styled_run.style);
       chunk_start = chunk_end;
     }
   }
@@ -344,10 +342,12 @@ void Paragraph::Layout(double width, bool force) {
 
   width_ = width;
 
-  if (!ComputeLineBreaks()) {
+  if (!ComputeLineBreaks())
     return;
-  }
-  ComputeBidiRuns();
+
+  std::vector<BidiRun> bidi_runs;
+  if (!ComputeBidiRuns(&bidi_runs))
+    return;
 
   SkPaint paint;
   paint.setAntiAlias(true);
@@ -389,7 +389,7 @@ void Paragraph::Layout(double width, bool force) {
 
     // Find the runs comprising this line.
     std::vector<BidiRun> line_runs;
-    for (const BidiRun& bidi_run : bidi_runs_) {
+    for (const BidiRun& bidi_run : bidi_runs) {
       if (bidi_run.start < line_range.end && bidi_run.end > line_range.start) {
         line_runs.emplace_back(std::max(bidi_run.start, line_range.start),
                                std::min(bidi_run.end, line_range.end),
