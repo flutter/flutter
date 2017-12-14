@@ -281,6 +281,7 @@ tasks:
       Measures the startup time of the Complex Layout sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >
