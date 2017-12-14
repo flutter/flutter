@@ -152,6 +152,8 @@ class AssetImage extends AssetBundleImageProvider {
   /// documentation for the [AssetImage] class itself for details.
   final String package;
 
+
+
   // We assume the main asset is designed for a device pixel ratio of 1.0
   static const double _naturalResolution = 1.0;
 
