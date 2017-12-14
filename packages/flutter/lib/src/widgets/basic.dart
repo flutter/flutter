@@ -14,6 +14,7 @@ import 'framework.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,
+  FlutterErrorDetails,
   Listenable,
   TargetPlatform,
   ValueNotifier;
