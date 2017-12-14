@@ -11,11 +11,10 @@ import 'package:args/args.dart';
 // that would replace api used below. This api was made private in
 // an effort to discourage further use.
 // ignore_for_file: implementation_imports
-import 'package:front_end/src/api_prototype/compilation_message.dart';
-
 import 'package:front_end/src/api_prototype/byte_store.dart';
 import 'package:front_end/src/api_prototype/compiler_options.dart';
 import 'package:front_end/src/api_prototype/incremental_kernel_generator.dart';
+
 import 'package:kernel/ast.dart';
 import 'package:kernel/binary/ast_to_binary.dart';
 import 'package:kernel/binary/limited_ast_to_binary.dart';
@@ -41,19 +40,19 @@ ArgParser _argParser = new ArgParser(allowTrailingOptions: true)
       help: 'Run compiler in AOT mode (enables whole-program transformations)',
       defaultsTo: false)
   ..addFlag('link-platform',
-      help: 'When in batch mode, link platform kernel file into result kernel file.'
+      help:
+          'When in batch mode, link platform kernel file into result kernel file.'
           ' Intended use is to satisfy different loading strategies implemented'
           ' by gen_snapshot(which needs platform embedded) vs'
           ' Flutter engine(which does not)',
       defaultsTo: true);
 
-
 String _usage = '''
 Usage: server [options] [input.dart]
 
-If input dart source code is provided on the command line, then the server 
+If input dart source code is provided on the command line, then the server
 compiles it, generates dill file and exits.
-If no input dart source is provided on the command line, server waits for 
+If no input dart source is provided on the command line, server waits for
 instructions from stdin.
 
 Instructions:
@@ -84,7 +83,9 @@ abstract class CompilerInterface {
   /// `options`. When `generator` parameter is omitted, new instance of
   /// `IncrementalKernelGenerator` is created by this method. Main use for this
   /// parameter is for mocking in tests.
-  Future<Null> compile(String filename, ArgResults options, {
+  Future<Null> compile(
+    String filename,
+    ArgResults options, {
     IncrementalKernelGenerator generator,
   });
 
@@ -112,14 +113,13 @@ abstract class CompilerInterface {
 class BinaryPrinterFactory {
   /// Creates new [BinaryPrinter] to write to [targetSink].
   BinaryPrinter newBinaryPrinter(IOSink targetSink) {
-    return new LimitedBinaryPrinter(
-      targetSink,
-      (_) => true /* predicate */,
-      false /* excludeUriToSource */);  }
+    return new LimitedBinaryPrinter(targetSink, (_) => true /* predicate */,
+        false /* excludeUriToSource */);
+  }
 }
 
 class _FrontendCompiler implements CompilerInterface {
-  _FrontendCompiler(this._outputStream, { this.printerFactory }) {
+  _FrontendCompiler(this._outputStream, {this.printerFactory}) {
     _outputStream ??= stdout;
     printerFactory ??= new BinaryPrinterFactory();
   }
@@ -132,7 +132,9 @@ class _FrontendCompiler implements CompilerInterface {
   String _kernelBinaryFilename;
 
   @override
-  Future<Null> compile(String filename, ArgResults options, {
+  Future<Null> compile(
+    String filename,
+    ArgResults options, {
     IncrementalKernelGenerator generator,
   }) async {
     _filename = filename;
@@ -148,29 +150,17 @@ class _FrontendCompiler implements CompilerInterface {
       ..sdkRoot = sdkRoot
       ..strongMode = false
       ..target = new FlutterTarget(new TargetFlags())
-      ..onError = (CompilationMessage message) {
-        final StringBuffer outputMessage = new StringBuffer()
-          ..write(_severityName(message.severity))
-          ..write(': ');
-        if (message.span != null) {
-          outputMessage.writeln(message.span.message(message.message));
-        } else {
-          outputMessage.writeln(message.message);
-        }
-        if (message.tip != null) {
-          outputMessage.writeln(message.tip);
-        }
-        _outputStream.write(outputMessage);
-      };
+      ..reportMessages = true;
+
     Program program;
     if (options['incremental']) {
       _generator = generator != null
-        ? generator
-        : await IncrementalKernelGenerator.newInstance(
-          compilerOptions, Uri.base.resolve(_filename),
-          useMinimalGenerator: true
-        );
-      final DeltaProgram deltaProgram = await _generator.computeDelta();
+          ? generator
+          : await IncrementalKernelGenerator.newInstance(
+              compilerOptions, Uri.base.resolve(_filename),
+              useMinimalGenerator: true);
+      final DeltaProgram deltaProgram =
+          await _runWithPrintRedirection(() => _generator.computeDelta());
       program = deltaProgram.newProgram;
     } else {
       if (options['link-platform']) {
@@ -180,9 +170,9 @@ class _FrontendCompiler implements CompilerInterface {
           sdkRoot.resolve('platform.dill')
         ];
       }
-      program = await compileToKernel(
+      program = await _runWithPrintRedirection(() => compileToKernel(
           Uri.base.resolve(_filename), compilerOptions,
-          aot: options['aot']);
+          aot: options['aot']));
     }
     if (program != null) {
       final IOSink sink = new File(_kernelBinaryFilename).openWrite();
@@ -231,24 +221,19 @@ class _FrontendCompiler implements CompilerInterface {
   Uri _ensureFolderPath(String path) {
     // This is a URI, not a file path, so the forward slash is correct even
     // on Windows.
-    if (!path.endsWith('/'))
+    if (!path.endsWith('/')) {
       path = '$path/';
+    }
     return Uri.base.resolve(path);
   }
 
-  static String _severityName(Severity severity) {
-    switch (severity) {
-      case Severity.error:
-        return "Error";
-      case Severity.internalProblem:
-        return "Internal problem";
-      case Severity.nit:
-        return "Nit";
-      case Severity.warning:
-        return "Warning";
-      default:
-        return severity.toString();
-    }
+  /// Runs the given function [f] in a Zone that redirects all prints into
+  /// [_outputStream].
+  Future<T> _runWithPrintRedirection<T>(Future<T> f()) {
+    return runZoned(() => new Future<T>(f),
+        zoneSpecification: new ZoneSpecification(
+            print: (Zone self, ZoneDelegate parent, Zone zone, String line) =>
+                _outputStream.writeln(line)));
   }
 }
 
@@ -256,17 +241,29 @@ class _FrontendCompiler implements CompilerInterface {
 /// processes user input.
 /// `compiler` is an optional parameter so it can be replaced with mocked
 /// version for testing.
-Future<int> starter(List<String> args, {
+Future<int> starter(
+  List<String> args, {
   CompilerInterface compiler,
-  Stream<List<int>> input, StringSink output,
+  Stream<List<int>> input,
+  StringSink output,
   IncrementalKernelGenerator generator,
   BinaryPrinterFactory binaryPrinterFactory,
 }) async {
-  final ArgResults options = _argParser.parse(args);
-  if (options['train'])
-    return 0;
+  ArgResults options;
+  try {
+    options = _argParser.parse(args);
+  } catch (error) {
+    print('ERROR: $error\n');
+    print(_usage);
+    return 1;
+  }
 
-  compiler ??= new _FrontendCompiler(output, printerFactory: binaryPrinterFactory);
+  if (options['train']) {
+    return 0;
+  }
+
+  compiler ??=
+      new _FrontendCompiler(output, printerFactory: binaryPrinterFactory);
   input ??= stdin;
 
   // Has to be a directory, that won't have any of the compiled application
@@ -284,27 +281,29 @@ Future<int> starter(List<String> args, {
   _State state = _State.READY_FOR_INSTRUCTION;
   String boundaryKey;
   input
-    .transform(UTF8.decoder)
-    .transform(new LineSplitter())
-    .listen((String string) async {
+      .transform(UTF8.decoder)
+      .transform(new LineSplitter())
+      .listen((String string) async {
     switch (state) {
       case _State.READY_FOR_INSTRUCTION:
         const String COMPILE_INSTRUCTION_SPACE = 'compile ';
         const String RECOMPILE_INSTRUCTION_SPACE = 'recompile ';
         if (string.startsWith(COMPILE_INSTRUCTION_SPACE)) {
-          final String filename = string.substring(COMPILE_INSTRUCTION_SPACE.length);
+          final String filename =
+              string.substring(COMPILE_INSTRUCTION_SPACE.length);
           await compiler.compile(filename, options, generator: generator);
         } else if (string.startsWith(RECOMPILE_INSTRUCTION_SPACE)) {
           boundaryKey = string.substring(RECOMPILE_INSTRUCTION_SPACE.length);
           state = _State.RECOMPILE_LIST;
-        } else if (string == 'accept')
+        } else if (string == 'accept') {
           compiler.acceptLastDelta();
-        else if (string == 'reject')
+        } else if (string == 'reject') {
           compiler.rejectLastDelta();
-        else if (string == 'reset')
+        } else if (string == 'reset') {
           compiler.resetIncrementalCompiler();
-        else if (string == 'quit')
+        } else if (string == 'quit') {
           exit(0);
+        }
         break;
       case _State.RECOMPILE_LIST:
         if (string == boundaryKey) {
