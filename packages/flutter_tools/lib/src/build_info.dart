@@ -202,7 +202,7 @@ String getAotBuildDirectory() {
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flutter_assets');
+  return fs.path.join(getBuildDirectory(), 'flx');
 }
 
 /// Returns the iOS build output directory.
