@@ -16,7 +16,7 @@ class VulkanSurfacePool {
   static const size_t kMaxSurfacesOfSameSize = 3;
   static const size_t kMaxSurfaceAge = 3;
 
-  VulkanSurfacePool(vulkan::VulkanProcTable& vk,
+  VulkanSurfacePool(vulkan::VulkanProvider& vulkan_provider,
                     sk_sp<GrContext> context,
                     sk_sp<GrVkBackendContext> backend_context,
                     scenic_lib::Session* mozart_session);
@@ -50,7 +50,7 @@ class VulkanSurfacePool {
     }
   };
 
-  vulkan::VulkanProcTable& vk_;
+  vulkan::VulkanProvider& vulkan_provider_;
   sk_sp<GrContext> context_;
   sk_sp<GrVkBackendContext> backend_context_;
   scenic_lib::Session* mozart_session_;

@@ -11,6 +11,7 @@
 #include "flutter/vulkan/vulkan_application.h"
 #include "flutter/vulkan/vulkan_device.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
+#include "flutter/vulkan/vulkan_provider.h"
 #include "lib/fsl/tasks/message_loop.h"
 #include "lib/fxl/macros.h"
 #include "lib/ui/scenic/client/resources.h"
@@ -19,7 +20,8 @@
 
 namespace flutter_runner {
 
-class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
+class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer,
+                              public vulkan::VulkanProvider {
  public:
   VulkanSurfaceProducer(scenic_lib::Session* mozart_session);
 
@@ -42,6 +44,12 @@ class VulkanSurfaceProducer : public flow::SceneUpdateContext::SurfaceProducer {
           surfaces);
 
  private:
+  // VulkanProvider
+  const vulkan::VulkanProcTable& vk() override { return *vk_.get(); }
+  const vulkan::VulkanHandle<VkDevice>& vk_device() override {
+    return logical_device_->GetHandle();
+  }
+
   // Note: the order here is very important. The proctable must be destroyed
   // last because it contains the function pointers for VkDestroyDevice and
   // VkDestroyInstance. The backend context owns the VkDevice and the

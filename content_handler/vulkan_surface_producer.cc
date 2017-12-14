@@ -111,7 +111,7 @@ bool VulkanSurfaceProducer::Initialize(scenic_lib::Session* mozart_session) {
                                    vulkan::kGrCacheMaxByteSize);
 
   surface_pool_ = std::make_unique<VulkanSurfacePool>(
-      *vk_, context_, backend_context_, mozart_session);
+      *this, context_, backend_context_, mozart_session);
 
   return true;
 }

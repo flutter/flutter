@@ -8,6 +8,7 @@
 #include "flutter/flow/scene_update_context.h"
 #include "flutter/vulkan/vulkan_handle.h"
 #include "flutter/vulkan/vulkan_proc_table.h"
+#include "flutter/vulkan/vulkan_provider.h"
 #include "lib/fsl/tasks/message_loop.h"
 #include "lib/fsl/tasks/message_loop_handler.h"
 #include "lib/fxl/macros.h"
@@ -22,7 +23,7 @@ namespace flutter_runner {
 class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
                       public fsl::MessageLoopHandler {
  public:
-  VulkanSurface(vulkan::VulkanProcTable& p_vk,
+  VulkanSurface(vulkan::VulkanProvider& vulkan_provider,
                 sk_sp<GrContext> context,
                 sk_sp<GrVkBackendContext> backend_context,
                 scenic_lib::Session* session,
@@ -56,7 +57,7 @@ class VulkanSurface : public flow::SceneUpdateContext::SurfaceProducerSurface,
   GrBackendSemaphore GetAcquireSemaphore() const;
 
  private:
-  vulkan::VulkanProcTable& vk_;
+  vulkan::VulkanProvider& vulkan_provider_;
   sk_sp<GrVkBackendContext> backend_context_;
   scenic_lib::Session* session_;
   vulkan::VulkanHandle<VkImage> vk_image_;
