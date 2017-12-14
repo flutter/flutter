@@ -596,11 +596,11 @@ void main() {
     final PageController controller = new PageController();
     try {
       controller.page;
-      fail('Accessing page before attaching should fail');
+      fail('Accessing page before attaching should fail.');
     } on AssertionError catch (e) {
       expect(
         e.message,
-        'PageController.page cannot be accessed before a PageView is built with it',
+        'PageController.page cannot be accessed before a PageView is built with it.',
       );
     }
     final PageStorageBucket bucket = new PageStorageBucket();
@@ -631,11 +631,11 @@ void main() {
     );
     try {
       controller.page;
-      fail('Accessing page after detaching all PageViews should fail');
+      fail('Accessing page after detaching all PageViews should fail.');
     } on AssertionError catch (e) {
       expect(
         e.message,
-        'PageController.page cannot be accessed before a PageView is built with it',
+        'PageController.page cannot be accessed before a PageView is built with it.',
       );
     }
     await tester.pumpWidget(new Directionality(
