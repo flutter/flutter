@@ -49,11 +49,16 @@ void main() {
     final Key trailingKey = new GlobalKey();
     bool hasSubtitle;
 
+    const double leftPadding = 10.0;
+    const double rightPadding = 20.0;
     Widget buildFrame({ bool dense: false, bool isTwoLine: false, bool isThreeLine: false, double textScaleFactor: 1.0 }) {
       hasSubtitle = isTwoLine || isThreeLine;
       return new MaterialApp(
         home: new MediaQuery(
-          data: new MediaQueryData(textScaleFactor: textScaleFactor),
+          data: new MediaQueryData(
+            padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
+            textScaleFactor: textScaleFactor,
+          ),
           child: new Material(
             child: new Center(
               child: new ListTile(
@@ -89,13 +94,14 @@ void main() {
 
 
     // 16.0 padding to the left and right of the leading and trailing widgets
+    // plus the media padding.
     void testHorizontalGeometry() {
-      expect(leftKey(leadingKey), 16.0);
-      expect(left('title'), 72.0);
+      expect(leftKey(leadingKey), 16.0 + leftPadding);
+      expect(left('title'), 72.0 + leftPadding);
       if (hasSubtitle)
-        expect(left('subtitle'), 72.0);
+        expect(left('subtitle'), 72.0 + leftPadding);
       expect(left('title'), rightKey(leadingKey) + 32.0);
-      expect(rightKey(trailingKey), 800.0 - 16.0);
+      expect(rightKey(trailingKey), 800.0 - 16.0 - rightPadding);
       expect(widthKey(trailingKey), 24.0);
     }
 
@@ -169,14 +175,21 @@ void main() {
 
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.rtl,
-      child: const Material(
-        child: const Center(
-          child: const ListTile(
-            leading: const Text('leading'),
-            title: const Text('title'),
-            trailing: const Text('trailing'),
+    const double leftPadding = 10.0;
+    const double rightPadding = 20.0;
+    await tester.pumpWidget(const MediaQuery(
+      data: const MediaQueryData(
+        padding: const EdgeInsets.only(left: leftPadding, right: rightPadding),
+      ),
+      child: const Directionality(
+        textDirection: TextDirection.rtl,
+        child: const Material(
+          child: const Center(
+            child: const ListTile(
+              leading: const Text('leading'),
+              title: const Text('title'),
+              trailing: const Text('trailing'),
+            ),
           ),
         ),
       ),
@@ -186,10 +199,10 @@ void main() {
     double right(String text) => tester.getTopRight(find.text(text)).dx;
 
     void testHorizontalGeometry() {
-      expect(right('leading'), 800.0 - 16.0);
-      expect(right('title'), 800.0 - 72.0);
+      expect(right('leading'), 800.0 - 16.0 - rightPadding);
+      expect(right('title'), 800.0 - 72.0 - rightPadding);
       expect(left('leading') - right('title'), 16.0);
-      expect(left('trailing'), 16.0);
+      expect(left('trailing'), 16.0 + leftPadding);
     }
 
     testHorizontalGeometry();
