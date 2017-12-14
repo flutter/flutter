@@ -47,7 +47,7 @@ void main() {
 
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[
@@ -60,6 +60,7 @@ void main() {
           'flutter_project.iml',
         ],
       );
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift project', () async {
@@ -82,7 +83,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('package project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=package'],
         <String>[
@@ -106,10 +107,11 @@ void main() {
           'test/widget_test.dart',
         ],
       );
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=plugin'],
         <String>[
@@ -126,6 +128,7 @@ void main() {
         ],
         plugin: true,
       );
+      return _runFlutterTest(projectDir.childDirectory('example'));
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift plugin project', () async {
@@ -212,19 +215,7 @@ void main() {
       // TODO(pq): enable when sky_shell is available
       if (!io.Platform.isWindows) {
         // Verify that the sample widget test runs cleanly.
-        final List<String> args = <String>[]
-          ..addAll(dartVmFlags)
-          ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
-          ..add('test')
-          ..add('--no-color')
-          ..add(fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
-
-        final ProcessResult result = await Process.run(
-          fs.path.join(dartSdkPath, 'bin', 'dart'),
-          args,
-          workingDirectory: projectDir.path,
-        );
-        expect(result.exitCode, 0);
+        await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
       }
 
       // Generated Xcode settings
@@ -387,6 +378,32 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
     '$dartSdkPath/bin/dart',
     args,
     workingDirectory: workingDir,
+  );
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
+  expect(exec.exitCode, 0);
+}
+
+Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
+
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..add('test')
+    ..add('--no-color');
+  if (target != null)
+    args.add(target);
+
+  final ProcessResult exec = await Process.run(
+    '$dartSdkPath/bin/dart',
+    args,
+    workingDirectory: workingDir.path,
   );
   if (exec.exitCode != 0) {
     print(exec.stdout);
