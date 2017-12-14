@@ -945,18 +945,29 @@ class _AnimatedOpacityState extends AnimatedWidgetBaseState<AnimatedOpacity> {
 /// default text style (the text style to apply to descendant [Text] widgets
 /// without explicit style) over a given duration whenever the given style
 /// changes.
+///
+/// The [textAlign], [softWrap], [textOverflow], and [maxLines] properties are
+/// not animated and take effect immediately when changed.
 class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates the default text style implicitly.
   ///
-  /// The [child], [style], [curve], and [duration] arguments must not be null.
+  /// The [child], [style], [softWrap], [overflow], [curve], and [duration]
+  /// arguments must not be null.
   const AnimatedDefaultTextStyle({
     Key key,
     @required this.child,
     @required this.style,
+    this.textAlign,
+    this.softWrap: true,
+    this.overflow: TextOverflow.clip,
+    this.maxLines,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(style != null),
        assert(child != null),
+       assert(softWrap != null),
+       assert(overflow != null),
+       assert(maxLines == null || maxLines > 0),
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
@@ -965,7 +976,33 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// The target text style.
   ///
   /// The text style must not be null.
+  ///
+  /// When this property is changed, the style will be animated over [duration] time.
   final TextStyle style;
+
+  /// How the text should be aligned horizontally.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextAlign textAlign;
+
+  /// Whether the text should break at soft line breaks.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.softWrap] for more details.
+  final bool softWrap;
+
+  /// How visual overflow should be handled.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  final TextOverflow overflow;
+
+  /// An optional maximum number of lines for the text to span, wrapping if necessary.
+  ///
+  /// This property takes effect immediately when changed, it is not animated.
+  ///
+  /// See [DefaultTextStyle.maxLines] for more details.
+  final int maxLines;
 
   @override
   _AnimatedDefaultTextStyleState createState() => new _AnimatedDefaultTextStyleState();
@@ -974,6 +1011,10 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     style?.debugFillProperties(description);
+    description.add(new EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
+    description.add(new FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
+    description.add(new EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
+    description.add(new IntProperty('maxLines', maxLines, defaultValue: null));
   }
 }
 
@@ -989,7 +1030,11 @@ class _AnimatedDefaultTextStyleState extends AnimatedWidgetBaseState<AnimatedDef
   Widget build(BuildContext context) {
     return new DefaultTextStyle(
       style: _style.evaluate(animation),
-      child: widget.child
+      textAlign: widget.textAlign,
+      softWrap: widget.softWrap,
+      overflow: widget.overflow,
+      maxLines: widget.maxLines,
+      child: widget.child,
     );
   }
 }
