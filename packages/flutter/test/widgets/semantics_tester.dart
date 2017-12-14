@@ -46,7 +46,8 @@ class TestSemantics {
     this.transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags != null),
+  }) : assert(flags is int || flags is List<SemanticsFlags>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
        assert(increasedValue != null),
@@ -70,7 +71,8 @@ class TestSemantics {
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
   }) : id = 0,
-       assert(flags != null),
+       assert(flags is int || flags is List<SemanticsFlags>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(increasedValue != null),
        assert(decreasedValue != null),
@@ -103,7 +105,8 @@ class TestSemantics {
     Matrix4 transform,
     this.children: const <TestSemantics>[],
     Iterable<SemanticsTag> tags,
-  }) : assert(flags != null),
+  }) : assert(flags is int || flags is List<SemanticsFlags>),
+       assert(actions is int || actions is List<SemanticsAction>),
        assert(label != null),
        assert(value != null),
        assert(increasedValue != null),
@@ -119,11 +122,20 @@ class TestSemantics {
   /// they are created.
   final int id;
 
-  /// A bit field of [SemanticsFlags] that apply to this node.
-  final int flags;
+  /// The [SemanticsFlags] set on this node.
+  ///
+  /// There are two ways to specify this property: as an `int` that encodes the
+  /// flags as a bit field, or as a `List<SemanticsFlags>` that are _on_.
+  final dynamic flags;
 
-  /// A bit field of [SemanticsActions] that apply to this node.
-  final int actions;
+  /// The [SemanticsAction]s set on this node.
+  ///
+  /// There are two ways to specify this property: as an `int` that encodes the
+  /// actions as a bit field, or as a `List<SemanticsAction>`.
+  ///
+  /// The tester does not check the function corresponding to the action, but
+  /// only its existence.
+  final dynamic actions;
 
   /// A textual description of this node.
   final String label;
@@ -204,10 +216,19 @@ class TestSemantics {
       return fail('could not find node with id $id.');
     if (!ignoreId && id != node.id)
       return fail('expected node id $id but found id ${node.id}.');
-    if (flags != nodeData.flags)
+
+    final int flagsBitmask = flags is int
+      ? flags
+      : flags.fold<int>(0, (int bitmask, SemanticsFlags flag) => bitmask | flag.index);
+    if (flagsBitmask != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
-    if (actions != nodeData.actions)
+
+    final int actionsBitmask = actions is int
+        ? actions
+        : actions.fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
+    if (actionsBitmask != nodeData.actions)
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
+
     if (label != nodeData.label)
       return fail('expected node id $id to have label "$label" but found label "${nodeData.label}".');
     if (value != nodeData.value)
@@ -393,6 +414,18 @@ class SemanticsTester {
     return _generateSemanticsTestForNode(node, 0);
   }
 
+  String _flagsToSemanticsFlagsExpression(int bitmap) {
+    return SemanticsFlags.values.values
+        .where((SemanticsFlags flag) => (flag.index & bitmap) != 0)
+        .join(', ');
+  }
+
+  String _actionsToSemanticsActionExpression(int bitmap) {
+    return SemanticsAction.values.values
+        .where((SemanticsAction action) => (action.index & bitmap) != 0)
+        .join(', ');
+  }
+
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
   String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
@@ -401,9 +434,9 @@ class SemanticsTester {
     final SemanticsData nodeData = node.getSemanticsData();
     buf.writeln('new TestSemantics(');
     if (nodeData.flags != 0)
-      buf.writeln('  flags: ${nodeData.flags},');
+      buf.writeln('  flags: <SemanticsFlags>[${_flagsToSemanticsFlagsExpression(nodeData.flags)}],');
     if (nodeData.actions != 0)
-      buf.writeln('  actions: ${nodeData.actions},');
+      buf.writeln('  actions: <SemanticsAction>[${_actionsToSemanticsActionExpression(nodeData.actions)}],');
     if (node.label != null && node.label.isNotEmpty)
       buf.writeln('  label: r\'${node.label}\',');
     if (node.value != null && node.value.isNotEmpty)
