@@ -91,9 +91,15 @@ class MediaQueryData {
   /// phone sensor housings).
   ///
   /// If you consumed this padding (e.g. by building a widget that envelops or
-  /// accounts for this padding in its layout), you should remove this padding
+  /// accounts for this padding in its layout in such a way that children are
+  /// no longer exposed to this padding), you should remove this padding
   /// for subsequent descendents in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
+  ///
+  /// See also:
+  ///
+  ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
+  ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
 
   /// Whether to use 24-hour format when formatting time.
