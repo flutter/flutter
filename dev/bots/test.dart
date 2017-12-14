@@ -87,6 +87,7 @@ Future<Null> _verifyInternationalizations() async {
 }
 
 Future<Null> _analyzeRepo() async {
+  await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImports(flutterRoot);
   await _verifyInternationalizations();
 
@@ -476,4 +477,64 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
 void _printProgress(String action, String workingDir, String command) {
   const String arrow = '⏩';
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
+}
+
+Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+  final Directory flutterRootDir = new Directory(flutterRoot);
+
+  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
+
+  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
+    if (entity is! File)
+      continue;
+    if (_isGeneratedPluginRegistrant(entity)) {
+      final String package = _getPackageFor(entity, flutterRootDir);
+      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+      registrants.add(entity);
+    }
+  }
+
+  final Set<String> outOfDate = new Set<String>();
+
+  for (String package in packageToRegistrants.keys) {
+    final Map<File, String> fileToContent = new Map<File, String>.fromIterable(packageToRegistrants[package],
+      key: (File f) => f,
+      value: (File f) => f.readAsStringSync(),
+    );
+    await _runCommand(flutter, <String>['inject-plugins'],
+      workingDirectory: package,
+      printOutput: false,
+    );
+    for (File registrant in fileToContent.keys) {
+      if (registrant.readAsStringSync() != fileToContent[registrant]) {
+        outOfDate.add(registrant.path);
+      }
+    }
+  }
+
+  if (outOfDate.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
+    for (String registrant in outOfDate) {
+      print(' - $registrant');
+    }
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+}
+
+String _getPackageFor(File entity, Directory flutterRootDir) {
+  for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
+    if (new File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
+      return dir.path;
+    }
+  }
+  throw new ArgumentError('$entity is not within a dart package.');
+}
+
+bool _isGeneratedPluginRegistrant(File file) {
+  final String filename = path.basename(file.path);
+  return filename == 'GeneratedPluginRegistrant.java' ||
+      filename == 'GeneratedPluginRegistrant.h' ||
+      filename == 'GeneratedPluginRegistrant.m';
 }
