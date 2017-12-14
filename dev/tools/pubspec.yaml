@@ -2,12 +2,12 @@ name: dev_tools
 description: Various repository development tools for flutter.
 
 dependencies:
-  archive: 1.0.32
+  archive: 1.0.33
   args: 0.13.7
   http: 0.11.3+14
   intl: 0.15.2
   meta: 1.1.1
-  path: 1.4.2
+  path: 1.5.1
 
   async: 1.13.3 # TRANSITIVE DEPENDENCY
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
@@ -16,6 +16,6 @@ dependencies:
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.9.0 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
