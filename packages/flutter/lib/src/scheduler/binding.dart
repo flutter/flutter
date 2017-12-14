@@ -674,7 +674,7 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
   void scheduleWarmUpFrame() {
-    if (_warmUpFrame && !(schedulerPhase == SchedulerPhase.idle))
+    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
       return;
 
     final bool hadScheduledFrame = _hasScheduledFrame;
