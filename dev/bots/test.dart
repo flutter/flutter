@@ -518,6 +518,7 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
     for (String registrant in outOfDate) {
       print(' - $registrant');
     }
+    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
     print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
     exit(1);
   }
