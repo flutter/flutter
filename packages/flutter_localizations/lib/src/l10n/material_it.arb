@@ -29,5 +29,6 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Seleziona ore",
-  "timePickerMinuteModeAnnouncement": "Seleziona minuti"
+  "timePickerMinuteModeAnnouncement": "Seleziona minuti",
+  "modalBarrierDismissLabel": "Ignora"
 }

@@ -32,5 +32,6 @@
   "anteMeridiemAbbreviation": "АМ",
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "ВЫБРАТЬ ЧАСЫ",
-  "timePickerMinuteModeAnnouncement": "ВЫБРАТЬ МИНУТЫ"
+  "timePickerMinuteModeAnnouncement": "ВЫБРАТЬ МИНУТЫ",
+  "modalBarrierDismissLabel": "Закрыть"
 }

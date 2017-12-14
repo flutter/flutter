@@ -18,7 +18,7 @@
   "selectedRowCountTitleOne": "1 Element ausgewählt",
   "selectedRowCountTitleOther": "$selectedRowCount Elemente ausgewählt",
   "cancelButtonLabel": "ABBRECHEN",
-  "closeButtonLabel": "SCHLIEẞEN",
+  "closeButtonLabel": "SCHLIESSEN",
   "continueButtonLabel": "WEITER",
   "copyButtonLabel": "KOPIEREN",
   "cutButtonLabel": "AUSSCHNEIDEN",
@@ -27,5 +27,6 @@
   "selectAllButtonLabel": "ALLE AUSWÄHLEN",
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
-  "postMeridiemAbbreviation": "NACHM."
+  "postMeridiemAbbreviation": "NACHM.",
+  "modalBarrierDismissLabel": "Schliessen"
 }

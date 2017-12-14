@@ -29,8 +29,10 @@ import 'typography.dart';
 //    you must add it to every other language (all the other *.arb files in that
 //    same directory), including a best guess as to the translation, e.g.
 //    obtained by optimistic use of Google Translate
-//    (https://translate.google.com/). There is a README file with further
-//    information in the lib/src/l10n/ directory.
+//    (https://translate.google.com/). After that you have to re-generate
+//    lib/src/l10n/localizaions.dart by running
+//    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
+//    file with further information in the lib/src/l10n/ directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -126,6 +128,13 @@ abstract class MaterialLocalizations {
   /// The text-to-speech announcement made when a time picker invoked using
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
+
+  /// Label read out by accessibility tools (TalkBack or VocieOver) for a modal
+  /// barrier to indicate that a tap dismisses the barrier.
+  ///
+  /// A modal barrier can for example be found behind a alert or popup to block
+  /// user interaction with elements behind it.
+  String get modalBarrierDismissLabel;
 
   /// The format used to lay out the time picker.
   ///
@@ -518,6 +527,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
 
   @override
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
+
+  @override
+  String get modalBarrierDismissLabel => 'Dismiss';
 
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {

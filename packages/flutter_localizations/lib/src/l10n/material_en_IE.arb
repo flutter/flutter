@@ -27,5 +27,6 @@
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "showMenuTooltip": "Show menu",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "modalBarrierDismissLabel": "Dismiss"
 }

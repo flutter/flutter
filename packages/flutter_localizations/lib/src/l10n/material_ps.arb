@@ -28,5 +28,6 @@
   "selectAllButtonLabel": "غوره کړئ",
   "viewLicensesButtonLabel": "لیدلس وګورئ",
   "timePickerHourModeAnnouncement": "وختونه وټاکئ",
-  "timePickerMinuteModeAnnouncement": "منې غوره کړئ"
+  "timePickerMinuteModeAnnouncement": "منې غوره کړئ",
+  "modalBarrierDismissLabel": "رد کړه"
 }

@@ -322,6 +322,9 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   String get timePickerMinuteModeAnnouncement => _nameToValue['timePickerMinuteModeAnnouncement'];
 
+  @override
+  String get modalBarrierDismissLabel => _nameToValue['modalBarrierDismissLabel'];
+
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
   ///

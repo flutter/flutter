@@ -29,5 +29,6 @@
   "anteMeridiemAbbreviation": "上午",
   "postMeridiemAbbreviation": "下午",
   "timePickerHourModeAnnouncement": "选择小时",
-  "timePickerMinuteModeAnnouncement": "选择分钟"
+  "timePickerMinuteModeAnnouncement": "选择分钟",
+  "modalBarrierDismissLabel": "关闭"
 }
