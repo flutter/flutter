@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'scrollbar.dart';
 import 'shadows.dart';
 import 'theme.dart';
@@ -283,6 +284,7 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
     this.elevation: 8,
     this.theme,
     @required this.style,
+    this.barrierLabel,
   }) : assert(style != null);
 
   final List<DropdownMenuItem<T>> items;
@@ -302,6 +304,9 @@ class _DropdownRoute<T> extends PopupRoute<_DropdownRouteResult<T>> {
 
   @override
   Color get barrierColor => null;
+
+  @override
+  final String barrierLabel;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -570,6 +575,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       elevation: widget.elevation,
       theme: Theme.of(context, shadowThemeOnly: true),
       style: _textStyle,
+      barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
     );
 
     Navigator.push(context, _dropdownRoute).then<Null>((_DropdownRouteResult<T> newValue) {

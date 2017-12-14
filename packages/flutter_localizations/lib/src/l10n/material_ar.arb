@@ -33,5 +33,6 @@
   "anteMeridiemAbbreviation": "ص",
   "postMeridiemAbbreviation": "م",
   "timePickerHourModeAnnouncement": "حدد ساعات",
-  "timePickerMinuteModeAnnouncement": "حدد دقائق"
+  "timePickerMinuteModeAnnouncement": "حدد دقائق",
+  "modalBarrierDismissLabel": "تجاهل"
 }

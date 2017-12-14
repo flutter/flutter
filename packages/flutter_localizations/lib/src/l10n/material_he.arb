@@ -31,5 +31,6 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "בחר שעות",
-  "timePickerMinuteModeAnnouncement": "בחר דקות"
+  "timePickerMinuteModeAnnouncement": "בחר דקות",
+  "modalBarrierDismissLabel": "סגירה"
 }

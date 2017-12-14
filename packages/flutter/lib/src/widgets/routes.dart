@@ -778,6 +778,25 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   Color get barrierColor;
 
+  /// The semantic label used for a dismissible barrier.
+  ///
+  /// If the barrier is dismissible, this label will be read out if
+  /// accessibility tools (like VoiceOver on iOS) focus on the barrier.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierDismissible], which controls the behavior of the barrier when
+  ///    tapped.
+  ///  * [ModalBarrier], the widget that implements this feature.
+  String get barrierLabel;
+
   /// Whether the route should remain in memory when it is inactive. If this is
   /// true, then the route is maintained, so that any futures it is holding from
   /// the next route will properly resolve when the next route pops. If this is
@@ -984,10 +1003,14 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       ));
       barrier = new AnimatedModalBarrier(
         color: color,
-        dismissible: barrierDismissible
+        dismissible: barrierDismissible,
+        semanticsLabel: barrierLabel,
       );
     } else {
-      barrier = new ModalBarrier(dismissible: barrierDismissible);
+      barrier = new ModalBarrier(
+        dismissible: barrierDismissible,
+        semanticsLabel: barrierLabel,
+      );
     }
     assert(animation.status != AnimationStatus.dismissed);
     return new IgnorePointer(
