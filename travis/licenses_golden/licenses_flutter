@@ -1220,6 +1220,7 @@ FILE: ../../../flutter/third_party/txt/src/txt/platform.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform.h
 FILE: ../../../flutter/third_party/txt/src/txt/platform_android.cc
 FILE: ../../../flutter/third_party/txt/src/txt/platform_mac.mm
+FILE: ../../../flutter/vulkan/skia_vulkan_header.h
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.cc
 FILE: ../../../flutter/vulkan/vulkan_native_surface_magma.h
 ----------------------------------------------------------------------------------------------------
