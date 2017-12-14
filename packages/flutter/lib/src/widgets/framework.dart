@@ -3456,6 +3456,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void performRebuild();
 }
 
+/// Signature for the constructor that is called when an error occurs while
+/// building a widget.
+///
+/// The argument provides information regarding the cause of the error.
+///
+/// See also:
+///
+///  * [ErrorWidget.builder], which can be set to override the default
+///    [ErrorWidget] builder.
+///  * [FlutterError.reportError], which is typically called with the same
+///    [FlutterErrorDetails] object immediately prior to [ErrorWidget.builder]
+///    being called.
+typedef Widget ErrorWidgetBuilder(FlutterErrorDetails details);
+
 /// A widget that renders an exception's message.
 ///
 /// This widget is used when a build method fails, to help with determining
@@ -3466,6 +3480,32 @@ class ErrorWidget extends LeafRenderObjectWidget {
   /// Creates a widget that displays the given error message.
   ErrorWidget(Object exception) : message = _stringify(exception),
       super(key: new UniqueKey());
+
+  /// The configurable factory for [ErrorWidget].
+  ///
+  /// When an error occurs while building a widget, the broken widget is
+  /// replaced by the widget returned by this function. By default, an
+  /// [ErrorWidget] is returned.
+  ///
+  /// The system is typically in an unstable state when this function is called.
+  /// An exception has just been thrown in the middle of build (and possibly
+  /// layout), so surrounding widgets and render objects may be in a rather
+  /// fragile state. The framework itself (especially the [BuildOwner]) may also
+  /// be confused, and additional exceptions are quite likely to be thrown.
+  ///
+  /// Because of this, it is highly recommended that the widget returned from
+  /// this function perform the least amount of work possible. A
+  /// [LeafRenderObjectWidget] is the best choice, especially one that
+  /// corresponds to a [RenderBox] that can handle the most absurd of incoming
+  /// constraints. The default constructor maps to a [RenderErrorBox].
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterError.onError], which is typically called with the same
+  ///    [FlutterErrorDetails] object immediately prior to this callback being
+  ///    invoked, and which can also be configured to control how errors are
+  ///    reported.
+  static ErrorWidgetBuilder builder = (FlutterErrorDetails details) => new ErrorWidget(details.exception);
 
   /// The message to display.
   final String message;
@@ -3544,8 +3584,7 @@ abstract class ComponentElement extends Element {
       built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -3556,8 +3595,7 @@ abstract class ComponentElement extends Element {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
       _child = updateChild(null, built, slot);
     }
 
@@ -4656,14 +4694,19 @@ class _DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack, {
+FlutterErrorDetails _debugReportException(
+  String context,
+  dynamic exception,
+  StackTrace stack, {
   InformationCollector informationCollector
 }) {
-  FlutterError.reportError(new FlutterErrorDetails(
+  final FlutterErrorDetails details = new FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
     context: context,
     informationCollector: informationCollector,
-  ));
+  );
+  FlutterError.reportError(details);
+  return details;
 }
