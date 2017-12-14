@@ -103,12 +103,11 @@ hb_font_t* getHbFontLocked(const MinikinFont* minikinFont) {
   hb_font_set_scale(parent_font, upem, upem);
 
   font = hb_font_create_sub_font(parent_font);
-  // TODO(abarth): Enable this code once we update harfbuzz.
-  // std::vector<hb_variation_t> variations;
-  // for (const FontVariation& variation : minikinFont->GetAxes()) {
-  //     variations.push_back({variation.axisTag, variation.value});
-  // }
-  // hb_font_set_variations(font, variations.data(), variations.size());
+  std::vector<hb_variation_t> variations;
+  for (const FontVariation& variation : minikinFont->GetAxes()) {
+    variations.push_back({variation.axisTag, variation.value});
+  }
+  hb_font_set_variations(font, variations.data(), variations.size());
   hb_font_destroy(parent_font);
   hb_face_destroy(face);
   fontCache->put(fontId, font);
