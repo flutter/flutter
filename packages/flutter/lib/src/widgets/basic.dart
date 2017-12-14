@@ -1001,6 +1001,15 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1672,7 +1681,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis constrainedAxis;
-  
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
@@ -1752,6 +1761,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1886,6 +1904,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
@@ -1973,6 +2000,15 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
@@ -2498,6 +2534,15 @@ class Stack extends MultiChildRenderObjectWidget {
   /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
   /// alignment to determine how they should be positioned in that
   /// under-specified axis.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -4244,6 +4289,13 @@ class RawImage extends LeafRenderObjectWidget {
   /// must be in scope.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
