@@ -41,7 +41,7 @@ dependencies:
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
   mime: 0.9.4 # TRANSITIVE DEPENDENCY
-  mockito: 3.0.0 # TRANSITIVE DEPENDENCY
+  mockito: 2.2.0 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY

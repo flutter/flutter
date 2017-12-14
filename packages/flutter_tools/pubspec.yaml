@@ -45,7 +45,7 @@ dependencies:
 
 dev_dependencies:
   collection: 1.14.3
-  mockito: 3.0.0
+  mockito: 2.2.0
 
   async: 1.13.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+13 # TRANSITIVE DEPENDENCY
