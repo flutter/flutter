@@ -64,7 +64,7 @@ class ModalBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugCheckHasDirectionality(context);
+    assert(!dismissible || semanticsLabel == null || debugCheckHasDirectionality(context));
     final bool semanticsDismissable = dismissible && defaultTargetPlatform != TargetPlatform.android;
     return new BlockSemantics(
       child: new ExcludeSemantics(
@@ -78,7 +78,7 @@ class ModalBarrier extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: new Semantics(
             label: semanticsDismissable ? semanticsLabel : null,
-            textDirection: semanticsDismissable ? Directionality.of(context) : null,
+            textDirection: semanticsDismissable && semanticsLabel != null ? Directionality.of(context) : null,
             child: new ConstrainedBox(
               constraints: const BoxConstraints.expand(),
               child: color == null ? null : new DecoratedBox(

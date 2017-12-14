@@ -71,14 +71,17 @@ class _TestAppState extends State<TestApp> {
       ],
       child: new MediaQuery(
         data: new MediaQueryData.fromWindow(window),
-        child:  new Navigator(
-          onGenerateRoute: (RouteSettings settings) {
-            assert(settings.name == '/');
-            return new MaterialPageRoute<dynamic>(
-              settings: settings,
-              builder: (BuildContext context) => widget.child,
-            );
-          },
+        child: new Directionality(
+          textDirection: widget.textDirection,
+          child: new Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              assert(settings.name == '/');
+              return new MaterialPageRoute<dynamic>(
+                settings: settings,
+                builder: (BuildContext context) => widget.child,
+              );
+            },
+          ),
         ),
       ),
     );
