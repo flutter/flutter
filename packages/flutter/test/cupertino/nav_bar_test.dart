@@ -116,6 +116,56 @@ void main() {
     expect(find.byType(SliverPersistentHeader), findsNothing);
   });
 
+  testWidgets('Media padding is applied to CupertinoSliverNavigationBar', (WidgetTester tester) async {
+    final ScrollController scrollController = new ScrollController();
+    final Key middleKey = new GlobalKey();
+    final Key titleKey = new GlobalKey();
+    await tester.pumpWidget(
+      new WidgetsApp(
+        color: const Color(0xFFFFFFFF),
+        onGenerateRoute: (RouteSettings settings) {
+          return new CupertinoPageRoute<Null>(
+            settings: settings,
+            builder: (BuildContext context) {
+              return new MediaQuery(
+                data: const MediaQueryData(
+                  padding: const EdgeInsets.only(
+                    top: 10.0,
+                    left: 20.0,
+                    bottom: 30.0,
+                    right: 40.0,
+                  ),
+                ),
+                child: new CupertinoPageScaffold(
+                  child: new CustomScrollView(
+                    controller: scrollController,
+                    slivers: <Widget>[
+                      new CupertinoSliverNavigationBar(
+                        middle: new Text('Not-large Title', key: middleKey),
+                        largeTitle: new Text('Large Title', key: titleKey),
+                      ),
+                      new SliverToBoxAdapter(
+                        child: new Container(
+                          height: 1200.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      ),
+    );
+
+    // Top padding is applied to middle.
+    expect(tester.getTopLeft(find.byKey(middleKey)), const Offset(277.5, 13.5 + 10.0));
+
+    // Top and left padding is applied to large title.
+    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(16.0 + 20.0, 58.0 + 10.0));
+  });
+
   testWidgets('Large title nav bar scrolls', (WidgetTester tester) async {
     final ScrollController scrollController = new ScrollController();
     await tester.pumpWidget(
