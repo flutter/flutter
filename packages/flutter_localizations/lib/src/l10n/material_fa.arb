@@ -29,5 +29,6 @@
   "anteMeridiemAbbreviation": "ق.ظ.",
   "postMeridiemAbbreviation": "ب.ظ.",
   "timePickerHourModeAnnouncement": "ساعت ها را انتخاب کنید",
-  "timePickerMinuteModeAnnouncement": "دقیقه را انتخاب کنید"
+  "timePickerMinuteModeAnnouncement": "دقیقه را انتخاب کنید",
+  "modalBarrierDismissLabel": "رد کردن"
 }

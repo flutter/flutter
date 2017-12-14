@@ -108,6 +108,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   Color get barrierColor => null;
 
   @override
+  String get barrierLabel => null;
+
+  @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
     return (previousRoute is MaterialPageRoute || previousRoute is CupertinoPageRoute);
   }

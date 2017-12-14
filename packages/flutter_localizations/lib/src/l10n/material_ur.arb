@@ -29,5 +29,6 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "گھنٹے منتخب کریں",
-  "timePickerMinuteModeAnnouncement": "منٹ منتخب کریں"
+  "timePickerMinuteModeAnnouncement": "منٹ منتخب کریں",
+  "modalBarrierDismissLabel": "برطرف"
 }

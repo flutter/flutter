@@ -546,7 +546,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
     this.items,
     this.initialValue,
     this.elevation,
-    this.theme
+    this.theme,
+    this.barrierLabel,
   });
 
   final RelativeRect position;
@@ -572,6 +573,9 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
   @override
   Color get barrierColor => null;
+
+  @override
+  final String barrierLabel;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -670,6 +674,7 @@ Future<T> showMenu<T>({
     initialValue: initialValue,
     elevation: elevation,
     theme: Theme.of(context, shadowThemeOnly: true),
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }
 
