@@ -498,8 +498,12 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                     child: new AnimatedOpacity(
                       opacity: showLargeTitle ? 1.0 : 0.0,
                       duration: _kNavBarTitleFadeDuration,
-                      child: title,
-                    )
+                      child: new SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: title,
+                      ),
+                    ),
                   ),
                 ),
               ),
