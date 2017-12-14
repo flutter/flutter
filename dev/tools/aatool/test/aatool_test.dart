@@ -5,7 +5,7 @@
 import 'dart:math';
 
 import 'package:collection/collection.dart';
-import 'package:svg2dart/svg2dart.dart';
+import 'package:aatool/aatool.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 
