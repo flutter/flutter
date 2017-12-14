@@ -395,15 +395,13 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
           color: actionsForegroundColor,
           size: 22.0,
         ),
-        child: new Padding(
-          padding: new EdgeInsetsDirectional.only(
-            top: MediaQuery.of(context).padding.top,
-            start: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
-            end: _kNavBarEdgePadding,
-          ),
-          child: new MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
+        child: new SafeArea(
+          bottom: false,
+          child: new Padding(
+            padding: new EdgeInsetsDirectional.only(
+              start: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
+              end: _kNavBarEdgePadding,
+            ),
             child: new NavigationToolbar(
               leading: styledLeading ?? backOrCloseButton,
               middle: animatedStyledMiddle,
