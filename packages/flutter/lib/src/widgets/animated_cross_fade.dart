@@ -166,6 +166,13 @@ class AnimatedCrossFade extends StatefulWidget {
   /// How the children should be aligned while the size is animating.
   ///
   /// Defaults to [Alignment.topCenter].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// A builder that positions the [firstChild] and [secondChild] widgets.

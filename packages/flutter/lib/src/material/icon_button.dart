@@ -108,6 +108,13 @@ class IconButton extends StatelessWidget {
   /// Defines how the icon is positioned within the IconButton.
   ///
   /// This property must not be null. It defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The icon to display inside the button.

@@ -398,6 +398,13 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
@@ -1144,7 +1151,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
-      shadowColor: widget.animateShadowColor 
+      shadowColor: widget.animateShadowColor
           ? _shadowColor.evaluate(animation)
           : widget.shadowColor,
     );
