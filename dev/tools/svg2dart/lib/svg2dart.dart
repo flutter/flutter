@@ -14,7 +14,7 @@ import 'package:xml/xml.dart' hide parse;
 // String to use for a single indentation.
 const String kIndent = '  ';
 
-/// Represents an entire animation.
+/// Represents an animation, and provides logic to generate dart code for it.
 class Animation {
   const Animation(this.size, this.paths);
 
@@ -41,28 +41,29 @@ class Animation {
       final FrameData frame = frames[i];
       if (size != frame.size)
         throw new Exception(
-            'All animation frames must have the same size, '
-                'first frame size was: (${size.x}, ${size.y}) '
-                'frame $i size was: (${frame.size.x}, ${frame.size.y}) '
+            'All animation frames must have the same size,\n'
+            'first frame size was: (${size.x}, ${size.y})\n'
+            'frame $i size was: (${frame.size.x}, ${frame.size.y})'
         );
       if (numPaths != frame.paths.length)
         throw new Exception(
-            'All animation frames must have the same number of paths, '
-                'first frame has $numPaths paths'
-                'frame $i has ${frame.paths.length} paths'
+            'All animation frames must have the same number of paths,\n'
+            'first frame has $numPaths paths\n'
+            'frame $i has ${frame.paths.length} paths'
         );
     }
   }
 
   String toDart(String className, String varName) {
-    String result = 'const $className $varName = const $className(\n';
-    result += '${kIndent}const Size(${size.x}, ${size.y}),\n';
-    result += '${kIndent}const <_PathFrames> [\n';
+    final StringBuffer sb = new StringBuffer();
+    sb.write('const $className $varName = const $className(\n');
+    sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
+    sb.write('${kIndent}const <_PathFrames>[\n');
     for (PathAnimation path in paths)
-      result += path.toDart();
-    result += '$kIndent],\n';
-    result += ');';
-    return result;
+      sb.write(path.toDart());
+    sb.write('$kIndent],\n');
+    sb.write(');');
+    return sb.toString();
   }
 }
 
@@ -72,16 +73,16 @@ class PathAnimation {
 
   factory PathAnimation.fromFrameData(List<FrameData> frames, int pathIdx) {
     if (frames.isEmpty)
-      return const PathAnimation(const <PathCommandAnimation> [], opacities: const <double> []);
+      return const PathAnimation(const <PathCommandAnimation>[], opacities: const <double>[]);
 
     final List<PathCommandAnimation> commands = <PathCommandAnimation>[];
-    for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx++) {
+    for (int commandIdx = 0; commandIdx < frames[0].paths[pathIdx].commands.length; commandIdx += 1) {
       final int numPointsInCommand = frames[0].paths[pathIdx].commands[commandIdx].points.length;
       final List<List<Point<double>>> points = new List<List<Point<double>>>(numPointsInCommand);
-      for (int j = 0; j < numPointsInCommand; j++)
+      for (int j = 0; j < numPointsInCommand; j += 1)
         points[j] = <Point<double>>[];
       final String commandType = frames[0].paths[pathIdx].commands[commandIdx].type;
-      for (int i = 0; i < frames.length; i++) {
+      for (int i = 0; i < frames.length; i += 1) {
         final FrameData frame = frames[i];
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType)
@@ -90,7 +91,7 @@ class PathAnimation {
               'command $commandIdx at frame 0 was of type \'$commandType\''
               'command $commandIdx at frame $i was of type \'$currentCommandType\''
           );
-        for (int j = 0; j < numPointsInCommand; j++)
+        for (int j = 0; j < numPointsInCommand; j += 1)
           points[j].add(frame.paths[pathIdx].commands[commandIdx].points[j]);
       }
       commands.add(new PathCommandAnimation(commandType, points));
@@ -113,17 +114,18 @@ class PathAnimation {
   }
 
   String toDart() {
-    String result = '${kIndent*2}const _PathFrames(\n';
-    result += '${kIndent*3}opacities: const <double> [\n';
+    final StringBuffer sb = new StringBuffer();
+    sb.write('${kIndent * 2}const _PathFrames(\n');
+    sb.write('${kIndent * 3}opacities: const <double>[\n');
     for (double opacity in opacities)
-      result +='${kIndent*4}$opacity,\n';
-    result += '${kIndent*3}],\n';
-    result += '${kIndent*3}commands: const <_PathCommand> [\n';
+      sb.write('${kIndent * 4}$opacity,\n');
+    sb.write('${kIndent * 3}],\n');
+    sb.write('${kIndent * 3}commands: const <_PathCommand>[\n');
     for (PathCommandAnimation command in commands)
-      result += command.toDart();
-    result += '${kIndent*3}],\n';
-    result += '${kIndent*2}),\n';
-    return result;
+      sb.write(command.toDart());
+    sb.write('${kIndent * 3}],\n');
+    sb.write('${kIndent * 2}),\n');
+    return sb.toString();
   }
 }
 
@@ -162,33 +164,31 @@ class PathCommandAnimation {
       default:
         throw new Exception('unsupported path command: $type');
     }
-    String result = '${kIndent*4}const $dartCommandClass(\n';
+    final StringBuffer sb = new StringBuffer();
+    sb.write('${kIndent * 4}const $dartCommandClass(\n');
     for (List<Point<double>> pointFrames in points) {
-      result += '${kIndent*5}const <Offset> [\n';
+      sb.write('${kIndent * 5}const <Offset>[\n');
       for (Point<double> point in pointFrames)
-        result += '${kIndent*6}const Offset(${point.x}, ${point.y}),\n';
-      result += '${kIndent*5}],\n';
+        sb.write('${kIndent * 6}const Offset(${point.x}, ${point.y}),\n');
+      sb.write('${kIndent * 5}],\n');
     }
-    result +='${kIndent*4}),\n';
-    return result;
+    sb.write('${kIndent * 4}),\n');
+    return sb.toString();
   }
 }
 
-/// Interprets some subset of an SVG* file.
+/// Interprets some subset of an SVG file.
 ///
 /// Recursively goes over the SVG tree, applying transforms and opacities,
 /// and build a FrameData which is a flat representation of the paths in the SVG
 /// file, after applying transformations and converting relative coordinates to
 /// absolute.
 ///
-/// * Note that this does not support the SVG specification, but is just built to
+/// This does not support the SVG specification, but is just built to
 /// support SVG files exported by a specific tool the motion design team is
 /// using.
 FrameData interpretSvg(String svgFilePath) {
   final File file = new File(svgFilePath);
-  if (!file.existsSync()) {
-    throw new ArgumentError('$file does not exist');
-  }
   final String fileData = file.readAsStringSync();
   final XmlElement svgElement = _extractSvgElement(xml.parse(fileData));
   final double width = parsePixels(_extractAttr(svgElement, 'width')).toDouble();
@@ -219,7 +219,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
       Matrix3 transformMatrix = transform.transformMatrix;
       if (_hasAttr(element, 'transform'))
         transformMatrix = transformMatrix.multiplied(
-            _parseSvgTransform(_extractAttr(element, 'transform')));
+          _parseSvgTransform(_extractAttr(element, 'transform')));
 
       final _Transform subtreeTransform = new _Transform(
         transformMatrix: transformMatrix,
@@ -237,11 +237,15 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
 // group 1 will match "25.0"
 // group 2 will match "1.0"
 // group 3 will match "12.0, 12.0 23.0, 9.0"
-final RegExp _pointMatcher = new RegExp(r' *([\-\.0-9]+) *, *([\-\.0-9]+)(.*)');
+//
+// Commas are optional.
+final RegExp _pointMatcher = new RegExp(r' *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)');
 
 /// Parse a string with a list of points, e.g:
 /// '25.0, 1.0 12.0, 12.0 23.0, 9.0' will be parsed to:
 /// [Point(25.0, 1.0), Point(12.0, 12.0), Point(23.0, 9.0)].
+///
+/// Commas are optional.
 List<Point<double>> parsePoints(String points) {
   String unParsed = points;
   final List<Point<double>> result = <Point<double>>[];
@@ -273,9 +277,7 @@ class FrameData {
   }
 
   @override
-  int get hashCode =>
-      size.hashCode ^
-      paths.hashCode;
+  int get hashCode => size.hashCode ^ paths.hashCode;
 
   @override
   String toString() {
@@ -297,7 +299,7 @@ class SvgPath {
     assert(pathElement.name.local == 'path');
     final String id = _extractAttr(pathElement, 'id');
     final String dAttr = _extractAttr(pathElement, 'd');
-    final List<SvgPathCommand> commands = <SvgPathCommand> [];
+    final List<SvgPathCommand> commands = <SvgPathCommand>[];
     final SvgPathCommandBuilder commandsBuilder = new SvgPathCommandBuilder();
     for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
@@ -324,10 +326,7 @@ class SvgPath {
   }
 
   @override
-  int get hashCode =>
-      id.hashCode ^
-      commands.hashCode ^
-      opacity.hashCode;
+  int get hashCode => id.hashCode ^ commands.hashCode ^ opacity.hashCode;
 
   @override
   String toString() {
@@ -375,9 +374,7 @@ class SvgPathCommand {
   }
 
   @override
-  int get hashCode =>
-      type.hashCode ^
-      points.hashCode;
+  int get hashCode => type.hashCode ^ points.hashCode;
 
   @override
   String toString() {

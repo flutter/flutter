@@ -1,5 +1,13 @@
-# svg2dart
+# aatool
 
-A tool for converting SVG sequences as provided by our motion designers into a Dart representation.
+This tool generates Dart files from frames described in SVG files that follow
+the small subset of SVG described below.
+This tool was crafted specifically to handle the assets for certain Material
+design animations as created by the Google Material Design team, and is not
+intended to be a general-purpose tool.
 
-**Note: only a very limited set of SVG features is supported**
+## Supported SVG features
+  - groups
+  - group transforms
+  - group opacities
+  - paths (strokes are not supported, only fills, eliptical arc curve commands are not supported)
