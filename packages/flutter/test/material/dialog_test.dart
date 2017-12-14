@@ -240,22 +240,19 @@ void main() {
         DefaultWidgetsLocalizations.delegate,
         DefaultMaterialLocalizations.delegate,
       ],
-      child: new Directionality(
-        textDirection: TextDirection.ltr,
-        child: new MediaQuery(
-          data: const MediaQueryData(
-            padding: const EdgeInsets.all(50.0),
-          ),
-          child: new Navigator(
-            onGenerateRoute: (_) {
-              return new PageRouteBuilder<Null>(
-                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-                  outerContext = context;
-                  return new Container();
-                },
-              );
-            },
-          ),
+      child:  new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.all(50.0),
+        ),
+        child: new Navigator(
+          onGenerateRoute: (_) {
+            return new PageRouteBuilder<Null>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                outerContext = context;
+                return new Container();
+              },
+            );
+          },
         ),
       ),
     ));

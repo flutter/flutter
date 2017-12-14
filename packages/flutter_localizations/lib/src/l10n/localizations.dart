@@ -47,6 +47,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'م',
     'timePickerHourModeAnnouncement': r'حدد ساعات',
     'timePickerMinuteModeAnnouncement': r'حدد دقائق',
+    'modalBarrierDismissLabel': r'تجاهل',
   },
   'de': const <String, String>{
     'scriptCategory': r'English-like',
@@ -81,6 +82,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'NACHM.',
     'timePickerHourModeAnnouncement': r'Stunde auswählen',
     'timePickerMinuteModeAnnouncement': r'Minute auswählen',
+    'modalBarrierDismissLabel': r'Schließen',
   },
   'de_CH': const <String, String>{
     'scriptCategory': r'English-like',
@@ -102,7 +104,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'selectedRowCountTitleOne': r'1 Element ausgewählt',
     'selectedRowCountTitleOther': r'$selectedRowCount Elemente ausgewählt',
     'cancelButtonLabel': r'ABBRECHEN',
-    'closeButtonLabel': r'SCHLIEẞEN',
+    'closeButtonLabel': r'SCHLIESSEN',
     'continueButtonLabel': r'WEITER',
     'copyButtonLabel': r'KOPIEREN',
     'cutButtonLabel': r'AUSSCHNEIDEN',
@@ -112,6 +114,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'LIZENZEN ANZEIGEN',
     'anteMeridiemAbbreviation': r'VORM.',
     'postMeridiemAbbreviation': r'NACHM.',
+    'modalBarrierDismissLabel': r'Schliessen',
   },
   'en': const <String, String>{
     'scriptCategory': r'English-like',
@@ -146,6 +149,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'Select hours',
     'timePickerMinuteModeAnnouncement': r'Select minutes',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_AU': const <String, String>{
     'scriptCategory': r'English-like',
@@ -177,6 +181,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VIEW LICENCES',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_CA': const <String, String>{
     'scriptCategory': r'English-like',
@@ -208,6 +213,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VIEW LICENCES',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_GB': const <String, String>{
     'scriptCategory': r'English-like',
@@ -239,6 +245,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'showMenuTooltip': r'Show menu',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_IE': const <String, String>{
     'scriptCategory': r'English-like',
@@ -270,6 +277,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'showMenuTooltip': r'Show menu',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_IN': const <String, String>{
     'scriptCategory': r'English-like',
@@ -301,6 +309,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VIEW LICENCES',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_SG': const <String, String>{
     'scriptCategory': r'English-like',
@@ -332,6 +341,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VIEW LICENCES',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'en_ZA': const <String, String>{
     'scriptCategory': r'English-like',
@@ -363,6 +373,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'showMenuTooltip': r'Show menu',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Dismiss',
   },
   'es': const <String, String>{
     'scriptCategory': r'English-like',
@@ -397,6 +408,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'P.M.',
     'timePickerHourModeAnnouncement': r'Seleccione Horas',
     'timePickerMinuteModeAnnouncement': r'Seleccione Minutos',
+    'modalBarrierDismissLabel': r'Ignorar',
   },
   'es_US': const <String, String>{
     'scriptCategory': r'English-like',
@@ -436,6 +448,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'ب.ظ.',
     'timePickerHourModeAnnouncement': r'ساعت ها را انتخاب کنید',
     'timePickerMinuteModeAnnouncement': r'دقیقه را انتخاب کنید',
+    'modalBarrierDismissLabel': r'رد کردن',
   },
   'fr': const <String, String>{
     'scriptCategory': r'English-like',
@@ -470,6 +483,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'Sélectionnez les heures',
     'timePickerMinuteModeAnnouncement': r'Sélectionnez les minutes',
+    'modalBarrierDismissLabel': r'Ignorer',
   },
   'fr_CA': const <String, String>{
     'scriptCategory': r'English-like',
@@ -505,6 +519,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'LIZENZEN ANZEIGEN',
     'anteMeridiemAbbreviation': r'VORM.',
     'postMeridiemAbbreviation': r'NACHM.',
+    'modalBarrierDismissLabel': r'Schließen',
   },
   'he': const <String, String>{
     'scriptCategory': r'English-like',
@@ -540,6 +555,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'בחר שעות',
     'timePickerMinuteModeAnnouncement': r'בחר דקות',
+    'modalBarrierDismissLabel': r'סגירה',
   },
   'it': const <String, String>{
     'scriptCategory': r'English-like',
@@ -573,6 +589,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'Seleziona ore',
     'timePickerMinuteModeAnnouncement': r'Seleziona minuti',
+    'modalBarrierDismissLabel': r'Ignora',
   },
   'ja': const <String, String>{
     'scriptCategory': r'dense',
@@ -606,6 +623,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'時を選択',
     'timePickerMinuteModeAnnouncement': r'分を選択',
+    'modalBarrierDismissLabel': r'閉じる',
   },
   'ps': const <String, String>{
     'scriptCategory': r'tall',
@@ -636,6 +654,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'لیدلس وګورئ',
     'timePickerHourModeAnnouncement': r'وختونه وټاکئ',
     'timePickerMinuteModeAnnouncement': r'منې غوره کړئ',
+    'modalBarrierDismissLabel': r'رد کړه',
   },
   'pt': const <String, String>{
     'scriptCategory': r'English-like',
@@ -666,6 +685,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VER LICENÇAS',
     'timePickerHourModeAnnouncement': r'Selecione horários',
     'timePickerMinuteModeAnnouncement': r'Selecione Minutos',
+    'modalBarrierDismissLabel': r'Dispensar',
   },
   'pt_PT': const <String, String>{
     'scriptCategory': r'English-like',
@@ -697,6 +717,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'viewLicensesButtonLabel': r'VER LICENÇAS',
     'anteMeridiemAbbreviation': r'AM',
     'postMeridiemAbbreviation': r'PM',
+    'modalBarrierDismissLabel': r'Ignorar',
   },
   'ru': const <String, String>{
     'scriptCategory': r'English-like',
@@ -733,6 +754,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'ВЫБРАТЬ ЧАСЫ',
     'timePickerMinuteModeAnnouncement': r'ВЫБРАТЬ МИНУТЫ',
+    'modalBarrierDismissLabel': r'Закрыть',
   },
   'ur': const <String, String>{
     'scriptCategory': r'tall',
@@ -766,6 +788,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'PM',
     'timePickerHourModeAnnouncement': r'گھنٹے منتخب کریں',
     'timePickerMinuteModeAnnouncement': r'منٹ منتخب کریں',
+    'modalBarrierDismissLabel': r'برطرف',
   },
   'zh': const <String, String>{
     'scriptCategory': r'dense',
@@ -799,6 +822,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'postMeridiemAbbreviation': r'下午',
     'timePickerHourModeAnnouncement': r'选择小时',
     'timePickerMinuteModeAnnouncement': r'选择分钟',
+    'modalBarrierDismissLabel': r'关闭',
   },
 };
 

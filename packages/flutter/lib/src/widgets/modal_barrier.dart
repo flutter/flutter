@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -52,6 +53,9 @@ class ModalBarrier extends StatelessWidget {
 
   /// Semantics label used for the barrier if it is [dismissable].
   ///
+  /// The semantics label is read out by accessibility tools (e.g. TalkBack
+  /// on Android and VoiceOver on iOS) when the barrier is focused.
+  ///
   /// See also:
   ///
   ///  * [ModalRoute.barrierLabel], which controls this property for the
@@ -60,6 +64,7 @@ class ModalBarrier extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugCheckHasDirectionality(context);
     final bool semanticsDismissable = dismissible && defaultTargetPlatform != TargetPlatform.android;
     return new BlockSemantics(
       child: new ExcludeSemantics(
@@ -132,6 +137,8 @@ class AnimatedModalBarrier extends AnimatedWidget {
 
   /// Semantics label used for the barrier if it is [dismissable].
   ///
+  /// The semantics label is read out by accessibility tools (e.g. TalkBack
+  /// on Android and VoiceOver on iOS) when the barrier is focused.
   /// See also:
   ///
   ///  * [ModalRoute.barrierLabel], which controls this property for the
