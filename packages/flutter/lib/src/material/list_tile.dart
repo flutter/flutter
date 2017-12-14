@@ -457,7 +457,11 @@ class ListTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
           child: new UnconstrainedBox(
             constrainedAxis: Axis.horizontal,
-            child: new Row(children: children),
+            child: new SafeArea(
+              top: false,
+              bottom: false,
+              child: new Row(children: children),
+            ),
           ),
         )
       ),
