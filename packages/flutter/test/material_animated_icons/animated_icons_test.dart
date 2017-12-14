@@ -35,6 +35,28 @@ void main() {
     verify(canvas.drawPath(any, paintColorMatcher(0xFF666666)));
   });
 
+  testWidgets('IconTheme opacity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: const IconTheme(
+          data: const IconThemeData(
+            color: const Color(0xFF666666),
+            opacity:  0.5,
+          ),
+          child: const AnimatedIcon(
+            progress: const AlwaysStoppedAnimation<double>(0.0),
+            icon: AnimatedIcons.arrow_menu,
+          )
+        ),
+      ),
+    );
+    final CustomPaint customPaint = tester.widget(find.byType(CustomPaint));
+    final MockCanvas canvas = new MockCanvas();
+    customPaint.painter.paint(canvas, const Size(48.0, 48.0));
+    verify(canvas.drawPath(any, paintColorMatcher(0x80666666)));
+  });
+
   testWidgets('color overrides IconTheme color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -195,11 +217,11 @@ void main() {
 }
 
 dynamic paintColorMatcher(int color) {
-  return new PaintpaintColorMatcher(color);
+  return new PaintColorMatcher(color);
 }
 
-class PaintpaintColorMatcher extends Matcher {
-  const PaintpaintColorMatcher(this.expectedColor);
+class PaintColorMatcher extends Matcher {
+  const PaintColorMatcher(this.expectedColor);
 
   final int expectedColor;
 

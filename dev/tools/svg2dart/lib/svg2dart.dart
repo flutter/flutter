@@ -207,7 +207,6 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
     final XmlElement element = node;
 
     if (element.name.local == 'path') {
-      // TODO(amirh): convert relative commands to absolute
       paths.add(SvgPath.fromElement(element).applyTransform(transform));
     }
 
@@ -456,7 +455,7 @@ class _Transform {
   }
 }
 
-final RegExp _transformCommand = new RegExp(' *(translate|scale|rotate)\\(([^)]*)\\)');
+final RegExp _transformCommand = new RegExp(' *([^)]+)\\(([^)]*)\\)');
 
 Matrix3 _parseSvgTransform(String transform){
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
@@ -481,8 +480,10 @@ Matrix3 _parseSvgTransform(String transform){
   return result;
 }
 
+final RegExp _valueSeparator = new RegExp('( *, *| +)');
+
 Matrix3 _parseSvgTranslate(String paramsStr) {
-  final List<String> params = paramsStr.split(',');
+  final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.isNotEmpty);
   assert(params.length <= 2);
   final double x = double.parse(params[0]);
@@ -491,7 +492,7 @@ Matrix3 _parseSvgTranslate(String paramsStr) {
 }
 
 Matrix3 _parseSvgScale(String paramsStr) {
-  final List<String> params = paramsStr.split(',');
+  final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.isNotEmpty);
   assert(params.length <= 2);
   final double x = double.parse(params[0]);
@@ -500,7 +501,7 @@ Matrix3 _parseSvgScale(String paramsStr) {
 }
 
 Matrix3 _parseSvgRotate(String paramsStr) {
-  final List<String> params = paramsStr.split(',');
+  final List<String> params = paramsStr.split(_valueSeparator);
   assert(params.length == 1);
   final double a = radians(double.parse(params[0]));
   return _matrix(cos(a), sin(a), -sin(a), cos(a), 0.0, 0.0);
@@ -518,7 +519,9 @@ final RegExp _pixelsExp = new RegExp('^([0-9]+)px\$');
 /// Throws an [ArgumentError] if the given string doesn't match the pattern.
 int parsePixels(String pixels) {
   if (!_pixelsExp.hasMatch(pixels))
-    throw new ArgumentError('illegal pixels expression: \'$pixels\'');
+    throw new ArgumentError(
+      'illegal pixels expression: \'$pixels\''
+      ' (the tool currently only support pixel units).');
   return int.parse(_pixelsExp.firstMatch(pixels).group(1));
 }
 
@@ -540,8 +543,8 @@ bool _hasAttr(XmlElement element, String name) {
 
 XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
-          (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT
-          && _asElement(node).name.local == 'svg'
+    (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT &&
+      _asElement(node).name.local == 'svg'
   );
 }
 

@@ -1023,4 +1023,5 @@ const _AnimatedIconData _$menu_arrow = const _AnimatedIconData(
       ],
     ),
   ],
+  shouldMirrorInRtl: true,
 );

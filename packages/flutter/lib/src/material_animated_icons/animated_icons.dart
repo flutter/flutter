@@ -16,7 +16,7 @@ class AnimatedIcon extends StatelessWidget {
 
   /// Creates an AnimatedIcon.
   ///
-  /// [progress], and [icon] cannot be null.
+  /// The [progress] and [icon] arguments must not be null.
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
     Key key,
@@ -26,11 +26,11 @@ class AnimatedIcon extends StatelessWidget {
     this.size,
     this.semanticLabel,
     this.textDirection,
-    // TODO(amirh): add a parameter for controlling scaling behavior.
   }) : assert(progress != null),
        assert(icon != null);
 
   /// The animation progress for the animated icon.
+  ///
   /// The value is clamped to be between 0 and 1.
   ///
   /// This determines the actual frame that is displayed.
@@ -43,11 +43,12 @@ class AnimatedIcon extends StatelessWidget {
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
   ///
-  /// If no [IconTheme]s are specified, icons will default to black.
-  ///
   /// In material apps, if there is a [Theme] without any [IconTheme]s
   /// specified, icon colors default to white if the theme is dark
   /// and black if the theme is light.
+  ///
+  /// If no [IconTheme] and no [Theme] is specified, icons will default to black.
+  ///
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   final Color color;
@@ -64,7 +65,7 @@ class AnimatedIcon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   /// See also:
@@ -89,17 +90,21 @@ class AnimatedIcon extends StatelessWidget {
     final IconThemeData iconTheme = IconTheme.of(context);
     final double iconSize = size ?? iconTheme.size;
     final TextDirection textDirection = this.textDirection ?? Directionality.of(context);
+    final double iconOpacity = iconTheme.opacity;
+    Color iconColor = color ?? iconTheme.color;
+    if (iconOpacity != 1.0)
+      iconColor = iconColor.withOpacity(iconColor.opacity * iconOpacity);
     return new Semantics(
       label: semanticLabel,
       child: new CustomPaint(
         size: new Size(iconSize, iconSize),
         painter: new _AnimatedIconPainter(
-          iconData.paths,
-          progress,
-          color ?? iconTheme.color,
-          iconSize / iconData.size.bottomRight(const Offset(0.0, 0.0)).dx,
-          textDirection == TextDirection.rtl,
-          _pathFactory,
+          paths: iconData.paths,
+          progress: progress,
+          color: iconColor,
+          scale: iconSize / iconData.size.width,
+          shouldMirror: textDirection == TextDirection.rtl && iconData.shouldMirrorInRtl,
+          uiPathFactory: _pathFactory,
         ),
       ),
     );
@@ -109,14 +114,14 @@ class AnimatedIcon extends StatelessWidget {
 typedef ui.Path _UiPathFactory();
 
 class _AnimatedIconPainter extends CustomPainter {
-  _AnimatedIconPainter(
-    this.paths,
-    this.progress,
-    this.color,
-    this.scale,
-    this.shouldMirror,
-    this.uiPathFactory,
-  ) : super(repaint: progress);
+  _AnimatedIconPainter({
+    @required this.paths,
+    @required this.progress,
+    @required this.color,
+    @required this.scale,
+    @required this.shouldMirror,
+    @required this.uiPathFactory,
+  }) : super(repaint: progress);
 
   // This list is assumed to be immutable, changes to the contents of the list
   // will not trigger a redraw as shouldRepaint will keep returning false.
@@ -130,26 +135,29 @@ class _AnimatedIconPainter extends CustomPainter {
 
   @override
   void paint(ui.Canvas canvas, Size size) {
+    // The RenderCustomPaint render object performs canvas.save before invoking
+    // this and canvas.restore after, so we don't need to do it here.
     canvas.scale(scale, scale);
     if (shouldMirror) {
       canvas.rotate(math.pi);
       canvas.translate(-size.width, -size.height);
     }
 
+    final double clampedProgress = progress.value.clamp(0.0, 1.0);
     for (_PathFrames path in paths)
-      path.paint(canvas, color, uiPathFactory, progress.value.clamp(0.0, 1.0));
+      path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
 
 
   @override
   bool shouldRepaint(_AnimatedIconPainter oldDelegate) {
     return oldDelegate.progress.value != progress.value
-      || oldDelegate.color != color
-      // We are comparing the paths list by reference, assuming the list is
-      // treated as immutable to be more efficient.
-      || oldDelegate.paths != paths
-      || oldDelegate.scale != scale
-      || oldDelegate.uiPathFactory != uiPathFactory;
+        || oldDelegate.color != color
+        // We are comparing the paths list by reference, assuming the list is
+        // treated as immutable to be more efficient.
+        || oldDelegate.paths != paths
+        || oldDelegate.scale != scale
+        || oldDelegate.uiPathFactory != uiPathFactory;
   }
 
   @override
@@ -175,7 +183,7 @@ class _PathFrames {
     final double opacity = _interpolate(opacities, progress, lerpDouble);
     final ui.Paint paint = new ui.Paint()
       ..style = PaintingStyle.fill
-      ..color = color.withOpacity(opacity);
+      ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
     for (_PathCommand command in commands)
       command.apply(path, progress);
@@ -183,9 +191,17 @@ class _PathFrames {
   }
 }
 
+/// Paths are being built by a set of commands e.g moveTo, lineTo, etc...
+/// 
+/// _PathCommand instances represents such a command, and can apply it to 
+/// a given Path.
 abstract class _PathCommand {
   const _PathCommand();
 
+  /// Applies the path command to [path].
+  ///
+  /// For example if the object is a [_PathMoveTo] command it will invoke
+  /// [Path.moveTo] on [path].
   void apply(ui.Path path, double progress);
 }
 

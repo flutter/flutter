@@ -10,18 +10,32 @@
 
 part of material_animated_icons;
 
+/// Identifier for the supported material design animated icons.
+///
+/// Use with [AnimatedIcon] class to show specific animated icons.
 abstract class AnimatedIcons {
+  /// The material design arrow to menu icon animation.
   static const AnimatedIconData arrow_menu = _$arrow_menu;
+
+  /// The material design menu to arrow icon animation.
   static const AnimatedIconData menu_arrow = _$menu_arrow;
 }
 
+/// Data for an animated icon.
 abstract class AnimatedIconData {
   const AnimatedIconData();
+  
+  /// Whether this icon should be mirrored horizontally when text direction is
+  /// RTL.
+  bool get shouldMirrorInRtl;
 }
 
 class _AnimatedIconData extends AnimatedIconData {
-  const _AnimatedIconData(this.size, this.paths);
+  const _AnimatedIconData(this.size, this.paths, {this.shouldMirrorInRtl = false});
 
   final Size size;
   final List<_PathFrames> paths;
+
+  @override
+  final bool shouldMirrorInRtl;
 }
