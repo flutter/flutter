@@ -63,8 +63,8 @@ void main() {
     );
     final Matrix4 c = a.clone()..rotateZ(1.0);
     final Matrix4Tween rotationTween = new Matrix4Tween(begin: a, end: c);
-    expect(rotationTween.lerp(0.0), equals(a));
-    expect(rotationTween.lerp(1.0), equals(c));
+    expect(rotationTween.lerp(0.0).absoluteError(a), moreOrLessEquals(0.0));
+    expect(rotationTween.lerp(1.0).absoluteError(c), moreOrLessEquals(0.0));
     expect(
       rotationTween.lerp(0.5).absoluteError(
         a.clone()..rotateZ(0.5)

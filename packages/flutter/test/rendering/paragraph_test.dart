@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
@@ -67,7 +68,10 @@ void main() {
     );
 
     expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
-    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+    expect(boxes.any((ui.TextBox box) =>
+      Platform.isWindows ?
+      box.right == 100 && box.top == 13 :
+      box.right == 100 && box.top == 10), isTrue);
   });
 
   test('getWordBoundary control test', () {
@@ -180,7 +184,8 @@ void main() {
     }
 
     layoutAt(null);
-    expect(paragraph.size.height, 130.0);
+    double height = (Platform.isWindows) ? 138.0 : 130.0;
+    expect(paragraph.size.height, height);
 
     layoutAt(1);
     expect(paragraph.size.height, 10.0);
@@ -189,7 +194,8 @@ void main() {
     expect(paragraph.size.height, 20.0);
 
     layoutAt(3);
-    expect(paragraph.size.height, 30.0);
+    height = (Platform.isWindows) ? 34.0 : 30.0;
+    expect(paragraph.size.height, height);
   });
 
   test('changing color does not do layout', () {

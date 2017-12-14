@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -284,25 +286,31 @@ void main() {
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.upstream), Rect.zero),
       const Offset(10.0, 0.0),
     );
+
+    Offset offset = (Platform.isWindows) ? new Offset(7.0, 12.0) : new Offset(10.0, 10.0);
     expect( // between A and Alef, before the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.downstream), Rect.zero),
-      const Offset(10.0, 10.0),
+      offset,
     );
 
+    offset = (Platform.isWindows) ? new Offset(0.0, 12.0) : new Offset(0.0, 10.0);
     expect( // after the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.upstream), Rect.zero),
-      const Offset(0.0, 10.0),
+      offset,
     );
     expect( // after the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.downstream), Rect.zero),
-      const Offset(0.0, 10.0),
+      offset,
     );
 
+    TextBox textBox = (Platform.isWindows) ?
+                      new TextBox.fromLTRBD(0.0, 12.0, 7.0, 22.0, TextDirection.rtl) :
+                      new TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl);
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
-      const <TextBox>[
-        const TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
-        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
+      <TextBox>[
+        new TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
+        textBox, // Alef
       ],
     );
     expect(
@@ -313,8 +321,8 @@ void main() {
     );
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 1, extentOffset: 2)),
-      const <TextBox>[
-        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
+      <TextBox>[
+        textBox, // Alef
       ],
     );
   });

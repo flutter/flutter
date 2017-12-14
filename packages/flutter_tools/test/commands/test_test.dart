@@ -23,31 +23,37 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
-    testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    });
+    // TODO(bkonyi): These tests all throw exceptions with unicode characters used for formatting,
+    // but the unicode characters aren't being reported correctly on stderr from Process.run. This
+    // seems like it's something to do with how the Dart VM handles Unicode on Windows, so we'll
+    // skip these for now.
+    if (!io.Platform.isWindows) {
+      testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
+        Cache.flutterRoot = '../..';
+        return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
+      });
 
-    testUsingContext('report a nice error when a guarded function was called without await', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    });
+      testUsingContext('report a nice error when a guarded function was called without await', () async {
+        Cache.flutterRoot = '../..';
+        return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
+      });
 
-    testUsingContext('report a nice error when an async function was called without await', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    });
+      testUsingContext('report a nice error when an async function was called without await', () async {
+        Cache.flutterRoot = '../..';
+        return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
+      });
 
-    testUsingContext('report a nice error when a Ticker is left running', () async {
-      Cache.flutterRoot = '../..';
-      return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    });
+      testUsingContext('report a nice error when a Ticker is left running', () async {
+        Cache.flutterRoot = '../..';
+        return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
+      });
 
-    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
-      final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
-      Cache.flutterRoot = '../..';
-      return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    });
+      testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
+        final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
+        Cache.flutterRoot = '../..';
+        return _testFile('trivial', missingDependencyTests, missingDependencyTests);
+      });
+    }
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
