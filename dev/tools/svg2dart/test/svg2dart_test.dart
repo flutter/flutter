@@ -170,6 +170,23 @@ void main() {
         ]),
       ]);
     });
+
+    test('close in middle of path', () {
+      // This asset uses the relative 'l' command instead of 'L'.
+      final FrameData frameData = interpretSvg(testAsset('close_path_in_middle.svg'));
+      expect(frameData.paths, const <SvgPath>[
+        const SvgPath(
+            'path_1', const<SvgPathCommand>[
+          const SvgPathCommand('M', const <Point<double>>[const Point<double>(50.0, 50.0)]),
+          const SvgPathCommand('L', const <Point<double>>[const Point<double>(60.0, 50.0)]),
+          const SvgPathCommand('L', const <Point<double>>[const Point<double>(60.0, 60.0)]),
+          const SvgPathCommand('Z', const <Point<double>>[]),
+          const SvgPathCommand('L', const <Point<double>>[const Point<double>(50.0, 40.0)]),
+          const SvgPathCommand('L', const <Point<double>>[const Point<double>(40.0, 40.0)]),
+          const SvgPathCommand('Z', const <Point<double>>[]),
+        ]),
+      ]);
+    });
   });
 
   group('create PathAnimation', () {

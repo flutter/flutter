@@ -392,6 +392,7 @@ class SvgPathCommandBuilder {
   };
 
   Point<double> lastPoint = const Point<double>(0.0, 0.0);
+  Point<double> subPathStartPoint = const Point<double>(0.0, 0.0);
 
   SvgPathCommand build(String type, List<Point<double>> points) {
     List<Point<double>> absPoints = points;
@@ -399,9 +400,12 @@ class SvgPathCommandBuilder {
       absPoints = points.map((Point<double> p) => p + lastPoint).toList();
     }
 
-    // closePath commands are always last in the path, so we don't need to track
-    // last point.
-    if (type != 'Z' && type != 'z')
+    if (type == 'M' || type == 'm')
+      subPathStartPoint = absPoints.last;
+
+    if (type == 'Z' || type == 'z')
+      lastPoint = subPathStartPoint;
+    else
       lastPoint = absPoints.last;
 
     return new SvgPathCommand(type.toUpperCase(), absPoints);
