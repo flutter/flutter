@@ -129,8 +129,11 @@ abstract class MaterialLocalizations {
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
 
-  /// Accessibility label used for dismissible barriers to indicate that
-  /// tapping on the barrier dismisses it.
+  /// Label read out by accessibility tools (TalkBack or VocieOver) for a modal
+  /// barrier to indicate that a tap dismisses the barrier.
+  ///
+  /// A modal barrier can for example be found behind a alert or popup to block
+  /// user interaction with elements behind it.
   String get modalBarrierDismissLabel;
 
   /// The format used to lay out the time picker.
