@@ -126,35 +126,31 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    Widget yearButton = new _DateHeaderButton(
-      color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
-      child: new Semantics(
-        selected: mode == DatePickerMode.year,
-        child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
-      ),
-    );
-    Widget dayButton = new _DateHeaderButton(
-      color: backgroundColor,
-      onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
-      child: new Semantics(
-        selected: mode == DatePickerMode.day,
-        child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
+    final Widget yearButton = new IgnorePointer(
+      ignoring: mode != DatePickerMode.day,
+      ignoringSemantics: false,
+      child: new _DateHeaderButton(
+        color: backgroundColor,
+        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.year), context),
+        child: new Semantics(
+          selected: mode == DatePickerMode.year,
+          child: new Text(localizations.formatYear(selectedDate), style: yearStyle),
+        ),
       ),
     );
 
-    // Disable the button for the current mode.
-    if (mode == DatePickerMode.day) {
-      dayButton = new IgnorePointer(
-        child: dayButton,
-        ignoringSemantics: false,
-      );
-    } else {
-      yearButton = new IgnorePointer(
-        child: yearButton,
-        ignoringSemantics: false,
-      );
-    }
+    final Widget dayButton = new IgnorePointer(
+      ignoring: mode == DatePickerMode.day,
+      ignoringSemantics: false,
+      child: new _DateHeaderButton(
+        color: backgroundColor,
+        onTap: Feedback.wrapForTap(() => _handleChangeMode(DatePickerMode.day), context),
+        child: new Semantics(
+          selected: mode == DatePickerMode.day,
+          child: new Text(localizations.formatMediumDate(selectedDate), style: dayStyle),
+        ),
+      ),
+    );
 
     return new Container(
       width: width,
