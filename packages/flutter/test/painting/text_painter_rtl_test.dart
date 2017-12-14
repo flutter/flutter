@@ -615,6 +615,9 @@ void main() {
           text: ' ',
           style: const TextStyle(fontSize: 200.0),
         ),
+        // Add a non-whitespace character because the renderer's line breaker
+        // may strip trailing whitespace on a line.
+        const TextSpan(text: 'A'),
       ],
     );
     painter.layout();
@@ -640,20 +643,19 @@ void main() {
     //                 |        |           |
     //                 |________v___________|
 
-    expect(painter.width, 310.0);
+    expect(painter.width, 410.0);
     expect(painter.height, 200.0);
     expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 160.0);
     expect(painter.preferredLineHeight, 100.0);
 
     expect(
-      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
+      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 3)),
       const <TextBox>[
         const TextBox.fromLTRBD(  0.0,  80.0, 100.0, 180.0, TextDirection.ltr),
         const TextBox.fromLTRBD(100.0, 152.0, 110.0, 162.0, TextDirection.ltr),
         const TextBox.fromLTRBD(110.0,   0.0, 310.0, 200.0, TextDirection.ltr),
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
-      // Somehow today we also lose the last space.
       skip: skipExpectsWithKnownBugs,
     );
   }, skip: skipTestsWithKnownBugs);
