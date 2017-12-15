@@ -101,9 +101,8 @@ class ShrinePageState extends State<ShrinePage> {
             )
           )
         ),
-        title: new Center(
-          child: new Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle)
-        ),
+        title: new Text('SHRINE', style: ShrineTheme.of(context).appBarTitleStyle),
+        centerTitle: true,
         actions: <Widget>[
           new IconButton(
             icon: const Icon(Icons.shopping_cart),
