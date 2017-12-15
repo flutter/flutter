@@ -1,4 +1,4 @@
-Signature: ccb571fdf87b96a5fbaf828119061411
+Signature: a565a2a404fc08936c2e0d0e0195e38f
 
 UNUSED LICENSES:
 
@@ -4715,168 +4715,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
-ORIGIN: ../../../third_party/dart/runtime/bin/common.cc + ../../../third_party/dart/LICENSE
-TYPE: LicenseType.bsd
-FILE: ../../../third_party/dart/runtime/bin/common.cc
-FILE: ../../../third_party/dart/runtime/bin/dfe.cc
-FILE: ../../../third_party/dart/runtime/bin/dfe.h
-FILE: ../../../third_party/dart/runtime/bin/error_exit.cc
-FILE: ../../../third_party/dart/runtime/bin/error_exit.h
-FILE: ../../../third_party/dart/runtime/bin/gzip.cc
-FILE: ../../../third_party/dart/runtime/bin/gzip.h
-FILE: ../../../third_party/dart/runtime/bin/isolate_data.cc
-FILE: ../../../third_party/dart/runtime/bin/main_options.cc
-FILE: ../../../third_party/dart/runtime/bin/main_options.h
-FILE: ../../../third_party/dart/runtime/bin/namespace.cc
-FILE: ../../../third_party/dart/runtime/bin/namespace.h
-FILE: ../../../third_party/dart/runtime/bin/namespace_android.cc
-FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/namespace_linux.cc
-FILE: ../../../third_party/dart/runtime/bin/namespace_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/namespace_patch.dart
-FILE: ../../../third_party/dart/runtime/bin/namespace_win.cc
-FILE: ../../../third_party/dart/runtime/bin/options.cc
-FILE: ../../../third_party/dart/runtime/bin/options.h
-FILE: ../../../third_party/dart/runtime/bin/secure_socket_filter.cc
-FILE: ../../../third_party/dart/runtime/bin/secure_socket_filter.h
-FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.cc
-FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.h
-FILE: ../../../third_party/dart/runtime/bin/security_context.cc
-FILE: ../../../third_party/dart/runtime/bin/security_context.h
-FILE: ../../../third_party/dart/runtime/bin/security_context_android.cc
-FILE: ../../../third_party/dart/runtime/bin/security_context_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/security_context_linux.cc
-FILE: ../../../third_party/dart/runtime/bin/security_context_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/security_context_win.cc
-FILE: ../../../third_party/dart/runtime/bin/snapshot_utils.cc
-FILE: ../../../third_party/dart/runtime/bin/snapshot_utils.h
-FILE: ../../../third_party/dart/runtime/bin/socket_base.cc
-FILE: ../../../third_party/dart/runtime/bin/socket_base.h
-FILE: ../../../third_party/dart/runtime/bin/sync_socket.cc
-FILE: ../../../third_party/dart/runtime/bin/sync_socket.h
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_android.cc
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_linux.cc
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_patch.dart
-FILE: ../../../third_party/dart/runtime/bin/sync_socket_win.cc
-FILE: ../../../third_party/dart/runtime/lib/async.cc
-FILE: ../../../third_party/dart/runtime/lib/class_id_fasta.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/search_bar.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/allocations.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/dashboard.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/graph.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/profile.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/snapshot.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/reload.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/subtypetestcache_ref.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/subtypetestcache_view.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/timeline/dashboard.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unlinkedcall_ref.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unlinkedcall_view.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/service.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/single_target_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/subtype_test_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unlinked_call.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/single_target_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/subtype_test_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/timeline.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/unlinked_call.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/vm.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/single_target_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/subtype_test_cache.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timeline.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/unlinked_call.dart
-FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/vm.dart
-FILE: ../../../third_party/dart/runtime/platform/allocation.h
-FILE: ../../../third_party/dart/runtime/platform/growable_array.h
-FILE: ../../../third_party/dart/runtime/vm/compilation_trace.cc
-FILE: ../../../third_party/dart/runtime/vm/compilation_trace.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_arm.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/call_specializer.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/call_specializer.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.cc
-FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.h
-FILE: ../../../third_party/dart/runtime/vm/compiler/jit/jit_call_specializer.h
-FILE: ../../../third_party/dart/runtime/vm/constants_x86.h
-FILE: ../../../third_party/dart/runtime/vm/debugger_api_impl_test.h
-FILE: ../../../third_party/dart/runtime/vm/dwarf.cc
-FILE: ../../../third_party/dart/runtime/vm/dwarf.h
-FILE: ../../../third_party/dart/runtime/vm/fixed_cache.h
-FILE: ../../../third_party/dart/runtime/vm/fixed_cache_test.cc
-FILE: ../../../third_party/dart/runtime/vm/gc_compactor.cc
-FILE: ../../../third_party/dart/runtime/vm/gc_compactor.h
-FILE: ../../../third_party/dart/runtime/vm/gdb_helpers.cc
-FILE: ../../../third_party/dart/runtime/vm/image_snapshot.cc
-FILE: ../../../third_party/dart/runtime/vm/image_snapshot.h
-FILE: ../../../third_party/dart/runtime/vm/json_writer.cc
-FILE: ../../../third_party/dart/runtime/vm/json_writer.h
-FILE: ../../../third_party/dart/runtime/vm/kernel_binary.h
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks.h
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm64.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_ia32.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_jemalloc.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_tcmalloc.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_unsupported.cc
-FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_x64.cc
-FILE: ../../../third_party/dart/runtime/vm/mixin_test.cc
-FILE: ../../../third_party/dart/runtime/vm/stack_trace.cc
-FILE: ../../../third_party/dart/runtime/vm/stack_trace.h
-FILE: ../../../third_party/dart/runtime/vm/timeline_android.cc
-FILE: ../../../third_party/dart/runtime/vm/timeline_fuchsia.cc
-FILE: ../../../third_party/dart/runtime/vm/timeline_linux.cc
-FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
-FILE: ../../../third_party/dart/runtime/vm/timeline_win.cc
-FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.cc
-FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.h
-FILE: ../../../third_party/dart/sdk/lib/_http/overrides.dart
-FILE: ../../../third_party/dart/sdk/lib/internal/linked_list.dart
-FILE: ../../../third_party/dart/sdk/lib/internal/patch.dart
-FILE: ../../../third_party/dart/sdk/lib/io/annotations.dart
-FILE: ../../../third_party/dart/sdk/lib/io/embedder_config.dart
-FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
-FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
-FILE: ../../../third_party/dart/sdk/lib/io/sync_socket.dart
-FILE: ../../../third_party/dart/sdk/lib/vmservice/named_lookup.dart
-----------------------------------------------------------------------------------------------------
-Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
-for details. All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-      copyright notice, this list of conditions and the following
-      disclaimer in the documentation and/or other materials provided
-      with the distribution.
-    * Neither the name of Google Inc. nor the names of its
-      contributors may be used to endorse or promote products derived
-      from this software without specific prior written permission.
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/crypto_fuchsia.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/.packages
@@ -5156,6 +4994,167 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: dart
+ORIGIN: ../../../third_party/dart/runtime/bin/dfe.cc + ../../../third_party/dart/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/dart/runtime/bin/dfe.cc
+FILE: ../../../third_party/dart/runtime/bin/dfe.h
+FILE: ../../../third_party/dart/runtime/bin/error_exit.cc
+FILE: ../../../third_party/dart/runtime/bin/error_exit.h
+FILE: ../../../third_party/dart/runtime/bin/gzip.cc
+FILE: ../../../third_party/dart/runtime/bin/gzip.h
+FILE: ../../../third_party/dart/runtime/bin/isolate_data.cc
+FILE: ../../../third_party/dart/runtime/bin/main_options.cc
+FILE: ../../../third_party/dart/runtime/bin/main_options.h
+FILE: ../../../third_party/dart/runtime/bin/namespace.cc
+FILE: ../../../third_party/dart/runtime/bin/namespace.h
+FILE: ../../../third_party/dart/runtime/bin/namespace_android.cc
+FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/namespace_linux.cc
+FILE: ../../../third_party/dart/runtime/bin/namespace_macos.cc
+FILE: ../../../third_party/dart/runtime/bin/namespace_patch.dart
+FILE: ../../../third_party/dart/runtime/bin/namespace_win.cc
+FILE: ../../../third_party/dart/runtime/bin/options.cc
+FILE: ../../../third_party/dart/runtime/bin/options.h
+FILE: ../../../third_party/dart/runtime/bin/secure_socket_filter.cc
+FILE: ../../../third_party/dart/runtime/bin/secure_socket_filter.h
+FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/secure_socket_utils.h
+FILE: ../../../third_party/dart/runtime/bin/security_context.cc
+FILE: ../../../third_party/dart/runtime/bin/security_context.h
+FILE: ../../../third_party/dart/runtime/bin/security_context_android.cc
+FILE: ../../../third_party/dart/runtime/bin/security_context_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/security_context_linux.cc
+FILE: ../../../third_party/dart/runtime/bin/security_context_macos.cc
+FILE: ../../../third_party/dart/runtime/bin/security_context_win.cc
+FILE: ../../../third_party/dart/runtime/bin/snapshot_utils.cc
+FILE: ../../../third_party/dart/runtime/bin/snapshot_utils.h
+FILE: ../../../third_party/dart/runtime/bin/socket_base.cc
+FILE: ../../../third_party/dart/runtime/bin/socket_base.h
+FILE: ../../../third_party/dart/runtime/bin/sync_socket.cc
+FILE: ../../../third_party/dart/runtime/bin/sync_socket.h
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_android.cc
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_linux.cc
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_macos.cc
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_patch.dart
+FILE: ../../../third_party/dart/runtime/bin/sync_socket_win.cc
+FILE: ../../../third_party/dart/runtime/lib/async.cc
+FILE: ../../../third_party/dart/runtime/lib/class_id_fasta.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/containers/search_bar.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/allocations.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/dashboard.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/graph.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/profile.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/memory/snapshot.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/nav/reload.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_ref.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/singletargetcache_view.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/subtypetestcache_ref.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/subtypetestcache_view.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/timeline/dashboard.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unlinkedcall_ref.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/elements/unlinkedcall_view.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/service.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/single_target_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/subtype_test_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/timeline.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/objects/unlinked_call.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/single_target_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/subtype_test_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/timeline.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/unlinked_call.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/models/repositories/vm.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/single_target_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/subtype_test_cache.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/timeline.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/unlinked_call.dart
+FILE: ../../../third_party/dart/runtime/observatory/lib/src/repositories/vm.dart
+FILE: ../../../third_party/dart/runtime/platform/allocation.h
+FILE: ../../../third_party/dart/runtime/platform/growable_array.h
+FILE: ../../../third_party/dart/runtime/vm/compilation_trace.cc
+FILE: ../../../third_party/dart/runtime/vm/compilation_trace.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_arm.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/locations_helpers_test.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/call_specializer.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/call_specializer.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/kernel_binary_flowgraph.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/frontend/prologue_builder.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/jit/jit_call_specializer.h
+FILE: ../../../third_party/dart/runtime/vm/constants_x86.h
+FILE: ../../../third_party/dart/runtime/vm/debugger_api_impl_test.h
+FILE: ../../../third_party/dart/runtime/vm/dwarf.cc
+FILE: ../../../third_party/dart/runtime/vm/dwarf.h
+FILE: ../../../third_party/dart/runtime/vm/fixed_cache.h
+FILE: ../../../third_party/dart/runtime/vm/fixed_cache_test.cc
+FILE: ../../../third_party/dart/runtime/vm/gc_compactor.cc
+FILE: ../../../third_party/dart/runtime/vm/gc_compactor.h
+FILE: ../../../third_party/dart/runtime/vm/gdb_helpers.cc
+FILE: ../../../third_party/dart/runtime/vm/image_snapshot.cc
+FILE: ../../../third_party/dart/runtime/vm/image_snapshot.h
+FILE: ../../../third_party/dart/runtime/vm/json_writer.cc
+FILE: ../../../third_party/dart/runtime/vm/json_writer.h
+FILE: ../../../third_party/dart/runtime/vm/kernel_binary.h
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks.h
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_arm64.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_jemalloc.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_tcmalloc.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_test.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_unsupported.cc
+FILE: ../../../third_party/dart/runtime/vm/malloc_hooks_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/mixin_test.cc
+FILE: ../../../third_party/dart/runtime/vm/stack_trace.cc
+FILE: ../../../third_party/dart/runtime/vm/stack_trace.h
+FILE: ../../../third_party/dart/runtime/vm/timeline_android.cc
+FILE: ../../../third_party/dart/runtime/vm/timeline_fuchsia.cc
+FILE: ../../../third_party/dart/runtime/vm/timeline_linux.cc
+FILE: ../../../third_party/dart/runtime/vm/timeline_macos.cc
+FILE: ../../../third_party/dart/runtime/vm/timeline_win.cc
+FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.cc
+FILE: ../../../third_party/dart/runtime/vm/zone_text_buffer.h
+FILE: ../../../third_party/dart/sdk/lib/_http/overrides.dart
+FILE: ../../../third_party/dart/sdk/lib/core/bigint.dart
+FILE: ../../../third_party/dart/sdk/lib/internal/linked_list.dart
+FILE: ../../../third_party/dart/sdk/lib/internal/patch.dart
+FILE: ../../../third_party/dart/sdk/lib/io/embedder_config.dart
+FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
+FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
+FILE: ../../../third_party/dart/sdk/lib/io/sync_socket.dart
+FILE: ../../../third_party/dart/sdk/lib/vmservice/named_lookup.dart
+----------------------------------------------------------------------------------------------------
+Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
+for details. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+    * Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+      copyright notice, this list of conditions and the following
+      disclaimer in the documentation and/or other materials provided
+      with the distribution.
+    * Neither the name of Google Inc. nor the names of its
+      contributors may be used to endorse or promote products derived
+      from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/bin/process_test.cc + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/bin/process_test.cc
@@ -5289,6 +5288,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart
 TYPE: LicenseType.mit
 FILE: ../../../third_party/dart/runtime/lib/bigint.dart
+FILE: ../../../third_party/dart/sdk/lib/core/bigint.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2003-2005  Tom Wu
 Copyright (c) 2012 Adam Singer (adam@solvr.io)
@@ -5326,6 +5326,7 @@ LIBRARY: dart
 ORIGIN: ../../../third_party/dart/runtime/lib/bigint.dart + ../../../third_party/dart/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/lib/bigint.dart
+FILE: ../../../third_party/dart/sdk/lib/core/bigint.dart
 ----------------------------------------------------------------------------------------------------
 Copyright 2009 The Go Authors. All rights reserved.
 
