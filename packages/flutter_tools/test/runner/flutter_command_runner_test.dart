@@ -38,21 +38,22 @@ void main() {
 
   testUsingContext('getRepoPackages', () {
     final FlutterCommandRunner runner = new FlutterCommandRunner();
-    fs.directory(fs.path.join(Cache.flutterRoot, 'examples'))
+    final String root = fs.path.absolute(Cache.flutterRoot);
+    fs.directory(fs.path.join(root, 'examples'))
       .createSync(recursive: true);
-    fs.directory(fs.path.join(Cache.flutterRoot, 'packages'))
+    fs.directory(fs.path.join(root, 'packages'))
       .createSync(recursive: true);
-    fs.directory(fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'aatool'))
+    fs.directory(fs.path.join(root, 'dev', 'tools', 'aatool'))
       .createSync(recursive: true);
 
-    fs.file(fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'pubspec.yaml')).createSync();
-    fs.file(fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml')).createSync();
+    fs.file(fs.path.join(root, 'dev', 'tools', 'pubspec.yaml')).createSync();
+    fs.file(fs.path.join(root, 'dev', 'tools', 'aatool', 'pubspec.yaml')).createSync();
 
     final List<String> packagePaths = runner.getRepoPackages()
       .map((Directory d) => d.path).toList();
     expect(packagePaths, <String>[
-      fs.directory(fs.path.join(Cache.flutterRoot, 'dev', 'tools', 'aatool')).path,
-      fs.directory(fs.path.join(Cache.flutterRoot, 'dev', 'tools')).path,
+      fs.directory(fs.path.join(root, 'dev', 'tools', 'aatool')).path,
+      fs.directory(fs.path.join(root, 'dev', 'tools')).path,
     ]);
   },  overrides: <Type, Generator>{ FileSystem: () => fs } );
 }
