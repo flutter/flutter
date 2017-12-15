@@ -60,85 +60,89 @@ class TravelDestinationItem extends StatelessWidget {
     final TextStyle titleStyle = theme.textTheme.headline.copyWith(color: Colors.white);
     final TextStyle descriptionStyle = theme.textTheme.subhead;
 
-    return new Container(
-      padding: const EdgeInsets.all(8.0),
-      height: height,
-      child: new Card(
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // photo and title
-            new SizedBox(
-              height: 184.0,
-              child: new Stack(
-                children: <Widget>[
-                  new Positioned.fill(
-                    child: new Image.asset(
-                      destination.assetName,
-                      package: destination.assetPackage,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  new Positioned(
-                    bottom: 16.0,
-                    left: 16.0,
-                    right: 16.0,
-                    child: new FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerLeft,
-                      child: new Text(destination.title,
-                        style: titleStyle,
+    return new SafeArea(
+      top: false,
+      bottom: false,
+      child: new Container(
+        padding: const EdgeInsets.all(8.0),
+        height: height,
+        child: new Card(
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              // photo and title
+              new SizedBox(
+                height: 184.0,
+                child: new Stack(
+                  children: <Widget>[
+                    new Positioned.fill(
+                      child: new Image.asset(
+                        destination.assetName,
+                        package: destination.assetPackage,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-            // description and share/expore buttons
-            new Expanded(
-              child: new Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
-                child: new DefaultTextStyle(
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: descriptionStyle,
-                  child: new Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      // three line description
-                      new Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
-                        child: new Text(
-                          destination.description[0],
-                          style: descriptionStyle.copyWith(color: Colors.black54),
+                    new Positioned(
+                      bottom: 16.0,
+                      left: 16.0,
+                      right: 16.0,
+                      child: new FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: new Text(destination.title,
+                          style: titleStyle,
                         ),
                       ),
-                      new Text(destination.description[1]),
-                      new Text(destination.description[2]),
-                    ],
+                    ),
+                  ],
+                ),
+              ),
+              // description and share/expore buttons
+              new Expanded(
+                child: new Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+                  child: new DefaultTextStyle(
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: descriptionStyle,
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        // three line description
+                        new Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: new Text(
+                            destination.description[0],
+                            style: descriptionStyle.copyWith(color: Colors.black54),
+                          ),
+                        ),
+                        new Text(destination.description[1]),
+                        new Text(destination.description[2]),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            // share, explore buttons
-            new ButtonTheme.bar(
-              child: new ButtonBar(
-                alignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  new FlatButton(
-                    child: const Text('SHARE'),
-                    textColor: Colors.amber.shade500,
-                    onPressed: () { /* do nothing */ },
-                  ),
-                  new FlatButton(
-                    child: const Text('EXPLORE'),
-                    textColor: Colors.amber.shade500,
-                    onPressed: () { /* do nothing */ },
-                  ),
-                ],
+              // share, explore buttons
+              new ButtonTheme.bar(
+                child: new ButtonBar(
+                  alignment: MainAxisAlignment.start,
+                  children: <Widget>[
+                    new FlatButton(
+                      child: const Text('SHARE'),
+                      textColor: Colors.amber.shade500,
+                      onPressed: () { /* do nothing */ },
+                    ),
+                    new FlatButton(
+                      child: const Text('EXPLORE'),
+                      textColor: Colors.amber.shade500,
+                      onPressed: () { /* do nothing */ },
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
