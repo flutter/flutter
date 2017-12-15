@@ -39,12 +39,16 @@ typedef List<CustomPainterSemantics> SemanticsBuilderCallback(Size size);
 /// is provided, to check if the new instance actually represents different
 /// information.
 ///
-/// The most efficient way to trigger a repaint is to either extend this class
-/// and supply a `repaint` argument to the constructor of the [CustomPainter],
-/// where that object notifies its listeners when it is time to repaint, or to
-/// extend [Listenable] (e.g. via [ChangeNotifier]) and implement
-/// [CustomPainter], so that the object itself provides the notifications
-/// directly. In either case, the [CustomPaint] widget or [RenderCustomPaint]
+/// The most efficient way to trigger a repaint is to either:
+///
+/// * Extend this class and supply a `repaint` argument to the constructor of
+///   the [CustomPainter], where that object notifies its listeners when it is
+///   time to repaint.
+/// * Extend [Listenable] (e.g. via [ChangeNotifier]) and implement
+///   [CustomPainter], so that the object itself provides the notifications
+///   directly.
+///
+/// In either case, the [CustomPaint] widget or [RenderCustomPaint]
 /// render object will listen to the [Listenable] and repaint whenever the
 /// animation ticks, avoiding both the build and layout phases of the pipeline.
 ///
