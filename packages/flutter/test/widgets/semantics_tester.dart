@@ -126,12 +126,16 @@ class TestSemantics {
   ///
   /// There are two ways to specify this property: as an `int` that encodes the
   /// flags as a bit field, or as a `List<SemanticsFlags>` that are _on_.
+  ///
+  /// Using `List<SemanticsFlags>` is recommended due to better readability.
   final dynamic flags;
 
   /// The [SemanticsAction]s set on this node.
   ///
   /// There are two ways to specify this property: as an `int` that encodes the
   /// actions as a bit field, or as a `List<SemanticsAction>`.
+  ///
+  /// Using `List<SemanticsAction>` is recommended due to better readability.
   ///
   /// The tester does not check the function corresponding to the action, but
   /// only its existence.
