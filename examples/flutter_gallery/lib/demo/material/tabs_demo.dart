@@ -154,15 +154,19 @@ class TabsDemo extends StatelessWidget {
           },
           body: new TabBarView(
             children: _allPages.keys.map((_Page page) {
-              return new ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                itemExtent: _CardDataItem.height,
-                children: _allPages[page].map((_CardData data) {
-                  return new Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: new _CardDataItem(page: page, data: data),
-                  );
-                }).toList(),
+              return new SafeArea(
+                top: false,
+                bottom: false,
+                child: new ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  itemExtent: _CardDataItem.height,
+                  children: _allPages[page].map((_CardData data) {
+                    return new Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0),
+                      child: new _CardDataItem(page: page, data: data),
+                    );
+                  }).toList(),
+                ),
               );
             }).toList(),
           ),
