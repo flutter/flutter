@@ -1345,7 +1345,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
 
   ASSERT_TRUE(Snapshot());
 
-  ASSERT_EQ(paragraph->records_.size(), 7ull);
+  ASSERT_EQ(paragraph->records_.size(), 6ull);
   EXPECT_DOUBLE_EQ(paragraph->records_[0].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[1].offset().y(), 126);
@@ -1354,7 +1354,6 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(NewlineParagraph)) {
   EXPECT_DOUBLE_EQ(paragraph->records_[4].offset().x(), 0);
   EXPECT_DOUBLE_EQ(paragraph->records_[3].offset().y(), 266);
   EXPECT_DOUBLE_EQ(paragraph->records_[5].offset().x(), 0);
-  EXPECT_DOUBLE_EQ(paragraph->records_[6].offset().x(), 0);
 }
 
 TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(EmojiParagraph)) {

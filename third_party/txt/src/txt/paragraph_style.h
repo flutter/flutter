@@ -23,6 +23,7 @@
 #include "font_style.h"
 #include "font_weight.h"
 #include "minikin/LineBreaker.h"
+#include "text_style.h"
 
 namespace txt {
 
@@ -58,6 +59,8 @@ class ParagraphStyle {
   // kBreakStrategy_Balanced will balance between the two.
   minikin::BreakStrategy break_strategy =
       minikin::BreakStrategy::kBreakStrategy_Greedy;
+
+  TextStyle GetTextStyle() const;
 };
 
 }  // namespace txt
