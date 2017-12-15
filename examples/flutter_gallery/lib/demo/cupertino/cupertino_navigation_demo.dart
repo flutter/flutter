@@ -132,8 +132,13 @@ class CupertinoDemoTab1 extends StatelessWidget {
             trailing: const ExitButton(),
           ),
           new SliverPadding(
-            // Top media query padding already consumed by CupertinoSliverNavigationBar.
-            padding: MediaQuery.of(context).removePadding(removeTop: true).padding,
+            // Top media padding consumed by CupertinoSliverNavigationBar.
+            // Left/Right media padding consumed by Tab1RowItem.
+            padding: MediaQuery.of(context).removePadding(
+              removeTop: true,
+              removeLeft: true,
+              removeRight: true,
+            ).padding,
             sliver: new SliverList(
               delegate: new SliverChildBuilderDelegate(
                 (BuildContext context, int index) {
@@ -175,49 +180,53 @@ class Tab1RowItem extends StatelessWidget {
           ),
         ));
       },
-      child: new Padding(
-        padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
-        child: new Row(
-          children: <Widget>[
-            new Container(
-              height: 60.0,
-              width: 60.0,
-              decoration: new BoxDecoration(
-                color: color,
-                borderRadius: new BorderRadius.circular(8.0),
-              ),
-            ),
-            new Expanded(
-              child: new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new Text(colorName),
-                    const Padding(padding: const EdgeInsets.only(top: 8.0)),
-                    const Text(
-                      'Buy this cool color',
-                      style: const TextStyle(
-                        color: const Color(0xFF8E8E93),
-                        fontSize: 13.0,
-                        fontWeight: FontWeight.w300,
-                      ),
-                    ),
-                  ],
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Padding(
+          padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0, right: 8.0),
+          child: new Row(
+            children: <Widget>[
+              new Container(
+                height: 60.0,
+                width: 60.0,
+                decoration: new BoxDecoration(
+                  color: color,
+                  borderRadius: new BorderRadius.circular(8.0),
                 ),
               ),
-            ),
-            new CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.plus_circled, color: CupertinoColors.activeBlue),
-              onPressed: () { },
-            ),
-            new CupertinoButton(
-              padding: EdgeInsets.zero,
-              child: const Icon(CupertinoIcons.share, color: CupertinoColors.activeBlue),
-              onPressed: () { },
-            ),
-          ],
+              new Expanded(
+                child: new Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      new Text(colorName),
+                      const Padding(padding: const EdgeInsets.only(top: 8.0)),
+                      const Text(
+                        'Buy this cool color',
+                        style: const TextStyle(
+                          color: const Color(0xFF8E8E93),
+                          fontSize: 13.0,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              new CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.plus_circled, color: CupertinoColors.activeBlue),
+                onPressed: () { },
+              ),
+              new CupertinoButton(
+                padding: EdgeInsets.zero,
+                child: const Icon(CupertinoIcons.share, color: CupertinoColors.activeBlue),
+                onPressed: () { },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -273,118 +282,122 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
         middle: new Text(widget.colorName),
         trailing: const ExitButton(),
       ),
-      child: new ListView(
-        children: <Widget>[
-          const Padding(padding: const EdgeInsets.only(top: 16.0)),
-          new Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: new Row(
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                new Container(
-                  height: 128.0,
-                  width: 128.0,
-                  decoration: new BoxDecoration(
-                    color: widget.color,
-                    borderRadius: new BorderRadius.circular(24.0),
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new ListView(
+          children: <Widget>[
+            const Padding(padding: const EdgeInsets.only(top: 16.0)),
+            new Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: new Row(
+                mainAxisSize: MainAxisSize.max,
+                children: <Widget>[
+                  new Container(
+                    height: 128.0,
+                    width: 128.0,
+                    decoration: new BoxDecoration(
+                      color: widget.color,
+                      borderRadius: new BorderRadius.circular(24.0),
+                    ),
                   ),
-                ),
-                const Padding(padding: const EdgeInsets.only(left: 18.0)),
-                new Expanded(
-                  child: new Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      new Text(
-                        widget.colorName,
-                        style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                      ),
-                      const Padding(padding: const EdgeInsets.only(top: 6.0)),
-                      new Text(
-                        'Item number ${widget.index}',
-                        style: const TextStyle(
-                          color: const Color(0xFF8E8E93),
-                          fontSize: 16.0,
-                          fontWeight: FontWeight.w100,
+                  const Padding(padding: const EdgeInsets.only(left: 18.0)),
+                  new Expanded(
+                    child: new Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        new Text(
+                          widget.colorName,
+                          style: const TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const Padding(padding: const EdgeInsets.only(top: 20.0)),
-                      new Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          new CupertinoButton(
-                            color: CupertinoColors.activeBlue,
-                            minSize: 30.0,
-                            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                            borderRadius: new BorderRadius.circular(32.0),
-                            child: const Text(
-                              'GET',
-                              style: const TextStyle(
-                                fontSize: 14.0,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: -0.28,
+                        const Padding(padding: const EdgeInsets.only(top: 6.0)),
+                        new Text(
+                          'Item number ${widget.index}',
+                          style: const TextStyle(
+                            color: const Color(0xFF8E8E93),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w100,
+                          ),
+                        ),
+                        const Padding(padding: const EdgeInsets.only(top: 20.0)),
+                        new Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            new CupertinoButton(
+                              color: CupertinoColors.activeBlue,
+                              minSize: 30.0,
+                              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                              borderRadius: new BorderRadius.circular(32.0),
+                              child: const Text(
+                                'GET',
+                                style: const TextStyle(
+                                  fontSize: 14.0,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.28,
+                                ),
                               ),
+                              onPressed: () { },
                             ),
-                            onPressed: () { },
-                          ),
-                          new CupertinoButton(
-                            color: CupertinoColors.activeBlue,
-                            minSize: 30.0,
-                            padding: EdgeInsets.zero,
-                            borderRadius: new BorderRadius.circular(32.0),
-                            child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
-                            onPressed: () { },
-                          ),
-                        ],
-                      ),
-                    ],
+                            new CupertinoButton(
+                              color: CupertinoColors.activeBlue,
+                              minSize: 30.0,
+                              padding: EdgeInsets.zero,
+                              borderRadius: new BorderRadius.circular(32.0),
+                              child: const Icon(CupertinoIcons.ellipsis, color: CupertinoColors.white),
+                              onPressed: () { },
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          const Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 28.0, bottom: 8.0),
-            child: const Text(
-              'USERS ALSO LIKED',
-              style: const TextStyle(
-                color: const Color(0xFF646464),
-                letterSpacing: -0.60,
-                fontSize: 15.0,
-                fontWeight: FontWeight.w500,
+                ],
               ),
             ),
-          ),
-          new SizedBox(
-            height: 200.0,
-            child: new ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: 10,
-              itemExtent: 160.0,
-              itemBuilder: (BuildContext context, int index) {
-                return new Padding(
-                  padding: const EdgeInsets.only(left: 16.0),
-                  child: new Container(
-                    decoration: new BoxDecoration(
-                      borderRadius: new BorderRadius.circular(8.0),
-                      color: relatedColors[index],
-                    ),
-                    child: new Center(
-                      child: new CupertinoButton(
-                        child: const Icon(
-                          CupertinoIcons.plus_circled,
-                          color: CupertinoColors.white,
-                          size: 36.0,
+            const Padding(
+              padding: const EdgeInsets.only(left: 16.0, top: 28.0, bottom: 8.0),
+              child: const Text(
+                'USERS ALSO LIKED',
+                style: const TextStyle(
+                  color: const Color(0xFF646464),
+                  letterSpacing: -0.60,
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            new SizedBox(
+              height: 200.0,
+              child: new ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 10,
+                itemExtent: 160.0,
+                itemBuilder: (BuildContext context, int index) {
+                  return new Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: new Container(
+                      decoration: new BoxDecoration(
+                        borderRadius: new BorderRadius.circular(8.0),
+                        color: relatedColors[index],
+                      ),
+                      child: new Center(
+                        child: new CupertinoButton(
+                          child: const Icon(
+                            CupertinoIcons.plus_circled,
+                            color: CupertinoColors.white,
+                            size: 36.0,
+                          ),
+                          onPressed: () { },
                         ),
-                        onPressed: () { },
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -412,112 +425,116 @@ class Tab2Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return new Padding(
       padding: const EdgeInsets.all(16.0),
-      child: new ClipRRect(
-        borderRadius: const BorderRadius.all(const Radius.circular(16.0)),
-        child: new Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            new Container(
-              decoration: const BoxDecoration(
-                color: const Color(0xFFE5E5E5),
-              ),
-              child: new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    const Text(
-                      'SUPPORT TICKET',
-                      style: const TextStyle(
-                        color: const Color(0xFF646464),
-                        letterSpacing: -0.8,
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Text(
-                      'Show More',
-                      style: const TextStyle(
-                        color: const Color(0xFF646464),
-                        letterSpacing: -0.6,
-                        fontSize: 12.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new ClipRRect(
+          borderRadius: const BorderRadius.all(const Radius.circular(16.0)),
+          child: new Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              new Container(
+                decoration: const BoxDecoration(
+                  color: const Color(0xFFE5E5E5),
                 ),
-              ),
-            ),
-            new Container(
-              decoration: const BoxDecoration(
-                color: const Color(0xFFF3F3F3),
-              ),
-              child: new Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
-                child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    const Text(
-                      'Product or product packaging damaged during transit',
-                      style: const TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: -0.6,
-                      ),
-                    ),
-                    const Padding(padding: const EdgeInsets.only(top: 16.0)),
-                    const Text(
-                      'REVIEWERS',
-                      style: const TextStyle(
-                        color: const Color(0xFF646464),
-                        fontSize: 12.0,
-                        letterSpacing: -0.6,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const Padding(padding: const EdgeInsets.only(top: 8.0)),
-                    new Row(
-                      children: <Widget>[
-                        new Container(
-                          width: 44.0,
-                          height: 44.0,
-                          decoration: const BoxDecoration(
-                            image: const DecorationImage(
-                              image: const AssetImage(
-                                'cupertino_navigation/person1.jpg',
-                                package: _kGalleryAssetsPackage
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const Padding(padding: const EdgeInsets.only(left: 8.0)),
-                        new Container(
-                          width: 44.0,
-                          height: 44.0,
-                          decoration: const BoxDecoration(
-                            image: const DecorationImage(
-                              image: const AssetImage(
-                                'cupertino_navigation/person2.jpg',
-                                package: _kGalleryAssetsPackage
-                              ),
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const Padding(padding: const EdgeInsets.only(left: 2.0)),
-                        const Icon(
-                          CupertinoIcons.check_mark_circled,
+                child: new Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                  child: new Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      const Text(
+                        'SUPPORT TICKET',
+                        style: const TextStyle(
                           color: const Color(0xFF646464),
-                          size: 20.0,
+                          letterSpacing: -0.8,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ],
-                    ),
-                  ],
+                      ),
+                      const Text(
+                        'Show More',
+                        style: const TextStyle(
+                          color: const Color(0xFF646464),
+                          letterSpacing: -0.6,
+                          fontSize: 12.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              new Container(
+                decoration: const BoxDecoration(
+                  color: const Color(0xFFF3F3F3),
+                ),
+                child: new Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 12.0),
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      const Text(
+                        'Product or product packaging damaged during transit',
+                        style: const TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: -0.6,
+                        ),
+                      ),
+                      const Padding(padding: const EdgeInsets.only(top: 16.0)),
+                      const Text(
+                        'REVIEWERS',
+                        style: const TextStyle(
+                          color: const Color(0xFF646464),
+                          fontSize: 12.0,
+                          letterSpacing: -0.6,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const Padding(padding: const EdgeInsets.only(top: 8.0)),
+                      new Row(
+                        children: <Widget>[
+                          new Container(
+                            width: 44.0,
+                            height: 44.0,
+                            decoration: const BoxDecoration(
+                              image: const DecorationImage(
+                                image: const AssetImage(
+                                  'cupertino_navigation/person1.jpg',
+                                  package: _kGalleryAssetsPackage
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const Padding(padding: const EdgeInsets.only(left: 8.0)),
+                          new Container(
+                            width: 44.0,
+                            height: 44.0,
+                            decoration: const BoxDecoration(
+                              image: const DecorationImage(
+                                image: const AssetImage(
+                                  'cupertino_navigation/person2.jpg',
+                                  package: _kGalleryAssetsPackage
+                                ),
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const Padding(padding: const EdgeInsets.only(left: 2.0)),
+                          const Icon(
+                            CupertinoIcons.check_mark_circled,
+                            color: const Color(0xFF646464),
+                            size: 20.0,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -623,11 +640,13 @@ class Tab2ConversationRow extends StatelessWidget {
           : Tab2ConversationBubbleColor.gray,
       ),
     );
-    return new Row(
-      mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
-      children: children,
+    return new SafeArea(
+      child: new Row(
+        mainAxisAlignment: isSelf ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: isSelf ? CrossAxisAlignment.center : CrossAxisAlignment.end,
+        children: children,
+      ),
     );
   }
 }
@@ -703,10 +722,14 @@ class CupertinoDemoTab3 extends StatelessWidget {
                 height: 44.0,
                 child: new Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: new Row(children: <Widget>[ const Text(
-                    'Sign in',
-                    style: const TextStyle(color: CupertinoColors.activeBlue),
-                  ) ]),
+                  child: new SafeArea(
+                    top: false,
+                    bottom: false,
+                      child: new Row(children: <Widget>[ const Text(
+                      'Sign in',
+                      style: const TextStyle(color: CupertinoColors.activeBlue),
+                    ) ]),
+                  ),
                 ),
               ),
             ),
