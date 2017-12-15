@@ -44,7 +44,8 @@ void main() {
 
     testUsingContext('returns no devices if none are attached', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs()).thenAnswer((_) => new Future<String>.value(''));
+      when(iMobileDevice.getAvailableDeviceIDs())
+          .thenAnswer((invocation) => new Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
@@ -53,7 +54,8 @@ void main() {
 
     testUsingContext('returns attached devices', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs()).thenAnswer((_) => new Future<String>.value('''
+      when(iMobileDevice.getAvailableDeviceIDs())
+          .thenAnswer((invocation) => new Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
@@ -80,20 +82,20 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('suppresses non-Flutter lines from output', () async {
-      when(mockIMobileDevice.startLogger()).thenAnswer((_) {
+      when(mockIMobileDevice.startLogger()).thenAnswer((invocation) {
         final Process mockProcess = new MockProcess();
         when(mockProcess.stdout)
-            .thenAnswer((_) => new Stream<List<int>>.fromIterable(<List<int>>['''
+            .thenAnswer((invocation) => new Stream<List<int>>.fromIterable(<List<int>>['''
   Runner(Flutter)[297] <Notice>: A is for ari
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
   Runner(Flutter)[297] <Notice>: I is for ichigo
   Runner(UIKit)[297] <Notice>: E is for enpitsu"
   '''.codeUnits]));
-        when(mockProcess.stderr).thenAnswer((_) => const Stream<List<int>>.empty());
+        when(mockProcess.stderr).thenAnswer((invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((_) => new Future<int>.delayed(Duration.ZERO, () => 0));
+            .thenAnswer((invocation) => new Future<int>.delayed(Duration.ZERO, () => 0));
         return new Future<Process>.value(mockProcess);
       });
 

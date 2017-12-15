@@ -120,15 +120,15 @@ void main() {
 
       when(mockProcessManager.start(
         argThat(contains('openssl')), environment: any, workingDirectory: any,
-      )).thenAnswer((_) => new Future<Process>.value(mockProcess));
+      )).thenAnswer((invocation) => new Future<Process>.value(mockProcess));
 
       when(mockProcess.stdin).thenReturn(mockStdIn);
-      when(mockProcess.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
+      when(mockProcess.stdout).thenAnswer((invocation) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'
         ))
       ));
-      when(mockProcess.stderr).thenAnswer((_) => mockStdErr);
+      when(mockProcess.stderr).thenAnswer((invocation) => mockStdErr);
       when(mockProcess.exitCode).thenReturn(0);
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
@@ -178,15 +178,15 @@ void main() {
 
       when(mockProcessManager.start(
         argThat(contains('openssl')), environment: any, workingDirectory: any,
-      )).thenAnswer((_) => new Future<Process>.value(mockOpenSslProcess));
+      )).thenAnswer((invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
+      when(mockOpenSslProcess.stdout).thenAnswer((invocation) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
         ))
       ));
-      when(mockOpenSslProcess.stderr).thenAnswer((_) => mockOpenSslStdErr);
+      when(mockOpenSslProcess.stderr).thenAnswer((invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenReturn(0);
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
@@ -247,15 +247,15 @@ void main() {
 
       when(mockProcessManager.start(
         argThat(contains('openssl')), environment: any, workingDirectory: any,
-      )).thenAnswer((_) => new Future<Process>.value(mockOpenSslProcess));
+      )).thenAnswer((invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
+      when(mockOpenSslProcess.stdout).thenAnswer((invocation) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US'
         )),
       ));
-      when(mockOpenSslProcess.stderr).thenAnswer((_) => mockOpenSslStdErr);
+      when(mockOpenSslProcess.stderr).thenAnswer((invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenReturn(0);
 
       final String developmentTeam = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: false);
@@ -308,15 +308,15 @@ void main() {
 
       when(mockProcessManager.start(
         argThat(contains('openssl')), environment: any, workingDirectory: any,
-      )).thenAnswer((_) => new Future<Process>.value(mockOpenSslProcess));
+      )).thenAnswer((invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
+      when(mockOpenSslProcess.stdout).thenAnswer((invocation) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
         ))
       ));
-      when(mockOpenSslProcess.stderr).thenAnswer((_) => mockOpenSslStdErr);
+      when(mockOpenSslProcess.stderr).thenAnswer((invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenReturn(0);
       when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
@@ -376,15 +376,15 @@ void main() {
 
       when(mockProcessManager.start(
         argThat(contains('openssl')), environment: any, workingDirectory: any,
-      )).thenAnswer((_) => new Future<Process>.value(mockOpenSslProcess));
+      )).thenAnswer((invocation) => new Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((_) => new Stream<List<int>>.fromFuture(
+      when(mockOpenSslProcess.stdout).thenAnswer((invocation) => new Stream<List<int>>.fromFuture(
         new Future<List<int>>.value(UTF8.encode(
           'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'
         ))
       ));
-      when(mockOpenSslProcess.stderr).thenAnswer((_) => mockOpenSslStdErr);
+      when(mockOpenSslProcess.stderr).thenAnswer((invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenReturn(0);
       when(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
 

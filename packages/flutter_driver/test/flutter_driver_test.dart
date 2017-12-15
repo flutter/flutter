@@ -41,7 +41,7 @@ void main() {
       when(mockVM.isolates).thenReturn(<VMRunnableIsolate>[mockIsolate]);
       when(mockIsolate.loadRunnable()).thenReturn(mockIsolate);
       when(mockIsolate.invokeExtension(any, any)).thenAnswer(
-          (_) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
+          (invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       vmServiceConnectFunction = (String url) {
         return new Future<VMServiceClientConnection>.value(
           new VMServiceClientConnection(mockClient, mockPeer)
@@ -56,16 +56,16 @@ void main() {
 
     test('connects to isolate paused at start', () async {
       final List<String> connectionLog = <String>[];
-      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((_) {
+      when(mockPeer.sendRequest('streamListen', any)).thenAnswer((invocation) {
         connectionLog.add('streamListen');
         return null;
       });
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseStartEvent());
-      when(mockIsolate.resume()).thenAnswer((_) {
+      when(mockIsolate.resume()).thenAnswer((invocation) {
         connectionLog.add('resume');
         return new Future<Null>.value();
       });
-      when(mockIsolate.onExtensionAdded).thenAnswer((_) {
+      when(mockIsolate.onExtensionAdded).thenAnswer((invocation) {
         connectionLog.add('onExtensionAdded');
         return new Stream<String>.fromIterable(<String>['ext.flutter.driver']);
       });
@@ -78,7 +78,7 @@ void main() {
 
     test('connects to isolate paused mid-flight', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((_) => new Future<Null>.value());
+      when(mockIsolate.resume()).thenAnswer((invocation) => new Future<Null>.value());
 
       final FlutterDriver driver = await FlutterDriver.connect(dartVmServiceUrl: '');
       expect(driver, isNotNull);
@@ -91,7 +91,7 @@ void main() {
     // just fine.
     test('connects despite losing the race to resume isolate', () async {
       when(mockIsolate.pauseEvent).thenReturn(new MockVMPauseBreakpointEvent());
-      when(mockIsolate.resume()).thenAnswer((_) {
+      when(mockIsolate.resume()).thenAnswer((invocation) {
         // This needs to be wrapped in a closure to not be considered uncaught
         // by package:test
         return new Future<Null>.error(new rpc.RpcException(101, ''));
@@ -125,13 +125,13 @@ void main() {
 
     test('checks the health of the driver extension', () async {
       when(mockIsolate.invokeExtension(any, any)).thenAnswer(
-          (_) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
+          (invocation) => makeMockResponse(<String, dynamic>{'status': 'ok'}));
       final Health result = await driver.checkHealth();
       expect(result.status, HealthStatus.ok);
     });
 
     test('closes connection', () async {
-      when(mockClient.close()).thenAnswer((_) => new Future<Null>.value());
+      when(mockClient.close()).thenAnswer((invocation) => new Future<Null>.value());
       await driver.close();
     });
 
@@ -234,7 +234,7 @@ void main() {
       test('clears timeline', () async {
         bool clearWasCalled = false;
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((_) async {
+            .thenAnswer((invocation) async {
           clearWasCalled = true;
           return null;
         });
@@ -250,24 +250,24 @@ void main() {
         log = <String>[];
 
         when(mockPeer.sendRequest('_clearVMTimeline', argThat(equals(<String, dynamic>{}))))
-            .thenAnswer((_) async {
+            .thenAnswer((invocation) async {
           log.add('clear');
           return null;
         });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[all]'}))))
-            .thenAnswer((_) async {
+            .thenAnswer((invocation) async {
           log.add('startTracing');
           return null;
         });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-            .thenAnswer((_) async {
+            .thenAnswer((invocation) async {
           log.add('stopTracing');
           return null;
         });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((invocation) async {
           log.add('download');
           return <String, dynamic> {
             'traceEvents': <dynamic>[
@@ -316,18 +316,18 @@ void main() {
         bool stopTracingCalled = false;
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[Dart, GC, Compiler]'}))))
-          .thenAnswer((_) async {
+          .thenAnswer((invocation) async {
             startTracingCalled = true;
             return null;
           });
 
         when(mockPeer.sendRequest('_setVMTimelineFlags', argThat(equals(<String, dynamic>{'recordedStreams': '[]'}))))
-          .thenAnswer((_) async {
+          .thenAnswer((invocation) async {
             stopTracingCalled = true;
             return null;
           });
 
-        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((_) async {
+        when(mockPeer.sendRequest('_getVMTimeline')).thenAnswer((invocation) async {
           return <String, dynamic> {
             'traceEvents': <dynamic>[
               <String, String>{
