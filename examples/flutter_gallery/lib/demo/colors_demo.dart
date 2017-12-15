@@ -64,13 +64,17 @@ class ColorItem extends StatelessWidget {
       height: kColorItemHeight,
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       color: color,
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          new Text('$prefix$index'),
-          new Text(colorString()),
-        ],
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            new Text('$prefix$index'),
+            new Text(colorString()),
+          ],
+        ),
       ),
     );
   }
