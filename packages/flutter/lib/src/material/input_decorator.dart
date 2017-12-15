@@ -21,6 +21,8 @@ enum InputBorderType {
   none,
 }
 
+// Defines the gap in the InputDecorator's outline border where the
+// floating label will appear.
 class _InputBorderGap extends ChangeNotifier {
   double _start;
   double get start => _start;
@@ -54,6 +56,7 @@ class _InputBorderGap extends ChangeNotifier {
   int get hashCode => hashValues(start, extent);
 }
 
+// Passes the _InputBorderGap parameters along to an InputBorder's paint method.
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
     Listenable repaint,
@@ -87,6 +90,10 @@ class _InputBorderPainter extends CustomPainter {
   }
 }
 
+// An analog of AnimatedContainer, which can animate its shaped border, for
+// InputBorder. This specialized animated container is needed because the
+// _InputBorderGap, which is computed at layout time, is required by the
+// InputBorder's paint method.
 class _BorderContainer extends StatefulWidget {
   const _BorderContainer({
     Key key,
@@ -162,6 +169,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   }
 }
 
+// Paints an InputDecorator's outline or underline border.
 class InputBorder extends ShapeBorder {
   InputBorder({
     this.borderType: InputBorderType.underline,
@@ -371,7 +379,6 @@ class _InputBorderTween extends Tween<InputBorder> {
   InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
 }
 
-
 // Used to "shake" the floating label to the left to the left and right
 // when the errorText first appears.
 class _Shaker extends AnimatedWidget {
@@ -575,6 +582,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
   }
 }
 
+// Identifies the children of a _RenderDecorationElement.
 enum _DecorationSlot {
   input,
   label,
@@ -588,6 +596,7 @@ enum _DecorationSlot {
   container,
 }
 
+// An analog of InputDecoration for the _Decorator widget.
 class _Decoration {
   const _Decoration({
     @required this.contentPadding,
@@ -671,6 +680,9 @@ class _Decoration {
   }
 }
 
+// A container for the layout values computed by _RenderDecoration._layout.
+// These values are used by _RenderDecoration.performLayout to position
+// all of the renderer children of a _RenderDecoration.
 class _RenderDecorationLayout {
   const _RenderDecorationLayout({
     this.boxToBaseline,
@@ -689,6 +701,7 @@ class _RenderDecorationLayout {
   final double subtextHeight;
 }
 
+// The workhorse: layout and paint a _Decorator widget's _Decoration.
 class _RenderDecoration extends RenderBox {
   _RenderDecoration({
     _Decoration decoration,
@@ -1707,24 +1720,29 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
     EdgeInsets contentPadding;
     double floatingLabelHeight;
-    switch (decoration.borderType) {
-      case InputBorderType.none:
-      case InputBorderType.underline:
-        // 4.0: the vertical gap between the inline elements and the floating label.
-        floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
-        contentPadding = decoration.isDense
-          ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-          : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+    if (decoration.isCollapsed) {
+      floatingLabelHeight = 0.0;
+      contentPadding = EdgeInsets.zero;
+    } else {
+      switch (decoration.borderType) {
+        case InputBorderType.none:
+        case InputBorderType.underline:
+          // 4.0: the vertical gap between the inline elements and the floating label.
+          floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
+          contentPadding = decoration.isDense
+            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+            break;
+        case InputBorderType.outline:
+          floatingLabelHeight = 0.0;
+          contentPadding = decoration.isDense
+            ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+            : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
+            break;
           break;
-      case InputBorderType.outline:
-        floatingLabelHeight = 0.0;
-        contentPadding = decoration.isDense
-          ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-          : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
-          break;
-        break;
-      default:
-        assert(false);
+        default:
+          assert(false);
+      }
     }
 
     return new _Decorator(

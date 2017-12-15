@@ -6,6 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+import '../rendering/recording_canvas.dart';
+
 Widget buildInputDecorator({
   InputDecoration decoration: const InputDecoration(),
   TextDirection textDirection: TextDirection.ltr,
@@ -36,24 +39,25 @@ Widget buildInputDecorator({
   );
 }
 
-Finder getInputContainer(WidgetTester tester) {
-  return find.byWidgetPredicate((Widget w) {
-    return w is AnimatedContainer && (w as dynamic).decoration != null;
-  });
+Finder findBorderPainter() {
+  return find.descendant(
+    of: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == '_BorderContainer'),
+    matching: find.byWidgetPredicate((Widget w) => w is CustomPaint),
+  );
 }
 
 double getDividerBottom(WidgetTester tester) {
-  return tester.getRect(getInputContainer(tester)).bottom;
+  final RenderBox box = InputDecorator.containerOf(tester.element(findBorderPainter()));
+  return box.size.height;
 }
 
 double getDividerWeight(WidgetTester tester) {
-  final Finder inputContainer = getInputContainer(tester);
-  if (inputContainer.evaluate().isEmpty)
-    return 0.0;
-  final AnimatedContainer input = tester.widget<AnimatedContainer>(inputContainer);
-  final BoxDecoration decoration = input.decoration;
-  final EdgeInsets insets = decoration.border?.dimensions;
-  return insets?.bottom ?? 0.0;
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic inputBorderTween = inputBorderPainter.border;
+  final Animation<double> animation = inputBorderPainter.animation;
+  final InputBorder border = inputBorderTween.evaluate(animation);
+  return border.borderSide.width;
 }
 
 double getHintOpacity(WidgetTester tester) {
@@ -82,9 +86,9 @@ void main() {
 
     // Overall height for this InputDecorator is 56dps:
     //   12 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
@@ -172,7 +176,7 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 2.0);
 
@@ -198,7 +202,7 @@ void main() {
 
   // Overall height for this InputDecorator is 40.0dps
   //   12 - top padding
-  //   16 - input text (font size 16dps)
+  //   16 - input text (ahem font size 16dps)
   //   12 - bottom padding
   testWidgets('InputDecorator input/hint layout', (WidgetTester tester) async {
     // The hint aligns with the input text
@@ -238,15 +242,15 @@ void main() {
     // label is "floating" (empty input or no focus) the layout is:
     //
     //   12 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
     //
     // When the label is not floating, it's vertically centered.
     //
     //   20 - top padding
-    //   16 - label (font size 16dps)
+    //   16 - label (ahem font size 16dps)
     //   20 - bottom padding (empty input text still appears here)
 
 
@@ -288,7 +292,7 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
     expect(tester.getRect(find.text('hint')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('hint')).bottomLeft.dy, 44.0);
     expect(getHintOpacity(tester), 1.0);
@@ -322,7 +326,7 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
     expect(tester.getRect(find.text('hint')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('hint')).bottomLeft.dy, 44.0);
     expect(getHintOpacity(tester), 0.0);
@@ -348,15 +352,15 @@ void main() {
     // label is "floating" (empty input or no focus) the layout is:
     //
     //    8 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //    8 - bottom padding
     //
     // When the label is not floating, it's vertically centered.
     //
     //   16 - top padding
-    //   16 - label (font size 16dps)
+    //   16 - label (ahem font size 16dps)
     //   16 - bottom padding (empty input text still appears here)
 
     // The label is not floating so it's vertically centered.
@@ -386,7 +390,7 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 8.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
     expect(getHintOpacity(tester), 1.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 2.0);
@@ -423,21 +427,21 @@ void main() {
     // floating the layout is:
     //
     //   12 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - help/error/counter text (ahem font size 12dps)
     //
     // When the label is not floating, it's vertically centered in the space
     // above the subtext:
     //
     //   20 - top padding
-    //   16 - label (font size 16dps)
+    //   16 - label (ahem font size 16dps)
     //   20 - bottom padding (empty input text still appears here)
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - help/error/counter text (ahem font size 12dps)
 
     // isEmpty: true, the label is not floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
@@ -470,32 +474,32 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
     expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 64.0));
     expect(tester.getRect(find.text('counter')).topRight, const Offset(788.0, 64.0));
-    //expect(find.text('helper'), findsNothing);
+    expect(find.text('helper'), findsNothing);
 
     // Overall height for this dense layout InputDecorator is 68dps. When the
     // label is floating the layout is:
     //
     //    8 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //    8 - bottom padding
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - help/error/counter text (ahem font size 12dps)
     //
     // When the label is not floating, it's vertically centered in the space
     // above the subtext:
     //
     //   16 - top padding
-    //   16 - label (font size 16dps)
+    //   16 - label (ahem font size 16dps)
     //   16 - bottom padding (empty input text still appears here)
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - help/error/counter text (ahem font size 12dps)
     // The layout of the error/helper/counter subtext doesn't change for dense layout.
     await tester.pumpWidget(
       buildInputDecorator(
@@ -517,7 +521,7 @@ void main() {
     expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
     expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
     expect(tester.getRect(find.text('label')).topLeft.dy, 8.0);
-    //expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
+    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
     expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 56.0));
@@ -564,7 +568,7 @@ void main() {
 
     // Overall height for this InputDecorator is 40dps:
     //   12 - top padding
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
     //
     // The prefix and suffix wrap the input text and are left and right justified
@@ -601,7 +605,7 @@ void main() {
 
     // Overall height for this InputDecorator is 40dps:
     //   12 - top padding
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
@@ -640,12 +644,12 @@ void main() {
 
     // Overall height for this InputDecorator is 76dps:
     //   12 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
     //    8 - below the divider line padding
-    //   12 - [counter helper/error] (font size 12dps)
+    //   12 - [counter helper/error] (ahem font size 12dps)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
     expect(tester.getTopLeft(find.text('text')).dy, 28.0);
@@ -674,7 +678,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(tester.getTopLeft(find.text('counter')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('error')), const Offset(788.0, 64.0));
-    //expect(find.text('helper'), findsNothing);
+    expect(find.text('helper'), findsNothing);
   });
 
   testWidgets('InputDecorator prefix/suffix RTL', (WidgetTester tester) async {
@@ -692,7 +696,7 @@ void main() {
 
     // Overall height for this InputDecorator is 40dps:
     //   12 - top padding
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
@@ -724,7 +728,7 @@ void main() {
 
     // Overall height for this InputDecorator is 32dps:
     //    8 - top padding
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //    8 - bottom padding
     //
     // The only difference from normal layout for this case is that the
@@ -754,7 +758,7 @@ void main() {
 
     // Overall height for this InputDecorator is 40dps:
     //   12 - top padding
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 40.0));
@@ -776,7 +780,7 @@ void main() {
     );
 
     // Overall height for this InputDecorator is 16dps:
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 16.0));
     expect(tester.getSize(find.text('text')).height, 16.0);
@@ -824,15 +828,15 @@ void main() {
     // floating the layout is:
     //
     //    12  - top padding
-    //    7.5 - floating label (font size 10dps * 0.75 = 7.5)
+    //    7.5 - floating label (ahem font size 10dps * 0.75 = 7.5)
     //    4   - floating label / input text gap
-    //   10   - input text (font size 10dps)
+    //   10   - input text (ahem font size 10dps)
     //   12   - bottom padding
     //
     // When the label is not floating, it's vertically centered.
     //
     //   17.75 - top padding
-    //      10 - label (font size 10dps)
+    //      10 - label (ahem font size 10dps)
     //   17.75 - bottom padding (empty input text still appears here)
 
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 45.5));
@@ -866,12 +870,12 @@ void main() {
     // Overall height for this InputDecorator is 76dps. When the label is
     // floating the layout is:
     //   12 - top padding
-    //   12 - floating label (font size 16dps * 0.75 = 12)
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
     //    4 - floating label / input text gap
-    //   16 - input text (font size 16dps)
+    //   16 - input text (ahem font size 16dps)
     //   12 - bottom padding
     //    8 - below the divider line padding
-    //   12 - help/error/counter text (font size 12dps)
+    //   12 - help/error/counter text (ahem font size 12dps)
 
     // Label is floating because isEmpty is false.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
@@ -897,7 +901,7 @@ void main() {
     );
     expect(
       child.toString(),
-      'InputDecorator-[<\'key\'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)',
+      "InputDecorator-[<'key'>](decoration: InputDecoration(borderType: InputBorderType.underline), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 }
