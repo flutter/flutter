@@ -196,6 +196,17 @@ abstract class MaterialLocalizations {
   /// - Russian: ср, сент. 27
   String formatMediumDate(DateTime date);
 
+  /// Formats day of week, month, day of month and year in a long-width format.
+  ///
+  /// Does not abbreviate names. Appears in spoken announcements of the date
+  /// picker invoked using [showDatePicker], when accessibility mode is on.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wednesday, September 27, 2017
+  /// - Russian: Среда, Сентябрь 27, 2017
+  String formatFullDate(DateTime date);
+
   /// Formats the month and the year of the given [date].
   ///
   /// The returned string does not contain the day of the month. This appears
@@ -275,7 +286,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   const DefaultMaterialLocalizations();
 
   // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
-  static const List<String>_shortWeekdays = const <String>[
+  static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -283,6 +294,17 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Fri',
     'Sat',
     'Sun',
+  ];
+
+  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  static const List<String> _weekdays = const <String>[
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   static const List<String> _narrowWeekdays = const <String>[
@@ -363,6 +385,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
     final String month = _shortMonths[date.month - DateTime.JANUARY];
     return '$day, $month ${date.day}';
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    final String month = _months[date.month - DateTime.JANUARY];
+    return '${_weekdays[date.weekday - DateTime.MONDAY]}, $month ${date.day}, ${date.year}';
   }
 
   @override
