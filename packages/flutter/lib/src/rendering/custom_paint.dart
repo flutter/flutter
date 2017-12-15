@@ -238,6 +238,8 @@ abstract class CustomPainter extends Listenable {
   /// repaints should be avoided as much as possible, a [RepaintBoundary] or
   /// [RenderRepaintBoundary] (or other render object with
   /// [RenderObject.isRepaintBoundary] set to true) might be helpful.
+  ///
+  /// `oldDelegate` is never null.
   bool shouldRepaint(covariant CustomPainter oldDelegate);
 
   /// Called whenever a hit test is being performed on an object that is using
