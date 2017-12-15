@@ -79,6 +79,7 @@ class MaterialApp extends StatefulWidget {
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
     Key key,
+    this.navigatorKey,
     this.title: '',
     this.onGenerateTitle,
     this.color,
@@ -127,6 +128,19 @@ class MaterialApp extends StatefulWidget {
          'app is started with an intent that specifies an unknown route.'
        ),
        super(key: key);
+
+  /// A key to use when building the [Navigator].
+  ///
+  /// If a [navigatorKey] is specified, the [Navigator] can be directly
+  /// manipulated without first obtaining it from a [BuildContext] via
+  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
+  /// getter.
+  ///
+  /// If this is changed, a new [Navigator] will be created, losing all the
+  /// application state in the process; in that case, the [navigatorObservers]
+  /// must also be changed, since the previous observers will be attached to the
+  /// previous navigator.
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// A one-line description used by the device to identify the app for the user.
   ///
@@ -403,6 +417,9 @@ class MaterialApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// The list of observers for the [Navigator] created for this app.
+  ///
+  /// This list must be replaced by a list of newly-created observers if the
+  /// [navigatorKey] is changed.
   final List<NavigatorObserver> navigatorObservers;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid
@@ -451,6 +468,18 @@ class _MaterialAppState extends State<MaterialApp> {
   void initState() {
     super.initState();
     _heroController = new HeroController(createRectTween: _createRectTween);
+  }
+
+  @override
+  void didUpdateWidget(MaterialApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey) {
+      // If the Navigator changes, we have to create a new observer, because the
+      // old Navigator won't be disposed (and thus won't unregister with its
+      // observers) until after the new one has been created (because the
+      // Navigator has a GlobalKey).
+      _heroController = new HeroController(createRectTween: _createRectTween);
+    }
   }
 
   // Combine the Localizations for Material with the ones contributed
@@ -526,6 +555,7 @@ class _MaterialAppState extends State<MaterialApp> {
       isMaterialAppTheme: true,
       child: new WidgetsApp(
         key: new GlobalObjectKey(this),
+        navigatorKey: widget.navigatorKey,
         title: widget.title,
         onGenerateTitle: widget.onGenerateTitle,
         textStyle: _errorTextStyle,
