@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,6 +12,8 @@ import 'package:flutter/widgets.dart';
 import 'theme.dart';
 
 const double _kScrollbarThickness = 6.0;
+const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 300);
+const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 600);
 
 /// A material design scrollbar.
 ///
@@ -44,81 +48,114 @@ class Scrollbar extends StatefulWidget {
 
   @override
   _ScrollbarState createState() => new _ScrollbarState();
-
-  static ScrollbarPainter _buildMaterialScrollbarPainter(TickerProvider vsync) {
-    return new ScrollbarPainter(
-        vsync: vsync,
-        thickness: _kScrollbarThickness,
-        crossAxisMargin: 0.0,
-      );
-  }
 }
 
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _painter;
   TargetPlatform _currentPlatform;
+  TextDirection _textDirection;
+  Color _themeColor;
+
+  AnimationController _fadeoutAnimationController;
+  Animation<double> _fadeoutOpacityAnimation;
+  Timer _fadeoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeoutAnimationController = new AnimationController(
+      vsync: this,
+      duration: _kScrollbarFadeDuration,
+    );
+    _fadeoutOpacityAnimation = new CurvedAnimation(
+      parent: _fadeoutAnimationController,
+      curve: Curves.fastOutSlowIn
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
     final ThemeData theme = Theme.of(context);
-    if (_currentPlatform != null && _currentPlatform != theme.platform) {
+    if (_currentPlatform != null
+        && _currentPlatform != theme.platform
+        && _painter != null) {
       final ScrollbarPainter oldPainter = _painter;
       // Dispose old painter to avoid leak but do it after letting CustomPaint
-      // swap to the new painter.
+      // be removed from the tree.
       SchedulerBinding.instance.addPostFrameCallback((Duration _) {
         oldPainter.dispose();
       });
+      _fadeoutAnimationController.reset();
       _painter = null;
     }
     _currentPlatform = theme.platform;
 
-    if (_currentPlatform == TargetPlatform.iOS) {
-      _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
-    } else {
-      _painter ??= Scrollbar._buildMaterialScrollbarPainter(this);
-      _painter.color = theme.highlightColor.withOpacity(1.0);
+    if (_currentPlatform != TargetPlatform.iOS) {
+      _themeColor = theme.highlightColor.withOpacity(1.0);
+      _textDirection = Directionality.of(context);
+      _painter = _buildMaterialScrollbarPainter();
     }
-    _painter.textDirection = Directionality.of(context);
+  }
+
+  ScrollbarPainter _buildMaterialScrollbarPainter() {
+    return new ScrollbarPainter(
+        color: _themeColor,
+        textDirection: _textDirection,
+        thickness: _kScrollbarThickness,
+        fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+      );
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    if (notification is ScrollUpdateNotification ||
-        notification is OverscrollNotification) {
-      _painter.update(notification.metrics, notification.metrics.axisDirection);
-      if (_currentPlatform != TargetPlatform.iOS) {
-        _painter.scheduleFade();
+    // iOS sub-delegates to the CupertinoScrollbar instead.
+    if (_currentPlatform != TargetPlatform.iOS
+        && (notification is ScrollUpdateNotification
+            || notification is OverscrollNotification)) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward) {
+        _fadeoutAnimationController.forward();
       }
-    } else if (_currentPlatform == TargetPlatform.iOS
-        && notification is ScrollEndNotification) {
-      // On iOS, the scrollbar can only go away once the user lifted the finger.
-      _painter.scheduleFade();
+
+      _painter.update(notification.metrics, notification.metrics.axisDirection);
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = new Timer(_kScrollbarTimeToFade, () {
+        _fadeoutAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
     }
     return false;
   }
 
   @override
   void dispose() {
-    _painter.dispose();
+    _painter?.dispose();
+    _fadeoutAnimationController.dispose();
+    _fadeoutTimer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return new NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      // TODO(ianh): Maybe we should try to collapse out these repaint
-      // boundaries when the scroll bars are invisible.
-      child: new RepaintBoundary(
-        child: new CustomPaint(
-          foregroundPainter: _painter,
-          child: new RepaintBoundary(
-            child: widget.child,
+    if (_currentPlatform == TargetPlatform.iOS) {
+      return new CupertinoScrollbar(
+        child: widget.child,
+      );
+    } else {
+      return new NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        // TODO(ianh): Maybe we should try to collapse out these repaint
+        // boundaries when the scroll bars are invisible.
+        child: new RepaintBoundary(
+          child: new CustomPaint(
+            foregroundPainter: _painter,
+            child: new RepaintBoundary(
+              child: widget.child,
+            ),
           ),
         ),
-      ),
-    );
+      );
+    }
   }
 }

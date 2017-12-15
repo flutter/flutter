@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,6 +15,7 @@ const double _kScrollbarCrossAxisMargin = 2.5;
 const double _kScrollbarMinLength = 4.0;
 const Radius _kScrollbarRadius = const Radius.circular(1.25);
 const Duration _kScrollbarTimeToFade = const Duration(milliseconds: 50);
+const Duration _kScrollbarFadeDuration = const Duration(milliseconds: 250);
 
 /// A iOS style scrollbar.
 ///
@@ -46,38 +49,67 @@ class CupertinoScrollbar extends StatefulWidget {
 
   @override
   _CupertinoScrollbarState createState() => new _CupertinoScrollbarState();
-
-  /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
-  static ScrollbarPainter buildCupertinoScrollbarPainter(TickerProvider vsync) {
-    return new ScrollbarPainter(
-      vsync: vsync,
-      thickness: _kScrollbarThickness,
-      mainAxisMargin: _kScrollbarMainAxisMargin,
-      crossAxisMargin: _kScrollbarCrossAxisMargin,
-      radius: _kScrollbarRadius,
-      minLength: _kScrollbarMinLength,
-      timeToFadeout: _kScrollbarTimeToFade,
-    )..color = _kScrollbarColor;
-  }
 }
 
 class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _painter;
+  TextDirection _textDirection;
+
+  AnimationController _fadeoutAnimationController;
+  Animation<double> _fadeoutOpacityAnimation;
+  Timer _fadeoutTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeoutAnimationController = new AnimationController(
+      vsync: this,
+      duration: _kScrollbarFadeDuration,
+    );
+    _fadeoutOpacityAnimation = new CurvedAnimation(
+      parent: _fadeoutAnimationController,
+      curve: Curves.fastOutSlowIn
+    );
+  }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _painter ??= CupertinoScrollbar.buildCupertinoScrollbarPainter(this);
-    _painter.textDirection = Directionality.of(context);
+    _textDirection = Directionality.of(context);
+    _painter = _buildCupertinoScrollbarPainter();
+  }
+
+  /// Returns a [ScrollbarPainter] visually styled like the iOS scrollbar.
+  ScrollbarPainter _buildCupertinoScrollbarPainter() {
+    return new ScrollbarPainter(
+      color: _kScrollbarColor,
+      textDirection: _textDirection,
+      thickness: _kScrollbarThickness,
+      fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+      mainAxisMargin: _kScrollbarMainAxisMargin,
+      crossAxisMargin: _kScrollbarCrossAxisMargin,
+      radius: _kScrollbarRadius,
+      minLength: _kScrollbarMinLength,
+    );
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification) {
+      if (_fadeoutAnimationController.status != AnimationStatus.forward) {
+        _fadeoutAnimationController.forward();
+      }
+
+      _fadeoutTimer?.cancel();
       _painter.update(notification.metrics, notification.metrics.axisDirection);
     } else if (notification is ScrollEndNotification) {
       // On iOS, the scrollbar can only go away once the user lifted the finger.
-      _painter.scheduleFade();
+
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = new Timer(_kScrollbarTimeToFade, () {
+        _fadeoutAnimationController.reverse();
+        _fadeoutTimer = null;
+      });
     }
     return false;
   }
@@ -85,6 +117,8 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   @override
   void dispose() {
     _painter.dispose();
+    _fadeoutAnimationController.dispose();
+    _fadeoutTimer?.cancel();
     super.dispose();
   }
 

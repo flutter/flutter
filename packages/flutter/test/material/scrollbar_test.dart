@@ -79,8 +79,16 @@ void main() {
       ),
     ));
 
-    final CustomPaint custom = tester.widget(find.descendant(of: find.byType(Scrollbar), matching: find.byType(CustomPaint)).first);
+    final CustomPaint custom = tester.widget(find.descendant(
+      of: find.byType(Scrollbar),
+      matching: find.byType(CustomPaint)).first
+    );
     final dynamic scrollPainter = custom.foregroundPainter;
+    // Dragging makes the scrollbar first appear.
+    await tester.drag(find.text('0'), const Offset(0.0, -10.0));
+    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
+
     final ScrollMetrics metrics = new FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 0.0,
@@ -89,8 +97,6 @@ void main() {
       axisDirection: AxisDirection.down
     );
     scrollPainter.update(metrics, AxisDirection.down);
-    await tester.pump(const Duration(milliseconds: 200));
-    await tester.pump(const Duration(milliseconds: 200));
 
     final List<Invocation> invocations = <Invocation>[];
     final TestCanvas canvas = new TestCanvas(invocations);
@@ -117,7 +123,9 @@ void main() {
     }
 
     await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();
     // Scrollbar fully showing

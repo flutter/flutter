@@ -2,21 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/scheduler.dart';
 
 import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
-const Duration _kDefaultThumbFadeDuration = const Duration(milliseconds: 300);
-const Duration _kDefaultTimeToFade = const Duration(milliseconds: 600);
 
 /// A [CustomPainter] for painting scrollbars.
+///
+/// Unlike [CustomPainter]s that sub-classes [CustomPainter] and only repaints
+/// when [shouldRepaint] returns true (which requires this [CustomPainter] to
+/// be rebuilt), this painter has the added optimization of repainting and not
+/// rebuilding when:
+///
+///  * the scroll position changes; and
+///  * when the scrollbar fades away.
 ///
 /// See also:
 ///
@@ -27,72 +31,56 @@ const Duration _kDefaultTimeToFade = const Duration(milliseconds: 600);
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
-    @required TickerProvider vsync,
+    @required this.color,
+    @required this.textDirection,
     @required this.thickness,
-    @required this.crossAxisMargin,
+    @required this.fadeoutOpacityAnimation,
     this.mainAxisMargin: 0.0,
+    this.crossAxisMargin: 0.0,
     this.radius,
     this.minLength: _kMinThumbExtent,
-    this.timeToFadeout: _kDefaultTimeToFade,
-    this.fadeoutDuration: _kDefaultThumbFadeDuration,
-  })
-      : assert(vsync != null),
-        assert(thickness != null),
-        assert(mainAxisMargin != null),
-        assert(minLength != null),
-        assert(timeToFadeout != null),
-        assert(fadeoutDuration != null) {
-    _fadeController = new AnimationController(duration: fadeoutDuration, vsync: vsync);
-    _opacity = new CurvedAnimation(parent: _fadeController, curve: Curves.fastOutSlowIn)
-      ..addListener(notifyListeners);
+  }) : assert(color != null),
+       assert(textDirection != null),
+       assert(thickness != null),
+       assert(fadeoutOpacityAnimation != null),
+       assert(mainAxisMargin != null),
+       assert(crossAxisMargin != null),
+       assert(minLength != null) {
+    fadeoutOpacityAnimation.addListener(notifyListeners);
   }
+
+  /// [Color] of the thumb. Mustn't be null.
+  final Color color;
+
+  /// [TextDirection] of the [BuildContext] which dictates the side of the
+  /// screen the scrollbar appears in (the trailing side). Mustn't be null.
+  final TextDirection textDirection;
 
   /// Thickness of the scrollbar in its cross-axis in pixels. Mustn't be null.
   final double thickness;
+
+  /// An opacity [Animation] that dictates the opacity of the thumb.
+  /// Changes in value of this [Listenable] will automatically trigger repaints.
+  /// Mustn't be null.
+  Animation<double> fadeoutOpacityAnimation;
+
+  /// Distance from the scrollbar's start and end to the edge of the viewport in
+  /// pixels. Mustn't be null.
+  final double mainAxisMargin;
+
+  /// Distance from the scrollbar's side to the nearest edge in pixels. Musn't
+  /// be null.
+  final double crossAxisMargin;
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null.
   final Radius radius;
 
-  /// Distance from the scrollbar's side to the nearest edge in pixels. Musn't
-  /// be null.
-  final double crossAxisMargin;
-
-  /// Distance from the scrollbar's start and end to the edge of the viewport in
-  /// pixels. Mustn't be null.
-  final double mainAxisMargin;
-
   /// The smallest size the scrollbar can shrink to when the total scrollable
   /// extent is large and the current visible viewport is small. Mustn't be
   /// null.
   final double minLength;
-
-  /// [Duration] the scrollbar is immobile before starting to fade out. Mustn't be
-  /// null.
-  final Duration timeToFadeout;
-
-  /// [Duration] of the fade out animation once started. Mustn't be null.
-  final Duration fadeoutDuration;
-
-  // Animation of the main axis direction.
-  AnimationController _fadeController;
-  Animation<double> _opacity;
-
-  // Fade-out timer.
-  Timer _fadeOut;
-
-  /// [Color] of the thumb.
-  final Color color;
-
-  final TextDirection textDirection;
-
-  @override
-  void dispose() {
-    _fadeOut?.cancel();
-    _fadeController.dispose();
-    super.dispose();
-  }
 
   ScrollMetrics _lastMetrics;
   AxisDirection _lastAxisDirection;
@@ -107,27 +95,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     _lastMetrics = metrics;
     _lastAxisDirection = axisDirection;
-    if (_fadeController.status == AnimationStatus.completed) {
-      notifyListeners();
-    } else if (_fadeController.status != AnimationStatus.forward) {
-      _fadeController.forward();
-    }
-    _fadeOut?.cancel();
-  }
-
-  /// Signal that the scrollbar can start to fade after the specified [timeToFadeout].
-  void scheduleFade() {
-    _fadeOut?.cancel();
-    _fadeOut = new Timer(timeToFadeout, _startFadeOut);
-  }
-
-  void _startFadeOut() {
-    _fadeOut = null;
-    _fadeController.reverse();
+    notifyListeners();
   }
 
   Paint get _paint {
-    return new Paint()..color = color.withOpacity(color.opacity * _opacity.value);
+    return new Paint()..color =
+        color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
   double _getThumbX(Size size) {
@@ -190,7 +163,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    if (_lastAxisDirection == null || _lastMetrics == null || _opacity.value == 0.0)
+    if (_lastAxisDirection == null
+        || _lastMetrics == null
+        || fadeoutOpacityAnimation.value == 0.0)
       return;
     switch (_lastAxisDirection) {
       case AxisDirection.down:
@@ -208,11 +183,22 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
   }
 
+  // Scrollbars are (currently) not interactive.
   @override
   bool hitTest(Offset position) => null;
 
   @override
-  bool shouldRepaint(ScrollbarPainter oldDelegate) => false;
+  bool shouldRepaint(ScrollbarPainter old) {
+    // Should repaint if any properties changed.
+    return color != old.color
+        || textDirection != old.textDirection
+        || thickness != old.thickness
+        || fadeoutOpacityAnimation != old.fadeoutOpacityAnimation
+        || mainAxisMargin != old.mainAxisMargin
+        || crossAxisMargin != old.crossAxisMargin
+        || radius != old.radius
+        || minLength != old.minLength;
+  }
 
   @override
   bool shouldRebuildSemantics(CustomPainter oldDelegate) => false;

@@ -39,7 +39,7 @@ void main() {
 
     // Opacity going down now.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-      color: const Color(0x46777777),
+      color: const Color(0x15777777),
     ));
   });
 }
