@@ -150,7 +150,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   @override
   Widget build(BuildContext context) {
     return new CustomPaint(
-      painter: new _InputBorderPainter(
+      foregroundPainter: new _InputBorderPainter(
         repaint: new Listenable.merge(<Listenable>[_animation, widget.gap]),
         animation: _animation,
         border: _border,
@@ -896,15 +896,11 @@ class _RenderDecoration extends RenderBox {
       aboveBaseline = math.max(baseline, aboveBaseline);
       belowBaseline = math.max(box.size.height - baseline, belowBaseline);
     }
-
     layoutLineBox(prefix);
-    layoutLineBox(hint);
     layoutLineBox(suffix);
 
     if (prefixIcon != null)
       prefixIcon.layout(boxConstraints, parentUsesSize: true);
-    if (label != null)
-      label.layout(boxConstraints, parentUsesSize: true);
     if (suffixIcon != null)
       suffixIcon.layout(boxConstraints, parentUsesSize: true);
 
@@ -915,7 +911,13 @@ class _RenderDecoration extends RenderBox {
       + _boxSize(suffix).width
       + _boxSize(suffixIcon).width
       + contentPadding.right);
-    boxConstraints = boxConstraints.tighten(width: inputWidth);
+
+    boxConstraints = boxConstraints.copyWith(maxWidth: inputWidth);
+    layoutLineBox(hint);
+    if (label != null) // The label is not baseline aligned.
+      label.layout(boxConstraints, parentUsesSize: true);
+
+    boxConstraints = boxConstraints.copyWith(minWidth: inputWidth);
     layoutLineBox(input);
 
     double inputBaseline = contentPadding.top + aboveBaseline;
@@ -1146,7 +1148,6 @@ class _RenderDecoration extends RenderBox {
       if (child != null)
         context.paintChild(child, _boxParentData(child).offset + offset);
     }
-
     doPaint(container);
 
     if (label != null) {
@@ -1435,6 +1436,11 @@ class InputDecorator extends StatefulWidget {
   @override
   _InputDecoratorState createState() => new _InputDecoratorState();
 
+  static RenderBox containerOf(BuildContext context) {
+    final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
+    return result?.container;
+  }
+
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
@@ -1518,7 +1524,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   Color _getFillColor(ThemeData themeData) {
     if (!decoration.filled)
-      return null;
+      return Colors.transparent;
     if (decoration.fillColor != null)
       return decoration.fillColor;
 
@@ -1633,21 +1639,32 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
           : _getInlineLabelStyle(themeData),
         child: new Text(
           decoration.labelText,
+          overflow: TextOverflow.ellipsis,
           textAlign: textAlign,
         ),
       ),
     );
 
     final Widget prefix = decoration.prefixText == null ? null :
-      new Text(
-        decoration.prefixText,
-        style: decoration.prefixStyle ?? inlineStyle
+      new AnimatedOpacity(
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        opacity: widget.labelIsFloating ? 1.0 : 0.0,
+        child: new Text(
+          decoration.prefixText,
+          style: decoration.prefixStyle ?? inlineStyle
+        ),
       );
 
     final Widget suffix = decoration.suffixText == null ? null :
-      new Text(
-        decoration.suffixText,
-        style: decoration.suffixStyle ?? inlineStyle
+      new AnimatedOpacity(
+        duration: _kTransitionDuration,
+        curve: _kTransitionCurve,
+        opacity: widget.labelIsFloating ? 1.0 : 0.0,
+        child: new Text(
+          decoration.suffixText,
+          style: decoration.suffixStyle ?? inlineStyle
+        ),
       );
 
     final Color activeColor = _getActiveColor(themeData);
