@@ -2,17 +2,28 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
+  group('showDatePicker', () {
+    _tests();
+  });
+}
+
+void _tests() {
   DateTime firstDate;
   DateTime lastDate;
   DateTime initialDate;
   SelectableDayPredicate selectableDayPredicate;
   DatePickerMode initialDatePickerMode;
+  final Finder nextMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Next month') ?? false));
+  final Finder previousMonthIcon = find.byWidgetPredicate((Widget w) => w is IconButton && (w.tooltip?.startsWith('Previous month') ?? false));
 
   setUp(() {
     firstDate = new DateTime(2001, DateTime.JANUARY, 1);
@@ -63,7 +74,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
-    await tester.tap(find.byTooltip('Next month'));
+    await tester.tap(nextMonthIcon);
     await tester.pumpAndSettle();
     expect(_selectedDate, equals(new DateTime(2016, DateTime.JULY, 1)));
 
@@ -112,38 +123,6 @@ void main() {
       ),
     );
     await tester.pump(const Duration(seconds: 5));
-  });
-
-  testWidgets('MonthPicker receives header taps', (WidgetTester tester) async {
-    DateTime currentValue;
-    bool headerTapped = false;
-
-    final Widget widget = new MaterialApp(
-      home: new Material(
-        child: new ListView(
-          children: <Widget>[
-            new MonthPicker(
-              selectedDate: new DateTime.utc(2015, 6, 9, 7, 12),
-              firstDate: new DateTime.utc(2013),
-              lastDate: new DateTime.utc(2018),
-              onChanged: (DateTime dateTime) {
-                currentValue = dateTime;
-              },
-              onMonthHeaderTap: () {
-                headerTapped = true;
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-
-    await tester.pumpWidget(widget);
-
-    expect(currentValue, isNull);
-    expect(headerTapped, false);
-    await tester.tap(find.text('June 2015'));
-    expect(headerTapped, true);
   });
 
   Future<Null> preparePicker(WidgetTester tester, Future<Null> callback(Future<DateTime> date)) async {
@@ -214,7 +193,7 @@ void main() {
 
   testWidgets('Can select a month', (WidgetTester tester) async {
     await preparePicker(tester, (Future<DateTime> date) async {
-      await tester.tap(find.byTooltip('Previous month'));
+      await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       await tester.tap(find.text('25'));
       await tester.tap(find.text('OK'));
@@ -279,17 +258,10 @@ void main() {
     firstDate = initialDate;
     lastDate = new DateTime(2017, DateTime.FEBRUARY, 20);
     await preparePicker(tester, (Future<DateTime> date) async {
-      await tester.tap(find.byTooltip('Next month'));
+      await tester.tap(nextMonthIcon);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       // Shouldn't be possible to keep going into March.
-      await tester.tap(find.byTooltip('Next month'));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      // We're still in February
-      await tester.tap(find.text('20'));
-      // Days outside bound for new month pages also disabled.
-      await tester.tap(find.text('25'));
-      await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2017, DateTime.FEBRUARY, 20)));
+      expect(nextMonthIcon, findsNothing);
     });
   });
 
@@ -298,17 +270,10 @@ void main() {
     firstDate = new DateTime(2016, DateTime.DECEMBER, 10);
     lastDate = initialDate;
     await preparePicker(tester, (Future<DateTime> date) async {
-      await tester.tap(find.byTooltip('Previous month'));
+      await tester.tap(previousMonthIcon);
       await tester.pumpAndSettle(const Duration(seconds: 1));
       // Shouldn't be possible to keep going into November.
-      await tester.tap(find.byTooltip('Previous month'));
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      // We're still in December
-      await tester.tap(find.text('10'));
-      // Days outside bound for new month pages also disabled.
-      await tester.tap(find.text('5'));
-      await tester.tap(find.text('OK'));
-      expect(await date, equals(new DateTime(2016, DateTime.DECEMBER, 10)));
+      expect(previousMonthIcon, findsNothing);
     });
   });
 
@@ -415,6 +380,229 @@ void main() {
 
       await tester.tap(find.text('CANCEL'));
       expect(await date, isNull);
+    });
+  });
+
+  testWidgets('exports semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await preparePicker(tester, (Future<DateTime> date) async {
+      final TestSemantics expected = new TestSemantics(
+        children: <TestSemantics>[
+          new TestSemantics(
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'2016',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'Fri, Jan 15',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            children: <TestSemantics>[
+              new TestSemantics(
+                actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
+                children: <TestSemantics>[
+                  new TestSemantics(
+                    children: <TestSemantics>[
+                      new TestSemantics(
+                        children: <TestSemantics>[
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'1, Friday, January 1, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'2, Saturday, January 2, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'3, Sunday, January 3, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'4, Monday, January 4, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'5, Tuesday, January 5, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'6, Wednesday, January 6, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'7, Thursday, January 7, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'8, Friday, January 8, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'9, Saturday, January 9, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'10, Sunday, January 10, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'11, Monday, January 11, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'12, Tuesday, January 12, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'13, Wednesday, January 13, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'14, Thursday, January 14, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'15, Friday, January 15, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'16, Saturday, January 16, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'17, Sunday, January 17, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'18, Monday, January 18, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'19, Tuesday, January 19, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'20, Wednesday, January 20, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'21, Thursday, January 21, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'22, Friday, January 22, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'23, Saturday, January 23, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'24, Sunday, January 24, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'25, Monday, January 25, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'26, Tuesday, January 26, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'27, Wednesday, January 27, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'28, Thursday, January 28, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'29, Friday, January 29, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'30, Saturday, January 30, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          new TestSemantics(
+                            actions: <SemanticsAction>[SemanticsAction.tap],
+                            label: r'31, Sunday, January 31, 2016',
+                            textDirection: TextDirection.ltr,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+          new TestSemantics(
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'Previous month December 2015',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'Next month February 2016',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'CANCEL',
+            textDirection: TextDirection.ltr,
+          ),
+          new TestSemantics(
+            flags: <SemanticsFlags>[SemanticsFlags.isButton],
+            actions: <SemanticsAction>[SemanticsAction.tap],
+            label: r'OK',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      );
+
+      expect(semantics, hasSemantics(
+        expected,
+        ignoreId: true,
+        ignoreTransform: true,
+        ignoreRect: true,
+      ));
     });
   });
 }
