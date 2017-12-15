@@ -25,7 +25,7 @@ import 'cocoapods.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 9;
+const int kXcodeRequiredVersionMajor = 8;
 const int kXcodeRequiredVersionMinor = 0;
 
 // The Python `six` module is a dependency for Xcode builds, and installed by
