@@ -9,9 +9,23 @@ part of material_animated_icons;
 // See: https://github.com/flutter/flutter/issues/1831 for details regarding
 // generic vector graphics support in Flutter.
 
+// Examples can assume:
+// AnimationController controller;
+
 /// Shows an animated icon at a given animation [progress].
 ///
 /// The available icons are specified in [AnimatedIcons].
+///
+/// ### Sample code
+///
+/// ```dart
+/// new AnimatedIcon(
+///   icon: AnimatedIcons.menu_arrow,
+///   progress: controller,
+///   semanticLabel: 'Show menu',
+/// )
+/// ```
+///
 class AnimatedIcon extends StatelessWidget {
 
   /// Creates an AnimatedIcon.
@@ -20,8 +34,8 @@ class AnimatedIcon extends StatelessWidget {
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const AnimatedIcon({
     Key key,
-    @required this.progress,
     @required this.icon,
+    @required this.progress,
     this.color,
     this.size,
     this.semanticLabel,
