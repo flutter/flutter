@@ -200,22 +200,25 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
         color: Theme.of(context).primaryColor,
       ),
       margin: widget.margin,
-      child: new Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          new Expanded(
-            child: new _AccountPictures(
-              currentAccountPicture: widget.currentAccountPicture,
-              otherAccountsPictures: widget.otherAccountsPictures,
-            )
-          ),
-          new _AccountDetails(
-            accountName: widget.accountName,
-            accountEmail: widget.accountEmail,
-            isOpen: _isOpen,
-            onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
-          ),
-        ],
+      child: new SafeArea(
+        bottom: false,
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            new Expanded(
+              child: new _AccountPictures(
+                currentAccountPicture: widget.currentAccountPicture,
+                otherAccountsPictures: widget.otherAccountsPictures,
+              )
+            ),
+            new _AccountDetails(
+              accountName: widget.accountName,
+              accountEmail: widget.accountEmail,
+              isOpen: _isOpen,
+              onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
+            ),
+          ],
+        ),
       ),
     );
   }
