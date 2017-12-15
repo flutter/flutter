@@ -554,8 +554,6 @@ class Navigator extends StatefulWidget {
   /// when the pushed route is popped off the navigator.
   @optionalTypeArgs
   static Future<T> push<T>(BuildContext context, Route<T> route) {
-    // TODO(leafp): Remove the explicit instantiations of `push<dynamic>` when
-    // https://github.com/dart-lang/linter/issues/851 is fixed.
     return Navigator.of(context).push(route);
   }
 
@@ -792,7 +790,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
           return true;
         }());
-        push<dynamic>(_routeNamed(Navigator.defaultRouteName));
+        push(_routeNamed(Navigator.defaultRouteName));
       } else {
         plannedInitialRoutes.forEach(push);
       }
@@ -849,7 +847,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<dynamic> _routeNamed(String name, { bool allowNull: false }) {
+  Route<Object> _routeNamed(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(
@@ -900,8 +898,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
-  Future<dynamic> pushNamed(String name) {
-    return push<dynamic>(_routeNamed(name));
+  Future<Object> pushNamed(String name) {
+    return push(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
