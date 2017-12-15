@@ -48,32 +48,32 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   /// Thickness of the scrollbar in its cross-axis in pixels. Mustn't be null.
-  double thickness;
+  final double thickness;
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
   ///
   /// Scrollbar will be rectangular if [radius] is null.
-  Radius radius;
+  final Radius radius;
 
   /// Distance from the scrollbar's side to the nearest edge in pixels. Musn't
   /// be null.
-  double crossAxisMargin;
+  final double crossAxisMargin;
 
   /// Distance from the scrollbar's start and end to the edge of the viewport in
   /// pixels. Mustn't be null.
-  double mainAxisMargin;
+  final double mainAxisMargin;
 
   /// The smallest size the scrollbar can shrink to when the total scrollable
   /// extent is large and the current visible viewport is small. Mustn't be
   /// null.
-  double minLength;
+  final double minLength;
 
   /// [Duration] the scrollbar is immobile before starting to fade out. Mustn't be
   /// null.
-  Duration timeToFadeout;
+  final Duration timeToFadeout;
 
   /// [Duration] of the fade out animation once started. Mustn't be null.
-  Duration fadeoutDuration;
+  final Duration fadeoutDuration;
 
   // Animation of the main axis direction.
   AnimationController _fadeController;
@@ -83,27 +83,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   Timer _fadeOut;
 
   /// [Color] of the thumb.
-  Color get color => _color;
-  Color _color;
-  set color(Color value) {
-    assert(value != null);
-    if (_color == value)
-      return;
-    _color = value;
-    notifyListeners();
-  }
+  final Color color;
 
-  /// Directionality of the text which affects the side of the screen the
-  /// scrollbar is positioned.
-  TextDirection get textDirection => _textDirection;
-  TextDirection _textDirection;
-  set textDirection(TextDirection value) {
-    assert(value != null);
-    if (_textDirection == value)
-      return;
-    _textDirection = value;
-    notifyListeners();
-  }
+  final TextDirection textDirection;
 
   @override
   void dispose() {
