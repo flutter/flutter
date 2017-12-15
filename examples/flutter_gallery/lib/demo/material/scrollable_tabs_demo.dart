@@ -105,15 +105,19 @@ class ScrollableTabsDemoState extends State<ScrollableTabsDemo> with SingleTicke
       body: new TabBarView(
         controller: _controller,
         children: _allPages.map((_Page page) {
-          return new Container(
-            key: new ObjectKey(page.icon),
-            padding: const EdgeInsets.all(12.0),
-            child:new Card(
-              child: new Center(
-                child: new Icon(
-                  page.icon,
-                  color: iconColor,
-                  size: 128.0,
+          return new SafeArea(
+            top: false,
+            bottom: false,
+            child: new Container(
+              key: new ObjectKey(page.icon),
+              padding: const EdgeInsets.all(12.0),
+              child:new Card(
+                child: new Center(
+                  child: new Icon(
+                    page.icon,
+                    color: iconColor,
+                    size: 128.0,
+                  ),
                 ),
               ),
             ),
