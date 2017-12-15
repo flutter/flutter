@@ -67,6 +67,7 @@ class WidgetsApp extends StatefulWidget {
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
     Key key,
+    this.navigatorKey,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.title: '',
@@ -98,6 +99,19 @@ class WidgetsApp extends StatefulWidget {
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
        super(key: key);
+
+  /// A key to use when building the [Navigator].
+  ///
+  /// If a [navigatorKey] is specified, the [Navigator] can be directly
+  /// manipulated without first obtaining it from a [BuildContext] via
+  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
+  /// getter.
+  ///
+  /// If this is changed, a new [Navigator] will be created, losing all the
+  /// application state in the process; in that case, the [navigatorObservers]
+  /// must also be changed, since the previous observers will be attached to the
+  /// previous navigator.
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// A one-line description used by the device to identify the app for the user.
   ///
@@ -285,6 +299,9 @@ class WidgetsApp extends StatefulWidget {
   final bool debugShowCheckedModeBanner;
 
   /// The list of observers for the [Navigator] created for this app.
+  ///
+  /// This list must be replaced by a list of newly-created observers if the
+  /// [navigatorKey] is changed.
   final List<NavigatorObserver> navigatorObservers;
 
   /// If true, forces the performance overlay to be visible in all instances.
@@ -315,7 +332,7 @@ class WidgetsApp extends StatefulWidget {
 }
 
 class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
-  GlobalObjectKey<NavigatorState> _navigator;
+  GlobalKey<NavigatorState> _navigator;
   Locale _locale;
 
   Locale _resolveLocale(Locale newLocale, Iterable<Locale> supportedLocales) {
@@ -338,9 +355,20 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
   @override
   void initState() {
     super.initState();
-    _navigator = new GlobalObjectKey<NavigatorState>(this);
+    _updateNavigator();
     _locale = _resolveLocale(ui.window.locale, widget.supportedLocales);
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didUpdateWidget(WidgetsApp oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey)
+      _updateNavigator();
+  }
+
+  void _updateNavigator() {
+    _navigator = widget.navigatorKey ?? new GlobalObjectKey<NavigatorState>(this);
   }
 
   @override
