@@ -78,6 +78,9 @@ class ParagraphBuilder {
   std::shared_ptr<FontCollection> font_collection_;
   StyledRuns runs_;
   ParagraphStyle paragraph_style_;
+  size_t paragraph_style_index_;
+
+  size_t PeekStyleIndex() const;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(ParagraphBuilder);
 };
