@@ -96,6 +96,7 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   bool _handleScrollNotification(ScrollNotification notification) {
     if (notification is ScrollUpdateNotification ||
         notification is OverscrollNotification) {
+      // Any movements always makes the scrollbar start showing up.
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }

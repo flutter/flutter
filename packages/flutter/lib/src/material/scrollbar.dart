@@ -82,6 +82,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     _currentPlatform = theme.platform;
 
     if (_currentPlatform == TargetPlatform.iOS) {
+      // On iOS, stop all local animations. CupertinoScrollbar has its own
+      // animations.
       _fadeoutTimer?.cancel();
       _fadeoutTimer = null;
       _fadeoutAnimationController.reset();
@@ -102,7 +104,8 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
-    // iOS sub-delegates to the CupertinoScrollbar instead.
+    // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
+    // scroll notifications here.
     if (_currentPlatform != TargetPlatform.iOS
         && (notification is ScrollUpdateNotification
             || notification is OverscrollNotification)) {
