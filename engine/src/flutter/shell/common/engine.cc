@@ -363,7 +363,7 @@ void Engine::RunBundleAndSource(const std::string& bundle_path,
   if (!bundle_path.empty())
     ConfigureAssetBundle(bundle_path);
 
-  ConfigureRuntime(GetScriptUriFromPath(bundle_path), reuse_runtime_controller);
+  ConfigureRuntime(main, reuse_runtime_controller);
 
   if (blink::GetKernelPlatformBinary() != nullptr) {
     std::vector<uint8_t> kernel;
