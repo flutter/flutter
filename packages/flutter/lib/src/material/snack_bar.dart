@@ -241,9 +241,12 @@ class SnackBar extends StatelessWidget {
                 data: darkTheme,
                 child: new FadeTransition(
                   opacity: fadeAnimation,
-                  child: new Row(
-                    children: children,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                  child: new SafeArea(
+                    top: false,
+                    child: new Row(
+                      children: children,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                    ),
                   ),
                 ),
               ),
