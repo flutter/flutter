@@ -123,17 +123,18 @@ void main() {
     }
 
     await tester.pumpWidget(viewWithScroll(TargetPlatform.android));
-    final TestGesture gesture = await tester.startGesture(
-      tester.getCenter(find.byType(SingleChildScrollView))
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     // Scrollbar fully showing
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(Scrollbar), paints..rect());
 
     await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
+    final TestGesture gesture = await tester.startGesture(
+      tester.getCenter(find.byType(SingleChildScrollView))
+    );
     await gesture.moveBy(const Offset(0.0, -10.0));
+    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(Scrollbar), paints..rrect());
