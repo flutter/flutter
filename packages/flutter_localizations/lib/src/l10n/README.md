@@ -161,19 +161,6 @@ English translations in `material_en.arb`. Google contributes
 translations for all the languages supported by this package.
 (Googlers, for more details see <go/flutter-l10n>.)
 
-Not all of the translations represented here have been vetted by
-native speakers. The following translations have been reviewed by
-native speakers on the Flutter team:
-
-*  material_de.arb
-*  material_en.arb, material_en_GB.arb, material_en_IE.arb, material_en_ZA.arb
-*  material_fr.arb, material_fr_CA.arb
-*  material_ja.arb
-*  material_ru.arb
-
-The others were automatically generated using the Google Translators
-Toolkit. We are actively seeking review (by native speakers) for them.
-
 If you have feedback about the translations please
 [file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new).
 
