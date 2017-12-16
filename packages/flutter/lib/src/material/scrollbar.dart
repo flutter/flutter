@@ -52,7 +52,7 @@ class Scrollbar extends StatefulWidget {
 
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
-  ScrollbarPainter _painter;
+  ScrollbarPainter _materialPainter;
   TargetPlatform _currentPlatform;
   TextDirection _textDirection;
   Color _themeColor;
@@ -79,24 +79,16 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     super.didChangeDependencies();
 
     final ThemeData theme = Theme.of(context);
-    if (_currentPlatform != null
-        && _currentPlatform != theme.platform
-        && _painter != null) {
-      final ScrollbarPainter oldPainter = _painter;
-      // Dispose old painter to avoid leak but do it after letting CustomPaint
-      // be removed from the tree.
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
-        oldPainter.dispose();
-      });
-      _fadeoutAnimationController.reset();
-      _painter = null;
-    }
     _currentPlatform = theme.platform;
 
-    if (_currentPlatform != TargetPlatform.iOS) {
+    if (_currentPlatform == TargetPlatform.iOS) {
+      _fadeoutTimer?.cancel();
+      _fadeoutTimer = null;
+      _fadeoutAnimationController.reset();
+     } else {
       _themeColor = theme.highlightColor.withOpacity(1.0);
       _textDirection = Directionality.of(context);
-      _painter = _buildMaterialScrollbarPainter();
+      _materialPainter = _buildMaterialScrollbarPainter();
     }
   }
 
@@ -118,7 +110,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         _fadeoutAnimationController.forward();
       }
 
-      _painter.update(notification.metrics, notification.metrics.axisDirection);
+      _materialPainter.update(notification.metrics, notification.metrics.axisDirection);
       _fadeoutTimer?.cancel();
       _fadeoutTimer = new Timer(_kScrollbarTimeToFade, () {
         _fadeoutAnimationController.reverse();
@@ -130,7 +122,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    _painter?.dispose();
+    _materialPainter?.dispose();
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
     super.dispose();
@@ -149,7 +141,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
         // boundaries when the scroll bars are invisible.
         child: new RepaintBoundary(
           child: new CustomPaint(
-            foregroundPainter: _painter,
+            foregroundPainter: _materialPainter,
             child: new RepaintBoundary(
               child: widget.child,
             ),
