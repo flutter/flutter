@@ -20,18 +20,22 @@ class _ContactCategory extends StatelessWidget {
       ),
       child: new DefaultTextStyle(
         style: Theme.of(context).textTheme.subhead,
-        child: new Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            new Container(
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
-              width: 72.0,
-              child: new Icon(icon, color: themeData.primaryColor)
-            ),
-            new Expanded(child: new Column(children: children))
-          ]
-        )
-      )
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              new Container(
+                padding: const EdgeInsets.symmetric(vertical: 24.0),
+                width: 72.0,
+                child: new Icon(icon, color: themeData.primaryColor)
+              ),
+              new Expanded(child: new Column(children: children))
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
