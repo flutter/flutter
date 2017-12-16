@@ -66,7 +66,7 @@ void main() {
     });
 
     test('sets PUB_CACHE properly', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.bz2'));
+      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.xz'));
       preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
       _answerWithResults();
       results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
@@ -86,7 +86,7 @@ void main() {
     });
 
     test('calls the right commands for tar output', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.bz2'));
+      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter_master.tar.xz'));
       preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
       _answerWithResults();
       results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
@@ -106,7 +106,7 @@ void main() {
         '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
         '$gitExe clean -f -X **/.packages',
-        '$tarExe cjf ${path.join(tmpDir.path, 'flutter_master.tar.bz2')} flutter',
+        '$tarExe cJf ${path.join(tmpDir.path, 'flutter_master.tar.xz')} flutter',
       ];
       int step = 0;
       for (String command in commands) {
@@ -144,7 +144,7 @@ void main() {
     });
 
     test('throws when a command errors out', () async {
-      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter.tar.bz2'));
+      outputFile = new File(path.join(tmpDir.absolute.path, 'flutter.tar.xz'));
       preparer = new ArchiveCreator(
         tmpDir,
         outputFile,
