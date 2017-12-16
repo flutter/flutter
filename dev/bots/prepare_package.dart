@@ -42,12 +42,12 @@ class ArchiveCreator {
   /// [tempDir] is the directory to use for creating the archive.  Will place
   /// several GiB of data there, so it should have available space.
   /// [outputFile] is the name of the output archive. It should end in either
-  /// ".tar.bz2" or ".zip".
+  /// ".tar.xz" or ".zip".
   /// The runner argument is used to inject a mock of [Process.runSync] for
   /// testing purposes.
   ArchiveCreator(this.tempDir, this.outputFile, {ProcessRunner runner})
       : assert(outputFile.path.toLowerCase().endsWith('.zip') ||
-            outputFile.path.toLowerCase().endsWith('.tar.bz2')),
+            outputFile.path.toLowerCase().endsWith('.tar.xz')),
         flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
         _runner = runner ?? Process.runSync {
     flutter = path.join(
@@ -111,7 +111,7 @@ class ArchiveCreator {
   void createArchive() {
     if (outputFile.path.toLowerCase().endsWith('.zip')) {
       createZipArchive(outputFile, flutterRoot);
-    } else if (outputFile.path.toLowerCase().endsWith('.tar.bz2')) {
+    } else if (outputFile.path.toLowerCase().endsWith('.tar.xz')) {
       createTarArchive(outputFile, flutterRoot);
     }
   }
@@ -153,7 +153,7 @@ class ArchiveCreator {
     return _runProcess(git, args, workingDirectory: workingDirectory);
   }
 
-  String createZipArchive(File output, Directory source) {
+  void createZipArchive(File output, Directory source) {
     final List<String> args = <String>[
       '-r',
       '-9',
@@ -162,17 +162,17 @@ class ArchiveCreator {
       path.basename(source.absolute.path),
     ];
 
-    return _runProcess(zip, args,
+    _runProcess(zip, args,
         workingDirectory: new Directory(path.dirname(source.absolute.path)));
   }
 
-  String createTarArchive(File output, Directory source) {
+  void createTarArchive(File output, Directory source) {
     final List<String> args = <String>[
-      'cjf',
+      'cJf',
       output.absolute.path,
       path.basename(source.absolute.path),
     ];
-    return _runProcess(tar, args,
+    _runProcess(tar, args,
         workingDirectory: new Directory(path.dirname(source.absolute.path)));
   }
 }
@@ -200,7 +200,7 @@ void main(List<String> argList) {
     'output',
     defaultsTo: null,
     help: 'The path where the output archive should be written. '
-        'The suffix determines the output format: .tar.bz2 or .zip are the '
+        'The suffix determines the output format: .tar.xz or .zip are the '
         'only formats supported.',
   );
   final ArgResults args = argParser.parse(argList);
@@ -229,11 +229,11 @@ void main(List<String> argList) {
 
   String outputFileString = args['output'];
   if (outputFileString == null || outputFileString.isEmpty) {
-    final String suffix = Platform.isWindows ? '.zip' : '.tar.bz2';
+    final String suffix = Platform.isWindows ? '.zip' : '.tar.xz';
     outputFileString = path.join(tmpDir.path, 'flutter_${args['revision']}$suffix');
   } else if (!outputFileString.toLowerCase().endsWith('.zip') &&
-      !outputFileString.toLowerCase().endsWith('.tar.bz2')) {
-    errorExit('Output file has unsupported suffix. It should be either ".zip" or ".tar.bz2".');
+      !outputFileString.toLowerCase().endsWith('.tar.xz')) {
+    errorExit('Output file has unsupported suffix. It should be either ".zip" or ".tar.xz".');
   }
 
   final File outputFile = new File(outputFileString);
