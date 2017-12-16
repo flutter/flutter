@@ -34,37 +34,29 @@ ParagraphBuilder::~ParagraphBuilder() = default;
 
 void ParagraphBuilder::SetParagraphStyle(const ParagraphStyle& style) {
   paragraph_style_ = style;
-  // Keep a default style to fall back to.
-  TextStyle text_style;
-  text_style.font_weight = paragraph_style_.font_weight;
-  text_style.font_style = paragraph_style_.font_style;
-  text_style.font_family = paragraph_style_.font_family;
-  text_style.font_size = paragraph_style_.font_size;
-  PushStyle(text_style);
+  paragraph_style_index_ = runs_.AddStyle(style.GetTextStyle());
+  runs_.StartRun(paragraph_style_index_, text_.size());
 }
 
 void ParagraphBuilder::PushStyle(const TextStyle& style) {
-  const size_t text_index = text_.size();
-  runs_.EndRunIfNeeded(text_index);
-  const size_t style_index = runs_.AddStyle(style);
-  runs_.StartRun(style_index, text_index);
+  size_t style_index = runs_.AddStyle(style);
   style_stack_.push_back(style_index);
+  runs_.StartRun(style_index, text_.size());
 }
 
 void ParagraphBuilder::Pop() {
   if (style_stack_.empty())
     return;
-  const size_t text_index = text_.size();
-  runs_.EndRunIfNeeded(text_index);
   style_stack_.pop_back();
-  if (style_stack_.empty())
-    return;
-  const size_t style_index = style_stack_.back();
-  runs_.StartRun(style_index, text_index);
+  runs_.StartRun(PeekStyleIndex(), text_.size());
+}
+
+size_t ParagraphBuilder::PeekStyleIndex() const {
+  return style_stack_.size() ? style_stack_.back() : paragraph_style_index_;
 }
 
 const TextStyle& ParagraphBuilder::PeekStyle() const {
-  return runs_.PeekStyle();
+  return runs_.GetStyle(PeekStyleIndex());
 }
 
 void ParagraphBuilder::AddText(const std::u16string& text) {
