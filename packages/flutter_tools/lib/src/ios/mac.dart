@@ -538,7 +538,19 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
   lines.insert(lines.indexOf(l5) + 1, l6);
   lines.insert(lines.indexOf(l7) + 1, l8);
 
-  // TODO(zarah): Remove lines with 'app.flx' once 'app.flx' is not used anymore.
+  final String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
+  final String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
+  final String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
+  final String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
+
+  if (lines.contains(l9)) {
+    printStatus('Removing app.flx from project.pbxproj since it has been '
+        'replaced with flutter_assets.');
+    lines.remove(l9);
+    lines.remove(l10);
+    lines.remove(l11);
+    lines.remove(l12);
+  }
 
   final StringBuffer buffer = new StringBuffer();
   lines.forEach(buffer.writeln);
