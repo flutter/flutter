@@ -1,4 +1,4 @@
-# aatool
+# vitool
 
 This tool generates Dart files from frames described in SVG files that follow
 the small subset of SVG described below.
