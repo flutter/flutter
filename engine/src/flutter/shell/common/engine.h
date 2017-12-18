@@ -120,7 +120,7 @@ class Engine : public blink::RuntimeDelegate {
   bool semantics_enabled_ = false;
   // TODO(zarah): Remove usage of asset_store_ once app.flx is removed.
   fxl::RefPtr<blink::ZipAssetStore> asset_store_;
-  std::unique_ptr<blink::DirectoryAssetBundle> directory_asset_bundle_;
+  fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle_;
   // TODO(eseidel): This should move into an AnimatorStateMachine.
   bool activity_running_;
   bool have_surface_;
