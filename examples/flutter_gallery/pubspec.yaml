@@ -5,9 +5,9 @@ dependencies:
   collection: 1.14.3
   device_info: 0.0.5
   intl: 0.15.2
-  connectivity: 0.1.0
+  connectivity: 0.1.1
   string_scanner: 1.0.2
-  url_launcher: 0.4.2+5
+  url_launcher: 1.0.3
   cupertino_icons: 0.1.1
   video_player: 0.0.6
 
@@ -30,22 +30,22 @@ dev_dependencies:
   charcode: 1.1.1 # TRANSITIVE DEPENDENCY
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
-  file: 2.3.4 # TRANSITIVE DEPENDENCY
+  file: 2.3.5 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
   http: 0.11.3+14 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
-  io: 0.3.0 # TRANSITIVE DEPENDENCY
+  io: 0.3.1 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   json_rpc_2: 2.0.4 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
   meta: 1.1.1 # TRANSITIVE DEPENDENCY
-  mime: 0.9.4 # TRANSITIVE DEPENDENCY
-  mockito: 2.2.0 # TRANSITIVE DEPENDENCY
+  mime: 0.9.5 # TRANSITIVE DEPENDENCY
+  mockito: 2.2.1 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
-  path: 1.4.2 # TRANSITIVE DEPENDENCY
+  path: 1.5.1 # TRANSITIVE DEPENDENCY
   pool: 1.3.3 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
   quiver: 0.26.2 # TRANSITIVE DEPENDENCY
@@ -56,7 +56,7 @@ dev_dependencies:
   source_map_stack_trace: 1.1.4 # TRANSITIVE DEPENDENCY
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.9.0 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
   stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   test: 0.12.26 # TRANSITIVE DEPENDENCY

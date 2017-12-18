@@ -54,10 +54,14 @@ class IconsDemoState extends State<IconsDemo> {
         data: new IconThemeData(color: iconColor),
         child: new Padding(
           padding: const EdgeInsets.all(24.0),
-          child: new Column(
-            children: <Widget>[
-              new _IconsDemoCard(handleIconButtonPress),
-            ],
+          child: new SafeArea(
+            top: false,
+            bottom: false,
+            child: new Column(
+              children: <Widget>[
+                new _IconsDemoCard(handleIconButtonPress),
+              ],
+            ),
           ),
         ),
       ),

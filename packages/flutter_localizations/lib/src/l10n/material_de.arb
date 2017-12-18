@@ -30,5 +30,6 @@
   "anteMeridiemAbbreviation": "VORM.",
   "postMeridiemAbbreviation": "NACHM.",
   "timePickerHourModeAnnouncement": "Stunde auswählen",
-  "timePickerMinuteModeAnnouncement": "Minute auswählen"
+  "timePickerMinuteModeAnnouncement": "Minute auswählen",
+  "modalBarrierDismissLabel": "Schließen"
 }

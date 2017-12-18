@@ -594,6 +594,15 @@ void main() {
   testWidgets('PageView can restore page',
       (WidgetTester tester) async {
     final PageController controller = new PageController();
+    try {
+      controller.page;
+      fail('Accessing page before attaching should fail.');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it.',
+      );
+    }
     final PageStorageBucket bucket = new PageStorageBucket();
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
@@ -620,7 +629,15 @@ void main() {
         child: new Container(),
       ),
     );
-    expect(() => controller.page, throwsAssertionError);
+    try {
+      controller.page;
+      fail('Accessing page after detaching all PageViews should fail.');
+    } on AssertionError catch (e) {
+      expect(
+        e.message,
+        'PageController.page cannot be accessed before a PageView is built with it.',
+      );
+    }
     await tester.pumpWidget(new Directionality(
       textDirection: TextDirection.ltr,
       child: new PageStorage(

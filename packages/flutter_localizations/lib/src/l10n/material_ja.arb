@@ -29,5 +29,6 @@
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "時を選択",
-  "timePickerMinuteModeAnnouncement": "分を選択"
+  "timePickerMinuteModeAnnouncement": "分を選択",
+  "modalBarrierDismissLabel": "閉じる"
 }

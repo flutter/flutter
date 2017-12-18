@@ -11,9 +11,12 @@ import 'package:flutter/rendering.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget wrap({ Widget child }) {
-  return new Directionality(
-    textDirection: TextDirection.ltr,
-    child: new Material(child: child),
+  return new MediaQuery(
+    data: const MediaQueryData(),
+    child: new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(child: child),
+    ),
   );
 }
 

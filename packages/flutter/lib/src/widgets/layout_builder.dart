@@ -111,16 +111,14 @@ class _LayoutBuilderElement extends RenderObjectElement {
           built = widget.builder(this, constraints);
           debugWidgetBuilderValue(widget, built);
         } catch (e, stack) {
-          _debugReportException('building $widget', e, stack);
-          built = new ErrorWidget(e);
+          built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
         }
       }
       try {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        _debugReportException('building $widget', e, stack);
-        built = new ErrorWidget(e);
+        built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
         _child = updateChild(null, built, slot);
       }
     });
@@ -225,11 +223,17 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack) {
-  FlutterError.reportError(new FlutterErrorDetails(
+FlutterErrorDetails _debugReportException(
+  String context,
+  dynamic exception,
+  StackTrace stack,
+) {
+  final FlutterErrorDetails details = new FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
     context: context
-  ));
+  );
+  FlutterError.reportError(details);
+  return details;
 }

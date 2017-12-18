@@ -26,6 +26,10 @@ import '../runner/flutter_command.dart';
 ///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
+  // New test package breaks the analyzer, see:
+  // https://github.com/dart-lang/sdk/issues/31442
+  // TODO(amirh): unpin this.
+  'test': '0.12.26',
   // Add pinned packages here.
 };
 

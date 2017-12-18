@@ -144,7 +144,11 @@ class GalleryHomeState extends State<GalleryHome> with SingleTickerProviderState
               height: 48.0,
               padding: const EdgeInsetsDirectional.only(start: 16.0),
               alignment: AlignmentDirectional.centerStart,
-              child: new Text(galleryItem.category, style: headerStyle)
+              child: new SafeArea(
+                top: false,
+                bottom: false,
+                child: new Text(galleryItem.category, style: headerStyle),
+              ),
             ),
           )
         );

@@ -16,7 +16,6 @@ void main() {
     expect(log[1], contains('debugPrintStack'));
   });
 
-
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
       final FlutterErrorDetails details = new FlutterErrorDetails(
@@ -42,4 +41,55 @@ void main() {
     expect(joined, contains('\nExample information\n'));
   });
 
+  test('FlutterErrorDetails.toString', () {
+    expect(
+      new FlutterErrorDetails(
+        exception: 'MESSAGE',
+        library: 'LIBRARY',
+        context: 'CONTEXTING',
+        informationCollector: (StringBuffer information) {
+          information.writeln('INFO');
+        },
+      ).toString(),
+      'Error caught by LIBRARY, thrown CONTEXTING.\n'
+      'MESSAGE\n'
+      'INFO',
+    );
+    expect(
+      new FlutterErrorDetails(
+        library: 'LIBRARY',
+        context: 'CONTEXTING',
+        informationCollector: (StringBuffer information) {
+          information.writeln('INFO');
+        },
+      ).toString(),
+      'Error caught by LIBRARY, thrown CONTEXTING.\n'
+      '  null\n'
+      'INFO',
+    );
+    expect(
+      new FlutterErrorDetails(
+        exception: 'MESSAGE',
+        context: 'CONTEXTING',
+        informationCollector: (StringBuffer information) {
+          information.writeln('INFO');
+        },
+      ).toString(),
+      'Error caught by Flutter framework, thrown CONTEXTING.\n'
+      'MESSAGE\n'
+      'INFO',
+    );
+    expect(
+      const FlutterErrorDetails(
+        exception: 'MESSAGE',
+      ).toString(),
+      'Error caught by Flutter framework.\n'
+      'MESSAGE'
+    );
+    expect(
+      const FlutterErrorDetails().toString(),
+      'Error caught by Flutter framework.\n'
+      '  null'
+    );
+  });
 }

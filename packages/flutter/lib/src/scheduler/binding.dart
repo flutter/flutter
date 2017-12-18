@@ -669,9 +669,14 @@ abstract class SchedulerBinding extends BindingBase with ServicesBinding {
   /// If a frame has already been scheduled with [scheduleFrame] or
   /// [scheduleForcedFrame], this call may delay that frame.
   ///
+  /// If any scheduled frame has already begun or if another
+  /// [scheduleWarmUpFrame] was already called, this call will be ignored.
+  ///
   /// Prefer [scheduleFrame] to update the display in normal operation.
   void scheduleWarmUpFrame() {
-    assert(!_warmUpFrame);
+    if (_warmUpFrame || schedulerPhase != SchedulerPhase.idle)
+      return;
+
     final bool hadScheduledFrame = _hasScheduledFrame;
     _warmUpFrame = true;
     // We use timers here to ensure that microtasks flush in between.

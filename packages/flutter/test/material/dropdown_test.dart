@@ -63,18 +63,25 @@ class TestApp extends StatefulWidget {
 class _TestAppState extends State<TestApp> {
   @override
   Widget build(BuildContext context) {
-    return new MediaQuery(
-      data: new MediaQueryData.fromWindow(window),
-      child: new Directionality(
-        textDirection: widget.textDirection,
-        child: new Navigator(
-          onGenerateRoute: (RouteSettings settings) {
-            assert(settings.name == '/');
-            return new MaterialPageRoute<dynamic>(
-              settings: settings,
-              builder: (BuildContext context) => widget.child,
-            );
-          },
+    return new Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: new MediaQuery(
+        data: new MediaQueryData.fromWindow(window),
+        child: new Directionality(
+          textDirection: widget.textDirection,
+          child: new Navigator(
+            onGenerateRoute: (RouteSettings settings) {
+              assert(settings.name == '/');
+              return new MaterialPageRoute<dynamic>(
+                settings: settings,
+                builder: (BuildContext context) => widget.child,
+              );
+            },
+          ),
         ),
       ),
     );

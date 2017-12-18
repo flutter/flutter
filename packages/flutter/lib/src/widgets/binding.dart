@@ -840,13 +840,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       _child = updateChild(_child, widget.child, _rootChildSlot);
       assert(_child != null);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      final FlutterErrorDetails details = new FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
         context: 'attaching to the render tree'
-      ));
-      final Widget error = new ErrorWidget(exception);
+      );
+      FlutterError.reportError(details);
+      final Widget error = ErrorWidget.builder(details);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }

@@ -893,7 +893,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         removeLeftPadding: false,
         removeTopPadding: true,
         removeRightPadding: false,
-        removeBottomPadding: widget.resizeToAvoidBottomPadding,
+        removeBottomPadding: false,
       );
     }
 

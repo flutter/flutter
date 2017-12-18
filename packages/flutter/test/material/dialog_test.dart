@@ -234,9 +234,13 @@ void main() {
     BuildContext outerContext;
     BuildContext dialogContext;
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
+    await tester.pumpWidget(new Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child:  new MediaQuery(
         data: const MediaQueryData(
           padding: const EdgeInsets.all(50.0),
         ),

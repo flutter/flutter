@@ -336,24 +336,28 @@ class _ExpansionPanelsDemoState extends State<ExpasionPanelsDemo> {
     return new Scaffold(
       appBar: new AppBar(title: const Text('Expansion panels')),
       body: new SingleChildScrollView(
-        child: new Container(
-          margin: const EdgeInsets.all(24.0),
-          child: new ExpansionPanelList(
-            expansionCallback: (int index, bool isExpanded) {
-              setState(() {
-                _demoItems[index].isExpanded = !isExpanded;
-              });
-            },
-            children: _demoItems.map((DemoItem<dynamic> item) {
-              return new ExpansionPanel(
-                isExpanded: item.isExpanded,
-                headerBuilder: item.headerBuilder,
-                body: item.builder(item)
-              );
-            }).toList()
-          )
-        )
-      )
+        child: new SafeArea(
+          top: false,
+          bottom: false,
+          child: new Container(
+            margin: const EdgeInsets.all(24.0),
+            child: new ExpansionPanelList(
+              expansionCallback: (int index, bool isExpanded) {
+                setState(() {
+                  _demoItems[index].isExpanded = !isExpanded;
+                });
+              },
+              children: _demoItems.map((DemoItem<dynamic> item) {
+                return new ExpansionPanel(
+                  isExpanded: item.isExpanded,
+                  headerBuilder: item.headerBuilder,
+                  body: item.builder(item)
+                );
+              }).toList()
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
