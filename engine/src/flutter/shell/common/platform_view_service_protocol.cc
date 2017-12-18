@@ -235,19 +235,7 @@ const char* PlatformViewServiceProtocol::kScreenshotExtensionName =
     "_flutter.screenshot";
 
 static sk_sp<SkData> EncodeBitmapAsPNG(const SkBitmap& bitmap) {
-  if (bitmap.empty()) {
-    return nullptr;
-  }
-
-  SkPixmap pixmap;
-  if (!bitmap.peekPixels(&pixmap)) {
-    return nullptr;
-  }
-
-  PngPixelSerializer serializer;
-  sk_sp<SkData> data(serializer.encodeToData(pixmap));
-
-  return data;
+  return SkEncodeBitmap(bitmap, SkEncodedImageFormat::kPNG, 100);
 }
 
 static fml::WeakPtr<Rasterizer> GetRandomRasterizer() {
@@ -339,10 +327,7 @@ bool PlatformViewServiceProtocol::ScreenshotSkp(const char* method,
 
   latch.Wait();
 
-  SkDynamicMemoryWStream stream;
-  PngPixelSerializer serializer;
-  picture->serialize(&stream, &serializer);
-  sk_sp<SkData> skp_data(stream.detachAsData());
+  sk_sp<SkData> skp_data = picture->serialize();
 
   size_t b64_size =
       SkBase64::Encode(skp_data->data(), skp_data->size(), nullptr);
