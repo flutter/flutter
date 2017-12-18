@@ -136,7 +136,7 @@ to test the engine.
 
 ### iOS (cross-compiling from Mac)
 
-* Make sure you have Xcode 7.3.0+ installed.
+* Make sure you have Xcode 9.0+ installed.
 * `git pull upstream master` in `src/flutter` to update the Flutter Engine repo.
 * `gclient sync` to update dependencies.
 * `./flutter/tools/gn --ios --unoptimized` to prepare build files (or `--ios --simulator --unoptimized` for simulator).
