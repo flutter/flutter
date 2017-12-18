@@ -103,4 +103,4 @@ const Timeout allowForRemotePubInvocation = const Timeout.factor(10.0);
 
 /// Test case timeout for tests involving creating a Flutter project with
 /// `--no-pub`. Use [allowForRemotePubInvocation] when creation involves `pub`.
-const Timeout allowForCreateFlutterProject = const Timeout.factor(2.0);
+const Timeout allowForCreateFlutterProject = const Timeout.factor(3.0);
