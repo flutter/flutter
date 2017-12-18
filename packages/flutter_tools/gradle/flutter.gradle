@@ -438,7 +438,6 @@ class FlutterTask extends BaseFlutterTask {
         return project.copySpec {
             from "${intermediateDir}"
             include "flutter_assets/**" // the working dir and its files
-            include "app.flx"
             if (buildMode != 'debug') {
 	       if (preferSharedLibrary) {
                   include "${intermediateDir}/app.so"
