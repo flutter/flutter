@@ -551,7 +551,6 @@ Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
     lines.remove(l11);
     lines.remove(l12);
   }
-  // TODO(zarah): Remove lines with 'app.flx' once 'app.flx' is not used anymore.
 
   final StringBuffer buffer = new StringBuffer();
   lines.forEach(buffer.writeln);
