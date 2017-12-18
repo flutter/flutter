@@ -21,7 +21,7 @@ void main() {
     List<MockProcessResult> results;
     final List<List<String>> args = <List<String>>[];
     final List<Map<Symbol, dynamic>> namedArgs = <Map<Symbol, dynamic>>[];
-    final String zipExe = Platform.isWindows ? 'zip.exe' : 'zip';
+    final String zipExe = Platform.isWindows ? '7za.exe' : 'zip';
     final String tarExe = Platform.isWindows ? 'tar.exe' : 'tar';
     final String gitExe = Platform.isWindows ? 'git.bat' : 'git';
     String flutterExe;
@@ -135,8 +135,13 @@ void main() {
         '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
         '$gitExe clean -f -X **/.packages',
-        '$zipExe -r -9 -q ${path.join(tmpDir.path, 'flutter_master.zip')} flutter',
       ];
+      if (Platform.isWindows) {
+        commands.add('$zipExe a -tzip -mx=9 ${path.join(tmpDir.path, 'flutter_master.zip')} flutter');
+      } else {
+        commands.add('$zipExe -r -9 -q ${path.join(tmpDir.path, 'flutter_master.zip')} flutter');
+      }
+
       int step = 0;
       for (String command in commands) {
         _verifyCommand(args[step++], command);
