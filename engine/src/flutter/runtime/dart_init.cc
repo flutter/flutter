@@ -609,7 +609,8 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
 
   if (!bundle_path.empty()) {
     fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle =
-        fxl::MakeRefCounted<blink::DirectoryAssetBundle>(std::move(bundle_path));
+        fxl::MakeRefCounted<blink::DirectoryAssetBundle>(
+            std::move(bundle_path));
     directory_asset_bundle->GetAsBuffer(kPlatformKernelAssetKey,
                                         &platform_data);
     if (!platform_data.empty()) {
