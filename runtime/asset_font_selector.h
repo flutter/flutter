@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "flutter/assets/zip_asset_store.h"
+#include "flutter/assets/directory_asset_bundle.h"
 #include "flutter/sky/engine/platform/fonts/FontCacheKey.h"
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
@@ -16,14 +16,14 @@
 namespace blink {
 
 // A FontSelector implementation that resolves custon font names to assets
-// loaded from the FLX.
+// loaded from the asset directory.
 class AssetFontSelector : public FontSelector {
  public:
   struct FlutterFontAttributes;
 
   ~AssetFontSelector() override;
 
-  static void Install(fxl::RefPtr<ZipAssetStore> asset_store);
+  static void Install(fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
 
   PassRefPtr<FontData> getFontData(const FontDescription& font_description,
                                    const AtomicString& family_name) override;
@@ -39,14 +39,15 @@ class AssetFontSelector : public FontSelector {
  private:
   struct TypefaceAsset;
 
-  explicit AssetFontSelector(fxl::RefPtr<ZipAssetStore> asset_store);
+  explicit AssetFontSelector(
+      fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
 
   void parseFontManifest();
 
   sk_sp<SkTypeface> getTypefaceAsset(const FontDescription& font_description,
                                      const AtomicString& family_name);
 
-  fxl::RefPtr<ZipAssetStore> asset_store_;
+  fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle_;
 
   HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
 

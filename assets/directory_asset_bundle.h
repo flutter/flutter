@@ -9,10 +9,12 @@
 #include <vector>
 
 #include "lib/fxl/macros.h"
+#include "lib/fxl/memory/ref_counted.h"
 
 namespace blink {
 
-class DirectoryAssetBundle {
+class DirectoryAssetBundle
+    : public fxl::RefCountedThreadSafe<DirectoryAssetBundle> {
  public:
   explicit DirectoryAssetBundle(std::string directory);
   ~DirectoryAssetBundle();
