@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -309,13 +310,12 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    // TODO(yjbanov): use the -k UniqueDeviceID option, which requires much less parsing.
-    final List<String> iosDeviceIDs = grep('UniqueDeviceID', from: await eval('ideviceinfo', <String>[]))
-      .map((String line) => line.split(' ').last).toList();
-
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+      .map((String line) => line.trim())
+      .where((String line) => line.isNotEmpty)
+      .toList();
     if (iosDeviceIDs.isEmpty)
       throw 'No connected iOS devices found.';
-
     return iosDeviceIDs;
   }
 
