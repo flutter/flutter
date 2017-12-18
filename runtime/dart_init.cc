@@ -608,9 +608,10 @@ void InitDartVM(const uint8_t* vm_snapshot_data,
 #endif
 
   if (!bundle_path.empty()) {
-    auto zip_asset_store = fxl::MakeRefCounted<ZipAssetStore>(
-        GetUnzipperProviderForPath(std::move(bundle_path)));
-    zip_asset_store->GetAsBuffer(kPlatformKernelAssetKey, &platform_data);
+    fxl::RefPtr<blink::DirectoryAssetBundle> directory_asset_bundle =
+        fxl::MakeRefCounted<blink::DirectoryAssetBundle>(std::move(bundle_path));
+    directory_asset_bundle->GetAsBuffer(kPlatformKernelAssetKey,
+                                        &platform_data);
     if (!platform_data.empty()) {
       kernel_platform = Dart_ReadKernelBinary(
           platform_data.data(), platform_data.size(), ReleaseFetchedBytes);

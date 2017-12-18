@@ -15,13 +15,13 @@
 
 namespace blink {
 
-// Name of the kernel blob asset within the FLX bundle.
+// Name of the kernel blob asset within the asset directory.
 extern const char kKernelAssetKey[];
 
-// Name of the snapshot blob asset within the FLX bundle.
+// Name of the snapshot blob asset within the asset directory.
 extern const char kSnapshotAssetKey[];
 
-// Name of the platform kernel blob asset within the FLX bundle.
+// Name of the platform kernel blob asset within the asset directory.
 extern const char kPlatformKernelAssetKey[];
 
 bool IsRunningPrecompiledCode();
