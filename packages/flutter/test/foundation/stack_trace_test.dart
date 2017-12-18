@@ -8,7 +8,8 @@ import 'package:test/test.dart';
 import 'platform_utils.dart';
 
 void main() {
-  // TODO(8128): These tests and the filtering mechanism should be revisited to account for causal async stack traces.
+  // TODO(rmacnak): These tests and the filtering mechanism should be revisited to account for causal async stack traces.
+  // Issue: https://github.com/flutter/flutter/issues/8128
 
   test('FlutterError.defaultStackFilter', () {
     final List<String> filtered = FlutterError.defaultStackFilter(sanitizePaths(StackTrace.current.toString()).trimRight().split('\n')).toList();

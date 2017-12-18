@@ -255,6 +255,8 @@ void main() {
     );
   }, skip: skipTestsWithKnownBugs);
 
+  // TODO(bkonyi): Offset's seen below are incorrect on Windows. Skipping on Windows for now.
+  // Issue: https://github.com/flutter/flutter/issues/13658.
   test('TextPainter - forced line-wrapping with bidi', () {
     final TextPainter painter = new TextPainter()
       ..textDirection = TextDirection.ltr;
@@ -286,31 +288,25 @@ void main() {
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.upstream), Rect.zero),
       const Offset(10.0, 0.0),
     );
-
-    Offset offset = (Platform.isWindows) ? new Offset(7.0, 12.0) : new Offset(10.0, 10.0);
     expect( // between A and Alef, before the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.downstream), Rect.zero),
-      offset,
+      const Offset(10.0, 10.0),
     );
 
-    offset = (Platform.isWindows) ? new Offset(0.0, 12.0) : new Offset(0.0, 10.0);
     expect( // after the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.upstream), Rect.zero),
-      offset,
+      const Offset(0.0, 10.0),
     );
     expect( // after the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 2, affinity: TextAffinity.downstream), Rect.zero),
-      offset,
+      const Offset(0.0, 10.0),
     );
 
-    TextBox textBox = (Platform.isWindows) ?
-                      new TextBox.fromLTRBD(0.0, 12.0, 7.0, 22.0, TextDirection.rtl) :
-                      new TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl);
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
-      <TextBox>[
-        new TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
-        textBox, // Alef
+      const <TextBox>[
+        const TextBox.fromLTRBD(0.0,  0.0, 10.0, 10.0, TextDirection.ltr), // A
+        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
     expect(
@@ -321,11 +317,11 @@ void main() {
     );
     expect(
       painter.getBoxesForSelection(const TextSelection(baseOffset: 1, extentOffset: 2)),
-      <TextBox>[
-        textBox, // Alef
+      const <TextBox>[
+        const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  });
+  }, skip: Platform.isWindows);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()

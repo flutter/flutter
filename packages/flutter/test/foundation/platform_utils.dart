@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+/// Replaces Windows-style path separators with Unix-style separators.
 String sanitizePaths(String path) {
   if (Platform.isWindows) {
     path = path.replaceAll(new RegExp('\\\\'), '/');
