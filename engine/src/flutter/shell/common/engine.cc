@@ -289,17 +289,9 @@ void Engine::Init(const std::string& bundle_path) {
 #error Unknown OS
 #endif
 
-  std::string flx_path = bundle_path;
-  struct stat stat_result = {};
-  if (::stat(flx_path.c_str(), &stat_result) == 0) {
-    if (S_ISDIR(stat_result.st_mode)) {
-      flx_path = files::GetDirectoryName(bundle_path) + "/app.flx";
-    }
-  }
-
   blink::InitRuntime(vm_snapshot_data, vm_snapshot_instr,
                      default_isolate_snapshot_data,
-                     default_isolate_snapshot_instr, flx_path);
+                     default_isolate_snapshot_instr, bundle_path);
 }
 
 const std::string Engine::main_entrypoint_ = "main";
