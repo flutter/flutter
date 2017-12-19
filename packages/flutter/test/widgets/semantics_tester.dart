@@ -274,25 +274,35 @@ class TestSemantics {
   String toString([int indentAmount = 0]) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
-    buf.writeln('$indent$runtimeType {');
+    buf.writeln('${indent}new $runtimeType(');
     if (id != null)
-      buf.writeln('$indent  id: $id');
-    buf.writeln('$indent  flags: $flags');
-    buf.writeln('$indent  actions: $actions');
-    if (label != null)
-      buf.writeln('$indent  label: "$label"');
+      buf.writeln('$indent  id: $id,');
+    if (flags is int && flags != 0 || flags is List<SemanticsFlags> && flags.isNotEmpty)
+      buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagsExpression(flags)},');
+    if (actions is int && actions != 0 || actions is List<SemanticsAction> && actions.isNotEmpty)
+      buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
+    if (label != null && label != '')
+      buf.writeln('$indent  label: \'$label\',');
+    if (value != null && value != '')
+      buf.writeln('$indent  value: \'$value\',');
+    if (increasedValue != null && increasedValue != '')
+      buf.writeln('$indent  increasedValue: \'$increasedValue\',');
+    if (decreasedValue != null && decreasedValue != '')
+      buf.writeln('$indent  decreasedValue: \'$decreasedValue\',');
+    if (hint != null && hint != '')
+      buf.writeln('$indent  hint: \'$hint\',');
     if (textDirection != null)
-      buf.writeln('$indent  textDirection: $textDirection');
+      buf.writeln('$indent  textDirection: $textDirection,');
     if (rect != null)
-      buf.writeln('$indent  rect: $rect');
+      buf.writeln('$indent  rect: $rect,');
     if (transform != null)
-      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')}');
-    buf.writeln('$indent  children: [');
+      buf.writeln('$indent  transform:\n${transform.toString().trim().split('\n').map((String line) => '$indent    $line').join('\n')},');
+    buf.writeln('$indent  children: <TestSemantics>[');
     for (TestSemantics child in children) {
-      buf.writeln(child.toString(indentAmount + 2));
+      buf.writeln('${child.toString(indentAmount + 2)},');
     }
-    buf.writeln('$indent  ]');
-    buf.write('$indent}');
+    buf.writeln('$indent  ],');
+    buf.write('$indent)');
     return buf.toString();
   }
 }
@@ -418,29 +428,39 @@ class SemanticsTester {
     return _generateSemanticsTestForNode(node, 0);
   }
 
-  String _flagsToSemanticsFlagsExpression(int bitmap) {
-    return SemanticsFlags.values.values
-        .where((SemanticsFlags flag) => (flag.index & bitmap) != 0)
-        .join(', ');
+  static String _flagsToSemanticsFlagsExpression(dynamic flags) {
+    Iterable<SemanticsFlags> list;
+    if (flags is int) {
+      list = SemanticsFlags.values.values
+          .where((SemanticsFlags flag) => (flag.index & flags) != 0);
+    } else {
+      list = flags;
+    }
+    return '<SemanticsFlags>[${list.join(', ')}]';
   }
 
-  String _actionsToSemanticsActionExpression(int bitmap) {
-    return SemanticsAction.values.values
-        .where((SemanticsAction action) => (action.index & bitmap) != 0)
-        .join(', ');
+  static String _actionsToSemanticsActionExpression(dynamic actions) {
+    Iterable<SemanticsAction> list;
+    if (actions is int) {
+      list = SemanticsAction.values.values
+          .where((SemanticsAction action) => (action.index & actions) != 0);
+    } else {
+      list = actions;
+    }
+    return '<SemanticsAction>[${list.join(', ')}]';
   }
 
   /// Recursively generates [TestSemantics] code for [node] and its children,
   /// indenting the expression by `indentAmount`.
-  String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
+  static String _generateSemanticsTestForNode(SemanticsNode node, int indentAmount) {
     final String indent = '  ' * indentAmount;
     final StringBuffer buf = new StringBuffer();
     final SemanticsData nodeData = node.getSemanticsData();
     buf.writeln('new TestSemantics(');
     if (nodeData.flags != 0)
-      buf.writeln('  flags: <SemanticsFlags>[${_flagsToSemanticsFlagsExpression(nodeData.flags)}],');
+      buf.writeln('  flags: ${_flagsToSemanticsFlagsExpression(nodeData.flags)},');
     if (nodeData.actions != 0)
-      buf.writeln('  actions: <SemanticsAction>[${_actionsToSemanticsActionExpression(nodeData.actions)}],');
+      buf.writeln('  actions: ${_actionsToSemanticsActionExpression(nodeData.actions)},');
     if (node.label != null && node.label.isNotEmpty)
       buf.writeln('  label: r\'${node.label}\',');
     if (node.value != null && node.value.isNotEmpty)
@@ -480,7 +500,11 @@ class _HasSemantics extends Matcher {
 
   @override
   bool matches(covariant SemanticsTester item, Map<dynamic, dynamic> matchState) {
-    return _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
+    final bool doesMatch = _semantics._matches(item.tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode, matchState, ignoreTransform: ignoreTransform, ignoreRect: ignoreRect, ignoreId: ignoreId);
+    if (!doesMatch) {
+      matchState['would-match'] = item.generateTestSemanticsExpressionForCurrentSemanticsTree();
+    }
+    return doesMatch;
   }
 
   @override
@@ -492,10 +516,10 @@ class _HasSemantics extends Matcher {
   Description describeMismatch(dynamic item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     return mismatchDescription
         .add('${matchState[TestSemantics]}\n')
-        .add(
-          'Current SemanticsNode tree:\n'
-        )
-        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest));
+        .add('Current SemanticsNode tree:\n')
+        .add(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: DebugSemanticsDumpOrder.inverseHitTest))
+        .add('The semantics tree would have matched the following configuration:\n')
+        .add(matchState['would-match']);
   }
 }
 
