@@ -1399,4 +1399,3 @@ TranslationBundle translationBundleForLocale(Locale locale) {
   }
   return const TranslationBundle(null);
 }
-

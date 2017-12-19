@@ -272,12 +272,12 @@ void main(List<String> rawArgs) {
   final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
   final StringBuffer buffer = new StringBuffer();
   buffer.writeln(outputHeader.replaceFirst('@(regenerate)', regenerate));
-  buffer.writeln(generateTranslationBundles());
+  buffer.write(generateTranslationBundles());
 
   if (options.writeToFile) {
     final File localizationsFile = new File(pathlib.join(directory.path, 'localizations.dart'));
-    localizationsFile.writeAsStringSync('$buffer');
+    localizationsFile.writeAsStringSync(buffer.toString());
   } else {
-    print(buffer);
+    stdout.write(buffer.toString());
   }
 }
