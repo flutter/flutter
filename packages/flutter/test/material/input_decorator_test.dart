@@ -134,10 +134,10 @@ void main() {
     // above the input text. The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double labelY50ms = tester.getRect(find.text('label')).topLeft.dy;
+      final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
       expect(labelY50ms, inExclusiveRange(12.0, 20.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double labelY100ms = tester.getRect(find.text('label')).topLeft.dy;
+      final double labelY100ms = tester.getTopLeft(find.text('label')).dy;
       expect(labelY100ms, inExclusiveRange(labelY50ms, 20.0));
     }
     await tester.pumpAndSettle();
@@ -164,19 +164,19 @@ void main() {
     // above the input text. The animation's duration is 200ms.
     {
       await tester.pump(const Duration(milliseconds: 50));
-      final double labelY50ms = tester.getRect(find.text('label')).topLeft.dy;
+      final double labelY50ms = tester.getTopLeft(find.text('label')).dy;
       expect(labelY50ms, inExclusiveRange(12.0, 28.0));
       await tester.pump(const Duration(milliseconds: 50));
-      final double labelY100ms = tester.getRect(find.text('label')).topLeft.dy;
+      final double labelY100ms = tester.getTopLeft(find.text('label')).dy;
       expect(labelY100ms, inExclusiveRange(12.0, labelY50ms));
     }
 
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 2.0);
 
@@ -256,10 +256,10 @@ void main() {
 
     // The label is not floating so it's vertically centered.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 20.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 36.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
@@ -289,12 +289,12 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
-    expect(tester.getRect(find.text('hint')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('hint')).bottomLeft.dy, 44.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
     expect(getHintOpacity(tester), 1.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 2.0);
@@ -323,12 +323,12 @@ void main() {
 
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
-    expect(tester.getRect(find.text('hint')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('hint')).bottomLeft.dy, 44.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
+    expect(tester.getTopLeft(find.text('hint')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('hint')).dy, 44.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 2.0);
@@ -365,10 +365,10 @@ void main() {
 
     // The label is not floating so it's vertically centered.
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 16.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 32.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getHintOpacity(tester), 0.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
@@ -387,10 +387,10 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 48.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 8.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
     expect(getHintOpacity(tester), 1.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 2.0);
@@ -445,14 +445,14 @@ void main() {
 
     // isEmpty: true, the label is not floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 20.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 36.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('helper')).topLeft, const Offset(12.0, 64.0));
-    expect(tester.getRect(find.text('counter')).topRight, const Offset(788.0, 64.0));
+    expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
 
     // If errorText is specified then the helperText isn't shown
     await tester.pumpWidget(
@@ -471,14 +471,14 @@ void main() {
 
     // isEmpty: false, the label _is_ floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 76.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 28.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 44.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 12.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 24.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 12.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getDividerBottom(tester), 56.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 64.0));
-    expect(tester.getRect(find.text('counter')).topRight, const Offset(788.0, 64.0));
+    expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 64.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
     expect(find.text('helper'), findsNothing);
 
     // Overall height for this dense layout InputDecorator is 68dps. When the
@@ -518,14 +518,14 @@ void main() {
 
     // isEmpty: false, the label _is_ floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 8.0);
-    //TBD expect(tester.getRect(find.text('label')).bottomLeft.dy, 20.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 8.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 20.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 56.0));
-    expect(tester.getRect(find.text('counter')).topRight, const Offset(788.0, 56.0));
+    expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
 
     await tester.pumpWidget(
       buildInputDecorator(
@@ -544,14 +544,14 @@ void main() {
 
     // isEmpty: false, the label is not floating
     expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 68.0));
-    expect(tester.getRect(find.text('text')).topLeft.dy, 24.0);
-    expect(tester.getRect(find.text('text')).bottomLeft.dy, 40.0);
-    expect(tester.getRect(find.text('label')).topLeft.dy, 16.0);
-    expect(tester.getRect(find.text('label')).bottomLeft.dy, 32.0);
+    expect(tester.getTopLeft(find.text('text')).dy, 24.0);
+    expect(tester.getBottomLeft(find.text('text')).dy, 40.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 16.0);
+    expect(tester.getBottomLeft(find.text('label')).dy, 32.0);
     expect(getDividerBottom(tester), 48.0);
     expect(getDividerWeight(tester), 1.0);
-    expect(tester.getRect(find.text('error')).topLeft, const Offset(12.0, 56.0));
-    expect(tester.getRect(find.text('counter')).topRight, const Offset(788.0, 56.0));
+    expect(tester.getTopLeft(find.text('error')), const Offset(12.0, 56.0));
+    expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 56.0));
   });
 
   testWidgets('InputDecorator prefix/suffix', (WidgetTester tester) async {
