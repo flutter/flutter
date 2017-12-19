@@ -573,11 +573,13 @@ void _tests() {
             ],
           ),
           new TestSemantics(
+            flags: <SemanticsFlags>[SemanticsFlags.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Previous month December 2015',
             textDirection: TextDirection.ltr,
           ),
           new TestSemantics(
+            flags: <SemanticsFlags>[SemanticsFlags.isButton],
             actions: <SemanticsAction>[SemanticsAction.tap],
             label: r'Next month February 2016',
             textDirection: TextDirection.ltr,
