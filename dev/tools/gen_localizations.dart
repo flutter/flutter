@@ -96,7 +96,7 @@ String generateTranslationBundles() {
 
   final Map<String, List<String>> languageToLocales = <String, List<String>>{};
   final Set<String> allResourceIdentifiers = new Set<String>();
-  for(String locale in localeToResources.keys) {
+  for(String locale in localeToResources.keys.toList()..sort()) {
     final List<String> codes = locale.split('_'); // [language, country]
     assert(codes.length == 1 || codes.length == 2);
     languageToLocales[codes[0]] ??= <String>[];
