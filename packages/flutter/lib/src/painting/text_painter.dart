@@ -407,7 +407,7 @@ class TextPainter {
     final int nextCodeUnit = _text.codeUnitAt(offset);
     if (nextCodeUnit == null)
       return null;
-    // TODO(goderbauer): doesn't handle flag emojis (https://github.com/flutter/flutter/issues/13404).
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
   }
 
@@ -417,7 +417,7 @@ class TextPainter {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
       return null;
-    // TODO(goderbauer): doesn't handle flag emojis (https://github.com/flutter/flutter/issues/13404).
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
     return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
   }
 

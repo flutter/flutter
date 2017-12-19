@@ -503,7 +503,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get rowsPerPageTitle => 'Rows per page';
+  String get rowsPerPageTitle => 'Rows per page:';
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
