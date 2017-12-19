@@ -61,6 +61,9 @@ class ParagraphStyle {
       minikin::BreakStrategy::kBreakStrategy_Greedy;
 
   TextStyle GetTextStyle() const;
+
+  bool unlimited_lines() const;
+  bool ellipsized() const;
 };
 
 }  // namespace txt
