@@ -27,4 +27,12 @@ TextStyle ParagraphStyle::GetTextStyle() const {
   return result;
 }
 
+bool ParagraphStyle::unlimited_lines() const {
+  return max_lines == std::numeric_limits<size_t>::max();
+};
+
+bool ParagraphStyle::ellipsized() const {
+  return !ellipsis.empty();
+}
+
 }  // namespace txt

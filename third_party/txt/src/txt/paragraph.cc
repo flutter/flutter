@@ -439,7 +439,7 @@ void Paragraph::Layout(double width, bool force) {
       std::vector<uint16_t> ellipsized_text;
       if (ellipsis.length() && !isinf(width_) && !line_range.hard_break &&
           (line_number == line_limit - 1 ||
-           paragraph_style_.max_lines == std::numeric_limits<size_t>::max())) {
+           paragraph_style_.unlimited_lines())) {
         float ellipsis_width = layout.measureText(
             reinterpret_cast<const uint16_t*>(ellipsis.data()), 0,
             ellipsis.length(), ellipsis.length(), bidiFlags, font,
@@ -471,7 +471,7 @@ void Paragraph::Layout(double width, bool force) {
 
         // If there is no line limit, then skip all lines after the ellipsized
         // line.
-        if (paragraph_style_.max_lines == std::numeric_limits<size_t>::max()) {
+        if (paragraph_style_.unlimited_lines()) {
           line_limit = line_number + 1;
           did_exceed_max_lines_ = true;
         }
@@ -666,7 +666,12 @@ void Paragraph::Layout(double width, bool force) {
   for (double line_width : line_widths_) {
     max_intrinsic_width_ += line_width;
   }
-  min_intrinsic_width_ = std::min(max_word_width, max_intrinsic_width_);
+  if (paragraph_style_.max_lines == 1 ||
+      (paragraph_style_.unlimited_lines() && paragraph_style_.ellipsized())) {
+    min_intrinsic_width_ = max_intrinsic_width_;
+  } else {
+    min_intrinsic_width_ = std::min(max_word_width, max_intrinsic_width_);
+  }
 
   std::sort(code_unit_runs_.begin(), code_unit_runs_.end(),
             [](const CodeUnitRun& a, const CodeUnitRun& b) {
