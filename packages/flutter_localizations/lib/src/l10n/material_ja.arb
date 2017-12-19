@@ -5,7 +5,7 @@
   "openAppDrawerTooltip": "ナビゲーション メニューを開く",
   "backButtonTooltip": "戻る",
   "closeButtonTooltip": "閉じる",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "削除",
   "nextMonthTooltip": "来月",
   "previousMonthTooltip": "前月",
   "nextPageTooltip": "次のページ",
@@ -28,7 +28,7 @@
   "viewLicensesButtonLabel": "ライセンスを表示",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
-  "timePickerHourModeAnnouncement": "時を選択",
+  "timePickerHourModeAnnouncement": "時間を選択",
   "timePickerMinuteModeAnnouncement": "分を選択",
   "modalBarrierDismissLabel": "閉じる"
 }

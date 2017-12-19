@@ -6,7 +6,7 @@
   "openAppDrawerTooltip": "Открыть меню навигации",
   "backButtonTooltip": "Назад",
   "closeButtonTooltip": "Закрыть",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Удалить",
   "nextMonthTooltip": "Следующий месяц",
   "previousMonthTooltip": "Предыдущий месяц",
   "nextPageTooltip": "Следующая страница",
@@ -31,7 +31,7 @@
   "viewLicensesButtonLabel": "ЛИЦЕНЗИИ",
   "anteMeridiemAbbreviation": "АМ",
   "postMeridiemAbbreviation": "PM",
-  "timePickerHourModeAnnouncement": "ВЫБРАТЬ ЧАСЫ",
-  "timePickerMinuteModeAnnouncement": "ВЫБРАТЬ МИНУТЫ",
+  "timePickerHourModeAnnouncement": "Выберите часы",
+  "timePickerMinuteModeAnnouncement": "Выберите минуты",
   "modalBarrierDismissLabel": "Закрыть"
 }

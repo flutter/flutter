@@ -17,9 +17,14 @@ void main() {
     'he', // Hebrew
     'it', // Italian
     'ja', // Japanese
+    'ko', // Korean
+    'nl', // Dutch
+    'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
     'ru', // Russian
+    'th', // Thai
+    'tr', // Turkish
     'ur', // Urdu
     'zh', // Chinese (simplified)
   ];

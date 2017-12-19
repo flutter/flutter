@@ -4,7 +4,7 @@
   "openAppDrawerTooltip": "Abrir el menú de navegación",
   "backButtonTooltip": "Atrás",
   "closeButtonTooltip": "Cerrar",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Eliminar",
   "nextMonthTooltip": "Mes siguiente",
   "previousMonthTooltip": "Mes anterior",
   "nextPageTooltip": "Página siguiente",
@@ -29,7 +29,7 @@
   "viewLicensesButtonLabel": "VER LICENCIAS",
   "anteMeridiemAbbreviation": "A.M.",
   "postMeridiemAbbreviation": "P.M.",
-  "timePickerHourModeAnnouncement": "Seleccione Horas",
-  "timePickerMinuteModeAnnouncement": "Seleccione Minutos",
+  "timePickerHourModeAnnouncement": "Seleccionar horas",
+  "timePickerMinuteModeAnnouncement": "Seleccionar minutos",
   "modalBarrierDismissLabel": "Ignorar"
 }

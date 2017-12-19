@@ -44,10 +44,14 @@ import 'widgets_localizations.dart';
 ///   * he - Hebrew
 ///   * it - Italian
 ///   * ja - Japanese
+///   * ko - Korean
+///   * nl - Dutch
+///   * pl - Polish
 ///   * ps - Pashto
 ///   * pt - Portuguese
 ///   * ru - Russian
-///   * sd - Sindhi
+///   * th - Thai
+///   * tr - Turkish
 ///   * ur - Urdu
 ///   * zh - Simplified Chinese
 ///
