@@ -137,7 +137,13 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
   }
 
   Widget _buildBody(BuildContext context, double statusBarHeight) {
-    final EdgeInsets padding = const EdgeInsets.all(8.0);
+    final EdgeInsets mediaPadding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = new EdgeInsets.only(
+      top: 8.0,
+      left: 8.0 + mediaPadding.left,
+      right: 8.0 + mediaPadding.right,
+      bottom: 8.0
+    );
     return new SliverPadding(
       padding: padding,
       sliver: new SliverGrid(
@@ -432,69 +438,73 @@ class RecipeSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new Material(
-      child: new Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
-        child: new Table(
-          columnWidths: <int, TableColumnWidth>{
-            0: const FixedColumnWidth(64.0)
-          },
-          children: <TableRow>[
-            new TableRow(
-              children: <Widget>[
-                new TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: new Image.asset(
-                    recipe.ingredientsImagePath,
-                    package: recipe.ingredientsImagePackage,
-                    width: 32.0,
-                    height: 32.0,
-                    alignment: Alignment.centerLeft,
-                    fit: BoxFit.scaleDown
-                  )
-                ),
-                new TableCell(
-                  verticalAlignment: TableCellVerticalAlignment.middle,
-                  child: new Text(recipe.name, style: titleStyle)
-                ),
-              ]
-            ),
-            new TableRow(
-              children: <Widget>[
-                const SizedBox(),
-                new Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
-                  child: new Text(recipe.description, style: descriptionStyle)
-                ),
-              ]
-            ),
-            new TableRow(
-              children: <Widget>[
-                const SizedBox(),
-                new Padding(
-                  padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                  child: new Text('Ingredients', style: headingStyle)
-                ),
-              ]
-            ),
-          ]..addAll(recipe.ingredients.map(
-            (RecipeIngredient ingredient) {
-              return _buildItemRow(ingredient.amount, ingredient.description);
-            }
-          ))..add(
-            new TableRow(
-              children: <Widget>[
-                const SizedBox(),
-                new Padding(
-                  padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
-                  child: new Text('Steps', style: headingStyle)
-                ),
-              ]
-            )
-          )..addAll(recipe.steps.map(
-            (RecipeStep step) {
-              return _buildItemRow(step.duration ?? '', step.description);
-            }
-          )),
+      child: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 40.0),
+          child: new Table(
+            columnWidths: <int, TableColumnWidth>{
+              0: const FixedColumnWidth(64.0)
+            },
+            children: <TableRow>[
+              new TableRow(
+                children: <Widget>[
+                  new TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: new Image.asset(
+                      recipe.ingredientsImagePath,
+                      package: recipe.ingredientsImagePackage,
+                      width: 32.0,
+                      height: 32.0,
+                      alignment: Alignment.centerLeft,
+                      fit: BoxFit.scaleDown
+                    )
+                  ),
+                  new TableCell(
+                    verticalAlignment: TableCellVerticalAlignment.middle,
+                    child: new Text(recipe.name, style: titleStyle)
+                  ),
+                ]
+              ),
+              new TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  new Padding(
+                    padding: const EdgeInsets.only(top: 8.0, bottom: 4.0),
+                    child: new Text(recipe.description, style: descriptionStyle)
+                  ),
+                ]
+              ),
+              new TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  new Padding(
+                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    child: new Text('Ingredients', style: headingStyle)
+                  ),
+                ]
+              ),
+            ]..addAll(recipe.ingredients.map(
+              (RecipeIngredient ingredient) {
+                return _buildItemRow(ingredient.amount, ingredient.description);
+              }
+            ))..add(
+              new TableRow(
+                children: <Widget>[
+                  const SizedBox(),
+                  new Padding(
+                    padding: const EdgeInsets.only(top: 24.0, bottom: 4.0),
+                    child: new Text('Steps', style: headingStyle)
+                  ),
+                ]
+              )
+            )..addAll(recipe.steps.map(
+              (RecipeStep step) {
+                return _buildItemRow(step.duration ?? '', step.description);
+              }
+            )),
+          ),
         ),
       ),
     );
