@@ -788,15 +788,18 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     width = record.GetRunWidth();
   }
 
-  paint.setStrokeWidth(
-      (metrics.fFlags &
-       SkPaint::FontMetrics::FontMetricsFlags::kUnderlineThicknessIsValid_Flag)
-          ? metrics.fUnderlineThickness *
-                record.style().decoration_thickness_multiplier
-          // Backup value if the fUnderlineThickness metric is not available:
-          // Divide by 14pt as it is the default size.
-          : record.style().font_size / 14.0f *
-                record.style().decoration_thickness_multiplier);
+  SkScalar underline_thickness;
+  if ((metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
+                            kUnderlineThicknessIsValid_Flag) &&
+      metrics.fUnderlineThickness > 0) {
+    underline_thickness = metrics.fUnderlineThickness;
+  } else {
+    // Backup value if the fUnderlineThickness metric is not available:
+    // Divide by 14pt as it is the default size.
+    underline_thickness = record.style().font_size / 14.0f;
+  }
+  paint.setStrokeWidth(underline_thickness *
+                       record.style().decoration_thickness_multiplier);
 
   // Setup the decorations.
   switch (record.style().decoration_style) {
@@ -838,8 +841,8 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
     case TextDecorationStyle::kWavy: {
       int wave_count = 0;
       double x_start = 0;
-      double wavelength = metrics.fUnderlineThickness *
-                          record.style().decoration_thickness_multiplier;
+      double wavelength =
+          underline_thickness * record.style().decoration_thickness_multiplier;
       path.moveTo(x, y);
       while (x_start + wavelength * 2 < width) {
         path.rQuadTo(wavelength, wave_count % 2 != 0 ? wavelength : -wavelength,
@@ -854,15 +857,14 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
   // Draw the decorations.
   // Use a for loop for "kDouble" decoration style
   for (int i = 0; i < decoration_count; i++) {
-    double y_offset =
-        i * metrics.fUnderlineThickness * kDoubleDecorationSpacing;
+    double y_offset = i * underline_thickness * kDoubleDecorationSpacing;
     double y_offset_original = y_offset;
     // Underline
     if (record.style().decoration & 0x1) {
       y_offset += (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
                                         kUnderlinePositionIsValid_Flag)
                       ? metrics.fUnderlinePosition
-                      : metrics.fUnderlineThickness;
+                      : underline_thickness;
       if (record.style().decoration_style != TextDecorationStyle::kWavy) {
         canvas->drawLine(x, y + y_offset, x + width, y + y_offset, paint);
       } else {
@@ -893,7 +895,7 @@ void Paragraph::PaintDecorations(SkCanvas* canvas,
         paint.setStrokeWidth(metrics.fStrikeoutThickness *
                              record.style().decoration_thickness_multiplier);
       // Make sure the double line is "centered" vertically.
-      y_offset += (decoration_count - 1.0) * metrics.fUnderlineThickness *
+      y_offset += (decoration_count - 1.0) * underline_thickness *
                   kDoubleDecorationSpacing / -2.0;
       y_offset += (metrics.fFlags & SkPaint::FontMetrics::FontMetricsFlags::
                                         kStrikeoutThicknessIsValid_Flag)
