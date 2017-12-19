@@ -2,15 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
+import 'package:http/http.dart' as http;
 
 const String CHROMIUM_REPO =
     'https://chromium.googlesource.com/external/github.com/flutter/flutter';
 const String GITHUB_REPO = 'https://github.com/flutter/flutter.git';
+const String MINGIT_FOR_WINDOWS_URL = 'https://storage.googleapis.com/flutter_infra/mingit/'
+  '603511c649b00bbef0a6122a827ac419b656bc19/mingit.zip';
 
 /// The type of the process runner function.  This allows us to
 /// inject a fake process runner into the ArchiveCreator for tests.
@@ -39,16 +44,16 @@ class ProcessFailedException extends Error {
 
 /// Creates a pre-populated Flutter archive from a git repo.
 class ArchiveCreator {
-  /// [tempDir] is the directory to use for creating the archive.  Will place
+  /// [tmpDir] is the directory to use for creating the archive.  Will place
   /// several GiB of data there, so it should have available space.
   /// [outputFile] is the name of the output archive. It should end in either
   /// ".tar.xz" or ".zip".
   /// The runner argument is used to inject a mock of [Process.runSync] for
   /// testing purposes.
-  ArchiveCreator(this.tempDir, this.outputFile, {ProcessRunner runner})
+  ArchiveCreator(this.tmpDir, this.outputFile, {ProcessRunner runner})
       : assert(outputFile.path.toLowerCase().endsWith('.zip') ||
             outputFile.path.toLowerCase().endsWith('.tar.xz')),
-        flutterRoot = new Directory(path.join(tempDir.path, 'flutter')),
+        flutterRoot = new Directory(path.join(tmpDir.path, 'flutter')),
         _runner = runner ?? Process.runSync {
     flutter = path.join(
       flutterRoot.absolute.path,
@@ -60,14 +65,23 @@ class ArchiveCreator {
   }
 
   final Directory flutterRoot;
-  final Directory tempDir;
+  final Directory tmpDir;
   final File outputFile;
   final ProcessRunner _runner;
   String flutter;
   final String git = Platform.isWindows ? 'git.bat' : 'git';
   final String zip = Platform.isWindows ? '7za.exe' : 'zip';
   final String tar = Platform.isWindows ? 'tar.exe' : 'tar';
+  final Uri minGitUri = Uri.parse(MINGIT_FOR_WINDOWS_URL);
   Map<String, String> environment;
+
+  /// Performs all of the steps needed to create an archive.
+  Future<Null> createArchive(String revision) async {
+    checkoutFlutter(revision);
+    await installMinGitIfNeeded();
+    populateCaches();
+    archiveFiles();
+  }
 
   /// Clone the Flutter repo and make sure that the git environment is sane
   /// for when the user will unpack it.
@@ -75,7 +89,7 @@ class ArchiveCreator {
     // We want the user to start out the in the 'master' branch instead of a
     // detached head. To do that, we need to make sure master points at the
     // desired revision.
-    runGit(<String>['clone', '-b', 'master', CHROMIUM_REPO], workingDirectory: tempDir);
+    runGit(<String>['clone', '-b', 'master', CHROMIUM_REPO], workingDirectory: tmpDir);
     runGit(<String>['reset', '--hard', revision]);
 
     // Make the origin point to github instead of the chromium mirror.
@@ -83,19 +97,34 @@ class ArchiveCreator {
     runGit(<String>['remote', 'add', 'origin', GITHUB_REPO]);
   }
 
+  /// Retrieve the MinGit executable from storage and unpack it.
+  Future<Null> installMinGitIfNeeded() async {
+    if (!Platform.isWindows) {
+      return;
+    }
+    final Uint8List data = await http.readBytes(minGitUri);
+    final File gitFile = new File(path.join(tmpDir.path, 'mingit.zip'));
+    await gitFile.open(mode: FileMode.WRITE);
+    await gitFile.writeAsBytes(data);
+
+    final Directory minGitPath = new Directory(path.join(flutterRoot.path, 'bin', 'mingit'));
+    await minGitPath.create(recursive: true);
+    unzipArchive(gitFile, currentDirectory: minGitPath);
+  }
+
   /// Prepare the archive repo so that it has all of the caches warmed up and
   /// is configured for the user to being working.
-  void prepareArchive() {
+  void populateCaches() {
     runFlutter(<String>['doctor']);
     runFlutter(<String>['update-packages']);
     runFlutter(<String>['precache']);
     runFlutter(<String>['ide-config']);
 
-    // Create each of the templates, since they will call pub get on
+    // Create each of the templates, since they will call 'pub get' on
     // themselves when created, and this will warm the cache with their
     // dependencies too.
     for (String template in <String>['app', 'package', 'plugin']) {
-      final String createName = path.join(tempDir.path, 'create_$template');
+      final String createName = path.join(tmpDir.path, 'create_$template');
       runFlutter(
         <String>['create', '--template=$template', createName],
       );
@@ -108,7 +137,7 @@ class ArchiveCreator {
   }
 
   /// Create the archive into the given output file.
-  void createArchive() {
+  void archiveFiles() {
     if (outputFile.path.toLowerCase().endsWith('.zip')) {
       createZipArchive(outputFile, flutterRoot);
     } else if (outputFile.path.toLowerCase().endsWith('.tar.xz')) {
@@ -153,13 +182,27 @@ class ArchiveCreator {
     return _runProcess(git, args, workingDirectory: workingDirectory);
   }
 
+  void unzipArchive(File archive, {Directory currentDirectory}) {
+    currentDirectory ??= new Directory(path.dirname(archive.absolute.path));
+    final List<String> args = <String>[];
+    String executable;
+    if (zip == 'zip') {
+      executable = 'unzip';
+    } else {
+      executable = zip;
+      args.addAll(<String>['x']);
+    }
+    args.add(archive.absolute.path);
+
+    _runProcess(executable, args, workingDirectory: currentDirectory);
+  }
+
   void createZipArchive(File output, Directory source) {
     final List<String> args = <String>[];
-    if (Platform.isWindows) {
-      // We use 7-Zip on Windows, which has different args.
-      args.addAll(<String>['a', '-tzip', '-mx=9']);
-    } else {
+    if (zip == 'zip') {
       args.addAll(<String>['-r', '-9', '-q']);
+    } else {
+      args.addAll(<String>['a', '-tzip', '-mx=9']);
     }
     args.addAll(<String>[
       output.absolute.path,
@@ -185,7 +228,12 @@ class ArchiveCreator {
 /// It mainly serves to populate the .pub-cache with any appropriate Dart
 /// packages, and the flutter cache in bin/cache with the appropriate
 /// dependencies and snapshots.
-void main(List<String> argList) {
+///
+/// Note that archives contain the executables and customizations for the
+/// platform that they are created on.  So, for instance, a ZIP archive
+/// created on a Mac will contain Mac executables and setup, even though
+/// it's in a zip file.
+Future<Null> main(List<String> argList) async {
   final ArgParser argParser = new ArgParser();
   argParser.addOption(
     'temp_dir',
@@ -249,9 +297,7 @@ void main(List<String> argList) {
   int exitCode = 0;
   String message;
   try {
-    preparer.checkoutFlutter(args['revision']);
-    preparer.prepareArchive();
-    preparer.createArchive();
+    await preparer.createArchive(args['revision']);
   } on ProcessFailedException catch (e) {
     exitCode = e.exitCode;
     message = e.message;
@@ -266,4 +312,5 @@ void main(List<String> argList) {
     }
     exit(0);
   }
+  return new Future<Null>.value();
 }
