@@ -1299,7 +1299,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
   },
   'ko': const <String, String>{
     'scriptCategory': r'dense',
-    'timeOfDayFormat': r'ah:mm',
+    'timeOfDayFormat': r'a h:mm',
     'openAppDrawerTooltip': r'탐색 메뉴 열기',
     'backButtonTooltip': r'뒤로',
     'closeButtonTooltip': r'닫기',
@@ -1538,7 +1538,7 @@ const Map<String, Map<String, String>> localizations = const <String, Map<String
     'modalBarrierDismissLabel': r'Закрыть',
   },
   'th': const <String, String>{
-    'scriptCategory': r'dense',
+    'scriptCategory': r'tall',
     'timeOfDayFormat': r'ah:mm',
     'openAppDrawerTooltip': r'เปิดเมนูการนำทาง',
     'backButtonTooltip': r'กลับ',
