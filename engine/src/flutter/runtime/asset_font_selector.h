@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "flutter/assets/directory_asset_bundle.h"
+#include "flutter/assets/zip_asset_store.h"
 #include "flutter/sky/engine/platform/fonts/FontCacheKey.h"
 #include "flutter/sky/engine/platform/fonts/FontSelector.h"
 #include "flutter/sky/engine/platform/fonts/SimpleFontData.h"
@@ -24,6 +25,10 @@ class AssetFontSelector : public FontSelector {
   ~AssetFontSelector() override;
 
   static void Install(fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
+
+  // TODO(zarah): Remove this and related code using asset_store once flx is
+  // removed.
+  static void Install(fxl::RefPtr<ZipAssetStore> asset_store);
 
   PassRefPtr<FontData> getFontData(const FontDescription& font_description,
                                    const AtomicString& family_name) override;
@@ -42,12 +47,16 @@ class AssetFontSelector : public FontSelector {
   explicit AssetFontSelector(
       fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle);
 
+  explicit AssetFontSelector(fxl::RefPtr<ZipAssetStore> asset_store);
+
   void parseFontManifest();
 
   sk_sp<SkTypeface> getTypefaceAsset(const FontDescription& font_description,
                                      const AtomicString& family_name);
 
   fxl::RefPtr<DirectoryAssetBundle> directory_asset_bundle_;
+
+  fxl::RefPtr<ZipAssetStore> asset_store_;
 
   HashMap<AtomicString, std::vector<FlutterFontAttributes>> font_family_map_;
 
