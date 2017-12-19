@@ -1,6 +1,6 @@
 {
   "scriptCategory": "dense",
-  "timeOfDayFormat": "ah:mm",
+  "timeOfDayFormat": "a h:mm",
   "openAppDrawerTooltip": "탐색 메뉴 열기",
   "backButtonTooltip": "뒤로",
   "closeButtonTooltip": "닫기",
