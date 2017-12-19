@@ -584,6 +584,7 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
 // Identifies the children of a _RenderDecorationElement.
 enum _DecorationSlot {
+  icon,
   input,
   label,
   hint,
@@ -604,6 +605,7 @@ class _Decoration {
     @required this.floatingLabelProgress,
     this.borderType,
     this.borderGap,
+    this.icon,
     this.input,
     this.label,
     this.hint,
@@ -623,6 +625,7 @@ class _Decoration {
   final double floatingLabelProgress;
   final InputBorderType borderType;
   final _InputBorderGap borderGap;
+  final Widget icon;
   final Widget input;
   final Widget label;
   final Widget hint;
@@ -646,6 +649,7 @@ class _Decoration {
         && typedOther.floatingLabelProgress == floatingLabelProgress
         && typedOther.borderType == borderType
         && typedOther.borderGap == borderGap
+        && typedOther.icon == icon
         && typedOther.input == input
         && typedOther.label == label
         && typedOther.hint == hint
@@ -666,6 +670,7 @@ class _Decoration {
       floatingLabelProgress,
       borderType,
       borderGap,
+      icon,
       input,
       label,
       hint,
@@ -724,6 +729,12 @@ class _RenderDecoration extends RenderBox {
       adoptChild(newChild);
     }
     return newChild;
+  }
+
+  RenderBox _icon;
+  RenderBox get icon => _icon;
+  set icon(RenderBox value) {
+    _icon = _updateChild(_icon, value, _DecorationSlot.icon);
   }
 
   RenderBox _input;
@@ -788,6 +799,8 @@ class _RenderDecoration extends RenderBox {
 
   // The returned list is ordered for hit testing.
   Iterable<RenderBox> get _children sync *{
+    if (icon != null)
+      yield icon;
     if (input != null)
       yield input;
     if (prefixIcon != null)
@@ -860,6 +873,7 @@ class _RenderDecoration extends RenderBox {
       if (child != null)
         value.add(input.toDiagnosticsNode(name: name));
     }
+    add(icon, 'icon');
     add(input, 'input');
     add(label, 'label');
     add(hint, 'hint');
@@ -894,6 +908,10 @@ class _RenderDecoration extends RenderBox {
 
   EdgeInsets get contentPadding => decoration.contentPadding;
 
+  // Returns a value used by performLayout to position all
+  // of the renderers. This method applies layout to all of the renderers
+  // except the container. For convenience, the container is laid out
+  // in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     BoxConstraints boxConstraints = layoutConstraints.loosen();
@@ -912,13 +930,16 @@ class _RenderDecoration extends RenderBox {
     layoutLineBox(prefix);
     layoutLineBox(suffix);
 
+    if (icon != null)
+      icon.layout(boxConstraints, parentUsesSize: true);
     if (prefixIcon != null)
       prefixIcon.layout(boxConstraints, parentUsesSize: true);
     if (suffixIcon != null)
       suffixIcon.layout(boxConstraints, parentUsesSize: true);
 
     final double inputWidth = constraints.maxWidth - (
-      contentPadding.left
+      _boxSize(icon).width
+      + contentPadding.left
       + _boxSize(prefixIcon).width
       + _boxSize(prefix).width
       + _boxSize(suffix).width
@@ -979,7 +1000,8 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    return contentPadding.left
+    return _minWidth(icon, height)
+      + contentPadding.left
       + _minWidth(prefixIcon, height)
       + _minWidth(prefix, height)
       + math.max(_minWidth(input, height), _minWidth(hint, height))
@@ -990,7 +1012,8 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    return contentPadding.left
+    return _maxWidth(icon, height)
+      + contentPadding.left
       + _maxWidth(prefixIcon, height)
       + _maxWidth(prefix, height)
       + math.max(_maxWidth(input, height), _maxWidth(hint, height))
@@ -1059,8 +1082,13 @@ class _RenderDecoration extends RenderBox {
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
     if (container != null) {
-      container.layout(constraints.tighten(height: layout.containerHeight), parentUsesSize: true);
-      _boxParentData(container).offset = Offset.zero;
+      BoxConstraints containerConstraints = new BoxConstraints.tightFor(
+        height: layout.containerHeight,
+        width: overallWidth - _boxSize(icon).width,
+      );
+      container.layout(containerConstraints, parentUsesSize: true);
+      final double x = textDirection == TextDirection.rtl ? 0.0 : _boxSize(icon).width;
+      _boxParentData(container).offset = new Offset(x, 0.0);
     }
 
     double height;
@@ -1083,8 +1111,13 @@ class _RenderDecoration extends RenderBox {
       ? layout.outlineBaseline
       : layout.inputBaseline;
 
+    if (icon != null) {
+      final double x = textDirection == TextDirection.rtl ? overallWidth - icon.size.width : 0.0;
+      centerLayout(icon, x);
+    }
+
     if (textDirection == TextDirection.rtl) {
-      double start = right;
+      double start = right - _boxSize(icon).width;
       double end = left;
       if (prefixIcon != null)
         start -= centerLayout(prefixIcon, start - prefixIcon.size.width);
@@ -1101,7 +1134,7 @@ class _RenderDecoration extends RenderBox {
       if (suffix != null)
         end += baselineLayout(suffix, end);
     } else {
-      double start = left;
+      double start = left + _boxSize(icon).width;
       double end = right;
       if (prefixIcon != null)
         start += centerLayout(prefixIcon, start);
@@ -1125,12 +1158,12 @@ class _RenderDecoration extends RenderBox {
 
       if (textDirection == TextDirection.rtl) {
         if (helperError != null)
-          baselineLayout(helperError, right - helperError.size.width);
+          baselineLayout(helperError, right - helperError.size.width - _boxSize(icon).width);
         if (counter != null)
           baselineLayout(counter, left);
       } else {
         if (helperError != null)
-          baselineLayout(helperError, left);
+          baselineLayout(helperError, left + _boxSize(icon).width);
         if (counter != null)
           baselineLayout(counter, right - counter.size.width);
       }
@@ -1182,6 +1215,7 @@ class _RenderDecoration extends RenderBox {
       context.pushTransform(needsCompositing, offset, _labelTransform, _paintLabel);
     }
 
+    doPaint(icon);
     doPaint(prefix);
     doPaint(suffix);
     doPaint(prefixIcon);
@@ -1260,6 +1294,7 @@ class _RenderDecorationElement extends RenderObjectElement {
   @override
   void mount(Element parent, dynamic newSlot) {
     super.mount(parent, newSlot);
+    _mountChild(widget.decoration.icon, _DecorationSlot.icon);
     _mountChild(widget.decoration.input, _DecorationSlot.input);
     _mountChild(widget.decoration.label, _DecorationSlot.label);
     _mountChild(widget.decoration.hint, _DecorationSlot.hint);
@@ -1289,6 +1324,7 @@ class _RenderDecorationElement extends RenderObjectElement {
   void update(_Decorator newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
+    _updateChild(widget.decoration.icon, _DecorationSlot.icon);
     _updateChild(widget.decoration.input, _DecorationSlot.input);
     _updateChild(widget.decoration.label, _DecorationSlot.label);
     _updateChild(widget.decoration.hint, _DecorationSlot.hint);
@@ -1303,6 +1339,9 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   void _updateRenderObject(RenderObject child, _DecorationSlot slot) {
     switch (slot) {
+      case _DecorationSlot.icon:
+        renderObject.icon = child;
+        break;
       case _DecorationSlot.input:
         renderObject.input = child;
         break;
@@ -1684,6 +1723,18 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final double iconSize = decoration.isDense ? 18.0 : 24.0;
     final Color iconColor = isFocused ? activeColor : Colors.black45;
 
+    final Widget icon = decoration.icon == null ? null :
+      new Padding(
+        padding: const EdgeInsetsDirectional.only(end: 16.0),
+        child: IconTheme.merge(
+          data: new IconThemeData(
+            color: iconColor,
+            size: iconSize,
+          ),
+          child: decoration.icon,
+        ),
+      );
+
     final Widget prefixIcon = decoration.prefixIcon == null ? null :
       IconTheme.merge(
         data: new IconThemeData(
@@ -1752,6 +1803,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         floatingLabelProgress: _floatingLabelController.value,
         borderType: border.borderType,
         borderGap: _borderGap,
+        icon: icon,
         input: widget.child,
         label: label,
         hint: hint,

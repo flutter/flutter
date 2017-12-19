@@ -616,14 +616,14 @@ void main() {
     expect(tester.getTopLeft(find.text('p')).dy, 12.0);
     expect(tester.getTopLeft(find.text('s')).dy, 12.0);
     expect(tester.getTopRight(find.text('s')).dx, 788.0);
-    //expect(tester.getSize(find.byType(Icon)).height, 24.0);
+    expect(tester.getSize(find.byType(Icon)).height, 24.0);
 
     // The 24dps high icon is centered on the 16dps high input line
-    //expect(tester.getTopLeft(find.byType(Icon)).dy, 8.0);
+    expect(tester.getTopLeft(find.byType(Icon)).dy, 8.0);
 
     // layout is a row: [icon, p text s]
-    //expect(tester.getTopLeft(find.byType(Icon)).dx, 0.0);
-    //expect(tester.getTopRight(find.byType(Icon)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
+    expect(tester.getTopLeft(find.byType(Icon)).dx, 0.0);
+    expect(tester.getTopRight(find.byType(Icon)).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('p')).dx));
     expect(tester.getTopRight(find.text('p')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('text')).dx));
     expect(tester.getTopRight(find.text('text')).dx, lessThanOrEqualTo(tester.getTopLeft(find.text('s')).dx));
   });
