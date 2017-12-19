@@ -123,6 +123,25 @@ the "Other" suffix. For example the English translations
 ```
 
 
+### scriptCategory and timeOfDayFormat
+
+The values of these resource IDs are not translations, they're keywords that
+help define an app's text theme and time picker layout respectively.
+
+The value of `timeOfDayFormat` defines how a time picker displayed by
+[showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
+formats and lays out its time controls. The value of `timeOfDayFormat` must be
+a string that matches one of the formats defined by
+https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html.
+
+The value of `scriptCategory` is based on the
+[Language categories reference](https://material.io/guidelines/style/typography.html#typography-language-categories-reference)
+section in the Material spec. The `scriptCategory` value is used when looking up
+the `TextTheme`, see the
+[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
+class.
+
+
 ### Generated file localizations.dart: all of the localizations as a Map
 
 If you look at the comment at the top of `localizations.dart` you'll
@@ -160,19 +179,6 @@ The translations (the `.arb` files) in this directory are based on the
 English translations in `material_en.arb`. Google contributes
 translations for all the languages supported by this package.
 (Googlers, for more details see <go/flutter-l10n>.)
-
-Not all of the translations represented here have been vetted by
-native speakers. The following translations have been reviewed by
-native speakers on the Flutter team:
-
-*  material_de.arb
-*  material_en.arb, material_en_GB.arb, material_en_IE.arb, material_en_ZA.arb
-*  material_fr.arb, material_fr_CA.arb
-*  material_ja.arb
-*  material_ru.arb
-
-The others were automatically generated using the Google Translators
-Toolkit. We are actively seeking review (by native speakers) for them.
 
 If you have feedback about the translations please
 [file an issue on the Flutter github repo](https://github.com/flutter/flutter/issues/new).

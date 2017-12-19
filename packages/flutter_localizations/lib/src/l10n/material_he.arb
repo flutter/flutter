@@ -7,7 +7,7 @@
   "openAppDrawerTooltip": "פתיחה של תפריט הניווט",
   "backButtonTooltip": "הקודם",
   "closeButtonTooltip": "סגירה",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "מחיקה",
   "nextMonthTooltip": "החודש הבא",
   "previousMonthTooltip": "החודש הקודם",
   "nextPageTooltip": "הדף הבא",
@@ -30,7 +30,7 @@
   "viewLicensesButtonLabel": "הצגת הרישיונות",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
-  "timePickerHourModeAnnouncement": "בחר שעות",
-  "timePickerMinuteModeAnnouncement": "בחר דקות",
+  "timePickerHourModeAnnouncement": "בחירת שעות",
+  "timePickerMinuteModeAnnouncement": "בחירת דקות",
   "modalBarrierDismissLabel": "סגירה"
 }

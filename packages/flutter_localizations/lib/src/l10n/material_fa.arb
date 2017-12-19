@@ -5,7 +5,7 @@
   "openAppDrawerTooltip": "باز کردن منوی پیمایش",
   "backButtonTooltip": "برگشت",
   "closeButtonTooltip": "بستن",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "حذف",
   "nextMonthTooltip": "ماه بعد",
   "previousMonthTooltip": "ماه قبل",
   "nextPageTooltip": "صفحه بعد",
@@ -28,7 +28,7 @@
   "viewLicensesButtonLabel": "مشاهده مجوزها",
   "anteMeridiemAbbreviation": "ق.ظ.",
   "postMeridiemAbbreviation": "ب.ظ.",
-  "timePickerHourModeAnnouncement": "ساعت ها را انتخاب کنید",
-  "timePickerMinuteModeAnnouncement": "دقیقه را انتخاب کنید",
+  "timePickerHourModeAnnouncement": "انتخاب ساعت",
+  "timePickerMinuteModeAnnouncement": "انتخاب دقیقه",
   "modalBarrierDismissLabel": "رد کردن"
 }
