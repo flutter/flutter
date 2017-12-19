@@ -12,9 +12,9 @@ import 'package:url_launcher/url_launcher.dart';
 typedef Future<String> UpdateUrlFetcher();
 
 class Updater extends StatefulWidget {
-  const Updater({ @required this.updateUrlFetcher, this.child, Key key })
+  const Updater({ @required this.updateUrlFetcher, this.child, Object debugLocation, Key key })
     : assert(updateUrlFetcher != null),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
   final Widget child;

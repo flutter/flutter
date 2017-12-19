@@ -116,9 +116,9 @@ class _ShrineGridDelegate extends SliverGridDelegate {
 
 // Displays the Vendor's name and avatar.
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({ Key key, @required this.vendor })
+  const _VendorItem({ Object debugLocation, Key key, @required this.vendor })
     : assert(vendor != null),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   final Vendor vendor;
 
@@ -152,9 +152,9 @@ class _VendorItem extends StatelessWidget {
 // Displays the product's price. If the product is in the shopping cart then the
 // background is highlighted.
 abstract class _PriceItem extends StatelessWidget {
-  const _PriceItem({ Key key, @required this.product })
+  const _PriceItem({ Object debugLocation, Key key, @required this.product })
       : assert(product != null),
-        super(key: key);
+        super(debugLocation: debugLocation, key: key);
 
   final Product product;
 
@@ -172,7 +172,7 @@ abstract class _PriceItem extends StatelessWidget {
 }
 
 class _ProductPriceItem extends _PriceItem {
-  const _ProductPriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _ProductPriceItem({ Object debugLocation, Key key, Product product }) : super(debugLocation: debugLocation, key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -185,7 +185,7 @@ class _ProductPriceItem extends _PriceItem {
 }
 
 class _FeaturePriceItem extends _PriceItem {
-  const _FeaturePriceItem({ Key key, Product product }) : super(key: key, product: product);
+  const _FeaturePriceItem({ Object debugLocation, Key key, Product product }) : super(debugLocation: debugLocation, key: key, product: product);
 
   @override
   Widget build(BuildContext context) {
@@ -244,11 +244,11 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 
 // A card that highlights the "featured" catalog item.
 class _Heading extends StatelessWidget {
-  _Heading({ Key key, @required this.product })
+  _Heading({ Object debugLocation, Key key, @required this.product })
     : assert(product != null),
       assert(product.featureTitle != null),
       assert(product.featureDescription != null),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   final Product product;
 
@@ -304,9 +304,9 @@ class _Heading extends StatelessWidget {
 // A card that displays a product's image, price, and vendor. The _ProductItem
 // cards appear in a grid below the heading.
 class _ProductItem extends StatelessWidget {
-  const _ProductItem({ Key key, @required this.product, this.onPressed })
+  const _ProductItem({ Object debugLocation, Key key, @required this.product, this.onPressed })
     : assert(product != null),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   final Product product;
   final VoidCallback onPressed;

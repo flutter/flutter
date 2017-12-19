@@ -17,7 +17,7 @@ const String _text3 =
   'By default snackbars automatically disappear after a few seconds ';
 
 class SnackBarDemo extends StatefulWidget {
-  const SnackBarDemo({ Key key }) : super(key: key);
+  const SnackBarDemo({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/material/snack-bar';
 

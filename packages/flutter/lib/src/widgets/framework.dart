@@ -317,6 +317,20 @@ class TypeMatcher<T> {
   bool check(dynamic object) => object is T;
 }
 
+/// Describes a location in a source file.
+///
+/// A Dart Kernel Transf
+class DebugLocation {
+  const DebugLocation({this.file, this.line, this.column});
+
+  final String file;
+  final int line;
+  final int column;
+
+  @override
+  String toString() => '$file:$line:$column';
+}
+
 /// Describes the configuration for an [Element].
 ///
 /// Widgets are the central class hierarchy in the Flutter framework. A widget

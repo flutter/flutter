@@ -31,7 +31,7 @@ final List<_BackgroundLayer> _kBackgroundLayers = <_BackgroundLayer>[
 ];
 
 class _AppBarBackground extends StatelessWidget {
-  const _AppBarBackground({ Key key, this.animation }) : super(key: key);
+  const _AppBarBackground({ Object debugLocation, Key key, this.animation }) : super(debugLocation: debugLocation, key: key);
 
   final Animation<double> animation;
 
@@ -63,7 +63,7 @@ class _AppBarBackground extends StatelessWidget {
 
 class GalleryHome extends StatefulWidget {
   const GalleryHome({
-    Key key,
+    Object debugLocation, Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
     this.timeDilation,
@@ -80,7 +80,7 @@ class GalleryHome extends StatefulWidget {
     this.onSendFeedback,
   }) : assert(onThemeChanged != null),
        assert(onTimeDilationChanged != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;

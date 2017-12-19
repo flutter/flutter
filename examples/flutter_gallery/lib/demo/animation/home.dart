@@ -76,12 +76,12 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 
 class _StatusBarPaddingSliver extends SingleChildRenderObjectWidget {
   const _StatusBarPaddingSliver({
-    Key key,
+    Object debugLocation, Key key,
     @required this.maxHeight,
     this.scrollFactor: 5.0,
   }) : assert(maxHeight != null && maxHeight >= 0.0),
        assert(scrollFactor != null && scrollFactor >= 1.0),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final double maxHeight;
   final double scrollFactor;
@@ -259,7 +259,7 @@ class _AllSectionsLayout extends MultiChildLayoutDelegate {
 
 class _AllSectionsView extends AnimatedWidget {
   _AllSectionsView({
-    Key key,
+    Object debugLocation, Key key,
     this.sectionIndex,
     @required this.sections,
     @required this.selectedIndex,
@@ -273,7 +273,7 @@ class _AllSectionsView extends AnimatedWidget {
        assert(sectionIndex >= 0 && sectionIndex < sections.length),
        assert(selectedIndex != null),
        assert(selectedIndex.value >= 0.0 && selectedIndex.value < sections.length.toDouble()),
-       super(key: key, listenable: selectedIndex);
+       super(debugLocation: debugLocation, key: key, listenable: selectedIndex);
 
   final int sectionIndex;
   final List<Section> sections;
@@ -421,7 +421,7 @@ class _SnappingScrollPhysics extends ClampingScrollPhysics {
 }
 
 class AnimationDemoHome extends StatefulWidget {
-  const AnimationDemoHome({ Key key }) : super(key: key);
+  const AnimationDemoHome({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/animation';
 

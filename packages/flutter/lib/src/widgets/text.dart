@@ -43,12 +43,13 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback()
+  const DefaultTextStyle.fallback({Object debugLocation})
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
-      overflow = TextOverflow.clip;
+      overflow = TextOverflow.clip,
+      super(debugLocation: debugLocation);
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -80,6 +81,7 @@ class DefaultTextStyle extends InheritedWidget {
       builder: (BuildContext context) {
         final DefaultTextStyle parent = DefaultTextStyle.of(context);
         return new DefaultTextStyle(
+          debugLocation: debugLocation ?? parent.debugLocation,
           key: key,
           style: parent.style.merge(style),
           textAlign: textAlign ?? parent.textAlign,

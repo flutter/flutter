@@ -35,7 +35,7 @@ class LinkTextSpan extends TextSpan {
 }
 
 class GalleryDrawerHeader extends StatefulWidget {
-  const GalleryDrawerHeader({ Key key, this.light }) : super(key: key);
+  const GalleryDrawerHeader({ Object debugLocation, Key key, this.light }) : super(debugLocation: debugLocation, key: key);
 
   final bool light;
 
@@ -103,7 +103,7 @@ class _GalleryDrawerHeaderState extends State<GalleryDrawerHeader> {
 
 class GalleryDrawer extends StatelessWidget {
   const GalleryDrawer({
-    Key key,
+    Object debugLocation, Key key,
     this.useLightTheme,
     @required this.onThemeChanged,
     this.timeDilation,
@@ -120,7 +120,7 @@ class GalleryDrawer extends StatelessWidget {
     this.onSendFeedback,
   }) : assert(onThemeChanged != null),
        assert(onTimeDilationChanged != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final bool useLightTheme;
   final ValueChanged<bool> onThemeChanged;

@@ -37,7 +37,7 @@ class Photo {
 }
 
 class GridPhotoViewer extends StatefulWidget {
-  const GridPhotoViewer({ Key key, this.photo }) : super(key: key);
+  const GridPhotoViewer({ Object debugLocation, Key key, this.photo }) : super(debugLocation: debugLocation, key: key);
 
   final Photo photo;
 
@@ -151,14 +151,14 @@ class _GridPhotoViewerState extends State<GridPhotoViewer> with SingleTickerProv
 
 class GridDemoPhotoItem extends StatelessWidget {
   GridDemoPhotoItem({
-    Key key,
+    Object debugLocation, Key key,
     @required this.photo,
     @required this.tileStyle,
     @required this.onBannerTap
   }) : assert(photo != null && photo.isValid),
        assert(tileStyle != null),
        assert(onBannerTap != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Photo photo;
   final GridDemoTileStyle tileStyle;
@@ -242,7 +242,7 @@ class GridDemoPhotoItem extends StatelessWidget {
 }
 
 class GridListDemo extends StatefulWidget {
-  const GridListDemo({ Key key }) : super(key: key);
+  const GridListDemo({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/material/grid-list';
 

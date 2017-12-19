@@ -21,8 +21,8 @@ class VideoCard extends StatelessWidget {
   final String title;
   final String subtitle;
 
-  const VideoCard({Key key, this.controller, this.title, this.subtitle})
-      : super(key: key);
+  const VideoCard({Object debugLocation, Key key, this.controller, this.title, this.subtitle})
+      : super(debugLocation: debugLocation, key: key);
 
   Widget _buildInlineVideo() {
     return new Padding(
@@ -342,7 +342,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 }
 
 class VideoDemo extends StatefulWidget {
-  const VideoDemo({Key key}) : super(key: key);
+  const VideoDemo({Object debugLocation, Key key}) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/video';
 

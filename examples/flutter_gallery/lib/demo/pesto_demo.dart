@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 class PestoDemo extends StatelessWidget {
-  const PestoDemo({ Key key }) : super(key: key);
+  const PestoDemo({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/pesto';
 
@@ -64,7 +64,7 @@ class PestoStyle extends TextStyle {
 
 // Displays a grid of recipe cards.
 class RecipeGridPage extends StatefulWidget {
-  const RecipeGridPage({ Key key, this.recipes }) : super(key: key);
+  const RecipeGridPage({ Object debugLocation, Key key, this.recipes }) : super(debugLocation: debugLocation, key: key);
 
   final List<Recipe> recipes;
 
@@ -244,7 +244,7 @@ class RecipeCard extends StatelessWidget {
   final TextStyle titleStyle = const PestoStyle(fontSize: 24.0, fontWeight: FontWeight.w600);
   final TextStyle authorStyle = const PestoStyle(fontWeight: FontWeight.w500, color: Colors.black54);
 
-  const RecipeCard({ Key key, this.recipe, this.onTap }) : super(key: key);
+  const RecipeCard({ Object debugLocation, Key key, this.recipe, this.onTap }) : super(debugLocation: debugLocation, key: key);
 
   final Recipe recipe;
   final VoidCallback onTap;
@@ -299,7 +299,7 @@ class RecipeCard extends StatelessWidget {
 
 // Displays one recipe. Includes the recipe sheet with a background image.
 class RecipePage extends StatefulWidget {
-  const RecipePage({ Key key, this.recipe }) : super(key: key);
+  const RecipePage({ Object debugLocation, Key key, this.recipe }) : super(debugLocation: debugLocation, key: key);
 
   final Recipe recipe;
 
@@ -425,7 +425,7 @@ class RecipeSheet extends StatelessWidget {
   final TextStyle itemAmountStyle = new PestoStyle(fontSize: 15.0, color: _kTheme.primaryColor, height: 24.0/15.0);
   final TextStyle headingStyle = const PestoStyle(fontSize: 16.0, fontWeight: FontWeight.bold, height: 24.0/15.0);
 
-  RecipeSheet({ Key key, this.recipe }) : super(key: key);
+  RecipeSheet({ Object debugLocation, Key key, this.recipe }) : super(debugLocation: debugLocation, key: key);
 
   final Recipe recipe;
 

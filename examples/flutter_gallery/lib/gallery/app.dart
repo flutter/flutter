@@ -29,8 +29,8 @@ class GalleryApp extends StatefulWidget {
     this.checkerboardRasterCacheImages: true,
     this.checkerboardOffscreenLayers: true,
     this.onSendFeedback,
-    Key key}
-  ) : super(key: key);
+    Object debugLocation, Key key}
+  ) : super(debugLocation: debugLocation, key: key);
 
   final UpdateUrlFetcher updateUrlFetcher;
 

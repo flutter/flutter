@@ -13,14 +13,14 @@ import 'shrine_types.dart';
 // Displays the product title's, description, and order quantity dropdown.
 class _ProductItem extends StatelessWidget {
   const _ProductItem({
-    Key key,
+    Object debugLocation, Key key,
     @required this.product,
     @required this.quantity,
     @required this.onChanged,
   }) : assert(product != null),
        assert(quantity != null),
        assert(onChanged != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Product product;
   final int quantity;
@@ -69,9 +69,9 @@ class _ProductItem extends StatelessWidget {
 
 // Vendor name and description
 class _VendorItem extends StatelessWidget {
-  const _VendorItem({ Key key, @required this.vendor })
+  const _VendorItem({ Object debugLocation, Key key, @required this.vendor })
     : assert(vendor != null),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   final Vendor vendor;
 
@@ -141,13 +141,13 @@ class _HeadingLayout extends MultiChildLayoutDelegate {
 // a order quantity (0-5). Appears at the top of the OrderPage.
 class _Heading extends StatelessWidget {
   const _Heading({
-    Key key,
+    Object debugLocation, Key key,
     @required this.product,
     @required this.quantity,
     this.quantityChanged,
   }) : assert(product != null),
        assert(quantity != null && quantity >= 0 && quantity <= 5),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Product product;
   final int quantity;
@@ -208,14 +208,14 @@ class _Heading extends StatelessWidget {
 
 class OrderPage extends StatefulWidget {
   OrderPage({
-    Key key,
+    Object debugLocation, Key key,
     @required this.order,
     @required this.products,
     @required this.shoppingCart,
   }) : assert(order != null),
        assert(products != null && products.isNotEmpty),
        assert(shoppingCart != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Order order;
   final List<Product> products;

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'logic.dart';
 
 class Calculator extends StatefulWidget {
-  const Calculator({Key key}) : super(key: key);
+  const Calculator({Object debugLocation, Key key}) : super(debugLocation: debugLocation, key: key);
 
   @override
   _CalculatorState createState() => new _CalculatorState();

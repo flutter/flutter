@@ -47,9 +47,9 @@ final List<TravelDestination> destinations = <TravelDestination>[
 ];
 
 class TravelDestinationItem extends StatelessWidget {
-  TravelDestinationItem({ Key key, @required this.destination })
+  TravelDestinationItem({ Object debugLocation, Key key, @required this.destination })
     : assert(destination != null && destination.isValid),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   static final double height = 366.0;
   final TravelDestination destination;

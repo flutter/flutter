@@ -9,12 +9,12 @@ import 'package:intl/intl.dart';
 
 class _InputDropdown extends StatelessWidget {
   const _InputDropdown({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     this.labelText,
     this.valueText,
     this.valueStyle,
-    this.onPressed }) : super(key: key);
+    this.onPressed }) : super(debugLocation: debugLocation, key: key);
 
   final String labelText;
   final String valueText;
@@ -48,13 +48,13 @@ class _InputDropdown extends StatelessWidget {
 
 class _DateTimePicker extends StatelessWidget {
   const _DateTimePicker({
-    Key key,
+    Object debugLocation, Key key,
     this.labelText,
     this.selectedDate,
     this.selectedTime,
     this.selectDate,
     this.selectTime
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final String labelText;
   final DateTime selectedDate;

@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 class MenuDemo extends StatefulWidget {
-  const MenuDemo({ Key key }) : super(key: key);
+  const MenuDemo({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   static const String routeName = '/material/menu';
 
