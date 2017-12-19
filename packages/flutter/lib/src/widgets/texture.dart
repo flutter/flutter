@@ -35,7 +35,7 @@ import 'framework.dart';
 ///   for how to create and manage backend textures on iOS.
 class Texture extends LeafRenderObjectWidget {
   /// Creates a widget backed by the texture identified by [textureId].
-  const Texture({ Key key, @required this.textureId }): assert(textureId != null), super(key: key);
+  const Texture({ Object debugLocation, Key key, @required this.textureId }): assert(textureId != null), super(debugLocation: debugLocation, key: key);
 
   /// The identity of the backend texture.
   final int textureId;

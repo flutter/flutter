@@ -28,10 +28,10 @@ import 'transitions.dart';
 class ModalBarrier extends StatelessWidget {
   /// Creates a widget that blocks user interaction.
   const ModalBarrier({
-    Key key,
+    Object debugLocation, Key key,
     this.color,
     this.dismissible: true
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// If non-null, fill the barrier with this color.
   ///
@@ -97,10 +97,10 @@ class ModalBarrier extends StatelessWidget {
 class AnimatedModalBarrier extends AnimatedWidget {
   /// Creates a widget that blocks user interaction.
   const AnimatedModalBarrier({
-    Key key,
+    Object debugLocation, Key key,
     Animation<Color> color,
     this.dismissible: true
-  }) : super(key: key, listenable: color);
+  }) : super(debugLocation: debugLocation, key: key, listenable: color);
 
   /// If non-null, fill the barrier with this color.
   ///

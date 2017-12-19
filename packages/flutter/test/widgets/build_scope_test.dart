@@ -86,9 +86,9 @@ class BadDisposeWidgetState extends State<BadDisposeWidget> {
 
 class StatefulWrapper extends StatefulWidget {
   const StatefulWrapper({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 
@@ -117,9 +117,9 @@ class StatefulWrapperState extends State<StatefulWrapper> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 

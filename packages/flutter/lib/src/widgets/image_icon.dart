@@ -24,10 +24,10 @@ class ImageIcon extends StatelessWidget {
   ///
   /// The [size] and [color] default to the value given by the current [IconTheme].
   const ImageIcon(this.image, {
-    Key key,
+    Object debugLocation, Key key,
     this.size,
     this.color
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The image to display as the icon.
   ///

@@ -28,11 +28,11 @@ class ButtonBar extends StatelessWidget {
   ///
   /// The alignment argument defaults to [MainAxisAlignment.end].
   const ButtonBar({
-    Key key,
+    Object debugLocation, Key key,
     this.alignment: MainAxisAlignment.end,
     this.mainAxisSize: MainAxisSize.max,
     this.children: const <Widget>[],
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// How the children should be placed along the horizontal axis.
   final MainAxisAlignment alignment;

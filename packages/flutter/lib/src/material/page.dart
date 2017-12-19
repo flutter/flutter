@@ -17,14 +17,14 @@ final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
 // Used for Android and Fuchsia.
 class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> routeAnimation,
     @required this.child,
   }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn,
        )),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Animation<Offset> _positionAnimation;
   final Widget child;

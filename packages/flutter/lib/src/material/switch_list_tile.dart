@@ -70,7 +70,7 @@ class SwitchListTile extends StatelessWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const SwitchListTile({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor,
@@ -86,7 +86,7 @@ class SwitchListTile extends StatelessWidget {
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Whether this switch is checked.
   ///

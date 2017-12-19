@@ -253,7 +253,7 @@ class DataTable extends StatelessWidget {
   /// the sort order is ascending, this should be true (the default),
   /// otherwise it should be false.
   DataTable({
-    Key key,
+    Object debugLocation, Key key,
     @required this.columns,
     this.sortColumnIndex,
     this.sortAscending: true,
@@ -266,7 +266,7 @@ class DataTable extends StatelessWidget {
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The configuration and labels for the columns in the table.
   final List<DataColumn> columns;
@@ -606,7 +606,7 @@ class DataTable extends StatelessWidget {
 class TableRowInkWell extends InkResponse {
   /// Creates an ink well for a table row.
   const TableRowInkWell({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,
@@ -660,11 +660,11 @@ class TableRowInkWell extends InkResponse {
 
 class _SortArrow extends StatefulWidget {
   const _SortArrow({
-    Key key,
+    Object debugLocation, Key key,
     this.visible,
     this.down,
     this.duration,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final bool visible;
 

@@ -46,7 +46,7 @@ class Switch extends StatefulWidget {
   /// * [value] determines whether this switch is on or off.
   /// * [onChanged] is called when the user toggles the switch on or off.
   const Switch({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor,
@@ -55,7 +55,7 @@ class Switch extends StatefulWidget {
     this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// Whether this switch is on or off.
   ///
@@ -160,7 +160,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
 class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
   const _SwitchRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.activeColor,
     this.inactiveColor,
@@ -171,7 +171,7 @@ class _SwitchRenderObjectWidget extends LeafRenderObjectWidget {
     this.configuration,
     this.onChanged,
     this.vsync,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final bool value;
   final Color activeColor;

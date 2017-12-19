@@ -85,12 +85,12 @@ class CupertinoTabScaffold extends StatefulWidget {
   ///
   /// The [tabBar] and [tabBuilder] arguments must not be null.
   const CupertinoTabScaffold({
-    Key key,
+    Object debugLocation, Key key,
     @required this.tabBar,
     @required this.tabBuilder,
   }) : assert(tabBar != null),
        assert(tabBuilder != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The [tabBar] is a [CupertinoTabBar] drawn at the bottom of the screen
   /// that lets the user switch between different tabs in the main content area

@@ -14,10 +14,10 @@ import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
   const _AccountPictures({
-    Key key,
+    Object debugLocation, Key key,
     this.currentAccountPicture,
     this.otherAccountsPictures,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget currentAccountPicture;
   final List<Widget> otherAccountsPictures;
@@ -55,12 +55,12 @@ class _AccountPictures extends StatelessWidget {
 
 class _AccountDetails extends StatelessWidget {
   const _AccountDetails({
-    Key key,
+    Object debugLocation, Key key,
     @required this.accountName,
     @required this.accountEmail,
     this.onTap,
     this.isOpen,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget accountName;
   final Widget accountEmail;
@@ -140,7 +140,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const UserAccountsDrawerHeader({
-    Key key,
+    Object debugLocation, Key key,
     this.decoration,
     this.margin: const EdgeInsets.only(bottom: 8.0),
     this.currentAccountPicture,
@@ -148,7 +148,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     @required this.accountName,
     @required this.accountEmail,
     this.onDetailsPressed
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
   /// with its background color set to the current theme's primaryColor is used.

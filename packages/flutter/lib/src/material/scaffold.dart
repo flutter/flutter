@@ -169,9 +169,9 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
 
 class _FloatingActionButtonTransition extends StatefulWidget {
   const _FloatingActionButtonTransition({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 
@@ -312,7 +312,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 class Scaffold extends StatefulWidget {
   /// Creates a visual scaffold for material design widgets.
   const Scaffold({
-    Key key,
+    Object debugLocation, Key key,
     this.appBar,
     this.body,
     this.floatingActionButton,
@@ -323,7 +323,7 @@ class Scaffold extends StatefulWidget {
     this.backgroundColor,
     this.resizeToAvoidBottomPadding: true,
     this.primary: true,
-  }) : assert(primary != null), super(key: key);
+  }) : assert(primary != null), super(debugLocation: debugLocation, key: key);
 
   /// An app bar to display at the top of the scaffold.
   final PreferredSizeWidget appBar;
@@ -1074,12 +1074,12 @@ class ScaffoldFeatureController<T extends Widget, U> {
 
 class _PersistentBottomSheet extends StatefulWidget {
   const _PersistentBottomSheet({
-    Key key,
+    Object debugLocation, Key key,
     this.animationController,
     this.onClosing,
     this.onDismissed,
     this.builder
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it
   final VoidCallback onClosing;
@@ -1151,10 +1151,11 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Pers
 
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
+    Object debugLocation,
     @required this.hasDrawer,
     @required Widget child,
   }) : assert(hasDrawer != null),
-       super(child: child);
+       super(debugLocation: debugLocation, child: child);
 
   final bool hasDrawer;
 

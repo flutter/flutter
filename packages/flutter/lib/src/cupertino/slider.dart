@@ -43,7 +43,7 @@ class CupertinoSlider extends StatefulWidget {
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
   const CupertinoSlider({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.min: 0.0,
@@ -55,7 +55,7 @@ class CupertinoSlider extends StatefulWidget {
        assert(max != null),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -139,13 +139,13 @@ class _CupertinoSliderState extends State<CupertinoSlider> with TickerProviderSt
 
 class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSliderRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.divisions,
     this.activeColor,
     this.onChanged,
     this.vsync,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final double value;
   final int divisions;

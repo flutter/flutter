@@ -45,7 +45,7 @@ class Chip extends StatelessWidget {
   ///  * [onDeleted] determines whether the chip has a delete button. This
   ///    callback runs when the delete button is pressed.
   const Chip({
-    Key key,
+    Object debugLocation, Key key,
     this.avatar,
     @required this.label,
     this.onDeleted,
@@ -57,7 +57,7 @@ class Chip extends StatelessWidget {
   }) : assert(label != null),
        assert(border != null),
        labelStyle = labelStyle ?? _defaultLabelStyle,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   static const TextStyle _defaultLabelStyle = const TextStyle(
     inherit: false,

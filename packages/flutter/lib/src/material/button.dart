@@ -43,13 +43,13 @@ class ButtonTheme extends InheritedWidget {
   ///
   /// The child argument is required.
   const ButtonTheme({
-    Key key,
+    Object debugLocation, Key key,
     this.textTheme: ButtonTextTheme.normal,
     this.minWidth: 88.0,
     this.height: 36.0,
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   /// Creates a button theme that is appropriate for button bars, as used in
   /// dialog footers and in the headers of data tables.
@@ -66,13 +66,13 @@ class ButtonTheme extends InheritedWidget {
   /// For example, buttons at the bottom of [Dialog] or [Card] widgets use this
   /// button theme.
   const ButtonTheme.bar({
-    Key key,
+    Object debugLocation, Key key,
     this.textTheme: ButtonTextTheme.accent,
     this.minWidth: 64.0,
     this.height: 36.0,
     this.padding: const EdgeInsets.symmetric(horizontal: 8.0),
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   /// The button color that this subtree should use.
   final ButtonTextTheme textTheme;
@@ -136,7 +136,7 @@ class MaterialButton extends StatefulWidget {
   /// Rather than creating a material button directly, consider using
   /// [FlatButton] or [RaisedButton].
   const MaterialButton({
-    Key key,
+    Object debugLocation, Key key,
     this.colorBrightness,
     this.textTheme,
     this.textColor,
@@ -150,7 +150,7 @@ class MaterialButton extends StatefulWidget {
     this.padding,
     @required this.onPressed,
     this.child
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The theme brightness to use for this button.
   ///

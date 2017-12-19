@@ -37,7 +37,7 @@ const Color _kDefaultTabBarBorderColor = const Color(0x4C000000);
 class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Creates a tab bar in the iOS style.
   CupertinoTabBar({
-    Key key,
+    Object debugLocation, Key key,
     @required this.items,
     this.onTap,
     this.currentIndex: 0,
@@ -49,7 +49,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
        assert(items.length >= 2),
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;
@@ -193,7 +193,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// Create a clone of the current [CupertinoTabBar] but with provided
   /// parameters overridden.
   CupertinoTabBar copyWith({
-    Key key,
+    Object debugLocation, Key key,
     List<BottomNavigationBarItem> items,
     Color backgroundColor,
     Color activeColor,

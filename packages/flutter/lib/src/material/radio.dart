@@ -52,12 +52,12 @@ class Radio<T> extends StatefulWidget {
   ///   selected.
   /// * [onChanged] is called when the user selects this radio button.
   const Radio({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.groupValue,
     @required this.onChanged,
     this.activeColor
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The value represented by this radio button.
   final T value;
@@ -133,7 +133,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
 class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
   const _RadioRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     @required this.selected,
     @required this.activeColor,
     @required this.inactiveColor,
@@ -143,7 +143,7 @@ class _RadioRenderObjectWidget extends LeafRenderObjectWidget {
        assert(activeColor != null),
        assert(inactiveColor != null),
        assert(vsync != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final bool selected;
   final Color inactiveColor;

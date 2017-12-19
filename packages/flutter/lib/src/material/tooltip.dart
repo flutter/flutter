@@ -42,7 +42,7 @@ class Tooltip extends StatefulWidget {
   ///
   /// The [message] argument must not be null.
   const Tooltip({
-    Key key,
+    Object debugLocation, Key key,
     @required this.message,
     this.height: 32.0,
     this.padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -54,7 +54,7 @@ class Tooltip extends StatefulWidget {
        assert(padding != null),
        assert(verticalOffset != null),
        assert(preferBelow != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The text to display in the tooltip.
   final String message;
@@ -248,7 +248,7 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
 
 class _TooltipOverlay extends StatelessWidget {
   const _TooltipOverlay({
-    Key key,
+    Object debugLocation, Key key,
     this.message,
     this.height,
     this.padding,
@@ -256,7 +256,7 @@ class _TooltipOverlay extends StatelessWidget {
     this.target,
     this.verticalOffset,
     this.preferBelow,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final String message;
   final double height;

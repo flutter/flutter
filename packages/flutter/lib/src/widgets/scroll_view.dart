@@ -50,7 +50,7 @@ abstract class ScrollView extends StatelessWidget {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   ScrollView({
-    Key key,
+    Object debugLocation, Key key,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.controller,
@@ -65,7 +65,7 @@ abstract class ScrollView extends StatelessWidget {
        ),
        primary = primary ?? controller == null && scrollDirection == Axis.vertical,
        physics = physics ?? (primary == true || (primary == null && controller == null && scrollDirection == Axis.vertical) ? const AlwaysScrollableScrollPhysics() : null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -311,7 +311,7 @@ class CustomScrollView extends ScrollView {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   CustomScrollView({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -349,7 +349,7 @@ abstract class BoxScrollView extends ScrollView {
   ///
   /// If the [primary] argument is true, the [controller] must be null.
   BoxScrollView({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -568,7 +568,7 @@ class ListView extends BoxScrollView {
   /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   ListView({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -620,7 +620,7 @@ class ListView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
   /// be null.
   ListView.builder({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -654,7 +654,7 @@ class ListView extends BoxScrollView {
   /// For example, a custom child model can control the algorithm used to
   /// estimate the size of children that are not actually visible.
   ListView.custom({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -852,7 +852,7 @@ class GridView extends BoxScrollView {
   /// [SliverChildListDelegate.addRepaintBoundaries] property. Both must not be
   /// null.
   GridView({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -901,7 +901,7 @@ class GridView extends BoxScrollView {
   /// [SliverChildBuilderDelegate.addRepaintBoundaries] property. Both must not
   /// be null.
   GridView.builder({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -940,7 +940,7 @@ class GridView extends BoxScrollView {
   ///
   /// The [gridDelegate] and [childrenDelegate] arguments must not be null.
   GridView.custom({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -978,7 +978,7 @@ class GridView extends BoxScrollView {
   ///
   ///  * [new SliverGrid.count], the equivalent constructor for [SliverGrid].
   GridView.count({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,
@@ -1029,7 +1029,7 @@ class GridView extends BoxScrollView {
   ///
   ///  * [new SliverGrid.extent], the equivalent constructor for [SliverGrid].
   GridView.extent({
-    Key key,
+    Object debugLocation, Key key,
     Axis scrollDirection: Axis.vertical,
     bool reverse: false,
     ScrollController controller,

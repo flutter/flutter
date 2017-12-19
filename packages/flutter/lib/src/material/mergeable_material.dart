@@ -98,12 +98,12 @@ class MaterialGap extends MergeableMaterialItem {
 class MergeableMaterial extends StatefulWidget {
   /// Creates a mergeable Material list of items.
   const MergeableMaterial({
-    Key key,
+    Object debugLocation, Key key,
     this.mainAxis: Axis.vertical,
     this.elevation: 2,
     this.hasDividers: false,
     this.children: const <MergeableMaterialItem>[]
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The children of the [MergeableMaterial].
   final List<MergeableMaterialItem> children;

@@ -180,7 +180,7 @@ class ImageConfiguration {
 ///     Key key,
 ///     @required this.imageProvider,
 ///   }) : assert(imageProvider != null),
-///        super(key: key);
+///        super(debugLocation: debugLocation, key: key);
 ///
 ///   final ImageProvider imageProvider;
 ///

@@ -363,7 +363,7 @@ class PageView extends StatefulWidget {
   /// child that could possibly be displayed in the page view, instead of just
   /// those children that are actually visible.
   PageView({
-    Key key,
+    Object debugLocation, Key key,
     this.scrollDirection: Axis.horizontal,
     this.reverse: false,
     PageController controller,
@@ -373,7 +373,7 @@ class PageView extends StatefulWidget {
     List<Widget> children: const <Widget>[],
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = new SliverChildListDelegate(children),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a scrollable list that works page by page using widgets that are
   /// created on demand.
@@ -388,7 +388,7 @@ class PageView extends StatefulWidget {
   /// [itemBuilder] will be called only with indices greater than or equal to
   /// zero and less than [itemCount].
   PageView.builder({
-    Key key,
+    Object debugLocation, Key key,
     this.scrollDirection: Axis.horizontal,
     this.reverse: false,
     PageController controller,
@@ -399,12 +399,12 @@ class PageView extends StatefulWidget {
     int itemCount,
   }) : controller = controller ?? _defaultPageController,
        childrenDelegate = new SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
   PageView.custom({
-    Key key,
+    Object debugLocation, Key key,
     this.scrollDirection: Axis.horizontal,
     this.reverse: false,
     PageController controller,
@@ -414,7 +414,7 @@ class PageView extends StatefulWidget {
     @required this.childrenDelegate,
   }) : assert(childrenDelegate != null),
        controller = controller ?? _defaultPageController,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The axis along which the page view scrolls.
   ///

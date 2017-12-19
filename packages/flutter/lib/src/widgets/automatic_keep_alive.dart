@@ -26,9 +26,9 @@ class AutomaticKeepAlive extends StatefulWidget {
   /// Creates a widget that listens to [KeepAliveNotification]s and maintains a
   /// [KeepAlive] widget appropriately.
   const AutomaticKeepAlive({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

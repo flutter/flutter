@@ -31,11 +31,11 @@ abstract class ProgressIndicator extends StatefulWidget {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const ProgressIndicator({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.backgroundColor,
     this.valueColor,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// If non-null, the value of this progress indicator with 0.0 corresponding
   /// to no progress having been made and 1.0 corresponding to all the progress
@@ -159,11 +159,11 @@ class LinearProgressIndicator extends ProgressIndicator {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const LinearProgressIndicator({
-    Key key,
+    Object debugLocation, Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+  }) : super(debugLocation: debugLocation, key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   @override
   _LinearProgressIndicatorState createState() => new _LinearProgressIndicatorState();
@@ -318,12 +318,12 @@ class CircularProgressIndicator extends ProgressIndicator {
   /// progress indicator) or non-null (corresponding to a determinate progress
   /// indicator). See [value] for details.
   const CircularProgressIndicator({
-    Key key,
+    Object debugLocation, Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,
     this.strokeWidth: 4.0,
-  }) : super(key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
+  }) : super(debugLocation: debugLocation, key: key, value: value, backgroundColor: backgroundColor, valueColor: valueColor);
 
   /// The width of the line used to draw the circle.
   final double strokeWidth;
@@ -482,7 +482,7 @@ class RefreshProgressIndicator extends CircularProgressIndicator {
   /// Rather than creating a refresh progress indicator directly, consider using
   /// a [RefreshIndicator] together with a [Scrollable] widget.
   const RefreshProgressIndicator({
-    Key key,
+    Object debugLocation, Key key,
     double value,
     Color backgroundColor,
     Animation<Color> valueColor,

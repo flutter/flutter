@@ -27,7 +27,7 @@ class NavigationToolbar extends StatelessWidget {
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.middle,
     this.trailing,
@@ -35,7 +35,7 @@ class NavigationToolbar extends StatelessWidget {
     this.middleSpacing: kMiddleSpacing,
   }) : assert(centerMiddle != null),
        assert(middleSpacing != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;

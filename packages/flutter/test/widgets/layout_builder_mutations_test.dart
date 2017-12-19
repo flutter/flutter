@@ -10,10 +10,10 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child
   }) : assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 

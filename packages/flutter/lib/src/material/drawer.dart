@@ -82,10 +82,10 @@ class Drawer extends StatelessWidget {
   ///
   /// Typically used in the [Scaffold.drawer] property.
   const Drawer({
-    Key key,
+    Object debugLocation, Key key,
     this.elevation: 16.0,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The z-coordinate at which to place this drawer. This controls the size of
   /// the shadow below the drawer.
@@ -131,12 +131,12 @@ class DrawerController extends StatefulWidget {
   ///
   /// The [child] argument must not be null and is typically a [Drawer].
   const DrawerController({
-    GlobalKey key,
+    Object debugLocation, GlobalKey key,
     @required this.child,
     @required this.alignment,
   }) : assert(child != null),
        assert(alignment != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   ///

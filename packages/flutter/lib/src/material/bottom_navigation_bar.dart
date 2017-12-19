@@ -70,7 +70,7 @@ class BottomNavigationBar extends StatefulWidget {
   /// color. The [fixedColor] field will be ignored if the [BottomNavigationBar.type] is
   /// not [BottomNavigationBarType.fixed].
   BottomNavigationBar({
-    Key key,
+    Object debugLocation, Key key,
     @required this.items,
     this.onTap,
     this.currentIndex: 0,
@@ -82,7 +82,7 @@ class BottomNavigationBar extends StatefulWidget {
        assert(0 <= currentIndex && currentIndex < items.length),
        assert(iconSize != null),
        type = type ?? (items.length <= 3 ? BottomNavigationBarType.fixed : BottomNavigationBarType.shifting),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The interactive items laid out within the bottom navigation bar.
   final List<BottomNavigationBarItem> items;

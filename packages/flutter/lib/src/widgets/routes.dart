@@ -370,7 +370,7 @@ abstract class LocalHistoryRoute<T> extends Route<T> {
 
 class _ModalScopeStatus extends InheritedWidget {
   const _ModalScopeStatus({
-    Key key,
+    Object debugLocation, Key key,
     @required this.isCurrent,
     @required this.canPop,
     @required this.route,
@@ -379,7 +379,7 @@ class _ModalScopeStatus extends InheritedWidget {
        assert(canPop != null),
        assert(route != null),
        assert(child != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final bool isCurrent;
   final bool canPop;
@@ -402,10 +402,10 @@ class _ModalScopeStatus extends InheritedWidget {
 
 class _ModalScope extends StatefulWidget {
   const _ModalScope({
-    Key key,
+    Object debugLocation, Key key,
     this.route,
     @required this.page,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final ModalRoute<dynamic> route;
   final Widget page;

@@ -84,7 +84,7 @@ class Draggable<T> extends StatefulWidget {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const Draggable({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     @required this.feedback,
     this.data,
@@ -99,7 +99,7 @@ class Draggable<T> extends StatefulWidget {
   }) : assert(child != null),
        assert(feedback != null),
        assert(maxSimultaneousDrags == null || maxSimultaneousDrags >= 0),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
 
   /// The data that will be dropped by this draggable.
@@ -219,7 +219,7 @@ class LongPressDraggable<T> extends Draggable<T> {
   /// The [child] and [feedback] arguments must not be null. If
   /// [maxSimultaneousDrags] is non-null, it must be non-negative.
   const LongPressDraggable({
-    Key key,
+    Object debugLocation, Key key,
     @required Widget child,
     @required Widget feedback,
     T data,
@@ -367,11 +367,11 @@ class DragTarget<T> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const DragTarget({
-    Key key,
+    Object debugLocation, Key key,
     @required this.builder,
     this.onWillAccept,
     this.onAccept
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// Called to build the contents of this widget.
   ///

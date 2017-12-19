@@ -26,7 +26,7 @@ import 'constants.dart';
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
-///   const MyTabbedPage({ Key key }) : super(key: key);
+///   const MyTabbedPage({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 ///   @override
 ///   _MyTabbedPageState createState() => new _MyTabbedPageState();
 /// }
@@ -190,11 +190,11 @@ class TabController extends ChangeNotifier {
 
 class _TabControllerScope extends InheritedWidget {
   const _TabControllerScope({
-    Key key,
+    Object debugLocation, Key key,
     this.controller,
     this.enabled,
     Widget child
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   final TabController controller;
   final bool enabled;
@@ -247,12 +247,12 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// The [initialIndex] argument must not be null.
   const DefaultTabController({
-    Key key,
+    Object debugLocation, Key key,
     @required this.length,
     this.initialIndex: 0,
     @required this.child,
   }) : assert(initialIndex != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The total number of tabs. Typically greater than one.
   final int length;

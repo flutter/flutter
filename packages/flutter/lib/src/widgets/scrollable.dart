@@ -74,14 +74,14 @@ class Scrollable extends StatefulWidget {
   ///
   /// The [axisDirection] and [viewportBuilder] arguments must not be null.
   const Scrollable({
-    Key key,
+    Object debugLocation, Key key,
     this.axisDirection: AxisDirection.down,
     this.controller,
     this.physics,
     @required this.viewportBuilder,
   }) : assert(axisDirection != null),
        assert(viewportBuilder != null),
-       super (key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The direction in which this widget scrolls.
   ///
@@ -207,13 +207,13 @@ class Scrollable extends StatefulWidget {
 // ScrollableState.build() always rebuilds its _ScrollableScope.
 class _ScrollableScope extends InheritedWidget {
   const _ScrollableScope({
-    Key key,
+    Object debugLocation, Key key,
     @required this.scrollable,
     @required this.position,
     @required Widget child
   }) : assert(scrollable != null),
        assert(child != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final ScrollableState scrollable;
   final ScrollPosition position;

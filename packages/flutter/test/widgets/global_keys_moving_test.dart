@@ -15,7 +15,7 @@ class Item {
 List<Item> items = <Item>[new Item(), new Item()];
 
 class StatefulLeaf extends StatefulWidget {
-  const StatefulLeaf({ GlobalKey key }) : super(key: key);
+  const StatefulLeaf({ Object debugLocation, GlobalKey key }) : super(debugLocation: debugLocation, key: key);
 
   @override
   StatefulLeafState createState() => new StatefulLeafState();

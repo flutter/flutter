@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart' hide TypeMatcher;
 // This is a regression test for https://github.com/flutter/flutter/issues/5588.
 
 class OrderSwitcher extends StatefulWidget {
-  const OrderSwitcher({ Key key, this.a, this.b }) : super(key: key);
+  const OrderSwitcher({ Object debugLocation, Key key, this.a, this.b }) : super(debugLocation: debugLocation, key: key);
 
   final Widget a;
   final Widget b;
@@ -45,7 +45,7 @@ class OrderSwitcherState extends State<OrderSwitcher> {
 }
 
 class DummyStatefulWidget extends StatefulWidget {
-  const DummyStatefulWidget(Key key) : super(key: key);
+  const DummyStatefulWidget(Key key, {Object debugLocation}) : super(debugLocation: debugLocation, key: key);
 
   @override
   DummyStatefulWidgetState createState() => new DummyStatefulWidgetState();

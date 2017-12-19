@@ -61,7 +61,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// The [rowsPerPage] and [availableRowsPerPage] must not be null (they
   /// both have defaults, though, so don't have to be specified).
   PaginatedDataTable({
-    Key key,
+    Object debugLocation, Key key,
     @required this.header,
     this.actions,
     @required this.columns,
@@ -87,7 +87,7 @@ class PaginatedDataTable extends StatefulWidget {
          return true;
        }()),
        assert(source != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The table card's header.
   ///

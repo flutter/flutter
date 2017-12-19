@@ -38,7 +38,7 @@ class AboutListTile extends StatelessWidget {
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
   const AboutListTile({
-    Key key,
+    Object debugLocation, Key key,
     this.icon: const Icon(null),
     this.child,
     this.applicationName,
@@ -46,7 +46,7 @@ class AboutListTile extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.aboutBoxChildren
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The icon to show for this drawer item.
   ///
@@ -213,13 +213,13 @@ class AboutDialog extends StatelessWidget {
   /// derived from the nearest [Title] widget. The version, icon, and legalese
   /// values default to the empty string.
   const AboutDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.applicationName,
     this.applicationVersion,
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The name of the application.
   ///
@@ -333,11 +333,11 @@ class LicensePage extends StatefulWidget {
   /// The licenses shown on the [LicensePage] are those returned by the
   /// [LicenseRegistry] API, which can be used to add more licenses to the list.
   const LicensePage({
-    Key key,
+    Object debugLocation, Key key,
     this.applicationName,
     this.applicationVersion,
     this.applicationLegalese
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The name of the application.
   ///

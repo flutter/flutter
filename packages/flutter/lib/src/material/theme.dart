@@ -37,13 +37,13 @@ class Theme extends StatelessWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const Theme({
-    Key key,
+    Object debugLocation, Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;
@@ -156,11 +156,11 @@ class Theme extends StatelessWidget {
 
 class _InheritedTheme extends InheritedWidget {
   const _InheritedTheme({
-    Key key,
+    Object debugLocation, Key key,
     @required this.theme,
     @required Widget child
   }) : assert(theme != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final Theme theme;
 
@@ -202,7 +202,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   /// By default, the theme transition uses a linear curve. The [data] and
   /// [child] arguments must not be null.
   const AnimatedTheme({
-    Key key,
+    Object debugLocation, Key key,
     @required this.data,
     this.isMaterialAppTheme: false,
     Curve curve: Curves.linear,
@@ -210,7 +210,7 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
     @required this.child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// Specifies the color and typography values for descendant widgets.
   final ThemeData data;

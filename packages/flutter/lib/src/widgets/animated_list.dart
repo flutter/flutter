@@ -47,7 +47,7 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
   const AnimatedList({
-    Key key,
+    Object debugLocation, Key key,
     @required this.itemBuilder,
     this.initialItemCount: 0,
     this.scrollDirection: Axis.vertical,
@@ -59,7 +59,7 @@ class AnimatedList extends StatefulWidget {
     this.padding,
   }) : assert(itemBuilder != null),
        assert(initialItemCount != null && initialItemCount >= 0),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Called, as needed, to build list item widgets.
   ///

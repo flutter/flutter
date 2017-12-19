@@ -22,12 +22,12 @@ class GridTile extends StatelessWidget {
   ///
   /// Must have a child. Does not typically have both a header and a footer.
   const GridTile({
-    Key key,
+    Object debugLocation, Key key,
     this.header,
     this.footer,
     @required this.child,
   }) : assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget to show over the top of this grid tile.
   ///

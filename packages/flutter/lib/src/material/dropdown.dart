@@ -89,9 +89,9 @@ class _DropdownScrollBehavior extends ScrollBehavior {
 
 class _DropdownMenu<T> extends StatefulWidget {
   const _DropdownMenu({
-    Key key,
+    Object debugLocation, Key key,
     this.route,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final _DropdownRoute<T> route;
 
@@ -371,11 +371,11 @@ class DropdownMenuItem<T> extends StatelessWidget {
   ///
   /// The [child] argument is required.
   const DropdownMenuItem({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     @required this.child,
   }) : assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   ///
@@ -407,10 +407,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   /// Creates a [DropdownButtonHideUnderline]. A non-null [child] must
   /// be given.
   const DropdownButtonHideUnderline({
-    Key key,
+    Object debugLocation, Key key,
     @required Widget child,
   }) : assert(child != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
@@ -450,7 +450,7 @@ class DropdownButton<T> extends StatefulWidget {
   /// The [elevation] and [iconSize] arguments must not be null (they both have
   /// defaults, so do not need to be specified).
   DropdownButton({
-    Key key,
+    Object debugLocation, Key key,
     @required this.items,
     this.value,
     this.hint,
@@ -461,7 +461,7 @@ class DropdownButton<T> extends StatefulWidget {
     this.isDense: false,
   }) : assert(items != null),
        assert(value == null || items.where((DropdownMenuItem<T> item) => item.value == value).length == 1),
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   /// The list of possible items to select among.
   final List<DropdownMenuItem<T>> items;

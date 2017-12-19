@@ -90,7 +90,7 @@ class TextField extends StatefulWidget {
   ///  * [maxLength], which discusses the precise meaning of "number of
   ///    characters" and how it may differ from the intuitive meaning.
   const TextField({
-    Key key,
+    Object debugLocation, Key key,
     this.controller,
     this.focusNode,
     this.decoration: const InputDecoration(),
@@ -115,7 +115,7 @@ class TextField extends StatefulWidget {
        assert(maxLines == null || maxLines > 0),
        assert(maxLength == null || maxLength > 0),
        keyboardType = maxLines == 1 ? keyboardType : TextInputType.multiline,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Controls the text being edited.
   ///

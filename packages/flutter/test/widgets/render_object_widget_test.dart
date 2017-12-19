@@ -21,7 +21,7 @@ class TestWidget extends StatelessWidget {
 }
 
 class TestOrientedBox extends SingleChildRenderObjectWidget {
-  const TestOrientedBox({ Key key, Widget child }) : super(key: key, child: child);
+  const TestOrientedBox({ Object debugLocation, Key key, Widget child }) : super(debugLocation: debugLocation, key: key, child: child);
 
   Decoration _getDecoration(BuildContext context) {
     final Orientation orientation = MediaQuery.of(context).orientation;

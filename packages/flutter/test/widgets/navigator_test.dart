@@ -63,7 +63,7 @@ class ThirdWidget extends StatelessWidget {
 }
 
 class OnTapPage extends StatelessWidget {
-  const OnTapPage({ Key key, this.id, this.onTap }) : super(key: key);
+  const OnTapPage({ Object debugLocation, Key key, this.id, this.onTap }) : super(debugLocation: debugLocation, key: key);
 
   final String id;
   final VoidCallback onTap;

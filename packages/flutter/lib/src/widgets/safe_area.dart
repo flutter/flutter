@@ -29,7 +29,7 @@ class SafeArea extends StatelessWidget {
   ///
   /// The [left], [top], [right], and [bottom] arguments must not be null.
   const SafeArea({
-    Key key,
+    Object debugLocation, Key key,
     this.left: true,
     this.top: true,
     this.right: true,
@@ -39,7 +39,7 @@ class SafeArea extends StatelessWidget {
        assert(top != null),
        assert(right != null),
        assert(bottom != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Whether to avoid system intrusions on the left.
   final bool left;

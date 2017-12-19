@@ -43,7 +43,7 @@ const Duration _kExpand = const Duration(milliseconds: 200);
 class TwoLevelListItem extends StatelessWidget {
   /// Creates an item in a two-level list.
   const TwoLevelListItem({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     @required this.title,
     this.trailing,
@@ -51,7 +51,7 @@ class TwoLevelListItem extends StatelessWidget {
     this.onTap,
     this.onLongPress
   }) : assert(title != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A widget to display before the title.
   ///
@@ -109,13 +109,13 @@ class TwoLevelListItem extends StatelessWidget {
 class TwoLevelSublist extends StatefulWidget {
   /// Creates an item in a two-level list that can expand and collapse.
   const TwoLevelSublist({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     @required this.title,
     this.backgroundColor,
     this.onOpenChanged,
     this.children: const <Widget>[],
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// A widget to display before the title.
   ///
@@ -260,12 +260,12 @@ class TwoLevelList extends StatelessWidget {
   ///
   /// The [type] argument must not be null.
   const TwoLevelList({
-    Key key,
+    Object debugLocation, Key key,
     this.children: const <Widget>[],
     this.type: MaterialListType.twoLine,
     this.padding,
   }) : assert(type != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widgets to display in this list.
   ///

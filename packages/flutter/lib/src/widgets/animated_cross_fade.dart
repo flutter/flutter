@@ -109,7 +109,7 @@ class AnimatedCrossFade extends StatefulWidget {
   ///
   /// All the arguments other than [key] must be non-null.
   const AnimatedCrossFade({
-    Key key,
+    Object debugLocation, Key key,
     @required this.firstChild,
     @required this.secondChild,
     this.firstCurve: Curves.linear,
@@ -128,7 +128,7 @@ class AnimatedCrossFade extends StatefulWidget {
        assert(crossFadeState != null),
        assert(duration != null),
        assert(layoutBuilder != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The child that is visible when [crossFadeState] is
   /// [CrossFadeState.showFirst]. It fades out when transitioning

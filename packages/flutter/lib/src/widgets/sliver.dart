@@ -308,10 +308,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
 abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
   /// Initializes fields for subclasses.
   const SliverMultiBoxAdaptorWidget({
-    Key key,
+    Object debugLocation, Key key,
     @required this.delegate,
   }) : assert(delegate != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The delegate that provides the children for this widget.
   ///
@@ -388,9 +388,9 @@ abstract class SliverMultiBoxAdaptorWidget extends RenderObjectWidget {
 class SliverList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children in a linear array.
   const SliverList({
-    Key key,
+    Object debugLocation, Key key,
     @required SliverChildDelegate delegate,
-  }) : super(key: key, delegate: delegate);
+  }) : super(debugLocation: debugLocation, key: key, delegate: delegate);
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
@@ -444,10 +444,10 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places box children with the same main axis extent
   /// in a linear array.
   const SliverFixedExtentList({
-    Key key,
+    Object debugLocation, Key key,
     @required SliverChildDelegate delegate,
     @required this.itemExtent,
-  }) : super(key: key, delegate: delegate);
+  }) : super(debugLocation: debugLocation, key: key, delegate: delegate);
 
   /// The extent the children are forced to have in the main axis.
   final double itemExtent;
@@ -511,10 +511,10 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement.
   const SliverGrid({
-    Key key,
+    Object debugLocation, Key key,
     @required SliverChildDelegate delegate,
     @required this.gridDelegate,
-  }) : super(key: key, delegate: delegate);
+  }) : super(debugLocation: debugLocation, key: key, delegate: delegate);
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with a fixed number of tiles in the cross axis.
@@ -526,7 +526,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   ///  * [new GridView.count], the equivalent constructor for [GridView] widgets.
   SliverGrid.count({
-    Key key,
+    Object debugLocation, Key key,
     @required int crossAxisCount,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
@@ -538,7 +538,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(debugLocation: debugLocation, key: key, delegate: new SliverChildListDelegate(children));
 
   /// Creates a sliver that places multiple box children in a two dimensional
   /// arrangement with tiles that each have a maximum cross-axis extent.
@@ -550,7 +550,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   ///
   ///  * [new GridView.extent], the equivalent constructor for [GridView] widgets.
   SliverGrid.extent({
-    Key key,
+    Object debugLocation, Key key,
     @required double maxCrossAxisExtent,
     double mainAxisSpacing: 0.0,
     double crossAxisSpacing: 0.0,
@@ -562,7 +562,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
          crossAxisSpacing: crossAxisSpacing,
          childAspectRatio: childAspectRatio,
        ),
-       super(key: key, delegate: new SliverChildListDelegate(children));
+       super(debugLocation: debugLocation, key: key, delegate: new SliverChildListDelegate(children));
 
   /// The delegate that controls the size and position of the children.
   final SliverGridDelegate gridDelegate;
@@ -614,12 +614,12 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
-    Key key,
+    Object debugLocation, Key key,
     @required SliverChildDelegate delegate,
     this.viewportFraction: 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
-       super(key: key, delegate: delegate);
+       super(debugLocation: debugLocation, key: key, delegate: delegate);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -885,9 +885,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 class SliverFillRemaining extends SingleChildRenderObjectWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => new RenderSliverFillRemaining();
@@ -903,12 +903,12 @@ class KeepAlive extends ParentDataWidget<SliverMultiBoxAdaptorWidget> {
   ///
   /// The [child] and [keepAlive] arguments must not be null.
   const KeepAlive({
-    Key key,
+    Object debugLocation, Key key,
     @required this.keepAlive,
     @required Widget child,
   }) : assert(child != null),
        assert(keepAlive != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// Whether to keep the child alive.
   ///

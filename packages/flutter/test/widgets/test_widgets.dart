@@ -30,7 +30,7 @@ class TestBuildCounter extends StatelessWidget {
 
 
 class FlipWidget extends StatefulWidget {
-  const FlipWidget({ Key key, this.left, this.right }) : super(key: key);
+  const FlipWidget({ Object debugLocation, Key key, this.left, this.right }) : super(debugLocation: debugLocation, key: key);
 
   final Widget left;
   final Widget right;

@@ -63,11 +63,11 @@ Widget buildTestWidgets({bool excludeSemantics, String label, bool isSemanticsBo
 
 class TestWidget extends SingleChildRenderObjectWidget {
   const TestWidget({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
     this.label,
     this.isSemanticBoundary,
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   final String label;
   final bool isSemanticBoundary;

@@ -57,7 +57,7 @@ const double _kMenuScreenPadding = 8.0;
 abstract class PopupMenuEntry<T> extends StatefulWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const PopupMenuEntry({ Key key }) : super(key: key);
+  const PopupMenuEntry({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   /// The amount of vertical space occupied by this entry.
   ///
@@ -96,7 +96,7 @@ class PopupMenuDivider extends PopupMenuEntry<Null> {
   /// Creates a horizontal divider for a popup menu.
   ///
   /// By default, the divider has a height of 16 logical pixels.
-  const PopupMenuDivider({ Key key, this.height: _kMenuDividerHeight }) : super(key: key);
+  const PopupMenuDivider({ Object debugLocation, Key key, this.height: _kMenuDividerHeight }) : super(debugLocation: debugLocation, key: key);
 
   /// The height of the divider entry.
   ///
@@ -161,14 +161,14 @@ class PopupMenuItem<T> extends PopupMenuEntry<T> {
   ///
   /// The `height` and `enabled` arguments must not be null.
   const PopupMenuItem({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.enabled: true,
     this.height: _kMenuItemHeight,
     @required this.child,
   }) : assert(enabled != null),
        assert(height != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The value that will be returned by [showMenu] if this entry is selected.
   final T value;
@@ -312,7 +312,7 @@ class CheckedPopupMenuItem<T> extends PopupMenuItem<T> {
   ///
   /// The `checked` and `enabled` arguments must not be null.
   const CheckedPopupMenuItem({
-    Key key,
+    Object debugLocation, Key key,
     T value,
     this.checked: false,
     bool enabled: true,
@@ -387,9 +387,9 @@ class _CheckedPopupMenuItemState<T> extends _PopupMenuItemState<CheckedPopupMenu
 
 class _PopupMenu<T> extends StatelessWidget {
   const _PopupMenu({
-    Key key,
+    Object debugLocation, Key key,
     this.route
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final _PopupMenuRoute<T> route;
 
@@ -741,7 +741,7 @@ class PopupMenuButton<T> extends StatefulWidget {
   ///
   /// The [itemBuilder] argument must not be null.
   const PopupMenuButton({
-    Key key,
+    Object debugLocation, Key key,
     @required this.itemBuilder,
     this.initialValue,
     this.onSelected,
@@ -752,7 +752,7 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.icon,
   }) : assert(itemBuilder != null),
        assert(!(child != null && icon != null)), // fails if passed both parameters
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Called when the button is pressed to create the items to show in the menu.
   final PopupMenuItemBuilder<T> itemBuilder;

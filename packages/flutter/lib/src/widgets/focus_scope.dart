@@ -10,11 +10,11 @@ import 'framework.dart';
 
 class _FocusScopeMarker extends InheritedWidget {
   const _FocusScopeMarker({
-    Key key,
+    Object debugLocation, Key key,
     @required this.node,
     Widget child,
   }) : assert(node != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final FocusScopeNode node;
 
@@ -52,13 +52,13 @@ class FocusScope extends StatefulWidget {
   ///
   /// The [node] argument must not be null.
   const FocusScope({
-    Key key,
+    Object debugLocation, Key key,
     @required this.node,
     this.autofocus: false,
     this.child,
   }) : assert(node != null),
        assert(autofocus != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Controls whether this scope is currently active.
   final FocusScopeNode node;

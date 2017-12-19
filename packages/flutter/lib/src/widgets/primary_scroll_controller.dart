@@ -19,18 +19,18 @@ import 'scroll_controller.dart';
 class PrimaryScrollController extends InheritedWidget {
   /// Creates a widget that associates a [ScrollController] with a subtree.
   const PrimaryScrollController({
-    Key key,
+    Object debugLocation, Key key,
     @required this.controller,
     @required Widget child
   }) : assert(controller != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({
-    Key key,
+    Object debugLocation, Key key,
     @required Widget child
   }) : controller = null,
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// The [ScrollController] associated with the subtree.
   ///

@@ -59,7 +59,7 @@ const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogAction
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
   const _DatePickerHeader({
-    Key key,
+    Object debugLocation, Key key,
     @required this.selectedDate,
     @required this.mode,
     @required this.onModeChanged,
@@ -67,7 +67,7 @@ class _DatePickerHeader extends StatelessWidget {
   }) : assert(selectedDate != null),
        assert(mode != null),
        assert(orientation != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final DateTime selectedDate;
   final DatePickerMode mode;
@@ -159,11 +159,11 @@ class _DatePickerHeader extends StatelessWidget {
 
 class _DateHeaderButton extends StatelessWidget {
   const _DateHeaderButton({
-    Key key,
+    Object debugLocation, Key key,
     this.onTap,
     this.color,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final VoidCallback onTap;
   final Color color;
@@ -231,7 +231,7 @@ class DayPicker extends StatelessWidget {
   ///
   /// Rarely used directly. Instead, typically used as part of a [MonthPicker].
   DayPicker({
-    Key key,
+    Object debugLocation, Key key,
     @required this.selectedDate,
     @required this.currentDate,
     @required this.onChanged,
@@ -246,7 +246,7 @@ class DayPicker extends StatelessWidget {
        assert(displayedMonth != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The currently selected date.
   ///
@@ -472,7 +472,7 @@ class MonthPicker extends StatefulWidget {
   /// Rarely used directly. Instead, typically used as part of the dialog shown
   /// by [showDatePicker].
   MonthPicker({
-    Key key,
+    Object debugLocation, Key key,
     @required this.selectedDate,
     @required this.onChanged,
     @required this.firstDate,
@@ -483,7 +483,7 @@ class MonthPicker extends StatefulWidget {
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
        assert(selectedDate.isAfter(firstDate) || selectedDate.isAtSameMomentAs(firstDate)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The currently selected date.
   ///
@@ -666,7 +666,7 @@ class YearPicker extends StatefulWidget {
   /// Rarely used directly. Instead, typically used as part of the dialog shown
   /// by [showDatePicker].
   YearPicker({
-    Key key,
+    Object debugLocation, Key key,
     @required this.selectedDate,
     @required this.onChanged,
     @required this.firstDate,
@@ -674,7 +674,7 @@ class YearPicker extends StatefulWidget {
   }) : assert(selectedDate != null),
        assert(onChanged != null),
        assert(!firstDate.isAfter(lastDate)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The currently selected date.
   ///
@@ -736,13 +736,13 @@ class _YearPickerState extends State<YearPicker> {
 
 class _DatePickerDialog extends StatefulWidget {
   const _DatePickerDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.initialDate,
     this.firstDate,
     this.lastDate,
     this.selectableDayPredicate,
     this.initialDatePickerMode,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final DateTime initialDate;
   final DateTime firstDate;

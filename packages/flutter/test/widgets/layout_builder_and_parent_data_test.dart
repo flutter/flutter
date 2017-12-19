@@ -7,9 +7,9 @@ import 'package:flutter/widgets.dart';
 
 class SizeChanger extends StatefulWidget {
   const SizeChanger({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 
@@ -43,9 +43,9 @@ class SizeChangerState extends State<SizeChanger> {
 
 class Wrapper extends StatelessWidget {
   const Wrapper({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 

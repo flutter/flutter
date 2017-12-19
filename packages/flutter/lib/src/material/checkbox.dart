@@ -48,12 +48,12 @@ class Checkbox extends StatefulWidget {
   /// * [onChanged], which is called when the value of the checkbox should
   ///   change. It can be set to null to disable the checkbox.
   const Checkbox({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor,
   }) : assert(value != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Whether this checkbox is checked.
   ///
@@ -113,7 +113,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin {
 
 class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
   const _CheckboxRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.activeColor,
     @required this.inactiveColor,
@@ -123,7 +123,7 @@ class _CheckboxRenderObjectWidget extends LeafRenderObjectWidget {
        assert(activeColor != null),
        assert(inactiveColor != null),
        assert(vsync != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final bool value;
   final Color activeColor;

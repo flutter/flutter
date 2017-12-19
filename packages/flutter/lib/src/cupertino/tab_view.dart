@@ -37,14 +37,14 @@ import 'route.dart';
 class CupertinoTabView extends StatelessWidget {
   /// Creates the content area for a tab in a [CupertinoTabScaffold].
   const CupertinoTabView({
-    Key key,
+    Object debugLocation, Key key,
     this.builder,
     this.routes,
     this.onGenerateRoute,
     this.onUnknownRoute,
     this.navigatorObservers: const <NavigatorObserver>[],
   }) : assert(navigatorObservers != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget builder for the default route of the tab view
   /// ([Navigator.defaultRouteName], which is `/`).

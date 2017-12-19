@@ -134,7 +134,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// Typically used in the [Scaffold.appBar] property.
   AppBar({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.automaticallyImplyLeading: true,
     this.title,
@@ -158,7 +158,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
        assert(toolbarOpacity != null),
        assert(bottomOpacity != null),
        preferredSize = new Size.fromHeight(kToolbarHeight + (bottom?.preferredSize?.height ?? 0.0)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A widget to display before the [title].
   ///
@@ -482,7 +482,7 @@ class _AppBarState extends State<AppBar> {
 }
 
 class _FloatingAppBar extends StatefulWidget {
-  const _FloatingAppBar({ Key key, this.child }) : super(key: key);
+  const _FloatingAppBar({ Object debugLocation, Key key, this.child }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 
@@ -709,7 +709,7 @@ class SliverAppBar extends StatefulWidget {
   /// The arguments [forceElevated], [primary], [floating], [pinned], [snap]
   /// and [automaticallyImplyLeading] must not be null.
   const SliverAppBar({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.automaticallyImplyLeading: true,
     this.title,
@@ -737,7 +737,7 @@ class SliverAppBar extends StatefulWidget {
        assert(pinned != null),
        assert(snap != null),
        assert(floating || !snap, 'The "snap" argument only makes sense for floating app bars.'),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A widget to display before the [title].
   ///

@@ -58,13 +58,13 @@ class _TextSelectionToolbarNotchPainter extends CustomPainter {
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
   const _TextSelectionToolbar({
-    Key key,
+    Object debugLocation, Key key,
     this.delegate,
     this.handleCut,
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final TextSelectionDelegate delegate;
   TextEditingValue get value => delegate.textEditingValue;

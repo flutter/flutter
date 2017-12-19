@@ -110,7 +110,7 @@ class Material extends StatefulWidget {
   ///
   /// The [type], [elevation] and [shadowColor] arguments must not be null.
   const Material({
-    Key key,
+    Object debugLocation, Key key,
     this.type: MaterialType.canvas,
     this.elevation: 0.0,
     this.color,
@@ -122,7 +122,7 @@ class Material extends StatefulWidget {
        assert(elevation != null),
        assert(shadowColor != null),
        assert(!(identical(type, MaterialType.circle) && borderRadius != null)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -340,11 +340,11 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
 
 class _InkFeatures extends SingleChildRenderObjectWidget {
   const _InkFeatures({
-    Key key,
+    Object debugLocation, Key key,
     this.color,
     @required this.vsync,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   // This widget must be owned by a MaterialState, which must be provided as the vsync.
   // This relationship must be 1:1 and cannot change for the lifetime of the MaterialState.

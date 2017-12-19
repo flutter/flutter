@@ -98,10 +98,10 @@ class TriggerableState extends State<TriggerableWidget> {
 
 class TestFocusable extends StatefulWidget {
   const TestFocusable({
-    Key key,
+    Object debugLocation, Key key,
     this.focusNode,
     this.autofocus: true,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final bool autofocus;
   final FocusNode focusNode;

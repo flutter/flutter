@@ -357,7 +357,7 @@ class InputDecorator extends StatelessWidget {
   ///
   /// The [isFocused] and [isEmpty] arguments must not be null.
   const InputDecorator({
-    Key key,
+    Object debugLocation, Key key,
     @required this.decoration,
     this.baseStyle,
     this.textAlign,
@@ -366,7 +366,7 @@ class InputDecorator extends StatelessWidget {
     this.child,
   }) : assert(isFocused != null),
        assert(isEmpty != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The text and styles to use when decorating the child.
   final InputDecoration decoration;
@@ -677,7 +677,7 @@ class InputDecorator extends StatelessWidget {
 // transitions between inline and caption.
 class _AnimatedLabel extends ImplicitlyAnimatedWidget {
   const _AnimatedLabel({
-    Key key,
+    Object debugLocation, Key key,
     this.text,
     @required this.style,
     Curve curve: Curves.linear,
@@ -685,7 +685,7 @@ class _AnimatedLabel extends ImplicitlyAnimatedWidget {
     this.textAlign,
     this.overflow,
   }) : assert(style != null),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   final String text;
   final TextStyle style;

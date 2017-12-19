@@ -78,7 +78,7 @@ class MaterialApp extends StatefulWidget {
   ///
   /// The boolean arguments, [routes], and [navigatorObservers], must not be null.
   MaterialApp({ // can't be const because the asserts use methods on Map :-(
-    Key key,
+    Object debugLocation, Key key,
     this.title: '',
     this.onGenerateTitle,
     this.color,
@@ -126,7 +126,7 @@ class MaterialApp extends StatefulWidget {
          'because otherwise there is nothing to fall back on if the '
          'app is started with an intent that specifies an unknown route.'
        ),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A one-line description used by the device to identify the app for the user.
   ///

@@ -196,12 +196,12 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const ImplicitlyAnimatedWidget({
-    Key key,
+    Object debugLocation, Key key,
     this.curve: Curves.linear,
     @required this.duration
   }) : assert(curve != null),
        assert(duration != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The curve to apply when animating the parameters of this container.
   final Curve curve;
@@ -353,7 +353,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   AnimatedContainer({
-    Key key,
+    Object debugLocation, Key key,
     this.alignment,
     this.padding,
     Color color,
@@ -381,7 +381,7 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The [child] contained by the container.
   ///
@@ -503,14 +503,14 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   ///
   /// The [padding], [curve], and [duration] arguments must not be null.
   AnimatedPadding({
-    Key key,
+    Object debugLocation, Key key,
     @required this.padding,
     this.child,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(padding != null),
        assert(padding.isNonNegative),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The amount of space by which to inset the child.
   final EdgeInsetsGeometry padding;
@@ -563,13 +563,13 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   ///
   /// The [alignment], [curve], and [duration] arguments must not be null.
   const AnimatedAlign({
-    Key key,
+    Object debugLocation, Key key,
     @required this.alignment,
     this.child,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(alignment != null),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// How to align the child.
   ///
@@ -645,7 +645,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedPositioned({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     this.left,
     this.top,
@@ -657,13 +657,13 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(left == null || right == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+      super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// Creates a widget that animates the rectangle it occupies implicitly.
   ///
   /// The [curve] and [duration] arguments must not be null.
   AnimatedPositioned.fromRect({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     Rect rect,
     Curve curve: Curves.linear,
@@ -674,7 +674,7 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
        height = rect.height,
        right = null,
        bottom = null,
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -783,7 +783,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
   ///
   /// The [curve] and [duration] arguments must not be null.
   const AnimatedPositionedDirectional({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     this.start,
     this.top,
@@ -795,7 +795,7 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
     @required Duration duration,
   }) : assert(start == null || end == null || width == null),
        assert(top == null || bottom == null || height == null),
-      super(key: key, curve: curve, duration: duration);
+      super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -895,13 +895,13 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
   /// inclusive. The [curve] and [duration] arguments must not be null.
   const AnimatedOpacity({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     @required this.opacity,
     Curve curve: Curves.linear,
     @required Duration duration,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -954,7 +954,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
   /// The [child], [style], [softWrap], [overflow], [curve], and [duration]
   /// arguments must not be null.
   const AnimatedDefaultTextStyle({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     @required this.style,
     this.textAlign,
@@ -968,7 +968,7 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -1059,7 +1059,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
   ///
   /// Animating [shadowColor] is optional and is controlled by the [animateShadowColor] flag.
   const AnimatedPhysicalModel({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     @required this.shape,
     this.borderRadius: BorderRadius.zero,
@@ -1078,7 +1078,7 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        assert(shadowColor != null),
        assert(animateColor != null),
        assert(animateShadowColor != null),
-       super(key: key, curve: curve, duration: duration);
+       super(debugLocation: debugLocation, key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
   final Widget child;

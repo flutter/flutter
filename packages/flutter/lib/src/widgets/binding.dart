@@ -36,7 +36,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 ///
 /// ```dart
 /// class AppLifecycleReactor extends StatefulWidget {
-///   const AppLifecycleReactor({ Key key }) : super(key: key);
+///   const AppLifecycleReactor({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 ///
 ///   @override
 ///   _AppLifecycleReactorState createState() => new _AppLifecycleReactorState();
@@ -113,7 +113,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class MetricsReactor extends StatefulWidget {
-  ///   const MetricsReactor({ Key key }) : super(key: key);
+  ///   const MetricsReactor({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
   ///
   ///   @override
   ///   _MetricsReactorState createState() => new _MetricsReactorState();
@@ -168,7 +168,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
-  ///   const TextScaleFactorReactor({ Key key }) : super(key: key);
+  ///   const TextScaleFactorReactor({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
   ///
   ///   @override
   ///   _TextScaleFactorReactorState createState() => new _TextScaleFactorReactorState();

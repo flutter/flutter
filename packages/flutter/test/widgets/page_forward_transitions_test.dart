@@ -8,11 +8,11 @@ import 'package:flutter/rendering.dart';
 
 class TestTransition extends AnimatedWidget {
   const TestTransition({
-    Key key,
+    Object debugLocation, Key key,
     this.childFirstHalf,
     this.childSecondHalf,
     Animation<double> animation
-  }) : super(key: key, listenable: animation);
+  }) : super(debugLocation: debugLocation, key: key, listenable: animation);
 
   final Widget childFirstHalf;
   final Widget childSecondHalf;

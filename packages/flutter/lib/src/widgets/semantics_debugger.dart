@@ -23,7 +23,7 @@ class SemanticsDebugger extends StatefulWidget {
   /// Creates a widget that visualizes the semantics for the child.
   ///
   /// The [child] argument must not be null.
-  const SemanticsDebugger({ Key key, this.child }) : super(key: key);
+  const SemanticsDebugger({ Object debugLocation, Key key, this.child }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

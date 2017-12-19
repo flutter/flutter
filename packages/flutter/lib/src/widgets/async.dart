@@ -46,7 +46,7 @@ import 'framework.dart';
 ///  recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  const StreamBuilderBase({ Key key, this.stream }) : super(key: key);
+  const StreamBuilderBase({ Object debugLocation, Key key, this.stream }) : super(debugLocation: debugLocation, key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
@@ -335,11 +335,11 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// snapshot of interaction with the specified [stream] and whose build
   /// strategy is given by [builder].
   const StreamBuilder({
-    Key key,
+    Object debugLocation, Key key,
     Stream<T> stream,
     @required this.builder
   }) : assert(builder != null),
-       super(key: key, stream: stream);
+       super(debugLocation: debugLocation, key: key, stream: stream);
 
   /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
@@ -435,11 +435,11 @@ class FutureBuilder<T> extends StatefulWidget {
   ///
   /// The [builder] must not be null.
   const FutureBuilder({
-    Key key,
+    Object debugLocation, Key key,
     this.future,
     @required this.builder
   }) : assert(builder != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.

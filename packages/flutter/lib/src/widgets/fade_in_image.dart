@@ -63,7 +63,7 @@ class FadeInImage extends StatefulWidget {
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
   const FadeInImage({
-    Key key,
+    Object debugLocation, Key key,
     @required this.placeholder,
     @required this.image,
     this.fadeOutDuration: const Duration(milliseconds: 300),
@@ -85,7 +85,7 @@ class FadeInImage extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that uses a placeholder image stored in memory while
   /// loading the final image from the network.
@@ -109,7 +109,7 @@ class FadeInImage extends StatefulWidget {
   ///  * [new Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.memoryNetwork({
-    Key key,
+    Object debugLocation, Key key,
     @required Uint8List placeholder,
     @required String image,
     double placeholderScale: 1.0,
@@ -137,7 +137,7 @@ class FadeInImage extends StatefulWidget {
        assert(matchTextDirection != null),
        placeholder = new MemoryImage(placeholder, scale: placeholderScale),
        image = new NetworkImage(image, scale: imageScale),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
   /// while loading the final image from the network.
@@ -164,7 +164,7 @@ class FadeInImage extends StatefulWidget {
   ///  * [new Image.network], which has more details about loading images from
   ///    the network.
   FadeInImage.assetNetwork({
-    Key key,
+    Object debugLocation, Key key,
     @required String placeholder,
     @required String image,
     AssetBundle bundle,
@@ -194,7 +194,7 @@ class FadeInImage extends StatefulWidget {
        assert(repeat != null),
        assert(matchTextDirection != null),
        image = new NetworkImage(image, scale: imageScale),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Image displayed while the target [image] is loading.
   final ImageProvider placeholder;

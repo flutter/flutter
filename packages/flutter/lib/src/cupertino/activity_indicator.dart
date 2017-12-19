@@ -16,10 +16,10 @@ import 'colors.dart';
 class CupertinoActivityIndicator extends StatefulWidget {
   /// Creates an iOS-style activity indicator.
   const CupertinoActivityIndicator({
-    Key key,
+    Object debugLocation, Key key,
     this.animating: true,
   }) : assert(animating != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Whether the activity indicator is running its animation.
   ///

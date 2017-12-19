@@ -23,7 +23,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// The [maxLines] property may be null (and indeed defaults to null), but if
   /// it is not null, it must be greater than zero.
   const DefaultTextStyle({
-    Key key,
+    Object debugLocation, Key key,
     @required this.style,
     this.textAlign,
     this.softWrap: true,
@@ -35,7 +35,7 @@ class DefaultTextStyle extends InheritedWidget {
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
   ///
@@ -67,7 +67,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// See the source below for an example of how to do this (since that's
   /// essentially what this constructor does).
   static Widget merge({
-    Key key,
+    Object debugLocation, Key key,
     TextStyle style,
     TextAlign textAlign,
     bool softWrap,
@@ -197,7 +197,7 @@ class Text extends StatelessWidget {
   /// If the [style] argument is null, the text will use the style from the
   /// closest enclosing [DefaultTextStyle].
   const Text(this.data, {
-    Key key,
+    Object debugLocation, Key key,
     this.style,
     this.textAlign,
     this.textDirection,
@@ -206,7 +206,7 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
   }) : assert(data != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The text to display.
   final String data;

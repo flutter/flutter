@@ -41,7 +41,7 @@ import 'scrollable.dart';
 class SingleChildScrollView extends StatelessWidget {
   /// Creates a box in which a single widget can be scrolled.
   SingleChildScrollView({
-    Key key,
+    Object debugLocation, Key key,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
     this.padding,
@@ -55,7 +55,7 @@ class SingleChildScrollView extends StatelessWidget {
           'You cannot both set primary to true and pass an explicit controller.'
        ),
        primary = primary ?? controller == null && scrollDirection == Axis.vertical,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The axis along which the scroll view scrolls.
   ///
@@ -147,12 +147,12 @@ class SingleChildScrollView extends StatelessWidget {
 
 class _SingleChildViewport extends SingleChildRenderObjectWidget {
   const _SingleChildViewport({
-    Key key,
+    Object debugLocation, Key key,
     this.axisDirection: AxisDirection.down,
     this.offset,
     Widget child,
   }) : assert(axisDirection != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final AxisDirection axisDirection;
   final ViewportOffset offset;

@@ -31,11 +31,11 @@ class FlexibleSpaceBar extends StatefulWidget {
   ///
   /// Most commonly used in the [AppBar.flexibleSpace] field.
   const FlexibleSpaceBar({
-    Key key,
+    Object debugLocation, Key key,
     this.title,
     this.background,
     this.centerTitle
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The primary contents of the flexible space bar when expanded.
   ///
@@ -176,13 +176,13 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
 class _FlexibleSpaceBarSettings extends InheritedWidget {
   const _FlexibleSpaceBarSettings({
-    Key key,
+    Object debugLocation, Key key,
     this.toolbarOpacity,
     this.minExtent,
     this.maxExtent,
     this.currentExtent,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   final double toolbarOpacity;
   final double minExtent;

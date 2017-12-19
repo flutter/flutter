@@ -139,11 +139,11 @@ class PageStorage extends StatelessWidget {
   ///
   /// The [bucket] argument must not be null.
   const PageStorage({
-    Key key,
+    Object debugLocation, Key key,
     @required this.bucket,
     @required this.child
   }) : assert(bucket != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

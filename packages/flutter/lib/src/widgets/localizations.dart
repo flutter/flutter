@@ -221,14 +221,14 @@ class DefaultWidgetsLocalizations implements WidgetsLocalizations {
 
 class _LocalizationsScope extends InheritedWidget {
   const _LocalizationsScope ({
-    Key key,
+    Object debugLocation, Key key,
     @required this.locale,
     @required this.localizationsState,
     @required this.typeToResources,
     Widget child,
   }) : assert(localizationsState != null),
        assert(typeToResources != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final Locale locale;
   final _LocalizationsState localizationsState;
@@ -332,14 +332,14 @@ class _LocalizationsScope extends InheritedWidget {
 class Localizations extends StatefulWidget {
   /// Create a widget from which localizations (like translated strings) can be obtained.
   Localizations({
-    Key key,
+    Object debugLocation, Key key,
     @required this.locale,
     @required this.delegates,
     this.child,
   }) : assert(locale != null),
        assert(delegates != null),
        assert(delegates.any((LocalizationsDelegate<dynamic> delegate) => delegate is LocalizationsDelegate<WidgetsLocalizations>)),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Overrides the inherited [Locale] or [LocalizationsDelegate]s for `child`.
   ///
@@ -369,7 +369,7 @@ class Localizations extends StatefulWidget {
   /// entire app, specify [WidgetsApp.locale] or [WidgetsApp.localizationsDelegates]
   /// (or specify the same parameters for [MaterialApp]).
   factory Localizations.override({
-    Key key,
+    Object debugLocation, Key key,
     @required BuildContext context,
     Locale locale,
     List<LocalizationsDelegate<dynamic>> delegates,

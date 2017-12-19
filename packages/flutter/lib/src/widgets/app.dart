@@ -66,7 +66,7 @@ class WidgetsApp extends StatefulWidget {
   /// The `supportedLocales` argument must be a list of one or more elements.
   /// By default supportedLocales is `[const Locale('en', 'US')]`.
   WidgetsApp({ // can't be const because the asserts use methods on Iterable :-(
-    Key key,
+    Object debugLocation, Key key,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.title: '',
@@ -97,7 +97,7 @@ class WidgetsApp extends StatefulWidget {
        assert(showSemanticsDebugger != null),
        assert(debugShowCheckedModeBanner != null),
        assert(debugShowWidgetInspector != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A one-line description used by the device to identify the app for the user.
   ///

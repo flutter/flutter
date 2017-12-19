@@ -64,9 +64,9 @@ const BoxDecoration _kCupertinoDialogBackFill = const BoxDecoration(
 class CupertinoDialog extends StatelessWidget {
   /// Creates an iOS-style dialog.
   const CupertinoDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -112,11 +112,11 @@ class CupertinoDialog extends StatelessWidget {
 class CupertinoAlertDialog extends StatelessWidget {
   /// Creates an iOS-style alert dialog.
   const CupertinoAlertDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.title,
     this.content,
     this.actions,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -259,9 +259,9 @@ const Color _kButtonDividerColor = const Color(0xFFD5D5D5);
 
 class _CupertinoButtonBar extends StatelessWidget {
   const _CupertinoButtonBar({
-    Key key,
+    Object debugLocation, Key key,
     this.children,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final List<Widget> children;
 

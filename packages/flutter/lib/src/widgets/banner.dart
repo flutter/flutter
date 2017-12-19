@@ -239,7 +239,7 @@ class Banner extends StatelessWidget {
   ///
   /// The [message] and [location] arguments must not be null.
   const Banner({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     @required this.message,
     this.textDirection,
@@ -251,7 +251,7 @@ class Banner extends StatelessWidget {
        assert(location != null),
        assert(color != null),
        assert(textStyle != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget to show behind the banner.
   final Widget child;
@@ -327,9 +327,9 @@ class Banner extends StatelessWidget {
 class CheckedModeBanner extends StatelessWidget {
   /// Creates a checked mode banner.
   const CheckedModeBanner({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget to show behind the banner.
   final Widget child;

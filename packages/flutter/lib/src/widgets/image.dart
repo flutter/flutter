@@ -111,7 +111,7 @@ class Image extends StatefulWidget {
   /// The [image], [alignment], [repeat], and [matchTextDirection] arguments
   /// must not be null.
   const Image({
-    Key key,
+    Object debugLocation, Key key,
     @required this.image,
     this.width,
     this.height,
@@ -128,7 +128,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
@@ -137,7 +137,7 @@ class Image extends StatefulWidget {
   ///
   /// All network images are cached regardless of HTTP headers.
   Image.network(String src, {
-    Key key,
+    Object debugLocation, Key key,
     double scale: 1.0,
     this.width,
     this.height,
@@ -155,7 +155,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
   ///
@@ -164,7 +164,7 @@ class Image extends StatefulWidget {
   /// On Android, this may require the
   /// `android.permission.READ_EXTERNAL_STORAGE` permission.
   Image.file(File file, {
-    Key key,
+    Object debugLocation, Key key,
     double scale: 1.0,
     this.width,
     this.height,
@@ -181,7 +181,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from an asset
   /// bundle. The key for the image is given by the `name` argument.
@@ -294,7 +294,7 @@ class Image extends StatefulWidget {
   ///  * <https://flutter.io/assets-and-images/>, an introduction to assets in
   ///    Flutter.
   Image.asset(String name, {
-    Key key,
+    Object debugLocation, Key key,
     AssetBundle bundle,
     double scale,
     this.width,
@@ -314,13 +314,13 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
   Image.memory(Uint8List bytes, {
-    Key key,
+    Object debugLocation, Key key,
     double scale: 1.0,
     this.width,
     this.height,
@@ -337,7 +337,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The image to display.
   final ImageProvider image;

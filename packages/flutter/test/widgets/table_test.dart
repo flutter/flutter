@@ -7,7 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 class TestStatefulWidget extends StatefulWidget {
-  const TestStatefulWidget({ Key key }) : super(key: key);
+  const TestStatefulWidget({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   @override
   TestStatefulWidgetState createState() => new TestStatefulWidgetState();

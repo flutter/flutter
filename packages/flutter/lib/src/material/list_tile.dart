@@ -36,21 +36,21 @@ class ListTileTheme extends InheritedWidget {
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s.
   const ListTileTheme({
-    Key key,
+    Object debugLocation, Key key,
     this.dense: false,
     this.style: ListTileStyle.list,
     this.selectedColor,
     this.iconColor,
     this.textColor,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s, and merges in the current list tile theme, if any.
   ///
   /// The [child] argument must not be null.
   static Widget merge({
-    Key key,
+    Object debugLocation, Key key,
     bool dense,
     ListTileStyle style,
     Color selectedColor,
@@ -203,7 +203,7 @@ class ListTile extends StatelessWidget {
   ///
   /// Requires one of its ancestors to be a [Material] widget.
   const ListTile({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.title,
     this.subtitle,
@@ -218,7 +218,7 @@ class ListTile extends StatelessWidget {
        assert(enabled != null),
        assert(selected != null),
        assert(!isThreeLine || subtitle != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// A widget to display before the title.
   ///

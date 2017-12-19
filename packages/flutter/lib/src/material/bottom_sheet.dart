@@ -47,13 +47,13 @@ class BottomSheet extends StatefulWidget {
   /// [ScaffoldState.showBottomSheet], for persistent bottom sheets, or by
   /// [showModalBottomSheet], for modal bottom sheets.
   const BottomSheet({
-    Key key,
+    Object debugLocation, Key key,
     this.animationController,
     @required this.onClosing,
     @required this.builder
   }) : assert(onClosing != null),
        assert(builder != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The animation that controls the bottom sheet's position.
   ///
@@ -169,7 +169,7 @@ class _ModalBottomSheetLayout extends SingleChildLayoutDelegate {
 }
 
 class _ModalBottomSheet<T> extends StatefulWidget {
-  const _ModalBottomSheet({ Key key, this.route }) : super(key: key);
+  const _ModalBottomSheet({ Object debugLocation, Key key, this.route }) : super(debugLocation: debugLocation, key: key);
 
   final _ModalBottomSheetRoute<T> route;
 

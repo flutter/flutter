@@ -56,7 +56,7 @@ class Slider extends StatefulWidget {
   /// * [value] determines currently selected value for this slider.
   /// * [onChanged] is called when the user selects a new value for the slider.
   const Slider({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.min: 0.0,
@@ -73,7 +73,7 @@ class Slider extends StatefulWidget {
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
        assert(thumbOpenAtMin != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The currently selected value for this slider.
   ///
@@ -214,7 +214,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
 
 class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   const _SliderRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.divisions,
     this.label,
@@ -226,7 +226,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChanged,
     this.vsync,
     this.reactionController,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final double value;
   final int divisions;

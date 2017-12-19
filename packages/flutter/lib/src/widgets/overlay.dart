@@ -154,9 +154,9 @@ class OverlayEntry {
 }
 
 class _OverlayEntry extends StatefulWidget {
-  _OverlayEntry(this.entry)
+  _OverlayEntry(this.entry, {Object debugLocation})
     : assert(entry != null),
-      super(key: entry._key);
+      super(key: entry._key, debugLocation: debugLocation);
 
   final OverlayEntry entry;
 
@@ -201,10 +201,10 @@ class Overlay extends StatefulWidget {
   /// Rather than creating an overlay, consider using the overlay that is
   /// created by the [WidgetsApp] or the [MaterialApp] for the application.
   const Overlay({
-    Key key,
+    Object debugLocation, Key key,
     this.initialEntries: const <OverlayEntry>[]
   }) : assert(initialEntries != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The entries to include in the overlay initially.
   ///

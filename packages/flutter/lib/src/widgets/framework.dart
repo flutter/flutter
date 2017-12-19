@@ -353,8 +353,11 @@ class TypeMatcher<T> {
 ///    particular configuration and ambient state.
 @immutable
 abstract class Widget extends DiagnosticableTree {
+  /// A kernel transformer will specificy this.
+  final Object debugLocation;
+
   /// Initializes [key] for subclasses.
-  const Widget({ this.key });
+  const Widget({ @required this.debugLocation, this.key });
 
   /// Controls how one widget replaces another widget in the tree.
   ///
@@ -478,7 +481,7 @@ abstract class Widget extends DiagnosticableTree {
 ///
 /// ```dart
 /// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+///   const GreenFrog({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -497,7 +500,7 @@ abstract class Widget extends DiagnosticableTree {
 ///     Key key,
 ///     this.color: const Color(0xFF2DBD3A),
 ///     this.child,
-///   }) : super(key: key);
+///   }) : super(debugLocation: debugLocation, key: key);
 ///
 ///   final Color color;
 ///
@@ -523,7 +526,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    be read by descendant widgets.
 abstract class StatelessWidget extends Widget {
   /// Initializes [key] for subclasses.
-  const StatelessWidget({ Key key }) : super(key: key);
+  const StatelessWidget({ @required Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   /// Creates a [StatelessElement] to manage this widget's location in the tree.
   ///
@@ -685,7 +688,7 @@ abstract class StatelessWidget extends Widget {
 ///
 /// ```dart
 /// class YellowBird extends StatefulWidget {
-///   const YellowBird({ Key key }) : super(key: key);
+///   const YellowBird({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 ///
 ///   @override
 ///   _YellowBirdState createState() => new _YellowBirdState();
@@ -713,7 +716,7 @@ abstract class StatelessWidget extends Widget {
 ///     Key key,
 ///     this.color: const Color(0xFFFFE306),
 ///     this.child,
-///   }) : super(key: key);
+///   }) : super(debugLocation: debugLocation, key: key);
 ///
 ///   final Color color;
 ///
@@ -754,7 +757,7 @@ abstract class StatelessWidget extends Widget {
 ///    be read by descendant widgets.
 abstract class StatefulWidget extends Widget {
   /// Initializes [key] for subclasses.
-  const StatefulWidget({ Key key }) : super(key: key);
+  const StatefulWidget({ @required Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   /// Creates a [StatefulElement] to manage this widget's location in the tree.
   ///
@@ -1308,7 +1311,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
 ///  * [Widget], for an overview of widgets in general.
 abstract class ProxyWidget extends Widget {
   /// Creates a widget that has exactly one child widget.
-  const ProxyWidget({ Key key, @required this.child }) : super(key: key);
+  const ProxyWidget({ Object debugLocation, Key key, @required this.child }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -1338,7 +1341,7 @@ abstract class ProxyWidget extends Widget {
 ///     @required Widget child,
 ///   }) : assert(child != null),
 ///        assert(size != null),
-///        super(key: key, child: child);
+///        super(debugLocation: debugLocation, key: key, child: child);
 ///
 ///   final Size size;
 ///
@@ -1367,8 +1370,8 @@ abstract class ProxyWidget extends Widget {
 abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const ParentDataWidget({ Key key, Widget child })
-    : super(key: key, child: child);
+  const ParentDataWidget({ Object debugLocation, Key key,Widget child })
+    : super(debugLocation: debugLocation, key: key, child: child);
 
   @override
   ParentDataElement<T> createElement() => new ParentDataElement<T>(this);
@@ -1467,7 +1470,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///     @required Widget child,
 ///   }) : assert(color != null),
 ///        assert(child != null),
-///        super(key: key, child: child);
+///        super(debugLocation: debugLocation, key: key, child: child);
 ///
 ///   final Color color;
 ///
@@ -1507,8 +1510,8 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 abstract class InheritedWidget extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const InheritedWidget({ Key key, Widget child })
-    : super(key: key, child: child);
+  const InheritedWidget({ @required Object debugLocation, Key key,Widget child })
+    : super(debugLocation: debugLocation, key: key, child: child);
 
   @override
   InheritedElement createElement() => new InheritedElement(this);
@@ -1535,7 +1538,7 @@ abstract class InheritedWidget extends ProxyWidget {
 abstract class RenderObjectWidget extends Widget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const RenderObjectWidget({ Key key }) : super(key: key);
+  const RenderObjectWidget({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   /// RenderObjectWidgets always inflate to a [RenderObjectElement] subclass.
   @override
@@ -1577,7 +1580,7 @@ abstract class RenderObjectWidget extends Widget {
 abstract class LeafRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const LeafRenderObjectWidget({ Key key }) : super(key: key);
+  const LeafRenderObjectWidget({ Object debugLocation, Key key }) : super(debugLocation: debugLocation, key: key);
 
   @override
   LeafRenderObjectElement createElement() => new LeafRenderObjectElement(this);
@@ -1589,7 +1592,7 @@ abstract class LeafRenderObjectWidget extends RenderObjectWidget {
 abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
-  const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
+  const SingleChildRenderObjectWidget({ Object debugLocation, Key key, this.child }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -1607,10 +1610,10 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// The [children] argument must not be null and must not contain any null
   /// objects.
-  MultiChildRenderObjectWidget({ Key key, this.children: const <Widget>[] })
+  MultiChildRenderObjectWidget({ Object debugLocation, Key key,this.children: const <Widget>[] })
     : assert(children != null),
       assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
-      super(key: key);
+      super(debugLocation: debugLocation, key: key);
 
   /// The widgets below this widget in the tree.
   ///

@@ -225,12 +225,12 @@ class MediaQuery extends InheritedWidget {
   ///
   /// The [data] and [child] arguments must not be null.
   const MediaQuery({
-    Key key,
+    Object debugLocation, Key key,
     @required this.data,
     @required Widget child,
   }) : assert(child != null),
        assert(data != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// Creates a new [MediaQuery] that inherits from the ambient [MediaQuery] from
   /// the given context, but removes the specified paddings.
@@ -254,7 +254,7 @@ class MediaQuery extends InheritedWidget {
   ///  * [SafeArea], which both removes the padding from the [MediaQuery] and
   ///    adds a [Padding] widget.
   factory MediaQuery.removePadding({
-    Key key,
+    Object debugLocation, Key key,
     @required BuildContext context,
     bool removeLeft: false,
     bool removeTop: false,

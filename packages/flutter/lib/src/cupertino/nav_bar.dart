@@ -72,7 +72,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.automaticallyImplyLeading: true,
     this.middle,
@@ -80,7 +80,7 @@ class CupertinoNavigationBar extends StatelessWidget implements ObstructingPrefe
     this.backgroundColor: _kDefaultNavBarBackgroundColor,
     this.actionsForegroundColor: CupertinoColors.activeBlue,
   }) : assert(automaticallyImplyLeading != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Widget to place at the start of the navigation bar. Normally a back button
   /// for a normal page or a cancel button for full page dialogs.
@@ -174,7 +174,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
   ///
   /// The [largeTitle] argument is required and must not be null.
   const CupertinoSliverNavigationBar({
-    Key key,
+    Object debugLocation, Key key,
     @required this.largeTitle,
     this.leading,
     this.automaticallyImplyLeading: true,
@@ -184,7 +184,7 @@ class CupertinoSliverNavigationBar extends StatelessWidget {
     this.actionsForegroundColor: CupertinoColors.activeBlue,
   }) : assert(largeTitle != null),
        assert(automaticallyImplyLeading != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The navigation bar's title.
   ///
@@ -302,14 +302,14 @@ Widget _wrapWithBackground({Color backgroundColor, Widget child}) {
 /// doesn't scroll.
 class _CupertinoPersistentNavigationBar extends StatelessWidget implements PreferredSizeWidget {
   const _CupertinoPersistentNavigationBar({
-    Key key,
+    Object debugLocation, Key key,
     this.leading,
     this.automaticallyImplyLeading,
     this.middle,
     this.trailing,
     this.actionsForegroundColor,
     this.middleVisible,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final Widget leading;
 

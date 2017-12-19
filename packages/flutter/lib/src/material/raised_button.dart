@@ -44,7 +44,7 @@ class RaisedButton extends StatelessWidget {
   /// The [child] argument is required and is typically a [Text] widget in all
   /// caps.
   const RaisedButton({
-    Key key,
+    Object debugLocation, Key key,
     @required this.onPressed,
     this.color,
     this.highlightColor,
@@ -55,7 +55,7 @@ class RaisedButton extends StatelessWidget {
     this.disabledElevation: 0.0,
     this.colorBrightness,
     this.child
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.

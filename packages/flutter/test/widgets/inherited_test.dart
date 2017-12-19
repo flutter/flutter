@@ -8,8 +8,8 @@ import 'package:flutter/material.dart';
 import 'test_widgets.dart';
 
 class TestInherited extends InheritedWidget {
-  const TestInherited({ Key key, Widget child, this.shouldNotify: true })
-    : super(key: key, child: child);
+  const TestInherited({ Object debugLocation, Key key,Widget child, this.shouldNotify: true })
+    : super(debugLocation: debugLocation, key: key, child: child);
 
   final bool shouldNotify;
 
@@ -20,8 +20,8 @@ class TestInherited extends InheritedWidget {
 }
 
 class ValueInherited extends InheritedWidget {
-  const ValueInherited({ Key key, Widget child, this.value })
-    : super(key: key, child: child);
+  const ValueInherited({ Object debugLocation, Key key,Widget child, this.value })
+    : super(debugLocation: debugLocation, key: key, child: child);
 
   final int value;
 

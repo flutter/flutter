@@ -82,7 +82,7 @@ class RefreshIndicator extends StatefulWidget {
   /// non-null. The default
   /// [displacement] is 40.0 logical pixels.
   const RefreshIndicator({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     this.displacement: 40.0,
     @required this.onRefresh,
@@ -92,7 +92,7 @@ class RefreshIndicator extends StatefulWidget {
   }) : assert(child != null),
        assert(onRefresh != null),
        assert(notificationPredicate != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The refresh indicator will be stacked on top of this child. The indicator
   /// will appear when child's Scrollable descendant is over-scrolled.

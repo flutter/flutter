@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Object debugLocation, Key key, this.child }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 
@@ -26,7 +26,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class DeactivateLogger extends StatefulWidget {
-  const DeactivateLogger({ Key key, this.log }) : super(key: key);
+  const DeactivateLogger({ Object debugLocation, Key key, this.log }) : super(debugLocation: debugLocation, key: key);
 
   final List<String> log;
 

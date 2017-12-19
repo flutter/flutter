@@ -64,7 +64,13 @@ dev_dependencies:
   vector_math: 2.0.5 # TRANSITIVE DEPENDENCY
   vm_service_client: 0.2.3 # TRANSITIVE DEPENDENCY
   web_socket_channel: 1.0.6 # TRANSITIVE DEPENDENCY
-  yaml: 2.1.13 # TRANSITIVE DEPENDENCY
+  yaml: 2.1.13 # TRANSITIVE DEPENDENCYZ
+
+dependency_overrides:
+  sky_engine:
+    path: /usr/local/google/home/jacobr/git/engine/src/out/host_debug_unopt_x64/gen/dart-pkg/sky_engine
+  sky_services:
+    path: /usr/local/google/home/jacobr/git/engine/src/out/host_debug_unopt_x64/gen/dart-pkg/sky_services
 
 flutter:
   uses-material-design: true

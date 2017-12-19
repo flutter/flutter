@@ -38,10 +38,10 @@ abstract class AnimatedWidget extends StatefulWidget {
   ///
   /// The [listenable] argument is required.
   const AnimatedWidget({
-    Key key,
+    Object debugLocation, Key key,
     @required this.listenable
   }) : assert(listenable != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The [Listenable] to which this widget is listening.
   ///
@@ -112,13 +112,13 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// The [position] argument must not be null.
   const SlideTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<Offset> position,
     this.transformHitTests: true,
     this.textDirection,
     this.child,
   }) : assert(position != null),
-       super(key: key, listenable: position);
+       super(debugLocation: debugLocation, key: key, listenable: position);
 
   /// The animation that controls the position of the child.
   ///
@@ -171,11 +171,11 @@ class ScaleTransition extends AnimatedWidget {
   /// The [scale] argument must not be null. The [alignment] argument defaults
   /// to [Alignment.center].
   const ScaleTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> scale,
     this.alignment: Alignment.center,
     this.child,
-  }) : super(key: key, listenable: scale);
+  }) : super(debugLocation: debugLocation, key: key, listenable: scale);
 
   /// The animation that controls the scale of the child.
   ///
@@ -212,10 +212,10 @@ class RotationTransition extends AnimatedWidget {
   ///
   /// The [turns] argument must not be null.
   const RotationTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> turns,
     this.child,
-  }) : super(key: key, listenable: turns);
+  }) : super(debugLocation: debugLocation, key: key, listenable: turns);
 
   /// The animation that controls the rotation of the child.
   ///
@@ -249,13 +249,13 @@ class SizeTransition extends AnimatedWidget {
   /// to [Axis.vertical]. The [axisAlignment] defaults to 0.0, which centers the
   /// child along the main axis during the transition.
   const SizeTransition({
-    Key key,
+    Object debugLocation, Key key,
     this.axis: Axis.vertical,
     @required Animation<double> sizeFactor,
     this.axisAlignment: 0.0,
     this.child,
   }) : assert(axis != null),
-       super(key: key, listenable: sizeFactor);
+       super(debugLocation: debugLocation, key: key, listenable: sizeFactor);
 
   /// [Axis.horizontal] if [sizeFactor] modifies the width, otherwise [Axis.vertical].
   final Axis axis;
@@ -298,10 +298,10 @@ class FadeTransition extends AnimatedWidget {
   ///
   /// The [opacity] argument must not be null.
   const FadeTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> opacity,
     this.child,
-  }) : super(key: key, listenable: opacity);
+  }) : super(debugLocation: debugLocation, key: key, listenable: opacity);
 
   /// The animation that controls the opacity of the child.
   ///
@@ -353,10 +353,10 @@ class PositionedTransition extends AnimatedWidget {
   ///
   /// The [rect] argument must not be null.
   const PositionedTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<RelativeRect> rect,
     @required this.child,
-  }) : super(key: key, listenable: rect);
+  }) : super(debugLocation: debugLocation, key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
   Animation<RelativeRect> get rect => listenable;
@@ -389,11 +389,11 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// current value of the [rect] argument assuming that the stack has the given
   /// [size]. Both [rect] and [size] must not be null.
   const RelativePositionedTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<Rect> rect,
     @required this.size,
     @required this.child,
-  }) : super(key: key, listenable: rect);
+  }) : super(debugLocation: debugLocation, key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
   ///
@@ -438,11 +438,11 @@ class DecoratedBoxTransition extends AnimatedWidget {
   ///
   /// * [new DecoratedBox].
   const DecoratedBoxTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required this.decoration,
     this.position: DecorationPosition.background,
     @required this.child,
-  }) : super(key: key, listenable: decoration);
+  }) : super(debugLocation: debugLocation, key: key, listenable: decoration);
 
   /// Animation of the decoration to paint.
   ///
@@ -475,12 +475,12 @@ class AlignTransition extends AnimatedWidget {
   ///
   /// * [new Align].
   const AlignTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<AlignmentGeometry> alignment,
     @required this.child,
     this.widthFactor,
     this.heightFactor,
-  }) : super(key: key, listenable: alignment);
+  }) : super(debugLocation: debugLocation, key: key, listenable: alignment);
 
   /// The animation that controls the child's alignment.
   Animation<AlignmentGeometry> get alignment => listenable;
@@ -584,12 +584,12 @@ class AnimatedBuilder extends AnimatedWidget {
   ///
   /// The [animation] and [builder] arguments must not be null.
   const AnimatedBuilder({
-    Key key,
+    Object debugLocation, Key key,
     @required Listenable animation,
     @required this.builder,
     this.child,
   }) : assert(builder != null),
-       super(key: key, listenable: animation);
+       super(debugLocation: debugLocation, key: key, listenable: animation);
 
   /// Called every time the animation changes value.
   final TransitionBuilder builder;

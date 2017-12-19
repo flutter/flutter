@@ -83,7 +83,7 @@ class InkResponse extends StatefulWidget {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   const InkResponse({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     this.onTap,
     this.onDoubleTap,
@@ -96,7 +96,7 @@ class InkResponse extends StatefulWidget {
     this.highlightColor,
     this.splashColor,
     this.enableFeedback: true,
-  }) : assert(enableFeedback != null), super(key: key);
+  }) : assert(enableFeedback != null), super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -415,7 +415,7 @@ class InkWell extends InkResponse {
   ///
   /// Must have an ancestor [Material] widget in which to cause ink reactions.
   const InkWell({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
     GestureTapCallback onTap,
     GestureTapCallback onDoubleTap,

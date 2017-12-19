@@ -35,9 +35,9 @@ class Dialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   const Dialog({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -127,13 +127,13 @@ class AlertDialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   const AlertDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.title,
     this.titlePadding,
     this.content,
     this.contentPadding,
     this.actions
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.
@@ -240,10 +240,10 @@ class AlertDialog extends StatelessWidget {
 class SimpleDialogOption extends StatelessWidget {
   /// Creates an option for a [SimpleDialog].
   const SimpleDialogOption({
-    Key key,
+    Object debugLocation, Key key,
     this.onPressed,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The callback that is called when this option is selected.
   ///
@@ -335,12 +335,12 @@ class SimpleDialog extends StatelessWidget {
   ///
   /// Typically used in conjunction with [showDialog].
   const SimpleDialog({
-    Key key,
+    Object debugLocation, Key key,
     this.title,
     this.titlePadding,
     this.children,
     this.contentPadding,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The (optional) title of the dialog is displayed in a large font at the top
   /// of the dialog.

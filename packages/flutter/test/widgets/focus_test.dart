@@ -7,11 +7,11 @@ import 'package:flutter/widgets.dart';
 
 class TestFocusable extends StatefulWidget {
   const TestFocusable({
-    Key key,
+    Object debugLocation, Key key,
     this.no,
     this.yes,
     this.autofocus: true,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final String no;
   final String yes;

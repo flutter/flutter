@@ -37,13 +37,13 @@ class Tab extends StatelessWidget {
   /// and [child] must be non-null. The [text] and [child] arguments must not be
   /// used at the same time.
   const Tab({
-    Key key,
+    Object debugLocation, Key key,
     this.text,
     this.icon,
     this.child,
   }) : assert(text != null || child != null || icon != null),
        assert(!(text != null && null != child)), // TODO(goderbauer): https://github.com/dart-lang/sdk/issues/31140
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The text to display as the tab's label.
   ///
@@ -109,7 +109,7 @@ class Tab extends StatelessWidget {
 
 class _TabStyle extends AnimatedWidget {
   const _TabStyle({
-    Key key,
+    Object debugLocation, Key key,
     Animation<double> animation,
     this.selected,
     this.labelColor,
@@ -117,7 +117,7 @@ class _TabStyle extends AnimatedWidget {
     this.labelStyle,
     this.unselectedLabelStyle,
     @required this.child,
-  }) : super(key: key, listenable: animation);
+  }) : super(debugLocation: debugLocation, key: key, listenable: animation);
 
   final TextStyle labelStyle;
   final TextStyle unselectedLabelStyle;
@@ -213,7 +213,7 @@ class _TabLabelBarRenderer extends RenderFlex {
 // or in response to input.
 class _TabLabelBar extends Flex {
   _TabLabelBar({
-    Key key,
+    Object debugLocation, Key key,
     List<Widget> children: const <Widget>[],
     this.onPerformLayout,
   }) : super(
@@ -480,7 +480,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   ///
   /// The [indicatorPadding] parameter defaults to [EdgeInsets.zero], and must not be null.
   const TabBar({
-    Key key,
+    Object debugLocation, Key key,
     @required this.tabs,
     this.controller,
     this.isScrollable: false,
@@ -495,7 +495,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
        assert(isScrollable != null),
        assert(indicatorWeight != null && indicatorWeight > 0.0),
        assert(indicatorPadding != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Typically a list of two or more [Tab] widgets.
   ///
@@ -861,11 +861,11 @@ class TabBarView extends StatefulWidget {
   ///
   /// The length of [children] must be the same as the [controller]'s length.
   const TabBarView({
-    Key key,
+    Object debugLocation, Key key,
     @required this.children,
     this.controller,
     this.physics,
-  }) : assert(children != null), super(key: key);
+  }) : assert(children != null), super(debugLocation: debugLocation, key: key);
 
   /// This widget's selection and animation state.
   ///
@@ -1050,11 +1050,11 @@ class TabPageSelectorIndicator extends StatelessWidget {
   ///
   /// The [backgroundColor], [borderColor], and [size] parameters must not be null.
   const TabPageSelectorIndicator({
-    Key key,
+    Object debugLocation, Key key,
     @required this.backgroundColor,
     @required this.borderColor,
     @required this.size,
-  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(key: key);
+  }) : assert(backgroundColor != null), assert(borderColor != null), assert(size != null), super(debugLocation: debugLocation, key: key);
 
   /// The indicator circle's background color.
   final Color backgroundColor;
@@ -1088,12 +1088,12 @@ class TabPageSelectorIndicator extends StatelessWidget {
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
   const TabPageSelector({
-    Key key,
+    Object debugLocation, Key key,
     this.controller,
     this.indicatorSize: 12.0,
     this.color,
     this.selectedColor,
-  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(key: key);
+  }) : assert(indicatorSize != null && indicatorSize > 0.0), super(debugLocation: debugLocation, key: key);
 
   /// This widget's selection and animation state.
   ///

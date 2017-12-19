@@ -476,13 +476,13 @@ class Navigator extends StatefulWidget {
   ///
   /// The [onGenerateRoute] argument must not be null.
   const Navigator({
-    Key key,
+    Object debugLocation, Key key,
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.observers: const <NavigatorObserver>[]
   }) : assert(onGenerateRoute != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The name of the first route to show.
   ///

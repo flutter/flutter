@@ -18,14 +18,14 @@ class FlutterLogo extends StatelessWidget {
   ///
   /// The [size] defaults to the value given by the current [IconTheme].
   const FlutterLogo({
-    Key key,
+    Object debugLocation, Key key,
     this.size,
     this.colors,
     this.textColor: const Color(0xFF616161),
     this.style: FlutterLogoStyle.markOnly,
     this.duration: const Duration(milliseconds: 750),
     this.curve: Curves.fastOutSlowIn,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The size of the logo in logical pixels.
   ///

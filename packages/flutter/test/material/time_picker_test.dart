@@ -17,7 +17,7 @@ import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class _TimePickerLauncher extends StatelessWidget {
-  const _TimePickerLauncher({ Key key, this.onChanged, this.locale }) : super(key: key);
+  const _TimePickerLauncher({ Object debugLocation, Key key, this.onChanged, this.locale }) : super(debugLocation: debugLocation, key: key);
 
   final ValueChanged<TimeOfDay> onChanged;
   final Locale locale;

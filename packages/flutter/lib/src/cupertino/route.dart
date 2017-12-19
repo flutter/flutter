@@ -289,7 +289,7 @@ class CupertinoPageTransition extends StatelessWidget {
   ///  * `linearTransition` is whether to perform primary transition linearly.
   ///    Used to precisely track back gesture drags.
   CupertinoPageTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> primaryRouteAnimation,
     @required Animation<double> secondaryRouteAnimation,
     @required this.child,
@@ -317,7 +317,7 @@ class CupertinoPageTransition extends StatelessWidget {
            curve: Curves.easeOut,
          )
        ),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   // When this page is coming in to cover another page.
   final Animation<Offset> _primaryPositionAnimation;
@@ -356,7 +356,7 @@ class CupertinoPageTransition extends StatelessWidget {
 class CupertinoFullscreenDialogTransition extends StatelessWidget {
   /// Creates an iOS-style transition used for summoning fullscreen dialogs.
   CupertinoFullscreenDialogTransition({
-    Key key,
+    Object debugLocation, Key key,
     @required Animation<double> animation,
     @required this.child,
   }) : _positionAnimation = _kBottomUpTween.animate(
@@ -365,7 +365,7 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
            curve: Curves.easeInOut,
          )
        ),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Animation<Offset> _positionAnimation;
 
@@ -391,14 +391,14 @@ class CupertinoFullscreenDialogTransition extends StatelessWidget {
 /// coordinates by this widget.
 class _CupertinoBackGestureDetector extends StatefulWidget {
   const _CupertinoBackGestureDetector({
-    Key key,
+    Object debugLocation, Key key,
     @required this.enabledCallback,
     @required this.onStartPopGesture,
     @required this.child,
   }) : assert(enabledCallback != null),
        assert(onStartPopGesture != null),
        assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 

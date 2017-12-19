@@ -50,13 +50,13 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
   /// The [decoration] and [position] arguments must not be null. By default the
   /// decoration paints behind the child.
   const DecoratedBox({
-    Key key,
+    Object debugLocation, Key key,
     @required this.decoration,
     this.position: DecorationPosition.background,
     Widget child
   }) : assert(decoration != null),
        assert(position != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// What decoration to paint.
   ///
@@ -236,7 +236,7 @@ class Container extends StatelessWidget {
   /// `decoration`, you can pass the color as the `color` argument to the
   /// `BoxDecoration`.
   Container({
-    Key key,
+    Object debugLocation, Key key,
     this.alignment,
     this.padding,
     Color color,
@@ -262,7 +262,7 @@ class Container extends StatelessWidget {
           ? constraints?.tighten(width: width, height: height)
             ?? new BoxConstraints.tightFor(width: width, height: height)
           : constraints,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The [child] contained by the container.
   ///

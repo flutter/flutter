@@ -42,7 +42,7 @@ class SamplePageState extends State<SamplePage> {
 int willPopCount = 0;
 
 class SampleForm extends StatelessWidget {
-  const SampleForm({ Key key, this.callback }) : super(key: key);
+  const SampleForm({ Object debugLocation, Key key, this.callback }) : super(debugLocation: debugLocation, key: key);
 
   final WillPopCallback callback;
 

@@ -40,7 +40,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// The [showLeading], [showTrailing], [axisDirection], [color], and
   /// [notificationPredicate] arguments must not be null.
   const GlowingOverscrollIndicator({
-    Key key,
+    Object debugLocation, Key key,
     this.showLeading: true,
     this.showTrailing: true,
     @required this.axisDirection,
@@ -52,7 +52,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
        assert(axisDirection != null),
        assert(color != null),
        assert(notificationPredicate != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Whether to show the overscroll glow on the side with negative scroll
   /// offsets.

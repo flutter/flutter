@@ -20,11 +20,11 @@ class TickerMode extends InheritedWidget {
   ///
   /// The [enabled] argument must not be null.
   const TickerMode({
-    Key key,
+    Object debugLocation, Key key,
     @required this.enabled,
     Widget child
   }) : assert(enabled != null),
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   /// The current ticker mode of this subtree.
   ///

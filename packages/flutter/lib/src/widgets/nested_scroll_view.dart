@@ -37,7 +37,7 @@ class NestedScrollView extends StatefulWidget {
   ///
   /// The [reverse], [headerSliverBuilder], and [body] arguments must not be null.
   const NestedScrollView({
-    Key key,
+    Object debugLocation, Key key,
     this.controller,
     this.scrollDirection: Axis.vertical,
     this.reverse: false,
@@ -48,7 +48,7 @@ class NestedScrollView extends StatefulWidget {
        assert(reverse != null),
        assert(headerSliverBuilder != null),
        assert(body != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// An object that can be used to control the position to which the outer
   /// scroll view is scrolled.

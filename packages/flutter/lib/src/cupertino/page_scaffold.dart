@@ -20,11 +20,11 @@ import 'colors.dart';
 class CupertinoPageScaffold extends StatelessWidget {
   /// Creates a layout for pages with a navigation bar at the top.
   const CupertinoPageScaffold({
-    Key key,
+    Object debugLocation, Key key,
     this.navigationBar,
     @required this.child,
   }) : assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The [navigationBar], typically a [CupertinoNavigationBar], is drawn at the
   /// top of the screen.

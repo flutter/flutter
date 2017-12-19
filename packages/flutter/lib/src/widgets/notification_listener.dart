@@ -91,10 +91,10 @@ abstract class Notification {
 class NotificationListener<T extends Notification> extends StatelessWidget {
   /// Creates a widget that listens for notifications.
   const NotificationListener({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     this.onNotification,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget directly below this widget in the tree.
   ///

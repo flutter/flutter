@@ -74,7 +74,7 @@ class Dismissible extends StatefulWidget {
   /// state of the dismissed item. Using keys causes the widgets to sync
   /// according to their keys and avoids this pitfall.
   const Dismissible({
-    @required Key key,
+    Object debugLocation, @required Key key,
     @required this.child,
     this.background,
     this.secondaryBackground,
@@ -85,7 +85,7 @@ class Dismissible extends StatefulWidget {
     this.dismissThresholds: const <DismissDirection, double>{},
   }) : assert(key != null),
        assert(secondaryBackground != null ? background != null : true),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

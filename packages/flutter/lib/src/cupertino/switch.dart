@@ -48,11 +48,11 @@ import 'thumb_painter.dart';
 class CupertinoSwitch extends StatefulWidget {
   /// Creates an iOS-style switch.
   const CupertinoSwitch({
-    Key key,
+    Object debugLocation, Key key,
     @required this.value,
     @required this.onChanged,
     this.activeColor: CupertinoColors.activeGreen,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// Whether this switch is on or off.
   final bool value;
@@ -109,12 +109,12 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
 
 class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
   const _CupertinoSwitchRenderObjectWidget({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.activeColor,
     this.onChanged,
     this.vsync,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   final bool value;
   final Color activeColor;

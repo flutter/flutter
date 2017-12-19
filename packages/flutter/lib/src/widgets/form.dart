@@ -22,12 +22,12 @@ class Form extends StatefulWidget {
   ///
   /// The [child] argument must not be null.
   const Form({
-    Key key,
+    Object debugLocation, Key key,
     @required this.child,
     this.autovalidate: false,
     this.onWillPop,
   }) : assert(child != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Returns the closest [FormState] which encloses the given context.
   ///
@@ -137,13 +137,13 @@ class FormState extends State<Form> {
 
 class _FormScope extends InheritedWidget {
   const _FormScope({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
     FormState formState,
     int generation
   }) : _formState = formState,
        _generation = generation,
-       super(key: key, child: child);
+       super(debugLocation: debugLocation, key: key, child: child);
 
   final FormState _formState;
 
@@ -199,14 +199,14 @@ class FormField<T> extends StatefulWidget {
   ///
   /// The [builder] argument must not be null.
   const FormField({
-    Key key,
+    Object debugLocation, Key key,
     @required this.builder,
     this.onSaved,
     this.validator,
     this.initialValue,
     this.autovalidate: false,
   }) : assert(builder != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// An optional method to call with the final value when the form is saved via
   /// Form.save().

@@ -60,11 +60,11 @@ import 'material.dart';
 class Card extends StatelessWidget {
   /// Creates a material design card.
   const Card({
-    Key key,
+    Object debugLocation, Key key,
     this.color,
     this.elevation: 2.0,
     this.child,
-  }) : super(key: key);
+  }) : super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;

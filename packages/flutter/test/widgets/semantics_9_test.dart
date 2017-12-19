@@ -137,7 +137,7 @@ void main() {
 }
 
 class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
-  const BoundaryBlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const BoundaryBlockSemantics({ Object debugLocation, Key key, Widget child }) : super(debugLocation: debugLocation, key: key, child: child);
 
   @override
   RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => new RenderBoundaryBlockSemantics();

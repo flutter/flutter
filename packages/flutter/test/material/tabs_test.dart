@@ -24,7 +24,7 @@ Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.lt
 }
 
 class StateMarker extends StatefulWidget {
-  const StateMarker({ Key key, this.child }) : super(key: key);
+  const StateMarker({ Object debugLocation, Key key, this.child }) : super(debugLocation: debugLocation, key: key);
 
   final Widget child;
 

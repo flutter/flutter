@@ -1345,10 +1345,10 @@ class _TimePickerDialog extends StatefulWidget {
   ///
   /// [initialTime] must not be null.
   const _TimePickerDialog({
-    Key key,
+    Object debugLocation, Key key,
     @required this.initialTime
   }) : assert(initialTime != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The time initially selected when the dialog is shown.
   final TimeOfDay initialTime;

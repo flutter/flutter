@@ -41,7 +41,7 @@ class TextFormField extends FormField<String> {
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
   TextFormField({
-    Key key,
+    Object debugLocation, Key key,
     this.controller,
     String initialValue: '',
     FocusNode focusNode,

@@ -137,7 +137,7 @@ class GestureDetector extends StatelessWidget {
   /// By default, gesture detectors contribute semantic information to the tree
   /// that is used by assistive technology.
   GestureDetector({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     this.onTapDown,
     this.onTapUp,
@@ -189,7 +189,7 @@ class GestureDetector extends StatelessWidget {
          }
          return true;
        }()),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -451,14 +451,14 @@ class RawGestureDetector extends StatefulWidget {
   /// that is used by assistive technology. This can be controlled using
   /// [excludeFromSemantics].
   const RawGestureDetector({
-    Key key,
+    Object debugLocation, Key key,
     this.child,
     this.gestures: const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics: false
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The widget below this widget in the tree.
   final Widget child;
@@ -725,10 +725,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
 class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
-    Key key,
+    Object debugLocation, Key key,
     Widget child,
     this.owner
-  }) : super(key: key, child: child);
+  }) : super(debugLocation: debugLocation, key: key, child: child);
 
   final RawGestureDetectorState owner;
 

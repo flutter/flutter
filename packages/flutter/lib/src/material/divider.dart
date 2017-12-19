@@ -28,12 +28,12 @@ class Divider extends StatelessWidget {
   ///
   /// The height must be positive.
   const Divider({
-    Key key,
+    Object debugLocation, Key key,
     this.height: 16.0,
     this.indent: 0.0,
     this.color
   }) : assert(height >= 0.0),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// The divider's vertical extent.
   ///

@@ -152,7 +152,7 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [style], [cursorColor], and [textAlign]
   /// arguments must not be null.
   EditableText({
-    Key key,
+    Object debugLocation, Key key,
     @required this.controller,
     @required this.focusNode,
     this.obscureText: false,
@@ -187,7 +187,7 @@ class EditableText extends StatefulWidget {
                  ..addAll(inputFormatters ?? const Iterable<TextInputFormatter>.empty())
              )
            : inputFormatters,
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   /// Controls the text being edited.
   final TextEditingController controller;
@@ -665,7 +665,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
 class _Editable extends LeafRenderObjectWidget {
   const _Editable({
-    Key key,
+    Object debugLocation, Key key,
     this.value,
     this.style,
     this.cursorColor,
@@ -683,7 +683,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.onSelectionChanged,
     this.onCaretChanged,
   }) : assert(textDirection != null),
-       super(key: key);
+       super(debugLocation: debugLocation, key: key);
 
   final TextEditingValue value;
   final TextStyle style;
