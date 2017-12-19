@@ -374,6 +374,5 @@ void main() {
     );
 
     semantics.dispose();
-
   });
 }
