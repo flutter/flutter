@@ -1296,7 +1296,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
 /// rectangle.
 ///
 /// A physical model layer casts a shadow based on its [elevation].
-class RenderPhysicalModel extends _RenderCustomClip<RRect> {
+class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   /// Creates a rounded-rectangular clip.
   ///
   /// The [color] is required.
@@ -1315,10 +1315,12 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
        assert(shadowColor != null),
        _shape = shape,
        _borderRadius = borderRadius,
-       _elevation = elevation,
-       _color = color,
-       _shadowColor = shadowColor,
-       super(child: child);
+       super(
+         child: child,
+         elevation: elevation,
+         color: color,
+         shadowColor: shadowColor
+       );
 
   /// The shape of the layer.
   ///
@@ -1350,6 +1352,218 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     _borderRadius = value;
     _markNeedsClip();
   }
+
+  @override
+  RRect get _defaultClip {
+    assert(hasSize);
+    assert(_shape != null);
+    switch (_shape) {
+      case BoxShape.rectangle:
+        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
+      case BoxShape.circle:
+        final Rect rect = Offset.zero & size;
+        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
+    }
+    return null;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      _updateClip();
+      final RRect offsetClipRRect = _clip.shift(offset);
+      final Rect offsetBounds = offsetClipRRect.outerRect;
+      final Path offsetClipPath = new Path()..addRRect(offsetClipRRect);
+      if (needsCompositing) {
+        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
+          clipPath: offsetClipPath,
+          elevation: elevation,
+          color: color,
+        );
+        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
+      } else {
+        final Canvas canvas = context.canvas;
+        if (elevation != 0.0) {
+          // The drawShadow call doesn't add the region of the shadow to the
+          // picture's bounds, so we draw a hardcoded amount of extra space to
+          // account for the maximum potential area of the shadow.
+          // TODO(jsimmons): remove this when Skia does it for us.
+          canvas.drawRect(
+            offsetBounds.inflate(20.0),
+            _RenderPhysicalModelBase._transparentPaint,
+          );
+          canvas.drawShadow(
+            offsetClipPath,
+            shadowColor,
+            elevation,
+            color.alpha != 0xFF,
+          );
+        }
+        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
+        canvas.save();
+        canvas.clipRRect(offsetClipRRect);
+        // We only use a new layer for non-rectangular clips, on the basis that
+        // rectangular clips won't need antialiasing. This is not really
+        // correct, because if we're e.g. rotated, rectangles will also be
+        // aliased. Unfortunately, it's too much of a performance win to err on
+        // the side of correctness here.
+        // TODO(ianh): Find a better solution.
+        if (!offsetClipRRect.isRect)
+          canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
+        super.paint(context, offset);
+        if (!offsetClipRRect.isRect)
+          canvas.restore();
+        canvas.restore();
+        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
+      }
+    }
+  }
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<BoxShape>('shape', shape));
+    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
+  }
+}
+
+/// Creates a physical model layer that clips its children to a [ShapeBorder].
+///
+/// A physical model layer casts a shadow based on its [elevation].
+///
+/// See also:
+///
+/// * [RenderPhysicalModel], which is optimized for rounded rectangles and
+///   circles.
+class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
+  /// Creates an arbitrary shape clip.
+  ///
+  /// The [color], [shape], and [textDirection] are required.
+  ///
+  /// The [shape], [elevation], [color], [textDirection] and [shadowColor] must
+  /// not be null.
+  RenderPhysicalShape({
+    RenderBox child,
+    @required ShapeBorder shape,
+    double elevation: 0.0,
+    @required Color color,
+    Color shadowColor: const Color(0xFF000000),
+    @required TextDirection textDirection,
+  }) : assert(shape != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       assert(textDirection != null),
+       _shape = shape,
+       _textDirection = textDirection,
+       super(
+         child: child,
+         elevation: elevation,
+         color: color,
+         shadowColor: shadowColor
+       );
+
+  /// The shape of the layer.
+  ShapeBorder get shape => _shape;
+  ShapeBorder _shape;
+  set shape(ShapeBorder value) {
+    assert(value != null);
+    if (shape == value)
+      return;
+    _shape = value;
+    _markNeedsClip();
+  }
+
+  /// The text direction to use for getting the outer path for [shape].
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (textDirection == value)
+      return;
+    _textDirection = value;
+    _markNeedsClip();
+  }
+
+  @override
+  Path get _defaultClip {
+    assert(hasSize);
+    return shape.getOuterPath(Offset.zero & size, textDirection: _textDirection);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null) {
+      _updateClip();
+      final Rect offsetBounds = offset & size;
+      if (needsCompositing) {
+        // TODO(amirh): implement this for Fuchsia.
+      } else {
+        final Canvas canvas = context.canvas;
+        final Path offsetPath = _defaultClip.shift(offset);
+        if (elevation != 0.0) {
+          // The drawShadow call doesn't add the region of the shadow to the
+          // picture's bounds, so we draw a hardcoded amount of extra space to
+          // account for the maximum potential area of the shadow.
+          // TODO(jsimmons): remove this when Skia does it for us.
+          canvas.drawRect(
+            offsetBounds.inflate(20.0),
+            _RenderPhysicalModelBase._transparentPaint,
+          );
+          canvas.drawShadow(
+            offsetPath,
+            shadowColor,
+            elevation,
+            color.alpha != 0xFF,
+          );
+        }
+        canvas.drawPath(offsetPath, new Paint()..color = color..style = PaintingStyle.fill);
+        canvas.saveLayer(offsetBounds, _RenderPhysicalModelBase._defaultPaint);
+        canvas.clipPath(offsetPath);
+        super.paint(context, offset);
+        canvas.restore();
+        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
+      }
+    }
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape));
+    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
+  }
+}
+
+/// A physical model layer casts a shadow based on its [elevation].
+///
+/// The concrete implementations [RenderPhysicalModel] and [RenderPhysicalShape]
+/// determines the actual shape of the physical model.
+abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  _RenderPhysicalModelBase({
+    @required RenderBox child,
+    @required double elevation,
+    @required Color color,
+    @required Color shadowColor,
+  }) : assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       _elevation = elevation,
+       _color = color,
+       _shadowColor = shadowColor,
+       super(child: child);
 
   /// The z-coordinate at which to place this material.
   double get elevation => _elevation;
@@ -1387,31 +1601,6 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     markNeedsPaint();
   }
 
-  @override
-  RRect get _defaultClip {
-    assert(hasSize);
-    assert(_shape != null);
-    switch (_shape) {
-      case BoxShape.rectangle:
-        return (borderRadius ?? BorderRadius.zero).toRRect(Offset.zero & size);
-      case BoxShape.circle:
-        final Rect rect = Offset.zero & size;
-        return new RRect.fromRectXY(rect, rect.width / 2, rect.height / 2);
-    }
-    return null;
-  }
-
-  @override
-  bool hitTest(HitTestResult result, { Offset position }) {
-    if (_clipper != null) {
-      _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
-        return false;
-    }
-    return super.hitTest(result, position: position);
-  }
-
   static final Paint _defaultPaint = new Paint();
   static final Paint _transparentPaint = new Paint()..color = const Color(0x00000000);
 
@@ -1421,62 +1610,8 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
   bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
 
   @override
-  void paint(PaintingContext context, Offset offset) {
-    if (child != null) {
-      _updateClip();
-      final RRect offsetClipRRect = _clip.shift(offset);
-      final Rect offsetBounds = offsetClipRRect.outerRect;
-      final Path offsetClipPath = new Path()..addRRect(offsetClipRRect);
-      if (needsCompositing) {
-        final PhysicalModelLayer physicalModel = new PhysicalModelLayer(
-          clipPath: offsetClipPath,
-          elevation: elevation,
-          color: color,
-        );
-        context.pushLayer(physicalModel, super.paint, offset, childPaintBounds: offsetBounds);
-      } else {
-        final Canvas canvas = context.canvas;
-        if (elevation != 0.0) {
-          // The drawShadow call doesn't add the region of the shadow to the
-          // picture's bounds, so we draw a hardcoded amount of extra space to
-          // account for the maximum potential area of the shadow.
-          // TODO(jsimmons): remove this when Skia does it for us.
-          canvas.drawRect(
-            offsetBounds.inflate(20.0),
-            _transparentPaint,
-          );
-          canvas.drawShadow(
-            offsetClipPath,
-            shadowColor,
-            elevation,
-            color.alpha != 0xFF,
-          );
-        }
-        canvas.drawRRect(offsetClipRRect, new Paint()..color = color);
-        canvas.save();
-        canvas.clipRRect(offsetClipRRect);
-        // We only use a new layer for non-rectangular clips, on the basis that
-        // rectangular clips won't need antialiasing. This is not really
-        // correct, because if we're e.g. rotated, rectangles will also be
-        // aliased. Unfortunately, it's too much of a performance win to err on
-        // the side of correctness here.
-        // TODO(ianh): Find a better solution.
-        if (!offsetClipRRect.isRect)
-          canvas.saveLayer(offsetBounds, _defaultPaint);
-        super.paint(context, offset);
-        if (!offsetClipRRect.isRect)
-          canvas.restore();
-        canvas.restore();
-        assert(context.canvas == canvas, 'canvas changed even though needsCompositing was false');
-      }
-    }
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<BoxShape>('shape', shape));
-    description.add(new DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
   }

@@ -717,6 +717,76 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   }
 }
 
+class PhysicalShape extends SingleChildRenderObjectWidget {
+  /// Creates a physical model with a rounded-rectangular clip.
+  ///
+  /// The [color] is required; physical things have a color.
+  ///
+  /// The [shape], [elevation], [color], and [shadowColor] must not be null.
+  const PhysicalShape({
+    Key key,
+    @required this.shape,
+    this.elevation: 0.0,
+    @required this.color,
+    this.shadowColor: const Color(0xFF000000),
+    Widget child,
+    this.textDirection,
+  }) : assert(shape != null),
+       assert(elevation != null),
+       assert(color != null),
+       assert(shadowColor != null),
+       super(key: key, child: child);
+
+  final ShapeBorder shape;
+
+  /// The z-coordinate at which to place this physical object.
+  final double elevation;
+
+  /// The background color.
+  final Color color;
+
+  final Color shadowColor;
+
+  /// The directionality of text.
+  ///
+  /// This affects how [shape]'s outer path is computed.
+  ///
+  /// Defaults to the ambient [Directionality], if any. If there is no ambient
+  /// [Directionality], then this must not be null.
+  final TextDirection textDirection;
+
+  @override
+  RenderPhysicalShape createRenderObject(BuildContext context) {
+    return new RenderPhysicalShape(
+      shape: shape,
+      elevation: elevation,
+      color: color,
+      shadowColor: shadowColor,
+      textDirection: textDirection ?? Directionality.of(context),
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
+    renderObject
+      ..shape = shape
+      ..elevation = elevation
+      ..color = color
+      ..shadowColor = shadowColor
+      ..textDirection = textDirection;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new EnumProperty<ShapeBorder>('shape', shape));
+    description.add(new DoubleProperty('elevation', elevation));
+    description.add(new DiagnosticsProperty<Color>('color', color));
+    description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
+  }
+}
+
 // POSITIONING AND SIZING NODES
 
 /// A widget that applies a transformation before painting its child.

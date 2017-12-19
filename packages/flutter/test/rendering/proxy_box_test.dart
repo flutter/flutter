@@ -91,4 +91,67 @@ void main() {
     expect(config.getActionHandler(SemanticsAction.scrollLeft), isNotNull);
     expect(config.getActionHandler(SemanticsAction.scrollRight), isNull);
   });
+
+  group('RenderPhysicalShape', () {
+    setUp(() {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    });
+
+    test('shape change triggers repaint', () {
+      final RenderPhysicalShape root = new RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        shape: const CircleBorder(),
+        textDirection: TextDirection.ltr,
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Same shape, no repaint.
+      root.shape = const CircleBorder();
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Different shape triggers repaint.
+      root.shape = const StadiumBorder();
+      expect(root.debugNeedsPaint, isTrue);
+    });
+
+    test('text direction change triggers repaint', () {
+      final RenderPhysicalShape root = new RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        shape: const CircleBorder(),
+        textDirection: TextDirection.ltr,
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Same direction, no repaint.
+      root.textDirection = TextDirection.ltr;
+      expect(root.debugNeedsPaint, isFalse);
+
+      // Different direction triggers repaint.
+      root.textDirection = TextDirection.rtl;
+      expect(root.debugNeedsPaint, isTrue);
+    });
+
+    test('compositing on non-Fuchsia', () {
+      final RenderPhysicalShape root = new RenderPhysicalShape(
+        color: const Color(0xffff00ff),
+        shape: const CircleBorder(),
+        textDirection: TextDirection.ltr,
+      );
+      layout(root, phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      // On non-Fuchsia platforms, Flutter draws its own shadows.
+      root.elevation = 1.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      root.elevation = 0.0;
+      pumpFrame(phase: EnginePhase.composite);
+      expect(root.needsCompositing, isFalse);
+
+      debugDefaultTargetPlatformOverride = null;
+    });
+  });
 }
