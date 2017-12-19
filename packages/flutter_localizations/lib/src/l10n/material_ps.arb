@@ -1,8 +1,8 @@
 {
   "scriptCategory": "tall",
   "timeOfDayFormat": "HH:mm",
-  "@anteMeridiemAbbreviation": { "notUsed": "Pashto time format does not use a.m. indicator" },
-  "@postMeridiemAbbreviation": { "notUsed": "Pashto time format does not use p.m. indicator" },
+  "@anteMeridiemAbbreviation": {"notUsed":"Pashto time format does not use a.m. indicator"},
+  "@postMeridiemAbbreviation": {"notUsed":"Pashto time format does not use p.m. indicator"},
   "openAppDrawerTooltip": "د پرانیستی نیینګ مینو",
   "backButtonTooltip": "شاته",
   "closeButtonTooltip": "بنده",
