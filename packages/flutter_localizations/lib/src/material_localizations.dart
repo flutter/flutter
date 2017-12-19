@@ -11,7 +11,7 @@ import 'package:intl/date_symbols.dart' as intl;
 import 'package:intl/date_symbol_data_custom.dart' as date_symbol_data_custom;
 import 'l10n/date_localizations.dart' as date_localizations;
 
-import 'l10n/localizations.dart';
+import 'l10n/localizations.dart' show TranslationBundle, translationBundleForLocale;
 import 'widgets_localizations.dart';
 
 /// Localized strings for the material widgets.
@@ -68,13 +68,11 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// function, rather than constructing this class directly.
   GlobalMaterialLocalizations(this.locale)
       : assert(locale != null),
-        this._localeName = _computeLocaleName(locale) {
+        _localeName = _computeLocaleName(locale) {
     _loadDateIntlDataIfNotLoaded();
 
-    if (localizations.containsKey(locale.languageCode))
-      _nameToValue.addAll(localizations[locale.languageCode]);
-    if (localizations.containsKey(_localeName))
-      _nameToValue.addAll(localizations[_localeName]);
+    _translationBundle = translationBundleForLocale(locale);
+    assert(_translationBundle != null);
 
     const String kMediumDatePattern = 'E, MMM\u00a0d';
     if (intl.DateFormat.localeExists(_localeName)) {
@@ -113,7 +111,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   final String _localeName;
 
-  final Map<String, String> _nameToValue = <String, String>{};
+  TranslationBundle _translationBundle;
 
   intl.NumberFormat _decimalFormat;
 
@@ -130,24 +128,6 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   static String _computeLocaleName(Locale locale) {
     final String localeName = locale.countryCode.isEmpty ? locale.languageCode : locale.toString();
     return intl.Intl.canonicalizedLocale(localeName);
-  }
-
-  // TODO(hmuller): the rules for mapping from an integer value to
-  // "one" or "two" etc. are locale specific and an additional "few" category
-  // is needed. See http://cldr.unicode.org/index/cldr-spec/plural-rules
-  String _nameToPluralValue(int count, String key) {
-    String text;
-    if (count == 0)
-      text = _nameToValue['${key}Zero'];
-    else if (count == 1)
-      text = _nameToValue['${key}One'];
-    else if (count == 2)
-      text = _nameToValue['${key}Two'];
-    else if (count > 2)
-      text = _nameToValue['${key}Many'];
-    text ??= _nameToValue['${key}Other'];
-    assert(text != null);
-    return text;
   }
 
   @override
@@ -242,45 +222,45 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get openAppDrawerTooltip => _nameToValue['openAppDrawerTooltip'];
+  String get openAppDrawerTooltip => _translationBundle.openAppDrawerTooltip;
 
   @override
-  String get backButtonTooltip => _nameToValue['backButtonTooltip'];
+  String get backButtonTooltip => _translationBundle.backButtonTooltip;
 
   @override
-  String get closeButtonTooltip => _nameToValue['closeButtonTooltip'];
+  String get closeButtonTooltip => _translationBundle.closeButtonTooltip;
 
   @override
-  String get deleteButtonTooltip => _nameToValue['deleteButtonTooltip'];
+  String get deleteButtonTooltip => _translationBundle.deleteButtonTooltip;
 
   @override
-  String get nextMonthTooltip => _nameToValue['nextMonthTooltip'];
+  String get nextMonthTooltip => _translationBundle.nextMonthTooltip;
 
   @override
-  String get previousMonthTooltip => _nameToValue['previousMonthTooltip'];
+  String get previousMonthTooltip => _translationBundle.previousMonthTooltip;
 
   @override
-  String get nextPageTooltip => _nameToValue['nextPageTooltip'];
+  String get nextPageTooltip => _translationBundle.nextPageTooltip;
 
   @override
-  String get previousPageTooltip => _nameToValue['previousPageTooltip'];
+  String get previousPageTooltip => _translationBundle.previousPageTooltip;
 
   @override
-  String get showMenuTooltip => _nameToValue['showMenuTooltip'];
+  String get showMenuTooltip => _translationBundle.showMenuTooltip;
 
   @override
   String aboutListTileTitle(String applicationName) {
-    final String text = _nameToValue['aboutListTileTitle'];
+    final String text = _translationBundle.aboutListTileTitle;
     return text.replaceFirst(r'$applicationName', applicationName);
   }
 
   @override
-  String get licensesPageTitle => _nameToValue['licensesPageTitle'];
+  String get licensesPageTitle => _translationBundle.licensesPageTitle;
 
   @override
   String pageRowsInfoTitle(int firstRow, int lastRow, int rowCount, bool rowCountIsApproximate) {
-    String text = rowCountIsApproximate ? _nameToValue['pageRowsInfoTitleApproximate'] : null;
-    text ??= _nameToValue['pageRowsInfoTitle'];
+    String text = rowCountIsApproximate ? _translationBundle.pageRowsInfoTitleApproximate : null;
+    text ??= _translationBundle.pageRowsInfoTitle;
     assert(text != null, 'A $locale localization was not found for pageRowsInfoTitle or pageRowsInfoTitleApproximate');
     // TODO(hansmuller): this could be more efficient.
     return text
@@ -290,55 +270,69 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get rowsPerPageTitle => _nameToValue['rowsPerPageTitle'];
+  String get rowsPerPageTitle => _translationBundle.rowsPerPageTitle;
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
-    return _nameToPluralValue(selectedRowCount, 'selectedRowCountTitle') // asserts on no match
-      .replaceFirst(r'$selectedRowCount', formatDecimal(selectedRowCount));
+    // TODO(hmuller): the rules for mapping from an integer value to
+    // "one" or "two" etc. are locale specific and an additional "few" category
+    // is needed. See http://cldr.unicode.org/index/cldr-spec/plural-rules
+    String text;
+    if (selectedRowCount == 0)
+      text = _translationBundle.selectedRowCountTitleZero;
+    else if (selectedRowCount == 1)
+      text = _translationBundle.selectedRowCountTitleOne;
+    else if (selectedRowCount == 2)
+      text = _translationBundle.selectedRowCountTitleTwo;
+    else if (selectedRowCount > 2)
+      text = _translationBundle.selectedRowCountTitleMany;
+    text ??= _translationBundle.selectedRowCountTitleOther;
+    assert(text != null);
+
+    return text.replaceFirst(r'$selectedRowCount', formatDecimal(selectedRowCount));
   }
 
   @override
-  String get cancelButtonLabel => _nameToValue['cancelButtonLabel'];
+  String get cancelButtonLabel => _translationBundle.cancelButtonLabel;
 
   @override
-  String get closeButtonLabel => _nameToValue['closeButtonLabel'];
+  String get closeButtonLabel => _translationBundle.closeButtonLabel;
 
   @override
-  String get continueButtonLabel => _nameToValue['continueButtonLabel'];
+  String get continueButtonLabel => _translationBundle.continueButtonLabel;
 
   @override
-  String get copyButtonLabel => _nameToValue['copyButtonLabel'];
+  String get copyButtonLabel => _translationBundle.copyButtonLabel;
 
   @override
-  String get cutButtonLabel => _nameToValue['cutButtonLabel'];
+  String get cutButtonLabel => _translationBundle.cutButtonLabel;
 
   @override
-  String get okButtonLabel => _nameToValue['okButtonLabel'];
+  String get okButtonLabel => _translationBundle.okButtonLabel;
 
   @override
-  String get pasteButtonLabel => _nameToValue['pasteButtonLabel'];
+  String get pasteButtonLabel => _translationBundle.pasteButtonLabel;
 
   @override
-  String get selectAllButtonLabel => _nameToValue['selectAllButtonLabel'];
+  String get selectAllButtonLabel => _translationBundle.selectAllButtonLabel;
 
   @override
-  String get viewLicensesButtonLabel => _nameToValue['viewLicensesButtonLabel'];
+  String get viewLicensesButtonLabel => _translationBundle.viewLicensesButtonLabel;
 
   @override
-  String get anteMeridiemAbbreviation => _nameToValue['anteMeridiemAbbreviation'];
+  String get anteMeridiemAbbreviation => _translationBundle.anteMeridiemAbbreviation;
 
   @override
-  String get postMeridiemAbbreviation => _nameToValue['postMeridiemAbbreviation'];
+  String get postMeridiemAbbreviation => _translationBundle.postMeridiemAbbreviation;
 
   @override
-  String get timePickerHourModeAnnouncement => _nameToValue['timePickerHourModeAnnouncement'];
+  String get timePickerHourModeAnnouncement => _translationBundle.timePickerHourModeAnnouncement;
 
   @override
-  String get timePickerMinuteModeAnnouncement => _nameToValue['timePickerMinuteModeAnnouncement'];
+  String get timePickerMinuteModeAnnouncement => _translationBundle.timePickerMinuteModeAnnouncement;
 
   @override
-  String get modalBarrierDismissLabel => _nameToValue['modalBarrierDismissLabel'];
+  String get modalBarrierDismissLabel => _translationBundle.modalBarrierDismissLabel;
 
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
@@ -358,7 +352,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   ///    short time pattern used in locale en_US
   @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
-    final String icuShortTimePattern = _nameToValue['timeOfDayFormat'];
+    final String icuShortTimePattern = _translationBundle.timeOfDayFormat;
 
     assert(() {
       if (!_icuTimeOfDayToEnum.containsKey(icuShortTimePattern)) {
@@ -382,7 +376,7 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
 
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
-  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_nameToValue['scriptCategory']);
+  TextTheme get localTextGeometry => MaterialTextGeometry.forScriptCategory(_translationBundle.scriptCategory);
 
   /// Creates an object that provides localized resource values for the
   /// for the widgets of the material library.
