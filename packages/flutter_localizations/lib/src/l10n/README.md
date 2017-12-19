@@ -123,6 +123,25 @@ the "Other" suffix. For example the English translations
 ```
 
 
+### scriptCategory and timeOfDayFormat
+
+The values of these resource IDs are not translations, they're keywords that
+help define an app's text theme and time picker layout respectively.
+
+The value of `timeOfDayFormat` defines how a time picker displayed by
+[showTimePicker()](https://docs.flutter.io/flutter/material/showTimePicker.html)
+formats and lays out its time controls. The value of `timeOfDayFormat` must be
+a string that matches one of the formats defined by
+https://docs.flutter.io/flutter/material/TimeOfDayFormat-class.html.
+
+The value of `scriptCategory` is based on the
+[Language categories reference](https://material.io/guidelines/style/typography.html#typography-language-categories-reference)
+section in the Material spec. The `scriptCategory` value is used when looking up
+the `TextTheme`, see the
+[MaterialTextGeometry](https://docs.flutter.io/flutter/material/MaterialTextGeometry/forScriptCategory.html)
+class.
+
+
 ### Generated file localizations.dart: all of the localizations as a Map
 
 If you look at the comment at the top of `localizations.dart` you'll
