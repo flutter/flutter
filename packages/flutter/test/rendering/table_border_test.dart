@@ -57,8 +57,8 @@ void main() {
     expect(border3.dimensions, const EdgeInsets.symmetric(horizontal: 1.0, vertical: 1.0));
     expect(border3.isUniform, isFalse);
     expect(border3.scale(0.0), new TableBorder.symmetric(
-      inside: const BorderSide(width: 0.0),
-      outside: const BorderSide(width: 0.0, color: const Color(0xFFFF0000)),
+      inside: const BorderSide(width: 0.0, style: BorderStyle.none),
+      outside: const BorderSide(width: 0.0, color: const Color(0xFFFF0000), style: BorderStyle.none),
     ));
   });
 
