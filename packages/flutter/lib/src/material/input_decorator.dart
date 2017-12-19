@@ -1077,7 +1077,6 @@ class _RenderDecoration extends RenderBox {
     _labelTransform = null;
     final _RenderDecorationLayout layout = _layout(constraints);
 
-    // TBD: if maxWidth is unconstrained then use intrinsicWidth
     final double overallWidth = constraints.maxWidth;
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
