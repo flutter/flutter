@@ -1114,7 +1114,6 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 ///   Widget build(BuildContext context) => new Container();
 ///
 /// }
-///
 /// ```
 class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   final Map<T, RouteAware> _listeners = <T, RouteAware>{};
@@ -1157,7 +1156,10 @@ class RouteObserver<T extends Route<dynamic>> extends NavigatorObserver {
   }
 }
 
-/// A interface that is aware of its current Route.
+/// An interface for objects that are aware of their current [Route].
+///
+/// This is used with [RouteObserver] to make a widget aware of changes to the
+/// [Navigator]'s session history.
 abstract class RouteAware {
   /// Called when the top route has been popped off, and the current route
   /// shows up.
