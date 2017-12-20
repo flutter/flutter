@@ -127,8 +127,6 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
   Widget build(BuildContext context) {
     return new NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
-      // TODO(ianh): Maybe we should try to collapse out these repaint
-      // boundaries when the scroll bars are invisible.
       child: new RepaintBoundary(
         child: new CustomPaint(
           foregroundPainter: _painter,

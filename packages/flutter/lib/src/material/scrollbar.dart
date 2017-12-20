@@ -139,8 +139,6 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     } else {
       return new NotificationListener<ScrollNotification>(
         onNotification: _handleScrollNotification,
-        // TODO(ianh): Maybe we should try to collapse out these repaint
-        // boundaries when the scroll bars are invisible.
         child: new RepaintBoundary(
           child: new CustomPaint(
             foregroundPainter: _materialPainter,
