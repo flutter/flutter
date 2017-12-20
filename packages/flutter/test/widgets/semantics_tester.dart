@@ -335,12 +335,20 @@ class SemanticsTester {
   @override
   String toString() => 'SemanticsTester for ${tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode}';
 
+  /// Returns all semantics nodes in the current semantics tree whose properties
+  /// match the non-null arguments.
+  ///
+  /// If multiple arguments are non-null, each of the returned nodes must match
+  /// on all of them.
+  ///
+  /// If `ancestor` is not null, only the descendants of it are returned.
   Iterable<SemanticsNode> nodesWith({
     String label,
     String value,
     TextDirection textDirection,
     List<SemanticsAction> actions,
     List<SemanticsFlags> flags,
+    SemanticsNode ancestor,
   }) {
     bool checkNode(SemanticsNode node) {
       if (label != null && node.label != label)
@@ -372,7 +380,11 @@ class SemanticsTester {
       node.visitChildren(visit);
       return true;
     }
-    visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
+    if (ancestor != null) {
+      visit(ancestor);
+    } else {
+      visit(tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode);
+    }
     return result;
   }
 
