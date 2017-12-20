@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -11,6 +10,7 @@ import 'debug.dart';
 import 'drawer_header.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
