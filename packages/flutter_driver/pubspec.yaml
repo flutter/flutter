@@ -54,7 +54,7 @@ dev_dependencies:
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
