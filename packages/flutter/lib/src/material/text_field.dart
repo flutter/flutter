@@ -466,10 +466,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       },
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
-        onTapDown: _handleTapDown,
+        //onTapDown: _handleTapDown,
         onTap: _handleTap,
-        onTapCancel: _handleTapCancel,
-        onLongPress: _handleLongPress,
+        //onTapCancel: _handleTapCancel,
+        //onLongPress: _handleLongPress,
         child: child,
         excludeFromSemantics: true,
       ),

@@ -1081,7 +1081,7 @@ class _RenderDecoration extends RenderBox {
     final double overallHeight = layout.containerHeight + layout.subtextHeight;
 
     if (container != null) {
-      BoxConstraints containerConstraints = new BoxConstraints.tightFor(
+      final BoxConstraints containerConstraints = new BoxConstraints.tightFor(
         height: layout.containerHeight,
         width: overallWidth - _boxSize(icon).width,
       );
