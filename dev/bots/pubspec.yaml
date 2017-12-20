@@ -2,12 +2,13 @@ name: tests_on_bots
 description: Scripts which run on bots.
 
 dependencies:
-  path: 1.5.1
   args: 0.13.7
+  http: 0.11.3+14
+  path: 1.5.1
 
 dev_dependencies:
-  test: 0.12.26
   mockito: 2.2.1
+  test: 0.12.26
 
   async: 1.13.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+13 # TRANSITIVE DEPENDENCY
@@ -17,7 +18,6 @@ dev_dependencies:
   convert: 2.0.1 # TRANSITIVE DEPENDENCY
   crypto: 2.0.2+1 # TRANSITIVE DEPENDENCY
   glob: 1.1.5 # TRANSITIVE DEPENDENCY
-  http: 0.11.3+14 # TRANSITIVE DEPENDENCY
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   io: 0.3.1 # TRANSITIVE DEPENDENCY
@@ -38,7 +38,7 @@ dev_dependencies:
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY
