@@ -718,7 +718,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
 }
 
 class PhysicalShape extends SingleChildRenderObjectWidget {
-  /// Creates a physical model with a rounded-rectangular clip.
+  /// Creates a physical model with an arbitrary shape clip.
   ///
   /// The [color] is required; physical things have a color.
   ///
@@ -745,6 +745,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The background color.
   final Color color;
 
+  /// The shadow color.
   final Color shadowColor;
 
   /// The directionality of text.

@@ -1292,7 +1292,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   }
 }
 
-/// Creates a physical model layer that clips its children to a rounded
+/// Creates a physical model layer that clips its child to a rounded
 /// rectangle.
 ///
 /// A physical model layer casts a shadow based on its [elevation].
@@ -1438,9 +1438,9 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 }
 
-/// Creates a physical model layer that clips its children to a [ShapeBorder].
+/// Creates a physical shape layer that clips its child to a [ShapeBorder].
 ///
-/// A physical model layer casts a shadow based on its [elevation].
+/// A physical shape layer casts a shadow based on its [elevation].
 ///
 /// See also:
 ///
@@ -1451,7 +1451,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   ///
   /// The [color], [shape], and [textDirection] are required.
   ///
-  /// The [shape], [elevation], [color], [textDirection] and [shadowColor] must
+  /// The [shape], [elevation], [color] and [shadowColor] must
   /// not be null.
   RenderPhysicalShape({
     RenderBox child,
@@ -1464,7 +1464,6 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
-       assert(textDirection != null),
        _shape = shape,
        _textDirection = textDirection,
        super(
@@ -1486,10 +1485,12 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   }
 
   /// The text direction to use for getting the outer path for [shape].
+  ///
+  /// [ShapeBorder]s can depend on the text direction (e.g having a "dent"
+  /// towards the start of the shape).
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
   set textDirection(TextDirection value) {
-    assert(value != null);
     if (textDirection == value)
       return;
     _textDirection = value;
@@ -1549,7 +1550,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
 /// A physical model layer casts a shadow based on its [elevation].
 ///
 /// The concrete implementations [RenderPhysicalModel] and [RenderPhysicalShape]
-/// determines the actual shape of the physical model.
+/// determine the actual shape of the physical model.
 abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   _RenderPhysicalModelBase({
