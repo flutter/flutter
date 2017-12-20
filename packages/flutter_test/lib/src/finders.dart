@@ -217,7 +217,7 @@ class CommonFinders {
   ///     );
   ///
   /// If the [matchRoot] argument is true then the widget(s) specified by [of]
-  /// will be matched along with the descendants.
+  /// will be matched along with the ancestors.
   Finder ancestor({ Finder of, Finder matching, bool matchRoot: false}) {
     return new _AncestorFinder(of, matching, matchRoot: matchRoot);
   }
@@ -616,6 +616,8 @@ class _AncestorFinder extends Finder {
 
   @override
   String get description {
+    if (matchRoot)
+      return 'ancestor ${ancestor.description} beginning with ${descendant.description}';
     return '${ancestor.description} which is an ancestor of ${descendant.description}';
   }
 
