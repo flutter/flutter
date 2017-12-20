@@ -169,7 +169,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   }
 }
 
-// Paints an InputDecorator's outline or underline border.
+/// Paints an InputDecorator's outline or underline border.
 class InputBorder extends ShapeBorder {
   InputBorder({
     this.borderType: InputBorderType.underline,
@@ -1772,22 +1772,22 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     double floatingLabelHeight;
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
-      contentPadding = EdgeInsets.zero;
+      contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
     } else {
       switch (decoration.borderType) {
         case InputBorderType.none:
         case InputBorderType.underline:
           // 4.0: the vertical gap between the inline elements and the floating label.
           floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
-          contentPadding = decoration.isDense
+          contentPadding = decoration.contentPadding ?? (decoration.isDense
             ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0);
+            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
             break;
         case InputBorderType.outline:
           floatingLabelHeight = 0.0;
-          contentPadding = decoration.isDense
+          contentPadding = decoration.contentPadding ?? (decoration.isDense
             ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-            : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0);
+            : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
             break;
           break;
         default:
@@ -1850,6 +1850,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.isDense: false,
+    this.contentPadding,
     this.hideDivider: false, // TBD: remove this, it's redundant vis borderType
     this.prefixIcon,
     this.prefixText,
@@ -1893,6 +1894,7 @@ class InputDecoration {
        errorText = null,
        errorStyle = null,
        isDense = false,
+       contentPadding = EdgeInsets.zero,
        isCollapsed = true,
        hideDivider = true,
        prefixIcon = null,
@@ -1978,6 +1980,8 @@ class InputDecoration {
   /// Defaults to false.
   final bool isDense;
 
+  final EdgeInsets contentPadding;
+
   /// Whether the decoration is the same size as the input field.
   ///
   /// A collapsed decoration cannot have [labelText], [errorText], an [icon], or
@@ -2051,6 +2055,7 @@ class InputDecoration {
     String errorText,
     TextStyle errorStyle,
     bool isDense,
+    EdgeInsets contentPadding,
     bool hideDivider,
     Widget prefixIcon,
     String prefixText,
@@ -2076,6 +2081,7 @@ class InputDecoration {
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
       isDense: isDense ?? this.isDense,
+      contentPadding: contentPadding ?? this.contentPadding,
       hideDivider: hideDivider ?? this.hideDivider,
       prefixIcon: prefixIcon ?? this.prefixIcon,
       prefixText: prefixText ?? this.prefixText,
@@ -2109,6 +2115,7 @@ class InputDecoration {
         && typedOther.errorText == errorText
         && typedOther.errorStyle == errorStyle
         && typedOther.isDense == isDense
+        && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
         && typedOther.hideDivider == hideDivider
         && typedOther.prefixIcon == prefixIcon
@@ -2139,6 +2146,7 @@ class InputDecoration {
         errorText,
         errorStyle,
         isDense,
+        contentPadding,
         isCollapsed,
         hideDivider,
         prefixIcon,
@@ -2172,6 +2180,8 @@ class InputDecoration {
       description.add('errorText: "$errorText"');
     if (isDense)
       description.add('isDense: $isDense');
+    if (contentPadding != null)
+      description.add('contentPadding: $contentPadding');
     if (isCollapsed)
       description.add('isCollapsed: $isCollapsed');
     if (hideDivider)
