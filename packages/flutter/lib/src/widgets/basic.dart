@@ -2993,6 +2993,8 @@ class PositionedDirectional extends StatelessWidget {
   final double height;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -5022,6 +5024,8 @@ class KeyedSubtree extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.

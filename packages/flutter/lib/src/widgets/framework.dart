@@ -29,6 +29,14 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { }
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
+// DOCUMENTATION TEMPLATES FOR THE WIDGET LIBRARY
+
+/// {@template flutter.widgets.child}
+/// This widget can only have one child. To lay out multiple children, let this
+/// widget's child be a widget such as [Row], [Column], or [Stack], which have a
+/// `children` property, and then provide the children to that widget.
+/// {@endtemplate}
+
 // KEYS
 
 /// A key that is only equal to itself.
@@ -1311,6 +1319,8 @@ abstract class ProxyWidget extends Widget {
   const ProxyWidget({ Key key, @required this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 }
 
@@ -1592,6 +1602,8 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

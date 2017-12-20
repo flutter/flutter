@@ -177,6 +177,8 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Whether the [child] is actually a placeholder.

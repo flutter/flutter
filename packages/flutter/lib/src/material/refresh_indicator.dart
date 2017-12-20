@@ -94,8 +94,12 @@ class RefreshIndicator extends StatefulWidget {
        assert(notificationPredicate != null),
        super(key: key);
 
+  /// The widget below this widget in the tree.
+  ///
   /// The refresh indicator will be stacked on top of this child. The indicator
   /// will appear when child's Scrollable descendant is over-scrolled.
+  ///
+  /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
   /// The distance from the child's top or bottom edge to where the refresh
