@@ -1440,7 +1440,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   _TimePickerMode _mode = _TimePickerMode.hour;
   _TimePickerMode _lastModeAnnounced;
+
+  TimeOfDay get selectedTime => _selectedTime;
   TimeOfDay _selectedTime;
+
   Timer _vibrateTimer;
   MaterialLocalizations localizations;
 
