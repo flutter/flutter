@@ -15,9 +15,24 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
+/// Used to define the appearance of an [InputDecorator]'s border.
+///
+/// An input decorator's border type is specified with
+/// [InputDecoration.borderType] and rendered by [InputBorder].
+///
+/// The value of [InputDecoration.borderType] also affects the internal
+/// layout of [InputDecorator], for example the default value of
+/// [InputDecoration.contentPadding] depends on the border type.
 enum InputBorderType {
+  /// A rounded rectangle outline that bounds the [InputDecorator] "container",
+  /// i.e. the area above the optional error, helper, and counter fields.
   outline,
+
+  /// A single line that separates the [InputDecorator] "container"
+  /// and the optional error, helper, and counter fields below it.
   underline,
+
+  /// A border is not drawn.
   none,
 }
 
@@ -169,7 +184,11 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   }
 }
 
-/// Paints an InputDecorator's outline or underline border.
+/// Paints an [InputDecorator]'s outline or underline border.
+///
+/// The border separates the input decorator's "container", i.e. the
+/// optionally filled area from the optional helper, error, and counter
+/// fields below and the optional icon to the left or right.
 class InputBorder extends ShapeBorder {
   InputBorder({
     this.borderType: InputBorderType.underline,

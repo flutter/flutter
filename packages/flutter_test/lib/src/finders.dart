@@ -199,7 +199,6 @@ class CommonFinders {
     return new _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
 
-<<<<<<< HEAD
   /// Finds widgets that are ancestors of the [of] parameter and that match
   /// the [matching] parameter.
   ///
