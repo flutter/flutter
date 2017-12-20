@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow $rowCount میں سے تقریباً",
   "rowsPerPageTitle": "قطاریں فی صفحہ:",
+  "tabLabel": "$tabIndex از $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount آئٹمز منتخب کیے گئے",
   "cancelButtonLabel": "منسوخ کریں",
   "closeButtonLabel": "بند کریں",

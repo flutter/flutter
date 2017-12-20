@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow - $lastRow 行（合計 $rowCount 行）",
   "pageRowsInfoTitleApproximate": "$firstRow – $lastRow 行（合計約 $rowCount 行）",
   "rowsPerPageTitle": "ページあたりの行数:",
+  "tabLabel": "$tabIndex 行（合計 $tabCount 行）",
   "selectedRowCountTitleOther": "$selectedRowCount 件のアイテムを選択中",
   "cancelButtonLabel": "キャンセル",
   "closeButtonLabel": "閉じる",

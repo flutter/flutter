@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",
   "rowsPerPageTitle": "ردیف در هر صفحه:",
+  "tabLabel": "$tabIndex از $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount مورد انتخاب شدند",
   "cancelButtonLabel": "لغو",
   "closeButtonLabel": "بستن",

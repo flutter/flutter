@@ -15,6 +15,7 @@
   "pageRowsInfoTitle": "$firstRow-$lastRow van $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow-$lastRow van ongeveer $rowCount",
   "rowsPerPageTitle": "Rijen per pagina:",
+  "tabLabel": "$tabIndex van $tabCount",
   "selectedRowCountTitleOne": "1 item geselecteerd",
   "selectedRowCountTitleOther": "$selectedRowCount items geselecteerd",
   "cancelButtonLabel": "ANNULEREN",

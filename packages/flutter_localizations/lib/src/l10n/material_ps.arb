@@ -17,6 +17,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow د $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow څخه $rowCount د",
   "rowsPerPageTitle": "د هرې پاڼې پاڼې:",
+  "tabLabel": "$tabIndex د $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount توکي غوره شوي",
   "cancelButtonLabel": "لغوه کول",
   "closeButtonLabel": "تړل",

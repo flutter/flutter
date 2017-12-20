@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow-$lastRow di $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow-$lastRow di circa $rowCount",
   "rowsPerPageTitle": "Righe per pagina:",
+  "tabLabel": "$tabIndex di $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount elementi selezionati",
   "cancelButtonLabel": "ANNULLA",
   "closeButtonLabel": "CHIUDI",
