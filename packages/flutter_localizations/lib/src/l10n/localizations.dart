@@ -118,7 +118,7 @@ class _Bundle_de extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow von $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow von etwa $rowCount';
   @override String get rowsPerPageTitle => r'Zeilen pro Seite:';
-  @override String get tabLabel => r'$tabIndex von $tabCount';
+  @override String get tabLabel => r'Tabulator $tabIndex von $tabCount';
   @override String get selectedRowCountTitleZero => r'Keine Objekte ausgewählt';
   @override String get selectedRowCountTitleOne => r'1 Element ausgewählt';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
