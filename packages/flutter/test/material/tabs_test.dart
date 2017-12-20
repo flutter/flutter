@@ -15,10 +15,17 @@ import '../rendering/recording_canvas.dart';
 import '../widgets/semantics_tester.dart';
 
 Widget boilerplate({ Widget child, TextDirection textDirection: TextDirection.ltr }) {
-  return new Directionality(
-    textDirection: textDirection,
-    child: new Material(
-      child: child,
+  return new Localizations(
+    locale: const Locale('en', 'US'),
+    delegates: <LocalizationsDelegate<dynamic>>[
+      DefaultMaterialLocalizations.delegate,
+      DefaultWidgetsLocalizations.delegate,
+    ],
+    child: new Directionality(
+      textDirection: textDirection,
+      child: new Material(
+        child: child,
+      ),
     ),
   );
 }
