@@ -35,7 +35,7 @@ class _AccountPictures extends StatelessWidget {
                 margin: const EdgeInsetsDirectional.only(start: 16.0),
                 width: 40.0,
                 height: 40.0,
-                child: picture
+                child: picture,
               );
             }).toList(),
           ),
@@ -45,7 +45,7 @@ class _AccountPictures extends StatelessWidget {
           child: new SizedBox(
             width: 72.0,
             height: 72.0,
-            child: currentAccountPicture
+            child: currentAccountPicture,
           ),
         ),
       ],
@@ -67,10 +67,14 @@ class _AccountDetails extends StatelessWidget {
   final VoidCallback onTap;
   final bool isOpen;
 
-  Widget addDropdownIcon(Widget line) {
-    final Widget icon = new Icon(
-      isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-      color: Colors.white
+  Widget _buildDropdownIcon(Widget line) {
+    final Widget icon = new Semantics(
+      container: true,
+      child: new Icon(
+        isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+        color: Colors.white,
+        semanticLabel: 'Show accounts button',
+      ),
     );
     return new Expanded(
       child: new Row(
@@ -86,21 +90,25 @@ class _AccountDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
-      style: theme.primaryTextTheme.body2,
-      overflow: TextOverflow.ellipsis,
-      child: accountName,
+    Widget accountNameLine = accountName == null ? null : new ExcludeSemantics(
+      child: new DefaultTextStyle(
+        style: theme.primaryTextTheme.body2,
+        overflow: TextOverflow.ellipsis,
+        child: accountName,
+      ),
     );
-    Widget accountEmailLine = accountEmail == null ? null : new DefaultTextStyle(
-      style: theme.primaryTextTheme.body1,
-      overflow: TextOverflow.ellipsis,
-      child: accountEmail,
+    Widget accountEmailLine = accountEmail == null ? null : new ExcludeSemantics(
+      child: new DefaultTextStyle(
+        style: theme.primaryTextTheme.body1,
+        overflow: TextOverflow.ellipsis,
+        child: accountEmail,
+      ),
     );
     if (onTap != null) {
       if (accountEmailLine != null)
-        accountEmailLine = addDropdownIcon(accountEmailLine);
+        accountEmailLine = _buildDropdownIcon(accountEmailLine);
       else
-        accountNameLine = addDropdownIcon(accountNameLine);
+        accountNameLine = _buildDropdownIcon(accountNameLine);
     }
 
     Widget accountDetails;
@@ -112,7 +120,7 @@ class _AccountDetails extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: (accountEmailLine != null && accountNameLine != null)
             ? <Widget>[accountNameLine, accountEmailLine]
-            : <Widget>[accountNameLine ?? accountEmailLine]
+            : <Widget>[accountNameLine ?? accountEmailLine],
         ),
       );
     }
@@ -147,7 +155,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.otherAccountsPictures,
     @required this.accountName,
     @required this.accountEmail,
-    this.onDetailsPressed
+    this.onDetailsPressed,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
