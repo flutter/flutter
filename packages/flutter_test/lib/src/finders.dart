@@ -202,9 +202,10 @@ class CommonFinders {
   /// Finds widgets that are ancestors of the [of] parameter and that match
   /// the [matching] parameter.
   ///
-  /// For example to test if a Text widget that contains 'faded' is the descendant
-  /// of an opacity widget with opacity 0.5:
+  /// Example:
   ///
+  ///     // Test if a Text widget that contains 'faded' is the
+  ///     // descendant of an Opacity widget with opacity 0.5:
   ///     expect(
   ///       tester.widget<Opacity>(
   ///         find.ancestor(
