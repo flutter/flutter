@@ -33,7 +33,7 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Выберите часы",
   "timePickerMinuteModeAnnouncement": "Выберите минуты",
-  "signedInLabel": "Авторизованный",
+  "signedInLabel": "Залогинен",
   "hideAccountsLabel": "Спрятать аккаунты",
   "showAccountsLabel": "Показать аккаунты",
   "modalBarrierDismissLabel": "Закрыть"
