@@ -451,19 +451,22 @@ class ListTile extends StatelessWidget {
     return new InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
-      child: new ConstrainedBox(
-        constraints: new BoxConstraints(minHeight: tileHeight),
-        child: new Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: new UnconstrainedBox(
-            constrainedAxis: Axis.horizontal,
-            child: new SafeArea(
-              top: false,
-              bottom: false,
-              child: new Row(children: children),
+      child: new Semantics(
+        selected: selected,
+        child: new ConstrainedBox(
+          constraints: new BoxConstraints(minHeight: tileHeight),
+          child: new Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: new UnconstrainedBox(
+              constrainedAxis: Axis.horizontal,
+              child: new SafeArea(
+                top: false,
+                bottom: false,
+                child: new Row(children: children),
+              ),
             ),
-          ),
-        )
+          )
+        ),
       ),
     );
   }
