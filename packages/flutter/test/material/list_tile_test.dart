@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../widgets/semantics_tester.dart';
 
 class TestIcon extends StatefulWidget {
   const TestIcon({ Key key }) : super(key: key);
@@ -322,4 +327,52 @@ void main() {
     expect(textColor(subtitleKey), theme.disabledColor);
   });
 
+  testWidgets('ListTile semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      new Material(
+        child: new Directionality(
+          textDirection: TextDirection.ltr,
+          child: new MediaQuery(
+            data: const MediaQueryData(),
+            child: new Column(
+              children: <Widget>[
+                const ListTile(
+                  title: const Text('one'),
+                ),
+                const ListTile(
+                  title: const Text('two'),
+                  selected: true,
+                ),
+                const ListTile(
+                  title: const Text('three'),
+                ),
+              ],
+            ),
+          ),
+        )
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      new TestSemantics.root(
+        children: <TestSemantics>[
+          new TestSemantics.rootChild(
+            label: 'one',
+          ),
+          new TestSemantics.rootChild(
+            label: 'two',
+            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+          ),
+          new TestSemantics.rootChild(
+            label: 'three',
+          ),
+        ]
+      ),
+      ignoreTransform: true, ignoreId: true, ignoreRect: true),
+    );
+
+    semantics.dispose();
+  });
 }
