@@ -92,17 +92,14 @@ class _AccountDetails extends StatelessWidget {
       rowChildren.add(
         new Expanded(
           flex: 1,
-          child: new ExcludeSemantics(
-            excluding: false,
-            child: new Padding(
-              padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
-              child: new Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: (accountEmailLine != null && accountNameLine != null)
-                    ? <Widget>[accountNameLine, accountEmailLine]
-                    : <Widget>[accountNameLine ?? accountEmailLine],
-              ),
+          child: new Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: (accountEmailLine != null && accountNameLine != null)
+                  ? <Widget>[accountNameLine, accountEmailLine]
+                  : <Widget>[accountNameLine ?? accountEmailLine],
             ),
           ),
         ),
@@ -113,23 +110,20 @@ class _AccountDetails extends StatelessWidget {
 
     if (onTap != null) {
       rowChildren.add(
-        new Semantics(
-          container: true,
-          child: new InkWell(
-            onTap: onTap,
-            child: new Semantics(
-              button: true,
-              child: new SizedBox(
-                height: kAccountDetailsHeight,
-                width: kAccountDetailsHeight,  // make it a square
-                child: new Center(
-                  child: new Icon(
-                    isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-                    color: Colors.white,
-                    semanticLabel: isOpen
-                      ? localizations.hideAccountsLabel
-                      : localizations.showAccountsLabel,
-                  ),
+        new InkWell(
+          onTap: onTap,
+          child: new Semantics(
+            button: true,
+            child: new SizedBox(
+              height: kAccountDetailsHeight,
+              width: kAccountDetailsHeight,  // make it a square
+              child: new Center(
+                child: new Icon(
+                  isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  color: Colors.white,
+                  semanticLabel: isOpen
+                    ? localizations.hideAccountsLabel
+                    : localizations.showAccountsLabel,
                 ),
               ),
             ),

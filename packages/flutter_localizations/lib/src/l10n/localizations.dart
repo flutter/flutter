@@ -301,7 +301,7 @@ class _Bundle_fr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Sélectionner une heure';
   @override String get timePickerMinuteModeAnnouncement => r'Sélectionner des minutes';
-  @override String get signedInLabel => r'Signé';
+  @override String get signedInLabel => r'Connecté';
   @override String get hideAccountsLabel => r'Masquer les comptes';
   @override String get showAccountsLabel => r'Afficher les comptes';
   @override String get modalBarrierDismissLabel => r'Ignorer';
@@ -460,7 +460,7 @@ class _Bundle_ja extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'時間を選択';
   @override String get timePickerMinuteModeAnnouncement => r'分を選択';
-  @override String get signedInLabel => r'署名された';
+  @override String get signedInLabel => r'ログイン中';
   @override String get hideAccountsLabel => r'アカウントを隠す';
   @override String get showAccountsLabel => r'アカウントを表示する';
   @override String get modalBarrierDismissLabel => r'閉じる';
@@ -702,7 +702,7 @@ class _Bundle_ru extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Выберите часы';
   @override String get timePickerMinuteModeAnnouncement => r'Выберите минуты';
-  @override String get signedInLabel => r'Авторизованный';
+  @override String get signedInLabel => r'Залогинен';
   @override String get hideAccountsLabel => r'Спрятать аккаунты';
   @override String get showAccountsLabel => r'Показать аккаунты';
   @override String get modalBarrierDismissLabel => r'Закрыть';
@@ -782,7 +782,7 @@ class _Bundle_tr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'ÖS';
   @override String get timePickerHourModeAnnouncement => r'Saati seçin';
   @override String get timePickerMinuteModeAnnouncement => r'Dakikayı seçin';
-  @override String get signedInLabel => r'Giriş yapıldı';
+  @override String get signedInLabel => r'Yetkili';
   @override String get hideAccountsLabel => r'Hesapları gizle';
   @override String get showAccountsLabel => r'Hesapları göster';
   @override String get modalBarrierDismissLabel => r'Reddet';

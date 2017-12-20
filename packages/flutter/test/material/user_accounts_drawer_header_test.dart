@@ -230,14 +230,10 @@ void main() {
                   textDirection: TextDirection.ltr,
                 ),
                 new TestSemantics(
-                  children: <TestSemantics>[
-                    new TestSemantics(
-                      flags: <SemanticsFlags>[SemanticsFlags.isButton],
-                      actions: <SemanticsAction>[SemanticsAction.tap],
-                      label: r'Show accounts',
-                      textDirection: TextDirection.ltr,
-                    ),
-                  ],
+                  flags: <SemanticsFlags>[SemanticsFlags.isButton],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: r'Show accounts',
+                  textDirection: TextDirection.ltr,
                 ),
               ],
             ),
