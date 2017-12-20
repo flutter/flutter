@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "오후",
   "timePickerHourModeAnnouncement": "시간 선택",
   "timePickerMinuteModeAnnouncement": "분 선택",
+  "signedInLabel": "로그인 함",
+  "hideAccountsLabel": "계정 숨기기",
+  "showAccountsLabel": "계정 표시",
   "modalBarrierDismissLabel": "버리다"
 }

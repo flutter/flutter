@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "گھنٹے منتخب کریں",
   "timePickerMinuteModeAnnouncement": "منٹ منتخب کریں",
+  "signedInLabel": "سائن ان",
+  "hideAccountsLabel": "اکاؤنٹس چھپائیں",
+  "showAccountsLabel": "اکاؤنٹس دکھائیں",
   "modalBarrierDismissLabel": "برطرف"
 }

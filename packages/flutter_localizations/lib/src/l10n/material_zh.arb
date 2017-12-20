@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "下午",
   "timePickerHourModeAnnouncement": "选择小时",
   "timePickerMinuteModeAnnouncement": "选择分钟",
+  "signedInLabel": "登录",
+  "hideAccountsLabel": "隐藏帐户",
+  "showAccountsLabel": "显示帐户",
   "modalBarrierDismissLabel": "关闭"
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -73,6 +74,7 @@ class _AccountDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
       style: theme.primaryTextTheme.body2,
       overflow: TextOverflow.ellipsis,
@@ -125,8 +127,8 @@ class _AccountDetails extends StatelessWidget {
                     isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
                     color: Colors.white,
                     semanticLabel: isOpen
-                      ? 'Hide accounts'
-                      : 'Show accounts',
+                      ? localizations.hideAccountsLabel
+                      : localizations.showAccountsLabel,
                   ),
                 ),
               ),

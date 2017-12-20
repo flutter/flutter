@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "pm",
   "timePickerHourModeAnnouncement": "Uren selecteren",
   "timePickerMinuteModeAnnouncement": "Minuten selecteren",
+  "signedInLabel": "Ingelogd",
+  "hideAccountsLabel": "Verberg accounts",
+  "showAccountsLabel": "Toon accounts",
   "modalBarrierDismissLabel": "ontslaan"
 }

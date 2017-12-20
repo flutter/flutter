@@ -334,6 +334,15 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   @override
   String get modalBarrierDismissLabel => _translationBundle.modalBarrierDismissLabel;
 
+  @override
+  String get signedInLabel => _translationBundle.signedInLabel;
+
+  @override
+  String get hideAccountsLabel => _translationBundle.hideAccountsLabel;
+
+  @override
+  String get showAccountsLabel => _translationBundle.showAccountsLabel;
+
   /// The [TimeOfDayFormat] corresponding to one of the following supported
   /// patterns:
   ///

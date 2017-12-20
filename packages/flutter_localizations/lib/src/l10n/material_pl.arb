@@ -32,5 +32,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Wybierz godziny",
   "timePickerMinuteModeAnnouncement": "Wybierz minuty",
+  "signedInLabel": "Zapisany",
+  "hideAccountsLabel": "Ukryj konta",
+  "showAccountsLabel": "Pokaż konta",
   "modalBarrierDismissLabel": "oddalić"
 }
