@@ -62,12 +62,7 @@ void main() {
     });
 
     tearDown(() async {
-      // On Windows, the directory is locked and not able to be deleted, because it is a
-      // temporary directory. So we just leave some (very small, because we're not actually
-      // building archives here) trash around to be deleted at the next reboot.
-      if (!Platform.isWindows) {
-        await tmpDir.delete(recursive: true);
-      }
+      await tmpDir.delete(recursive: true);
     });
 
     test('sets PUB_CACHE properly', () async {
@@ -75,7 +70,9 @@ void main() {
       preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
       _answerWithResults();
       results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      await preparer.createArchive('master');
+      preparer.checkoutFlutter('master');
+      preparer.prepareArchive();
+      preparer.createArchive();
       expect(
         verify(runner.call(
           captureAny,
@@ -93,17 +90,14 @@ void main() {
       preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
       _answerWithResults();
       results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      await preparer.createArchive('master');
+      preparer.checkoutFlutter('master');
+      preparer.prepareArchive();
+      preparer.createArchive();
       final List<String> commands = <String>[
         '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
         '$gitExe reset --hard master',
         '$gitExe remote remove origin',
         '$gitExe remote add origin https://github.com/flutter/flutter.git',
-      ];
-      if (Platform.isWindows) {
-        commands.add('$zipExe x ${path.join(tmpDir.path, 'mingit.zip')}');
-      }
-      commands.addAll(<String>[
         '$flutterExe doctor',
         '$flutterExe update-packages',
         '$flutterExe precache',
@@ -113,7 +107,7 @@ void main() {
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
         '$gitExe clean -f -X **/.packages',
         '$tarExe cJf ${path.join(tmpDir.path, 'flutter_master.tar.xz')} flutter',
-      ]);
+      ];
       int step = 0;
       for (String command in commands) {
         _verifyCommand(args[step++], command);
@@ -125,17 +119,14 @@ void main() {
       preparer = new ArchiveCreator(tmpDir, outputFile, runner: runner);
       _answerWithResults();
       results = <MockProcessResult>[new MockProcessResult('deadbeef\n', '', 0)];
-      await preparer.createArchive('master');
+      preparer.checkoutFlutter('master');
+      preparer.prepareArchive();
+      preparer.createArchive();
       final List<String> commands = <String>[
         '$gitExe clone -b master https://chromium.googlesource.com/external/github.com/flutter/flutter',
         '$gitExe reset --hard master',
         '$gitExe remote remove origin',
         '$gitExe remote add origin https://github.com/flutter/flutter.git',
-      ];
-      if (Platform.isWindows) {
-        commands.add('$zipExe x ${path.join(tmpDir.path, 'mingit.zip')}');
-      }
-      commands.addAll(<String>[
         '$flutterExe doctor',
         '$flutterExe update-packages',
         '$flutterExe precache',
@@ -144,7 +135,7 @@ void main() {
         '$flutterExe create --template=package ${path.join(tmpDir.path, 'create_package')}',
         '$flutterExe create --template=plugin ${path.join(tmpDir.path, 'create_plugin')}',
         '$gitExe clean -f -X **/.packages',
-      ]);
+      ];
       if (Platform.isWindows) {
         commands.add('$zipExe a -tzip -mx=9 ${path.join(tmpDir.path, 'flutter_master.zip')} flutter');
       } else {
