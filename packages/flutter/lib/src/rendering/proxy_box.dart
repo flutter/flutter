@@ -3317,7 +3317,8 @@ class RenderBlockSemantics extends RenderProxyBox {
   /// order.
   RenderBlockSemantics({ RenderBox child, bool blocking: true, }) : _blocking = blocking, super(child);
 
-  /// Whether this render object is blocking semantics from the semantic tree.
+  /// Whether this render object is blocking semantics of previously painted
+  /// [RenderObject]s below a common semantics boundary from the semantic tree.
   bool get blocking => _blocking;
   bool _blocking;
   set blocking(bool value) {

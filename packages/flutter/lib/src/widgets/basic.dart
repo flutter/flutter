@@ -4966,7 +4966,8 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
   /// it in the same semantic container.
   const BlockSemantics({ Key key, this.blocking: true, Widget child }) : super(key: key, child: child);
 
-  /// Whether this widget is blocking semantics in the semantics tree.
+  /// Whether this widget is blocking semantics of all widget that were painted
+  /// before it in the same semantic container.
   final bool blocking;
 
   @override
