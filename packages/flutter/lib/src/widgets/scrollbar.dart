@@ -170,6 +170,12 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   @override
+  void dispose() {
+    fadeoutOpacityAnimation.removeListener(notifyListeners);
+    super.dispose();
+  }
+
+  @override
   void paint(Canvas canvas, Size size) {
     if (_lastAxisDirection == null
         || _lastMetrics == null
