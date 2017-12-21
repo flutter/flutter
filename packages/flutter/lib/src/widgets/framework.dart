@@ -857,6 +857,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
 ///    calls to [setState] in [didUpdateWidget] are redundant.
+///  * During development, if a hot reload occurs (whether initiated from the
+///    command line `flutter` tool by pressing `r`, or from an IDE), the
+///    [reassemble] method is called. This provides an opportunity to
+///    reinitialize any data that was prepared in the [initState] method.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
 ///    or [Widget.key]), the framework calls the [deactivate] method. Subclasses
@@ -994,7 +998,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// Called whenever the application is reassembled during debugging.
+  /// Called whenever the application is reassembled during debugging, for
+  /// example during hot reload.
   ///
   /// This method should rerun any initialization logic that depends on global
   /// state, for example, image loading from asset bundles (since the asset
@@ -2001,7 +2006,7 @@ abstract class BuildContext {
 /// This class tracks which widgets need rebuilding, and handles other tasks
 /// that apply to widget trees as a whole, such as managing the inactive element
 /// list for the tree and triggering the "reassemble" command when necessary
-/// during debugging.
+/// during hot reload when debugging.
 ///
 /// The main build owner is typically owned by the [WidgetsBinding], and is
 /// driven from the operating system along with the rest of the
@@ -2365,7 +2370,8 @@ class BuildOwner {
 
   /// Cause the entire subtree rooted at the given [Element] to be entirely
   /// rebuilt. This is used by development tools when the application code has
-  /// changed, to cause the widget tree to pick up any changed implementations.
+  /// changed and is being hot-reloaded, to cause the widget tree to pick up any
+  /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
   void reassemble(Element root) {
