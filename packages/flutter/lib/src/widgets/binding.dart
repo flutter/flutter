@@ -459,7 +459,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+  Future<Null> _handleSystemMessage(Object systemMessage) async {
+    final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
       case 'memoryPressure':

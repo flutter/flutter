@@ -373,11 +373,10 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
     );
   }
   // Verify that the imports are well-ordered.
-  final Map<String, Set<String>> dependencyMap = new Map<String, Set<String>>.fromIterable(
-    directories,
-    key: (String directory) => directory,
-    value: (String directory) => _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation'),
-  );
+  final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
+  for (String directory in directories) {
+    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+  }
   for (String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
