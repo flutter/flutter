@@ -168,6 +168,8 @@ class ImageConfiguration {
 /// The type argument does not have to be specified when using the type as an
 /// argument (where any image provider is acceptable).
 ///
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+///
 /// ## Sample code
 ///
 /// The following shows the code required to write a widget that fully conforms
