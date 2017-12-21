@@ -45,6 +45,8 @@ class MaterialSlice extends MergeableMaterialItem {
        super(key);
 
   /// The contents of this slice.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

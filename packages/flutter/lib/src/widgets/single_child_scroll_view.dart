@@ -112,6 +112,8 @@ class SingleChildScrollView extends StatelessWidget {
   final ScrollPhysics physics;
 
   /// The widget that scrolls.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   AxisDirection _getDirection(BuildContext context) {

@@ -86,7 +86,7 @@ class GlowingOverscrollIndicator extends StatefulWidget {
 
   /// The color of the glow. The alpha channel is ignored.
   final Color color;
-  
+
   /// A check that specifies whether a [ScrollNotification] should be
   /// handled by this widget.
   ///
@@ -94,9 +94,10 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   /// else for more complicated layouts.
   final ScrollNotificationPredicate notificationPredicate;
 
-  /// The subtree to place inside the overscroll indicator. This should include
-  /// a source of [ScrollNotification] notifications, typically a [Scrollable]
-  /// widget.
+  /// The widget below this widget in the tree.
+  ///
+  /// The overscroll indicator will paint on top of this child. This child (and its
+  /// subtree) should include a source of [ScrollNotification] notifications.
   ///
   /// Typically a [GlowingOverscrollIndicator] is created by a
   /// [ScrollBehavior.buildViewportChrome] method, in which case
