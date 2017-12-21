@@ -26,6 +26,8 @@ class SemanticsDebugger extends StatefulWidget {
   const SemanticsDebugger({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

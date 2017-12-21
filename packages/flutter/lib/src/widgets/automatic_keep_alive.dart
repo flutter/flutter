@@ -31,6 +31,8 @@ class AutomaticKeepAlive extends StatefulWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

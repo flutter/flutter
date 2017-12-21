@@ -389,6 +389,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// container will expand to fill all available space in its parent, unless
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Align the [child] within the container.
@@ -523,6 +525,8 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final EdgeInsetsGeometry padding;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -597,6 +601,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final AlignmentGeometry alignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -684,6 +690,8 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -805,6 +813,8 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -911,6 +921,8 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target opacity.
@@ -978,6 +990,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target text style.
@@ -1088,6 +1102,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The type of shape.

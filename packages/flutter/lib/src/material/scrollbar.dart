@@ -33,10 +33,12 @@ class Scrollbar extends StatefulWidget {
     @required this.child,
   }) : super(key: key);
 
-  /// The subtree to place inside the [Scrollbar].
+  /// The widget below this widget in the tree.
   ///
-  /// This should include a source of [ScrollNotification] notifications,
-  /// typically a [Scrollable] widget.
+  /// The scrollbar will be stacked on top of this child. This child (and its
+  /// subtree) should include a source of [ScrollNotification] notifications.
+  ///
+  /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
   @override

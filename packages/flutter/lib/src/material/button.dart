@@ -249,6 +249,8 @@ class MaterialButton extends StatefulWidget {
   final VoidCallback onPressed;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Whether the button is enabled or disabled. Buttons are disabled by default. To

@@ -723,6 +723,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.
