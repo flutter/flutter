@@ -65,19 +65,19 @@ void main() {
 
       TestRender middle;
       final TestRender root = new TestRender(
-        action: SemanticsAction.tap,
+        hasTapAction: true,
         isSemanticBoundary: true,
         child: new TestRender(
-          action: SemanticsAction.longPress,
+          hasLongPressAction: true,
           isSemanticBoundary: false,
           child: middle = new TestRender(
-            action: SemanticsAction.scrollLeft,
+            hasScrollLeftAction: true,
             isSemanticBoundary: false,
             child: new TestRender(
-              action: SemanticsAction.scrollRight,
+              hasScrollRightAction: true,
               isSemanticBoundary: false,
               child: new TestRender(
-                action: SemanticsAction.scrollUp,
+                hasScrollUpAction: true,
                 isSemanticBoundary: true,
               )
             )
@@ -91,7 +91,9 @@ void main() {
       int expectedActions = SemanticsAction.tap.index | SemanticsAction.longPress.index | SemanticsAction.scrollLeft.index | SemanticsAction.scrollRight.index;
       expect(root.debugSemantics.getSemanticsData().actions, expectedActions);
 
-      middle.action = SemanticsAction.scrollDown;
+      middle
+        ..hasScrollLeftAction = false
+        ..hasScrollDownAction = true;
       middle.markNeedsSemanticsUpdate();
 
       pumpFrame(phase: EnginePhase.flushSemantics);
@@ -204,9 +206,9 @@ void main() {
 
     final SemanticsConfiguration config = new SemanticsConfiguration()
       ..isMergingSemanticsOfDescendants = true
-      ..addAction(SemanticsAction.scrollUp, () { })
-      ..addAction(SemanticsAction.longPress, () { })
-      ..addAction(SemanticsAction.showOnScreen, () { })
+      ..onScrollUp = () { }
+      ..onLongPress = () { }
+      ..onShowOnScreen = () { }
       ..isChecked = false
       ..isSelected = true
       ..isButton = true
@@ -237,22 +239,128 @@ void main() {
       'SemanticsData(Rect.fromLTRB(50.0, 10.0, 70.0, 40.0), [10.0,0.0,0.0,0.0; 0.0,10.0,0.0,0.0; 0.0,0.0,1.0,0.0; 0.0,0.0,0.0,1.0])',
     );
   });
+
+  test('SemanticsConfiguration getter/setter', () {
+    final SemanticsConfiguration config = new SemanticsConfiguration();
+
+    expect(config.isSemanticBoundary, isFalse);
+    expect(config.isButton, isFalse);
+    expect(config.isMergingSemanticsOfDescendants, isFalse);
+    expect(config.isChecked, isFalse);
+    expect(config.isSelected, isFalse);
+    expect(config.isBlockingSemanticsOfPreviouslyPaintedNodes, isFalse);
+    expect(config.isFocused, isFalse);
+    expect(config.isMergingDescendantsIntoOneNode, isFalse);
+    expect(config.isTextField, isFalse);
+
+    expect(config.onShowOnScreen, isNull);
+    expect(config.onScrollDown, isNull);
+    expect(config.onScrollUp, isNull);
+    expect(config.onScrollLeft, isNull);
+    expect(config.onScrollRight, isNull);
+    expect(config.onLongPress, isNull);
+    expect(config.onDecrease, isNull);
+    expect(config.onIncrease, isNull);
+    expect(config.onMoveCursorForwardByCharacter, isNull);
+    expect(config.onMoveCursorBackwardByCharacter, isNull);
+    expect(config.onTap, isNull);
+
+    config.isSemanticBoundary = true;
+    config.isButton = true;
+    config.isMergingSemanticsOfDescendants = true;
+    config.isChecked = true;
+    config.isSelected = true;
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+    config.isFocused = true;
+    config.isMergingDescendantsIntoOneNode = true;
+    config.isTextField = true;
+
+    final VoidCallback onShowOnScreen = () { };
+    final VoidCallback onScrollDown = () { };
+    final VoidCallback onScrollUp = () { };
+    final VoidCallback onScrollLeft = () { };
+    final VoidCallback onScrollRight = () { };
+    final VoidCallback onLongPress = () { };
+    final VoidCallback onDecrease = () { };
+    final VoidCallback onIncrease = () { };
+    final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
+    final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
+    final VoidCallback onTap = () { };
+
+    config.onShowOnScreen = onShowOnScreen;
+    config.onScrollDown = onScrollDown;
+    config.onScrollUp = onScrollUp;
+    config.onScrollLeft = onScrollLeft;
+    config.onScrollRight = onScrollRight;
+    config.onLongPress = onLongPress;
+    config.onDecrease = onDecrease;
+    config.onIncrease = onIncrease;
+    config.onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter;
+    config.onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter;
+    config.onTap = onTap;
+
+    expect(config.isSemanticBoundary, isTrue);
+    expect(config.isButton, isTrue);
+    expect(config.isMergingSemanticsOfDescendants, isTrue);
+    expect(config.isChecked, isTrue);
+    expect(config.isSelected, isTrue);
+    expect(config.isBlockingSemanticsOfPreviouslyPaintedNodes, isTrue);
+    expect(config.isFocused, isTrue);
+    expect(config.isMergingDescendantsIntoOneNode, isTrue);
+    expect(config.isTextField, isTrue);
+
+    expect(config.onShowOnScreen, same(onShowOnScreen));
+    expect(config.onScrollDown, same(onScrollDown));
+    expect(config.onScrollUp, same(onScrollUp));
+    expect(config.onScrollLeft, same(onScrollLeft));
+    expect(config.onScrollRight, same(onScrollRight));
+    expect(config.onLongPress, same(onLongPress));
+    expect(config.onDecrease, same(onDecrease));
+    expect(config.onIncrease, same(onIncrease));
+    expect(config.onMoveCursorForwardByCharacter, same(onMoveCursorForwardByCharacter));
+    expect(config.onMoveCursorBackwardByCharacter, same(onMoveCursorBackwardByCharacter));
+    expect(config.onTap, same(onTap));
+  });
 }
 
 class TestRender extends RenderProxyBox {
 
-  TestRender({ this.action, this.isSemanticBoundary, RenderObject child }) : super(child);
+  TestRender({
+    this.hasTapAction: false,
+    this.hasLongPressAction: false,
+    this.hasScrollLeftAction: false,
+    this.hasScrollRightAction: false,
+    this.hasScrollUpAction: false,
+    this.hasScrollDownAction: false,
+    this.isSemanticBoundary,
+    RenderObject child
+  }) : super(child);
 
-  final bool isSemanticBoundary;
+  bool hasTapAction;
+  bool hasLongPressAction;
+  bool hasScrollLeftAction;
+  bool hasScrollRightAction;
+  bool hasScrollUpAction;
+  bool hasScrollDownAction;
+  bool isSemanticBoundary;
 
-  SemanticsAction action;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
 
-    config
-      ..isSemanticBoundary = isSemanticBoundary
-      ..addAction(action, () { });
+    config.isSemanticBoundary = isSemanticBoundary;
+    if (hasTapAction)
+      config.onTap = () { };
+    if (hasLongPressAction)
+      config.onLongPress = () { };
+    if (hasScrollLeftAction)
+      config.onScrollLeft = () { };
+    if (hasScrollRightAction)
+      config.onScrollRight = () { };
+    if (hasScrollUpAction)
+      config.onScrollUp = () { };
+    if (hasScrollDownAction)
+      config.onScrollDown = () { };
   }
 }

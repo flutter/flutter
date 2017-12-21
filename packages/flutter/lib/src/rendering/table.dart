@@ -1114,13 +1114,15 @@ class RenderTable extends RenderBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    Canvas canvas;
     assert(_children.length == rows * columns);
-    if (rows * columns == 0)
+    if (rows * columns == 0) {
+      final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, 0.0);
+      border.paint(context.canvas, borderRect, rows: const <double>[], columns: const <double>[]);
       return;
+    }
     assert(_rowTops.length == rows + 1);
-    canvas = context.canvas;
     if (_rowDecorations != null) {
+      final Canvas canvas = context.canvas;
       for (int y = 0; y < rows; y += 1) {
         if (_rowDecorations.length <= y)
           break;
@@ -1148,7 +1150,7 @@ class RenderTable extends RenderBox {
       // if the rows underflow. We always force the columns to fill the width of
       // the render object, which means the columns cannot underflow.
       final Rect borderRect = new Rect.fromLTWH(offset.dx, offset.dy, size.width, _rowTops.last);
-      final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 2);
+      final Iterable<double> rows = _rowTops.getRange(1, _rowTops.length - 1);
       final Iterable<double> columns = _columnLefts.skip(1);
       border.paint(context.canvas, borderRect, rows: rows, columns: columns);
     }
