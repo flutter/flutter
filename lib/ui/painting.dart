@@ -16,6 +16,11 @@ part of dart.ui;
 // Painting APIs will also warn about arguments representing NaN coordinates,
 // which can not be rendered by Skia.
 
+// Update this list when changing the list of supported codecs.
+/// {@template flutter.dart:ui.imageFormats}
+/// JPEG, PNG, GIF, Animated GIF, WebP, Animated WebP, BMP, and WBMP
+/// {@endtemplate}
+
 bool _rectIsValid(Rect rect) {
   assert(rect != null, 'Rect argument was null.');
   assert(!rect._value.any((double value) => value.isNaN), 'Rect argument contained a NaN value.');
@@ -926,6 +931,8 @@ abstract class Codec extends NativeFieldWrapperClass2 {
 ///
 /// [list] is the binary image data (e.g a PNG or GIF binary data).
 /// The data can be for either static or animated images.
+///
+/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
