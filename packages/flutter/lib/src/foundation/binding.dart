@@ -189,7 +189,7 @@ abstract class BindingBase {
     assert(!locked);
   }
 
-  /// Cause the entire application to redraw.
+  /// Cause the entire application to redraw, e.g. after a hot reload.
   ///
   /// This is used by development tools when the application code has changed,
   /// to cause the application to pick up any changed code. It can be triggered
@@ -212,7 +212,7 @@ abstract class BindingBase {
   }
 
   /// This method is called by [reassembleApplication] to actually cause the
-  /// application to reassemble.
+  /// application to reassemble, e.g. after a hot reload.
   ///
   /// Bindings are expected to use this method to reregister anything that uses
   /// closures, so that they do not keep pointing to old code, and to flush any
