@@ -4,10 +4,10 @@
 
 import 'dart:async';
 import 'dart:convert' show UTF8;
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 
 import 'package:archive/archive.dart';
+import 'package:http/http.dart' as http;
+import 'package:xml/xml.dart' as xml;
 
 import 'android/android_studio_validator.dart';
 import 'android/android_workflow.dart';
@@ -335,9 +335,6 @@ abstract class IntelliJValidator extends DoctorValidator {
 
       return;
     }
-
-    
-
     messages.add(new ValidationMessage.error(
       '$title plugin not installed; this adds $title specific functionality.'
     ));
@@ -367,9 +364,9 @@ abstract class IntelliJValidator extends DoctorValidator {
             messages.add(new ValidationMessage(
               '$title plugin ${localVersion != null ? "version $localVersion" : "installed"} $serverMessage'
             ));
-        } catch (e) {
+        } catch (e) {          
           messages.add(new ValidationMessage(
-            '$title plugin ${localVersion != null ? "version $localVersion" : "installed"}'
+            '$title plugin ${localVersion != null ? "version $localVersion" : "installed"} [$e]'
           ));
         }
       }
@@ -393,7 +390,7 @@ abstract class IntelliJValidator extends DoctorValidator {
         final String version = xmlDocument.findAllElements('version').map((xml.XmlElement node) => node.text).first;
         return version;
       } catch (e) {
-        return e;
+        return "Unable to obtain version from Intellij Server";
       }
     }
 
