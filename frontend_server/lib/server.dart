@@ -128,6 +128,7 @@ class _FrontendCompiler implements CompilerInterface {
   BinaryPrinterFactory printerFactory;
 
   IncrementalKernelGenerator _generator;
+  String _filename;
   String _kernelBinaryFilename;
 
   @override
@@ -136,7 +137,7 @@ class _FrontendCompiler implements CompilerInterface {
     ArgResults options, {
     IncrementalKernelGenerator generator,
   }) async {
-    final Uri _filenameUri = Uri.base.resolve(new Uri.file(filename).toString());
+    _filename = filename;
     _kernelBinaryFilename = "$filename.dill";
     final String boundaryKey = new Uuid().generateV4();
     _outputStream.writeln("result $boundaryKey");
@@ -156,7 +157,7 @@ class _FrontendCompiler implements CompilerInterface {
       _generator = generator != null
           ? generator
           : await IncrementalKernelGenerator.newInstance(
-              compilerOptions, _filenameUri,
+              compilerOptions, Uri.base.resolve(_filename),
               useMinimalGenerator: true);
       final DeltaProgram deltaProgram =
           await _runWithPrintRedirection(() => _generator.computeDelta());
@@ -169,8 +170,9 @@ class _FrontendCompiler implements CompilerInterface {
           sdkRoot.resolve('platform.dill')
         ];
       }
-      program = await _runWithPrintRedirection(() =>
-          compileToKernel(_filenameUri, compilerOptions, aot: options['aot']));
+      program = await _runWithPrintRedirection(() => compileToKernel(
+          Uri.base.resolve(_filename), compilerOptions,
+          aot: options['aot']));
     }
     if (program != null) {
       final IOSink sink = new File(_kernelBinaryFilename).openWrite();
@@ -217,11 +219,12 @@ class _FrontendCompiler implements CompilerInterface {
   }
 
   Uri _ensureFolderPath(String path) {
-    String uriPath = new Uri.file(path).toString();
-    if (!uriPath.endsWith('/')) {
-      uriPath = '$uriPath/';
+    // This is a URI, not a file path, so the forward slash is correct even
+    // on Windows.
+    if (!path.endsWith('/')) {
+      path = '$path/';
     }
-    return Uri.base.resolve(uriPath);
+    return Uri.base.resolve(path);
   }
 
   /// Runs the given function [f] in a Zone that redirects all prints into
