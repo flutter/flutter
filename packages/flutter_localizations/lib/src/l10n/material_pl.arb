@@ -17,6 +17,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow z $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow z około $rowCount",
   "rowsPerPageTitle": "Wiersze na stronie:",
+  "tabLabel": "$tabIndex z $tabCount",
   "selectedRowCountTitleOne": "1 wybrany element",
   "selectedRowCountTitleOther": "$selectedRowCount wybranego elementu",
   "cancelButtonLabel": "ANULUJ",

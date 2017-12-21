@@ -15,6 +15,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow из $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow из примерно $rowCount",
   "rowsPerPageTitle": "Строк на странице:",
+  "tabLabel": "Закладка $tabIndex из $tabCount",
   "aboutListTileTitle": "$applicationName: сведения",
   "licensesPageTitle": "Лицензии",
   "selectedRowCountTitleZero": "Строки не выбраны",

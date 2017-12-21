@@ -15,6 +15,7 @@
   "pageRowsInfoTitle": "$rowCount행 중 $firstRow~$lastRow행",
   "pageRowsInfoTitleApproximate": "약 $rowCount행 중 $firstRow~$lastRow행",
   "rowsPerPageTitle": "페이지당 행 수:",
+  "tabLabel": "$tabCount행 중 $tabIndex행",
   "selectedRowCountTitleOne": "항목 1개 선택됨",
   "selectedRowCountTitleOther": "항목 $selectedRowCount개 선택됨",
   "cancelButtonLabel": "취소",
