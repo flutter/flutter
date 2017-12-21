@@ -117,9 +117,9 @@ class _CupertinoScrollbarState extends State<CupertinoScrollbar> with TickerProv
 
   @override
   void dispose() {
-    _painter.dispose();
     _fadeoutAnimationController.dispose();
     _fadeoutTimer?.cancel();
+    _painter.dispose();
     super.dispose();
   }
 

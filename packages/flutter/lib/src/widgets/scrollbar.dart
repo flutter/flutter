@@ -14,13 +14,21 @@ const double _kMinThumbExtent = 18.0;
 
 /// A [CustomPainter] for painting scrollbars.
 ///
-/// Unlike [CustomPainter]s that sub-classes [CustomPainter] and only repaints
+/// Unlike [CustomPainter]s that subclasses [CustomPainter] and only repaint
 /// when [shouldRepaint] returns true (which requires this [CustomPainter] to
 /// be rebuilt), this painter has the added optimization of repainting and not
 /// rebuilding when:
 ///
 ///  * the scroll position changes; and
 ///  * when the scrollbar fades away.
+///
+/// Calling [update] with the new [ScrollMetrics] will repaint the new scrollbar
+/// position.
+///
+/// Updating the value on the provided [fadeoutOpacityAnimation] will repaint
+/// with the new opacity.
+///
+/// You must call [dispose] on this [ScrollbarPainter] when it's no longer used.
 ///
 /// See also:
 ///
@@ -62,7 +70,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// An opacity [Animation] that dictates the opacity of the thumb.
   /// Changes in value of this [Listenable] will automatically trigger repaints.
   /// Mustn't be null.
-  Animation<double> fadeoutOpacityAnimation;
+  final Animation<double> fadeoutOpacityAnimation;
 
   /// Distance from the scrollbar's start and end to the edge of the viewport in
   /// pixels. Mustn't be null.
