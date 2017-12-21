@@ -7,6 +7,7 @@ import '../base/process.dart';
 
 const String kCFBundleIdentifierKey = 'CFBundleIdentifier';
 const String kCFBundleShortVersionStringKey = 'CFBundleShortVersionString';
+const String kCFBundleVersionKey = 'CFBundleVersion';
 
 String getValueFromFile(String plistFilePath, String key) {
   // TODO(chinmaygarde): For now, we only need to read from plist files on a mac

@@ -251,6 +251,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   IntelliJValidator(String title) : super(title);
 
   String get version;
+  String get buildNumber;
   String get pluginsPath;
 
   static final Map<String, String> _idToTitle = <String, String>{
@@ -379,9 +380,6 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   Future<String> _getLatestVersionPossible() async {
-      
-      final List<String> stripVersion = version.split(".");
-      final String buildNumber = '${stripVersion[0].substring(2)}${stripVersion[1]}.${stripVersion[2]}';
       final String url = 'https://plugins.jetbrains.com/plugins/list?build=IU-$buildNumber&pluginId=io.flutter';
       
       try {
@@ -422,10 +420,13 @@ abstract class IntelliJValidator extends DoctorValidator {
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(String title, this.version, this.installPath, this.pluginsPath) : super(title);
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, this.installPath, this.pluginsPath, this.buildNumber) : super(title);
 
   @override
   String version;
+
+  @override
+  String buildNumber;
 
   final String installPath;
 
@@ -437,9 +438,9 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
     if (homeDirPath == null)
       return validators;
 
-    void addValidator(String title, String version, String installPath, String pluginsPath) {
+    void addValidator(String title, String version, String installPath, String pluginsPath, String buildNumber) {
       final IntelliJValidatorOnLinuxAndWindows validator =
-        new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
+        new IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath, buildNumber);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
@@ -457,6 +458,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
         IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
             final String version = name.substring(id.length + 1);
+            String buildNumber;
             String installPath;
             try {
               installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
@@ -465,7 +467,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
             }
             if (installPath != null && fs.isDirectorySync(installPath)) {
               final String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
-              addValidator(title, version, installPath, pluginsPath);
+              addValidator(title, version, installPath, pluginsPath, buildNumber);
             }
           }
         });
@@ -539,6 +541,16 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     return _version;
   }
   String _version;
+
+  @override
+  String get buildNumber {
+    if (_buildNumber == null) {
+      final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
+      _buildNumber = getValueFromFile(plistFile, kCFBundleVersionKey) ?? 'unknown';
+    }
+    return _buildNumber;
+  }
+  String _buildNumber;
 
   @override
   String get pluginsPath {
