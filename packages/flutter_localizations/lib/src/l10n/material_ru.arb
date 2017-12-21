@@ -33,5 +33,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "Выберите часы",
   "timePickerMinuteModeAnnouncement": "Выберите минуты",
+  "signedInLabel": "Залогинен",
+  "hideAccountsLabel": "Спрятать аккаунты",
+  "showAccountsLabel": "Показать аккаунты",
   "modalBarrierDismissLabel": "Закрыть"
 }

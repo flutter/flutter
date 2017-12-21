@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "เลือกชั่วโมง",
   "timePickerMinuteModeAnnouncement": "เลือกนาที",
+  "signedInLabel": "ลงทะเบียนเข้า",
+  "hideAccountsLabel": "ซ่อนบัญชี",
+  "showAccountsLabel": "แสดงบัญชี",
   "modalBarrierDismissLabel": "ยกเลิก"
 }

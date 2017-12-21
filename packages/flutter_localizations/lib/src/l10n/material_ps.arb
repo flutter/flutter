@@ -29,5 +29,8 @@
   "viewLicensesButtonLabel": "لیدلس وګورئ",
   "timePickerHourModeAnnouncement": "وختونه وټاکئ",
   "timePickerMinuteModeAnnouncement": "منې غوره کړئ",
+  "signedInLabel": "ننوتل",
+  "hideAccountsLabel": "حسابونه پټ کړئ",
+  "showAccountsLabel": "حسابونه ښکاره کړئ",
   "modalBarrierDismissLabel": "رد کړه"
 }

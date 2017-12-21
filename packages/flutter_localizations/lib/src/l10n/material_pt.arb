@@ -32,5 +32,8 @@
   "viewLicensesButtonLabel": "VER LICENÇAS",
   "timePickerHourModeAnnouncement": "Selecione as horas",
   "timePickerMinuteModeAnnouncement": "Selecione os minutos",
+  "signedInLabel": "Assinado",
+  "hideAccountsLabel": "Ocultar contas",
+  "showAccountsLabel": "Mostrar contas",
   "modalBarrierDismissLabel": "Dispensar"
 }

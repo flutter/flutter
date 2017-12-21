@@ -31,5 +31,8 @@
   "postMeridiemAbbreviation": "NACHM.",
   "timePickerHourModeAnnouncement": "Stunden auswählen",
   "timePickerMinuteModeAnnouncement": "Minuten auswählen",
+  "signedInLabel": "Angemeldet",
+  "hideAccountsLabel": "Konten ausblenden",
+  "showAccountsLabel": "Konten anzeigen",
   "modalBarrierDismissLabel": "Schließen"
 }

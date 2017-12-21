@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "ÖS",
   "timePickerHourModeAnnouncement": "Saati seçin",
   "timePickerMinuteModeAnnouncement": "Dakikayı seçin",
+  "signedInLabel": "Yetkili",
+  "hideAccountsLabel": "Hesapları gizle",
+  "showAccountsLabel": "Hesapları göster",
   "modalBarrierDismissLabel": "Reddet"
 }

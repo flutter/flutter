@@ -10,6 +10,7 @@ import 'debug.dart';
 import 'drawer_header.dart';
 import 'icons.dart';
 import 'ink_well.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 class _AccountPictures extends StatelessWidget {
@@ -35,7 +36,10 @@ class _AccountPictures extends StatelessWidget {
                 margin: const EdgeInsetsDirectional.only(start: 16.0),
                 width: 40.0,
                 height: 40.0,
-                child: picture
+                child: new Semantics(
+                  container: true,
+                  child: picture,
+                ),
               );
             }).toList(),
           ),
@@ -45,7 +49,7 @@ class _AccountPictures extends StatelessWidget {
           child: new SizedBox(
             width: 72.0,
             height: 72.0,
-            child: currentAccountPicture
+            child: currentAccountPicture,
           ),
         ),
       ],
@@ -67,62 +71,72 @@ class _AccountDetails extends StatelessWidget {
   final VoidCallback onTap;
   final bool isOpen;
 
-  Widget addDropdownIcon(Widget line) {
-    final Widget icon = new Icon(
-      isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
-      color: Colors.white
-    );
-    return new Expanded(
-      child: new Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: line == null ? <Widget>[icon] : <Widget>[
-          new Expanded(child: line),
-          icon,
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
+    final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+    final Widget accountNameLine = accountName == null ? null : new DefaultTextStyle(
       style: theme.primaryTextTheme.body2,
       overflow: TextOverflow.ellipsis,
       child: accountName,
     );
-    Widget accountEmailLine = accountEmail == null ? null : new DefaultTextStyle(
+    final Widget accountEmailLine = accountEmail == null ? null : new DefaultTextStyle(
       style: theme.primaryTextTheme.body1,
       overflow: TextOverflow.ellipsis,
       child: accountEmail,
     );
-    if (onTap != null) {
-      if (accountEmailLine != null)
-        accountEmailLine = addDropdownIcon(accountEmailLine);
-      else
-        accountNameLine = addDropdownIcon(accountNameLine);
-    }
 
-    Widget accountDetails;
+    final List<Widget> rowChildren = <Widget>[];
+
     if (accountEmailLine != null || accountNameLine != null) {
-      accountDetails = new Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: (accountEmailLine != null && accountNameLine != null)
-            ? <Widget>[accountNameLine, accountEmailLine]
-            : <Widget>[accountNameLine ?? accountEmailLine]
+      rowChildren.add(
+        new Expanded(
+          flex: 1,
+          child: new Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 8.0, 0.0, 8.0),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: (accountEmailLine != null && accountNameLine != null)
+                  ? <Widget>[accountNameLine, accountEmailLine]
+                  : <Widget>[accountNameLine ?? accountEmailLine],
+            ),
+          ),
         ),
       );
     }
 
-    if (onTap != null)
-      accountDetails = new InkWell(onTap: onTap, child: accountDetails);
+    const double kAccountDetailsHeight = 56.0;
+
+    if (onTap != null) {
+      rowChildren.add(
+        new InkWell(
+          onTap: onTap,
+          child: new Semantics(
+            button: true,
+            child: new SizedBox(
+              height: kAccountDetailsHeight,
+              width: kAccountDetailsHeight,  // make it a square
+              child: new Center(
+                child: new Icon(
+                  isOpen ? Icons.arrow_drop_up : Icons.arrow_drop_down,
+                  color: Colors.white,
+                  semanticLabel: isOpen
+                    ? localizations.hideAccountsLabel
+                    : localizations.showAccountsLabel,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     return new SizedBox(
-      height: 56.0,
-      child: accountDetails,
+      height: kAccountDetailsHeight,
+      child: new Row(
+        children: rowChildren,
+      ),
     );
   }
 }
@@ -147,7 +161,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.otherAccountsPictures,
     @required this.accountName,
     @required this.accountEmail,
-    this.onDetailsPressed
+    this.onDetailsPressed,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -200,24 +214,32 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
         color: Theme.of(context).primaryColor,
       ),
       margin: widget.margin,
+      padding: EdgeInsets.zero,
       child: new SafeArea(
         bottom: false,
-        child: new Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            new Expanded(
-              child: new _AccountPictures(
-                currentAccountPicture: widget.currentAccountPicture,
-                otherAccountsPictures: widget.otherAccountsPictures,
-              )
-            ),
-            new _AccountDetails(
-              accountName: widget.accountName,
-              accountEmail: widget.accountEmail,
-              isOpen: _isOpen,
-              onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
-            ),
-          ],
+        child: new Semantics(
+          container: true,
+          label: 'Signed in',
+          child: new Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[
+              new Expanded(
+                child: new Padding(
+                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 0.0),
+                  child: new _AccountPictures(
+                    currentAccountPicture: widget.currentAccountPicture,
+                    otherAccountsPictures: widget.otherAccountsPictures,
+                  ),
+                ),
+              ),
+              new _AccountDetails(
+                accountName: widget.accountName,
+                accountEmail: widget.accountEmail,
+                isOpen: _isOpen,
+                onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
+              ),
+            ],
+          ),
         ),
       ),
     );
