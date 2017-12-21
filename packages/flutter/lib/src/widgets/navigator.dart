@@ -799,7 +799,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (initialRouteName != Navigator.defaultRouteName)
         route = _routeNamed(initialRouteName, allowNull: true);
       route ??= _routeNamed(Navigator.defaultRouteName);
-      push<dynamic>(route);
+      push(route);
     }
     for (Route<dynamic> route in _history)
       _initialOverlayEntries.addAll(route.overlayEntries);
@@ -847,7 +847,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
   bool _debugLocked = false; // used to prevent re-entrant calls to push, pop, and friends
 
-  Route<Object> _routeNamed(String name, { bool allowNull: false }) {
+  Route<dynamic> _routeNamed(String name, { bool allowNull: false }) {
     assert(!_debugLocked);
     assert(name != null);
     final RouteSettings settings = new RouteSettings(
@@ -898,7 +898,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// ```dart
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
-  Future<Object> pushNamed(String name) {
+  Future<dynamic> pushNamed(String name) {
     return push(_routeNamed(name));
   }
 
@@ -914,8 +914,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  @optionalTypeArgs
-  Future<T> push<T>(Route<T> route) {
+  Future<Object> push(Route<Object> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     assert(route != null);
