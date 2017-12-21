@@ -75,6 +75,10 @@ void main() {
       ]);
     });
 
+    test('leading space path command', () {
+      final FrameData frameData = interpretSvg(testAsset('leading_space_path_command.svg'));
+    });
+
     test('SVG illegal path', () {
       expect(
         () { interpretSvg(testAsset('illegal_path.svg')); },

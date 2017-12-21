@@ -238,7 +238,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
 // group 3 will match "12.0, 12.0 23.0, 9.0"
 //
 // Commas are optional.
-final RegExp _pointMatcher = new RegExp(r' *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)');
+final RegExp _pointMatcher = new RegExp(r'^ *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)');
 
 /// Parse a string with a list of points, e.g:
 /// '25.0, 1.0 12.0, 12.0 23.0, 9.0' will be parsed to:
@@ -248,7 +248,7 @@ final RegExp _pointMatcher = new RegExp(r' *([\-\.0-9]+) *,? *([\-\.0-9]+)(.*)')
 List<Point<double>> parsePoints(String points) {
   String unParsed = points;
   final List<Point<double>> result = <Point<double>>[];
-  while(unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
+  while (unParsed.isNotEmpty && _pointMatcher.hasMatch(unParsed)) {
     final Match m = _pointMatcher.firstMatch(unParsed);
     result.add(new Point<double>(
         double.parse(m.group(1)),
@@ -292,7 +292,7 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static final String _pathCommandAtom = '([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static final String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
   static final RegExp _pathCommandValidator = new RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = new RegExp(_pathCommandAtom);
 
@@ -391,7 +391,7 @@ class SvgPathCommandBuilder {
     'l': null,
     'm': null,
     't': null,
-    's': null
+    's': null,
   };
 
   Point<double> lastPoint = const Point<double>(0.0, 0.0);

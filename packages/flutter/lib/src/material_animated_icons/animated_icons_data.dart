@@ -22,11 +22,20 @@ abstract class AnimatedIcons {
 }
 
 /// Data for an animated icon.
+///
+/// This base class provides the public API for an animated icon's data.
 abstract class AnimatedIconData {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
   const AnimatedIconData();
   
   /// Whether this icon should be mirrored horizontally when text direction is
-  /// RTL.
+  /// right-to-left.
+  ///
+  /// See also:
+  ///  * [TextDirection], which discusses concerns regarding reading direction
+  ///    in Flutter.
+  ///  * [Directionality], a widget which determines the ambient directionality.
   bool get matchTextDirection;
 }
 
