@@ -18,6 +18,10 @@ const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 /// Used to define the appearance of an [InputDecorator]'s border
 /// with [InputDecoration.borderType].
 ///
+/// The border is drawn around the input decorator's "container" which
+/// is the optionally filled area above the decorator's helper, error,
+/// and counter.
+///
 /// The value of [InputDecoration.borderType] also affects the internal
 /// layout of [InputDecorator], for example the default value of
 /// [InputDecoration.contentPadding] depends on the border type.
@@ -1453,7 +1457,7 @@ class _Decorator extends RenderObjectWidget {
 /// Defines the appearance of a Material Design text field.
 ///
 /// [InputDecorator] displays the visual elements of a Material Design text
-/// field around its `child`. The visual elements themselves are defined
+/// field around its input [child]. The visual elements themselves are defined
 /// by an [InputDecoration] object and their layout and appearance depend
 /// on the `baseStyle`, `textAlign`, `isFocused`, and `isEmpty` parameters.
 ///
@@ -1874,13 +1878,16 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///  * [TextField], which is a text input widget that uses an
 ///    [InputDecoration].
 ///  * [InputDecorator], which is a widget that draws an [InputDecoration]
-///    around an arbitrary child widget.
-///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
-///    around other widgets.
+///    around an input child widget.
+///  * [Decoration] and [DecoratedBox], for drawing borders and backgrounds
+///    around a child widget.
 @immutable
 class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
+  ///
+  /// The [isDense], [filled], [borderType], and [enabled] arguments must not
+  /// be null.
   const InputDecoration({
     this.icon,
     this.labelText,
@@ -1983,10 +1990,10 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
-  /// Text that provides context about the field’s value, such as how the value
-  /// will be used.
+  /// Text that provides context about the input [child]'s value, such as how
+  /// the value will be used.
   ///
-  /// If non-null, the text is displayed below the input field, in the same
+  /// If non-null, the text is displayed below the input [child], in the same
   /// location as [errorText]. If a non-null [errorText] value is specified then
   /// the helper text is not shown.
   final String helperText;
@@ -1996,25 +2003,25 @@ class InputDecoration {
 
   /// Text that suggests what sort of input the field accepts.
   ///
-  /// Displayed on top of the input field (i.e., at the same location on the
-  /// screen where text my be entered in the input field) when the input field
-  /// is empty and either (a) [labelText] is null or (b) the input field has
-  /// focus.
+  /// Displayed on top of the input [child] (i.e., at the same location on the
+  /// screen where text my be entered in the input [child]) when the input
+  /// [isEmpty] and either (a) [labelText] is null or (b) the input has the focus.
   final String hintText;
 
   /// The style to use for the [hintText].
   ///
   /// Also used for the [labelText] when the [labelText] is displayed on
   /// top of the input field (i.e., at the same location on the screen where
-  /// text my be entered in the input field).
+  /// text my be entered in the input [child]).
   ///
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle hintStyle;
 
-  /// Text that appears below the input field.
+  /// Text that appears below the input [child] and the border.
   ///
-  /// If non-null, the divider that appears below the input field is red.
+  /// If non-null, the border's color animates to red and the [helperText] is
+  /// not shown.
   final String errorText;
 
   /// The style to use for the [errorText].
@@ -2023,13 +2030,13 @@ class InputDecoration {
   /// input field and the current [Theme].
   final TextStyle errorStyle;
 
-  /// Whether the input field is part of a dense form (i.e., uses less vertical
+  /// Whether the input [child] is part of a dense form (i.e., uses less vertical
   /// space).
   ///
   /// Defaults to false.
   final bool isDense;
 
-  /// The padding for the input decorator's container.
+  /// The padding for the input decoration's container.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
   /// true and bordered per the [borderType]. It's the area adjacent to
@@ -2141,6 +2148,8 @@ class InputDecoration {
   /// true and bordered per the [borderType]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
+  ///
+  /// This property is false by default.
   final bool filled;
 
   /// The color to fill the decoration's container with, if [filled] is true.
@@ -2159,15 +2168,18 @@ class InputDecoration {
   /// true and bordered per the [borderType]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
+  ///
+  /// The default value of this property is [BorderType.underline].
   final InputBorderType borderType;
 
-  /// If false, input is inhibited, the border, [helperText],
-  /// [errorText], and [counterText] are not displayed, and the opacity
-  /// of the remaining visual elements are reduced.
+  /// If false [helperText],[errorText], and [counterText] are not displayed,
+  /// and the opacity of the remaining visual elements is reduced.
+  ///
+  /// This property is true by default.
   final bool enabled;
 
-  /// Creates a copy of this input decoration but with the given fields replaced
-  /// with the new values.
+  /// Creates a copy of this input decoration with the given fields replaced
+  /// by the new values.
   ///
   /// Always sets [isCollapsed] to false.
   InputDecoration copyWith({
