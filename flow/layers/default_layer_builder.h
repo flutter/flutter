@@ -53,6 +53,12 @@ class DefaultLayerBuilder final : public LayerBuilder {
                          SkScalar device_pixel_ratio) override;
 
   // |flow::LayerBuilder|
+  void PushPhysicalModel(const SkPath& path,
+                         double elevation,
+                         SkColor color,
+                         SkScalar device_pixel_ratio) override;
+
+  // |flow::LayerBuilder|
   void PushPerformanceOverlay(uint64_t enabled_options,
                               const SkRect& rect) override;
 
