@@ -1524,21 +1524,22 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
+  bool get _labelIsFloating => !isEmpty || isFocused;
+
+  @override
+  _InputDecoratorState createState() => new _InputDecoratorState();
+
   /// The RenderBox that defines this decorator's "container". That's the
-  /// area which is filled if [decoration.isFilled] is true. It's the area
-  /// adjacent to [decoration.icon] and above the widgets that contain
-  /// [decoration.helperText], [decoration.errorText], [decoration.counterText].
+  /// area which is filled if [InputDecoration.isFilled] is true. It's the area
+  /// adjacent to [InputDecoration.icon] and above the widgets that contain
+  /// [InputDecoration.helperText], [InputDecoration.errorText], and
+  /// [InputDecoration.counterText].
   ///
   /// [TextField] renders ink splashes within the container.
   static RenderBox containerOf(BuildContext context) {
     final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
     return result?.container;
   }
-
-  bool get _labelIsFloating => !isEmpty || isFocused;
-
-  @override
-  _InputDecoratorState createState() => new _InputDecoratorState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1674,13 +1675,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.textTheme.caption.copyWith(color: themeData.errorColor).merge(decoration.errorStyle);
   }
 
-  double get _dividerWeight {
-    if (decoration.hideDivider || !decoration.enabled)
+  double get _borderWeight {
+    if (decoration.isCollapsed || decoration.borderType == InputBorderType.none || !decoration.enabled)
       return 0.0;
     return isFocused ? 2.0 : 1.0;
   }
 
-  Color _getDividerColor(ThemeData themeData) {
+  Color _getBorderColor(ThemeData themeData) {
     return decoration.errorText == null
       ? _getActiveColor(themeData)
       : themeData.errorColor;
@@ -1713,8 +1714,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
               topRight: const Radius.circular(4.0),
             ),
         borderSide: new BorderSide(
-          color: _getDividerColor(themeData),
-          width: _dividerWeight,
+          color: _getBorderColor(themeData),
+          width: _borderWeight,
         ),
       );
 
@@ -1900,7 +1901,6 @@ class InputDecoration {
     this.errorStyle,
     this.isDense: false,
     this.contentPadding,
-    this.hideDivider: false, // TBD: remove this, it's redundant vis borderType
     this.prefixIcon,
     this.prefixText,
     this.prefixStyle,
@@ -1914,7 +1914,6 @@ class InputDecoration {
     this.borderType: InputBorderType.underline,
     this.enabled: true,
   }) : assert(isDense != null),
-       assert(hideDivider != null),
        assert(filled != null),
        assert(borderType != null),
        assert(enabled != null),
@@ -1944,7 +1943,6 @@ class InputDecoration {
        isDense = false,
        contentPadding = EdgeInsets.zero,
        isCollapsed = true,
-       hideDivider = true,
        prefixIcon = null,
        prefixText = null,
        prefixStyle = null,
@@ -2049,16 +2047,10 @@ class InputDecoration {
 
   /// Whether the decoration is the same size as the input field.
   ///
-  /// A collapsed decoration cannot have [labelText], [errorText], an [icon], or
-  /// a divider because those elements require extra space.
+  /// A collapsed decoration cannot have [labelText], [errorText], an [icon].
   ///
   /// To create a collapsed input decoration, use [InputDecoration..collapsed].
   final bool isCollapsed;
-
-  /// Whether to hide the divider below the input field and above the error text.
-  ///
-  /// Defaults to false.
-  final bool hideDivider;
 
   /// An icon that that appears before the [prefixText] and the input and within
   /// the decoration's container.
@@ -2194,7 +2186,6 @@ class InputDecoration {
     TextStyle errorStyle,
     bool isDense,
     EdgeInsets contentPadding,
-    bool hideDivider,
     Widget prefixIcon,
     String prefixText,
     TextStyle prefixStyle,
@@ -2220,7 +2211,6 @@ class InputDecoration {
       errorStyle: errorStyle ?? this.errorStyle,
       isDense: isDense ?? this.isDense,
       contentPadding: contentPadding ?? this.contentPadding,
-      hideDivider: hideDivider ?? this.hideDivider,
       prefixIcon: prefixIcon ?? this.prefixIcon,
       prefixText: prefixText ?? this.prefixText,
       prefixStyle: prefixStyle ?? this.prefixStyle,
@@ -2255,7 +2245,6 @@ class InputDecoration {
         && typedOther.isDense == isDense
         && typedOther.contentPadding == contentPadding
         && typedOther.isCollapsed == isCollapsed
-        && typedOther.hideDivider == hideDivider
         && typedOther.prefixIcon == prefixIcon
         && typedOther.prefixText == prefixText
         && typedOther.prefixStyle == prefixStyle
@@ -2286,7 +2275,6 @@ class InputDecoration {
         isDense,
         contentPadding,
         isCollapsed,
-        hideDivider,
         prefixIcon,
         prefixText,
         prefixStyle,
@@ -2322,8 +2310,6 @@ class InputDecoration {
       description.add('contentPadding: $contentPadding');
     if (isCollapsed)
       description.add('isCollapsed: $isCollapsed');
-    if (hideDivider)
-      description.add('hideDivider: $hideDivider');
     if (prefixIcon != null)
       description.add('prefixIcon: $prefixIcon');
     if (prefixText != null)
