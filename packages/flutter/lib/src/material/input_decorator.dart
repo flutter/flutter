@@ -101,9 +101,10 @@ class _InputBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_InputBorderPainter oldPainter) {
-    return border != oldPainter.border
-      || gap != oldPainter.gap
-      || textDirection != oldPainter.textDirection;
+    return animation != oldPainter.animation
+        || border != oldPainter.border
+        || gap != oldPainter.gap
+        || textDirection != oldPainter.textDirection;
   }
 }
 
@@ -860,7 +861,6 @@ class _RenderDecoration extends RenderBox {
     if (_decoration == value)
       return;
     _decoration = value;
-    // TBD: if only the border OR floatingLabelProgress changed, then just paint
     markNeedsLayout();
   }
 
@@ -1061,8 +1061,8 @@ class _RenderDecoration extends RenderBox {
       height = math.max(_minHeight(box, width), height);
     }
     return height;
-    // TBD: this should compute the overall line height for the boxes
-    // when they've been baseline-aligned.
+    // TODO(hansmuller): this should compute the overall line height for the
+    // boxes when they've been baseline-aligned.
     // See https://github.com/flutter/flutter/issues/13715
   }
 
@@ -1085,7 +1085,7 @@ class _RenderDecoration extends RenderBox {
 
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
-    // TBD: layout first? Add input.parentData.offset?
+    // TODO(hansmuller): layout first? Add input.parentData.offset?
     assert(false);
     return 0.0;
   }
@@ -1253,7 +1253,7 @@ class _RenderDecoration extends RenderBox {
   bool hitTestChildren(HitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (RenderBox child in _children) {
-      // TBD: label must be handled specially since we've transformed it
+      // TODO(hansmuller): label must be handled specially since we've transformed it
       if (child.hitTest(result, position: position - _boxParentData(child).offset))
         return true;
     }
@@ -1392,8 +1392,6 @@ class _RenderDecorationElement extends RenderObjectElement {
       case _DecorationSlot.container:
         renderObject.container = child;
         break;
-      default:
-        assert(false, 'Unrecognized _DecorationSlot $slot');
     }
   }
 
@@ -1421,9 +1419,9 @@ class _RenderDecorationElement extends RenderObjectElement {
     assert(child is RenderBox);
     assert(slotValue is _DecorationSlot);
     assert(renderObject.childToSlot.keys.contains(child));
-    //final _DecorationSlot slot = slotValue;
-    // TBD: just move child from renderObject._foo to renderObject._bar?
-    assert(false, 'not implemented');
+    // final _DecorationSlot slot = slotValue;
+    // TODO(hansmuller): verify that it's not possible to arrive here.
+    assert(false, 'not reachable');
   }
 }
 
@@ -2264,10 +2262,10 @@ class InputDecoration {
     return hashValues(
       icon,
       labelText,
-      hashList(<Object>[ // Over 20 fields...
-        labelStyle,
-        helperText,
-        helperStyle,
+      labelStyle,
+      helperText,
+      helperStyle,
+      hashValues( // Over 20 fields...
         hintText,
         hintStyle,
         errorText,
@@ -2287,7 +2285,7 @@ class InputDecoration {
         fillColor,
         borderType,
         enabled,
-      ]),
+      ),
     );
   }
 
