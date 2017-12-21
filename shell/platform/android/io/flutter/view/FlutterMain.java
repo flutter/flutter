@@ -232,6 +232,7 @@ public class FlutterMain {
                 sAotIsolateSnapshotInstr = metadata.getString(PUBLIC_AOT_ISOLATE_SNAPSHOT_INSTR_KEY, DEFAULT_AOT_ISOLATE_SNAPSHOT_INSTR);
                 sFlx = metadata.getString(PUBLIC_FLX_KEY, DEFAULT_FLX);
                 sSnapshotBlob = metadata.getString(PUBLIC_SNAPSHOT_BLOB_KEY, DEFAULT_SNAPSHOT_BLOB);
+                sFlutterAssetsDir = metadata.getString(PUBLIC_FLUTTER_ASSETS_DIR_KEY, DEFAULT_FLUTTER_ASSETS_DIR);
             }
         } catch (PackageManager.NameNotFoundException e) {
             throw new RuntimeException(e);
