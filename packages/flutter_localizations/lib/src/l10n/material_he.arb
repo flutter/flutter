@@ -18,6 +18,7 @@
   "pageRowsInfoTitle": "$lastRow–$firstRow מתוך $rowCount",
   "pageRowsInfoTitleApproximate": "$lastRow–$firstRow מתוך כ-$rowCount",
   "rowsPerPageTitle": "שורות בכל דף:",
+  "tabLabel": "$tabIndex מתוך $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount פריטים נבחרו",
   "cancelButtonLabel": "ביטול",
   "closeButtonLabel": "סגירה",

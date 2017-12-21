@@ -12,6 +12,7 @@
   "pageRowsInfoTitle": "第 $firstRow-$lastRow 行（共 $rowCount 行）",
   "pageRowsInfoTitleApproximate": "第 $firstRow-$lastRow 行（共约 $rowCount 行）",
   "rowsPerPageTitle": "每页行数：",
+  "tabLabel": "第 $tabIndex 行（共 $tabCount 行）",
   "selectedRowCountTitleOther": "已选择 $selectedRowCount 项内容",
   "cancelButtonLabel": "取消",
   "continueButtonLabel": "继续",

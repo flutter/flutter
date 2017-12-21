@@ -273,6 +273,16 @@ class GlobalMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => _translationBundle.rowsPerPageTitle;
 
   @override
+  String tabLabel({int tabIndex, int tabCount}) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    final String template = _translationBundle.tabLabel;
+    return template
+      .replaceFirst(r'$tabIndex', formatDecimal(tabIndex))
+      .replaceFirst(r'tabCount', formatDecimal(tabCount));
+  }
+
+  @override
   String selectedRowCountTitle(int selectedRowCount) {
     // TODO(hmuller): the rules for mapping from an integer value to
     // "one" or "two" etc. are locale specific and an additional "few" category

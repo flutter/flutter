@@ -39,6 +39,7 @@ class TranslationBundle {
   String get pageRowsInfoTitle => parent?.pageRowsInfoTitle;
   String get pageRowsInfoTitleApproximate => parent?.pageRowsInfoTitleApproximate;
   String get rowsPerPageTitle => parent?.rowsPerPageTitle;
+  String get tabLabel => parent?.tabLabel;
   String get selectedRowCountTitleOther => parent?.selectedRowCountTitleOther;
   String get cancelButtonLabel => parent?.cancelButtonLabel;
   String get closeButtonLabel => parent?.closeButtonLabel;
@@ -83,6 +84,7 @@ class _Bundle_ar extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'من $firstRow إلى $lastRow من إجمالي $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'من $firstRow إلى $lastRow من إجمالي $rowCount تقريبًا';
   @override String get rowsPerPageTitle => r'عدد الصفوف في الصفحة:';
+  @override String get tabLabel => r'من $tabIndex من إجمالي $tabCount';
   @override String get selectedRowCountTitleOther => r'تم اختيار $selectedRowCount عنصر';
   @override String get cancelButtonLabel => r'إلغاء';
   @override String get closeButtonLabel => r'إغلاق';
@@ -122,6 +124,7 @@ class _Bundle_de extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow von $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow von etwa $rowCount';
   @override String get rowsPerPageTitle => r'Zeilen pro Seite:';
+  @override String get tabLabel => r'Tabulator $tabIndex von $tabCount';
   @override String get selectedRowCountTitleZero => r'Keine Objekte ausgewählt';
   @override String get selectedRowCountTitleOne => r'1 Element ausgewählt';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount Elemente ausgewählt';
@@ -163,6 +166,7 @@ class _Bundle_en extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow of $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow of about $rowCount';
   @override String get rowsPerPageTitle => r'Rows per page:';
+  @override String get tabLabel => r'Tab $tabIndex of $tabCount';
   @override String get selectedRowCountTitleZero => r'No items selected';
   @override String get selectedRowCountTitleOne => r'1 item selected';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount items selected';
@@ -204,6 +208,7 @@ class _Bundle_es extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow‑$lastRow de $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow‑$lastRow de aproximadamente $rowCount';
   @override String get rowsPerPageTitle => r'Filas por página:';
+  @override String get tabLabel => r'$tabIndex de $tabCount';
   @override String get selectedRowCountTitleZero => r'No se han seleccionado elementos';
   @override String get selectedRowCountTitleOne => r'1 elemento seleccionado';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount elementos seleccionados';
@@ -246,6 +251,7 @@ class _Bundle_fa extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow از $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow از حدود $rowCount';
   @override String get rowsPerPageTitle => r'ردیف در هر صفحه:';
+  @override String get tabLabel => r'$tabIndex از $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount مورد انتخاب شدند';
   @override String get cancelButtonLabel => r'لغو';
   @override String get closeButtonLabel => r'بستن';
@@ -285,6 +291,7 @@ class _Bundle_fr extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow – $lastRow sur $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow sur environ $rowCount';
   @override String get rowsPerPageTitle => r'Lignes par page :';
+  @override String get tabLabel => r'$tabIndex sur $tabCount';
   @override String get selectedRowCountTitleZero => r'Aucun élément sélectionné';
   @override String get selectedRowCountTitleOne => r'1 élément sélectionné';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount éléments sélectionnés';
@@ -366,6 +373,7 @@ class _Bundle_he extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$lastRow–$firstRow מתוך $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$lastRow–$firstRow מתוך כ-$rowCount';
   @override String get rowsPerPageTitle => r'שורות בכל דף:';
+  @override String get tabLabel => r'$tabIndex מתוך $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount פריטים נבחרו';
   @override String get cancelButtonLabel => r'ביטול';
   @override String get closeButtonLabel => r'סגירה';
@@ -406,6 +414,7 @@ class _Bundle_it extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow di $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow di circa $rowCount';
   @override String get rowsPerPageTitle => r'Righe per pagina:';
+  @override String get tabLabel => r'$tabIndex di $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount elementi selezionati';
   @override String get cancelButtonLabel => r'ANNULLA';
   @override String get closeButtonLabel => r'CHIUDI';
@@ -446,6 +455,7 @@ class _Bundle_ja extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow - $lastRow 行（合計 $rowCount 行）';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow 行（合計約 $rowCount 行）';
   @override String get rowsPerPageTitle => r'ページあたりの行数:';
+  @override String get tabLabel => r'$tabIndex 行（合計 $tabCount 行）';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount 件のアイテムを選択中';
   @override String get cancelButtonLabel => r'キャンセル';
   @override String get closeButtonLabel => r'閉じる';
@@ -485,6 +495,7 @@ class _Bundle_ko extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$rowCount행 중 $firstRow~$lastRow행';
   @override String get pageRowsInfoTitleApproximate => r'약 $rowCount행 중 $firstRow~$lastRow행';
   @override String get rowsPerPageTitle => r'페이지당 행 수:';
+  @override String get tabLabel => r'$tabCount행 중 $tabIndex행';
   @override String get selectedRowCountTitleOne => r'항목 1개 선택됨';
   @override String get selectedRowCountTitleOther => r'항목 $selectedRowCount개 선택됨';
   @override String get cancelButtonLabel => r'취소';
@@ -525,6 +536,7 @@ class _Bundle_nl extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow van $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow van ongeveer $rowCount';
   @override String get rowsPerPageTitle => r'Rijen per pagina:';
+  @override String get tabLabel => r'$tabIndex van $tabCount';
   @override String get selectedRowCountTitleOne => r'1 item geselecteerd';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount items geselecteerd';
   @override String get cancelButtonLabel => r'ANNULEREN';
@@ -567,6 +579,7 @@ class _Bundle_pl extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow z $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow z około $rowCount';
   @override String get rowsPerPageTitle => r'Wiersze na stronie:';
+  @override String get tabLabel => r'$tabIndex z $tabCount';
   @override String get selectedRowCountTitleOne => r'1 wybrany element';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount wybranego elementu';
   @override String get cancelButtonLabel => r'ANULUJ';
@@ -607,6 +620,7 @@ class _Bundle_ps extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow د $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow څخه $rowCount د';
   @override String get rowsPerPageTitle => r'د هرې پاڼې پاڼې:';
+  @override String get tabLabel => r'$tabIndex د $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount توکي غوره شوي';
   @override String get cancelButtonLabel => r'لغوه کول';
   @override String get closeButtonLabel => r'تړل';
@@ -647,6 +661,7 @@ class _Bundle_pt extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow – $lastRow de $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow – $lastRow de aproximadamente $rowCount';
   @override String get rowsPerPageTitle => r'Linhas por página:';
+  @override String get tabLabel => r'$tabIndex de $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount itens selecionados';
   @override String get cancelButtonLabel => r'CANCELAR';
   @override String get closeButtonLabel => r'FECHAR';
@@ -684,6 +699,7 @@ class _Bundle_ru extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow из $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow из примерно $rowCount';
   @override String get rowsPerPageTitle => r'Строк на странице:';
+  @override String get tabLabel => r'Закладка $tabIndex из $tabCount';
   @override String get aboutListTileTitle => r'$applicationName: сведения';
   @override String get licensesPageTitle => r'Лицензии';
   @override String get selectedRowCountTitleZero => r'Строки не выбраны';
@@ -727,6 +743,7 @@ class _Bundle_th extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow จาก $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow จากประมาณ $rowCount';
   @override String get rowsPerPageTitle => r'แถวต่อหน้า:';
+  @override String get tabLabel => r'$tabIndex จาก $tabCount';
   @override String get selectedRowCountTitleOne => r'เลือกแล้ว 1 รายการ';
   @override String get selectedRowCountTitleOther => r'เลือกแล้ว $selectedRowCount รายการ';
   @override String get cancelButtonLabel => r'ยกเลิก';
@@ -767,6 +784,7 @@ class _Bundle_tr extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow-$lastRow / $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow-$lastRow / $rowCount';
   @override String get rowsPerPageTitle => r'Sayfa başına satır sayısı:';
+  @override String get tabLabel => r'$tabIndex, $tabCount içinde';
   @override String get selectedRowCountTitleOne => r'1 öğe seçildi';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount öğe seçildi';
   @override String get cancelButtonLabel => r'İPTAL';
@@ -808,6 +826,7 @@ class _Bundle_ur extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'$firstRow–$lastRow از $rowCount';
   @override String get pageRowsInfoTitleApproximate => r'$firstRow–$lastRow $rowCount میں سے تقریباً';
   @override String get rowsPerPageTitle => r'قطاریں فی صفحہ:';
+  @override String get tabLabel => r'$tabIndex از $tabCount';
   @override String get selectedRowCountTitleOther => r'$selectedRowCount آئٹمز منتخب کیے گئے';
   @override String get cancelButtonLabel => r'منسوخ کریں';
   @override String get closeButtonLabel => r'بند کریں';
@@ -844,6 +863,7 @@ class _Bundle_zh extends TranslationBundle {
   @override String get pageRowsInfoTitle => r'第 $firstRow-$lastRow 行（共 $rowCount 行）';
   @override String get pageRowsInfoTitleApproximate => r'第 $firstRow-$lastRow 行（共约 $rowCount 行）';
   @override String get rowsPerPageTitle => r'每页行数：';
+  @override String get tabLabel => r'第 $tabIndex 行（共 $tabCount 行）';
   @override String get selectedRowCountTitleOther => r'已选择 $selectedRowCount 项内容';
   @override String get cancelButtonLabel => r'取消';
   @override String get continueButtonLabel => r'继续';
