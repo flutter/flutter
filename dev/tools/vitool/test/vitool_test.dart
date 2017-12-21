@@ -75,6 +75,14 @@ void main() {
       ]);
     });
 
+    test('SVG illegal path', () {
+      expect(
+        () { interpretSvg(testAsset('illegal_path.svg')); },
+        throwsA(anything)
+      );
+    });
+
+
     test('SVG group', () {
       final FrameData frameData = interpretSvg(testAsset('bars_group.svg'));
       expect(frameData.paths, const <SvgPath>[
@@ -137,6 +145,13 @@ void main() {
             margin: 0.000000001
         )
       ]);
+    });
+
+    test('SVG illegal transform', () {
+      expect(
+        () { interpretSvg(testAsset('illegal_transform.svg')); },
+        throwsA(anything)
+      );
     });
 
     test('SVG group opacity', () {
@@ -446,6 +461,18 @@ void main() {
           '        const _PathClose(\n'
           '        ),\n'
 
+      );
+    });
+
+    test('Unsupported path command', () {
+      final PathCommandAnimation command = const PathCommandAnimation(
+        'h',
+        const <List<Point<double>>>[],
+      );
+
+      expect(
+        () { command.toDart(); },
+        throwsA(anything)
       );
     });
 

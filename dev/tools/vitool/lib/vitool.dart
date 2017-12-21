@@ -292,7 +292,9 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static final RegExp _pathCommandMatcher = new RegExp(r'([MmLlQqCcAZz]) *([\-\.0-9 ,]*)');
+  static final String _pathCommandAtom = '([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static final RegExp _pathCommandValidator = new RegExp('^($_pathCommandAtom)*\$');
+  static final RegExp _pathCommandMatcher = new RegExp(_pathCommandAtom);
 
   static SvgPath fromElement(XmlElement pathElement) {
     assert(pathElement.name.local == 'path');
@@ -300,6 +302,8 @@ class SvgPath {
     final String dAttr = _extractAttr(pathElement, 'd');
     final List<SvgPathCommand> commands = <SvgPathCommand>[];
     final SvgPathCommandBuilder commandsBuilder = new SvgPathCommandBuilder();
+    if (!_pathCommandValidator.hasMatch(dAttr))
+      throw new Exception('illegal or unsupported path d expression: $dAttr');
     for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
       final String pointStr = match.group(2);
@@ -455,9 +459,14 @@ class _Transform {
   }
 }
 
-final RegExp _transformCommand = new RegExp(' *([^)]+)\\(([^)]*)\\)');
+
+final String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
+final RegExp _transformValidator = new RegExp('^($_transformCommandAtom)*\$');
+final RegExp _transformCommand = new RegExp(_transformCommandAtom);
 
 Matrix3 _parseSvgTransform(String transform){
+  if (!_transformValidator.hasMatch(transform))
+    throw new Exception('illegal or unsupported transform: $transform');
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
   Matrix3 result = new Matrix3.identity();
   for (Match m in matches) {

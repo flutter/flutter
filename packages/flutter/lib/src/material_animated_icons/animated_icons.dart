@@ -117,7 +117,7 @@ class AnimatedIcon extends StatelessWidget {
           progress: progress,
           color: iconColor,
           scale: iconSize / iconData.size.width,
-          shouldMirror: textDirection == TextDirection.rtl && iconData.shouldMirrorInRtl,
+          shouldMirror: textDirection == TextDirection.rtl && iconData.matchTextDirection,
           uiPathFactory: _pathFactory,
         ),
       ),

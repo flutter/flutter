@@ -27,15 +27,15 @@ abstract class AnimatedIconData {
   
   /// Whether this icon should be mirrored horizontally when text direction is
   /// RTL.
-  bool get shouldMirrorInRtl;
+  bool get matchTextDirection;
 }
 
 class _AnimatedIconData extends AnimatedIconData {
-  const _AnimatedIconData(this.size, this.paths, {this.shouldMirrorInRtl = false});
+  const _AnimatedIconData(this.size, this.paths, {this.matchTextDirection = false});
 
   final Size size;
   final List<_PathFrames> paths;
 
   @override
-  final bool shouldMirrorInRtl;
+  final bool matchTextDirection;
 }
