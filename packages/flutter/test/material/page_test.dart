@@ -28,8 +28,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 1));
 
-    Opacity widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
+    FadeTransition widget2Opacity =
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
     Offset widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
     final Size widget2Size = tester.getSize(find.text('Page 2'));
 
@@ -40,7 +40,7 @@ void main() {
     // Animation begins 3/4 of the way up the page.
     expect(widget2TopLeft.dy < widget2Size.height / 4.0, true);
     // Animation starts with page 2 being near transparent.
-    expect(widget2Opacity.opacity < 0.01, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
+    expect(widget2Opacity.opacity.value < 0.01, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
 
     await tester.pump(const Duration(milliseconds: 300));
 
@@ -53,13 +53,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
 
     widget2Opacity =
-        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(Opacity);
+        tester.element(find.text('Page 2')).ancestorWidgetOfExactType(FadeTransition);
     widget2TopLeft = tester.getTopLeft(find.text('Page 2'));
 
     // Page 2 starts to move down.
     expect(widget1TopLeft.dy < widget2TopLeft.dy, true);
     // Page 2 starts to lose opacity.
-    expect(widget2Opacity.opacity < 1.0, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
+    expect(widget2Opacity.opacity.value < 1.0, MaterialPageRoute.debugEnableFadingRoutes); // ignore: deprecated_member_use
 
     await tester.pump(const Duration(milliseconds: 300));
 
