@@ -1,11 +1,13 @@
 {
+  "timePickerMinuteModeAnnouncement": "Select minutes",
+  "timePickerHourModeAnnouncement": "Select hours",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "nextMonthTooltip": "Next month",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow of about $rowCount",
   "copyButtonLabel": "COPY",
   "closeButtonTooltip": "Close",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Delete",
   "selectAllButtonLabel": "SELECT ALL",
   "viewLicensesButtonLabel": "VIEW LICENCES",
   "rowsPerPageTitle": "Rows per page:",
@@ -27,5 +29,6 @@
   "selectedRowCountTitleOther": "$selectedRowCount items selected",
   "showMenuTooltip": "Show menu",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "modalBarrierDismissLabel": "Dismiss"
 }

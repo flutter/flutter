@@ -137,10 +137,12 @@ Alternatively, delete the `bin/cache/flutter_tools.snapshot` file. Doing so will
 force a rebuild of the tool from your local sources the next time you run `flutter`.
 
 flutter_tools' tests run inside the Dart command line VM rather than in the
-flutter shell. To run the test:
+flutter shell. To run the tests, ensure that no devices are connected,
+then navigate to `flutter_tools` and execute:
 
-* `cd packages/flutter_tools`
-* `pub run test -j1`
+```shell
+DART_VM_OPTIONS=--assert-initializer ../../bin/cache/dart-sdk/bin/pub run test
+```
 
 The pre-built flutter tool runs in release mode with the observatory off by default.
 To enable debugging mode and the observatory on the `flutter` tool, uncomment the

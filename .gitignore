@@ -1,4 +1,5 @@
 # Miscellaneous
+*.class
 *.lock
 *.log
 *.pyc
@@ -41,7 +42,6 @@ unlinked.ds
 unlinked_spec.ds
 
 # Android related
-**/android/**/GeneratedPluginRegistrant.java
 **/android/**/gradle-wrapper.jar
 **/android/.gradle
 **/android/captures/
@@ -60,8 +60,6 @@ unlinked_spec.ds
 **/ios/**/.tags*
 **/ios/**/.vagrant/
 **/ios/**/DerivedData/
-**/ios/**/GeneratedPluginRegistrant.h
-**/ios/**/GeneratedPluginRegistrant.m
 **/ios/**/Icon?
 **/ios/**/Pods/
 **/ios/**/profile
@@ -72,6 +70,7 @@ unlinked_spec.ds
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/app.flx
 **/ios/Flutter/app.zip
+**/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 
 # Exceptions to above rules.

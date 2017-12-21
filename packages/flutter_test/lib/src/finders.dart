@@ -198,6 +198,29 @@ class CommonFinders {
   Finder descendant({ Finder of, Finder matching, bool matchRoot: false, bool skipOffstage: true }) {
     return new _DescendantFinder(of, matching, matchRoot: matchRoot, skipOffstage: skipOffstage);
   }
+
+  /// Finds widgets that are ancestors of the [of] parameter and that match
+  /// the [matching] parameter.
+  ///
+  /// Example:
+  ///
+  ///     // Test if a Text widget that contains 'faded' is the
+  ///     // descendant of an Opacity widget with opacity 0.5:
+  ///     expect(
+  ///       tester.widget<Opacity>(
+  ///         find.ancestor(
+  ///           of: find.text('faded'),
+  ///           matching: find.byType('Opacity'),
+  ///         )
+  ///       ).opacity,
+  ///       0.5
+  ///     );
+  ///
+  /// If the [matchRoot] argument is true then the widget(s) specified by [of]
+  /// will be matched along with the ancestors.
+  Finder ancestor({ Finder of, Finder matching, bool matchRoot: false}) {
+    return new _AncestorFinder(of, matching, matchRoot: matchRoot);
+  }
 }
 
 /// Searches a widget tree and returns nodes that match a particular
@@ -580,6 +603,42 @@ class _DescendantFinder extends Finder {
     ).toSet().toList();
     if (matchRoot)
       candidates.insertAll(0, ancestorElements);
+    return candidates;
+  }
+}
+
+class _AncestorFinder extends Finder {
+  _AncestorFinder(this.descendant, this.ancestor, { this.matchRoot: false }) : super(skipOffstage: false);
+
+  final Finder ancestor;
+  final Finder descendant;
+  final bool matchRoot;
+
+  @override
+  String get description {
+    if (matchRoot)
+      return 'ancestor ${ancestor.description} beginning with ${descendant.description}';
+    return '${ancestor.description} which is an ancestor of ${descendant.description}';
+  }
+
+  @override
+  Iterable<Element> apply(Iterable<Element> candidates) {
+    return candidates.where((Element element) => ancestor.evaluate().contains(element));
+  }
+
+  @override
+  Iterable<Element> get allCandidates {
+    final List<Element> candidates = <Element>[];
+    for (Element root in descendant.evaluate()) {
+      final List<Element> ancestors = <Element>[];
+      if (matchRoot)
+        ancestors.add(root);
+      root.visitAncestorElements((Element element) {
+        ancestors.add(element);
+        return true;
+      });
+      candidates.addAll(ancestors);
+    }
     return candidates;
   }
 }

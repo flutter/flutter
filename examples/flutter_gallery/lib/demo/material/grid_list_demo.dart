@@ -363,27 +363,31 @@ class GridListDemoState extends State<GridListDemo> {
       body: new Column(
         children: <Widget>[
           new Expanded(
-            child: new GridView.count(
-              crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
-              mainAxisSpacing: 4.0,
-              crossAxisSpacing: 4.0,
-              padding: const EdgeInsets.all(4.0),
-              childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
-              children: photos.map((Photo photo) {
-                return new GridDemoPhotoItem(
-                  photo: photo,
-                  tileStyle: _tileStyle,
-                  onBannerTap: (Photo photo) {
-                    setState(() {
-                      photo.isFavorite = !photo.isFavorite;
-                    });
-                  }
-                );
-              }).toList(),
-            )
-          )
-        ]
-      )
+            child: new SafeArea(
+              top: false,
+              bottom: false,
+              child: new GridView.count(
+                crossAxisCount: (orientation == Orientation.portrait) ? 2 : 3,
+                mainAxisSpacing: 4.0,
+                crossAxisSpacing: 4.0,
+                padding: const EdgeInsets.all(4.0),
+                childAspectRatio: (orientation == Orientation.portrait) ? 1.0 : 1.3,
+                children: photos.map((Photo photo) {
+                  return new GridDemoPhotoItem(
+                    photo: photo,
+                    tileStyle: _tileStyle,
+                    onBannerTap: (Photo photo) {
+                      setState(() {
+                        photo.isFavorite = !photo.isFavorite;
+                      });
+                    }
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

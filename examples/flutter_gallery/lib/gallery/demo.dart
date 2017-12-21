@@ -77,16 +77,20 @@ class TabbedComponentDemoScaffold extends StatelessWidget {
         ),
         body: new TabBarView(
           children: demos.map((ComponentDemoTabData demo) {
-            return new Column(
-              children: <Widget>[
-                new Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: new Text(demo.description,
-                    style: Theme.of(context).textTheme.subhead
-                  )
-                ),
-                new Expanded(child: demo.demoWidget)
-              ],
+            return new SafeArea(
+              top: false,
+              bottom: false,
+              child: new Column(
+                children: <Widget>[
+                  new Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: new Text(demo.description,
+                      style: Theme.of(context).textTheme.subhead
+                    )
+                  ),
+                  new Expanded(child: demo.demoWidget)
+                ],
+              ),
             );
           }).toList(),
         ),

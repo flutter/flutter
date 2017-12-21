@@ -8,10 +8,10 @@ environment:
   sdk: '>=1.19.0 <2.0.0'
 
 dependencies:
-  file: 2.3.4
+  file: 2.3.5
   json_rpc_2: 2.0.4
   meta: 1.1.1
-  path: 1.4.2
+  path: 1.5.1
   web_socket_channel: 1.0.6
   vm_service_client: 0.2.3
   flutter:
@@ -21,7 +21,7 @@ dependencies:
 
 dev_dependencies:
   test: 0.12.26
-  mockito: 2.2.0
+  mockito: 2.2.1
   quiver: 0.26.2
 
   args: 0.13.7 # TRANSITIVE DEPENDENCY
@@ -37,10 +37,10 @@ dev_dependencies:
   http_multi_server: 2.0.4 # TRANSITIVE DEPENDENCY
   http_parser: 3.1.1 # TRANSITIVE DEPENDENCY
   intl: 0.15.2 # TRANSITIVE DEPENDENCY
-  io: 0.3.0 # TRANSITIVE DEPENDENCY
+  io: 0.3.1 # TRANSITIVE DEPENDENCY
   js: 0.6.1 # TRANSITIVE DEPENDENCY
   matcher: 0.12.1+4 # TRANSITIVE DEPENDENCY
-  mime: 0.9.4 # TRANSITIVE DEPENDENCY
+  mime: 0.9.5 # TRANSITIVE DEPENDENCY
   node_preamble: 1.4.0 # TRANSITIVE DEPENDENCY
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
@@ -53,7 +53,7 @@ dev_dependencies:
   source_map_stack_trace: 1.1.4 # TRANSITIVE DEPENDENCY
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
-  stack_trace: 1.9.0 # TRANSITIVE DEPENDENCY
+  stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
   stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY

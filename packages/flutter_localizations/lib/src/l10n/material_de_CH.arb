@@ -1,10 +1,12 @@
 {
+  "timePickerMinuteModeAnnouncement": "Minuten auswählen",
+  "timePickerHourModeAnnouncement": "Stunden auswählen",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "openAppDrawerTooltip": "Navigationsmenü öffnen",
   "backButtonTooltip": "Zurück",
   "closeButtonTooltip": "Schliessen",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Löschen",
   "nextMonthTooltip": "Nächster Monat",
   "previousMonthTooltip": "Vorheriger Monat",
   "nextPageTooltip": "Nächste Seite",
@@ -27,5 +29,6 @@
   "selectAllButtonLabel": "ALLE AUSWÄHLEN",
   "viewLicensesButtonLabel": "LIZENZEN ANZEIGEN",
   "anteMeridiemAbbreviation": "VORM.",
-  "postMeridiemAbbreviation": "NACHM."
+  "postMeridiemAbbreviation": "NACHM.",
+  "modalBarrierDismissLabel": "Schliessen"
 }

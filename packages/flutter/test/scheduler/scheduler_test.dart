@@ -1,6 +1,7 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -18,8 +19,12 @@ class TestStrategy {
 }
 
 void main() {
+  SchedulerBinding scheduler;
+  setUpAll(() {
+    scheduler = new TestSchedulerBinding();
+  });
+
   test('Tasks are executed in the right order', () {
-    final SchedulerBinding scheduler = new TestSchedulerBinding();
     final TestStrategy strategy = new TestStrategy();
     scheduler.schedulingStrategy = strategy.shouldRunTaskWithPriority;
     final List<int> input = <int>[2, 23, 23, 11, 0, 80, 3];
@@ -83,5 +88,26 @@ void main() {
     expect(scheduler.handleEventLoopCallback(), isFalse);
     expect(executedTasks, hasLength(1));
     expect(executedTasks[0], equals(0));
+  });
+
+  test('2 calls to scheduleWarmUpFrame just schedules it once', () {
+    final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
+    runZoned(
+      () {
+        // Run it twice without processing the queued tasks.
+        scheduler.scheduleWarmUpFrame();
+        scheduler.scheduleWarmUpFrame();
+      },
+      zoneSpecification: new ZoneSpecification(
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          // Don't actually run the tasks, just record that it was scheduled.
+          timerQueueTasks.add(f);
+          return null;
+        },
+      ),
+    );
+
+    // A single call to scheduleWarmUpFrame queues up 2 Timer tasks.
+    expect(timerQueueTasks.length, 2);
   });
 }

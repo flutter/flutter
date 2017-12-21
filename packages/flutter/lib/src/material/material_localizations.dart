@@ -29,8 +29,10 @@ import 'typography.dart';
 //    you must add it to every other language (all the other *.arb files in that
 //    same directory), including a best guess as to the translation, e.g.
 //    obtained by optimistic use of Google Translate
-//    (https://translate.google.com/). There is a README file with further
-//    information in the lib/src/l10n/ directory.
+//    (https://translate.google.com/). After that you have to re-generate
+//    lib/src/l10n/localizaions.dart by running
+//    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
+//    file with further information in the lib/src/l10n/ directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -83,6 +85,14 @@ abstract class MaterialLocalizations {
   /// Title for the [PaginatedDataTable]'s "rows per page" footer.
   String get rowsPerPageTitle;
 
+  /// The accessibility label used on a tab in a [TabBar].
+  ///
+  /// This message describes the index of the selected tab and how many tabs
+  /// there are, e.g. 'Tab 1 of 2' in United States English.
+  ///
+  /// `tabIndex` and `tabCount` must be greater than or equal to one.
+  String tabLabel({int tabIndex, int tabCount});
+
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
 
@@ -126,6 +136,13 @@ abstract class MaterialLocalizations {
   /// The text-to-speech announcement made when a time picker invoked using
   /// [showTimePicker] is set to the minute picker mode.
   String get timePickerMinuteModeAnnouncement;
+
+  /// Label read out by accessibility tools (TalkBack or VocieOver) for a modal
+  /// barrier to indicate that a tap dismisses the barrier.
+  ///
+  /// A modal barrier can for example be found behind a alert or popup to block
+  /// user interaction with elements behind it.
+  String get modalBarrierDismissLabel;
 
   /// The format used to lay out the time picker.
   ///
@@ -187,6 +204,17 @@ abstract class MaterialLocalizations {
   /// - Russian: ср, сент. 27
   String formatMediumDate(DateTime date);
 
+  /// Formats day of week, month, day of month and year in a long-width format.
+  ///
+  /// Does not abbreviate names. Appears in spoken announcements of the date
+  /// picker invoked using [showDatePicker], when accessibility mode is on.
+  ///
+  /// Examples:
+  ///
+  /// - US English: Wednesday, September 27, 2017
+  /// - Russian: Среда, Сентябрь 27, 2017
+  String formatFullDate(DateTime date);
+
   /// Formats the month and the year of the given [date].
   ///
   /// The returned string does not contain the day of the month. This appears
@@ -218,6 +246,18 @@ abstract class MaterialLocalizations {
   /// var firstDayOfWeek = localizations.narrowWeekdays[localizations.firstDayOfWeekIndex];
   /// ```
   int get firstDayOfWeekIndex;
+
+  /// The semantics label used to indicate which account is signed in in the
+  /// [UserAccountsDrawerHeader] widget.
+  String get signedInLabel;
+
+  /// The semantics label used for the button on [UserAccountsDrawerHeader] that
+  /// hides the list of accounts.
+  String get hideAccountsLabel;
+
+  /// The semantics label used for the button on [UserAccountsDrawerHeader] that
+  /// shows the list of accounts.
+  String get showAccountsLabel;
 
   /// The `MaterialLocalizations` from the closest [Localizations] instance
   /// that encloses the given context.
@@ -266,7 +306,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   const DefaultMaterialLocalizations();
 
   // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
-  static const List<String>_shortWeekdays = const <String>[
+  static const List<String> _shortWeekdays = const <String>[
     'Mon',
     'Tue',
     'Wed',
@@ -274,6 +314,17 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     'Fri',
     'Sat',
     'Sun',
+  ];
+
+  // Ordered to match DateTime.MONDAY=1, DateTime.SUNDAY=6
+  static const List<String> _weekdays = const <String>[
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
   ];
 
   static const List<String> _narrowWeekdays = const <String>[
@@ -354,6 +405,12 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
     final String day = _shortWeekdays[date.weekday - DateTime.MONDAY];
     final String month = _shortMonths[date.month - DateTime.JANUARY];
     return '$day, $month ${date.day}';
+  }
+
+  @override
+  String formatFullDate(DateTime date) {
+    final String month = _months[date.month - DateTime.JANUARY];
+    return '${_weekdays[date.weekday - DateTime.MONDAY]}, $month ${date.day}, ${date.year}';
   }
 
   @override
@@ -466,7 +523,14 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   }
 
   @override
-  String get rowsPerPageTitle => 'Rows per page';
+  String get rowsPerPageTitle => 'Rows per page:';
+
+  @override
+  String tabLabel({int tabIndex, int tabCount}) {
+    assert(tabIndex >= 1);
+    assert(tabCount >= 1);
+    return 'Tab $tabIndex of $tabCount';
+  }
 
   @override
   String selectedRowCountTitle(int selectedRowCount) {
@@ -520,6 +584,9 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get timePickerMinuteModeAnnouncement => 'Select minutes';
 
   @override
+  String get modalBarrierDismissLabel => 'Dismiss';
+
+  @override
   TimeOfDayFormat timeOfDayFormat({ bool alwaysUse24HourFormat: false }) {
     return alwaysUse24HourFormat
       ? TimeOfDayFormat.HH_colon_mm
@@ -529,6 +596,15 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Looks up text geometry defined in [MaterialTextGeometry].
   @override
   TextTheme get localTextGeometry => MaterialTextGeometry.englishLike;
+
+  @override
+  String get signedInLabel => 'Signed in';
+
+  @override
+  String get hideAccountsLabel => 'Hide accounts';
+
+  @override
+  String get showAccountsLabel => 'Show accounts';
 
   /// Creates an object that provides US English resource values for the material
   /// library widgets.

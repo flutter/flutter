@@ -78,6 +78,7 @@ class PageRouteBuilder<T> extends PageRoute<T> {
     this.opaque: true,
     this.barrierDismissible: false,
     this.barrierColor,
+    this.barrierLabel,
     this.maintainState: true,
   }) : assert(pageBuilder != null),
        assert(transitionsBuilder != null),
@@ -107,6 +108,9 @@ class PageRouteBuilder<T> extends PageRoute<T> {
 
   @override
   final Color barrierColor;
+
+  @override
+  final String barrierLabel;
 
   @override
   final bool maintainState;

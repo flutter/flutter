@@ -23,7 +23,7 @@ import 'android_studio.dart';
 const String gradleManifestPath = 'android/app/src/main/AndroidManifest.xml';
 const String gradleAppOutV1 = 'android/app/build/outputs/apk/app-debug.apk';
 const String gradleAppOutDirV1 = 'android/app/build/outputs/apk';
-const String gradleVersion = '3.3';
+const String gradleVersion = '4.1';
 final RegExp _assembleTaskPattern = new RegExp(r'assemble([^:]+): task ');
 
 GradleProject _cachedGradleProject;
@@ -336,6 +336,12 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.modeName, apkFileName));
   if (apkFile.existsSync())
     return apkFile;
+  if (buildInfo.flavor != null) {
+    // Android Studio Gradle plugin v3 adds flavor to path.
+    apkFile = fs.file(fs.path.join(project.apkDirectory, buildInfo.flavor, buildInfo.modeName, apkFileName));
+    if (apkFile.existsSync())
+      return apkFile;
+  }
   return null;
 }
 

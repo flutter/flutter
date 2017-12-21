@@ -1,10 +1,12 @@
 {
+  "timePickerMinuteModeAnnouncement": "Selecionar minutos",
+  "timePickerHourModeAnnouncement": "Selecionar horas",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "openAppDrawerTooltip": "Abrir menu de navegação",
-  "backButtonTooltip": "Anterior",
+  "backButtonTooltip": "Voltar",
   "closeButtonTooltip": "Fechar",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Eliminar",
   "nextMonthTooltip": "Mês seguinte",
   "previousMonthTooltip": "Mês anterior",
   "nextPageTooltip": "Página seguinte",
@@ -27,5 +29,6 @@
   "selectAllButtonLabel": "SELECIONAR TUDO",
   "viewLicensesButtonLabel": "VER LICENÇAS",
   "anteMeridiemAbbreviation": "AM",
-  "postMeridiemAbbreviation": "PM"
+  "postMeridiemAbbreviation": "PM",
+  "modalBarrierDismissLabel": "Ignorar"
 }

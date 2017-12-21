@@ -274,12 +274,14 @@ tasks:
       Measures the startup time of the Flutter Gallery app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   complex_layout_ios__start_up:
     description: >
       Measures the startup time of the Complex Layout sample app on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["has-ios-device"]
+    flaky: true
 
   flutter_gallery_ios__transition_perf:
     description: >

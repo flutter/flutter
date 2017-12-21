@@ -156,11 +156,11 @@ void main() {
 
     expect(foo.debugLabel, 'foo');
     expect(foo.toString(), 'TextStyle(debugLabel: foo, inherit: true, size: 1.0)');
-    expect(foo.merge(bar).debugLabel, 'bar < foo');
-    expect(foo.merge(bar).merge(baz).debugLabel, 'baz < bar < foo');
-    expect(foo.copyWith().debugLabel, 'copy of foo');
-    expect(foo.apply().debugLabel, 'modified foo');
-    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo, bar)');
-    expect(TextStyle.lerp(foo.merge(bar), baz, 0.5).copyWith().debugLabel, 'copy of lerp(bar < foo, baz)');
+    expect(foo.merge(bar).debugLabel, '(foo).merge(bar)');
+    expect(foo.merge(bar).merge(baz).debugLabel, '((foo).merge(bar)).merge(baz)');
+    expect(foo.copyWith().debugLabel, '(foo).copyWith');
+    expect(foo.apply().debugLabel, '(foo).apply');
+    expect(TextStyle.lerp(foo, bar, 0.5).debugLabel, 'lerp(foo ⎯0.5→ bar)');
+    expect(TextStyle.lerp(foo.merge(bar), baz, 0.51).copyWith().debugLabel, '(lerp((foo).merge(bar) ⎯0.5→ baz)).copyWith');
   });
 }

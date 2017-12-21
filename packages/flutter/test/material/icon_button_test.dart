@@ -2,10 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 
 class MockOnPressedFunction implements Function {
   int called = 0;
@@ -269,6 +273,32 @@ void main() {
     );
 
     await gesture.up();
+  });
+
+  testWidgets('IconButton Semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(
+      wrap(
+        child: new IconButton(
+          onPressed: mockOnPressedFunction,
+          icon: const Icon(Icons.link, semanticLabel: 'link'),
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(new TestSemantics.root(
+      children: <TestSemantics>[
+        new TestSemantics.rootChild(
+          rect: new Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          actions: <SemanticsAction>[SemanticsAction.tap],
+          flags: <SemanticsFlags>[SemanticsFlags.isButton],
+          label: 'link',
+        )
+      ]
+    ), ignoreId: true, ignoreTransform: true));
+
+    semantics.dispose();
   });
 }
 
