@@ -50,11 +50,11 @@ class BenchmarkResultPrinter {
   }
 
   String _printJson() {
-    return JSON.encode(new Map<String, double>.fromIterable(
-      _results,
-      key: (_BenchmarkResult result) => result.name,
-      value: (_BenchmarkResult result) => result.value,
-    ));
+    final Map<String, double> results = <String, double>{};
+    for (_BenchmarkResult result in _results) {
+      results[result.name] = result.value;
+    }
+    return JSON.encode(results);
   }
 
   String _printPlainText() {
