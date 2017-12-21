@@ -21,9 +21,13 @@ abstract class AnimatedIcons {
   static const AnimatedIconData menu_arrow = _$menu_arrow;
 }
 
-/// Data for an animated icon.
+/// Vector graphics data for icons used by [AnimatedIcon].
 ///
-/// This base class provides the public API for an animated icon's data.
+/// Instances of this class are currently opaque because we have not committed to a specific
+/// animated vector graphics format.
+///
+/// See also:
+///  * [AnimatedIcons], a class that contains constants that implement this interface.
 abstract class AnimatedIconData {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
