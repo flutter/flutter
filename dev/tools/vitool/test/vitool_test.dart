@@ -9,7 +9,7 @@ import 'package:vitool/vitool.dart';
 import 'package:test/test.dart';
 import 'package:path/path.dart' as path;
 
-const String kPackagePath = '.';
+const String kPackagePath = '..';
 
 void main() {
 
