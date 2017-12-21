@@ -53,6 +53,9 @@ class TranslationBundle {
   String get postMeridiemAbbreviation => parent?.postMeridiemAbbreviation;
   String get timePickerHourModeAnnouncement => parent?.timePickerHourModeAnnouncement;
   String get timePickerMinuteModeAnnouncement => parent?.timePickerMinuteModeAnnouncement;
+  String get signedInLabel => parent?.signedInLabel;
+  String get hideAccountsLabel => parent?.hideAccountsLabel;
+  String get showAccountsLabel => parent?.showAccountsLabel;
   String get modalBarrierDismissLabel => parent?.modalBarrierDismissLabel;
 }
 
@@ -94,6 +97,9 @@ class _Bundle_ar extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'م';
   @override String get timePickerHourModeAnnouncement => r'اختيار الساعات';
   @override String get timePickerMinuteModeAnnouncement => r'اختيار الدقائق';
+  @override String get signedInLabel => r'تم تسجيل الدخول';
+  @override String get hideAccountsLabel => r'إخفاء الحسابات';
+  @override String get showAccountsLabel => r'عرض الحسابات';
   @override String get modalBarrierDismissLabel => r'تجاهل';
 }
 
@@ -132,6 +138,9 @@ class _Bundle_de extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'NACHM.';
   @override String get timePickerHourModeAnnouncement => r'Stunden auswählen';
   @override String get timePickerMinuteModeAnnouncement => r'Minuten auswählen';
+  @override String get signedInLabel => r'Angemeldet';
+  @override String get hideAccountsLabel => r'Konten ausblenden';
+  @override String get showAccountsLabel => r'Konten anzeigen';
   @override String get modalBarrierDismissLabel => r'Schließen';
 }
 
@@ -171,6 +180,9 @@ class _Bundle_en extends TranslationBundle {
   @override String get timePickerHourModeAnnouncement => r'Select hours';
   @override String get timePickerMinuteModeAnnouncement => r'Select minutes';
   @override String get modalBarrierDismissLabel => r'Dismiss';
+  @override String get signedInLabel => r'Signed in';
+  @override String get hideAccountsLabel => r'Hide accounts';
+  @override String get showAccountsLabel => r'Show accounts';
 }
 
 // ignore: camel_case_types
@@ -208,6 +220,9 @@ class _Bundle_es extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'P.M.';
   @override String get timePickerHourModeAnnouncement => r'Seleccionar horas';
   @override String get timePickerMinuteModeAnnouncement => r'Seleccionar minutos';
+  @override String get signedInLabel => r'Registrado';
+  @override String get hideAccountsLabel => r'Ocultar cuentas';
+  @override String get showAccountsLabel => r'Mostrar cuentas';
   @override String get modalBarrierDismissLabel => r'Ignorar';
 }
 
@@ -245,6 +260,9 @@ class _Bundle_fa extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'ب.ظ.';
   @override String get timePickerHourModeAnnouncement => r'انتخاب ساعت';
   @override String get timePickerMinuteModeAnnouncement => r'انتخاب دقیقه';
+  @override String get signedInLabel => r'وارد شدن';
+  @override String get hideAccountsLabel => r'پنهان کردن حساب ها';
+  @override String get showAccountsLabel => r'نمایش حساب ها';
   @override String get modalBarrierDismissLabel => r'رد کردن';
 }
 
@@ -283,6 +301,9 @@ class _Bundle_fr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Sélectionner une heure';
   @override String get timePickerMinuteModeAnnouncement => r'Sélectionner des minutes';
+  @override String get signedInLabel => r'Connecté';
+  @override String get hideAccountsLabel => r'Masquer les comptes';
+  @override String get showAccountsLabel => r'Afficher les comptes';
   @override String get modalBarrierDismissLabel => r'Ignorer';
 }
 
@@ -359,6 +380,9 @@ class _Bundle_he extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'בחירת שעות';
   @override String get timePickerMinuteModeAnnouncement => r'בחירת דקות';
+  @override String get signedInLabel => r'מחובר';
+  @override String get hideAccountsLabel => r'הסתר חשבונות';
+  @override String get showAccountsLabel => r'הצג חשבונות';
   @override String get modalBarrierDismissLabel => r'סגירה';
 }
 
@@ -396,6 +420,9 @@ class _Bundle_it extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Seleziona le ore';
   @override String get timePickerMinuteModeAnnouncement => r'Seleziona i minuti';
+  @override String get signedInLabel => r'Registrato';
+  @override String get hideAccountsLabel => r'Nascondi account';
+  @override String get showAccountsLabel => r'Mostra account';
   @override String get modalBarrierDismissLabel => r'Ignora';
 }
 
@@ -433,6 +460,9 @@ class _Bundle_ja extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'時間を選択';
   @override String get timePickerMinuteModeAnnouncement => r'分を選択';
+  @override String get signedInLabel => r'ログイン中';
+  @override String get hideAccountsLabel => r'アカウントを隠す';
+  @override String get showAccountsLabel => r'アカウントを表示する';
   @override String get modalBarrierDismissLabel => r'閉じる';
 }
 
@@ -470,6 +500,9 @@ class _Bundle_ko extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'오후';
   @override String get timePickerHourModeAnnouncement => r'시간 선택';
   @override String get timePickerMinuteModeAnnouncement => r'분 선택';
+  @override String get signedInLabel => r'로그인 함';
+  @override String get hideAccountsLabel => r'계정 숨기기';
+  @override String get showAccountsLabel => r'계정 표시';
   @override String get modalBarrierDismissLabel => r'버리다';
 }
 
@@ -507,6 +540,9 @@ class _Bundle_nl extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'pm';
   @override String get timePickerHourModeAnnouncement => r'Uren selecteren';
   @override String get timePickerMinuteModeAnnouncement => r'Minuten selecteren';
+  @override String get signedInLabel => r'Ingelogd';
+  @override String get hideAccountsLabel => r'Verberg accounts';
+  @override String get showAccountsLabel => r'Toon accounts';
   @override String get modalBarrierDismissLabel => r'ontslaan';
 }
 
@@ -546,6 +582,9 @@ class _Bundle_pl extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Wybierz godziny';
   @override String get timePickerMinuteModeAnnouncement => r'Wybierz minuty';
+  @override String get signedInLabel => r'Zapisany';
+  @override String get hideAccountsLabel => r'Ukryj konta';
+  @override String get showAccountsLabel => r'Pokaż konta';
   @override String get modalBarrierDismissLabel => r'oddalić';
 }
 
@@ -580,6 +619,9 @@ class _Bundle_ps extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'لیدلس وګورئ';
   @override String get timePickerHourModeAnnouncement => r'وختونه وټاکئ';
   @override String get timePickerMinuteModeAnnouncement => r'منې غوره کړئ';
+  @override String get signedInLabel => r'ننوتل';
+  @override String get hideAccountsLabel => r'حسابونه پټ کړئ';
+  @override String get showAccountsLabel => r'حسابونه ښکاره کړئ';
   @override String get modalBarrierDismissLabel => r'رد کړه';
 }
 
@@ -617,6 +659,9 @@ class _Bundle_pt extends TranslationBundle {
   @override String get viewLicensesButtonLabel => r'VER LICENÇAS';
   @override String get timePickerHourModeAnnouncement => r'Selecione as horas';
   @override String get timePickerMinuteModeAnnouncement => r'Selecione os minutos';
+  @override String get signedInLabel => r'Assinado';
+  @override String get hideAccountsLabel => r'Ocultar contas';
+  @override String get showAccountsLabel => r'Mostrar contas';
   @override String get modalBarrierDismissLabel => r'Dispensar';
 }
 
@@ -657,6 +702,9 @@ class _Bundle_ru extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'Выберите часы';
   @override String get timePickerMinuteModeAnnouncement => r'Выберите минуты';
+  @override String get signedInLabel => r'Залогинен';
+  @override String get hideAccountsLabel => r'Спрятать аккаунты';
+  @override String get showAccountsLabel => r'Показать аккаунты';
   @override String get modalBarrierDismissLabel => r'Закрыть';
 }
 
@@ -694,6 +742,9 @@ class _Bundle_th extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'เลือกชั่วโมง';
   @override String get timePickerMinuteModeAnnouncement => r'เลือกนาที';
+  @override String get signedInLabel => r'ลงทะเบียนเข้า';
+  @override String get hideAccountsLabel => r'ซ่อนบัญชี';
+  @override String get showAccountsLabel => r'แสดงบัญชี';
   @override String get modalBarrierDismissLabel => r'ยกเลิก';
 }
 
@@ -731,6 +782,9 @@ class _Bundle_tr extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'ÖS';
   @override String get timePickerHourModeAnnouncement => r'Saati seçin';
   @override String get timePickerMinuteModeAnnouncement => r'Dakikayı seçin';
+  @override String get signedInLabel => r'Yetkili';
+  @override String get hideAccountsLabel => r'Hesapları gizle';
+  @override String get showAccountsLabel => r'Hesapları göster';
   @override String get modalBarrierDismissLabel => r'Reddet';
 }
 
@@ -768,6 +822,9 @@ class _Bundle_ur extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'PM';
   @override String get timePickerHourModeAnnouncement => r'گھنٹے منتخب کریں';
   @override String get timePickerMinuteModeAnnouncement => r'منٹ منتخب کریں';
+  @override String get signedInLabel => r'سائن ان';
+  @override String get hideAccountsLabel => r'اکاؤنٹس چھپائیں';
+  @override String get showAccountsLabel => r'اکاؤنٹس دکھائیں';
   @override String get modalBarrierDismissLabel => r'برطرف';
 }
 
@@ -805,6 +862,9 @@ class _Bundle_zh extends TranslationBundle {
   @override String get postMeridiemAbbreviation => r'下午';
   @override String get timePickerHourModeAnnouncement => r'选择小时';
   @override String get timePickerMinuteModeAnnouncement => r'选择分钟';
+  @override String get signedInLabel => r'登录';
+  @override String get hideAccountsLabel => r'隐藏帐户';
+  @override String get showAccountsLabel => r'显示帐户';
   @override String get modalBarrierDismissLabel => r'关闭';
 }
 

@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "時間を選択",
   "timePickerMinuteModeAnnouncement": "分を選択",
+  "signedInLabel": "ログイン中",
+  "hideAccountsLabel": "アカウントを隠す",
+  "showAccountsLabel": "アカウントを表示する",
   "modalBarrierDismissLabel": "閉じる"
 }

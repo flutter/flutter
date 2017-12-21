@@ -4826,7 +4826,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// more accessible.
   final SemanticsProperties properties;
 
-  /// If 'container' is true, this widget will introduce a new
+  /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///

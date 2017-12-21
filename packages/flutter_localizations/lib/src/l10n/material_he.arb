@@ -32,5 +32,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "בחירת שעות",
   "timePickerMinuteModeAnnouncement": "בחירת דקות",
+  "signedInLabel": "מחובר",
+  "hideAccountsLabel": "הסתר חשבונות",
+  "showAccountsLabel": "הצג חשבונות",
   "modalBarrierDismissLabel": "סגירה"
 }

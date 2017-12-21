@@ -31,5 +31,8 @@
   "postMeridiemAbbreviation": "P.M.",
   "timePickerHourModeAnnouncement": "Seleccionar horas",
   "timePickerMinuteModeAnnouncement": "Seleccionar minutos",
+  "signedInLabel": "Registrado",
+  "hideAccountsLabel": "Ocultar cuentas",
+  "showAccountsLabel": "Mostrar cuentas",
   "modalBarrierDismissLabel": "Ignorar"
 }

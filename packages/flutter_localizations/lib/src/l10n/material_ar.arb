@@ -34,5 +34,8 @@
   "postMeridiemAbbreviation": "م",
   "timePickerHourModeAnnouncement": "اختيار الساعات",
   "timePickerMinuteModeAnnouncement": "اختيار الدقائق",
+  "signedInLabel": "تم تسجيل الدخول",
+  "hideAccountsLabel": "إخفاء الحسابات",
+  "showAccountsLabel": "عرض الحسابات",
   "modalBarrierDismissLabel": "تجاهل"
 }

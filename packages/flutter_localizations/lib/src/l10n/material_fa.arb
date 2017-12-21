@@ -30,5 +30,8 @@
   "postMeridiemAbbreviation": "ب.ظ.",
   "timePickerHourModeAnnouncement": "انتخاب ساعت",
   "timePickerMinuteModeAnnouncement": "انتخاب دقیقه",
+  "signedInLabel": "وارد شدن",
+  "hideAccountsLabel": "پنهان کردن حساب ها",
+  "showAccountsLabel": "نمایش حساب ها",
   "modalBarrierDismissLabel": "رد کردن"
 }
