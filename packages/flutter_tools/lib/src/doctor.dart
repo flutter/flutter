@@ -4,6 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert' show UTF8;
+import 'package:http/http.dart' as http;
+import 'package:xml/xml.dart' as xml;
 
 import 'package:archive/archive.dart';
 
@@ -270,8 +272,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-
-    _validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
+    
+    await _validateFlutterPackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
         'Flutter', minVersion: kMinFlutterPluginVersion);
     _validatePackage(messages, <String>['Dart'], 'Dart');
 
@@ -334,10 +336,66 @@ abstract class IntelliJValidator extends DoctorValidator {
       return;
     }
 
+    
+
     messages.add(new ValidationMessage.error(
       '$title plugin not installed; this adds $title specific functionality.'
     ));
   }
+
+  Future<Null> _validateFlutterPackage(List<ValidationMessage> messages, List<String> packageNames, String title, {
+    Version minVersion
+  }) async {
+
+    for (String packageName in packageNames) {
+      if (!hasPackage(packageName)) {
+        continue;
+      }
+      final String versionText = _readPackageVersion(packageName);
+      final Version localVersion = new Version.parse(versionText);
+      if (localVersion != null && minVersion != null && localVersion < minVersion) {
+        messages.add(new ValidationMessage.error(
+          '$title plugin version $versionText - the recommended minimum version is $minVersion'
+        ));
+      } 
+      else {
+        
+        try {
+          final String latestFlutter = await _getLatestVersionPossible();
+          final Version flutterVersion = new Version.parse(latestFlutter);
+          final String serverMessage = localVersion < flutterVersion ? "[Consider upgrading your plugin version to $version]" : "";
+            messages.add(new ValidationMessage(
+              '$title plugin ${localVersion != null ? "version $localVersion" : "installed"} $serverMessage'
+            ));
+        } catch (e) {
+          messages.add(new ValidationMessage(
+            '$title plugin ${localVersion != null ? "version $localVersion" : "installed"}'
+          ));
+        }
+      }
+
+      return;
+    }
+    messages.add(new ValidationMessage.error(
+      '$title plugin not installed; this adds $title specific functionality.'
+    ));
+  }
+
+  Future<String> _getLatestVersionPossible() async {
+      
+      final List<String> stripVersion = version.split(".");
+      final String buildNumber = '${stripVersion[0].substring(2)}${stripVersion[1]}.${stripVersion[2]}';
+      final String url = 'https://plugins.jetbrains.com/plugins/list?build=IU-$buildNumber&pluginId=io.flutter';
+      
+      try {
+        final http.Response response = await http.get(url);
+        final xml.XmlDocument xmlDocument = xml.parse(response.body);
+        final String version = xmlDocument.findAllElements('version').map((xml.XmlElement node) => node.text).first;
+        return version;
+      } catch (e) {
+        return e;
+      }
+    }
 
   String _readPackageVersion(String packageName) {
     final String jarPath = packageName.endsWith('.jar')
