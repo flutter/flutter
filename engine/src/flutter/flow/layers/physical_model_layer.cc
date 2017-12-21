@@ -19,7 +19,7 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
   PrerollChildren(context, matrix, &child_paint_bounds);
 
   if (elevation_ == 0) {
-    set_paint_bounds(rrect_.getBounds());
+    set_paint_bounds(shape_->getBounds());
   } else {
 #if defined(OS_FUCHSIA)
     // Let the system compositor draw all shadows for us.
@@ -29,7 +29,7 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
     // The margin is hardcoded to an arbitrary maximum for now because Skia
     // doesn't provide a way to calculate it.  We fill this whole region
     // and clip children to it so we don't need to join the child paint bounds.
-    SkRect bounds(rrect_.getBounds());
+    SkRect bounds(shape_->getBounds());
     bounds.outset(20.0, 20.0);
     set_paint_bounds(bounds);
 #endif  // defined(OS_FUCHSIA)
@@ -57,8 +57,7 @@ void PhysicalModelLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PhysicalModelLayer::Paint");
   FXL_DCHECK(needs_painting());
 
-  SkPath path;
-  path.addRRect(rrect_);
+  SkPath path = shape_->getPath();
 
   if (elevation_ != 0) {
     DrawShadow(&context.canvas, path, SK_ColorBLACK, elevation_,
@@ -70,15 +69,15 @@ void PhysicalModelLayer::Paint(PaintContext& context) const {
   context.canvas.drawPath(path, paint);
 
   SkAutoCanvasRestore save(&context.canvas, false);
-  if (rrect_.isRect()) {
+  if (shape_->isRect()) {
     context.canvas.save();
   } else {
-    context.canvas.saveLayer(&rrect_.getBounds(), nullptr);
+    context.canvas.saveLayer(&shape_->getBounds(), nullptr);
   }
-  context.canvas.clipRRect(rrect_, true);
+  shape_->clipCanvas(context.canvas);
   PaintChildren(context);
-  if (context.checkerboard_offscreen_layers && !rrect_.isRect())
-    DrawCheckerboard(&context.canvas, rrect_.getBounds());
+  if (context.checkerboard_offscreen_layers && !shape_->isRect())
+    DrawCheckerboard(&context.canvas, shape_->getBounds());
 }
 
 void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
@@ -96,6 +95,12 @@ void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
   SkShadowUtils::DrawShadow(canvas, path, dpr * elevation,
                             SkPoint3::Make(shadow_x, shadow_y, dpr * 600.0f),
                             dpr * 800.0f, 0.039f, 0.25f, color, flags);
+}
+
+const SkPath PhysicalLayerRRect::getPath() const {
+  SkPath path;
+  path.addRRect(rrect_);
+  return path;
 }
 
 }  // namespace flow

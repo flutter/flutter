@@ -52,6 +52,11 @@ class LayerBuilder {
                                  SkColor color,
                                  SkScalar device_pixel_ratio) = 0;
 
+  virtual void PushPhysicalModel(const SkPath& path,
+                                 double elevation,
+                                 SkColor color,
+                                 SkScalar device_pixel_ratio) = 0;
+
   virtual void PushPerformanceOverlay(uint64_t enabled_options,
                                       const SkRect& rect) = 0;
 
