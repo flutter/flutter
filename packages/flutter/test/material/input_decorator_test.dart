@@ -50,10 +50,10 @@ double getDividerBottom(WidgetTester tester) {
 
 double getDividerWeight(WidgetTester tester) {
   final CustomPaint customPaint = tester.widget(findBorderPainter());
-  final dynamic inputBorderPainter = customPaint.foregroundPainter;
-  final dynamic inputBorderTween = inputBorderPainter.border;
+  final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
+  final dynamic/*_InputBorderTween */  inputBorderTween = inputBorderPainter.border;
   final Animation<double> animation = inputBorderPainter.animation;
-  final InputBorder border = inputBorderTween.evaluate(animation);
+  final dynamic/*_InputBorder */ border = inputBorderTween.evaluate(animation);
   return border.borderSide.width;
 }
 

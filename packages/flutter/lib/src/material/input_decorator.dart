@@ -15,10 +15,8 @@ import 'theme.dart';
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
 
-/// Used to define the appearance of an [InputDecorator]'s border.
-///
-/// An input decorator's border type is specified with
-/// [InputDecoration.borderType] and rendered by [InputBorder].
+/// Used to define the appearance of an [InputDecorator]'s border
+/// with [InputDecoration.borderType].
 ///
 /// The value of [InputDecoration.borderType] also affects the internal
 /// layout of [InputDecorator], for example the default value of
@@ -106,9 +104,9 @@ class _InputBorderPainter extends CustomPainter {
 }
 
 // An analog of AnimatedContainer, which can animate its shaped border, for
-// InputBorder. This specialized animated container is needed because the
+// _InputBorder. This specialized animated container is needed because the
 // _InputBorderGap, which is computed at layout time, is required by the
-// InputBorder's paint method.
+// _InputBorder's paint method.
 class _BorderContainer extends StatefulWidget {
   const _BorderContainer({
     Key key,
@@ -119,7 +117,7 @@ class _BorderContainer extends StatefulWidget {
        assert(gap != null),
        super(key: key);
 
-  final InputBorder border;
+  final _InputBorder border;
   final _InputBorderGap gap;
   final Widget child;
 
@@ -184,13 +182,23 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   }
 }
 
-/// Paints an [InputDecorator]'s outline or underline border.
-///
-/// The border separates the input decorator's "container", i.e. the
-/// optionally filled area from the optional helper, error, and counter
-/// fields below and the optional icon to the left or right.
-class InputBorder extends ShapeBorder {
-  InputBorder({
+// Paints an [InputDecorator]'s outline or underline border.
+//
+// The border separates the input decorator's "container", i.e. the
+// optionally filled area above the optional helper, error, and counter
+// fields and adjacent to the optional icon.
+//
+// When `borderType` is [InputBorderType.underline] a horizontal
+// line is drawn at the bottom of the container. The line's color
+// and weight are defined by the `borderSide` parameter.
+//
+// When `borderType` is [InputBorderType.outline] a rounded rectangle
+// outline is drawn. The line's color and weight are defined by the
+// `borderSide` parameter, and the (circular) radii of the corners are
+// defined by the `borderRadius` parameter. The outline border may
+// have an animated gap, see [paint].
+class _InputBorder extends ShapeBorder {
+  _InputBorder({
     this.borderType: InputBorderType.underline,
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
@@ -220,8 +228,8 @@ class InputBorder extends ShapeBorder {
   }
 
   @override
-  InputBorder scale(double t) {
-    return new InputBorder(
+  _InputBorder scale(double t) {
+    return new _InputBorder(
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
       gapPad: gapPad * t,
@@ -347,8 +355,8 @@ class InputBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    if (a is InputBorder) {
-      return new InputBorder(
+    if (a is _InputBorder) {
+      return new _InputBorder(
         borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
@@ -361,8 +369,8 @@ class InputBorder extends ShapeBorder {
 
   @override
   ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is InputBorder) {
-      return new InputBorder(
+    if (b is _InputBorder) {
+      return new _InputBorder(
         borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
@@ -379,7 +387,7 @@ class InputBorder extends ShapeBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final InputBorder typedOther = other;
+    final _InputBorder typedOther = other;
     return typedOther.borderType == borderType
         && typedOther.borderRadius == borderRadius
         && typedOther.borderSide == borderSide
@@ -391,11 +399,11 @@ class InputBorder extends ShapeBorder {
   int get hashCode => hashValues(borderType, borderSide, borderRadius, gapPad, gapAnimation);
 }
 
-class _InputBorderTween extends Tween<InputBorder> {
-  _InputBorderTween({ InputBorder begin, InputBorder end }) : super(begin: begin, end: end);
+class _InputBorderTween extends Tween<_InputBorder> {
+  _InputBorderTween({ _InputBorder begin, _InputBorder end }) : super(begin: begin, end: end);
 
   @override
-  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
+  _InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
 }
 
 // Used to "shake" the floating label to the left to the left and right
@@ -1049,19 +1057,9 @@ class _RenderDecoration extends RenderBox {
       height = math.max(_minHeight(box, width), height);
     }
     return height;
-    /*
-      TBD: This fails because calls to box.getDistanceToBaseline() asserts
-    double aboveBaseline = 0.0;
-    double belowBaseline = 0.0;
-    for (RenderBox box in boxes) {
-      if (box == null)
-        continue;
-      final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
-      aboveBaseline = math.max(baseline, aboveBaseline);
-      belowBaseline = math.max(_minHeight(box, width) - baseline, belowBaseline);
-    }
-    return aboveBaseline + belowBaseline;
-    */
+    // TBD: this should compute the overall line height for the boxes
+    // when they've been baseline-aligned.
+    // See https://github.com/flutter/flutter/issues/13715
   }
 
   @override
@@ -1452,9 +1450,29 @@ class _Decorator extends RenderObjectWidget {
   }
 }
 
+/// Defines the appearance of a Material Design text field.
+///
+/// [InputDecorator] displays the visual elements of a Material Design text
+/// field around its `child`. The visual elements themselves are defined
+/// by an [InputDecoration] object and their layout and appearance depend
+/// on the `baseStyle`, `textAlign`, `isFocused`, and `isEmpty` parameters.
+///
+/// [TextField] uses this widget to decorate its [EditableText] child.
+///
+/// [InputDecorator] can be used to create widgets that look and behave like a
+/// [TextField] but support other kinds of input.
+///
+/// Requires one of its ancestors to be a [Material] widget.
+///
+/// See also:
+///
+///  * [TextField], which uses an [InputDecorator] to display a border,
+///    labels, and icons, around its [EditableText] child.
+///  * [Decoration] and [DecoratedBox], for drawing arbitrary decorations
+///    around other widgets.
 class InputDecorator extends StatefulWidget {
-  /// Creates a widget that displays labels and other visual elements similar
-  /// to a [TextField].
+  /// Creates a widget that displays a border, labels, and icons,
+  /// for a [TextField].
   ///
   /// The [isFocused] and [isEmpty] arguments must not be null.
   const InputDecorator({
@@ -1472,8 +1490,8 @@ class InputDecorator extends StatefulWidget {
   /// The text and styles to use when decorating the child.
   final InputDecoration decoration;
 
-  /// The style on which to base the label, hint, and error styles if the
-  /// [decoration] does not provide explicit styles.
+  /// The style on which to base the label, hint, counter, and error styles
+  /// if the [decoration] does not provide explicit styles.
   ///
   /// If null, defaults to a text style from the current [Theme].
   final TextStyle baseStyle;
@@ -1483,7 +1501,8 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the input field has focus.
   ///
-  /// Determines the position of the label text and the color of the divider.
+  /// Determines the position of the label text and the color and weight
+  /// of the border.
   ///
   /// Defaults to false.
   final bool isFocused;
@@ -1501,11 +1520,17 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
-  bool get labelIsFloating => !isEmpty || isFocused;
+  bool get _labelIsFloating => !isEmpty || isFocused;
 
   @override
   _InputDecoratorState createState() => new _InputDecoratorState();
 
+  /// The RenderBox that defines this decorator's "container". That's the
+  /// area which is filled if [decoration.isFilled] is true. It's the area
+  /// adjacent to [decoration.icon] and above the widgets that contain
+  /// [decoration.helperText], [decoration.errorText], [decoration.counterText].
+  ///
+  /// [TextField] renders ink splashes within the container.
   static RenderBox containerOf(BuildContext context) {
     final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
     return result?.container;
@@ -1532,7 +1557,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     _floatingLabelController = new AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
-      value: widget.labelIsFloating ? 1.0 : 0.0,
+      value: widget._labelIsFloating ? 1.0 : 0.0,
     );
     _floatingLabelController.addListener(_handleChange);
 
@@ -1563,8 +1588,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   @override
   void didUpdateWidget(InputDecorator old) {
     super.didUpdateWidget(old);
-    if (widget.labelIsFloating != old.labelIsFloating) {
-      if (widget.labelIsFloating)
+    if (widget._labelIsFloating != old._labelIsFloating) {
+      if (widget._labelIsFloating)
         _floatingLabelController.forward();
       else
         _floatingLabelController.reverse();
@@ -1674,7 +1699,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final InputBorder border = new InputBorder(
+    final _InputBorder border = new _InputBorder(
         gapAnimation: _floatingLabelController.view,
         borderType: decoration.borderType,
         borderRadius: decoration.borderType == InputBorderType.outline
@@ -1704,7 +1729,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: new AnimatedDefaultTextStyle(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
-        style: widget.labelIsFloating
+        style: widget._labelIsFloating
           ? _getFloatingLabelStyle(themeData)
           : _getInlineLabelStyle(themeData),
         child: new Text(
@@ -1719,7 +1744,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       new AnimatedOpacity(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
-        opacity: widget.labelIsFloating ? 1.0 : 0.0,
+        opacity: widget._labelIsFloating ? 1.0 : 0.0,
         child: new Text(
           decoration.prefixText,
           style: decoration.prefixStyle ?? inlineStyle
@@ -1837,7 +1862,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 }
 
-/// Text and styles used to label an input field.
+/// The border, labels, icons, and styles used to decorate a Material
+/// Design text field.
 ///
 /// The [TextField] and [InputDecorator] classes use [InputDecoration] objects
 /// to describe their decoration. (In fact, this class is merely the
@@ -1853,11 +1879,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 ///    around other widgets.
 @immutable
 class InputDecoration {
-  /// Creates a bundle of text and styles used to label an input field.
-  ///
-  /// Sets the [isCollapsed] property to false. To create a decoration that does
-  /// not reserve space for [labelText] or [errorText], use
-  /// [InputDecoration.collapsed].
+  /// Creates a bundle of the border, labels, icons, and styles used to
+  /// decorate a Material Design text field.
   const InputDecoration({
     this.icon,
     this.labelText,
@@ -1890,10 +1913,9 @@ class InputDecoration {
        assert(enabled != null),
        isCollapsed = false;
 
-  /// Creates a decoration that is the same size as the input field.
+  /// Defines an [InputDecorator] that is the same size as the input field.
   ///
-  /// This type of input decoration does not include a divider or an icon and
-  /// does not reserve space for [labelText] or [errorText].
+  /// This type of input decoration only includes the border.
   ///
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
@@ -1925,11 +1947,19 @@ class InputDecoration {
        counterText = null,
        counterStyle = null;
 
-  /// An icon to show before the input field.
+  /// An icon to show before the input field and outside of the decoration's
+  /// container.
   ///
   /// The size and color of the icon is configured automatically using an
   /// [IconTheme] and therefore does not need to be explicitly given in the
   /// icon widget.
+  ///
+  /// The trailing edge of the icon is padded by 16dps.
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
   ///
   /// See [Icon], [ImageIcon].
   final Widget icon;
@@ -1949,7 +1979,7 @@ class InputDecoration {
   /// When the [labelText] is on top of the input field, the text uses the
   /// [hintStyle] instead.
   ///
-  /// If null, defaults of a value derived from the base [TextStyle] for the
+  /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle labelStyle;
 
@@ -1978,7 +2008,7 @@ class InputDecoration {
   /// top of the input field (i.e., at the same location on the screen where
   /// text my be entered in the input field).
   ///
-  /// If null, defaults of a value derived from the base [TextStyle] for the
+  /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle hintStyle;
 
@@ -1999,6 +2029,15 @@ class InputDecoration {
   /// Defaults to false.
   final bool isDense;
 
+  /// The padding for the input decorator's container.
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
+  ///
+  /// By default the `contentPadding` reflects [isDense] and [borderType]. If
+  /// [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
   final EdgeInsets contentPadding;
 
   /// Whether the decoration is the same size as the input field.
@@ -2014,6 +2053,27 @@ class InputDecoration {
   /// Defaults to false.
   final bool hideDivider;
 
+  /// An icon that that appears before the [prefixText] and the input and within
+  /// the decoration's container.
+  ///
+  /// The size and color of the prefix icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// The prefix icon is not padded. To pad the trailing edge of the prefix icon:
+  /// ```dart
+  /// prefixIcon: new Padding(
+  ///   padding: const EdgeInsetsDirectional.only(end: 16.0),
+  ///   child: myIcon,
+  /// )
+  /// ```
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
+  ///
+  /// See [Icon], [ImageIcon].
   final Widget prefixIcon;
 
   /// Optional text prefix to place on the line before the input.
@@ -2027,6 +2087,27 @@ class InputDecoration {
   /// If null, defaults to the [hintStyle].
   final TextStyle prefixStyle;
 
+  /// An icon that that appears after the input and [suffixText] and within
+  /// the decoration's container.
+  ///
+  /// The size and color of the suffix icon is configured automatically using an
+  /// [IconTheme] and therefore does not need to be explicitly given in the
+  /// icon widget.
+  ///
+  /// The suffix icon is not padded. To pad the leading edge of the prefix icon:
+  /// ```dart
+  /// prefixIcon: new Padding(
+  ///   padding: const EdgeInsetsDirectional.only(start: 16.0),
+  ///   child: myIcon,
+  /// )
+  /// ```
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
+  ///
+  /// See [Icon], [ImageIcon].
   final Widget suffixIcon;
 
   /// Optional text suffix to place on the line after the input.
@@ -2051,12 +2132,38 @@ class InputDecoration {
   /// If null, defaults to the [helperStyle].
   final TextStyle counterStyle;
 
+  /// If true the decoration's container is filled with [fillColor].
+  ///
+  /// Typically this field set to true if [borderType] is
+  /// [InputBorderType.underline].
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
   final bool filled;
 
+  /// The color to fill the decoration's container with, if [filled] is true.
+  ///
+  /// By default the fillColor is based on the current [Theme].
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
   final Color fillColor;
 
+  /// The border to draw around the decoration's container.
+  ///
+  /// The decoration's container is the area which is filled if [isFilled] is
+  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
   final InputBorderType borderType;
 
+  /// If false, input is inhibited, the border, [helperText],
+  /// [errorText], and [counterText] are not displayed, and the opacity
+  /// of the remaining visual elements are reduced.
   final bool enabled;
 
   /// Creates a copy of this input decoration but with the given fields replaced
