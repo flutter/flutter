@@ -66,11 +66,13 @@ class Icon extends StatelessWidget {
   /// The given color will be adjusted by the opacity of the current
   /// [IconTheme], if any.
   ///
-  /// If no [IconTheme]s are specified, icons will default to black.
   ///
   /// In material apps, if there is a [Theme] without any [IconTheme]s
   /// specified, icon colors default to white if the theme is dark
   /// and black if the theme is light.
+  ///
+  /// If no [IconTheme] and no [Theme] is specified, icons will default to black.
+  ///
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
@@ -86,7 +88,7 @@ class Icon extends StatelessWidget {
 
   /// Semantic label for the icon.
   ///
-  /// This would be read out in accessibility modes (e.g TalkBack/VoiceOver).
+  /// Announced in accessibility modes (e.g TalkBack/VoiceOver).
   /// This label does not show in the UI.
   ///
   /// See also:
