@@ -58,14 +58,13 @@ double getDividerWeight(WidgetTester tester) {
 }
 
 double getHintOpacity(WidgetTester tester) {
-  expect(
-    find.descendant(
-      of: find.byType(Opacity),
-      matching: find.text('hint')
-    ),
-    findsOneWidget,
+  final Opacity opacityWidget = tester.widget<Opacity>(
+    find.ancestor(
+      of: find.text('hint'),
+      matching: find.byType(Opacity),
+    ).last
   );
-  return tester.widget<Opacity>(find.byType(Opacity)).opacity;
+  return opacityWidget.opacity;
 }
 
 void main() {

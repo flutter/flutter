@@ -1524,11 +1524,6 @@ class InputDecorator extends StatefulWidget {
   /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
-  bool get _labelIsFloating => !isEmpty || isFocused;
-
-  @override
-  _InputDecoratorState createState() => new _InputDecoratorState();
-
   /// The RenderBox that defines this decorator's "container". That's the
   /// area which is filled if [decoration.isFilled] is true. It's the area
   /// adjacent to [decoration.icon] and above the widgets that contain
@@ -1539,6 +1534,11 @@ class InputDecorator extends StatefulWidget {
     final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
     return result?.container;
   }
+
+  bool get _labelIsFloating => !isEmpty || isFocused;
+
+  @override
+  _InputDecoratorState createState() => new _InputDecoratorState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
@@ -1759,7 +1759,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       new AnimatedOpacity(
         duration: _kTransitionDuration,
         curve: _kTransitionCurve,
-        opacity: widget.labelIsFloating ? 1.0 : 0.0,
+        opacity: widget._labelIsFloating ? 1.0 : 0.0,
         child: new Text(
           decoration.suffixText,
           style: decoration.suffixStyle ?? inlineStyle

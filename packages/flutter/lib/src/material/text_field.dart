@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'feedback.dart';
-import 'ink_ripple.dart';
 import 'input_decorator.dart';
 import 'material.dart';
 import 'text_selection.dart';
@@ -280,7 +279,7 @@ class TextField extends StatefulWidget {
   }
 }
 
-class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixin {
+class _TextFieldState extends State<TextField> {
   final GlobalKey<EditableTextState> _editableTextKey = new GlobalKey<EditableTextState>();
 
   TextEditingController _controller;
@@ -288,9 +287,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
 
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= new FocusNode());
-
-  Set<InkRipple> _ripples;
-  InkRipple _currentRipple;
 
   bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
@@ -343,68 +339,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _onSelectionChanged(BuildContext context, SelectionChangedCause cause) {
     if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
-  }
-
-  @override
-  bool get wantKeepAlive => _ripples != null && _ripples.isNotEmpty;
-
-  void _handleTapDown(TapDownDetails details) {
-    if (_effectiveFocusNode.hasFocus)
-      return;
-
-    final RenderBox referenceBox = InputDecorator.containerOf(_editableTextKey.currentContext);
-    InkRipple ripple;
-    ripple = new InkRipple(
-      controller: Material.of(context),
-      referenceBox: referenceBox,
-      position: referenceBox.globalToLocal(details.globalPosition),
-      color: Theme.of(context).splashColor,
-      containedInkWell: true,
-      rectCallback: null,
-      radius: math.max(referenceBox.size.width, referenceBox.size.height),
-      onRemoved: () {
-        if (_ripples != null) {
-          assert(_ripples.contains(ripple));
-          _ripples.remove(ripple);
-          if (_currentRipple == ripple)
-            _currentRipple = null;
-          updateKeepAlive();
-        } // else we're probably in deactivate()
-      }
-    );
-    _ripples ??= new HashSet<InkRipple>();
-    _ripples.add(ripple);
-    _currentRipple = ripple;
-    updateKeepAlive();
-  }
-
-  void _handleTap() {
-    _currentRipple?.confirm();
-    _currentRipple = null;
-    _requestKeyboard();
-  }
-
-  void _handleTapCancel() {
-    _currentRipple?.cancel();
-    _currentRipple = null;
-  }
-
-  void _handleLongPress() {
-    _currentRipple?.confirm();
-    _currentRipple = null;
-  }
-
-  @override
-  void deactivate() {
-    if (_ripples != null) {
-      final Set<InkRipple> ripples = _ripples;
-      _ripples = null;
-      for (InkRipple ripple in ripples)
-        ripple.dispose();
-      _currentRipple = null;
-    }
-    assert(_currentRipple == null);
-    super.deactivate();
   }
 
   @override
@@ -466,10 +400,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       },
       child: new GestureDetector(
         behavior: HitTestBehavior.opaque,
-        //onTapDown: _handleTapDown,
-        onTap: _handleTap,
-        //onTapCancel: _handleTapCancel,
-        //onLongPress: _handleLongPress,
+        onTap: _requestKeyboard,
         child: child,
         excludeFromSemantics: true,
       ),
