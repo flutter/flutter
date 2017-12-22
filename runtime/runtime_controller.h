@@ -66,8 +66,8 @@ class RuntimeController : public WindowClient, public IsolateClient {
   void DidShutdownMainIsolate() override;
 
   RuntimeDelegate* client_;
-  std::string language_code_ = "en";
-  std::string country_code_ = "US";
+  std::string language_code_;
+  std::string country_code_;
   std::string user_settings_data_ = "{}";
   bool semantics_enabled_ = false;
   std::unique_ptr<DartController> dart_controller_;
