@@ -97,7 +97,7 @@ void PhysicalModelLayer::DrawShadow(SkCanvas* canvas,
                             dpr * 800.0f, 0.039f, 0.25f, color, flags);
 }
 
-const SkPath PhysicalLayerRRect::getPath() const {
+SkPath PhysicalLayerRRect::getPath() const {
   SkPath path;
   path.addRRect(rrect_);
   return path;
