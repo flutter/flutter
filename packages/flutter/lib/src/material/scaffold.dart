@@ -587,6 +587,10 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _endDrawerKey.currentState?.open();
   }
 
+  void closeEndDrawer() {
+    _endDrawerKey.currentState?.close();
+  }
+
   // SNACKBAR API
 
   final Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>> _snackBars = new Queue<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>();
