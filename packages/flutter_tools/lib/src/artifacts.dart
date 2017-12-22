@@ -33,7 +33,7 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.dartVmEntryPointsTxt:
       return 'dart_vm_entry_points.txt';
     case Artifact.genSnapshot:
-      return 'gen_snapshot';
+      return platform.isWindows ? 'gen_snapshot.exe' : 'gen_snapshot';
     case Artifact.flutterTester:
       return 'flutter_tester';
     case Artifact.snapshotDart:
@@ -262,7 +262,7 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = const <String>['clang_x86', 'clang_x64', 'clang_i386'];
+    const List<String> clangDirs = const <String>['.', 'clang_x86', 'clang_x64', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
