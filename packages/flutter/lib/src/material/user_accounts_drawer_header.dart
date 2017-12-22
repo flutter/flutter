@@ -216,26 +216,22 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
       margin: widget.margin,
       child: new SafeArea(
         bottom: false,
-        child: new Semantics(
-          container: true,
-          label: 'Signed in',
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              new Expanded(
-                child: new _AccountPictures(
-                  currentAccountPicture: widget.currentAccountPicture,
-                  otherAccountsPictures: widget.otherAccountsPictures,
-                ),
-              ),
-              new _AccountDetails(
-                accountName: widget.accountName,
-                accountEmail: widget.accountEmail,
-                isOpen: _isOpen,
-                onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
-              ),
-            ],
-          ),
+        child: new Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            new Expanded(
+              child: new _AccountPictures(
+                currentAccountPicture: widget.currentAccountPicture,
+                otherAccountsPictures: widget.otherAccountsPictures,
+              )
+            ),
+            new _AccountDetails(
+              accountName: widget.accountName,
+              accountEmail: widget.accountEmail,
+              isOpen: _isOpen,
+              onTap: widget.onDetailsPressed == null ? null : _handleDetailsPressed,
+            ),
+          ],
         ),
       ),
     );
