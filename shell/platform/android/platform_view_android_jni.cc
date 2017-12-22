@@ -90,6 +90,15 @@ void SurfaceTextureUpdateTexImage(JNIEnv* env, jobject obj) {
   FXL_CHECK(CheckException(env));
 }
 
+static jmethodID g_get_transform_matrix_method = nullptr;
+void SurfaceTextureGetTransformMatrix(JNIEnv* env,
+                                      jobject obj,
+                                      jfloatArray result) {
+  ASSERT_IS_GPU_THREAD;
+  env->CallVoidMethod(obj, g_get_transform_matrix_method, result);
+  FXL_CHECK(CheckException(env));
+}
+
 static jmethodID g_detach_from_gl_context_method = nullptr;
 void SurfaceTextureDetachFromGLContext(JNIEnv* env, jobject obj) {
   ASSERT_IS_GPU_THREAD;
@@ -499,6 +508,13 @@ bool PlatformViewAndroid::Register(JNIEnv* env) {
       env->GetMethodID(g_surface_texture_class->obj(), "updateTexImage", "()V");
 
   if (g_update_tex_image_method == nullptr) {
+    return false;
+  }
+
+  g_get_transform_matrix_method = env->GetMethodID(
+      g_surface_texture_class->obj(), "getTransformMatrix", "([F)V");
+
+  if (g_get_transform_matrix_method == nullptr) {
     return false;
   }
 
