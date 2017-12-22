@@ -118,6 +118,8 @@ Engine::Engine(PlatformView* platform_view)
           platform_view->GetVsyncWaiter(),
           this)),
       load_script_error_(tonic::kNoError),
+      language_code_("en"),
+      country_code_("US"),
       user_settings_data_("{}"),
       activity_running_(false),
       have_surface_(false),
