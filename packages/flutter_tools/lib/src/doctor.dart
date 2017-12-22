@@ -363,7 +363,7 @@ abstract class IntelliJValidator extends DoctorValidator {
         try {
           final String latestFlutter = await _getLatestVersionPossible();
           final Version flutterVersion = new Version.parse(latestFlutter);
-          final String serverMessage = localVersion < flutterVersion ? "[Consider upgrading your plugin version to $version]" : "";
+          final String serverMessage = localVersion < flutterVersion ? "[Consider upgrading your plugin version to $latestFlutter]" : "";
             messages.add(new ValidationMessage(
               '$title plugin ${localVersion != null ? "version $localVersion" : "installed"} $serverMessage'
             ));
@@ -382,15 +382,15 @@ abstract class IntelliJValidator extends DoctorValidator {
   }
 
   Future<String> _getLatestVersionPossible() async {
-      final String url = 'https://plugins.jetbrains.com/plugins/list?build=IU-$buildNumber&pluginId=io.flutter';
-      
+      final String url = 'https://plugins.jetbrains.com/plugins/list?build=$buildNumber&pluginId=io.flutter';
+
       try {
         final http.Response response = await http.get(url);
         final xml.XmlDocument xmlDocument = xml.parse(response.body);
         final String version = xmlDocument.findAllElements('version').map((xml.XmlElement node) => node.text).first;
         return version;
       } catch (e) {
-        return "Unable to obtain version from Intellij Server";
+        throw "Unable to obtain version from Intellij plugin server";
       }
     }
 
@@ -464,6 +464,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
             String installPath;
             try {
               installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
+              buildNumber = fs.file(fs.path.join(installPath, 'build.txt')).readAsStringSync();
             } catch (e) {
               // ignored
             }
