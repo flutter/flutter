@@ -191,21 +191,24 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
 
-    Widget result = new ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
-      child: new Padding(
-        padding: padding,
-        child: new SizedBox(
-          height: iconSize,
-          width: iconSize,
-          child: new Align(
-            alignment: alignment,
-            child: IconTheme.merge(
-              data: new IconThemeData(
-                size: iconSize,
-                color: currentColor
+    Widget result = new Semantics(
+      button: true,
+      child: new ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
+        child: new Padding(
+          padding: padding,
+          child: new SizedBox(
+            height: iconSize,
+            width: iconSize,
+            child: new Align(
+              alignment: alignment,
+              child: IconTheme.merge(
+                data: new IconThemeData(
+                  size: iconSize,
+                  color: currentColor
+                ),
+                child: icon
               ),
-              child: icon
             ),
           ),
         ),

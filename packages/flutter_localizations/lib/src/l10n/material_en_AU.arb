@@ -1,10 +1,12 @@
 {
+  "timePickerMinuteModeAnnouncement": "Select minutes",
+  "timePickerHourModeAnnouncement": "Select hours",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "h:mm a",
   "openAppDrawerTooltip": "Open navigation menu",
   "backButtonTooltip": "Back",
   "closeButtonTooltip": "Close",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "Delete",
   "nextMonthTooltip": "Next month",
   "previousMonthTooltip": "Previous month",
   "nextPageTooltip": "Next page",

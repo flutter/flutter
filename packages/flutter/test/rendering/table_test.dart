@@ -82,7 +82,7 @@ void main() {
         ' │ parentData: offset=Offset(335.0, 185.0) (can use size)\n'
         ' │ constraints: BoxConstraints(0.0<=w<=800.0, 0.0<=h<=600.0)\n'
         ' │ size: Size(130.0, 230.0)\n'
-        ' │ default column width: IntrinsicColumnWidth\n'
+        ' │ default column width: IntrinsicColumnWidth(flex: null)\n'
         ' │ table size: 5×5\n'
         ' │ column offsets: 0.0, 10.0, 30.0, 130.0, 130.0\n'
         ' │ row offsets: 0.0, 30.0, 30.0, 30.0, 30.0, 230.0\n'

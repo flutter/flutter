@@ -459,7 +459,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+  Future<Null> _handleSystemMessage(Object systemMessage) async {
+    final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
       case 'memoryPressure':
@@ -722,6 +723,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.

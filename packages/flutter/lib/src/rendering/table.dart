@@ -113,6 +113,9 @@ class IntrinsicColumnWidth extends TableColumnWidth {
 
   @override
   double flex(Iterable<RenderBox> cells) => _flex;
+
+  @override
+  String toString() => '$runtimeType(flex: ${_flex?.toStringAsFixed(1)})';
 }
 
 /// Sizes the column to a specific number of pixels.

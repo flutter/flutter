@@ -42,7 +42,11 @@ class Form extends StatefulWidget {
     return scope?._formState;
   }
 
-  /// Root of the widget hierarchy that contains this form.
+  /// The widget below this widget in the tree.
+  ///
+  /// This is the root of the widget hierarchy that contains this form.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// If true, form fields will validate and update their error text

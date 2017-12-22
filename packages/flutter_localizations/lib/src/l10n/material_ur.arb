@@ -5,7 +5,7 @@
   "openAppDrawerTooltip": "نیویگیشن مینو کھولیں",
   "backButtonTooltip": "پیچھے",
   "closeButtonTooltip": "بند کریں",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "حذف کریں",
   "nextMonthTooltip": "اگلا مہینہ",
   "previousMonthTooltip": "پچھلا مہینہ",
   "nextPageTooltip": "اگلا صفحہ",
@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow $rowCount میں سے تقریباً",
   "rowsPerPageTitle": "قطاریں فی صفحہ:",
+  "tabLabel": "$tabIndex از $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount آئٹمز منتخب کیے گئے",
   "cancelButtonLabel": "منسوخ کریں",
   "closeButtonLabel": "بند کریں",
@@ -30,5 +31,8 @@
   "postMeridiemAbbreviation": "PM",
   "timePickerHourModeAnnouncement": "گھنٹے منتخب کریں",
   "timePickerMinuteModeAnnouncement": "منٹ منتخب کریں",
+  "signedInLabel": "سائن ان",
+  "hideAccountsLabel": "اکاؤنٹس چھپائیں",
+  "showAccountsLabel": "اکاؤنٹس دکھائیں",
   "modalBarrierDismissLabel": "برطرف"
 }
