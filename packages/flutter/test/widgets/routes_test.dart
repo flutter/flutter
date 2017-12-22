@@ -453,6 +453,31 @@ void main() {
       observer.didPop(route, pageRoute);
       verifyNoMoreInteractions(pageRouteAware);
     });
+
+    test('does not call listeners when already subscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = new MockRouteAware();
+      final MockPageRoute pageRoute = new MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, pageRoute);
+      verify(pageRouteAware.didPush()).called(1);
+    });
+
+    test('does not call listeners when unsubscribed', () {
+      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = new MockRouteAware();
+      final MockPageRoute pageRoute = new MockPageRoute();
+      final MockPageRoute nextPageRoute = new MockPageRoute();
+      observer.subscribe(pageRouteAware, pageRoute);
+      observer.subscribe(pageRouteAware, nextPageRoute);
+      verify(pageRouteAware.didPush()).called(2);
+
+      observer.unsubscribe(pageRouteAware);
+
+      observer.didPush(nextPageRoute, pageRoute);
+      observer.didPop(nextPageRoute, pageRoute);
+      verifyNoMoreInteractions(pageRouteAware);
+    });
   });
 }
 
