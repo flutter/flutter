@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'build_info.dart';
 import 'globals.dart';
 
@@ -33,7 +34,7 @@ String _artifactToFileName(Artifact artifact) {
     case Artifact.dartVmEntryPointsTxt:
       return 'dart_vm_entry_points.txt';
     case Artifact.genSnapshot:
-      return platform.isWindows ? 'gen_snapshot.exe' : 'gen_snapshot';
+      return 'gen_snapshot';
     case Artifact.flutterTester:
       return 'flutter_tester';
     case Artifact.snapshotDart:
@@ -266,7 +267,7 @@ class LocalEngineArtifacts extends Artifacts {
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (fs.file(genSnapshotPath).existsSync())
+      if (processManager.canRun(genSnapshotPath))
         return genSnapshotPath;
     }
     throw new Exception('Unable to find $genSnapshotName');
