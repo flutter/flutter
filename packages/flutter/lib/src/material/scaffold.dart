@@ -553,6 +553,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// Whether this scaffold has a non-null [Scaffold.endDrawer].
   bool get hasEndDrawer => widget.endDrawer != null;
 
+  bool get isDrawerOpen => _drawerKey.currentState?.isOpen ?? false;
+
   /// Opens the [Drawer] (if any).
   ///
   /// If the scaffold has a non-null [Scaffold.drawer], this function will cause
