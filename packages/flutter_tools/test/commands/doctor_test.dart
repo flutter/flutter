@@ -36,4 +36,7 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 
   @override
   String get version => 'test.test.test';
+
+  @override
+  String get buildNumber => 'IU-173.3942.27';
 }
