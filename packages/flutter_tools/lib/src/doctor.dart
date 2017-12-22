@@ -4,8 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert' show UTF8;
-import 'package:http/http.dart' as http;
-import 'package:xml/xml.dart' as xml;
 
 import 'package:archive/archive.dart';
 import 'package:http/http.dart' as http;
