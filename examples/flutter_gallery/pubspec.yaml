@@ -3,13 +3,13 @@ dependencies:
   flutter:
     sdk: flutter
   collection: 1.14.3
-  device_info: 0.0.5
+  device_info: 0.1.0
   intl: 0.15.2
-  connectivity: 0.1.1
+  connectivity: 0.2.0
   string_scanner: 1.0.2
-  url_launcher: 1.0.3
+  url_launcher: 2.0.0
   cupertino_icons: 0.1.1
-  video_player: 0.0.6
+  video_player: 0.0.7
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets:
@@ -23,7 +23,7 @@ dev_dependencies:
   flutter_driver:
     sdk: flutter
 
-  args: 0.13.7 # TRANSITIVE DEPENDENCY
+  args: 1.2.0 # TRANSITIVE DEPENDENCY
   async: 1.13.3 # TRANSITIVE DEPENDENCY
   barback: 0.15.2+13 # TRANSITIVE DEPENDENCY
   boolean_selector: 1.0.2 # TRANSITIVE DEPENDENCY
@@ -57,7 +57,7 @@ dev_dependencies:
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   test: 0.12.26 # TRANSITIVE DEPENDENCY
   typed_data: 1.1.4 # TRANSITIVE DEPENDENCY

@@ -3,7 +3,7 @@ description: Various repository development tools for flutter.
 
 dependencies:
   archive: 1.0.33
-  args: 0.13.7
+  args: 1.2.0
   http: 0.11.3+14
   intl: 0.15.2
   meta: 1.1.1
