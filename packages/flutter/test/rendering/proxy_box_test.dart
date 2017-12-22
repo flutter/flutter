@@ -100,25 +100,25 @@ void main() {
     test('shape change triggers repaint', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        shape: const CircleBorder(),
+        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
         textDirection: TextDirection.ltr,
       );
       layout(root, phase: EnginePhase.composite);
       expect(root.debugNeedsPaint, isFalse);
 
       // Same shape, no repaint.
-      root.shape = const CircleBorder();
+      root.clipper = const ShapeBorderClipper(shapeBorder: const CircleBorder());
       expect(root.debugNeedsPaint, isFalse);
 
       // Different shape triggers repaint.
-      root.shape = const StadiumBorder();
+      root.clipper = const ShapeBorderClipper(shapeBorder: const StadiumBorder());
       expect(root.debugNeedsPaint, isTrue);
     });
 
     test('text direction change triggers repaint', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        shape: const CircleBorder(),
+        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
         textDirection: TextDirection.ltr,
       );
       layout(root, phase: EnginePhase.composite);
@@ -136,7 +136,7 @@ void main() {
     test('compositing on non-Fuchsia', () {
       final RenderPhysicalShape root = new RenderPhysicalShape(
         color: const Color(0xffff00ff),
-        shape: const CircleBorder(),
+        clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
         textDirection: TextDirection.ltr,
       );
       layout(root, phase: EnginePhase.composite);

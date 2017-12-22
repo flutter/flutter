@@ -954,6 +954,26 @@ abstract class CustomClipper<T> {
   String toString() => '$runtimeType';
 }
 
+/// A [CustomClipper] that clips to the outer path of a [ShapeBorder].
+class ShapeBorderClipper extends CustomClipper<Path> {
+  /// Creates a [ShapeBorder] clipper.
+  ///
+  /// The [shapeBorder] argument must not be null.
+  const ShapeBorderClipper({
+    @required this.shapeBorder
+  }) : assert(shapeBorder != null);
+
+  final ShapeBorder shapeBorder;
+
+  /// Returns the outer path of [shapeBorder] as the clip.
+  @override
+  Path getClip(Size size) => shapeBorder.getOuterPath(Offset.zero & size);
+
+  @override
+  bool shouldReclip(covariant ShapeBorderClipper oldClipper)
+    => oldClipper.shapeBorder != shapeBorder;
+}
+
 abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
@@ -1451,38 +1471,27 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   ///
   /// The [color], [shape], and [textDirection] are required.
   ///
-  /// The [shape], [elevation], [color] and [shadowColor] must
+  /// The [clipper], [elevation], [color] and [shadowColor] must
   /// not be null.
   RenderPhysicalShape({
     RenderBox child,
-    @required ShapeBorder shape,
+    @required CustomClipper<Path> clipper,
     double elevation: 0.0,
     @required Color color,
     Color shadowColor: const Color(0xFF000000),
     @required TextDirection textDirection,
-  }) : assert(shape != null),
+  }) : assert(clipper != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
-       _shape = shape,
        _textDirection = textDirection,
        super(
          child: child,
          elevation: elevation,
          color: color,
-         shadowColor: shadowColor
+         shadowColor: shadowColor,
+         clipper: clipper,
        );
-
-  /// The shape of the layer.
-  ShapeBorder get shape => _shape;
-  ShapeBorder _shape;
-  set shape(ShapeBorder value) {
-    assert(value != null);
-    if (shape == value)
-      return;
-    _shape = value;
-    _markNeedsClip();
-  }
 
   /// The text direction to use for getting the outer path for [shape].
   ///
@@ -1498,21 +1507,24 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   }
 
   @override
-  Path get _defaultClip {
-    assert(hasSize);
-    return shape.getOuterPath(Offset.zero & size, textDirection: _textDirection);
-  }
+  Path get _defaultClip => new Path()..addRect(Offset.zero & size);
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
       final Rect offsetBounds = offset & size;
+      final Path offsetPath = _clip.shift(offset);
       if (needsCompositing) {
-        // TODO(amirh): implement this for Fuchsia.
+        final PhysicalShapeLayer physicalShape = new PhysicalShapeLayer(
+          clipPath: offsetPath,
+          elevation: elevation,
+          color: color,
+        );
+        context.pushLayer(physicalShape, super.paint, offset, childPaintBounds: offsetBounds);
       } else {
         final Canvas canvas = context.canvas;
-        final Path offsetPath = _defaultClip.shift(offset);
+        print('Clipping $this');
         if (elevation != 0.0) {
           // The drawShadow call doesn't add the region of the shadow to the
           // picture's bounds, so we draw a hardcoded amount of extra space to
@@ -1542,7 +1554,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new DiagnosticsProperty<ShapeBorder>('shape', shape));
+    description.add(new DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DiagnosticsProperty<TextDirection>('textDirection', textDirection));
   }
 }
@@ -1558,13 +1570,14 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
     @required double elevation,
     @required Color color,
     @required Color shadowColor,
+    CustomClipper<T> clipper,
   }) : assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
        _elevation = elevation,
        _color = color,
        _shadowColor = shadowColor,
-       super(child: child);
+       super(child: child, clipper: clipper);
 
   /// The z-coordinate at which to place this material.
   double get elevation => _elevation;

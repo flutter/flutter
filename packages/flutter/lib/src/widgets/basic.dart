@@ -725,19 +725,20 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   /// The [shape], [elevation], [color], and [shadowColor] must not be null.
   const PhysicalShape({
     Key key,
-    @required this.shape,
+    @required this.clipper,
     this.elevation: 0.0,
     @required this.color,
     this.shadowColor: const Color(0xFF000000),
     Widget child,
     this.textDirection,
-  }) : assert(shape != null),
+  }) : assert(clipper != null),
        assert(elevation != null),
        assert(color != null),
        assert(shadowColor != null),
        super(key: key, child: child);
 
-  final ShapeBorder shape;
+  /// Determines which clip to use.
+  final CustomClipper<Path> clipper;
 
   /// The z-coordinate at which to place this physical object.
   final double elevation;
@@ -759,7 +760,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   @override
   RenderPhysicalShape createRenderObject(BuildContext context) {
     return new RenderPhysicalShape(
-      shape: shape,
+      clipper: clipper,
       elevation: elevation,
       color: color,
       shadowColor: shadowColor,
@@ -770,7 +771,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   @override
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
     renderObject
-      ..shape = shape
+      ..clipper = clipper
       ..elevation = elevation
       ..color = color
       ..shadowColor = shadowColor
@@ -780,7 +781,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<ShapeBorder>('shape', shape));
+    description.add(new EnumProperty<CustomClipper<Path>>('clipper', clipper));
     description.add(new DoubleProperty('elevation', elevation));
     description.add(new DiagnosticsProperty<Color>('color', color));
     description.add(new DiagnosticsProperty<Color>('shadowColor', shadowColor));

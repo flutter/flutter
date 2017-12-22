@@ -12,7 +12,7 @@ void main() {
     testWidgets('properties', (WidgetTester tester) async {
       await tester.pumpWidget(
         const PhysicalShape(
-          shape: const CircleBorder(),
+          clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
           elevation: 2.0,
           color: const Color(0xFF0000FF),
           shadowColor: const Color(0xFF00FF00),
@@ -20,7 +20,7 @@ void main() {
         )
       );
       final RenderPhysicalShape renderObject = tester.renderObject(find.byType(PhysicalShape));
-      expect(renderObject.shape, const CircleBorder());
+      expect(renderObject.clipper, const ShapeBorderClipper(shapeBorder: const CircleBorder()));
       expect(renderObject.color, const Color(0xFF0000FF));
       expect(renderObject.shadowColor, const Color(0xFF00FF00));
       expect(renderObject.elevation, 2.0);
@@ -32,7 +32,7 @@ void main() {
         const Directionality(
           textDirection: TextDirection.rtl,
           child: const PhysicalShape(
-            shape: const CircleBorder(),
+            clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
             color: const Color(0xFF0000FF),
             textDirection: TextDirection.ltr,
           ),
@@ -47,7 +47,7 @@ void main() {
         const Directionality(
           textDirection: TextDirection.rtl,
           child: const PhysicalShape(
-            shape: const CircleBorder(),
+            clipper: const ShapeBorderClipper(shapeBorder: const CircleBorder()),
             color: const Color(0xFF0000FF),
           ),
         ),
