@@ -64,6 +64,7 @@ template("flutter_content_handler") {
              "//garnet/public/lib/ui/views/fidl",
              "//garnet/public/lib/vulkan",
              "//garnet/public/lib/zip",
+             "//peridot/public/lib/clipboard/fidl",
              "//peridot/public/lib/context/fidl",
              "//third_party/rapidjson",
              "//third_party/skia",

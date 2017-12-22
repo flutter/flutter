@@ -21,6 +21,7 @@
 #include "lib/app/cpp/application_context.h"
 #include "lib/app/fidl/application_environment.fidl.h"
 #include "lib/app/fidl/service_provider.fidl.h"
+#include "lib/clipboard/fidl/clipboard.fidl.h"
 #include "lib/fidl/cpp/bindings/binding.h"
 #include "lib/fxl/functional/closure.h"
 #include "lib/fxl/macros.h"
@@ -92,6 +93,7 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   blink::UnzipperProvider GetUnzipperProviderForRootBundle();
   bool HandleAssetPlatformMessage(blink::PlatformMessage* message);
   bool HandleTextInputPlatformMessage(blink::PlatformMessage* message);
+  bool HandleFlutterPlatformMessage(blink::PlatformMessage* message);
 
   void InitDartIoInternal();
   void InitFuchsia();
@@ -132,6 +134,8 @@ class RuntimeHolder : public blink::RuntimeDelegate,
   std::unique_ptr<AccessibilityBridge> accessibility_bridge_;
 
   std::function<void()> main_isolate_shutdown_callback_;
+
+  modular::ClipboardPtr clipboard_;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(RuntimeHolder);
 };

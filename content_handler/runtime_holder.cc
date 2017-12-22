@@ -44,6 +44,7 @@ constexpr char kDylibKey[] = "libapp.so";
 constexpr char kAssetChannel[] = "flutter/assets";
 constexpr char kKeyEventChannel[] = "flutter/keyevent";
 constexpr char kTextInputChannel[] = "flutter/textinput";
+constexpr char kFlutterPlatformChannel[] = "flutter/platform";
 
 void SetThreadName(fxl::RefPtr<fxl::TaskRunner> runner, std::string name) {
   runner->PostTask([name]() {
@@ -377,6 +378,9 @@ void RuntimeHolder::HandlePlatformMessage(
   } else if (message->channel() == kTextInputChannel) {
     if (HandleTextInputPlatformMessage(message.get()))
       return;
+  } else if (message->channel() == kFlutterPlatformChannel) {
+    if (HandleFlutterPlatformMessage(message.get()))
+      return;
   }
   if (auto response = message->response())
     response->CompleteEmpty();
@@ -416,6 +420,11 @@ void RuntimeHolder::InitFuchsia() {
   context_->ConnectToEnvironmentService(environment.NewRequest());
   fuchsia::dart::Initialize(std::move(environment),
                             std::move(outgoing_services_));
+
+  app::ServiceProviderPtr parent_env_service_provider;
+  context_->environment()->GetServices(
+      parent_env_service_provider.NewRequest());
+  ConnectToService(parent_env_service_provider.get(), clipboard_.NewRequest());
 }
 
 void RuntimeHolder::InitMozartInternal() {
@@ -459,6 +468,46 @@ bool RuntimeHolder::HandleAssetPlatformMessage(
   std::vector<uint8_t> asset_data;
   if (asset_store_ && asset_store_->GetAsBuffer(asset_name, &asset_data)) {
     response->Complete(std::move(asset_data));
+  } else {
+    response->CompleteEmpty();
+  }
+  return true;
+}
+
+bool RuntimeHolder::HandleFlutterPlatformMessage(
+    blink::PlatformMessage* message) {
+  const auto& data = message->data();
+  rapidjson::Document document;
+  document.Parse(reinterpret_cast<const char*>(data.data()), data.size());
+  if (document.HasParseError() || !document.IsObject()) {
+    return false;
+  }
+
+  auto root = document.GetObject();
+  auto method = root.FindMember("method");
+  if (method == root.MemberEnd() || !method->value.IsString()) {
+    return false;
+  }
+
+  fxl::RefPtr<blink::PlatformMessageResponse> response = message->response();
+  if (method->value == "Clipboard.setData") {
+    auto text = root["args"]["text"].GetString();
+    clipboard_->Push(text);
+    response->CompleteEmpty();
+  } else if (method->value == "Clipboard.getData") {
+    clipboard_->Peek([response](const ::fidl::String& text) {
+      rapidjson::StringBuffer json_buffer;
+      rapidjson::Writer<rapidjson::StringBuffer> writer(json_buffer);
+      writer.StartArray();
+      writer.StartObject();
+      writer.Key("text");
+      writer.String(text);
+      writer.EndObject();
+      writer.EndArray();
+
+      std::string result = json_buffer.GetString();
+      response->Complete(std::vector<uint8_t>{result.begin(), result.end()});
+    });
   } else {
     response->CompleteEmpty();
   }
