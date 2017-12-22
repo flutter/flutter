@@ -12,7 +12,7 @@ group("flutter") {
     "$flutter_root/third_party/txt",
   ]
 
-  if (!is_fuchsia) {
+  if (!is_fuchsia && !is_fuchsia_host) {
     if (current_toolchain == host_toolchain) {
       public_deps += [
         "$flutter_root/frontend_server",
