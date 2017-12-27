@@ -31,7 +31,7 @@ vars = {
   # Dart is: https://github.com/dart-lang/sdk/blob/master/DEPS.
   # You can use //tools/dart/create_updated_flutter_deps.py to produce
   # updated revision list of existing dependencies.
-  'dart_revision': '9e8a3e2d31621c1bdf6139d068e7898a2ac2ab5a',
+  'dart_revision': 'e122f4825726035e4579471ef83848b1aa796444',
 
   'dart_args_tag': '0.13.7',
   'dart_async_tag': '2.0.0',
@@ -81,7 +81,7 @@ vars = {
   'dart_resource_rev': 'af5a5bf65511943398146cf146e466e5f0b95cb9',
   'dart_root_certificates_rev': 'a4c7c6f23a664a37bc1b6f15a819e3f2a292791a',
   'dart_shelf_packages_handler_tag': '1.0.3',
-  'dart_shelf_static_tag': '0.2.5',
+  'dart_shelf_static_rev': '3558aa35a0d2f0f35868c3fd64b258e140db0122',
   'dart_shelf_tag': '0.7.1',
   'dart_shelf_web_socket_tag': '0.2.2',
   'dart_source_map_stack_trace_tag': '1.1.4',
@@ -300,7 +300,7 @@ deps = {
    Var('chromium_git') + '/external/github.com/dart-lang/shelf_packages_handler' + '@' + Var('dart_shelf_packages_handler_tag'),
 
   'src/third_party/dart/third_party/pkg/shelf_static':
-   Var('chromium_git') + '/external/github.com/dart-lang/shelf_static' + '@' + Var('dart_shelf_static_tag'),
+   Var('chromium_git') + '/external/github.com/dart-lang/shelf_static' + '@' + Var('dart_shelf_static_rev'),
 
   'src/third_party/dart/third_party/pkg/shelf_web_socket':
    Var('chromium_git') + '/external/github.com/dart-lang/shelf_web_socket' + '@' + Var('dart_shelf_web_socket_tag'),
