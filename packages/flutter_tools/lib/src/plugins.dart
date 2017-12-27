@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
@@ -77,12 +78,13 @@ List<Plugin> _findPlugins(String directory) {
   return plugins;
 }
 
-// Return true if .flutter-plugins has changed, otherwise return false.
+/// Returns true if .flutter-plugins has changed, otherwise returns false.
 bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
   final File pluginsProperties = fs.file(fs.path.join(directory, '.flutter-plugins'));
-  final String priorFlutterPlugins = (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
+  final String previousFlutterPlugins =
+      (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
   final String pluginManifest =
-    plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+      plugins.map((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsProperties.writeAsStringSync('$pluginManifest\n');
   } else {
@@ -90,8 +92,9 @@ bool _writeFlutterPluginsList(String directory, List<Plugin> plugins) {
       pluginsProperties.deleteSync();
     }
   }
-  final String currentFlutterPlugins = (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
-  return currentFlutterPlugins != priorFlutterPlugins;
+  final String currentFlutterPlugins =
+      (pluginsProperties.existsSync() ? pluginsProperties.readAsStringSync() : null);
+  return currentFlutterPlugins != previousFlutterPlugins;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -211,7 +214,10 @@ void _writeIOSPluginRegistry(String directory, List<Plugin> plugins) {
 }
 
 class InjectPluginsResult{
-  InjectPluginsResult({this.hasPlugin : false, this.hasChanged : false});
+  InjectPluginsResult({
+    @required this.hasPlugin,
+    @required this.hasChanged,
+  });
   /// True if any flutter plugin exists, otherwise false.
   final bool hasPlugin;
   /// True if plugins have changed since last build.
@@ -221,7 +227,7 @@ class InjectPluginsResult{
 /// Finds Flutter plugins in the pubspec.yaml, creates platform injection
 /// registries classes and add them to the build dependencies.
 ///
-/// Returns whether any Flutter plugins are added.
+/// Returns whether any Flutter plugins are added and whether they changed.
 InjectPluginsResult injectPlugins({String directory}) {
   directory ??= fs.currentDirectory.path;
   final List<Plugin> plugins = _findPlugins(directory);

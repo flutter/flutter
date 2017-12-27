@@ -64,13 +64,12 @@ class CocoaPods {
       if (!fs.file(fs.path.join(appIosDir.path, 'Podfile')).existsSync()) {
         await _createPodfile(appIosDir, isSwift);
       } // TODO(xster): Add more logic for handling merge conflicts.
-      if (_checkIfRunPodInstall(appIosDir.path, pluginOrFlutterPodChanged))
+      if (_shouldRunPodInstall(appIosDir.path, pluginOrFlutterPodChanged))
         await _runPodInstall(appIosDir);
-    } else {
-      throwToolExit('CocoaPods not available for project using Flutter plugins');
     }
   }
 
+  /// Make sure the CocoaPods tools are in the right states.
   Future<bool> _checkPodCondition() async {
     if (!await isCocoaPodsInstalledAndMeetsVersionCheck) {
       final String minimumVersion = cocoaPodsMinimumVersion;
@@ -110,6 +109,29 @@ class CocoaPods {
     podfileTemplate.copySync(fs.path.join(bundle.path, 'Podfile'));
   }
 
+  // Check if you need to run pod install.
+  // The pod install will run if any of below is true.
+  // 1. Any plugins changed (add/update/delete)
+  // 2. The flutter.framework has changed (debug/release/profile)
+  // 3. The podfile.lock doesn't exists
+  // 4. The Pods/manifest.lock doesn't exists
+  // 5. The podfile.lock doesn't match Pods/manifest.lock.
+  bool _shouldRunPodInstall(String appDir, bool pluginOrFlutterPodChanged) {
+    if (pluginOrFlutterPodChanged)
+      return true;
+    // Check if podfile.lock and Pods/Manifest.lock exists and matches.
+    final File podfileLockFile = fs.file(fs.path.join(appDir, 'Podfile.lock'));
+    final File manifestLockFile =
+        fs.file(fs.path.join(appDir, 'Pods', 'Manifest.lock'));
+    if (!podfileLockFile.existsSync()
+        || !manifestLockFile.existsSync()
+        || podfileLockFile.readAsStringSync() !=
+            manifestLockFile.readAsStringSync()) {
+      return true;
+    }
+    return false;
+  }
+
   Future<Null> _runPodInstall(Directory bundle) async {
     final Status status = logger.startProgress('Running pod install...', expectSlowOperation: true);
     final ProcessResult result = await processManager.run(
@@ -136,28 +158,6 @@ class CocoaPods {
       _diagnosePodInstallFailure(result);
       throwToolExit('Error running pod install');
     }
-  }
-
-  // Check if you need to run pod install.
-  // The pod install will run if any of below is true.
-  // 1.Any plugins changed (add/update/delete)
-  // 2.The flutter.framework has changed (debug/release/profile)
-  // 3.The podfile.lock doesn't exists
-  // 4.The Pods/manifest.lock doesn't exists
-  // 5.The podfile.lock doesn't match Pods/manifest.lock.
-  bool _checkIfRunPodInstall(String appDir, bool pluginOrFlutterPodChanged) {
-    if (pluginOrFlutterPodChanged)
-      return true;
-    // Check if podfile.lock and Pods/Manifest.lock exists and matches.
-    final File podfileLockFile = fs.file(fs.path.join(appDir, 'Podfile.lock'));
-    final File manifestLockFile =
-        fs.file(fs.path.join(appDir, 'Pods', 'Manifest.lock'));
-    if (!podfileLockFile.existsSync() ||
-        !manifestLockFile.existsSync() ||
-        podfileLockFile.readAsStringSync() !=
-            manifestLockFile.readAsStringSync())
-      return true;
-    return false;
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {

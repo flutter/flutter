@@ -254,9 +254,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final InjectPluginsResult injectionResult = injectPlugins();
-  final bool hasFlutterPlugins = injectionResult.hasPlugin;
-  final String priorGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
+  final InjectPluginsResult injectPluginsResult = injectPlugins();
+  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
+  final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -267,12 +267,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   );
 
   if (hasFlutterPlugins) {
-    final String currentGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
+    final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
     await cocoaPods.processPods(
         appIosDir: appDirectory,
         isSwift: app.isSwift,
-        pluginOrFlutterPodChanged: (injectionResult.hasChanged ||
-            priorGeneratedXCConfig != currentGeneratedXCConfig));
+        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+    );
   }
 
   final List<String> commands = <String>[
@@ -359,13 +360,13 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-String readGeneratedXCConfig(String appPath) {
-  final String generateXCConfigPath =
+String readGeneratedXcconfig(String appPath) {
+  final String generatedXcconfigPath =
       fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
-  final File generateXCConfigFile = fs.file(generateXCConfigPath);
-  if (!generateXCConfigFile.existsSync())
+  final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
+  if (!generatedXcconfigFile.existsSync())
     return null;
-  return generateXCConfigFile.readAsStringSync();
+  return generatedXcconfigFile.readAsStringSync();
 }
 
 Future<Null> diagnoseXcodeBuildFailure(
@@ -383,7 +384,8 @@ Future<Null> diagnoseXcodeBuildFailure(
       // Make sure the user has specified one of:
       // DEVELOPMENT_TEAM (automatic signing)
       // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
+          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
