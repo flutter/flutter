@@ -254,14 +254,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = injectPlugins();
-
-  if (hasFlutterPlugins)
-    await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
-    );
+  final InjectPluginsResult injectionResult = injectPlugins();
+  final bool hasFlutterPlugins = injectionResult.hasPlugin;
+  final String priorGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -270,6 +265,15 @@ Future<XcodeBuildResult> buildXcodeProject({
     hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
   );
+
+  if (hasFlutterPlugins) {
+    final String currentGeneratedXCConfig = readGeneratedXCConfig(app.appDirectory);
+    await cocoaPods.processPods(
+        appIosDir: appDirectory,
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged: (injectionResult.hasChanged ||
+            priorGeneratedXCConfig != currentGeneratedXCConfig));
+  }
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -355,7 +359,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+String readGeneratedXCConfig(String appPath) {
+  final String generateXCConfigPath =
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+  final File generateXCConfigFile = fs.file(generateXCConfigPath);
+  if (!generateXCConfigFile.existsSync())
+    return null;
+  return generateXCConfigFile.readAsStringSync();
+}
+
+Future<Null> diagnoseXcodeBuildFailure(
+    XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
