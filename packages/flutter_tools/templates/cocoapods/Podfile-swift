@@ -1,42 +1,32 @@
 # Uncomment this line to define a global platform for your project
 # platform :ios, '9.0'
 
-def parse_KV_file(file,seperator='=')
-  file_abs_path = File.expand_path(file)
-  if !File.exists? file_abs_path
-    puts "Generated.xcconfig or .flutter-plugins expected but not present. If you're running pod install manually, make sure flutter build or flutter run is executed once first."
-    return [];
-  end
-  pods_ary = []
-  File.foreach(file_abs_path) { |line|
-      plugin = line.split(pattern=seperator)
-      if plugin.length == 2
-        podname = plugin[0].strip()
-        path = plugin[1].strip()
-        podpath = File.expand_path("#{path}", file_abs_path)
-        pods_ary.push({:name => podname,:path=>podpath});
-      else
-        puts "Invalid plugin specification: #{line}"
-      end
-  }
-  return pods_ary
+if ENV['FLUTTER_FRAMEWORK_DIR'] == nil
+  abort('Please set FLUTTER_FRAMEWORK_DIR to the directory containing Flutter.framework')
 end
 
 target 'Runner' do
   use_frameworks!
-  # Flutter Pods
-  generated_xcode_build_settings = parse_KV_file("./Flutter/Generated.xcconfig")
-    generated_xcode_build_settings.map{ |p|
-    if p[:name]=='FLUTTER_FRAMEWORK_DIR'
-      pod 'Flutter', :path => p[:path]
-    end
-  }
 
-  # Plugin Pods
-  plugin_pods = parse_KV_file("../.flutter-plugins")
-  plugin_pods.map{ |p|
-    pod p[:name], :path => File.expand_path("ios",p[:path])
-  }
+  # Pods for Runner
+
+  # Flutter Pods
+  pod 'Flutter', :path => ENV['FLUTTER_FRAMEWORK_DIR']
+
+  if File.exists? '../.flutter-plugins'
+    flutter_root = File.expand_path('..')
+    File.foreach('../.flutter-plugins') { |line|
+      plugin = line.split(pattern='=')
+      if plugin.length == 2
+        name = plugin[0].strip()
+        path = plugin[1].strip()
+        resolved_path = File.expand_path("#{path}/ios", flutter_root)
+        pod name, :path => resolved_path
+      else
+        puts "Invalid plugin specification: #{line}"
+      end
+    }
+  end
 end
 
 post_install do |installer|
