@@ -361,7 +361,7 @@ abstract class IntelliJValidator extends DoctorValidator {
         try {
           final String latestFlutter = await _getLatestVersionPossible();
           final Version flutterVersion = new Version.parse(latestFlutter);
-          final String serverMessage = localVersion < flutterVersion ? "[Consider upgrading your plugin version to $latestFlutter]" : "";
+          final String serverMessage = localVersion < flutterVersion ? '[Consider upgrading your plugin version to $latestFlutter]' : '';
             messages.add(new ValidationMessage(
               '$title plugin ${localVersion != null ? "version $localVersion" : "installed"} $serverMessage'
             ));
@@ -388,7 +388,7 @@ abstract class IntelliJValidator extends DoctorValidator {
         final String version = xmlDocument.findAllElements('version').map((xml.XmlElement node) => node.text).first;
         return version;
       } catch (e) {
-        throw "Unable to obtain version from Intellij plugin server";
+        throw 'Unable to check for the plugin updates in the plugin repository';
       }
     }
 
