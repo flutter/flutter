@@ -41,7 +41,7 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
-      environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
     )).thenReturn(exitsHappy);
   });
 
@@ -50,12 +50,13 @@ void main() {
     () async {
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
+        iosEngineDir: 'engine/path',
       );
       expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Objective-C podfile template');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -69,13 +70,14 @@ void main() {
     () async {
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
+        iosEngineDir: 'engine/path',
         isSwift: true,
       );
       expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Swift podfile template');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -92,11 +94,13 @@ void main() {
         ..writeAsString('Existing Podfile');
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
-      );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
+        iosEngineDir: 'engine/path',
+      );
+      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -112,13 +116,14 @@ void main() {
       try {
         await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
         );
         fail('Expected tool error');
       } catch (ToolExit) {
         verifyNever(mockProcessManager.run(
           <String>['pod', 'install', '--verbose'],
           workingDirectory: 'project/ios',
-          environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+          environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
         ));
       }
     },
@@ -138,7 +143,7 @@ void main() {
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       )).thenReturn(new ProcessResult(
         1,
         1,
@@ -161,6 +166,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       try {
         await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
         );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
         fail('Exception expected');
       } catch (ToolExit) {
@@ -187,12 +193,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsString('Existing lock files.');
       await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
           pluginOrFlutterPodChanged: true
       );
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
@@ -215,12 +222,13 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         ..writeAsString('Existing lock files.');
       await cocoaPodsUnderTest.processPods(
           appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
           pluginOrFlutterPodChanged: false
       );
       verifyNever(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
       ));
     },
     overrides: <Type, Generator>{
