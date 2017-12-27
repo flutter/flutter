@@ -254,14 +254,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = injectPlugins();
-
-  if (hasFlutterPlugins)
-    await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
-    );
+  final InjectPluginsResult injectPluginsResult = injectPlugins();
+  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
+  final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
@@ -270,6 +265,17 @@ Future<XcodeBuildResult> buildXcodeProject({
     hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
   );
+
+  if (hasFlutterPlugins) {
+    final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
+    await cocoaPods.processPods(
+        appIosDir: appDirectory,
+        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+    );
+  }
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -355,7 +361,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+String readGeneratedXcconfig(String appPath) {
+  final String generatedXcconfigPath =
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+  final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
+  if (!generatedXcconfigFile.existsSync())
+    return null;
+  return generatedXcconfigFile.readAsStringSync();
+}
+
+Future<Null> diagnoseXcodeBuildFailure(
+    XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -369,7 +385,8 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
       // Make sure the user has specified one of:
       // DEVELOPMENT_TEAM (automatic signing)
       // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
+          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
