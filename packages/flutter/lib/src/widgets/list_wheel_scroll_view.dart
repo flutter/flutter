@@ -10,30 +10,14 @@ import 'package:flutter/widgets.dart';
 
 /// A box in which widgets on a wheel can be scrolled.
 ///
-/// This widget is useful when you have a single box that will normally be
-/// entirely visible, for example a clock face in a time picker, but you need to
-/// make sure it can be scrolled if the container gets too small in one axis
-/// (the scroll direction).
+/// This widget is similar to a [ListView] but with the restriction that all
+/// children must be the same size along the scrolling axis.
 ///
-/// It is also useful if you need to shrink-wrap in both axes (the main
-/// scrolling direction as well as the cross axis), as one might see in a dialog
-/// or pop-up menu. In that case, you might pair the [ListWheelScrollView]
-/// with a [ListBody] child.
+/// The children starts at the middle instead of at the top of the viewport.
 ///
-/// When you have a list of children and do not require cross-axis
-/// shrink-wrapping behavior, for example a scrolling list that is always the
-/// width of the screen, consider [ListView], which is vastly more efficient
-/// that a [ListWheelScrollView] containing a [ListBody] or [Column] with
-/// many children.
-///
-/// See also:
-///
-/// * [ListView], which handles multiple children in a scrolling list.
-/// * [GridView], which handles multiple children in a scrolling grid.
-/// * [PageView], for a scrollable that works page by page.
-/// * [Scrollable], which handles arbitrary scrolling effects.
+/// The children are also rendered as if on a wheel instead of on a plane.
 class ListWheelScrollView extends StatelessWidget {
-  /// Creates a box in which a single widget can be scrolled.
+  /// Creates a box in which children are scrolled on a wheel.
   const ListWheelScrollView({
     Key key,
     this.controller,
