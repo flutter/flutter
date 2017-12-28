@@ -15,6 +15,9 @@ import 'package:flutter/widgets.dart';
 ///
 /// The children starts at the middle instead of at the top of the viewport.
 ///
+/// Scrolling also ends with the last child at the middle instead of at the
+/// bottom of the viewport.
+///
 /// The children are also rendered as if on a wheel instead of on a plane.
 class ListWheelScrollView extends StatelessWidget {
   /// Creates a box in which children are scrolled on a wheel.
@@ -68,7 +71,7 @@ class ListWheelScrollView extends StatelessWidget {
   ///
   /// Defaults to an arbitrary but aesthetically sane number of 2.0.
   ///
-  /// Must not be null.
+  /// Must not be null and must be positive.
   final double diameterRatio;
 
   /// Perspective of the cylindrical projection.
@@ -89,7 +92,7 @@ class ListWheelScrollView extends StatelessWidget {
   /// positive.
   final double itemExtent;
 
-  /// Whether to clip painted children to the dimensions of this scroll view.
+  /// Whether to clip painted children to the inside of this scroll view.
   ///
   /// Defaults to [true]. Must not be null.
   ///
@@ -99,7 +102,8 @@ class ListWheelScrollView extends StatelessWidget {
 
   /// Whether to paint children inside the viewport only.
   ///
-  /// If false, every child will be painted.
+  /// If false, every child will be painted. However the [Scrollable] is still
+  /// the size of the viewport and detects gestures inside only.
   ///
   /// Defaults to [false]. Must not be null. Cannot be true if [clipToSize]
   /// is also true since children outside the viewport will be clipped, leading
@@ -271,6 +275,7 @@ class RenderListWheelViewport
     addAll(children);
   }
 
+  /// The associated ViewportOffset object for the viewport.
   ViewportOffset get offset => _offset;
   ViewportOffset _offset;
   set offset(ViewportOffset value) {
@@ -301,12 +306,13 @@ class RenderListWheelViewport
   /// The same number of children will be visible in the viewport regardless of
   /// the [diameterRatio]. The number of children visible is based on the
   /// viewport's length along the main axis divided by the children's
-  /// [itemExtent].
+  /// [itemExtent]. Then the children are evenly distributed along the visible
+  /// angles up to +/- [math.pi] / 2.
   ///
   /// Just as it's impossible to stretch a paper to cover the an entire
   /// half of a cylinder's surface where the cylinder has the same diameter
   /// as the paper's length, choosing a [diameterRatio] smaller than [math.pi]
-  /// will leave gaps between the children.
+  /// will leave same gaps between the children.
   /// {@endtemplate}
   double get diameterRatio => _diameterRatio;
   double _diameterRatio;
