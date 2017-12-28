@@ -6,7 +6,12 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+
+import 'framework.dart';
+import 'scroll_controller.dart';
+import 'scroll_physics.dart';
+import 'scrollable.dart';
+
 
 /// A box in which widgets on a wheel can be scrolled.
 ///
