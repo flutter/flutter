@@ -377,6 +377,7 @@ class MaterialApp extends StatefulWidget {
   /// ja - Japanese
   /// ps - Pashto
   /// pt - Portugese
+  /// ro - Romanian
   /// ru - Russian
   /// sd - Sindhi
   /// ur - Urdu
