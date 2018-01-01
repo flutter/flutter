@@ -27,11 +27,21 @@ beautiful Material Design and
 Cupertino (iOS-flavor) widgets, rich motion APIs,
 smooth natural scrolling, and platform awareness.
 
+<a href="https://github.com/flutter/flutter/tree/master/examples/flutter_gallery/lib/demo/animation">
 <img src="https://flutter.io/images/homepage/screenshot-1.png" width="270" height="480" alt="Brand-first shopping design" align="left">
-<img src="https://flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
+</a>
 
+<a href="https://github.com/flutter/posse_gallery">
+<img src="https://flutter.io/images/homepage/screenshot-2.png" width="270" height="480" alt="Fitness app design">
+</a>
+
+<a href="https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/lib/demo/contacts_demo.dart">
 <img src="https://flutter.io/images/homepage/screenshot-3.png" width="270" height="480" alt="Contact app design" align="left">
+</a>
+
+<a href="https://codelabs.developers.google.com/codelabs/flutter-firebase">
 <img src="https://flutter.io/images/homepage/ios-friendlychat.png" width="270" height="480" alt="iOS chat app design">
+</a>
 
 Browse the <a href="https://flutter.io/widgets/">widget catalog</a>.
 
