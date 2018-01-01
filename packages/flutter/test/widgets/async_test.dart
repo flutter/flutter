@@ -180,6 +180,19 @@ void main() {
       await eventFiring(tester);
       expect(find.text('AsyncSnapshot(ConnectionState.done, 4, null)'), findsOneWidget);
     });
+    testWidgets('runs the builder using given initial data', (WidgetTester tester) async {
+      final String initial = 'A';
+      final StreamController<String> controller = new StreamController<String>();
+      await tester.pumpWidget(new StreamBuilder<String>(
+        stream: controller.stream,
+        builder: snapshotText,
+        initialData: initial,
+      ));
+      expect(
+        find.text('AsyncSnapshot(ConnectionState.waiting, $initial, null)'),
+        findsOneWidget,
+      );
+    });
   });
   group('FutureBuilder and StreamBuilder behave identically on Stream from Future', () {
     testWidgets('when completing with data', (WidgetTester tester) async {

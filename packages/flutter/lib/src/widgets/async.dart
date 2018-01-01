@@ -333,19 +333,27 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
-  /// strategy is given by [builder].
+  /// strategy is given by [builder]. You can also specify the [initialData],
+  /// which will be contained within the first AsyncSnapshot delivered to
+  /// your [builder].
   const StreamBuilder({
     Key key,
+    this.initialData,
     Stream<T> stream,
     @required this.builder
-  }) : assert(builder != null),
-       super(key: key, stream: stream);
+  })
+      : assert(builder != null),
+        super(key: key, stream: stream);
 
   /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
 
+  /// Allows you to provide data for the first AsyncSnapshot sent to the
+  /// [builder]. By default, no data will be provided.
+  final T initialData;
+
   @override
-  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.nothing(); // ignore: prefer_const_constructors
+  AsyncSnapshot<T> initial() => new AsyncSnapshot<T>.withData(ConnectionState.none, initialData);
 
   @override
   AsyncSnapshot<T> afterConnected(AsyncSnapshot<T> current) => current.inState(ConnectionState.waiting);
