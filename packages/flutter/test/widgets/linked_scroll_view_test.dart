@@ -178,6 +178,10 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
   }
 
+  void _userMoved(ScrollDirection direction) {
+    updateUserScrollDirection(direction);
+  }
+
   LinkedScrollActivity link(LinkedScrollPosition driver) {
     if (this.activity is! LinkedScrollActivity)
       beginActivity(new LinkedScrollActivity(this));
@@ -239,7 +243,7 @@ class LinkedScrollActivity extends ScrollActivity {
       if (driver.userScrollDirection != commonDirection)
         commonDirection = ScrollDirection.idle;
     }
-    delegate.updateUserScrollDirection(commonDirection);
+    delegate._userMoved(commonDirection);
     return delegate.setPixels(delegate.pixels + delta);
   }
 

@@ -165,7 +165,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   /// Set [userScrollDirection] to the given value.
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
-  @visibleForTesting
+  @protected
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
     if (userScrollDirection == value)
