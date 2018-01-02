@@ -2,59 +2,72 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' show SemanticsFlags;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
-    final Key avatarA = const Key('A');
-    final Key avatarC = const Key('C');
-    final Key avatarD = const Key('D');
+import '../widgets/semantics_tester.dart';
 
-    await tester.pumpWidget(
-      new MaterialApp(
-        home: new MediaQuery(
-          data: const MediaQueryData(
-            padding: const EdgeInsets.only(
-              left: 10.0,
-              top: 20.0,
-              right: 30.0,
-              bottom: 40.0,
-            ),
+const Key avatarA = const Key('A');
+const Key avatarC = const Key('C');
+const Key avatarD = const Key('D');
+
+Future<Null> pumpTestWidget(WidgetTester tester, {
+  bool withName: true,
+  bool withEmail: true,
+  bool withOnDetailsPressedHandler: true,
+}) async {
+  await tester.pumpWidget(
+    new MaterialApp(
+      home: new MediaQuery(
+        data: const MediaQueryData(
+          padding: const EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
           ),
-          child: new Material(
-            child: new Center(
-              child: new UserAccountsDrawerHeader(
-                currentAccountPicture: new CircleAvatar(
-                  key: avatarA,
-                  child: const Text('A'),
-                ),
-                otherAccountsPictures: <Widget>[
-                  const CircleAvatar(
-                    child: const Text('B'),
-                  ),
-                  new CircleAvatar(
-                    key: avatarC,
-                    child: const Text('C'),
-                  ),
-                  new CircleAvatar(
-                    key: avatarD,
-                    child: const Text('D'),
-                  ),
-                  const CircleAvatar(
-                    child: const Text('E'),
-                  )
-                ],
-                accountName: const Text('name'),
-                accountEmail: const Text('email'),
+        ),
+        child: new Material(
+          child: new Center(
+            child: new UserAccountsDrawerHeader(
+              onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
+              currentAccountPicture: const CircleAvatar(
+                key: avatarA,
+                child: const Text('A'),
               ),
+              otherAccountsPictures: <Widget>[
+                const CircleAvatar(
+                  child: const Text('B'),
+                ),
+                const CircleAvatar(
+                  key: avatarC,
+                  child: const Text('C'),
+                ),
+                const CircleAvatar(
+                  key: avatarD,
+                  child: const Text('D'),
+                ),
+                const CircleAvatar(
+                  child: const Text('E'),
+                )
+              ],
+              accountName: withName ? const Text('name') : null,
+              accountEmail: withEmail ? const Text('email') : null,
             ),
           ),
         ),
       ),
-    );
+    ),
+  );
+}
 
+void main() {
+  testWidgets('UserAccountsDrawerHeader test', (WidgetTester tester) async {
+    await pumpTestWidget(tester);
+    
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsOneWidget);
     expect(find.text('C'), findsOneWidget);
@@ -185,5 +198,88 @@ void main() {
       tester.getBottomLeft(find.text('accountName')).dy,
       greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
     );
+  });
+
+  testWidgets('UserAccountsDrawerHeader provides semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await pumpTestWidget(tester);
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics(
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: 'Signed in\nA\nname\nemail',
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: r'B',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  label: r'C',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  label: r'D',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  flags: <SemanticsFlags>[SemanticsFlags.isButton],
+                  actions: <SemanticsAction>[SemanticsAction.tap],
+                  label: r'Show accounts',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
+  });
+
+  testWidgets('UserAccountsDrawerHeader provides semantics with missing properties', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+    await pumpTestWidget(
+      tester,
+      withEmail: false,
+      withName: false,
+      withOnDetailsPressedHandler: false,
+    );
+
+    expect(
+      semantics,
+      hasSemantics(
+        new TestSemantics(
+          children: <TestSemantics>[
+            new TestSemantics(
+              label: 'Signed in\nA',
+              textDirection: TextDirection.ltr,
+              children: <TestSemantics>[
+                new TestSemantics(
+                  label: r'B',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  label: r'C',
+                  textDirection: TextDirection.ltr,
+                ),
+                new TestSemantics(
+                  label: r'D',
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),
+          ],
+        ),
+        ignoreId: true, ignoreTransform: true, ignoreRect: true,
+      ),
+    );
+
+    semantics.dispose();
   });
 }

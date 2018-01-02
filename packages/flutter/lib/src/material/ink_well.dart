@@ -96,6 +96,7 @@ class InkResponse extends StatefulWidget {
     this.highlightColor,
     this.splashColor,
     this.enableFeedback: true,
+    this.excludeFromSemantics: false,
   }) : assert(enableFeedback != null), super(key: key);
 
   /// The widget below this widget in the tree.
@@ -193,6 +194,15 @@ class InkResponse extends StatefulWidget {
   ///
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool enableFeedback;
+
+  /// Whether to exclude the gestures introduced by this widget from the
+  /// semantics tree.
+  ///
+  /// For example, a long-press gesture for showing a tooltip is usually
+  /// excluded because the tooltip itself is included in the semantics
+  /// tree directly and so having a gesture to show it would result in
+  /// duplication of information.
+  final bool excludeFromSemantics;
 
   /// The rectangle to use for the highlight effect and for clipping
   /// the splash effects if [containedInkWell] is true.
@@ -379,7 +389,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       onDoubleTap: widget.onDoubleTap != null ? _handleDoubleTap : null,
       onLongPress: widget.onLongPress != null ? () => _handleLongPress(context) : null,
       behavior: HitTestBehavior.opaque,
-      child: widget.child
+      child: widget.child,
+      excludeFromSemantics: widget.excludeFromSemantics,
     );
   }
 
@@ -427,6 +438,7 @@ class InkWell extends InkResponse {
     Color splashColor,
     BorderRadius borderRadius,
     bool enableFeedback: true,
+    bool excludeFromSemantics: false,
   }) : super(
     key: key,
     child: child,
@@ -440,5 +452,6 @@ class InkWell extends InkResponse {
     splashColor: splashColor,
     borderRadius: borderRadius,
     enableFeedback: enableFeedback,
+    excludeFromSemantics: excludeFromSemantics,
   );
 }

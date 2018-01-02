@@ -100,17 +100,33 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
                   package: _kGalleryAssetsPackage,
                 ),
               ),
-              otherAccountsPictures: const <Widget>[
-                const CircleAvatar(
-                  backgroundImage: const AssetImage(
-                    _kAsset1,
-                    package: _kGalleryAssetsPackage,
+              otherAccountsPictures:  <Widget>[
+                new GestureDetector(
+                  onTap: () {
+                    _onOtherAccountsTap(context);
+                  },
+                  child: new Semantics(
+                    label: 'Switch to Account B',
+                    child: const CircleAvatar(
+                      backgroundImage: const AssetImage(
+                        _kAsset1,
+                        package: _kGalleryAssetsPackage,
+                      ),
+                    ),
                   ),
                 ),
-                const CircleAvatar(
-                  backgroundImage: const AssetImage(
-                    _kAsset2,
-                    package: _kGalleryAssetsPackage,
+                new GestureDetector(
+                  onTap: () {
+                    _onOtherAccountsTap(context);
+                  },
+                  child: new Semantics(
+                    label: 'Switch to Account C',
+                    child: const CircleAvatar(
+                      backgroundImage: const AssetImage(
+                        _kAsset2,
+                        package: _kGalleryAssetsPackage,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -210,6 +226,23 @@ class _DrawerDemoState extends State<DrawerDemo> with TickerProviderStateMixin {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  void _onOtherAccountsTap(BuildContext context) {
+    showDialog<Null>(
+      context: context,
+      child: new AlertDialog(
+        title: const Text('Account switching not implemented.'),
+        actions: <Widget>[
+          new FlatButton(
+            child: const Text('OK'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
       ),
     );
   }
