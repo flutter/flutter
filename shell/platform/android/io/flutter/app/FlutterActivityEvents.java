@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import io.flutter.plugin.common.PluginRegistry.ActivityResultListener;
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionResultListener;
+import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener;
 
 /**
  * A collection of Android {@code Activity} methods that are relevant to the
@@ -21,7 +22,10 @@ import io.flutter.plugin.common.PluginRegistry.RequestPermissionResultListener;
  * {@code FlutterActivity}.</p>
  */
 public interface FlutterActivityEvents
-        extends ComponentCallbacks2, ActivityResultListener, RequestPermissionResultListener {
+        extends ComponentCallbacks2,
+                ActivityResultListener,
+                RequestPermissionResultListener,
+                RequestPermissionsResultListener {
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
      */

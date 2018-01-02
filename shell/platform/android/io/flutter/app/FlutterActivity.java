@@ -114,7 +114,7 @@ public class FlutterActivity extends Activity implements FlutterView.Provider, P
 
     // @Override - added in API level 23
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        eventDelegate.onRequestPermissionResult(requestCode, permissions, grantResults);
+        eventDelegate.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

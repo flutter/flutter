@@ -21,6 +21,7 @@ import java.util.Map;
 public class FlutterPluginRegistry
   implements PluginRegistry,
              PluginRegistry.RequestPermissionResultListener,
+             PluginRegistry.RequestPermissionsResultListener,
              PluginRegistry.ActivityResultListener,
              PluginRegistry.NewIntentListener,
              PluginRegistry.UserLeaveHintListener,
@@ -33,7 +34,7 @@ public class FlutterPluginRegistry
     private FlutterView mFlutterView;
 
     private final Map<String, Object> mPluginMap = new LinkedHashMap<>(0);
-    private final List<RequestPermissionResultListener> mRequestPermissionResultListeners = new ArrayList<>(0);
+    private final List<RequestPermissionsResultListener> mRequestPermissionsResultListeners = new ArrayList<>(0);
     private final List<ActivityResultListener> mActivityResultListeners = new ArrayList<>(0);
     private final List<NewIntentListener> mNewIntentListeners = new ArrayList<>(0);
     private final List<UserLeaveHintListener> mUserLeaveHintListeners = new ArrayList<>(0);
@@ -113,9 +114,21 @@ public class FlutterPluginRegistry
         }
 
         @Override
+        @Deprecated
         public Registrar addRequestPermissionResultListener(
-                RequestPermissionResultListener listener) {
-            mRequestPermissionResultListeners.add(listener);
+                final RequestPermissionResultListener listener) {
+            return addRequestPermissionsResultListener(new RequestPermissionsResultListener() {
+                @Override
+                public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+                    return listener.onRequestPermissionResult(requestCode, permissions, grantResults);
+                }
+            });
+        }
+
+        @Override
+        public Registrar addRequestPermissionsResultListener(
+                RequestPermissionsResultListener listener) {
+            mRequestPermissionsResultListeners.add(listener);
             return this;
         }
 
@@ -145,13 +158,19 @@ public class FlutterPluginRegistry
     }
 
     @Override
-    public boolean onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
-        for (RequestPermissionResultListener listener : mRequestPermissionResultListeners) {
-            if (listener.onRequestPermissionResult(requestCode, permissions, grantResults)) {
+    public boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        for (RequestPermissionsResultListener listener : mRequestPermissionsResultListeners) {
+            if (listener.onRequestPermissionsResult(requestCode, permissions, grantResults)) {
                 return true;
             }
         }
         return false;
+    }
+
+    @Deprecated
+    @Override
+    public boolean onRequestPermissionResult(int requestCode, String[] permissions, int[] grantResults) {
+      return onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
