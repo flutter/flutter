@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/android/android_external_texture_gl.h"
 
+// #include <GLES/gl.h>
 #include <GLES/glext.h>
 #include "flutter/common/threads.h"
 #include "flutter/shell/platform/android/platform_view_android_jni.h"
@@ -14,7 +15,7 @@ namespace shell {
 AndroidExternalTextureGL::AndroidExternalTextureGL(
     int64_t id,
     const fml::jni::JavaObjectWeakGlobalRef& surfaceTexture)
-    : Texture(id), surface_texture_(surfaceTexture), transform(SkMatrix::I()) {}
+    : Texture(id), surface_texture_(surfaceTexture) {}
 
 AndroidExternalTextureGL::~AndroidExternalTextureGL() = default;
 
@@ -43,40 +44,14 @@ void AndroidExternalTextureGL::Paint(SkCanvas& canvas, const SkRect& bounds) {
     new_frame_ready_ = false;
   }
   GrGLTextureInfo textureInfo = {GL_TEXTURE_EXTERNAL_OES, texture_name_};
-  GrBackendTexture backendTexture(1, 1, kRGBA_8888_GrPixelConfig, textureInfo);
+  GrBackendTexture backendTexture(bounds.width(), bounds.height(),
+                                  kRGBA_8888_GrPixelConfig, textureInfo);
   sk_sp<SkImage> image = SkImage::MakeFromTexture(
       canvas.getGrContext(), backendTexture, kTopLeft_GrSurfaceOrigin,
       SkAlphaType::kPremul_SkAlphaType, nullptr);
   if (image) {
-    SkAutoCanvasRestore autoRestore(&canvas, true);
-    canvas.translate(bounds.x(), bounds.y());
-    canvas.scale(bounds.width(), bounds.height());
-    if (!transform.isIdentity()) {
-      SkMatrix transformAroundCenter(transform);
-
-      transformAroundCenter.preTranslate(-0.5, -0.5);
-      transformAroundCenter.postScale(1, -1);
-      transformAroundCenter.postTranslate(0.5, 0.5);
-      canvas.concat(transformAroundCenter);
-    }
-    canvas.drawImage(image, 0, 0);
+    canvas.drawImage(image, bounds.x(), bounds.y());
   }
-}
-
-void AndroidExternalTextureGL::UpdateTransform() {
-  JNIEnv* env = fml::jni::AttachCurrentThread();
-  fml::jni::ScopedJavaLocalRef<jobject> surfaceTexture =
-      surface_texture_.get(env);
-  jfloatArray transformMatrix = env->NewFloatArray(16);
-  SurfaceTextureGetTransformMatrix(env, surfaceTexture.obj(), transformMatrix);
-  float* m = env->GetFloatArrayElements(transformMatrix, nullptr);
-  SkScalar matrix3[] = {
-      m[0], m[1], m[2],   //
-      m[4], m[5], m[6],   //
-      m[8], m[9], m[10],  //
-  };
-  env->ReleaseFloatArrayElements(transformMatrix, m, JNI_ABORT);
-  transform.set9(matrix3);
 }
 
 void AndroidExternalTextureGL::OnGrContextDestroyed() {
@@ -102,7 +77,6 @@ void AndroidExternalTextureGL::Update() {
       surface_texture_.get(env);
   if (!surfaceTexture.is_null()) {
     SurfaceTextureUpdateTexImage(env, surfaceTexture.obj());
-    UpdateTransform();
   }
 }
 
