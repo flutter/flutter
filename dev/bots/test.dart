@@ -498,10 +498,10 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   final Set<String> outOfDate = new Set<String>();
 
   for (String package in packageToRegistrants.keys) {
-    final Map<File, String> fileToContent = new Map<File, String>.fromIterable(packageToRegistrants[package],
-      key: (File f) => f,
-      value: (File f) => f.readAsStringSync(),
-    );
+    final Map<File, String> fileToContent = <File, String>{};
+    for(File f in packageToRegistrants[package]) {
+      fileToContent[f] = f.readAsStringSync();
+    }
     await _runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
       printOutput: false,
