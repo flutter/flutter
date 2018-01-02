@@ -77,31 +77,35 @@ class _InputBorderGap extends ChangeNotifier {
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
     Listenable repaint,
-    this.animation,
+    this.borderAnimation,
     this.border,
+    this.gapAnimation,
     this.gap,
     this.textDirection,
   }) : super(repaint: repaint);
 
-  final Animation<double> animation;
+  final Animation<double> borderAnimation;
   final _InputBorderTween border;
+  final Animation<double> gapAnimation;
   final _InputBorderGap gap;
   final TextDirection textDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
-    border.evaluate(animation).paint(
+    border.evaluate(borderAnimation).paint(
       canvas,
       Offset.zero & size,
       gapStart: gap.start,
       gapExtent: gap.extent,
+      gapPercentage: gapAnimation.value,
       textDirection: textDirection,
     );
   }
 
   @override
   bool shouldRepaint(_InputBorderPainter oldPainter) {
-    return animation != oldPainter.animation
+    return borderAnimation != oldPainter.borderAnimation
+        || gapAnimation != oldPainter.gapAnimation
         || border != oldPainter.border
         || gap != oldPainter.gap
         || textDirection != oldPainter.textDirection;
@@ -117,6 +121,7 @@ class _BorderContainer extends StatefulWidget {
     Key key,
     @required this.border,
     @required this.gap,
+    @required this.gapAnimation,
     this.child
   }) : assert(border != null),
        assert(gap != null),
@@ -124,6 +129,7 @@ class _BorderContainer extends StatefulWidget {
 
   final _InputBorder border;
   final _InputBorderGap gap;
+  final Animation<double> gapAnimation;
   final Widget child;
 
   @override
@@ -132,7 +138,7 @@ class _BorderContainer extends StatefulWidget {
 
 class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
   AnimationController _controller;
-  Animation<double> _animation;
+  Animation<double> _borderAnimation;
   _InputBorderTween _border;
 
   @override
@@ -142,7 +148,7 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
       duration: _kTransitionDuration,
       vsync: this,
     );
-    _animation = new CurvedAnimation(
+    _borderAnimation = new CurvedAnimation(
       parent: _controller,
       curve: _kTransitionCurve,
     );
@@ -176,9 +182,10 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
   Widget build(BuildContext context) {
     return new CustomPaint(
       foregroundPainter: new _InputBorderPainter(
-        repaint: new Listenable.merge(<Listenable>[_animation, widget.gap]),
-        animation: _animation,
+        repaint: new Listenable.merge(<Listenable>[_borderAnimation, widget.gap]),
+        borderAnimation: _borderAnimation,
         border: _border,
+        gapAnimation: widget.gapAnimation,
         gap: widget.gap,
         textDirection: Directionality.of(context),
       ),
@@ -208,7 +215,6 @@ class _InputBorder extends ShapeBorder {
     this.borderSide: BorderSide.none,
     this.borderRadius: BorderRadius.zero,
     this.gapPad: 4.0,
-    this.gapAnimation,
   }) : assert(borderSide != null),
        assert(borderRadius != null),
        assert(_cornersAreCircular(borderRadius)),
@@ -225,7 +231,6 @@ class _InputBorder extends ShapeBorder {
   final BorderSide borderSide;
   final BorderRadius borderRadius;
   final double gapPad;
-  final Animation<double> gapAnimation;
 
   @override
   EdgeInsetsGeometry get dimensions {
@@ -238,7 +243,6 @@ class _InputBorder extends ShapeBorder {
       borderSide: borderSide.scale(t),
       borderRadius: borderRadius * t,
       gapPad: gapPad * t,
-      gapAnimation: gapAnimation,
     );
   }
 
@@ -314,14 +318,14 @@ class _InputBorder extends ShapeBorder {
       ..lineTo(center.left, center.top + center.trRadiusY);
   }
 
-  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection, double gapStart, double gapExtent) {
+  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection, double gapStart, double gapExtent, double gapPercentage) {
     final Paint paint = borderSide.toPaint();
     final RRect outer = borderRadius.toRRect(rect);
     final RRect center = outer.deflate(borderSide.width / 2.0);
     if (gapStart == null || gapExtent <= 0.0) {
       canvas.drawRRect(center, paint);
     } else {
-      final double extent = lerpDouble(0.0, gapExtent + gapPad * 2.0, gapAnimation.value);
+      final double extent = lerpDouble(0.0, gapExtent + gapPad * 2.0, gapPercentage);
       if (textDirection == TextDirection.rtl) {
         final Path path = _gapBorderPath(canvas, center, gapStart + gapPad - extent, extent);
         canvas.drawPath(path, paint);
@@ -337,7 +341,13 @@ class _InputBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, { double gapStart, double gapExtent: 0.0, TextDirection textDirection }) {
+  void paint(Canvas canvas, Rect rect, {
+      double gapStart,
+      double gapExtent: 0.0,
+      double gapPercentage: 0.0,
+      TextDirection textDirection
+  }) {
+    // TBD: asserts
     switch (borderSide.style) {
       case BorderStyle.none:
         break;
@@ -346,7 +356,7 @@ class _InputBorder extends ShapeBorder {
           case InputBorderType.none:
             return;
           case InputBorderType.outline:
-            paintOutline(canvas, rect, textDirection, gapStart, gapExtent);
+            paintOutline(canvas, rect, textDirection, gapStart, gapExtent, gapPercentage);
             break;
           case InputBorderType.underline:
             paintUnderline(canvas, rect);
@@ -365,7 +375,6 @@ class _InputBorder extends ShapeBorder {
         borderType: a.borderType,
         borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        gapAnimation: a.gapAnimation,
         gapPad: a.gapPad,
       );
     }
@@ -379,7 +388,6 @@ class _InputBorder extends ShapeBorder {
         borderType: b.borderType,
         borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        gapAnimation: b.gapAnimation,
         gapPad: b.gapPad,
       );
     }
@@ -396,12 +404,11 @@ class _InputBorder extends ShapeBorder {
     return typedOther.borderType == borderType
         && typedOther.borderRadius == borderRadius
         && typedOther.borderSide == borderSide
-        && typedOther.gapPad == gapPad
-        && typedOther.gapAnimation == gapAnimation;
+        && typedOther.gapPad == gapPad;
   }
 
   @override
-  int get hashCode => hashValues(borderType, borderSide, borderRadius, gapPad, gapAnimation);
+  int get hashCode => hashValues(borderType, borderSide, borderRadius, gapPad);
 }
 
 class _InputBorderTween extends Tween<_InputBorder> {
@@ -1703,7 +1710,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     );
 
     final _InputBorder border = new _InputBorder(
-        gapAnimation: _floatingLabelController.view,
         borderType: decoration.borderType,
         borderRadius: decoration.borderType == InputBorderType.outline
           ? new BorderRadius.circular(4.0)
@@ -1720,6 +1726,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final Widget container = new _BorderContainer(
       border: border,
       gap: _borderGap,
+      gapAnimation: _floatingLabelController.view,
       child: new DecoratedBox(
         decoration: new BoxDecoration(
           color: _getFillColor(themeData),
