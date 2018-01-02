@@ -303,6 +303,16 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
 ///
+/// By default, the initial snapshot will not contain data, resulting in a
+/// snapshot of the form
+///
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, null)`
+///
+/// You can override this by providing [initialData], which results in a
+/// snapshot of the form
+///
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, 'initial data')`
+///
 /// See also:
 ///
 /// * [StreamBuilderBase], which supports widget building based on a computation
@@ -333,9 +343,8 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
-  /// strategy is given by [builder]. You can also specify the [initialData],
-  /// which will be contained within the first AsyncSnapshot delivered to
-  /// your [builder].
+  /// strategy is given by [builder]. The [initialData] is used to create the
+  /// first snapshot delivered to the [builder].
   const StreamBuilder({
     Key key,
     this.initialData,
@@ -348,8 +357,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
 
-  /// Allows you to provide data for the first AsyncSnapshot sent to the
-  /// [builder]. By default, no data will be provided.
+  /// The data that will be used to create the initial snapshot. Null by default.
   final T initialData;
 
   @override
@@ -399,6 +407,16 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
 /// * `new AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
 ///
+/// By default, the initial snapshot delivered to the [builder] will not contain
+/// data, resulting in a snapshot of the form:
+///
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
+///
+/// You can override this by providing [initialData], which results in a
+/// snapshot of the form:
+///
+/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, 'initial data')`
+///
 /// The data and error fields of the snapshot change only as the connection
 /// state field transitions from `waiting` to `done`, and they will be retained
 /// when changing the [FutureBuilder] configuration to another future. If the
@@ -445,6 +463,7 @@ class FutureBuilder<T> extends StatefulWidget {
   const FutureBuilder({
     Key key,
     this.future,
+    this.initialData,
     @required this.builder
   }) : assert(builder != null),
        super(key: key);
@@ -456,6 +475,9 @@ class FutureBuilder<T> extends StatefulWidget {
   /// The build strategy currently used by this builder. Cannot be null.
   final AsyncWidgetBuilder<T> builder;
 
+  /// The data that will be used to create the initial snapshot. Null by default.
+  final T initialData;
+
   @override
   State<FutureBuilder<T>> createState() => new _FutureBuilderState<T>();
 }
@@ -466,11 +488,12 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   /// calling setState from stale callbacks, e.g. after disposal of this state,
   /// or after widget reconfiguration to a new Future.
   Object _activeCallbackIdentity;
-  AsyncSnapshot<T> _snapshot = new AsyncSnapshot<T>.nothing(); // ignore: prefer_const_constructors
+  AsyncSnapshot<T> _snapshot;
 
   @override
   void initState() {
     super.initState();
+    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData); // ignore: prefer_const_constructors
     _subscribe();
   }
 
