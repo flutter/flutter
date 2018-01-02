@@ -552,7 +552,7 @@ class Navigator extends StatefulWidget {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  static Future<dynamic> push(BuildContext context, Route<dynamic> route) {
+  static Future<T> push<T>(BuildContext context, Route<T> route) {
     return Navigator.of(context).push(route);
   }
 
@@ -789,7 +789,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           );
           return true;
         }());
-        push(_routeNamed(Navigator.defaultRouteName));
+        push<dynamic>(_routeNamed(Navigator.defaultRouteName));
       } else {
         plannedInitialRoutes.forEach(push);
       }
@@ -798,7 +798,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       if (initialRouteName != Navigator.defaultRouteName)
         route = _routeNamed(initialRouteName, allowNull: true);
       route ??= _routeNamed(Navigator.defaultRouteName);
-      push(route);
+      push<dynamic>(route);
     }
     for (Route<dynamic> route in _history)
       _initialOverlayEntries.addAll(route.overlayEntries);
@@ -898,7 +898,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// Navigator.of(context).pushNamed('/nyc/1776');
   /// ```
   Future<dynamic> pushNamed(String name) {
-    return push(_routeNamed(name));
+    return push<dynamic>(_routeNamed(name));
   }
 
   /// Adds the given route to the navigator's history, and transitions to it.
@@ -913,7 +913,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// Returns a [Future] that completes to the `result` value passed to [pop]
   /// when the pushed route is popped off the navigator.
-  Future<dynamic> push(Route<dynamic> route) {
+  @optionalTypeArgs
+  Future<T> push<T>(Route<T> route) {
     assert(!_debugLocked);
     assert(() { _debugLocked = true; return true; }());
     assert(route != null);

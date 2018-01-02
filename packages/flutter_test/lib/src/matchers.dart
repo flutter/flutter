@@ -592,7 +592,7 @@ class _HasGoodToStringDeep extends Matcher {
 /// sets of value for which a metric space is defined.
 typedef num DistanceFunction<T>(T a, T b);
 
-const Map<Type, DistanceFunction<dynamic>> _kStandardDistanceFunctions = const <Type, DistanceFunction<dynamic>>{
+const Map<Type, DistanceFunction<Null>> _kStandardDistanceFunctions = const <Type, DistanceFunction<Null>>{
   Color: _maxComponentColorDistance,
   Offset: _offsetDistance,
   int: _intDistance,

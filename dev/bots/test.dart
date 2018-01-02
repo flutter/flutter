@@ -210,7 +210,7 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
-  final Map<String, String> pubEnvironment = <String, String>{'DART_VM_OPTIONS': '--assert-initializer'};
+  final Map<String, String> pubEnvironment = <String, String>{};
   if (new Directory(pubCache).existsSync()) {
     pubEnvironment['PUB_CACHE'] = pubCache;
   }

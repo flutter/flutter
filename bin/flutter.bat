@@ -40,7 +40,6 @@ IF NOT EXIST "%flutter_root%\.git" (
 REM Ensure that bin/cache exists.
 IF NOT EXIST "%cache_dir%" MKDIR "%cache_dir%"
 
-SET FLUTTER_TOOL_ARGS=--assert-initializer %FLUTTER_TOOL_ARGS%
 REM To debug the tool, you can uncomment the following lines to enable checked mode and set an observatory port:
 REM SET FLUTTER_TOOL_ARGS="--checked %FLUTTER_TOOL_ARGS%"
 REM SET FLUTTER_TOOL_ARGS="%FLUTTER_TOOL_ARGS% --observe=65432"
