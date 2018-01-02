@@ -298,6 +298,11 @@ class OutlineInputBorder extends InputBorder {
   /// Draw a rounded rectangle around [rect] using [borderRadius].
   ///
   /// The [borderSide] defines the line's color and weight.
+  ///
+  /// The top side of the rounded rectangle may be interrupted by a single gap
+  /// if [gapExtent] is non-null. In that case the gap begins at
+  /// `gapStart - gapPad` (asuming that the [textDirection] is [TextDirection.ltr]).
+  /// The gap's width is `(gapPad + gapExtent + gapPad) * gapPercentage`.
   @override
   void paint(Canvas canvas, Rect rect, {
       double gapStart,
