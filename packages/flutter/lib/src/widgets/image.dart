@@ -511,13 +511,13 @@ class _ImageState extends State<Image> {
 
     if (_isListeningToStream)
       _imageStream.removeListener(_handleImageChanged);
+    
+    if (!widget.gaplessPlayback)
+      setState(() { _imageInfo = null; });
 
     _imageStream = newStream;
     if (_isListeningToStream)
       _imageStream.addListener(_handleImageChanged);
-
-    if (!widget.gaplessPlayback)
-      setState(() { _imageInfo = null; });
   }
 
   void _listenToStream() {
