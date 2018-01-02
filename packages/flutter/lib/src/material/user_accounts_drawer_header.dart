@@ -111,7 +111,7 @@ class _AccountDetails extends StatelessWidget {
 
     if (onTap != null) {
       final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-      final Widget dorpDownIcon = new LayoutId(
+      final Widget dropDownIcon = new LayoutId(
         id: _AccountDetailsLayout.dropdownIcon,
         child: new Semantics(
           container: true,
@@ -132,7 +132,7 @@ class _AccountDetails extends StatelessWidget {
           ),
         ),
       );
-      children.add(dorpDownIcon);
+      children.add(dropDownIcon);
     }
 
     Widget accountDetails = new CustomMultiChildLayout(
