@@ -86,6 +86,7 @@ Future<GradleProject> _gradleProject() async {
 Future<GradleProject> _readGradleProject() async {
   final String gradle = await _ensureGradle();
   updateLocalProperties();
+  injectPlugins();
   try {
     final Status status = logger.startProgress('Resolving dependencies...', expectSlowOperation: true);
     final RunResult runResult = await runCheckedAsync(
@@ -222,8 +223,6 @@ Future<Null> buildGradleProject(BuildInfo buildInfo, String target) async {
   // uses the standard Android way to determine what to build, but we still
   // update local.properties, in case we want to use it in the future.
   updateLocalProperties(buildInfo: buildInfo);
-
-  injectPlugins();
 
   final String gradle = await _ensureGradle();
 
