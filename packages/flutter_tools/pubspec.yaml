@@ -24,7 +24,7 @@ dependencies:
   package_config: 1.0.3
   platform: 2.1.1
   plugin: 0.2.0+2
-  process: 2.0.6
+  process: 2.0.7
   quiver: 0.26.2
   stack_trace: 1.9.1
   stream_channel: 1.6.3

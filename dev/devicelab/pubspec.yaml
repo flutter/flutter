@@ -14,7 +14,7 @@ dependencies:
   meta: 1.1.1
   path: 1.5.1
   platform: 2.1.1
-  process: 2.0.6
+  process: 2.0.7
   stack_trace: 1.9.1
   vm_service_client: 0.2.3
 
