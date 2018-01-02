@@ -25,11 +25,19 @@ export 'semantics_event.dart';
 /// Used by [SemanticsNode.visitChildren].
 typedef bool SemanticsNodeVisitor(SemanticsNode node);
 
+/// Signature for [SemanticsAction]s that move the cursor.
+///
+/// If `extendSelection` is set to true the cursor movement should extend the
+/// current selection or (if nothing is currently selected) start a selection.
+typedef void MoveCursorHandler(bool extendSelection);
+
+typedef void _SemanticsActionHandler(dynamic args);
+
 /// A tag for a [SemanticsNode].
 ///
 /// Tags can be interpreted by the parent of a [SemanticsNode]
 /// and depending on the presence of a tag the parent can for example decide
-/// how to add the tagged note as a child. Tags are not sent to the engine.
+/// how to add the tagged node as a child. Tags are not sent to the engine.
 ///
 /// As an example, the [RenderSemanticsGestureHandler] uses tags to determine
 /// if a child node should be excluded from the scrollable area for semantic
@@ -224,6 +232,256 @@ class _SemanticsDiagnosticableNode extends DiagnosticableNode<SemanticsNode> {
   }
 }
 
+/// Contains properties used by assistive technologies to make the application
+/// more accessible.
+///
+/// The properties of this class are used to generate a [SemanticsNode]s in the
+/// semantics tree.
+@immutable
+class SemanticsProperties extends DiagnosticableTree {
+  /// Creates a semantic annotation.
+  ///
+  /// The [container] argument must not be null.
+  const SemanticsProperties({
+    this.checked,
+    this.selected,
+    this.button,
+    this.label,
+    this.value,
+    this.increasedValue,
+    this.decreasedValue,
+    this.hint,
+    this.textDirection,
+    this.onTap,
+    this.onLongPress,
+    this.onScrollLeft,
+    this.onScrollRight,
+    this.onScrollUp,
+    this.onScrollDown,
+    this.onIncrease,
+    this.onDecrease,
+    this.onMoveCursorForwardByCharacter,
+    this.onMoveCursorBackwardByCharacter,
+  });
+
+  /// If non-null, indicates that this subtree represents a checkbox
+  /// or similar widget with a "checked" state, and what its current
+  /// state is.
+  final bool checked;
+
+  /// If non-null indicates that this subtree represents something that can be
+  /// in a selected or unselected state, and what its current state is.
+  ///
+  /// The active tab in a tab bar for example is considered "selected", whereas
+  /// all other tabs are unselected.
+  final bool selected;
+
+  /// If non-null, indicates that this subtree represents a button.
+  ///
+  /// TalkBack/VoiceOver provides users with the hint "button" when a button
+  /// is focused.
+  final bool button;
+
+  /// Provides a textual description of the widget.
+  ///
+  /// If a label is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.label] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String label;
+
+  /// Provides a textual description of the value of the widget.
+  ///
+  /// If a value is provided, there must either by an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.value] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String value;
+
+  /// The value that [value] will become after a [SemanticsAction.increase]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onIncrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.increasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String increasedValue;
+
+  /// The value that [value] will become after a [SemanticsAction.decrease]
+  /// action has been performed on this widget.
+  ///
+  /// If a value is provided, [onDecrease] must also be set and there must
+  /// either be an ambient [Directionality] or an explicit [textDirection]
+  /// must be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
+  ///    is exposed in TalkBack and VoiceOver.
+  final String decreasedValue;
+
+  /// Provides a brief textual description of the result of an action performed
+  /// on the widget.
+  ///
+  /// If a hint is provided, there must either be an ambient [Directionality]
+  /// or an explicit [textDirection] should be provided.
+  ///
+  /// See also:
+  ///
+  ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
+  ///    in TalkBack and VoiceOver.
+  final String hint;
+
+  /// The reading direction of the [label], [value], [hint], [increasedValue],
+  /// and [decreasedValue].
+  ///
+  /// Defaults to the ambient [Directionality].
+  final TextDirection textDirection;
+
+  /// The handler for [SemanticsAction.tap].
+  ///
+  /// This is the semantic equivalent of a user briefly tapping the screen with
+  /// the finger without moving it. For example, a button should implement this
+  /// action.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen while an element is focused.
+  final VoidCallback onTap;
+
+  /// The handler for [SemanticsAction.longPress].
+  ///
+  /// This is the semantic equivalent of a user pressing and holding the screen
+  /// with the finger for a few seconds without moving it.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen without lifting the finger after the
+  /// second tap.
+  final VoidCallback onLongPress;
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from right to left. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping left with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollLeft;
+
+  /// The handler for [SemanticsAction.scrollRight].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from left to right. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping right with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollRight;
+
+  /// The handler for [SemanticsAction.scrollUp].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from bottom to top. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollUp;
+
+  /// The handler for [SemanticsAction.scrollDown].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from top to bottom. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  final VoidCallback onScrollDown;
+
+  /// The handler for [SemanticsAction.increase].
+  ///
+  /// This is a request to increase the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume up button.
+  final VoidCallback onIncrease;
+
+  /// The handler for [SemanticsAction.decrease].
+  ///
+  /// This is a request to decrease the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume down button.
+  final VoidCallback onDecrease;
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field forward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume up key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorForwardByCharacter;
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  final MoveCursorHandler onMoveCursorBackwardByCharacter;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
+    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
+    description.add(new StringProperty('label', label, defaultValue: ''));
+    description.add(new StringProperty('value', value));
+    description.add(new StringProperty('hint', hint));
+    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+  }
+}
+
+/// In tests use this function to reset the counter used to generate
+/// [SemanticsNode.id].
+void debugResetSemanticsIdCounter() {
+  SemanticsNode._lastIdentifier = 0;
+}
+
 /// A node that represents some semantic data.
 ///
 /// The semantics tree is maintained during the semantics phase of the pipeline
@@ -236,6 +494,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Each semantic node has a unique identifier that is assigned when the node
   /// is created.
   SemanticsNode({
+    this.key,
     VoidCallback showOnScreen,
   }) : id = _generateNewId(),
        _showOnScreen = showOnScreen;
@@ -244,6 +503,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// The root node is assigned an identifier of zero.
   SemanticsNode.root({
+    this.key,
     VoidCallback showOnScreen,
     SemanticsOwner owner,
   }) : id = 0,
@@ -256,6 +516,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _lastIdentifier += 1;
     return _lastIdentifier;
   }
+
+  /// Uniquely identifies this node in the list of sibling nodes.
+  ///
+  /// Keys are used during the construction of the semantics tree. They are not
+  /// transferred to the engine.
+  final Key key;
 
   /// The unique identifier for this node.
   ///
@@ -344,9 +610,44 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Contains the children in inverse hit test order (i.e. paint order).
   List<SemanticsNode> _children;
 
+  /// A snapshot of `newChildren` passed to [_replaceChildren] that we keep in
+  /// debug mode. It supports the assertion that user does not mutate the list
+  /// of children.
+  List<SemanticsNode> _debugPreviousSnapshot;
+
   void _replaceChildren(List<SemanticsNode> newChildren) {
     assert(!newChildren.any((SemanticsNode child) => child == this));
     assert(() {
+      if (identical(newChildren, _children)) {
+        final StringBuffer mutationErrors = new StringBuffer();
+        if (newChildren.length != _debugPreviousSnapshot.length) {
+          mutationErrors.writeln(
+            'The list\'s length has changed from ${_debugPreviousSnapshot.length} '
+            'to ${newChildren.length}.'
+          );
+        } else {
+          for (int i = 0; i < newChildren.length; i++) {
+            if (!identical(newChildren[i], _debugPreviousSnapshot[i])) {
+              mutationErrors.writeln(
+                'Child node at position $i was replaced:\n'
+                'Previous child: ${newChildren[i]}\n'
+                'New child: ${_debugPreviousSnapshot[i]}\n'
+              );
+            }
+          }
+        }
+        if (mutationErrors.isNotEmpty) {
+          throw new FlutterError(
+            'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
+            'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
+            'Error details:\n'
+            '$mutationErrors'
+          );
+        }
+      }
+
+      _debugPreviousSnapshot = new List<SemanticsNode>.from(newChildren);
+
       SemanticsNode ancestor = this;
       while (ancestor.parent is SemanticsNode)
         ancestor = ancestor.parent;
@@ -412,10 +713,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
         }
       }
     }
-    final List<SemanticsNode> oldChildren = _children;
     _children = newChildren;
-    oldChildren?.clear();
-    newChildren = oldChildren;
     if (sawChange)
       _markDirty();
   }
@@ -534,7 +832,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
 
   // TAGS, LABELS, ACTIONS
 
-  Map<SemanticsAction, VoidCallback> _actions = _kEmptyConfig._actions;
+  Map<SemanticsAction, _SemanticsActionHandler> _actions = _kEmptyConfig._actions;
 
   int _actionsAsBits = _kEmptyConfig._actionsAsBits;
 
@@ -599,7 +897,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   static final SemanticsConfiguration _kEmptyConfig = new SemanticsConfiguration();
 
   /// Reconfigures the properties of this object to describe the configuration
-  /// provided in the `config` argument and the children listen in the
+  /// provided in the `config` argument and the children listed in the
   /// `childrenInInversePaintOrder` argument.
   ///
   /// The arguments may be null; this represents an empty configuration (all
@@ -609,7 +907,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// list is used as-is and should therefore not be changed after this call.
   void updateWith({
     @required SemanticsConfiguration config,
-    @required List<SemanticsNode> childrenInInversePaintOrder,
+    List<SemanticsNode> childrenInInversePaintOrder,
   }) {
     config ??= _kEmptyConfig;
     if (_isDifferentFromCurrentSemanticAnnotation(config))
@@ -622,7 +920,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     _hint = config.hint;
     _flags = config._flags;
     _textDirection = config.textDirection;
-    _actions = new Map<SemanticsAction, VoidCallback>.from(config._actions);
+    _actions = new Map<SemanticsAction, _SemanticsActionHandler>.from(config._actions);
     _actionsAsBits = config._actionsAsBits;
     _mergeAllDescendantsIntoThisNode = config.isMergingSemanticsOfDescendants;
     _replaceChildren(childrenInInversePaintOrder ?? const <SemanticsNode>[]);
@@ -923,7 +1221,7 @@ class SemanticsOwner extends ChangeNotifier {
     notifyListeners();
   }
 
-  VoidCallback _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
+  _SemanticsActionHandler _getSemanticsActionHandlerForId(int id, SemanticsAction action) {
     SemanticsNode result = _nodes[id];
     if (result != null && result.isPartOfNodeMerging && !result._canPerformAction(action)) {
       result._visitDescendants((SemanticsNode node) {
@@ -943,11 +1241,14 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
-  void performAction(int id, SemanticsAction action) {
+  ///
+  /// If the given `action` requires arguments they need to be passed in via
+  /// the `args` parameter.
+  void performAction(int id, SemanticsAction action, [dynamic args]) {
     assert(action != null);
-    final VoidCallback handler = _getSemanticsActionHandlerForId(id, action);
+    final _SemanticsActionHandler handler = _getSemanticsActionHandlerForId(id, action);
     if (handler != null) {
-      handler();
+      handler(args);
       return;
     }
 
@@ -956,7 +1257,7 @@ class SemanticsOwner extends ChangeNotifier {
       _nodes[id]._showOnScreen();
   }
 
-  VoidCallback _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
+  _SemanticsActionHandler _getSemanticsActionHandlerForPosition(SemanticsNode node, Offset position, SemanticsAction action) {
     if (node.transform != null) {
       final Matrix4 inverse = new Matrix4.identity();
       if (inverse.copyInverse(node.transform) == 0.0)
@@ -978,7 +1279,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     if (node.hasChildren) {
       for (SemanticsNode child in node._children.reversed) {
-        final VoidCallback handler = _getSemanticsActionHandlerForPosition(child, position, action);
+        final _SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;
       }
@@ -990,14 +1291,17 @@ class SemanticsOwner extends ChangeNotifier {
   ///
   /// If the [SemanticsNode] has not indicated that it can perform the action,
   /// this function does nothing.
-  void performActionAt(Offset position, SemanticsAction action) {
+  ///
+  /// If the given `action` requires arguments they need to be passed in via
+  /// the `args` parameter.
+  void performActionAt(Offset position, SemanticsAction action, [dynamic args]) {
     assert(action != null);
     final SemanticsNode node = rootSemanticsNode;
     if (node == null)
       return;
-    final VoidCallback handler = _getSemanticsActionHandlerForPosition(node, position, action);
+    final _SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(node, position, action);
     if (handler != null)
-      handler();
+      handler(args);
   }
 
   @override
@@ -1017,7 +1321,7 @@ class SemanticsConfiguration {
   /// own [SemanticsNode].
   ///
   /// When set to true semantic information associated with the [RenderObject]
-  /// owner of this configuration or any of its defendants will not leak into
+  /// owner of this configuration or any of its descendants will not leak into
   /// parents. The [SemanticsNode] generated out of this configuration will
   /// act as a boundary.
   ///
@@ -1048,7 +1352,7 @@ class SemanticsConfiguration {
   /// create semantic boundaries that are either writable or not for children.
   bool explicitChildNodes = false;
 
-  /// Whether the owning [RenderObject] makes other [RenderObjects] previously
+  /// Whether the owning [RenderObject] makes other [RenderObject]s previously
   /// painted within the same semantic boundary unreachable for accessibility
   /// purposes.
   ///
@@ -1076,7 +1380,7 @@ class SemanticsConfiguration {
   bool _isMergingDescendantsIntoOneNode = false;
   set isMergingDescendantsIntoOneNode(bool value) {
     assert(isSemanticBoundary);
-    _isMergingDescendantsIntoOneNode = isMergingDescendantsIntoOneNode;
+    _isMergingDescendantsIntoOneNode = value;
   }
 
   // SEMANTIC ANNOTATIONS
@@ -1096,18 +1400,224 @@ class SemanticsConfiguration {
   /// See also:
   ///
   /// * [addAction] to add an action.
-  final Map<SemanticsAction, VoidCallback> _actions = <SemanticsAction, VoidCallback>{};
+  final Map<SemanticsAction, _SemanticsActionHandler> _actions = <SemanticsAction, _SemanticsActionHandler>{};
 
   int _actionsAsBits = 0;
 
   /// Adds an `action` to the semantics tree.
   ///
-  /// Whenever the user performs `action` the provided `handler` is called.
-  void addAction(SemanticsAction action, VoidCallback handler) {
+  /// The provided `handler` is called to respond to the user triggered
+  /// `action`.
+  void _addAction(SemanticsAction action, _SemanticsActionHandler handler) {
     assert(handler != null);
     _actions[action] = handler;
     _actionsAsBits |= action.index;
     _hasBeenAnnotated = true;
+  }
+
+  /// Adds an `action` to the semantics tree, whose `handler` does not expect
+  /// any arguments.
+  ///
+  /// The provided `handler` is called to respond to the user triggered
+  /// `action`.
+  void _addArgumentlessAction(SemanticsAction action, VoidCallback handler) {
+    assert(handler != null);
+    _addAction(action, (dynamic args) {
+      assert(args == null);
+      handler();
+    });
+  }
+
+  /// The handler for [SemanticsAction.tap].
+  ///
+  /// This is the semantic equivalent of a user briefly tapping the screen with
+  /// the finger without moving it. For example, a button should implement this
+  /// action.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen while an element is focused.
+  VoidCallback get onTap => _onTap;
+  VoidCallback _onTap;
+  set onTap(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.tap, value);
+    _onTap = value;
+  }
+
+  /// The handler for [SemanticsAction.longPress].
+  ///
+  /// This is the semantic equivalent of a user pressing and holding the screen
+  /// with the finger for a few seconds without moving it.
+  ///
+  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
+  /// action by double-tapping the screen without lifting the finger after the
+  /// second tap.
+  VoidCallback get onLongPress => _onLongPress;
+  VoidCallback _onLongPress;
+  set onLongPress(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.longPress, value);
+    _onLongPress = value;
+  }
+
+  /// The handler for [SemanticsAction.scrollLeft].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from right to left. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping left with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollLeft => _onScrollLeft;
+  VoidCallback _onScrollLeft;
+  set onScrollLeft(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollLeft, value);
+    _onScrollLeft = value;
+  }
+
+  /// The handler for [SemanticsAction.scrollRight].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from left to right. It should be recognized by controls that are
+  /// horizontally scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping right with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path.  On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollRight => _onScrollRight;
+  VoidCallback _onScrollRight;
+  set onScrollRight(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollRight, value);
+    _onScrollRight = value;
+  }
+
+  /// The handler for [SemanticsAction.scrollUp].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from bottom to top. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// right and then left in one motion path. On Android, [onScrollUp] and
+  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollUp => _onScrollUp;
+  VoidCallback _onScrollUp;
+  set onScrollUp(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollUp, value);
+    _onScrollUp = value;
+  }
+
+  /// The handler for [SemanticsAction.scrollDown].
+  ///
+  /// This is the semantic equivalent of a user moving their finger across the
+  /// screen from top to bottom. It should be recognized by controls that are
+  /// vertically scrollable.
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with three
+  /// fingers. TalkBack users on Android can trigger this action by swiping
+  /// left and then right in one motion path. On Android, [onScrollDown] and
+  /// [onScrollRight] share the same gesture. Therefore, only on of them should
+  /// be provided.
+  VoidCallback get onScrollDown => _onScrollDown;
+  VoidCallback _onScrollDown;
+  set onScrollDown(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.scrollDown, value);
+    _onScrollDown = value;
+  }
+
+  /// The handler for [SemanticsAction.increase].
+  ///
+  /// This is a request to increase the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [increasedValue] must also be provided and
+  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping up with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume up button.
+  VoidCallback get onIncrease => _onIncrease;
+  VoidCallback _onIncrease;
+  set onIncrease(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.increase, value);
+    _onIncrease = value;
+  }
+
+  /// The handler for [SemanticsAction.decrease].
+  ///
+  /// This is a request to decrease the value represented by the widget. For
+  /// example, this action might be recognized by a slider control.
+  ///
+  /// If a [value] is set, [decreasedValue] must also be provided and
+  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
+  ///
+  /// VoiceOver users on iOS can trigger this action by swiping down with one
+  /// finger. TalkBack users on Android can trigger this action by pressing the
+  /// volume down button.
+  VoidCallback get onDecrease => _onDecrease;
+  VoidCallback _onDecrease;
+  set onDecrease(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.decrease, value);
+    _onDecrease = value;
+  }
+
+  /// The handler for [SemanticsAction.showOnScreen].
+  ///
+  /// A request to fully show the semantics node on screen. For example, this
+  /// action might be send to a node in a scrollable list that is partially off
+  /// screen to bring it on screen.
+  ///
+  /// For elements in a scrollable list the framework provides a default
+  /// implementation for this action and it is not advised to provide a
+  /// custom one via this setter.
+  VoidCallback get onShowOnScreen => _onShowOnScreen;
+  VoidCallback _onShowOnScreen;
+  set onShowOnScreen(VoidCallback value) {
+    _addArgumentlessAction(SemanticsAction.showOnScreen, value);
+    _onShowOnScreen = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field forward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume up key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorForwardByCharacter = value;
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
+    assert(value != null);
+    _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
+      final bool extentSelection = args;
+      assert(extentSelection != null);
+      value(extentSelection);
+    });
+    _onMoveCursorBackwardByCharacter = value;
   }
 
   /// Returns the action handler registered for [action] or null if none was
@@ -1116,7 +1626,7 @@ class SemanticsConfiguration {
   /// See also:
   ///
   ///  * [addAction] to add an action.
-  VoidCallback getActionHandler(SemanticsAction action) => _actions[action];
+  _SemanticsActionHandler getActionHandler(SemanticsAction action) => _actions[action];
 
   /// Whether the semantic information provided by the owning [RenderObject] and
   /// all of its descendants should be treated as one logical entity.
@@ -1226,6 +1736,7 @@ class SemanticsConfiguration {
   }
 
   /// Whether the owning [RenderObject] is selected (true) or not (false).
+  bool get isSelected => _hasFlag(SemanticsFlags.isSelected);
   set isSelected(bool value) {
     _setFlag(SemanticsFlags.isSelected, value);
   }
@@ -1235,22 +1746,26 @@ class SemanticsConfiguration {
   ///
   /// Do not set this to any value if the owning [RenderObject] doesn't have
   /// Booleans state that can be controlled by the user.
+  bool get isChecked => _hasFlag(SemanticsFlags.hasCheckedState) && _hasFlag(SemanticsFlags.isChecked);
   set isChecked(bool value) {
     _setFlag(SemanticsFlags.hasCheckedState, true);
     _setFlag(SemanticsFlags.isChecked, value);
   }
 
   /// Whether the owning [RenderObject] currently holds the user's focus.
+  bool get isFocused => _hasFlag(SemanticsFlags.isFocused);
   set isFocused(bool value) {
     _setFlag(SemanticsFlags.isFocused, value);
   }
 
   /// Whether the owning [RenderObject] is a button (true) or not (false).
+  bool get isButton => _hasFlag(SemanticsFlags.isButton);
   set isButton(bool value) {
     _setFlag(SemanticsFlags.isButton, value);
   }
 
   /// Whether the owning [RenderObject] is a text field.
+  bool get isTextField => _hasFlag(SemanticsFlags.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlags.isTextField, value);
   }
@@ -1299,6 +1814,8 @@ class SemanticsConfiguration {
     _hasBeenAnnotated = true;
   }
 
+  bool _hasFlag(SemanticsFlags flag) => (_flags & flag.index) != 0;
+
   // CONFIGURATION COMBINATION LOGIC
 
   /// Whether this configuration is compatible with the provided `other`
@@ -1324,7 +1841,7 @@ class SemanticsConfiguration {
   /// result in this configuration.
   ///
   /// Only configurations that have [explicitChildNodes] set to false can
-  /// absorb other configurations and its recommended to only absorb compatible
+  /// absorb other configurations and it is recommended to only absorb compatible
   /// configurations as determined by [isCompatibleWith].
   void absorb(SemanticsConfiguration other) {
     assert(!explicitChildNodes);

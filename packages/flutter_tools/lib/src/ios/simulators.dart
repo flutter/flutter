@@ -211,17 +211,6 @@ class IOSSimulator extends Device {
 
   String get xcrunPath => fs.path.join('/usr', 'bin', 'xcrun');
 
-  String _getSimulatorPath() {
-    return fs.path.join(homeDirPath, 'Library', 'Developer', 'CoreSimulator', 'Devices', id);
-  }
-
-  String _getSimulatorAppHomeDirectory(ApplicationPackage app) {
-    final String simulatorPath = _getSimulatorPath();
-    if (simulatorPath == null)
-      return null;
-    return fs.path.join(simulatorPath, 'data');
-  }
-
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
     return SimControl.instance.isInstalled(id, app.id);
@@ -308,10 +297,10 @@ class IOSSimulator extends Device {
     String route,
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
-    bool previewDart2: false,
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!prebuiltApplication) {
       printTrace('Building ${app.name} for $id.');
@@ -332,7 +321,7 @@ class IOSSimulator extends Device {
 
     if (!prebuiltApplication) {
       args.addAll(<String>[
-        '--flx=${fs.path.absolute(fs.path.join(getBuildDirectory(), 'app.flx'))}',
+        '--flutter-assets-dir=${fs.path.absolute(getAssetBuildDirectory())}',
         '--dart-main=${fs.path.absolute(mainPath)}',
         '--packages=${fs.path.absolute('.packages')}',
       ]);
@@ -352,7 +341,8 @@ class IOSSimulator extends Device {
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled)
-      observatoryDiscovery = new ProtocolDiscovery.observatory(getLogReader(app: app));
+      observatoryDiscovery = new ProtocolDiscovery.observatory(
+          getLogReader(app: app), ipv6: ipv6);
 
     // Launch the updated application in the simulator.
     try {
@@ -423,18 +413,10 @@ class IOSSimulator extends Device {
     return false;
   }
 
-  Future<bool> pushFile(
-      ApplicationPackage app, String localFile, String targetFile) async {
-    if (platform.isMacOS) {
-      final String simulatorHomeDirectory = _getSimulatorAppHomeDirectory(app);
-      await runCheckedAsync(<String>['cp', localFile, fs.path.join(simulatorHomeDirectory, targetFile)]);
-      return true;
-    }
-    return false;
-  }
-
   String get logFilePath {
-    return fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
+        ? platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
+        : fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
@@ -442,6 +424,13 @@ class IOSSimulator extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async => category;
+
+  final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
+
+  Future<int> get sdkMajorVersion async {
+    final Match sdkMatch = _iosSdkRegExp.firstMatch(await sdkNameAndVersion);
+    return int.parse(sdkMatch.group(1) ?? 11);
+  }
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
@@ -463,10 +452,12 @@ class IOSSimulator extends Device {
     }
   }
 
-  void ensureLogsExists() {
-    final File logFile = fs.file(logFilePath);
-    if (!logFile.existsSync())
-      logFile.writeAsBytesSync(<int>[]);
+  Future<Null> ensureLogsExists() async {
+    if (await sdkMajorVersion < 11) {
+      final File logFile = fs.file(logFilePath);
+      if (!logFile.existsSync())
+        logFile.writeAsBytesSync(<int>[]);
+    }
   }
 
   bool get _xcodeVersionSupportsScreenshot {
@@ -482,15 +473,10 @@ class IOSSimulator extends Device {
   }
 }
 
-final RegExp _iosSdkRegExp = new RegExp(r'iOS (\d+)');
-
 /// Launches the device log reader process on the host.
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
-  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
-  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
-
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
-  if (majorVersion < 11)
+  if (await device.sdkMajorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', device.logFilePath]);
 
   // For iOS 11 and above, use /usr/bin/log to tail process logs.
@@ -501,11 +487,8 @@ Future<Process> launchDeviceLogTool(IOSSimulator device) async {
 }
 
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
-  final Match sdkMatch = _iosSdkRegExp.firstMatch(await device.sdkNameAndVersion);
-  final int majorVersion = int.parse(sdkMatch.group(1) ?? 11);
-
   // Versions of iOS prior to 11 tail the simulator syslog file.
-  if (majorVersion < 11)
+  if (await device.sdkMajorVersion < 11)
     return runCommand(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
 
   // For iOS 11 and later, all relevant detail is in the device log.
@@ -539,7 +522,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
 
   Future<Null> _start() async {
     // Device log.
-    device.ensureLogsExists();
+    await device.ensureLogsExists();
     _deviceProcess = await launchDeviceLogTool(device);
     _deviceProcess.stdout.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);
     _deviceProcess.stderr.transform(UTF8.decoder).transform(const LineSplitter()).listen(_onDeviceLine);

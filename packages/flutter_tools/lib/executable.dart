@@ -18,6 +18,7 @@ import 'src/commands/drive.dart';
 import 'src/commands/format.dart';
 import 'src/commands/fuchsia_reload.dart';
 import 'src/commands/ide_config.dart';
+import 'src/commands/inject_plugins.dart';
 import 'src/commands/install.dart';
 import 'src/commands/logs.dart';
 import 'src/commands/packages.dart';
@@ -45,6 +46,7 @@ Future<Null> main(List<String> args) async {
     new BuildCommand(verboseHelp: verboseHelp),
     new ChannelCommand(),
     new CleanCommand(),
+    new InjectPluginsCommand(hidden: !verboseHelp),
     new ConfigCommand(verboseHelp: verboseHelp),
     new CreateCommand(),
     new DaemonCommand(hidden: !verboseHelp),

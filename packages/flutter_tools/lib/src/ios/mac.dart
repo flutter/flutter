@@ -25,7 +25,7 @@ import 'cocoapods.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 8;
+const int kXcodeRequiredVersionMajor = 9;
 const int kXcodeRequiredVersionMinor = 0;
 
 // The Python `six` module is a dependency for Xcode builds, and installed by
@@ -206,6 +206,9 @@ Future<XcodeBuildResult> buildXcodeProject({
   bool codesign: true,
   bool usesTerminalUi: true,
 }) async {
+  if (!await upgradePbxProjWithFlutterAssets(app.name))
+    return new XcodeBuildResult(success: false);
+
   if (!_checkXcodeVersion())
     return new XcodeBuildResult(success: false);
 
@@ -251,21 +254,28 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   final Directory appDirectory = fs.directory(app.appDirectory);
   await _addServicesToBundle(appDirectory);
-  final bool hasFlutterPlugins = injectPlugins();
-
-  if (hasFlutterPlugins)
-    await cocoaPods.processPods(
-      appIosDir: appDirectory,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: app.isSwift,
-    );
+  final InjectPluginsResult injectPluginsResult = injectPlugins();
+  final bool hasFlutterPlugins = injectPluginsResult.hasPlugin;
+  final String previousGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
 
   updateXcodeGeneratedProperties(
     projectPath: fs.currentDirectory.path,
     buildInfo: buildInfo,
     target: target,
-    hasPlugins: hasFlutterPlugins
+    hasPlugins: hasFlutterPlugins,
+    previewDart2: buildInfo.previewDart2,
   );
+
+  if (hasFlutterPlugins) {
+    final String currentGeneratedXcconfig = readGeneratedXcconfig(app.appDirectory);
+    await cocoaPods.processPods(
+        appIosDir: appDirectory,
+        iosEngineDir: flutterFrameworkDir(buildInfo.mode),
+        isSwift: app.isSwift,
+        pluginOrFlutterPodChanged: (injectPluginsResult.hasChanged
+            || previousGeneratedXcconfig != currentGeneratedXcconfig),
+    );
+  }
 
   final List<String> commands = <String>[
     '/usr/bin/env',
@@ -351,7 +361,17 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 }
 
-Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp app) async {
+String readGeneratedXcconfig(String appPath) {
+  final String generatedXcconfigPath =
+      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter','Generated.xcconfig');
+  final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
+  if (!generatedXcconfigFile.existsSync())
+    return null;
+  return generatedXcconfigFile.readAsStringSync();
+}
+
+Future<Null> diagnoseXcodeBuildFailure(
+    XcodeBuildResult result, BuildableIOSApp app) async {
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
       result.stdout?.contains('BCEROR') == true &&
@@ -365,7 +385,8 @@ Future<Null> diagnoseXcodeBuildFailure(XcodeBuildResult result, BuildableIOSApp 
       // Make sure the user has specified one of:
       // DEVELOPMENT_TEAM (automatic signing)
       // PROVISIONING_PROFILE (manual signing)
-      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
+      !(app.buildSettings?.containsKey('DEVELOPMENT_TEAM')) == true
+          || app.buildSettings?.containsKey('PROVISIONING_PROFILE') == true) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
@@ -490,4 +511,66 @@ void _copyServiceDefinitionsManifest(List<Map<String, String>> services, File ma
   }).toList();
   final Map<String, dynamic> json = <String, dynamic>{ 'services' : jsonServices };
   manifest.writeAsStringSync(JSON.encode(json), mode: FileMode.WRITE, flush: true);
+}
+
+Future<bool> upgradePbxProjWithFlutterAssets(String app) async {
+  final File xcodeProjectFile = fs.file(fs.path.join('ios', 'Runner.xcodeproj',
+                                                     'project.pbxproj'));
+  assert(await xcodeProjectFile.exists());
+  final List<String> lines = await xcodeProjectFile.readAsLines();
+
+  if (lines.any((String line) => line.contains('path = Flutter/flutter_assets')))
+    return true;
+
+  final String l1 = '		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };';
+  final String l2 = '		2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */ = {isa = PBXBuildFile; fileRef = 2D5378251FAA1A9400D5DBA9 /* flutter_assets */; };';
+  final String l3 = '		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };';
+  final String l4 = '		2D5378251FAA1A9400D5DBA9 /* flutter_assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = flutter_assets; path = Flutter/flutter_assets; sourceTree = SOURCE_ROOT; };';
+  final String l5 = '				3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */,';
+  final String l6 = '				2D5378251FAA1A9400D5DBA9 /* flutter_assets */,';
+  final String l7 = '				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,';
+  final String l8 = '				2D5378261FAA1A9400D5DBA9 /* flutter_assets in Resources */,';
+
+
+  printStatus("Upgrading project.pbxproj of $app' to include the "
+              "'flutter_assets' directory");
+
+  if (!lines.contains(l1) || !lines.contains(l3) ||
+      !lines.contains(l5) || !lines.contains(l7)) {
+    printError('Automatic upgrade of project.pbxproj failed.');
+    printError(' To manually upgrade, open ios/Runner.xcodeproj/project.pbxproj:');
+    printError(' Add the following line in the "PBXBuildFile" section');
+    printError(l2);
+    printError(' Add the following line in the "PBXFileReference" section');
+    printError(l4);
+    printError(' Add the following line in the "children" list of the "Flutter" group in the "PBXGroup" section');
+    printError(l6);
+    printError(' Add the following line in the "files" list of "Resources" in the "PBXResourcesBuildPhase" section');
+    printError(l8);
+    return false;
+  }
+
+  lines.insert(lines.indexOf(l1) + 1, l2);
+  lines.insert(lines.indexOf(l3) + 1, l4);
+  lines.insert(lines.indexOf(l5) + 1, l6);
+  lines.insert(lines.indexOf(l7) + 1, l8);
+
+  final String l9 = '		9740EEBB1CF902C7004384FC /* app.flx in Resources */ = {isa = PBXBuildFile; fileRef = 9740EEB71CF902C7004384FC /* app.flx */; };';
+  final String l10 = '		9740EEB71CF902C7004384FC /* app.flx */ = {isa = PBXFileReference; lastKnownFileType = file; name = app.flx; path = Flutter/app.flx; sourceTree = "<group>"; };';
+  final String l11 = '				9740EEB71CF902C7004384FC /* app.flx */,';
+  final String l12 = '				9740EEBB1CF902C7004384FC /* app.flx in Resources */,';
+
+  if (lines.contains(l9)) {
+    printStatus('Removing app.flx from project.pbxproj since it has been '
+        'replaced with flutter_assets.');
+    lines.remove(l9);
+    lines.remove(l10);
+    lines.remove(l11);
+    lines.remove(l12);
+  }
+
+  final StringBuffer buffer = new StringBuffer();
+  lines.forEach(buffer.writeln);
+  await xcodeProjectFile.writeAsString(buffer.toString());
+  return true;
 }

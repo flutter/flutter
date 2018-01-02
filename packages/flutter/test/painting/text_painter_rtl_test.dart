@@ -287,7 +287,6 @@ void main() {
     expect( // between A and Alef, before the Alef
       painter.getOffsetForCaret(const TextPosition(offset: 1, affinity: TextAffinity.downstream), Rect.zero),
       const Offset(10.0, 10.0),
-      skip: skipExpectsWithKnownBugs, // this ends up on the wrong line currently - this is a major bug
     );
 
     expect( // after the Alef
@@ -318,7 +317,7 @@ void main() {
         const TextBox.fromLTRBD(0.0, 10.0, 10.0, 20.0, TextDirection.rtl), // Alef
       ],
     );
-  }, skip: skipTestsWithKnownBugs);
+  });
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = new TextPainter()
@@ -380,7 +379,7 @@ void main() {
         const TextBox.fromLTRBD( 0.0,  8.0, 50.0, 18.0, TextDirection.ltr),
         const TextBox.fromLTRBD(50.0,  0.0, 90.0, 20.0, TextDirection.rtl),
         const TextBox.fromLTRBD( 0.0, 20.0, 40.0, 40.0, TextDirection.rtl),
-        const TextBox.fromLTRBD(60.0, 28.0, 90.0, 38.0, TextDirection.ltr),
+        const TextBox.fromLTRBD(40.0, 28.0, 90.0, 38.0, TextDirection.ltr),
       ],
       skip: skipExpectsWithKnownBugs, // horizontal offsets are one pixel off in places; vertical offsets are good
     );
@@ -616,6 +615,9 @@ void main() {
           text: ' ',
           style: const TextStyle(fontSize: 200.0),
         ),
+        // Add a non-whitespace character because the renderer's line breaker
+        // may strip trailing whitespace on a line.
+        const TextSpan(text: 'A'),
       ],
     );
     painter.layout();
@@ -641,20 +643,34 @@ void main() {
     //                 |        |           |
     //                 |________v___________|
 
-    expect(painter.width, 310.0);
+    expect(painter.width, 410.0);
     expect(painter.height, 200.0);
     expect(painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 160.0);
     expect(painter.preferredLineHeight, 100.0);
 
     expect(
-      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 2)),
+      painter.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 3)),
       const <TextBox>[
         const TextBox.fromLTRBD(  0.0,  80.0, 100.0, 180.0, TextDirection.ltr),
         const TextBox.fromLTRBD(100.0, 152.0, 110.0, 162.0, TextDirection.ltr),
         const TextBox.fromLTRBD(110.0,   0.0, 310.0, 200.0, TextDirection.ltr),
       ],
       // Horizontal offsets are currently one pixel off in places; vertical offsets are good.
-      // Somehow today we also lose the last space.
+      skip: skipExpectsWithKnownBugs,
+    );
+  }, skip: skipTestsWithKnownBugs);
+
+  test('TextPainter - empty text baseline', () {
+    final TextPainter painter = new TextPainter()
+      ..textDirection = TextDirection.ltr;
+    painter.text = const TextSpan(
+      text: '',
+      style: const TextStyle(fontFamily: 'Ahem', fontSize: 100.0, height: 1.0),
+    );
+    painter.layout();
+    expect(
+      // Returns -1
+      painter.computeDistanceToActualBaseline(TextBaseline.alphabetic), 80.0,
       skip: skipExpectsWithKnownBugs,
     );
   }, skip: skipTestsWithKnownBugs);

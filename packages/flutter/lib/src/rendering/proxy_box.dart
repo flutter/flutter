@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
-import 'package:flutter/services.dart';
 
 import 'package:vector_math/vector_math_64.dart';
 
@@ -737,11 +736,15 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = _getAlphaFromOpacity(_opacity);
-    markNeedsCompositingBitsUpdate();
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    markNeedsSemanticsUpdate();
+    if (wasVisible != (_alpha != 0))
+      markNeedsSemanticsUpdate();
   }
 
   int _alpha;
@@ -992,7 +995,7 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   void _markNeedsClip() {
     _clip = null;
     markNeedsPaint();
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
   }
 
   T get _defaultClip;
@@ -1355,8 +1358,10 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     assert(value != null);
     if (elevation == value)
       return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     _elevation = value;
-    markNeedsCompositingBitsUpdate();
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -2054,399 +2059,6 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 }
 
-/// The interface used by [CustomPaint] (in the widgets library) and
-/// [RenderCustomPaint] (in the rendering library).
-///
-/// To implement a custom painter, either subclass or implement this interface
-/// to define your custom paint delegate. [CustomPaint] subclasses must
-/// implement the [paint] and [shouldRepaint] methods, and may optionally also
-/// implement the [hitTest] method.
-///
-/// The [paint] method is called whenever the custom object needs to be repainted.
-///
-/// The [shouldRepaint] method is called when a new instance of the class
-/// is provided, to check if the new instance actually represents different
-/// information.
-///
-/// The most efficient way to trigger a repaint is to either extend this class
-/// and supply a `repaint` argument to the constructor of the [CustomPainter],
-/// where that object notifies its listeners when it is time to repaint, or to
-/// extend [Listenable] (e.g. via [ChangeNotifier]) and implement
-/// [CustomPainter], so that the object itself provides the notifications
-/// directly. In either case, the [CustomPaint] widget or [RenderCustomPaint]
-/// render object will listen to the [Listenable] and repaint whenever the
-/// animation ticks, avoiding both the build and layout phases of the pipeline.
-///
-/// The [hitTest] method is called when the user interacts with the underlying
-/// render object, to determine if the user hit the object or missed it.
-///
-/// ## Sample code
-///
-/// This sample extends the same code shown for [RadialGradient] to create a
-/// custom painter that paints a sky.
-///
-/// ```dart
-/// class Sky extends CustomPainter {
-///   @override
-///   void paint(Canvas canvas, Size size) {
-///     var rect = Offset.zero & size;
-///     var gradient = new RadialGradient(
-///       center: const Alignment(0.7, -0.6),
-///       radius: 0.2,
-///       colors: [const Color(0xFFFFFF00), const Color(0xFF0099FF)],
-///       stops: [0.4, 1.0],
-///     );
-///     canvas.drawRect(
-///       rect,
-///       new Paint()..shader = gradient.createShader(rect),
-///     );
-///   }
-///
-///   @override
-///   bool shouldRepaint(Sky oldDelegate) {
-///     // Since this Sky painter has no fields, it always paints
-///     // the same thing, and therefore we return false here. If
-///     // we had fields (set from the constructor) then we would
-///     // return true if any of them differed from the same
-///     // fields on the oldDelegate.
-///     return false;
-///   }
-/// }
-/// ```
-///
-/// See also:
-///
-///  * [Canvas], the class that a custom painter uses to paint.
-///  * [CustomPaint], the widget that uses [CustomPainter], and whose sample
-///    code shows how to use the above `Sky` class.
-///  * [RadialGradient], whose sample code section shows a different take
-///    on the sample code above.
-abstract class CustomPainter extends Listenable {
-  /// Creates a custom painter.
-  ///
-  /// The painter will repaint whenever `repaint` notifies its listeners.
-  const CustomPainter({ Listenable repaint }) : _repaint = repaint;
-
-  final Listenable _repaint;
-
-  /// Register a closure to be notified when it is time to repaint.
-  ///
-  /// The [CustomPainter] implementation merely forwards to the same method on
-  /// the [Listenable] provided to the constructor in the `repaint` argument, if
-  /// it was not null.
-  @override
-  void addListener(VoidCallback listener) => _repaint?.addListener(listener);
-
-  /// Remove a previously registered closure from the list of closures that the
-  /// object notifies when it is time to repaint.
-  ///
-  /// The [CustomPainter] implementation merely forwards to the same method on
-  /// the [Listenable] provided to the constructor in the `repaint` argument, if
-  /// it was not null.
-  @override
-  void removeListener(VoidCallback listener) => _repaint?.removeListener(listener);
-
-  /// Called whenever the object needs to paint. The given [Canvas] has its
-  /// coordinate space configured such that the origin is at the top left of the
-  /// box. The area of the box is the size of the [size] argument.
-  ///
-  /// Paint operations should remain inside the given area. Graphical operations
-  /// outside the bounds may be silently ignored, clipped, or not clipped.
-  ///
-  /// Implementations should be wary of correctly pairing any calls to
-  /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
-  /// subsequent painting on this canvas may be affected, with potentially
-  /// hilarious but confusing results.
-  ///
-  /// To paint text on a [Canvas], use a [TextPainter].
-  ///
-  /// To paint an image on a [Canvas]:
-  ///
-  /// 1. Obtain an [ImageStream], for example by calling [ImageProvider.resolve]
-  ///    on an [AssetImage] or [NetworkImage] object.
-  ///
-  /// 2. Whenever the [ImageStream]'s underlying [ImageInfo] object changes
-  ///    (see [ImageStream.addListener]), create a new instance of your custom
-  ///    paint delegate, giving it the new [ImageInfo] object.
-  ///
-  /// 3. In your delegate's [paint] method, call the [Canvas.drawImage],
-  ///    [Canvas.drawImageRect], or [Canvas.drawImageNine] methods to paint the
-  ///    [ImageInfo.image] object, applying the [ImageInfo.scale] value to
-  ///    obtain the correct rendering size.
-  void paint(Canvas canvas, Size size);
-
-  /// Called whenever a new instance of the custom painter delegate class is
-  /// provided to the [RenderCustomPaint] object, or any time that a new
-  /// [CustomPaint] object is created with a new instance of the custom painter
-  /// delegate class (which amounts to the same thing, because the latter is
-  /// implemented in terms of the former).
-  ///
-  /// If the new instance represents different information than the old
-  /// instance, then the method should return true, otherwise it should return
-  /// false.
-  ///
-  /// If the method returns false, then the [paint] call might be optimized
-  /// away.
-  ///
-  /// It's possible that the [paint] method will get called even if
-  /// [shouldRepaint] returns false (e.g. if an ancestor or descendant needed to
-  /// be repainted). It's also possible that the [paint] method will get called
-  /// without [shouldRepaint] being called at all (e.g. if the box changes
-  /// size).
-  ///
-  /// If a custom delegate has a particularly expensive paint function such that
-  /// repaints should be avoided as much as possible, a [RepaintBoundary] or
-  /// [RenderRepaintBoundary] (or other render object with
-  /// [RenderObject.isRepaintBoundary] set to true) might be helpful.
-  bool shouldRepaint(covariant CustomPainter oldDelegate);
-
-  /// Called whenever a hit test is being performed on an object that is using
-  /// this custom paint delegate.
-  ///
-  /// The given point is relative to the same coordinate space as the last
-  /// [paint] call.
-  ///
-  /// The default behavior is to consider all points to be hits for
-  /// background painters, and no points to be hits for foreground painters.
-  ///
-  /// Return true if the given position corresponds to a point on the drawn
-  /// image that should be considered a "hit", false if it corresponds to a
-  /// point that should be considered outside the painted image, and null to use
-  /// the default behavior.
-  bool hitTest(Offset position) => null;
-
-  @override
-  String toString() => '${describeIdentity(this)}(${ _repaint?.toString() ?? "" })';
-}
-
-/// Provides a canvas on which to draw during the paint phase.
-///
-/// When asked to paint, [RenderCustomPaint] first asks its [painter] to paint
-/// on the current canvas, then it paints its child, and then, after painting
-/// its child, it asks its [foregroundPainter] to paint. The coordinate system of
-/// the canvas matches the coordinate system of the [CustomPaint] object. The
-/// painters are expected to paint within a rectangle starting at the origin and
-/// encompassing a region of the given size. (If the painters paint outside
-/// those bounds, there might be insufficient memory allocated to rasterize the
-/// painting commands and the resulting behavior is undefined.)
-///
-/// Painters are implemented by subclassing or implementing [CustomPainter].
-///
-/// Because custom paint calls its painters during paint, you cannot mark the
-/// tree as needing a new layout during the callback (the layout for this frame
-/// has already happened).
-///
-/// Custom painters normally size themselves to their child. If they do not have
-/// a child, they attempt to size themselves to the [preferredSize], which
-/// defaults to [Size.zero].
-///
-/// See also:
-///
-///  * [CustomPainter], the class that custom painter delegates should extend.
-///  * [Canvas], the API provided to custom painter delegates.
-class RenderCustomPaint extends RenderProxyBox {
-  /// Creates a render object that delegates its painting.
-  RenderCustomPaint({
-    CustomPainter painter,
-    CustomPainter foregroundPainter,
-    Size preferredSize: Size.zero,
-    this.isComplex: false,
-    this.willChange: false,
-    RenderBox child,
-  }) : assert(preferredSize != null),
-       _painter = painter,
-       _foregroundPainter = foregroundPainter,
-       _preferredSize = preferredSize,
-       super(child);
-
-  /// The background custom paint delegate.
-  ///
-  /// This painter, if non-null, is called to paint behind the children.
-  CustomPainter get painter => _painter;
-  CustomPainter _painter;
-  /// Set a new background custom paint delegate.
-  ///
-  /// If the new delegate is the same as the previous one, this does nothing.
-  ///
-  /// If the new delegate is the same class as the previous one, then the new
-  /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
-  /// true, then the delegate will be called.
-  ///
-  /// If the new delegate is a different class than the previous one, then the
-  /// delegate will be called.
-  ///
-  /// If the new value is null, then there is no background custom painter.
-  set painter(CustomPainter value) {
-    if (_painter == value)
-      return;
-    final CustomPainter oldPainter = _painter;
-    _painter = value;
-    _didUpdatePainter(_painter, oldPainter);
-  }
-
-  /// The foreground custom paint delegate.
-  ///
-  /// This painter, if non-null, is called to paint in front of the children.
-  CustomPainter get foregroundPainter => _foregroundPainter;
-  CustomPainter _foregroundPainter;
-  /// Set a new foreground custom paint delegate.
-  ///
-  /// If the new delegate is the same as the previous one, this does nothing.
-  ///
-  /// If the new delegate is the same class as the previous one, then the new
-  /// delegate has its [CustomPainter.shouldRepaint] called; if the result is
-  /// true, then the delegate will be called.
-  ///
-  /// If the new delegate is a different class than the previous one, then the
-  /// delegate will be called.
-  ///
-  /// If the new value is null, then there is no foreground custom painter.
-  set foregroundPainter(CustomPainter value) {
-    if (_foregroundPainter == value)
-      return;
-    final CustomPainter oldPainter = _foregroundPainter;
-    _foregroundPainter = value;
-    _didUpdatePainter(_foregroundPainter, oldPainter);
-  }
-
-  void _didUpdatePainter(CustomPainter newPainter, CustomPainter oldPainter) {
-    if (newPainter == null) {
-      assert(oldPainter != null); // We should be called only for changes.
-      markNeedsPaint();
-    } else if (oldPainter == null ||
-        newPainter.runtimeType != oldPainter.runtimeType ||
-        newPainter.shouldRepaint(oldPainter)) {
-      markNeedsPaint();
-    }
-    if (attached) {
-      oldPainter?.removeListener(markNeedsPaint);
-      newPainter?.addListener(markNeedsPaint);
-    }
-  }
-
-  /// The size that this [RenderCustomPaint] should aim for, given the layout
-  /// constraints, if there is no child.
-  ///
-  /// Defaults to [Size.zero].
-  ///
-  /// If there's a child, this is ignored, and the size of the child is used
-  /// instead.
-  Size get preferredSize => _preferredSize;
-  Size _preferredSize;
-  set preferredSize(Size value) {
-    assert(value != null);
-    if (preferredSize == value)
-      return;
-    _preferredSize = value;
-    markNeedsLayout();
-  }
-
-  /// Whether to hint that this layer's painting should be cached.
-  ///
-  /// The compositor contains a raster cache that holds bitmaps of layers in
-  /// order to avoid the cost of repeatedly rendering those layers on each
-  /// frame.  If this flag is not set, then the compositor will apply its own
-  /// heuristics to decide whether the this layer is complex enough to benefit
-  /// from caching.
-  bool isComplex;
-
-  /// Whether the raster cache should be told that this painting is likely
-  /// to change in the next frame.
-  bool willChange;
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _painter?.addListener(markNeedsPaint);
-    _foregroundPainter?.addListener(markNeedsPaint);
-  }
-
-  @override
-  void detach() {
-    _painter?.removeListener(markNeedsPaint);
-    _foregroundPainter?.removeListener(markNeedsPaint);
-    super.detach();
-  }
-
-  @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
-    if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
-      return true;
-    return super.hitTestChildren(result, position: position);
-  }
-
-  @override
-  bool hitTestSelf(Offset position) {
-    return _painter != null && (_painter.hitTest(position) ?? true);
-  }
-
-  @override
-  void performResize() {
-    size = constraints.constrain(preferredSize);
-  }
-
-  void _paintWithPainter(Canvas canvas, Offset offset, CustomPainter painter) {
-    int debugPreviousCanvasSaveCount;
-    canvas.save();
-    assert(() { debugPreviousCanvasSaveCount = canvas.getSaveCount(); return true; }());
-    if (offset != Offset.zero)
-      canvas.translate(offset.dx, offset.dy);
-    painter.paint(canvas, size);
-    assert(() {
-      // This isn't perfect. For example, we can't catch the case of
-      // someone first restoring, then setting a transform or whatnot,
-      // then saving.
-      // If this becomes a real problem, we could add logic to the
-      // Canvas class to lock the canvas at a particular save count
-      // such that restore() fails if it would take the lock count
-      // below that number.
-      final int debugNewCanvasSaveCount = canvas.getSaveCount();
-      if (debugNewCanvasSaveCount > debugPreviousCanvasSaveCount) {
-        throw new FlutterError(
-          'The $painter custom painter called canvas.save() or canvas.saveLayer() at least '
-          '${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount} more '
-          'time${debugNewCanvasSaveCount - debugPreviousCanvasSaveCount == 1 ? '' : 's' } '
-          'than it called canvas.restore().\n'
-          'This leaves the canvas in an inconsistent state and will probably result in a broken display.\n'
-          'You must pair each call to save()/saveLayer() with a later matching call to restore().'
-        );
-      }
-      if (debugNewCanvasSaveCount < debugPreviousCanvasSaveCount) {
-        throw new FlutterError(
-          'The $painter custom painter called canvas.restore() '
-          '${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount} more '
-          'time${debugPreviousCanvasSaveCount - debugNewCanvasSaveCount == 1 ? '' : 's' } '
-          'than it called canvas.save() or canvas.saveLayer().\n'
-          'This leaves the canvas in an inconsistent state and will result in a broken display.\n'
-          'You should only call restore() if you first called save() or saveLayer().'
-        );
-      }
-      return debugNewCanvasSaveCount == debugPreviousCanvasSaveCount;
-    }());
-    canvas.restore();
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    if (_painter != null) {
-      _paintWithPainter(context.canvas, offset, _painter);
-      _setRasterCacheHints(context);
-    }
-    super.paint(context, offset);
-    if (_foregroundPainter != null) {
-      _paintWithPainter(context.canvas, offset, _foregroundPainter);
-      _setRasterCacheHints(context);
-    }
-  }
-
-  void _setRasterCacheHints(PaintingContext context) {
-    if (isComplex)
-      context.setIsComplexHint();
-    if (willChange)
-      context.setWillChangeHint();
-  }
-}
-
 /// Signature for listening to [PointerDownEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
@@ -2977,8 +2589,8 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// purposes.
   ///
   /// If this tag is used, the first "outer" semantics node is the regular node
-  /// of this object. The second "inner" node is introduces as a child to that
-  /// node. All scrollable children are now a child of the inner node, which has
+  /// of this object. The second "inner" node is introduced as a child to that
+  /// node. All scrollable children become children of the inner node, which has
   /// the semantic scrolling logic enabled. All children that have been
   /// excluded from scrolling with [excludeFromScrolling] are turned into
   /// children of the outer node.
@@ -3003,7 +2615,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     if (setEquals<SemanticsAction>(value, _validActions))
       return;
     _validActions = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
   }
 
    /// Called when the user taps on the render object.
@@ -3012,11 +2624,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onTap(GestureTapCallback value) {
     if (_onTap == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onTap != null;
     _onTap = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user presses on the render object for a long period of time.
@@ -3025,11 +2636,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onLongPress(GestureLongPressCallback value) {
     if (_onLongPress == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onLongPress != null;
     _onLongPress = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user scrolls to the left or to the right.
@@ -3038,11 +2648,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onHorizontalDragUpdate != null;
     _onHorizontalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// Called when the user scrolls up or down.
@@ -3051,11 +2660,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   set onVerticalDragUpdate(GestureDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
-    final bool hadHandlers = _hasHandlers;
     final bool hadHandler = _onVerticalDragUpdate != null;
     _onVerticalDragUpdate = value;
     if ((value != null) != hadHandler)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: _hasHandlers == hadHandlers);
+      markNeedsSemanticsUpdate();
   }
 
   /// The fraction of the dimension of this render box to use when
@@ -3083,27 +2691,26 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     config.explicitChildNodes = onHorizontalDragUpdate != null
         || onVerticalDragUpdate != null;
 
-    final Map<SemanticsAction, VoidCallback> actions = <SemanticsAction, VoidCallback>{};
-    if (onTap != null)
-      actions[SemanticsAction.tap] = onTap;
-    if (onLongPress != null)
-      actions[SemanticsAction.longPress] = onLongPress;
+    if (onTap != null && _isValidAction(SemanticsAction.tap))
+      config.onTap = onTap;
+    if (onLongPress != null && _isValidAction(SemanticsAction.longPress))
+      config.onLongPress = onLongPress;
     if (onHorizontalDragUpdate != null) {
-      actions[SemanticsAction.scrollRight] = _performSemanticScrollRight;
-      actions[SemanticsAction.scrollLeft] = _performSemanticScrollLeft;
+      if (_isValidAction(SemanticsAction.scrollRight))
+        config.onScrollRight = _performSemanticScrollRight;
+      if (_isValidAction(SemanticsAction.scrollLeft))
+        config.onScrollLeft = _performSemanticScrollLeft;
     }
     if (onVerticalDragUpdate != null) {
-      actions[SemanticsAction.scrollUp] = _performSemanticScrollUp;
-      actions[SemanticsAction.scrollDown] = _performSemanticScrollDown;
+      if (_isValidAction(SemanticsAction.scrollUp))
+        config.onScrollUp = _performSemanticScrollUp;
+      if (_isValidAction(SemanticsAction.scrollDown))
+        config.onScrollDown = _performSemanticScrollDown;
     }
+  }
 
-    final Iterable<SemanticsAction> actionsToAdd = validActions ?? actions.keys;
-
-    for (SemanticsAction action in actionsToAdd) {
-      final VoidCallback handler = actions[action];
-      if (handler != null)
-        config.addAction(action, handler);
-    }
+  bool _isValidAction(SemanticsAction action) {
+    return validActions == null || validActions.contains(action);
   }
 
   SemanticsNode _innerNode;
@@ -3228,6 +2835,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     VoidCallback onScrollDown,
     VoidCallback onIncrease,
     VoidCallback onDecrease,
+    MoveCursorHandler onMoveCursorForwardByCharacter,
+    MoveCursorHandler onMoveCursorBackwardByCharacter,
   }) : assert(container != null),
        _container = container,
        _explicitChildNodes = explicitChildNodes,
@@ -3248,6 +2857,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
        _onScrollDown = onScrollDown,
        _onIncrease = onIncrease,
        _onDecrease = onDecrease,
+       _onMoveCursorForwardByCharacter = onMoveCursorForwardByCharacter,
+       _onMoveCursorBackwardByCharacter = onMoveCursorBackwardByCharacter,
        super(child);
 
   /// If 'container' is true, this [RenderObject] will introduce a new
@@ -3296,9 +2907,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set checked(bool value) {
     if (checked == value)
       return;
-    final bool hadValue = checked != null;
     _checked = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
@@ -3308,9 +2918,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set selected(bool value) {
     if (selected == value)
       return;
-    final bool hadValue = selected != null;
     _selected = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
@@ -3319,9 +2928,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set button(bool value) {
     if (button == value)
       return;
-    final bool hadValue = button != null;
     _button = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.label] semantic to the given value.
@@ -3332,9 +2940,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set label(String value) {
     if (_label == value)
       return;
-    final bool hadValue = _label != null;
     _label = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.value] semantic to the given value.
@@ -3345,9 +2952,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set value(String value) {
     if (_value == value)
       return;
-    final bool hadValue = _value != null;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.increasedValue] semantic to the given
@@ -3359,9 +2965,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set increasedValue(String value) {
     if (_increasedValue == value)
       return;
-    final bool hadValue = _increasedValue != null;
     _increasedValue = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.decreasedValue] semantic to the given
@@ -3373,9 +2978,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set decreasedValue(String value) {
     if (_decreasedValue == value)
       return;
-    final bool hadValue = _decreasedValue != null;
     _decreasedValue = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.hint] semantic to the given value.
@@ -3386,9 +2990,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set hint(String value) {
     if (_hint == value)
       return;
-    final bool hadValue = _hint != null;
     _hint = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// If non-null, sets the [SemanticsNode.textDirection] semantic to the given value.
@@ -3400,9 +3003,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   set textDirection(TextDirection value) {
     if (textDirection == value)
       return;
-    final bool hadValue = textDirection != null;
     _textDirection = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: (value != null) == hadValue);
+    markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.tap].
@@ -3421,7 +3023,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onTap != null;
     _onTap = handler;
     if ((handler != null) == hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.longPress].
@@ -3440,7 +3042,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onLongPress != null;
     _onLongPress = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollLeft].
@@ -3462,7 +3064,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollLeft != null;
     _onScrollLeft = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollRight].
@@ -3484,7 +3086,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollRight != null;
     _onScrollRight = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollUp].
@@ -3506,7 +3108,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollUp != null;
     _onScrollUp = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.scrollDown].
@@ -3528,7 +3130,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onScrollDown != null;
     _onScrollDown = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.increase].
@@ -3547,7 +3149,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onIncrease != null;
     _onIncrease = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
   }
 
   /// The handler for [SemanticsAction.decrease].
@@ -3566,20 +3168,48 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     final bool hadValue = _onDecrease != null;
     _onDecrease = handler;
     if ((handler != null) != hadValue)
-      markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorForwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field forward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume up key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorForwardByCharacter => _onMoveCursorForwardByCharacter;
+  MoveCursorHandler _onMoveCursorForwardByCharacter;
+  set onMoveCursorForwardByCharacter(MoveCursorHandler handler) {
+    if (_onMoveCursorForwardByCharacter == handler)
+      return;
+    final bool hadValue = _onMoveCursorForwardByCharacter != null;
+    _onMoveCursorForwardByCharacter = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
+  }
+
+  /// The handler for [SemanticsAction.onMoveCursorBackwardByCharacter].
+  ///
+  /// This handler is invoked when the user wants to move the cursor in a
+  /// text field backward by one character.
+  ///
+  /// TalkBack users can trigger this by pressing the volume down key while the
+  /// input focus is in a text field.
+  MoveCursorHandler get onMoveCursorBackwardByCharacter => _onMoveCursorBackwardByCharacter;
+  MoveCursorHandler _onMoveCursorBackwardByCharacter;
+  set onMoveCursorBackwardByCharacter(MoveCursorHandler handler) {
+    if (_onMoveCursorBackwardByCharacter == handler)
+      return;
+    final bool hadValue = _onMoveCursorBackwardByCharacter != null;
+    _onMoveCursorBackwardByCharacter = handler;
+    if ((handler != null) != hadValue)
+      markNeedsSemanticsUpdate();
   }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
-    assert(
-      onIncrease == null || (value == null) == (increasedValue == null),
-      'If "onIncrease" is set either both "value" and "increasedValue" or neither have to be set.',
-    );
-    assert(
-      onDecrease == null || (value == null) == (decreasedValue == null),
-      'If "onDecrease" is set either both "value" and "decreasedValue" or neither have to be set.',
-    );
-
+    super.describeSemanticsConfiguration(config);
     config.isSemanticBoundary = container;
     config.explicitChildNodes = explicitChildNodes;
 
@@ -3605,21 +3235,25 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     // ones to ensure that changing a user provided handler from a non-null to
     // another non-null value doesn't require a semantics update.
     if (onTap != null)
-      config.addAction(SemanticsAction.tap, _performTap);
+      config.onTap = _performTap;
     if (onLongPress != null)
-      config.addAction(SemanticsAction.longPress, _performLongPress);
+      config.onLongPress = _performLongPress;
     if (onScrollLeft != null)
-      config.addAction(SemanticsAction.scrollLeft, _performScrollLeft);
+      config.onScrollLeft = _performScrollLeft;
     if (onScrollRight != null)
-      config.addAction(SemanticsAction.scrollRight, _performScrollRight);
+      config.onScrollRight = _performScrollRight;
     if (onScrollUp != null)
-      config.addAction(SemanticsAction.scrollUp, _performScrollUp);
+      config.onScrollUp = _performScrollUp;
     if (onScrollDown != null)
-      config.addAction(SemanticsAction.scrollDown, _performScrollDown);
+      config.onScrollDown = _performScrollDown;
     if (onIncrease != null)
-      config.addAction(SemanticsAction.increase, _performIncrease);
+      config.onIncrease = _performIncrease;
     if (onDecrease != null)
-      config.addAction(SemanticsAction.decrease, _performDecrease);
+      config.onDecrease = _performDecrease;
+    if (onMoveCursorForwardByCharacter != null)
+      config.onMoveCursorForwardByCharacter = _performMoveCursorForwardByCharacter;
+    if (onMoveCursorBackwardByCharacter != null)
+      config.onMoveCursorBackwardByCharacter = _performMoveCursorBackwardByCharacter;
   }
 
   void _performTap() {
@@ -3661,6 +3295,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     if (onDecrease != null)
       onDecrease();
   }
+
+  void _performMoveCursorForwardByCharacter(bool extendSelection) {
+    if (onMoveCursorForwardByCharacter != null)
+      onMoveCursorForwardByCharacter(extendSelection);
+  }
+
+  void _performMoveCursorBackwardByCharacter(bool extendSelection) {
+    if (onMoveCursorBackwardByCharacter != null)
+      onMoveCursorBackwardByCharacter(extendSelection);
+  }
 }
 
 /// Causes the semantics of all earlier render objects below the same semantic
@@ -3671,12 +3315,30 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 class RenderBlockSemantics extends RenderProxyBox {
   /// Create a render object that blocks semantics for nodes below it in paint
   /// order.
-  RenderBlockSemantics({ RenderBox child }) : super(child);
+  RenderBlockSemantics({ RenderBox child, bool blocking: true, }) : _blocking = blocking, super(child);
+
+  /// Whether this render object is blocking semantics of previously painted
+  /// [RenderObject]s below a common semantics boundary from the semantic tree.
+  bool get blocking => _blocking;
+  bool _blocking;
+  set blocking(bool value) {
+    assert(value != null);
+    if (value == _blocking)
+      return;
+    _blocking = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
   }
 }
 

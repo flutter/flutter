@@ -17,14 +17,14 @@ void main() {
         textDirection: TextDirection.ltr,
         fit: StackFit.expand,
         children: <Widget>[
-          const Semantics(
+          new Semantics(
             // this tests that empty nodes disappear
           ),
-          const Semantics(
+          new Semantics(
             // this tests whether you can have a container with no other semantics
             container: true,
           ),
-          const Semantics(
+          new Semantics(
             label: 'label', // (force a fork)
             textDirection: TextDirection.ltr,
           ),

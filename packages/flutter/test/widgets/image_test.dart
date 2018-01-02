@@ -8,11 +8,10 @@ import 'dart:ui' as ui show Image;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../services/image_data.dart';
+import '../painting/image_data.dart';
 
 void main() {
   testWidgets('Verify Image resets its RenderImage when changing providers', (WidgetTester tester) async {
@@ -342,11 +341,39 @@ void main() {
     stream.addListener((ImageInfo image, bool sync) { isSync = sync; });
     expect(isSync, isTrue);
   });
+
+  testWidgets('TickerMode controls stream registration', (WidgetTester tester) async {
+    final TestImageStreamCompleter imageStreamCompleter = new TestImageStreamCompleter();
+    final Image image = new Image(
+      image: new TestImageProvider(streamCompleter: imageStreamCompleter),
+    );
+    await tester.pumpWidget(
+      new TickerMode(
+        enabled: true,
+        child: image,
+      ),
+    );
+    expect(imageStreamCompleter.listeners.length, 1);
+    await tester.pumpWidget(
+      new TickerMode(
+        enabled: false,
+        child: image,
+      ),
+    );
+    expect(imageStreamCompleter.listeners.length, 0);
+  });
+
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
   final Completer<ImageInfo> _completer = new Completer<ImageInfo>();
+  ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
+
+  TestImageProvider({ImageStreamCompleter streamCompleter}) {
+    _streamCompleter = streamCompleter
+      ?? new OneFrameImageStreamCompleter(_completer.future);
+  }
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -360,7 +387,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) => new OneFrameImageStreamCompleter(_completer.future);
+  ImageStreamCompleter load(TestImageProvider key) => _streamCompleter;
 
   void complete() {
     _completer.complete(new ImageInfo(image: new TestImage()));
@@ -368,6 +395,20 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 
   @override
   String toString() => '${describeIdentity(this)}()';
+}
+
+class TestImageStreamCompleter extends ImageStreamCompleter {
+  final List<ImageListener> listeners = <ImageListener> [];
+
+  @override 
+  void addListener(ImageListener listener) {
+    listeners.add(listener);
+  }
+
+  @override
+  void removeListener(ImageListener listener) {
+    listeners.remove(listener);
+  }
 }
 
 class TestImage extends ui.Image {

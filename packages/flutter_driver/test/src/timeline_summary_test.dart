@@ -5,10 +5,10 @@
 import 'dart:convert' show JSON;
 
 import 'package:file/file.dart';
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_driver/src/driver/common.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-import 'package:flutter_driver/src/common.dart';
-import 'package:flutter_driver/flutter_driver.dart';
 
 void main() {
   group('TimelineSummary', () {

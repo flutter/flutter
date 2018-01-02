@@ -31,7 +31,7 @@ import 'thumb_painter.dart';
 ///
 /// See also:
 ///
-///  * <https://developer.apple.com/ios/human-interface-guidelines/ui-controls/sliders/>
+///  * <https://developer.apple.com/ios/human-interface-guidelines/controls/sliders/>
 class CupertinoSlider extends StatefulWidget {
   /// Creates an iOS-style slider.
   ///
@@ -179,7 +179,6 @@ class _CupertinoSliderRenderObjectWidget extends LeafRenderObjectWidget {
 }
 
 const double _kPadding = 8.0;
-const double _kTrackHeight = 2.0;
 const Color _kTrackColor = const Color(0xFFB5B5B5);
 const double _kSliderHeight = 2.0 * (CupertinoThumbPainter.radius + _kPadding);
 const double _kSliderWidth = 176.0; // Matches Material Design slider.
@@ -344,13 +343,13 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
     switch (textDirection) {
       case TextDirection.rtl:
         visualPosition = 1.0 - _position.value;
-        leftColor = _kTrackColor;
-        rightColor = _activeColor;
+        leftColor = _activeColor;
+        rightColor = _kTrackColor;
         break;
       case TextDirection.ltr:
         visualPosition = _position.value;
-        leftColor = _activeColor;
-        rightColor = _kTrackColor;
+        leftColor = _kTrackColor;
+        rightColor = _activeColor;
         break;
     }
 
@@ -384,8 +383,8 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive) {
-      config.addAction(SemanticsAction.increase, _increaseAction);
-      config.addAction(SemanticsAction.decrease, _decreaseAction);
+      config.onIncrease = _increaseAction;
+      config.onDecrease = _decreaseAction;
     }
   }
 

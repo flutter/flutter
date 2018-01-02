@@ -94,8 +94,12 @@ class RefreshIndicator extends StatefulWidget {
        assert(notificationPredicate != null),
        super(key: key);
 
+  /// The widget below this widget in the tree.
+  ///
   /// The refresh indicator will be stacked on top of this child. The indicator
   /// will appear when child's Scrollable descendant is over-scrolled.
+  ///
+  /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
   /// The distance from the child's top or bottom edge to where the refresh
@@ -326,7 +330,22 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
             _mode = _RefreshIndicatorMode.refresh;
           });
 
-          widget.onRefresh().whenComplete(() {
+          final Future<Null> refreshResult = widget.onRefresh();
+          assert(() {
+            if (refreshResult == null)
+              FlutterError.reportError(new FlutterErrorDetails(
+                exception: new FlutterError(
+                  'The onRefresh callback returned null.\n'
+                  'The RefreshIndicator onRefresh callback must return a Future.'
+                ),
+                context: 'when calling onRefresh',
+                library: 'material library',
+              ));
+            return true;
+          });
+          if (refreshResult == null)
+            return;
+          refreshResult.whenComplete(() {
             if (mounted && _mode == _RefreshIndicatorMode.refresh) {
               completer.complete();
               _dismiss(_RefreshIndicatorMode.done);

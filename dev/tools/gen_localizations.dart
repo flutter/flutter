@@ -91,28 +91,139 @@ String generateString(String s) {
   return output.toString();
 }
 
-String generateLocalizationsMap() {
+String generateTranslationBundles() {
   final StringBuffer output = new StringBuffer();
 
-  output.writeln('''
-/// Maps from [Locale.languageCode] to a map that contains the localized strings
-/// for that locale.
-///
-/// This variable is used by [MaterialLocalizations].
-const Map<String, Map<String, String>> localizations = const <String, Map<String, String>> {''');
-
-  for (String locale in localeToResources.keys.toList()..sort()) {
-    output.writeln("  '$locale': const <String, String>{");
-
-    final Map<String, String> resources = localeToResources[locale];
-    for (String name in resources.keys) {
-      final String value = generateString(resources[name]);
-      output.writeln("    '$name': $value,");
-    }
-    output.writeln('  },');
+  final Map<String, List<String>> languageToLocales = <String, List<String>>{};
+  final Set<String> allResourceIdentifiers = new Set<String>();
+  for(String locale in localeToResources.keys.toList()..sort()) {
+    final List<String> codes = locale.split('_'); // [language, country]
+    assert(codes.length == 1 || codes.length == 2);
+    languageToLocales[codes[0]] ??= <String>[];
+    languageToLocales[codes[0]].add(locale);
+    allResourceIdentifiers.addAll(localeToResources[locale].keys);
   }
 
-  output.writeln('};');
+  // Generate the TranslationsBundle base class. It contains one getter
+  // per resource identifier found in any of the .arb files.
+  //
+  // class TranslationsBundle {
+  //   const TranslationsBundle(this.parent);
+  //   final TranslationsBundle parent;
+  //   String get scriptCategory => parent?.scriptCategory;
+  //   ...
+  // }
+  output.writeln('''
+// The TranslationBundle subclasses defined here encode all of the translations
+// found in the flutter_localizations/lib/src/l10n/*.arb files.
+//
+// The [MaterialLocalizations] class uses the (generated)
+// translationBundleForLocale() function to look up a const TranslationBundle
+// instance for a locale.
+
+import \'dart:ui\' show Locale;
+
+class TranslationBundle {
+  const TranslationBundle(this.parent);
+  final TranslationBundle parent;''');
+  for (String key in allResourceIdentifiers)
+    output.writeln('  String get $key => parent?.$key;');
+  output.writeln('''
+}''');
+
+  // Generate one private TranslationBundle subclass per supported
+  // language. Each of these classes overrides every resource identifier
+  // getter. For example:
+  //
+  // class _Bundle_en extends TranslationBundle {
+  //   const _Bundle_en() : super(null);
+  //   @override String get scriptCategory => r'English-like';
+  //   ...
+  // }
+  for(String language in languageToLocales.keys) {
+    final Map<String, String> resources = localeToResources[language];
+    output.writeln('''
+
+// ignore: camel_case_types
+class _Bundle_$language extends TranslationBundle {
+  const _Bundle_$language() : super(null);''');
+    for (String key in resources.keys) {
+      final String value = generateString(resources[key]);
+      output.writeln('''
+  @override String get $key => $value;''');
+    }
+   output.writeln('''
+}''');
+  }
+
+  // Generate one private TranslationBundle subclass for each locale
+  // with a country code. The parent of these subclasses is a const
+  // instance of a translation bundle for the same locale, but without
+  // a country code. These subclasses only override getters that
+  // return different value than the parent class, or a resource identifier
+  // that's not defined in the parent class. For example:
+  //
+  // class _Bundle_en_CA extends TranslationBundle {
+  //   const _Bundle_en_CA() : super(const _Bundle_en());
+  //   @override String get licensesPageTitle => r'Licences';
+  //   ...
+  // }
+  for(String language in languageToLocales.keys) {
+    final Map<String, String> languageResources = localeToResources[language];
+    for(String localeName in languageToLocales[language]) {
+      if (localeName == language)
+        continue;
+      final Map<String, String> localeResources = localeToResources[localeName];
+      output.writeln('''
+
+// ignore: camel_case_types
+class _Bundle_$localeName extends TranslationBundle {
+  const _Bundle_$localeName() : super(const _Bundle_$language());''');
+      for (String key in localeResources.keys) {
+        if (languageResources[key] == localeResources[key])
+          continue;
+        final String value = generateString(localeResources[key]);
+        output.writeln('''
+  @override String get $key => $value;''');
+      }
+     output.writeln('''
+}''');
+    }
+  }
+
+  // Generate the translationBundleForLocale function. Given a Locale
+  // it returns the corresponding const TranslationBundle.
+  output.writeln('''
+
+TranslationBundle translationBundleForLocale(Locale locale) {
+  switch(locale.languageCode) {''');
+  for(String language in languageToLocales.keys) {
+    if (languageToLocales[language].length == 1) {
+      output.writeln('''
+    case \'$language\':
+      return const _Bundle_${languageToLocales[language][0]}();''');
+    } else {
+      output.writeln('''
+    case \'$language\': {
+      switch(locale.toString()) {''');
+      for(String localeName in languageToLocales[language]) {
+        if (localeName == language)
+          continue;
+        output.writeln('''
+        case \'$localeName\':
+          return const _Bundle_$localeName();''');
+      }
+      output.writeln('''
+      }
+      return const _Bundle_$language();
+    }''');
+    }
+  }
+  output.writeln('''
+  }
+  return const TranslationBundle(null);
+}''');
+
   return output.toString();
 }
 
@@ -161,12 +272,12 @@ void main(List<String> rawArgs) {
   final String regenerate = 'dart dev/tools/gen_localizations.dart --overwrite';
   final StringBuffer buffer = new StringBuffer();
   buffer.writeln(outputHeader.replaceFirst('@(regenerate)', regenerate));
-  buffer.writeln(generateLocalizationsMap());
+  buffer.write(generateTranslationBundles());
 
   if (options.writeToFile) {
     final File localizationsFile = new File(pathlib.join(directory.path, 'localizations.dart'));
-    localizationsFile.writeAsStringSync('$buffer');
+    localizationsFile.writeAsStringSync(buffer.toString());
   } else {
-    print(buffer);
+    stdout.write(buffer.toString());
   }
 }

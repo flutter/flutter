@@ -17,9 +17,14 @@ void main() {
     'he', // Hebrew
     'it', // Italian
     'ja', // Japanese
+    'ko', // Korean
+    'nl', // Dutch
+    'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
     'ru', // Russian
+    'th', // Thai
+    'tr', // Turkish
     'ur', // Urdu
     'zh', // Chinese (simplified)
   ];
@@ -56,19 +61,25 @@ void main() {
       expect(localizations.selectedRowCountTitle(1), isNotNull);
       expect(localizations.selectedRowCountTitle(2), isNotNull);
       expect(localizations.selectedRowCountTitle(100), isNotNull);
-      expect(localizations.selectedRowCountTitle(0).contains(r'$selectedRowCount'), isFalse);
-      expect(localizations.selectedRowCountTitle(1).contains(r'$selectedRowCount'), isFalse);
-      expect(localizations.selectedRowCountTitle(2).contains(r'$selectedRowCount'), isFalse);
-      expect(localizations.selectedRowCountTitle(100).contains(r'$selectedRowCount'), isFalse);
+      expect(localizations.selectedRowCountTitle(0), isNot(contains(r'$selectedRowCount')));
+      expect(localizations.selectedRowCountTitle(1), isNot(contains(r'$selectedRowCount')));
+      expect(localizations.selectedRowCountTitle(2), isNot(contains(r'$selectedRowCount')));
+      expect(localizations.selectedRowCountTitle(100), isNot(contains(r'$selectedRowCount')));
 
       expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNotNull);
       expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNotNull);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$firstRow'), isFalse);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$lastRow'), isFalse);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, true).contains(r'$rowCount'), isFalse);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$firstRow'), isFalse);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$lastRow'), isFalse);
-      expect(localizations.pageRowsInfoTitle(1, 10, 100, false).contains(r'$rowCount'), isFalse);
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNot(contains(r'$firstRow')));
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNot(contains(r'$lastRow')));
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, true), isNot(contains(r'$rowCount')));
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$firstRow')));
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$lastRow')));
+      expect(localizations.pageRowsInfoTitle(1, 10, 100, false), isNot(contains(r'$rowCount')));
+
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNotNull);
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabIndex')));
+      expect(localizations.tabLabel(tabIndex: 2, tabCount: 5), isNot(contains('tabCount')));
+      expect(() => localizations.tabLabel(tabIndex: 0, tabCount: 5), throwsAssertionError);
+      expect(() => localizations.tabLabel(tabIndex: 2, tabCount: 0), throwsAssertionError);
     });
   }
 
@@ -81,8 +92,8 @@ void main() {
 
     localizations = new GlobalMaterialLocalizations(const Locale('es', ''));
     expect(localizations.selectedRowCountTitle(0), 'No se han seleccionado elementos');
-    expect(localizations.selectedRowCountTitle(1), '1 artículo seleccionado');
-    expect(localizations.selectedRowCountTitle(2), '2 artículos seleccionados');
-    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 artículos seleccionados');
+    expect(localizations.selectedRowCountTitle(1), '1 elemento seleccionado');
+    expect(localizations.selectedRowCountTitle(2), '2 elementos seleccionados');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elementos seleccionados');
   });
 }

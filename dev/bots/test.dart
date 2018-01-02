@@ -14,7 +14,8 @@ final String flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(P
 final String flutter = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
 final String dart = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'dart.exe' : 'dart');
 final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Platform.isWindows ? 'pub.bat' : 'pub');
-final String flutterTestArgs = Platform.environment['FLUTTER_TEST_ARGS'];
+final String pubCache = path.join(flutterRoot, '.pub-cache');
+final List<String> flutterTestArgs = <String>[];
 final bool hasColor = stdout.supportsAnsiEscapes;
 
 final String bold = hasColor ? '\x1B[1m' : '';
@@ -31,17 +32,19 @@ const Map<String, ShardRunner> _kShards = const <String, ShardRunner>{
   'coverage': _runCoverage,
 };
 
-/// When you call this, you can set FLUTTER_TEST_ARGS to pass custom
+/// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
-/// script using FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt to
+/// script with the parameter --local-engine=host_debug_unopt to
 /// use your own build of the engine.
 ///
 /// To run the analysis part, run it with SHARD=analyze
 ///
 /// For example:
 /// SHARD=analyze bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-/// FLUTTER_TEST_ARGS=--local-engine=host_debug_unopt bin/cache/dart-sdk/bin/dart dev/bots/test.dart
-Future<Null> main() async {
+/// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
+Future<Null> main(List<String> args) async {
+  flutterTestArgs.addAll(args);
+
   final String shard = Platform.environment['SHARD'] ?? 'tests';
   if (!_kShards.containsKey(shard))
     throw new ArgumentError('Invalid shard: $shard');
@@ -84,6 +87,7 @@ Future<Null> _verifyInternationalizations() async {
 }
 
 Future<Null> _analyzeRepo() async {
+  await _verifyGeneratedPluginRegistrants(flutterRoot);
   await _verifyNoBadImports(flutterRoot);
   await _verifyInternationalizations();
 
@@ -158,9 +162,11 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
   await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
@@ -204,8 +210,12 @@ Future<Null> _pubRunTest(
   final List<String> args = <String>['run', 'test', '-j1', '-rexpanded'];
   if (testPath != null)
     args.add(testPath);
+  final Map<String, String> pubEnvironment = <String, String>{'DART_VM_OPTIONS': '--assert-initializer'};
+  if (new Directory(pubCache).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCache;
+  }
   return _runCommand(pub, args, workingDirectory: workingDirectory,
-      environment: <String, String>{'DART_VM_OPTIONS': '--assert-initializer'});
+      environment: pubEnvironment);
 }
 
 class EvalResult {
@@ -312,7 +322,7 @@ Future<Null> _runFlutterTest(String workingDirectory, {
 }) {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
-    args.add(flutterTestArgs);
+    args.addAll(flutterTestArgs);
   if (script != null)
     args.add(script);
   return _runCommand(flutter, args,
@@ -364,11 +374,10 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
     );
   }
   // Verify that the imports are well-ordered.
-  final Map<String, Set<String>> dependencyMap = new Map<String, Set<String>>.fromIterable(
-    directories,
-    key: (String directory) => directory,
-    value: (String directory) => _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation'),
-  );
+  final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
+  for (String directory in directories) {
+    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+  }
   for (String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
@@ -469,4 +478,65 @@ List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
 void _printProgress(String action, String workingDir, String command) {
   const String arrow = '⏩';
   print('$arrow $action: cd $cyan$workingDir$reset; $yellow$command$reset');
+}
+
+Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
+  final Directory flutterRootDir = new Directory(flutterRoot);
+
+  final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
+
+  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
+    if (entity is! File)
+      continue;
+    if (_isGeneratedPluginRegistrant(entity)) {
+      final String package = _getPackageFor(entity, flutterRootDir);
+      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+      registrants.add(entity);
+    }
+  }
+
+  final Set<String> outOfDate = new Set<String>();
+
+  for (String package in packageToRegistrants.keys) {
+    final Map<File, String> fileToContent = new Map<File, String>.fromIterable(packageToRegistrants[package],
+      key: (File f) => f,
+      value: (File f) => f.readAsStringSync(),
+    );
+    await _runCommand(flutter, <String>['inject-plugins'],
+      workingDirectory: package,
+      printOutput: false,
+    );
+    for (File registrant in fileToContent.keys) {
+      if (registrant.readAsStringSync() != fileToContent[registrant]) {
+        outOfDate.add(registrant.path);
+      }
+    }
+  }
+
+  if (outOfDate.isNotEmpty) {
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    print('${bold}The following GeneratedPluginRegistrants are out of date:$reset');
+    for (String registrant in outOfDate) {
+      print(' - $registrant');
+    }
+    print('\nRun "flutter inject-plugins" in the package that\'s out of date.');
+    print('$red━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset');
+    exit(1);
+  }
+}
+
+String _getPackageFor(File entity, Directory flutterRootDir) {
+  for (Directory dir = entity.parent; dir != flutterRootDir; dir = dir.parent) {
+    if (new File(path.join(dir.path, 'pubspec.yaml')).existsSync()) {
+      return dir.path;
+    }
+  }
+  throw new ArgumentError('$entity is not within a dart package.');
+}
+
+bool _isGeneratedPluginRegistrant(File file) {
+  final String filename = path.basename(file.path);
+  return filename == 'GeneratedPluginRegistrant.java' ||
+      filename == 'GeneratedPluginRegistrant.h' ||
+      filename == 'GeneratedPluginRegistrant.m';
 }

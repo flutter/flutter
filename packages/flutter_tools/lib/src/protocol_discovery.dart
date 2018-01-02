@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'base/common.dart';
+import 'base/io.dart';
 import 'base/port_scanner.dart';
 import 'device.dart';
 import 'globals.dart';
@@ -18,6 +19,7 @@ class ProtocolDiscovery {
     this.portForwarder,
     this.hostPort,
     this.defaultHostPort,
+    this.ipv6,
   }) : assert(logReader != null),
        assert(portForwarder == null || defaultHostPort != null),
        _prefix = '$serviceName listening on ' {
@@ -28,6 +30,7 @@ class ProtocolDiscovery {
     DeviceLogReader logReader, {
     DevicePortForwarder portForwarder,
     int hostPort,
+    bool ipv6: false,
   }) {
     const String kObservatoryService = 'Observatory';
     return new ProtocolDiscovery._(
@@ -35,6 +38,7 @@ class ProtocolDiscovery {
       portForwarder: portForwarder,
       hostPort: hostPort,
       defaultHostPort: kDefaultObservatoryPort,
+      ipv6: ipv6,
     );
   }
 
@@ -43,6 +47,7 @@ class ProtocolDiscovery {
   final DevicePortForwarder portForwarder;
   final int hostPort;
   final int defaultHostPort;
+  final bool ipv6;
 
   final String _prefix;
   final Completer<Uri> _completer = new Completer<Uri>();
@@ -88,6 +93,11 @@ class ProtocolDiscovery {
       hostPort = await portForwarder.forward(devicePort, hostPort: hostPort);
       printTrace('Forwarded host port $hostPort to device port $devicePort for $serviceName');
       hostUri = deviceUri.replace(port: hostPort);
+    }
+
+    assert(new InternetAddress(hostUri.host).isLoopback);
+    if (ipv6) {
+      hostUri = hostUri.replace(host: InternetAddress.LOOPBACK_IP_V6.host);
     }
 
     return hostUri;

@@ -18,8 +18,29 @@ class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
 
 void main() {
-  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
-  osx.operatingSystem = 'macos';
+  FakePlatform osx;
+
+  setUp(() {
+    osx = new FakePlatform.fromPlatform(const LocalPlatform());
+    osx.operatingSystem = 'macos';
+  });
+
+  group('logFilePath', () {
+    testUsingContext('defaults to rooted from HOME', () {
+      osx.environment['HOME'] = '/foo/bar';
+      expect(new IOSSimulator('123').logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    }, testOn: 'posix');
+
+    testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
+      osx.environment['HOME'] = '/foo/bar';
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
+      expect(new IOSSimulator('456').logFilePath, '/baz/qux/456/system.log');
+    }, overrides: <Type, Generator>{
+      Platform: () => osx,
+    });
+  });
 
   group('compareIosVersions', () {
     test('compares correctly', () {
@@ -131,7 +152,7 @@ void main() {
       // Let everything else return exit code 0 so process.dart doesn't crash.
       when(
         mockProcessManager.run(any, environment: null, workingDirectory:  null)
-      ).thenReturn(
+      ).thenAnswer((Invocation invocation) =>
         new Future<ProcessResult>.value(new ProcessResult(2, 0, '', ''))
       );
       // Doesn't matter what the device is.
@@ -185,7 +206,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-        .thenReturn(new Future<Process>.value(new MockProcess()));
+        .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
@@ -219,7 +240,7 @@ void main() {
     setUp(() {
       mockProcessManager = new MockProcessManager();
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-        .thenReturn(new Future<Process>.value(new MockProcess()));
+        .thenAnswer((Invocation invocation) => new Future<Process>.value(new MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {

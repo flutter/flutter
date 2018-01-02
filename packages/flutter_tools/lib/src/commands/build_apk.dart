@@ -8,14 +8,14 @@ import '../android/apk.dart';
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
-  BuildApkCommand() {
+  BuildApkCommand({bool verboseHelp: false}) {
     usesTargetOption();
     addBuildModeFlags();
     usesFlavorOption();
     usesPubOption();
 
     argParser
-      ..addFlag('preview-dart-2', negatable: false)
+      ..addFlag('preview-dart-2', negatable: false,  hide: !verboseHelp)
       ..addFlag('prefer-shared-library', negatable: false,
           help: 'Whether to prefer compiling to a *.so file (android only).');
   }

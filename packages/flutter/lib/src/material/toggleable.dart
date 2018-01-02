@@ -122,7 +122,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
     if (value == _value)
       return;
     _value = value;
-    markNeedsSemanticsUpdate(onlyLocalUpdates: true);
+    markNeedsSemanticsUpdate();
     _position
       ..curve = Curves.easeIn
       ..reverseCurve = Curves.easeOut;
@@ -288,7 +288,7 @@ abstract class RenderToggleable extends RenderConstrainedBox {
 
     config.isSemanticBoundary = isInteractive;
     if (isInteractive)
-      config.addAction(SemanticsAction.tap, _handleTap);
+      config.onTap = _handleTap;
     config.isChecked = _value;
   }
 

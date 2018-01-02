@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'colors.dart';
 import 'icons.dart';
+import 'page_scaffold.dart';
 
 /// Standard iOS navigation bar height without the status bar.
 const double _kNavBarPersistentHeight = 44.0;
@@ -68,7 +69,7 @@ const TextStyle _kLargeTitleTextStyle = const TextStyle(
 ///    [CupertinoNavigationBar].
 ///  * [CupertinoSliverNavigationBar] for a navigation bar to be placed in a
 ///    scrolling list and that supports iOS-11-style large titles.
-class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWidget {
+class CupertinoNavigationBar extends StatelessWidget implements ObstructingPreferredSizeWidget {
   /// Creates a navigation bar in the iOS style.
   const CupertinoNavigationBar({
     Key key,
@@ -116,11 +117,12 @@ class CupertinoNavigationBar extends StatelessWidget implements PreferredSizeWid
   final Color actionsForegroundColor;
 
   /// True if the navigation bar's background color has no transparency.
-  bool get opaque => backgroundColor.alpha == 0xFF;
+  @override
+  bool get fullObstruction => backgroundColor.alpha == 0xFF;
 
   @override
   Size get preferredSize {
-    return opaque ? const Size.fromHeight(_kNavBarPersistentHeight) : Size.zero;
+    return const Size.fromHeight(_kNavBarPersistentHeight);
   }
 
   @override
@@ -376,7 +378,7 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
               ? new Container(
                 height: _kNavBarPersistentHeight,
                 width: _kNavBarBackButtonTapWidth,
-                alignment: Alignment.centerLeft,
+                alignment: AlignmentDirectional.centerStart,
                 child: const Icon(CupertinoIcons.back, size: 34.0,)
               )
               : const Text('Close'),
@@ -393,15 +395,13 @@ class _CupertinoPersistentNavigationBar extends StatelessWidget implements Prefe
           color: actionsForegroundColor,
           size: 22.0,
         ),
-        child: new Padding(
-          padding: new EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            left: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
-            right: _kNavBarEdgePadding,
-          ),
-          child: new MediaQuery.removePadding(
-            context: context,
-            removeTop: true,
+        child: new SafeArea(
+          bottom: false,
+          child: new Padding(
+            padding: new EdgeInsetsDirectional.only(
+              start: useBackButton ? _kNavBarBackButtonPadding : _kNavBarEdgePadding,
+              end: _kNavBarEdgePadding,
+            ),
             child: new NavigationToolbar(
               leading: styledLeading ?? backOrCloseButton,
               middle: animatedStyledMiddle,
@@ -496,8 +496,12 @@ class _CupertinoLargeTitleNavigationBarSliverDelegate
                     child: new AnimatedOpacity(
                       opacity: showLargeTitle ? 1.0 : 0.0,
                       duration: _kNavBarTitleFadeDuration,
-                      child: title,
-                    )
+                      child: new SafeArea(
+                        top: false,
+                        bottom: false,
+                        child: title,
+                      ),
+                    ),
                   ),
                 ),
               ),

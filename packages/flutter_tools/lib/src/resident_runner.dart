@@ -282,6 +282,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: hotRunner.usesTerminalUI,
+      ipv6: hotRunner.ipv6,
     );
 
     final LaunchResult result = await futureResult;
@@ -325,9 +326,9 @@ class FlutterDevice {
       return 1;
     }
 
-    Map<String, dynamic> platformArgs;
+    final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
-      platformArgs = <String, dynamic>{ 'trace-startup': coldRunner.traceStartup };
+      platformArgs['trace-startup'] = coldRunner.traceStartup;
 
     startEchoingDeviceLog();
 
@@ -341,6 +342,7 @@ class FlutterDevice {
       prebuiltApplication: prebuiltMode,
       applicationNeedsRebuild: shouldBuild || hasDirtyDependencies,
       usesTerminalUi: coldRunner.usesTerminalUI,
+      ipv6: coldRunner.ipv6,
     );
 
     if (!result.started) {
@@ -403,6 +405,7 @@ abstract class ResidentRunner {
     String packagesFilePath,
     String projectAssets,
     this.stayResident,
+    this.ipv6,
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
@@ -419,6 +422,7 @@ abstract class ResidentRunner {
   final DebuggingOptions debuggingOptions;
   final bool usesTerminalUI;
   final bool stayResident;
+  final bool ipv6;
   final Completer<int> _finished = new Completer<int>();
   bool _stopped = false;
   String _packagesFilePath;

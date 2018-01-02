@@ -65,9 +65,9 @@ class FuchsiaDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication: false,
-    bool previewDart2: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: false,
+    bool ipv6: false,
   }) => new Future<Null>.error('unimplemented');
 
   @override

@@ -317,4 +317,25 @@ void main() {
     expect(textScaleFactor, isNotNull);
     expect(textScaleFactor, equals(1.0));
   });
+
+  testWidgets('MaterialApp.navigatorKey', (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> key = new GlobalKey<NavigatorState>();
+    await tester.pumpWidget(new MaterialApp(
+      navigatorKey: key,
+      color: const Color(0xFF112233),
+      home: const Placeholder(),
+    ));
+    expect(key.currentState, const isInstanceOf<NavigatorState>());
+    await tester.pumpWidget(new MaterialApp(
+      color: const Color(0xFF112233),
+      home: const Placeholder(),
+    ));
+    expect(key.currentState, isNull);
+    await tester.pumpWidget(new MaterialApp(
+      navigatorKey: key,
+      color: const Color(0xFF112233),
+      home: const Placeholder(),
+    ));
+    expect(key.currentState, const isInstanceOf<NavigatorState>());
+  });
 }

@@ -9,8 +9,6 @@ import 'package:flutter/services.dart';
 
 import 'widget_tester.dart';
 
-const String _kTextInputClientChannel = 'flutter/textinputclient';
-
 /// A testing stub for the system's onscreen keyboard.
 ///
 /// Typical app tests will not need to use this class directly.
@@ -24,7 +22,24 @@ class TestTextInput {
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+    _isRegistered = true;
   }
+
+  /// Removes this object as a mock handler for [SystemChannels.textInput].
+  ///
+  /// After calling this method, the channel will exchange messages with the
+  /// Flutter engine. Use this with [FlutterDriver] tests that need to display
+  /// on-screen keyboard provided by the operating system.
+  void unregister() {
+    SystemChannels.textInput.setMockMethodCallHandler(null);
+    _isRegistered = false;
+  }
+
+  /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
+  ///
+  /// Use [register] and [unregister] methods to control this value.
+  bool get isRegistered => _isRegistered;
+  bool _isRegistered = false;
 
   int _client = 0;
 
@@ -67,7 +82,11 @@ class TestTextInput {
 
   /// Simulates the user changing the [TextEditingValue] to the given value.
   void updateEditingValue(TextEditingValue value) {
-    expect(_client, isNonZero);
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0) {
+      throw new TestFailure('_client must be non-zero');
+    }
     BinaryMessages.handlePlatformMessage(
       SystemChannels.textInput.name,
       SystemChannels.textInput.codec.encodeMethodCall(
@@ -84,7 +103,6 @@ class TestTextInput {
   void enterText(String text) {
     updateEditingValue(new TextEditingValue(
       text: text,
-      composing: new TextRange(start: 0, end: text.length),
     ));
   }
 

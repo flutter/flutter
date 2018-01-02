@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'build_info.dart';
 import 'globals.dart';
 
@@ -159,10 +160,6 @@ class CachedArtifacts extends Artifacts {
         // android_arm in profile mode because it is available on all supported host platforms.
         return _getAndroidArtifactPath(artifact, TargetPlatform.android_arm, BuildMode.profile);
       case Artifact.flutterTester:
-        if (platform == TargetPlatform.windows_x64)
-          throw new UnimplementedError('Artifact $artifact not available on platfrom $platform.');
-        continue fallThrough;
-      fallThrough:
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
@@ -180,8 +177,6 @@ class CachedArtifacts extends Artifacts {
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
     }
-    assert(false, 'Artifact $artifact not available for platform $platform.');
-    return null;
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [BuildMode mode]) {
@@ -268,11 +263,11 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = const <String>['clang_x86', 'clang_x64', 'clang_i386'];
+    const List<String> clangDirs = const <String>['.', 'clang_x86', 'clang_x64', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (fs.file(genSnapshotPath).existsSync())
+      if (processManager.canRun(genSnapshotPath))
         return genSnapshotPath;
     }
     throw new Exception('Unable to find $genSnapshotName');

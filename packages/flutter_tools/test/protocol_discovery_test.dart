@@ -104,47 +104,68 @@ void main() {
       testUsingContext('discovers uri if log line contains non-localhost', () async {
         initialize();
         final Future<Uri> uriFuture = discoverer.uri;
-        logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
         final Uri uri = await uriFuture;
         expect(uri.port, 54804);
-        expect('$uri', 'http://somehost:54804/PTwjm8Ii8qg=/');
+        expect('$uri', 'http://127.0.0.1:54804/PTwjm8Ii8qg=/');
       });
     });
 
-    testUsingContext('port forwarding - default port', () async {
-      final MockDeviceLogReader logReader = new MockDeviceLogReader();
-      final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-          hostPort: 54777);
+    group('port forwarding', () {
+      testUsingContext('default port', () async {
+        final MockDeviceLogReader logReader = new MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 54777);
 
-      // Get next port future.
-      final Future<Uri> nextUri = discoverer.uri;
-      logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      final Uri uri = await nextUri;
-      expect(uri.port, 54777);
-      expect('$uri', 'http://somehost:54777/PTwjm8Ii8qg=/');
+        // Get next port future.
+        final Future<Uri> nextUri = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        final Uri uri = await nextUri;
+        expect(uri.port, 54777);
+        expect('$uri', 'http://127.0.0.1:54777/PTwjm8Ii8qg=/');
 
-      discoverer.cancel();
-      logReader.dispose();
-    });
+        discoverer.cancel();
+        logReader.dispose();
+      });
 
-    testUsingContext('port forwarding - specified port', () async {
-      final MockDeviceLogReader logReader = new MockDeviceLogReader();
-      final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
-          logReader,
-          portForwarder: new MockPortForwarder(99),
-          hostPort: 1243);
+      testUsingContext('specified port', () async {
+        final MockDeviceLogReader logReader = new MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 1243);
 
-      // Get next port future.
-      final Future<Uri> nextUri = discoverer.uri;
-      logReader.addLine('I/flutter : Observatory listening on http://somehost:54804/PTwjm8Ii8qg=/');
-      final Uri uri = await nextUri;
-      expect(uri.port, 1243);
-      expect('$uri', 'http://somehost:1243/PTwjm8Ii8qg=/');
+        // Get next port future.
+        final Future<Uri> nextUri = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        final Uri uri = await nextUri;
+        expect(uri.port, 1243);
+        expect('$uri', 'http://127.0.0.1:1243/PTwjm8Ii8qg=/');
 
-      discoverer.cancel();
-      logReader.dispose();
+        discoverer.cancel();
+        logReader.dispose();
+      });
+
+      testUsingContext('ipv6', () async {
+        final MockDeviceLogReader logReader = new MockDeviceLogReader();
+        final ProtocolDiscovery discoverer = new ProtocolDiscovery.observatory(
+            logReader,
+            portForwarder: new MockPortForwarder(99),
+            hostPort: 54777,
+            ipv6: true);
+
+        // Get next port future.
+        final Future<Uri> nextUri = discoverer.uri;
+        logReader.addLine('I/flutter : Observatory listening on http://127.0.0.1:54804/PTwjm8Ii8qg=/');
+        final Uri uri = await nextUri;
+        expect(uri.port, 54777);
+        expect('$uri', 'http://[::1]:54777/PTwjm8Ii8qg=/');
+
+        discoverer.cancel();
+        logReader.dispose();
+      });
     });
   });
 }

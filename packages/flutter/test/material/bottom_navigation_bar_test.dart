@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('BottomNavigationBar callback test', (WidgetTester tester) async {
@@ -60,6 +63,35 @@ void main() {
     expect(box.size.height, kBottomNavigationBarHeight);
     expect(find.text('AC'), findsOneWidget);
     expect(find.text('Alarm'), findsOneWidget);
+  });
+
+  testWidgets('BottomNavigationBar adds bottom padding to height', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      new MaterialApp(
+        home: new MediaQuery(
+          data: const MediaQueryData(padding: const EdgeInsets.only(bottom: 40.0)),
+          child: new Scaffold(
+            bottomNavigationBar: new BottomNavigationBar(
+              items: <BottomNavigationBarItem>[
+                const BottomNavigationBarItem(
+                  icon: const Icon(Icons.ac_unit),
+                  title: const Text('AC')
+                ),
+                const BottomNavigationBarItem(
+                  icon: const Icon(Icons.access_alarm),
+                  title: const Text('Alarm')
+                )
+              ]
+            )
+          )
+        )
+      )
+    );
+
+    const double labelBottomMargin = 8.0; // _kBottomMargin in implementation.
+    const double additionalPadding = 40.0 - labelBottomMargin;
+    const double expectedHeight = kBottomNavigationBarHeight + additionalPadding;
+    expect(tester.getSize(find.byType(BottomNavigationBar)).height, expectedHeight);
   });
 
   testWidgets('BottomNavigationBar action size test', (WidgetTester tester) async {
@@ -392,4 +424,78 @@ void main() {
     final RenderBox itemBoxB = tester.renderObject(find.text(longTextB.data));
     expect(itemBoxB.size, equals(const Size(400.0, 14.0)));
   });
+
+  testWidgets('BottomNavigationBar paints circles', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.ltr,
+        bottomNavigationBar: new BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              title: const Text('A'),
+              icon: const Icon(Icons.ac_unit),
+            ),
+            const BottomNavigationBarItem(
+              title: const Text('B'),
+              icon: const Icon(Icons.battery_alert),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject(find.byType(BottomNavigationBar));
+    expect(box, isNot(paints..circle()));
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(box, paints..circle(x: 200.0));
+
+    await tester.tap(find.text('B'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(box, paints..circle(x: 200.0)..circle(x: 600.0));
+
+    // Now we flip the directionality and verify that the circles switch positions.
+    await tester.pumpWidget(
+      boilerplate(
+        textDirection: TextDirection.rtl,
+        bottomNavigationBar: new BottomNavigationBar(
+          items: <BottomNavigationBarItem>[
+            const BottomNavigationBarItem(
+              title: const Text('A'),
+              icon: const Icon(Icons.ac_unit),
+            ),
+            const BottomNavigationBarItem(
+              title: const Text('B'),
+              icon: const Icon(Icons.battery_alert),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(box, paints..circle(x: 600.0)..circle(x: 200.0));
+
+    await tester.tap(find.text('A'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 20));
+    expect(box, paints..circle(x: 600.0)..circle(x: 200.0)..circle(x: 600.0));
+  });
+}
+
+Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDirection }) {
+  assert(textDirection != null);
+  return new Directionality(
+    textDirection: textDirection,
+    child: new MediaQuery(
+      data: const MediaQueryData(),
+      child: new Material(
+        child: new Scaffold(
+          bottomNavigationBar: bottomNavigationBar,
+        ),
+      ),
+    ),
+  );
 }

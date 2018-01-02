@@ -68,6 +68,7 @@ void testUsingContext(String description, dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides: const <Type, Generator>{},
   ContextInitializer initializeContext: _defaultInitializeContext,
+  String testOn,
   bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
 
@@ -124,7 +125,7 @@ void testUsingContext(String description, dynamic testMethod(), {
       rethrow;
     }
 
-  }, timeout: timeout, skip: skip);
+  }, timeout: timeout, testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -188,6 +189,12 @@ class MockDeviceManager implements DeviceManager {
   }
 
   void addDevice(Device device) => devices.add(device);
+
+  @override
+  bool get canListAnything => true;
+
+  @override
+  Future<List<String>> getDeviceDiagnostics() async => <String>[];
 }
 
 class MockDoctor extends Doctor {

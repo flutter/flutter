@@ -14,6 +14,7 @@ import 'framework.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,
+  FlutterErrorDetails,
   Listenable,
   TargetPlatform,
   ValueNotifier;
@@ -26,6 +27,7 @@ export 'package:flutter/rendering.dart' show
   CrossAxisAlignment,
   CustomClipper,
   CustomPainter,
+  CustomPainterSemantics,
   DecorationPosition,
   FlexFit,
   FlowDelegate,
@@ -48,6 +50,7 @@ export 'package:flutter/rendering.dart' show
   PointerUpEvent,
   PointerUpEventListener,
   RelativeRect,
+  SemanticsBuilderCallback,
   ShaderCallback,
   SingleChildLayoutDelegate,
   StackFit,
@@ -348,7 +351,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
     this.size: Size.zero,
     this.isComplex: false,
     this.willChange: false,
-    Widget child
+    Widget child,
   }) : assert(size != null),
        assert(isComplex != null),
        assert(willChange != null),
@@ -999,6 +1002,15 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1670,7 +1682,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis constrainedAxis;
-  
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
@@ -1750,6 +1762,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1884,6 +1905,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
@@ -1971,6 +2001,15 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
@@ -2496,6 +2535,15 @@ class Stack extends MultiChildRenderObjectWidget {
   /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
   /// alignment to determine how they should be positioned in that
   /// under-specified axis.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -2945,6 +2993,8 @@ class PositionedDirectional extends StatelessWidget {
   final double height;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -4242,6 +4292,13 @@ class RawImage extends LeafRenderObjectWidget {
   /// must be in scope.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
@@ -4696,36 +4753,82 @@ class MetaData extends SingleChildRenderObjectWidget {
 /// * [SemanticsDebugger], an overlay to help visualize the semantics tree. Can
 ///   be enabled using [WidgetsApp.showSemanticsDebugger] or
 ///   [MaterialApp.showSemanticsDebugger].
+@immutable
 class Semantics extends SingleChildRenderObjectWidget {
   /// Creates a semantic annotation.
   ///
-  /// The [container] argument must not be null.
-  const Semantics({
+  /// The [container] argument must not be null. To create a `const` instance
+  /// of [Semantics], use the [new Semantics.fromProperties] constructor.
+  Semantics({
+    Key key,
+    Widget child,
+    bool container: false,
+    bool explicitChildNodes: false,
+    bool checked,
+    bool selected,
+    bool button,
+    String label,
+    String value,
+    String increasedValue,
+    String decreasedValue,
+    String hint,
+    TextDirection textDirection,
+    VoidCallback onTap,
+    VoidCallback onLongPress,
+    VoidCallback onScrollLeft,
+    VoidCallback onScrollRight,
+    VoidCallback onScrollUp,
+    VoidCallback onScrollDown,
+    VoidCallback onIncrease,
+    VoidCallback onDecrease,
+    MoveCursorHandler onMoveCursorForwardByCharacter,
+    MoveCursorHandler onMoveCursorBackwardByCharacter,
+  }) : this.fromProperties(
+    key: key,
+    child: child,
+    container: container,
+    explicitChildNodes: explicitChildNodes,
+    properties: new SemanticsProperties(
+      checked: checked,
+      selected: selected,
+      button: button,
+      label: label,
+      value: value,
+      increasedValue: increasedValue,
+      decreasedValue: decreasedValue,
+      hint: hint,
+      textDirection: textDirection,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      onScrollLeft: onScrollLeft,
+      onScrollRight: onScrollRight,
+      onScrollUp: onScrollUp,
+      onScrollDown: onScrollDown,
+      onIncrease: onIncrease,
+      onDecrease: onDecrease,
+      onMoveCursorForwardByCharacter: onMoveCursorForwardByCharacter,
+      onMoveCursorBackwardByCharacter: onMoveCursorBackwardByCharacter,
+    ),
+  );
+
+  /// Creates a semantic annotation using [SemanticsProperties].
+  ///
+  /// The [container] and [properties] arguments must not be null.
+  const Semantics.fromProperties({
     Key key,
     Widget child,
     this.container: false,
     this.explicitChildNodes: false,
-    this.checked,
-    this.selected,
-    this.button,
-    this.label,
-    this.value,
-    this.increasedValue,
-    this.decreasedValue,
-    this.hint,
-    this.textDirection,
-    this.onTap,
-    this.onLongPress,
-    this.onScrollLeft,
-    this.onScrollRight,
-    this.onScrollUp,
-    this.onScrollDown,
-    this.onIncrease,
-    this.onDecrease,
+    @required this.properties,
   }) : assert(container != null),
+       assert(properties != null),
        super(key: key, child: child);
 
-  /// If 'container' is true, this widget will introduce a new
+  /// Contains properties used by assistive technologies to make the application
+  /// more accessible.
+  final SemanticsProperties properties;
+
+  /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
@@ -4748,215 +4851,43 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// create semantic boundaries that are either writable or not for children.
   final bool explicitChildNodes;
 
-  /// If non-null, indicates that this subtree represents a checkbox
-  /// or similar widget with a "checked" state, and what its current
-  /// state is.
-  final bool checked;
-
-  /// If non-null indicates that this subtree represents something that can be
-  /// in a selected or unselected state, and what its current state is.
-  ///
-  /// The active tab in a tab bar for example is considered "selected", whereas
-  /// all other tabs are unselected.
-  final bool selected;
-
-  /// If non-null, indicates that this subtree represents a button.
-  ///
-  /// TalkBack/VoiceOver provides users with the hint "button" when a button
-  /// is focused.
-  final bool button;
-
-  /// Provides a textual description of the widget.
-  ///
-  /// If a label is provided, there must either by an ambient [Directionality]
-  /// or an explicit [textDirection] should be provided.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.label] for a description of how this is exposed
-  ///    in TalkBack and VoiceOver.
-  final String label;
-
-  /// Provides a textual description of the value of the widget.
-  ///
-  /// If a value is provided, there must either by an ambient [Directionality]
-  /// or an explicit [textDirection] should be provided.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.value] for a description of how this is exposed
-  ///    in TalkBack and VoiceOver.
-  final String value;
-
-  /// The value that [value] will become after a [SemanticsAction.increase]
-  /// action has been performed on this widget.
-  ///
-  /// If a value is provided, [onIncrease] must also be set and there must
-  /// either be an ambient [Directionality] or an explicit [textDirection]
-  /// must be provided.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.increasedValue] for a description of how this
-  ///    is exposed in TalkBack and VoiceOver.
-  final String increasedValue;
-
-  /// The value that [value] will become after a [SemanticsAction.decrease]
-  /// action has been performed on this widget.
-  ///
-  /// If a value is provided, [onDecrease] must also be set and there must
-  /// either be an ambient [Directionality] or an explicit [textDirection]
-  /// must be provided.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.decreasedValue] for a description of how this
-  ///    is exposed in TalkBack and VoiceOver.
-  final String decreasedValue;
-
-  /// Provides a brief textual description of the result of an action performed
-  /// on the widget.
-  ///
-  /// If a hint is provided, there must either by an ambient [Directionality]
-  /// or an explicit [textDirection] should be provided.
-  ///
-  /// See also:
-  ///
-  ///  * [SemanticsConfiguration.hint] for a description of how this is exposed
-  ///    in TalkBack and VoiceOver.
-  final String hint;
-
-  /// The reading direction of the [label], [value], [hint], [increasedValue],
-  /// and [decreasedValue].
-  ///
-  /// Defaults to the ambient [Directionality].
-  final TextDirection textDirection;
-
-  TextDirection _getTextDirection(BuildContext context) {
-    return textDirection ?? (label != null || value != null || hint != null ? Directionality.of(context) : null);
-  }
-
-  /// The handler for [SemanticsAction.tap].
-  ///
-  /// This is the semantic equivalent of a user briefly tapping the screen with
-  /// the finger without moving it. For example, a button should implement this
-  /// action.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen while an element is focused.
-  final VoidCallback onTap;
-
-  /// The handler for [SemanticsAction.longPress].
-  ///
-  /// This is the semantic equivalent of a user pressing and holding the screen
-  /// with the finger for a few seconds without moving it.
-  ///
-  /// VoiceOver users on iOS and TalkBack users on Android can trigger this
-  /// action by double-tapping the screen without lifting the finger after the
-  /// second tap.
-  final VoidCallback onLongPress;
-
-  /// The handler for [SemanticsAction.scrollLeft].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from right to left. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping left with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  final VoidCallback onScrollLeft;
-
-  /// The handler for [SemanticsAction.scrollRight].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from left to right. It should be recognized by controls that are
-  /// horizontally scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping right with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path.  On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  final VoidCallback onScrollRight;
-
-  /// The handler for [SemanticsAction.scrollUp].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from bottom to top. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// right and then left in one motion path. On Android, [onScrollUp] and
-  /// [onScrollLeft] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  final VoidCallback onScrollUp;
-
-  /// The handler for [SemanticsAction.scrollDown].
-  ///
-  /// This is the semantic equivalent of a user moving their finger across the
-  /// screen from top to bottom. It should be recognized by controls that are
-  /// vertically scrollable.
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with three
-  /// fingers. TalkBack users on Android can trigger this action by swiping
-  /// left and then right in one motion path. On Android, [onScrollDown] and
-  /// [onScrollRight] share the same gesture. Therefore, only on of them should
-  /// be provided.
-  final VoidCallback onScrollDown;
-
-  /// The handler for [SemanticsAction.increase].
-  ///
-  /// This is a request to increase the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// If a [value] is set, [increasedValue] must also be provided and
-  /// [onIncrease] must ensure that [value] will be set to [increasedValue].
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping up with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume up button.
-  final VoidCallback onIncrease;
-
-  /// The handler for [SemanticsAction.decrease].
-  ///
-  /// This is a request to decrease the value represented by the widget. For
-  /// example, this action might be recognized by a slider control.
-  ///
-  /// If a [value] is set, [decreasedValue] must also be provided and
-  /// [onDecrease] must ensure that [value] will be set to [decreasedValue].
-  ///
-  /// VoiceOver users on iOS can trigger this action by swiping down with one
-  /// finger. TalkBack users on Android can trigger this action by pressing the
-  /// volume down button.
-  final VoidCallback onDecrease;
-
   @override
   RenderSemanticsAnnotations createRenderObject(BuildContext context) {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
-      checked: checked,
-      selected: selected,
-      button: button,
-      label: label,
-      value: value,
-      increasedValue: increasedValue,
-      decreasedValue: decreasedValue,
-      hint: hint,
+      checked: properties.checked,
+      selected: properties.selected,
+      button: properties.button,
+      label: properties.label,
+      value: properties.value,
+      increasedValue: properties.increasedValue,
+      decreasedValue: properties.decreasedValue,
+      hint: properties.hint,
       textDirection: _getTextDirection(context),
-      onTap: onTap,
-      onLongPress: onLongPress,
-      onScrollLeft: onScrollLeft,
-      onScrollRight: onScrollRight,
-      onScrollUp: onScrollUp,
-      onScrollDown: onScrollDown,
-      onIncrease: onIncrease,
-      onDecrease: onDecrease,
+      onTap: properties.onTap,
+      onLongPress: properties.onLongPress,
+      onScrollLeft: properties.onScrollLeft,
+      onScrollRight: properties.onScrollRight,
+      onScrollUp: properties.onScrollUp,
+      onScrollDown: properties.onScrollDown,
+      onIncrease: properties.onIncrease,
+      onDecrease: properties.onDecrease,
+      onMoveCursorForwardByCharacter: properties.onMoveCursorForwardByCharacter,
+      onMoveCursorBackwardByCharacter: properties.onMoveCursorBackwardByCharacter,
     );
+  }
+
+  TextDirection _getTextDirection(BuildContext context) {
+    if (properties.textDirection != null)
+      return properties.textDirection;
+
+    final bool containsText = properties.label != null || properties.value != null || properties.hint != null;
+
+    if (!containsText)
+      return null;
+
+    return Directionality.of(context);
   }
 
   @override
@@ -4964,34 +4895,32 @@ class Semantics extends SingleChildRenderObjectWidget {
     renderObject
       ..container = container
       ..explicitChildNodes = explicitChildNodes
-      ..checked = checked
-      ..selected = selected
-      ..label = label
-      ..value = value
-      ..increasedValue = increasedValue
-      ..decreasedValue = decreasedValue
-      ..hint = hint
+      ..checked = properties.checked
+      ..selected = properties.selected
+      ..label = properties.label
+      ..value = properties.value
+      ..increasedValue = properties.increasedValue
+      ..decreasedValue = properties.decreasedValue
+      ..hint = properties.hint
       ..textDirection = _getTextDirection(context)
-      ..onTap = onTap
-      ..onLongPress = onLongPress
-      ..onScrollLeft = onScrollLeft
-      ..onScrollRight = onScrollRight
-      ..onScrollUp = onScrollUp
-      ..onScrollDown = onScrollDown
-      ..onIncrease = onIncrease
-      ..onDecrease = onDecrease;
+      ..onTap = properties.onTap
+      ..onLongPress = properties.onLongPress
+      ..onScrollLeft = properties.onScrollLeft
+      ..onScrollRight = properties.onScrollRight
+      ..onScrollUp = properties.onScrollUp
+      ..onScrollDown = properties.onScrollDown
+      ..onIncrease = properties.onIncrease
+      ..onDecrease = properties.onDecrease
+      ..onMoveCursorForwardByCharacter = properties.onMoveCursorForwardByCharacter
+      ..onMoveCursorBackwardByCharacter = properties.onMoveCursorForwardByCharacter;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<bool>('container', container));
-    description.add(new DiagnosticsProperty<bool>('checked', checked, defaultValue: null));
-    description.add(new DiagnosticsProperty<bool>('selected', selected, defaultValue: null));
-    description.add(new StringProperty('label', label, defaultValue: ''));
-    description.add(new StringProperty('value', value));
-    description.add(new StringProperty('hint', hint));
-    description.add(new EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    description.add(new DiagnosticsProperty<SemanticsProperties>('properties', properties));
+    properties.debugFillProperties(description);
   }
 }
 
@@ -5037,10 +4966,25 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 class BlockSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that excludes the semantics of all widgets painted before
   /// it in the same semantic container.
-  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const BlockSemantics({ Key key, this.blocking: true, Widget child }) : super(key: key, child: child);
+
+  /// Whether this widget is blocking semantics of all widget that were painted
+  /// before it in the same semantic container.
+  final bool blocking;
 
   @override
-  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics(blocking: blocking);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBlockSemantics renderObject) {
+    renderObject.blocking = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
+  }
 }
 
 /// A widget that drops all the semantics of its descendants.
@@ -5048,7 +4992,7 @@ class BlockSemantics extends SingleChildRenderObjectWidget {
 /// When [excluding] is true, this widget (and its subtree) is excluded from
 /// the semantics tree.
 ///
-/// This can be used to hide subwidgets that would otherwise be
+/// This can be used to hide descendant widgets that would otherwise be
 /// reported but that would only be confusing. For example, the
 /// material library's [Chip] widget hides the avatar since it is
 /// redundant with the chip label.
@@ -5095,6 +5039,8 @@ class KeyedSubtree extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.

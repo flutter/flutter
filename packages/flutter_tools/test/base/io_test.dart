@@ -19,7 +19,7 @@ void main() {
       final ProcessSignal signalUnderTest = new ProcessSignal(mockSignal);
       final StreamController<io.ProcessSignal> controller = new StreamController<io.ProcessSignal>();
 
-      when(mockSignal.watch()).thenReturn(controller.stream);
+      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
       controller.add(mockSignal);
 
       expect(signalUnderTest, await signalUnderTest.watch().first);

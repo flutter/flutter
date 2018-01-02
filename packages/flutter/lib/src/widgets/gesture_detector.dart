@@ -192,6 +192,8 @@ class GestureDetector extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// A pointer that might cause a tap has contacted the screen at a particular
@@ -461,6 +463,8 @@ class RawGestureDetector extends StatefulWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The gestures that this widget will attempt to recognize.

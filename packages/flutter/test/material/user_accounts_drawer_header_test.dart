@@ -14,31 +14,41 @@ void main() {
 
     await tester.pumpWidget(
       new MaterialApp(
-        home: new Material(
-          child: new Center(
-            child: new UserAccountsDrawerHeader(
-              currentAccountPicture: new CircleAvatar(
-                key: avatarA,
-                child: const Text('A'),
+        home: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.only(
+              left: 10.0,
+              top: 20.0,
+              right: 30.0,
+              bottom: 40.0,
+            ),
+          ),
+          child: new Material(
+            child: new Center(
+              child: new UserAccountsDrawerHeader(
+                currentAccountPicture: new CircleAvatar(
+                  key: avatarA,
+                  child: const Text('A'),
+                ),
+                otherAccountsPictures: <Widget>[
+                  const CircleAvatar(
+                    child: const Text('B'),
+                  ),
+                  new CircleAvatar(
+                    key: avatarC,
+                    child: const Text('C'),
+                  ),
+                  new CircleAvatar(
+                    key: avatarD,
+                    child: const Text('D'),
+                  ),
+                  const CircleAvatar(
+                    child: const Text('E'),
+                  )
+                ],
+                accountName: const Text('name'),
+                accountEmail: const Text('email'),
               ),
-              otherAccountsPictures: <Widget>[
-                const CircleAvatar(
-                  child: const Text('B'),
-                ),
-                new CircleAvatar(
-                  key: avatarC,
-                  child: const Text('C'),
-                ),
-                new CircleAvatar(
-                  key: avatarD,
-                  child: const Text('D'),
-                ),
-                const CircleAvatar(
-                  child: const Text('E'),
-                )
-              ],
-              accountName: const Text('name'),
-              accountEmail: const Text('email'),
             ),
           ),
         ),
@@ -62,8 +72,9 @@ void main() {
     expect(box.size.width, equals(40.0));
     expect(box.size.height, equals(40.0));
 
+    // Verify height = height + top padding + bottom margin + bottom edge)
     box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
-    expect(box.size.height, equals(160.0 + 8.0 + 1.0)); // height + bottom margin + bottom edge)
+    expect(box.size.height, equals(160.0 + 20.0 + 8.0 + 1.0));
 
     final Offset topLeft = tester.getTopLeft(find.byType(UserAccountsDrawerHeader));
     final Offset topRight = tester.getTopRight(find.byType(UserAccountsDrawerHeader));
@@ -72,10 +83,10 @@ void main() {
     final Offset avatarDTopRight = tester.getTopRight(find.byKey(avatarD));
     final Offset avatarCTopRight = tester.getTopRight(find.byKey(avatarC));
 
-    expect(avatarATopLeft.dx - topLeft.dx, equals(16.0));
-    expect(avatarATopLeft.dy - topLeft.dy, equals(16.0));
-    expect(topRight.dx - avatarDTopRight.dx, equals(16.0));
-    expect(avatarDTopRight.dy - topRight.dy, equals(16.0));
+    expect(avatarATopLeft.dx - topLeft.dx, equals(16.0 + 10.0)); // left padding
+    expect(avatarATopLeft.dy - topLeft.dy, equals(16.0 + 20.0)); // add top padding
+    expect(topRight.dx - avatarDTopRight.dx, equals(16.0 + 30.0)); // right padding
+    expect(avatarDTopRight.dy - topRight.dy, equals(16.0 + 20.0)); // add top padding
     expect(avatarDTopRight.dx - avatarCTopRight.dx, equals(40.0 + 16.0)); // size + space between
   });
 

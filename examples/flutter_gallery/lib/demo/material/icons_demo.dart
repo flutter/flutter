@@ -35,7 +35,6 @@ class IconsDemoState extends State<IconsDemo> {
   ];
 
   int iconColorIndex = 8; // teal
-  double iconOpacity = 1.0;
 
   Color get iconColor => iconColors[iconColorIndex];
 
@@ -45,22 +44,60 @@ class IconsDemoState extends State<IconsDemo> {
     });
   }
 
-  Widget buildIconButton(double iconSize, IconData icon, bool enabled) {
+  @override
+  Widget build(BuildContext context) {
+    return new Scaffold(
+      appBar: new AppBar(
+        title: const Text('Icons')
+      ),
+      body: new IconTheme(
+        data: new IconThemeData(color: iconColor),
+        child: new Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: new SafeArea(
+            top: false,
+            bottom: false,
+            child: new Column(
+              children: <Widget>[
+                new _IconsDemoCard(handleIconButtonPress),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IconsDemoCard extends StatelessWidget {
+
+  const _IconsDemoCard(this.handleIconButtonPress);
+
+  final VoidCallback handleIconButtonPress;
+
+  Widget _buildIconButton(double iconSize, IconData icon, bool enabled) {
     return new IconButton(
       icon: new Icon(icon),
       iconSize: iconSize,
-      color: iconColor,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
       onPressed: enabled ? handleIconButtonPress : null
     );
   }
 
-  Widget buildSizeLabel(int size, TextStyle style) {
-    return new SizedBox(
-      height: size.toDouble() + 16.0, // to match an IconButton's padded height
-      child: new Center(
-        child: new Text('$size', style: style)
-      )
+  Widget _centeredText(String label) =>
+    new Padding(
+      // Match the default padding of IconButton.
+      padding: const EdgeInsets.all(8.0),
+      child: new Text(label, textAlign: TextAlign.center),
+    );
+
+  TableRow _buildIconRow(double size) {
+    return new TableRow(
+      children: <Widget> [
+        _centeredText(size.floor().toString()),
+        _buildIconButton(size, Icons.face, true),
+        _buildIconButton(size, Icons.face, false),
+      ],
     );
   }
 
@@ -68,59 +105,24 @@ class IconsDemoState extends State<IconsDemo> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final TextStyle textStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
-
-    return new Scaffold(
-      appBar: new AppBar(
-        title: const Text('Icons')
-      ),
-      body: new IconTheme(
-        data: new IconThemeData(opacity: iconOpacity),
-        child: new Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: new Column(
-            children: <Widget>[
-              new Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  new Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      new Text('Size', style: textStyle),
-                      buildSizeLabel(18, textStyle),
-                      buildSizeLabel(24, textStyle),
-                      buildSizeLabel(36, textStyle),
-                      buildSizeLabel(48, textStyle),
-                    ],
-                  ),
-                  new Expanded(
-                    child: new Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        new Text('Enabled', style: textStyle),
-                        buildIconButton(18.0, Icons.face, true),
-                        buildIconButton(24.0, Icons.alarm, true),
-                        buildIconButton(36.0, Icons.home, true),
-                        buildIconButton(48.0, Icons.android, true),
-                      ],
-                    )
-                  ),
-                  new Expanded(
-                    child: new Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        new Text('Disabled', style: textStyle),
-                        buildIconButton(18.0, Icons.face, false),
-                        buildIconButton(24.0, Icons.alarm, false),
-                        buildIconButton(36.0, Icons.home, false),
-                        buildIconButton(48.0, Icons.android, false),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+    return new Card(
+      child: new DefaultTextStyle(
+        style: textStyle,
+        child: new Table(
+          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+          children: <TableRow> [
+            new TableRow(
+              children: <Widget> [
+                _centeredText('Size'),
+                _centeredText('Enabled'),
+                _centeredText('Disabled'),
+              ]
+            ),
+            _buildIconRow(18.0),
+            _buildIconRow(24.0),
+            _buildIconRow(36.0),
+            _buildIconRow(48.0),
+          ],
         ),
       ),
     );

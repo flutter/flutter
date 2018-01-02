@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 import 'package:test/test.dart';
 
 import '../src/common.dart';
@@ -27,12 +28,14 @@ void main() {
     Directory temp;
     Directory projectDir;
     FlutterVersion mockFlutterVersion;
+    LoggingProcessManager loggingProcessManager;
 
     setUpAll(() {
       Cache.disableLocking();
     });
 
     setUp(() {
+      loggingProcessManager = new LoggingProcessManager();
       temp = fs.systemTempDirectory.createTempSync('flutter_tools');
       projectDir = temp.childDirectory('flutter_project');
       mockFlutterVersion = new MockFlutterVersion();
@@ -44,7 +47,7 @@ void main() {
 
     // Verify that we create a project that is well-formed.
     testUsingContext('project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>[],
         <String>[
@@ -57,6 +60,7 @@ void main() {
           'flutter_project.iml',
         ],
       );
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift project', () async {
@@ -79,7 +83,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('package project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=package'],
         <String>[
@@ -103,10 +107,11 @@ void main() {
           'test/widget_test.dart',
         ],
       );
+      return _runFlutterTest(projectDir);
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('plugin project', () async {
-      return _createAndAnalyzeProject(
+      await _createAndAnalyzeProject(
         projectDir,
         <String>['--template=plugin'],
         <String>[
@@ -123,6 +128,7 @@ void main() {
         ],
         plugin: true,
       );
+      return _runFlutterTest(projectDir.childDirectory('example'));
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('kotlin/swift plugin project', () async {
@@ -209,19 +215,7 @@ void main() {
       // TODO(pq): enable when sky_shell is available
       if (!io.Platform.isWindows) {
         // Verify that the sample widget test runs cleanly.
-        final List<String> args = <String>[]
-          ..addAll(dartVmFlags)
-          ..add(fs.path.absolute(fs.path.join('bin', 'flutter_tools.dart')))
-          ..add('test')
-          ..add('--no-color')
-          ..add(fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
-
-        final ProcessResult result = await Process.run(
-          fs.path.join(dartSdkPath, 'bin', 'dart'),
-          args,
-          workingDirectory: projectDir.path,
-        );
-        expect(result.exitCode, 0);
+        await _runFlutterTest(projectDir, target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
       }
 
       // Generated Xcode settings
@@ -299,6 +293,40 @@ void main() {
         throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
       );
     });
+
+    testUsingContext('invokes pub offline when requested', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+      final List<String> commands = loggingProcessManager.commands;
+      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(commands, contains('--offline'));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
+
+    testUsingContext('invokes pub online when offline not requested', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = new CreateCommand();
+      final CommandRunner<Null> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--pub', projectDir.path]);
+      final List<String> commands = loggingProcessManager.commands;
+      expect(commands, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(commands, isNot(contains('--offline')));
+    },
+      timeout: allowForCreateFlutterProject,
+      overrides: <Type, Generator>{
+        ProcessManager: () => loggingProcessManager,
+      },
+    );
   });
 }
 
@@ -358,4 +386,56 @@ Future<Null> _analyzeProject(String workingDir, {String target}) async {
   expect(exec.exitCode, 0);
 }
 
+Future<Null> _runFlutterTest(Directory workingDir, {String target}) async {
+  final String flutterToolsPath = fs.path.absolute(fs.path.join(
+    'bin',
+    'flutter_tools.dart',
+  ));
+
+  final List<String> args = <String>[]
+    ..addAll(dartVmFlags)
+    ..add(flutterToolsPath)
+    ..add('test')
+    ..add('--no-color');
+  if (target != null)
+    args.add(target);
+
+  final ProcessResult exec = await Process.run(
+    '$dartSdkPath/bin/dart',
+    args,
+    workingDirectory: workingDir.path,
+  );
+  if (exec.exitCode != 0) {
+    print(exec.stdout);
+    print(exec.stderr);
+  }
+  expect(exec.exitCode, 0);
+}
+
 class MockFlutterVersion extends Mock implements FlutterVersion {}
+
+/// A ProcessManager that invokes a real process manager, but keeps
+/// the last commands sent to it.
+class LoggingProcessManager extends LocalProcessManager {
+  List<String> commands;
+
+  @override
+  Future<Process> start(
+    List<dynamic> command, {
+      String workingDirectory,
+      Map<String, String> environment,
+      bool includeParentEnvironment: true,
+      bool runInShell: false,
+      ProcessStartMode mode: ProcessStartMode.NORMAL,
+    }) {
+    commands = command;
+    return super.start(
+      command,
+      workingDirectory: workingDirectory,
+      environment: environment,
+      includeParentEnvironment: includeParentEnvironment,
+      runInShell: runInShell,
+      mode: mode,
+    );
+  }
+}

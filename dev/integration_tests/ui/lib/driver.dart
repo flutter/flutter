@@ -83,6 +83,9 @@ class DriverTestAppState extends State<DriverTestApp> {
                 ),
               ],
             ),
+            const TextField(
+              key: const ValueKey<String>('enter-text-field'),
+            ),
           ],
         ),
       ),

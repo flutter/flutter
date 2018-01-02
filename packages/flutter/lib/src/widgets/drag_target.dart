@@ -116,6 +116,8 @@ class Draggable<T> extends StatefulWidget {
   ///
   /// To limit the number of simultaneous drags on multitouch devices, see
   /// [maxSimultaneousDrags].
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The widget to display instead of [child] when one or more drags are under way.
@@ -228,7 +230,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     DragAnchor dragAnchor: DragAnchor.child,
     int maxSimultaneousDrags,
     VoidCallback onDragStarted,
-    DraggableCanceledCallback onDraggableCanceled
+    DraggableCanceledCallback onDraggableCanceled,
+    VoidCallback onDragCompleted
   }) : super(
     key: key,
     child: child,
@@ -239,7 +242,8 @@ class LongPressDraggable<T> extends Draggable<T> {
     dragAnchor: dragAnchor,
     maxSimultaneousDrags: maxSimultaneousDrags,
     onDragStarted: onDragStarted,
-    onDraggableCanceled: onDraggableCanceled
+    onDraggableCanceled: onDraggableCanceled,
+    onDragCompleted: onDragCompleted
   );
 
   @override

@@ -8,10 +8,12 @@ import 'package:meta/meta.dart';
 
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/net.dart';
 import 'base/os.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'globals.dart';
 
 /// A wrapper around the `bin/cache/` directory.
@@ -105,19 +107,41 @@ class Cache {
     }
   }
 
-  static String _dartSdkVersion;
+  String _dartSdkVersion;
 
-  static String get dartSdkVersion => _dartSdkVersion ??= platform.version;
+  String get dartSdkVersion => _dartSdkVersion ??= platform.version;
 
-  static String _engineRevision;
+  String _engineRevision;
 
-  static String get engineRevision {
-    if (_engineRevision == null) {
-      final File revisionFile = fs.file(fs.path.join(flutterRoot, 'bin', 'internal', 'engine.version'));
-      if (revisionFile.existsSync())
-        _engineRevision = revisionFile.readAsStringSync().trim();
-    }
+  String get engineRevision {
+    _engineRevision ??= getVersionFor('engine');
     return _engineRevision;
+  }
+
+  String _engineDartVersion;
+
+  String get engineDartVersion {
+    if (_engineDartVersion == null) {
+      final Directory engineDirectory = getArtifactDirectory('engine');
+
+      List<String> dartSdkBinParts;
+      if (platform.isLinux) {
+        dartSdkBinParts = <String>['linux-x64', 'dart-sdk', 'bin', 'dart'];
+      } else if (platform.isMacOS) {
+        dartSdkBinParts = <String>['darwin-x64', 'dart-sdk', 'bin', 'dart'];
+      } else if (platform.isWindows) {
+        dartSdkBinParts = <String>['windows-x64', 'dart-sdk', 'bin', 'dart.exe'];
+      } else {
+        // Unknown platform, we can't derive version.
+        return null;
+      }
+      final File dartSdkBin = engineDirectory.childFile(fs.path.joinAll(dartSdkBinParts));
+      final ProcessResult result = processManager.runSync(<String>[dartSdkBin.path, '--version']);
+      // https://github.com/dart-lang/sdk/issues/31481
+      // We can use the process utils directly when this is fixed instead of parsing stderr.
+      _engineDartVersion = result.stderr.trim().replaceAll('Dart VM version: ', '');
+    }
+    return _engineDartVersion;
   }
 
   static Cache get instance => context[Cache];
@@ -144,7 +168,7 @@ class Cache {
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
-    return fs.directory(fs.path.join(getCacheArtifacts().path, name));
+    return getCacheArtifacts().childDirectory(name);
   }
 
   String getVersionFor(String artifactName) {
@@ -220,9 +244,8 @@ abstract class CachedArtifact {
     if (location.existsSync())
       location.deleteSync(recursive: true);
     location.createSync(recursive: true);
-    return updateInner().then<Null>((_) {
-      cache.setStampFor(name, version);
-    });
+    await updateInner();
+    cache.setStampFor(name, version);
   }
 
   /// Hook method for extra checks for being up-to-date.
@@ -230,6 +253,28 @@ abstract class CachedArtifact {
 
   /// Template method to perform artifact update.
   Future<Null> updateInner();
+
+  String get _storageBaseUrl {
+    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl == null)
+      return 'https://storage.googleapis.com';
+    _maybeWarnAboutStorageOverride(overrideUrl);
+    return overrideUrl;
+  }
+
+  Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
+}
+
+bool _hasWarnedAboutStorageOverride = false;
+
+void _maybeWarnAboutStorageOverride(String overrideUrl) {
+  if (_hasWarnedAboutStorageOverride)
+    return;
+  logger.printStatus(
+    'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
+    emphasis: true,
+  );
+  _hasWarnedAboutStorageOverride = true;
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -238,8 +283,9 @@ class MaterialFonts extends CachedArtifact {
 
   @override
   Future<Null> updateInner() {
+    final Uri archiveUri = _toStorageUri(version);
     final Status status = logger.startProgress('Downloading Material fonts...', expectSlowOperation: true);
-    return _downloadZipArchive(Uri.parse(version), location).then<Null>((_) {
+    return _downloadZipArchive(archiveUri, location).then<Null>((_) {
       status.stop();
     }).whenComplete(status.cancel);
   }
@@ -335,7 +381,7 @@ class FlutterEngine extends CachedArtifact {
 
   @override
   Future<Null> updateInner() async {
-    final String url = 'https://storage.googleapis.com/flutter_infra/flutter/$version/';
+    final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in _getPackageDirs()) {
@@ -386,14 +432,15 @@ class GradleWrapper extends CachedArtifact {
   GradleWrapper(Cache cache): super('gradle_wrapper', cache);
 
   @override
-  Future<Null> updateInner() async {
+  Future<Null> updateInner() {
+    final Uri archiveUri = _toStorageUri(version);
     final Status status = logger.startProgress('Downloading Gradle Wrapper...', expectSlowOperation: true);
 
-    final String url = 'https://android.googlesource.com'
-        '/platform/tools/base/+archive/$version/templates/gradle/wrapper.tgz';
-    await _downloadZippedTarball(Uri.parse(url), location).then<Null>((_) {
+    return _downloadZippedTarball(archiveUri, location).then<Null>((_) {
       // Delete property file, allowing templates to provide it.
       fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
+      // Remove NOTICE file. Should not be part of the template.
+      fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
       status.stop();
     }).whenComplete(status.cancel);
   }

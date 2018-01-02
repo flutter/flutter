@@ -88,7 +88,7 @@ void main() {
     // Spanish Bolivia locale, falls back to just 'es'
     await tester.binding.setLocale('es', 'bo');
     await tester.pump();
-    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Espalda');
+    expect(tester.widget<Text>(find.byKey(textKey)).data, 'Atrás');
   });
 
   testWidgets('Localizations.override widget tracks parent\'s locale', (WidgetTester tester) async {

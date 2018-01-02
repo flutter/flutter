@@ -10,12 +10,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
 import 'debug.dart';
+import 'focus_manager.dart';
 
 export 'dart:ui' show hashValues, hashList;
 
 export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticLevel;
+export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
@@ -27,85 +29,15 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJar extends RenderObjectWidget { }
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
+// DOCUMENTATION TEMPLATES FOR THE WIDGET LIBRARY
+
+/// {@template flutter.widgets.child}
+/// This widget can only have one child. To lay out multiple children, let this
+/// widget's child be a widget such as [Row], [Column], or [Stack], which have a
+/// `children` property, and then provide the children to that widget.
+/// {@endtemplate}
+
 // KEYS
-
-/// A [Key] is an identifier for [Widget]s and [Element]s.
-///
-/// A new widget will only be used to update an existing element if its key is
-/// the same as the key of the current widget associated with the element.
-///
-/// Keys must be unique amongst the [Element]s with the same parent.
-///
-/// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
-///
-/// See also the discussion at [Widget.key].
-@immutable
-abstract class Key {
-  /// Construct a [ValueKey<String>] with the given [String].
-  ///
-  /// This is the simplest way to create keys.
-  const factory Key(String value) = ValueKey<String>;
-
-  /// Default constructor, used by subclasses.
-  ///
-  /// Useful so that subclasses can call us, because the Key() factory
-  /// constructor shadows the implicit constructor.
-  const Key._();
-}
-
-/// A key that is not a [GlobalKey].
-///
-/// Keys must be unique amongst the [Element]s with the same parent. By
-/// contrast, [GlobalKey]s must be unique across the entire app.
-///
-/// See also the discussion at [Widget.key].
-abstract class LocalKey extends Key {
-  /// Default constructor, used by subclasses.
-  const LocalKey() : super._();
-}
-
-/// A key that uses a value of a particular type to identify itself.
-///
-/// A [ValueKey<T>] is equal to another [ValueKey<T>] if, and only if, their
-/// values are [operator==].
-///
-/// This class can be subclassed to create value keys that will not be equal to
-/// other value keys that happen to use the same value. If the subclass is
-/// private, this results in a value key type that cannot collide with keys from
-/// other sources, which could be useful, for example, if the keys are being
-/// used as fallbacks in the same scope as keys supplied from another widget.
-///
-/// See also the discussion at [Widget.key].
-class ValueKey<T> extends LocalKey {
-  /// Creates a key that delegates its [operator==] to the given value.
-  const ValueKey(this.value);
-
-  /// The value to which this key delegates its [operator==]
-  final T value;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    final ValueKey<T> typedOther = other;
-    return value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => hashValues(runtimeType, value);
-
-  @override
-  String toString() {
-    final String valueString = T == String ? '<\'$value\'>' : '<$value>';
-    // The crazy on the next line is a workaround for
-    // https://github.com/dart-lang/sdk/issues/28548
-    if (runtimeType == new _TypeLiteral<ValueKey<T>>().type)
-      return '[$valueString]';
-    return '[$T $valueString]';
-  }
-}
-
-class _TypeLiteral<T> { Type get type => T; }
 
 /// A key that is only equal to itself.
 class UniqueKey extends LocalKey {
@@ -182,7 +114,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   ///
   /// Used by subclasses because the factory constructor shadows the implicit
   /// constructor.
-  const GlobalKey.constructor() : super._();
+  const GlobalKey.constructor() : super.empty();
 
   static final Map<GlobalKey, Element> _registry = <GlobalKey, Element>{};
   static final Set<GlobalKey> _removedKeys = new HashSet<GlobalKey>();
@@ -933,6 +865,10 @@ typedef void StateSetter(VoidCallback fn);
 ///    associated widget (e.g., to start implicit animations). The framework
 ///    always calls [build] after calling [didUpdateWidget], which means any
 ///    calls to [setState] in [didUpdateWidget] are redundant.
+///  * During development, if a hot reload occurs (whether initiated from the
+///    command line `flutter` tool by pressing `r`, or from an IDE), the
+///    [reassemble] method is called. This provides an opportunity to
+///    reinitialize any data that was prepared in the [initState] method.
 ///  * If the subtree containing the [State] object is removed from the tree
 ///    (e.g., because the parent built a widget with a different [runtimeType]
 ///    or [Widget.key]), the framework calls the [deactivate] method. Subclasses
@@ -1070,7 +1006,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   @protected
   void didUpdateWidget(covariant T oldWidget) { }
 
-  /// Called whenever the application is reassembled during debugging.
+  /// Called whenever the application is reassembled during debugging, for
+  /// example during hot reload.
   ///
   /// This method should rerun any initialization logic that depends on global
   /// state, for example, image loading from asset bundles (since the asset
@@ -1387,6 +1324,8 @@ abstract class ProxyWidget extends Widget {
   const ProxyWidget({ Key key, @required this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 }
 
@@ -1668,6 +1607,8 @@ abstract class SingleChildRenderObjectWidget extends RenderObjectWidget {
   const SingleChildRenderObjectWidget({ Key key, this.child }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -1852,6 +1793,10 @@ abstract class BuildContext {
   /// The current configuration of the [Element] that is this [BuildContext].
   Widget get widget;
 
+  /// The [BuildOwner] for this context. The [BuildOwner] is in charge of
+  /// managing the rendering pipeline for this context.
+  BuildOwner get owner;
+
   /// The current [RenderObject] for the widget. If the widget is a
   /// [RenderObjectWidget], this is the render object that the widget created
   /// for itself. Otherwise, it is the render object of the first descendant
@@ -1939,10 +1884,7 @@ abstract class BuildContext {
   /// Calling this method is O(1) with a small constant factor.
   ///
   /// This method does not establish a relationship with the target in the way
-  /// that [inheritFromWidgetOfExactType] does. It is normally used by such
-  /// widgets to obtain their corresponding [InheritedElement] object so that they
-  /// can call [InheritedElement.dispatchDidChangeDependencies] to actually
-  /// notify the widgets that _did_ register such a relationship.
+  /// that [inheritFromWidgetOfExactType] does.
   ///
   /// This method should not be called from [State.deactivate] or [State.dispose]
   /// because the element tree is no longer stable at that time. To refer to
@@ -2076,7 +2018,7 @@ abstract class BuildContext {
 /// This class tracks which widgets need rebuilding, and handles other tasks
 /// that apply to widget trees as a whole, such as managing the inactive element
 /// list for the tree and triggering the "reassemble" command when necessary
-/// during debugging.
+/// during hot reload when debugging.
 ///
 /// The main build owner is typically owned by the [WidgetsBinding], and is
 /// driven from the operating system along with the rest of the
@@ -2100,6 +2042,14 @@ class BuildOwner {
   final List<Element> _dirtyElements = <Element>[];
   bool _scheduledFlushDirtyElements = false;
   bool _dirtyElementsNeedsResorting; // null means we're not in a buildScope
+
+  /// The object in charge of the focus tree.
+  ///
+  /// Rarely used directly. Instead, consider using [FocusScope.of] to obtain
+  /// the [FocusScopeNode] for a given [BuildContext].
+  ///
+  /// See [FocusManager] for more details.
+  final FocusManager focusManager = new FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2432,7 +2382,8 @@ class BuildOwner {
 
   /// Cause the entire subtree rooted at the given [Element] to be entirely
   /// rebuilt. This is used by development tools when the application code has
-  /// changed, to cause the widget tree to pick up any changed implementations.
+  /// changed and is being hot-reloaded, to cause the widget tree to pick up any
+  /// changed implementations.
   ///
   /// This is expensive and should not be called except during development.
   void reassemble(Element root) {
@@ -2562,6 +2513,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   Widget _widget;
 
   /// The object that manages the lifecycle of this element.
+  @override
   BuildOwner get owner => _owner;
   BuildOwner _owner;
 
@@ -3331,15 +3283,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(() {
       if (owner._debugCurrentBuildTarget == null) {
         throw new FlutterError(
-            '$methodName for ${widget.runtimeType} was called at an '
-                'inappropriate time.\n'
-                'It may only be called while the widgets are being built. A possible '
-                'cause of this error is when $methodName is called during '
-                'one of:\n'
-                ' * network I/O event\n'
-                ' * file I/O event\n'
-                ' * timer\n'
-                ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
+          '$methodName for ${widget.runtimeType} was called at an '
+          'inappropriate time.\n'
+          'It may only be called while the widgets are being built. A possible '
+          'cause of this error is when $methodName is called during '
+          'one of:\n'
+          ' * network I/O event\n'
+          ' * file I/O event\n'
+          ' * timer\n'
+          ' * microtask (caused by Future.then, async/await, scheduleMicrotask)'
         );
       }
       return true;
@@ -3360,6 +3312,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     if (node != null)
       chain.add('\u22EF');
     return chain.join(' \u2190 ');
+  }
+
+  /// Returns the parent chain from this element back to the root of the tree.
+  ///
+  /// Useful for debug display of a tree of Elements with only nodes in the path
+  /// from the root to this Element expanded.
+  List<Element> debugGetDiagnosticChain() {
+    final List<Element> chain = <Element>[this];
+    Element node = _parent;
+    while (node != null) {
+      chain.add(node);
+      node = node._parent;
+    }
+    return chain;
   }
 
   /// A short, textual description of this element.
@@ -3508,6 +3474,20 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   void performRebuild();
 }
 
+/// Signature for the constructor that is called when an error occurs while
+/// building a widget.
+///
+/// The argument provides information regarding the cause of the error.
+///
+/// See also:
+///
+///  * [ErrorWidget.builder], which can be set to override the default
+///    [ErrorWidget] builder.
+///  * [FlutterError.reportError], which is typically called with the same
+///    [FlutterErrorDetails] object immediately prior to [ErrorWidget.builder]
+///    being called.
+typedef Widget ErrorWidgetBuilder(FlutterErrorDetails details);
+
 /// A widget that renders an exception's message.
 ///
 /// This widget is used when a build method fails, to help with determining
@@ -3518,6 +3498,32 @@ class ErrorWidget extends LeafRenderObjectWidget {
   /// Creates a widget that displays the given error message.
   ErrorWidget(Object exception) : message = _stringify(exception),
       super(key: new UniqueKey());
+
+  /// The configurable factory for [ErrorWidget].
+  ///
+  /// When an error occurs while building a widget, the broken widget is
+  /// replaced by the widget returned by this function. By default, an
+  /// [ErrorWidget] is returned.
+  ///
+  /// The system is typically in an unstable state when this function is called.
+  /// An exception has just been thrown in the middle of build (and possibly
+  /// layout), so surrounding widgets and render objects may be in a rather
+  /// fragile state. The framework itself (especially the [BuildOwner]) may also
+  /// be confused, and additional exceptions are quite likely to be thrown.
+  ///
+  /// Because of this, it is highly recommended that the widget returned from
+  /// this function perform the least amount of work possible. A
+  /// [LeafRenderObjectWidget] is the best choice, especially one that
+  /// corresponds to a [RenderBox] that can handle the most absurd of incoming
+  /// constraints. The default constructor maps to a [RenderErrorBox].
+  ///
+  /// See also:
+  ///
+  ///  * [FlutterError.onError], which is typically called with the same
+  ///    [FlutterErrorDetails] object immediately prior to this callback being
+  ///    invoked, and which can also be configured to control how errors are
+  ///    reported.
+  static ErrorWidgetBuilder builder = (FlutterErrorDetails details) => new ErrorWidget(details.exception);
 
   /// The message to display.
   final String message;
@@ -3596,8 +3602,7 @@ abstract class ComponentElement extends Element {
       built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -3608,8 +3613,7 @@ abstract class ComponentElement extends Element {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      _debugReportException('building $this', e, stack);
-      built = new ErrorWidget(e);
+      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
       _child = updateChild(null, built, slot);
     }
 
@@ -3976,23 +3980,22 @@ class InheritedElement extends ProxyElement {
     super.debugDeactivated();
   }
 
+  /// Calls [Element.didChangeDependencies] of all dependent elements, if
+  /// [InheritedWidget.updateShouldNotify] returns true.
+  ///
+  /// Notifies all dependent elements that this inherited widget has changed.
+  ///
+  /// [InheritedElement] calls this function if the [widget]'s
+  /// [InheritedWidget.updateShouldNotify] returns true.
+  ///
+  /// This method must be called during the build phase. Usually this method is
+  /// called automatically when an inherited widget is rebuilt, e.g. as a
+  /// result of calling [State.setState] above the inherited widget.
   @override
   void notifyClients(InheritedWidget oldWidget) {
     if (!widget.updateShouldNotify(oldWidget))
       return;
-    dispatchDidChangeDependencies();
-  }
-
-  /// Notifies all dependent elements that this inherited widget has changed.
-  ///
-  /// [InheritedElement] calls this function if [InheritedWidget.updateShouldNotify]
-  /// returns true. Subclasses of [InheritedElement] might wish to call this
-  /// function at other times if their inherited information changes outside of
-  /// the build phase. [InheritedWidget] subclasses can also call this directly
-  /// by first obtaining their [InheritedElement] using
-  /// [BuildContext.ancestorInheritedElementForWidgetOfExactType].
-  void dispatchDidChangeDependencies() {
-    assert(_debugCheckOwnerBuildTargetExists('dispatchDidChangeDependencies'));
+    assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
     for (Element dependent in _dependents) {
       assert(() {
         // check that it really is our descendant
@@ -4001,7 +4004,7 @@ class InheritedElement extends ProxyElement {
           ancestor = ancestor._parent;
         return ancestor == this;
       }());
-      // check that it really deepends on us
+      // check that it really depends on us
       assert(dependent._dependencies.contains(this));
       dependent.didChangeDependencies();
     }
@@ -4263,9 +4266,10 @@ abstract class RenderObjectElement extends Element {
       return forgottenChildren != null && forgottenChildren.contains(child) ? null : child;
     }
 
-    // This attempts to diff the new child list (this.children) with
-    // the old child list (old.children), and update our renderObject
-    // accordingly.
+    // This attempts to diff the new child list (newWidgets) with
+    // the old child list (oldChildren), and produce a new list of elements to
+    // be the new list of child elements of this element. The called of this
+    // method is expected to update this render object accordingly.
 
     // The cases it tries to optimize for are:
     //  - the old list is empty
@@ -4281,13 +4285,13 @@ abstract class RenderObjectElement extends Element {
     // 2. Walk the lists from the bottom, without syncing nodes, until you no
     //    longer have matching nodes. We'll sync these nodes at the end. We
     //    don't sync them now because we want to sync all the nodes in order
-    //    from beginning ot end.
+    //    from beginning to end.
     // At this point we narrowed the old and new lists to the point
     // where the nodes no longer match.
     // 3. Walk the narrowed part of the old list to get the list of
     //    keys and sync null with non-keyed items.
     // 4. Walk the narrowed part of the new list forwards:
-    //     * Sync unkeyed items with null
+    //     * Sync non-keyed items with null
     //     * Sync keyed items with the source if it exists, else with null.
     // 5. Walk the bottom of the list again, syncing the nodes.
     // 6. Sync null with any items in the list of keys that are still
@@ -4354,7 +4358,7 @@ abstract class RenderObjectElement extends Element {
       if (haveOldChildren) {
         final Key key = newWidget.key;
         if (key != null) {
-          oldChild = oldKeyedChildren[newWidget.key];
+          oldChild = oldKeyedChildren[key];
           if (oldChild != null) {
             if (Widget.canUpdate(oldChild.widget, newWidget)) {
               // we found a match!
@@ -4376,7 +4380,7 @@ abstract class RenderObjectElement extends Element {
       newChildrenTop += 1;
     }
 
-    // We've scaned the whole list.
+    // We've scanned the whole list.
     assert(oldChildrenTop == oldChildrenBottom + 1);
     assert(newChildrenTop == newChildrenBottom + 1);
     assert(newWidgets.length - newChildrenTop == oldChildren.length - oldChildrenTop);
@@ -4399,7 +4403,7 @@ abstract class RenderObjectElement extends Element {
       oldChildrenTop += 1;
     }
 
-    // clean up any of the remaining middle nodes from the old list
+    // Clean up any of the remaining middle nodes from the old list.
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
       for (Element oldChild in oldKeyedChildren.values) {
         if (forgottenChildren == null || !forgottenChildren.contains(oldChild))
@@ -4708,14 +4712,19 @@ class _DebugCreator {
   String toString() => element.debugGetCreatorChain(12);
 }
 
-void _debugReportException(String context, dynamic exception, StackTrace stack, {
+FlutterErrorDetails _debugReportException(
+  String context,
+  dynamic exception,
+  StackTrace stack, {
   InformationCollector informationCollector
 }) {
-  FlutterError.reportError(new FlutterErrorDetails(
+  final FlutterErrorDetails details = new FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
     context: context,
     informationCollector: informationCollector,
-  ));
+  );
+  FlutterError.reportError(details);
+  return details;
 }

@@ -6,12 +6,14 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../rendering/rendering_tester.dart';
 
 void main() {
+  new TestRenderingFlutterBinding(); // initializes the imageCache
+
   test('ShapeDecoration constructor', () {
     final Color colorR = const Color(0xffff0000);
     final Color colorG = const Color(0xff00ff00);

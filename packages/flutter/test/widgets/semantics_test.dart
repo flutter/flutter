@@ -262,10 +262,10 @@ void main() {
           container: true,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 hint: 'hint one',
               ),
-              const Semantics(
+              new Semantics(
                 hint: 'hint two',
               )
 
@@ -347,10 +347,10 @@ void main() {
           container: true,
           child: new Column(
             children: <Widget>[
-              const Semantics(
+              new Semantics(
                 hint: 'hint',
               ),
-              const Semantics(
+              new Semantics(
                 value: 'value',
               ),
             ],
@@ -388,6 +388,8 @@ void main() {
         onScrollDown: () => performedActions.add(SemanticsAction.scrollDown),
         onIncrease: () => performedActions.add(SemanticsAction.increase),
         onDecrease: () => performedActions.add(SemanticsAction.decrease),
+        onMoveCursorForwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorForwardByCharacter),
+        onMoveCursorBackwardByCharacter: (bool _) => performedActions.add(SemanticsAction.moveCursorBackwardByCharacter),
       )
     );
 
@@ -410,7 +412,14 @@ void main() {
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     int expectedLength = 1;
     for (SemanticsAction action in allActions) {
-      semanticsOwner.performAction(expectedId, action);
+      switch (action) {
+        case SemanticsAction.moveCursorBackwardByCharacter:
+        case SemanticsAction.moveCursorForwardByCharacter:
+          semanticsOwner.performAction(expectedId, action, true);
+          break;
+        default:
+          semanticsOwner.performAction(expectedId, action);
+      }
       expect(performedActions.length, expectedLength);
       expect(performedActions.last, action);
       expectedLength += 1;

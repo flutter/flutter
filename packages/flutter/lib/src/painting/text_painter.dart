@@ -285,6 +285,29 @@ class TextPainter {
     return new Size(width, height);
   }
 
+  // Workaround for https://github.com/flutter/flutter/issues/13303
+  double _workaroundBaselineBug(double value, TextBaseline baseline) {
+    if (value >= 0.0)
+      return value;
+
+    final ui.ParagraphBuilder builder = new ui.ParagraphBuilder(
+      _createParagraphStyle(TextDirection.ltr),
+    );
+    if (text?.style != null)
+      builder.pushStyle(text.style.getTextStyle(textScaleFactor: textScaleFactor));
+    builder.addText(_kZeroWidthSpace);
+    final ui.Paragraph paragraph = builder.build()
+      ..layout(new ui.ParagraphConstraints(width: double.INFINITY));
+
+    switch (baseline) {
+      case TextBaseline.alphabetic:
+        return paragraph.alphabeticBaseline;
+      case TextBaseline.ideographic:
+       return paragraph.ideographicBaseline;
+    }
+    return null;
+  }
+
   /// Returns the distance from the top of the text to the first baseline of the
   /// given type.
   ///
@@ -294,9 +317,9 @@ class TextPainter {
     assert(baseline != null);
     switch (baseline) {
       case TextBaseline.alphabetic:
-        return _paragraph.alphabeticBaseline;
+        return _workaroundBaselineBug(_paragraph.alphabeticBaseline, baseline);
       case TextBaseline.ideographic:
-        return _paragraph.ideographicBaseline;
+       return _workaroundBaselineBug(_paragraph.ideographicBaseline, baseline);
     }
     return null;
   }
@@ -378,6 +401,26 @@ class TextPainter {
     return value & 0xF800 == 0xD800;
   }
 
+  /// Returns the closest offset after `offset` at which the inout cursor can be
+  /// positioned.
+  int getOffsetAfter(int offset) {
+    final int nextCodeUnit = _text.codeUnitAt(offset);
+    if (nextCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;
+  }
+
+  /// Returns the closest offset before `offset` at which the inout cursor can
+  /// be positioned.
+  int getOffsetBefore(int offset) {
+    final int prevCodeUnit = _text.codeUnitAt(offset - 1);
+    if (prevCodeUnit == null)
+      return null;
+    // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
+    return _isUtf16Surrogate(prevCodeUnit) ? offset - 2 : offset - 1;
+  }
+
   Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
     final int prevCodeUnit = _text.codeUnitAt(offset - 1);
     if (prevCodeUnit == null)
@@ -393,7 +436,7 @@ class TextPainter {
   }
 
   Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
-    final int nextCodeUnit = _text.codeUnitAt(offset + 1);
+    final int nextCodeUnit = _text.codeUnitAt(offset);
     if (nextCodeUnit == null)
       return null;
     final int nextRuneOffset = _isUtf16Surrogate(nextCodeUnit) ? offset + 2 : offset + 1;

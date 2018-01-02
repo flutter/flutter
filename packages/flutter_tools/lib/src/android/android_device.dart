@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
+
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
 import '../android/apk.dart';
@@ -49,6 +51,9 @@ class AndroidDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<Device>> pollingGetDevices() async => getAdbDevices();
+
+  @override
+  Future<List<String>> getDiagnostics() async => getAdbDeviceDiagnostics();
 }
 
 class AndroidDevice extends Device {
@@ -345,6 +350,7 @@ class AndroidDevice extends Device {
     bool prebuiltApplication: false,
     bool applicationNeedsRebuild: false,
     bool usesTerminalUi: true,
+    bool ipv6: false,
   }) async {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return new LaunchResult.failed();
@@ -381,7 +387,11 @@ class AndroidDevice extends Device {
       // TODO(devoncarew): Remember the forwarding information (so we can later remove the
       // port forwarding or set it up again when adb fails on us).
       observatoryDiscovery = new ProtocolDiscovery.observatory(
-        getLogReader(), portForwarder: portForwarder, hostPort: debuggingOptions.observatoryPort);
+        getLogReader(),
+        portForwarder: portForwarder,
+        hostPort: debuggingOptions.observatoryPort,
+        ipv6: ipv6,
+      );
     }
 
     List<String> cmd;
@@ -525,30 +535,49 @@ Map<String, String> parseAdbDeviceProperties(String str) {
   return properties;
 }
 
+/// Return the list of connected ADB devices.
+List<AndroidDevice> getAdbDevices() {
+  final String adbPath = getAdbPath(androidSdk);
+  if (adbPath == null)
+    return <AndroidDevice>[];
+  final String text = runSync(<String>[adbPath, 'devices', '-l']);
+  final List<AndroidDevice> devices = <AndroidDevice>[];
+  parseADBDeviceOutput(text, devices: devices);
+  return devices;
+}
+
+/// Get diagnostics about issues with any connected devices.
+Future<List<String>> getAdbDeviceDiagnostics() async {
+  final String adbPath = getAdbPath(androidSdk);
+  if (adbPath == null)
+    return <String>[];
+
+  final RunResult result = await runAsync(<String>[adbPath, 'devices', '-l']);
+  if (result.exitCode != 0) {
+    return <String>[];
+  } else {
+    final String text = result.stdout;
+    final List<String> diagnostics = <String>[];
+    parseADBDeviceOutput(text, diagnostics: diagnostics);
+    return diagnostics;
+  }
+}
+
 // 015d172c98400a03       device usb:340787200X product:nakasi model:Nexus_7 device:grouper
 final RegExp _kDeviceRegex = new RegExp(r'^(\S+)\s+(\S+)(.*)');
 
-/// Return the list of connected ADB devices.
-///
-/// [mockAdbOutput] is public for testing.
-List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
-  final List<AndroidDevice> devices = <AndroidDevice>[];
-  String text;
-
-  if (mockAdbOutput == null) {
-    final String adbPath = getAdbPath(androidSdk);
-    printTrace('Listing devices using $adbPath');
-    if (adbPath == null)
-      return <AndroidDevice>[];
-    text = runSync(<String>[adbPath, 'devices', '-l']);
-  } else {
-    text = mockAdbOutput;
-  }
-
+/// Parse the given `adb devices` output in [text], and fill out the given list
+/// of devices and possible device issue diagnostics. Either argument can be null,
+/// in which case information for that parameter won't be populated.
+@visibleForTesting
+void parseADBDeviceOutput(String text, {
+  List<AndroidDevice> devices,
+  List<String> diagnostics
+}) {
   // Check for error messages from adb
   if (!text.contains('List of devices')) {
-    printError(text);
-    return <AndroidDevice>[];
+    diagnostics?.add(text);
+    return;
   }
 
   for (String line in text.trim().split('\n')) {
@@ -558,7 +587,7 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
 
     // Skip lines about adb server and client version not matching
     if (line.startsWith(new RegExp(r'adb server (version|is out of date)'))) {
-      printStatus(line);
+      diagnostics?.add(line);
       continue;
     }
 
@@ -587,14 +616,14 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
         info['model'] = cleanAdbDeviceName(info['model']);
 
       if (deviceState == 'unauthorized') {
-        printError(
+        diagnostics?.add(
           'Device $deviceID is not authorized.\n'
           'You might need to check your device for an authorization dialog.'
         );
       } else if (deviceState == 'offline') {
-        printError('Device $deviceID is offline.');
+        diagnostics?.add('Device $deviceID is offline.');
       } else {
-        devices.add(new AndroidDevice(
+        devices?.add(new AndroidDevice(
           deviceID,
           productID: info['product'],
           modelID: info['model'] ?? deviceID,
@@ -602,14 +631,12 @@ List<AndroidDevice> getAdbDevices({ String mockAdbOutput }) {
         ));
       }
     } else {
-      printError(
+      diagnostics?.add(
         'Unexpected failure parsing device information from adb output:\n'
         '$line\n'
         'Please report a bug at https://github.com/flutter/flutter/issues/new');
     }
   }
-
-  return devices;
 }
 
 /// A log reader that logs from `adb logcat`.
@@ -674,8 +701,22 @@ class _AdbLogReader extends DeviceLogReader {
     new RegExp(r'^[F]\/[\S^:]+:\s+')
   ];
 
+  // 'F/libc(pid): Fatal signal 11'
+  static final RegExp _fatalLog = new RegExp(r'^F\/libc\s*\(\s*\d+\):\sFatal signal (\d+)');
+
+  // 'I/DEBUG(pid): ...'
+  static final RegExp _tombstoneLine = new RegExp(r'^[IF]\/DEBUG\s*\(\s*\d+\):\s(.+)$');
+
+  // 'I/DEBUG(pid): Tombstone written to: '
+  static final RegExp _tombstoneTerminator = new RegExp(r'^Tombstone written to:\s');
+
   // we default to true in case none of the log lines match
   bool _acceptedLastLine = true;
+
+  // Whether a fatal crash is happening or not.
+  // During a fatal crash only lines from the crash are accepted, the rest are
+  // dropped.
+  bool _fatalCrash = false;
 
   // The format of the line is controlled by the '-v' parameter passed to
   // adb logcat. We are currently passing 'time', which has the format:
@@ -701,12 +742,35 @@ class _AdbLogReader extends DeviceLogReader {
     final Match logMatch = _logFormat.firstMatch(line);
     if (logMatch != null) {
       bool acceptLine = false;
-      if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
+
+      if (_fatalCrash) {
+        // While a fatal crash is going on, only accept lines from the crash
+        // Otherwise the crash log in the console may get interrupted
+
+        final Match fatalMatch = _tombstoneLine.firstMatch(line);
+
+        if (fatalMatch != null) {
+          acceptLine = true;
+
+          line = fatalMatch[1];
+
+          if (_tombstoneTerminator.hasMatch(fatalMatch[1])) {
+            // Hit crash terminator, stop logging the crash info
+            _fatalCrash = false;
+          }
+        }
+      } else if (appPid != null && int.parse(logMatch.group(1)) == appPid) {
         acceptLine = true;
+
+        if (_fatalLog.hasMatch(line)) {
+          // Hit fatal signal, app is now crashing
+          _fatalCrash = true;
+        }
       } else {
         // Filter on approved names and levels.
         acceptLine = _whitelistedTags.any((RegExp re) => re.hasMatch(line));
       }
+
       if (acceptLine) {
         _acceptedLastLine = true;
         _linesController.add(line);

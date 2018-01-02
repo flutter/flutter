@@ -101,6 +101,12 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// The translation is expressed as a [Offset] scaled to the child's size. For
 /// example, an [Offset] with a `dx` of 0.25 will result in a horizontal
 /// translation of one quarter the width of the child.
+///
+/// By default, the offsets are applied in the coordinate system of the canvas
+/// (so positive x offsets move the child towards the right). If a
+/// [textDirection] is provided, then the offsets are applied in the reading
+/// direction, so in right-to-left text, positive x offsets move towards the
+/// left, and in left-to-right text, positive x offsets move towards the right.
 class SlideTransition extends AnimatedWidget {
   /// Creates a fractional translation transition.
   ///
@@ -109,6 +115,7 @@ class SlideTransition extends AnimatedWidget {
     Key key,
     @required Animation<Offset> position,
     this.transformHitTests: true,
+    this.textDirection,
     this.child,
   }) : assert(position != null),
        super(key: key, listenable: position);
@@ -117,8 +124,21 @@ class SlideTransition extends AnimatedWidget {
   ///
   /// If the current value of the position animation is `(dx, dy)`, the child
   /// will be translated horizontally by `width * dx` and vertically by
-  /// `height * dy`.
+  /// `height * dy`, after applying the [textDirection] if available.
   Animation<Offset> get position => listenable;
+
+  /// The direction to use for the x offset described by the [position].
+  ///
+  /// If [textDirection] is null, the x offset is applied in the coordinate
+  /// system of the canvas (so positive x offsets move the child towards the
+  /// right).
+  ///
+  /// If [textDirection] is [TextDirection.rtl], the x offset is applied in the
+  /// reading direction such that x offsets move the child towards the left.
+  ///
+  /// If [textDirection] is [TextDirection.ltr], the x offset is applied in the
+  /// reading direction such that x offsets move the child towards the right.
+  final TextDirection textDirection;
 
   /// Whether hit testing should be affected by the slide animation.
   ///
@@ -129,12 +149,17 @@ class SlideTransition extends AnimatedWidget {
   final bool transformHitTests;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
+    Offset offset = position.value;
+    if (textDirection == TextDirection.rtl)
+      offset = new Offset(-offset.dx, offset.dy);
     return new FractionalTranslation(
-      translation: position.value,
+      translation: offset,
       transformHitTests: transformHitTests,
       child: child,
     );
@@ -168,6 +193,8 @@ class ScaleTransition extends AnimatedWidget {
   final Alignment alignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -201,6 +228,8 @@ class RotationTransition extends AnimatedWidget {
   Animation<double> get turns => listenable;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -246,6 +275,8 @@ class SizeTransition extends AnimatedWidget {
   final double axisAlignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -289,6 +320,8 @@ class FadeTransition extends AnimatedWidget {
   Animation<double> get opacity => listenable;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -339,6 +372,8 @@ class PositionedTransition extends AnimatedWidget {
   Animation<RelativeRect> get rect => listenable;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -382,6 +417,8 @@ class RelativePositionedTransition extends AnimatedWidget {
   final Size size;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -431,6 +468,8 @@ class DecoratedBoxTransition extends AnimatedWidget {
   final DecorationPosition position;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -469,6 +508,8 @@ class AlignTransition extends AnimatedWidget {
   final double heightFactor;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -571,13 +612,15 @@ class AnimatedBuilder extends AnimatedWidget {
   /// Called every time the animation changes value.
   final TransitionBuilder builder;
 
-  /// If your builder function contains a subtree that does not depend on the
-  /// animation, it's more efficient to build that subtree once instead of
-  /// rebuilding it on every animation tick.
+  /// The child widget to pass to the [builder].
   ///
-  /// If you pass the pre-built subtree as the [child] parameter, the
-  /// AnimatedBuilder will pass it back to your builder function so that you
-  /// can incorporate it into your build.
+  /// If a [builder] callback's return value contains a subtree that does not
+  /// depend on the animation, it's more efficient to build that subtree once
+  /// instead of rebuilding it on every animation tick.
+  ///
+  /// If the pre-built subtree is passed as the [child] parameter, the
+  /// [AnimatedBuilder] will pass it back to the [builder] function so that it
+  /// can be incorporated into the build.
   ///
   /// Using this pre-built child is entirely optional, but can improve
   /// performance significantly in some cases and is therefore a good practice.

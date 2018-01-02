@@ -26,19 +26,17 @@ typedef Future<Map<String, String>> ServiceExtensionCallback(Map<String, String>
 /// "bindings").
 ///
 /// To use this class in a mixin, inherit from it and implement
-/// [initInstances()]. The mixin is guaranteed to only be constructed
-/// once in the lifetime of the app (more precisely, it will assert if
-/// constructed twice in checked mode).
+/// [initInstances()]. The mixin is guaranteed to only be constructed once in
+/// the lifetime of the app (more precisely, it will assert if constructed twice
+/// in checked mode).
 ///
-/// The top-most layer used to write the application will have a
-/// concrete class that inherits from BindingBase and uses all the
-/// various BindingBase mixins (such as [ServicesBinding]). For example, the
-/// Widgets library in flutter introduces a binding called
-/// [WidgetsFlutterBinding]. The relevant library defines how to create
-/// the binding. It could be implied (for example,
-/// [WidgetsFlutterBinding] is automatically started from [runApp]), or
-/// the application might be required to explicitly call the
-/// constructor.
+/// The top-most layer used to write the application will have a concrete class
+/// that inherits from [BindingBase] and uses all the various [BindingBase]
+/// mixins (such as [ServicesBinding]). For example, the Widgets library in
+/// Flutter introduces a binding called [WidgetsFlutterBinding]. The relevant
+/// library defines how to create the binding. It could be implied (for example,
+/// [WidgetsFlutterBinding] is automatically started from [runApp]), or the
+/// application might be required to explicitly call the constructor.
 abstract class BindingBase {
   /// Default abstract constructor for bindings.
   ///
@@ -106,15 +104,15 @@ abstract class BindingBase {
     assert(!_debugServiceExtensionsRegistered);
     registerSignalServiceExtension(
       name: 'reassemble',
-      callback: reassembleApplication
+      callback: reassembleApplication,
     );
     registerSignalServiceExtension(
       name: 'exit',
-      callback: _exitApplication
+      callback: _exitApplication,
     );
     registerSignalServiceExtension(
       name: 'frameworkPresent',
-      callback: () => new Future<Null>.value()
+      callback: () => new Future<Null>.value(),
     );
     assert(() {
       registerServiceExtension(
@@ -191,7 +189,7 @@ abstract class BindingBase {
     assert(!locked);
   }
 
-  /// Cause the entire application to redraw.
+  /// Cause the entire application to redraw, e.g. after a hot reload.
   ///
   /// This is used by development tools when the application code has changed,
   /// to cause the application to pick up any changed code. It can be triggered
@@ -214,7 +212,7 @@ abstract class BindingBase {
   }
 
   /// This method is called by [reassembleApplication] to actually cause the
-  /// application to reassemble.
+  /// application to reassemble, e.g. after a hot reload.
   ///
   /// Bindings are expected to use this method to reregister anything that uses
   /// closures, so that they do not keep pointing to old code, and to flush any

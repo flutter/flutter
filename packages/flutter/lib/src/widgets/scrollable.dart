@@ -440,8 +440,10 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
   }
 
   void _handleDragStart(DragStartDetails details) {
+    // It's possible for _hold to become null between _handleDragDown and
+    // _handleDragStart, for example if some user code calls jumpTo or otherwise
+    // triggers a new activity to begin.
     assert(_drag == null);
-    assert(_hold != null);
     _drag = position.drag(details, _disposeDrag);
     assert(_drag != null);
     assert(_hold == null);

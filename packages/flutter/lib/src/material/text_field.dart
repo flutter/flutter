@@ -14,9 +14,6 @@ import 'theme.dart';
 
 export 'package:flutter/services.dart' show TextInputType;
 
-const Duration _kTransitionDuration = const Duration(milliseconds: 200);
-const Curve _kTransitionCurve = Curves.fastOutSlowIn;
-
 /// A material design text field.
 ///
 /// A text field lets the user enter text, either with hardware keyboard or with
@@ -150,7 +147,7 @@ class TextField extends StatefulWidget {
   ///
   /// This text style is also used as the base style for the [decoration].
   ///
-  /// If null, defaults to a text style from the current [Theme].
+  /// If null, defaults to the `subhead` text style from the current [Theme].
   final TextStyle style;
 
   /// How the text being edited should be aligned horizontally.
@@ -334,8 +331,8 @@ class _TextFieldState extends State<TextField> {
     _editableTextKey.currentState?.requestKeyboard();
   }
 
-  void _onSelectionChanged(BuildContext context, bool longPress) {
-    if (longPress)
+  void _onSelectionChanged(BuildContext context, SelectionChangedCause cause) {
+    if (cause == SelectionChangedCause.longPress)
       Feedback.forLongPress(context);
   }
 
@@ -368,7 +365,7 @@ class _TextFieldState extends State<TextField> {
             : materialTextSelectionControls,
         onChanged: widget.onChanged,
         onSubmitted: widget.onSubmitted,
-        onSelectionChanged: (TextSelection _, bool longPress) => _onSelectionChanged(context, longPress),
+        onSelectionChanged: (TextSelection _, SelectionChangedCause cause) => _onSelectionChanged(context, cause),
         inputFormatters: formatters,
       ),
     );
@@ -390,10 +387,18 @@ class _TextFieldState extends State<TextField> {
       );
     }
 
-    return new GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: _requestKeyboard,
-      child: child,
+    return new Semantics(
+      onTap: () {
+        if (!_controller.selection.isValid)
+          _controller.selection = new TextSelection.collapsed(offset: _controller.text.length);
+        _requestKeyboard();
+      },
+      child: new GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: _requestKeyboard,
+        child: child,
+        excludeFromSemantics: true,
+      ),
     );
   }
 }

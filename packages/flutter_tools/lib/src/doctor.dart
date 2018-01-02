@@ -48,7 +48,8 @@ class Doctor {
       else
         _validators.add(new NoIdeValidator());
 
-      _validators.add(new DeviceValidator());
+      if (deviceManager.canListAnything)
+        _validators.add(new DeviceValidator());
     }
     return _validators;
   }
@@ -208,6 +209,7 @@ class _FlutterValidator extends DoctorValidator {
     ));
     messages.add(new ValidationMessage('Engine revision ${version.engineRevisionShort}'));
     messages.add(new ValidationMessage('Tools Dart version ${version.dartSdkVersion}'));
+    messages.add(new ValidationMessage('Engine Dart version ${version.engineDartVersion}'));
     final String genSnapshotPath =
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
@@ -500,12 +502,17 @@ class DeviceValidator extends DoctorValidator {
     final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
     List<ValidationMessage> messages;
     if (devices.isEmpty) {
-      messages = <ValidationMessage>[new ValidationMessage('None')];
+      final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
+      if (diagnostics.isNotEmpty) {
+        messages = diagnostics.map((String message) => new ValidationMessage(message)).toList();
+      } else {
+        messages = <ValidationMessage>[new ValidationMessage('None')];
+      }
     } else {
       messages = await Device.descriptions(devices)
           .map((String msg) => new ValidationMessage(msg)).toList();
     }
-    return new ValidationResult(ValidationType.installed, messages);
+    return new ValidationResult(devices.isEmpty ? ValidationType.partial : ValidationType.installed, messages);
   }
 }
 

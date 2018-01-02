@@ -125,6 +125,8 @@ class Material extends StatefulWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The kind of material to show (e.g., card or canvas). This
@@ -276,8 +278,6 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     return contents;
   }
 }
-
-const Duration _kHighlightFadeDuration = const Duration(milliseconds: 200);
 
 class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController {
   _RenderInkFeatures({

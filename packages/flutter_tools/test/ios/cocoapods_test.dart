@@ -95,7 +95,8 @@ void main() {
       await cocoaPodsUnderTest.processPods(
         appIosDir: projectUnderTest,
         iosEngineDir: 'engine/path',
-      );      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
+      );
+      expect(fs.file(fs.path.join('project', 'ios', 'Podfile')).readAsStringSync() , 'Existing Podfile');
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
@@ -171,6 +172,64 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       } catch (ToolExit) {
         expect(testLogger.errorText, contains("CocoaPods's specs repository is too out-of-date to satisfy dependencies"));
       }
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
+
+  testUsingContext(
+    'Run pod install if plugins or flutter framework have changes.',
+        () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+      fs.file(fs.path.join('project', 'ios', 'Podfile.lock'))
+        ..createSync()
+        ..writeAsString('Existing lock files.');
+      fs.file(fs.path.join('project', 'ios', 'Pods','Manifest.lock'))
+        ..createSync(recursive: true)
+        ..writeAsString('Existing lock files.');
+      await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
+          pluginOrFlutterPodChanged: true
+      );
+      verify(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      ));
+    },
+    overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => mockProcessManager,
+    },
+  );
+
+  testUsingContext(
+    'Skip pod install if plugins and flutter framework remain unchanged.',
+        () async {
+      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+        ..createSync()
+        ..writeAsString('Existing Podfile');
+      fs.file(fs.path.join('project', 'ios', 'Podfile.lock'))
+        ..createSync()
+        ..writeAsString('Existing lock files.');
+      fs.file(fs.path.join('project', 'ios', 'Pods','Manifest.lock'))
+        ..createSync(recursive: true)
+        ..writeAsString('Existing lock files.');
+      await cocoaPodsUnderTest.processPods(
+          appIosDir: projectUnderTest,
+          iosEngineDir: 'engine/path',
+          pluginOrFlutterPodChanged: false
+      );
+      verifyNever(mockProcessManager.run(
+        <String>['pod', 'install', '--verbose'],
+        workingDirectory: 'project/ios',
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      ));
     },
     overrides: <Type, Generator>{
       FileSystem: () => fs,

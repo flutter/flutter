@@ -12,6 +12,7 @@ import 'button_bar.dart';
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -40,6 +41,8 @@ class Dialog extends StatelessWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   Color _getColor(BuildContext context) {
@@ -408,6 +411,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
     @required this.theme,
     bool barrierDismissible: true,
+    this.barrierLabel,
     @required this.child,
   }) : assert(barrierDismissible != null),
        _barrierDismissible = barrierDismissible;
@@ -426,8 +430,22 @@ class _DialogRoute<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black54;
 
   @override
+  final String barrierLabel;
+
+  @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return theme != null ? new Theme(data: theme, child: child) : child;
+    return new MediaQuery.removePadding(
+      context: context,
+      removeTop: true,
+      removeBottom: true,
+      removeLeft: true,
+      removeRight: true,
+      child: new Builder(
+        builder: (BuildContext context) {
+          return theme != null ? new Theme(data: theme, child: child) : child;
+        }
+      ),
+    );
   }
 
   @override
@@ -447,6 +465,10 @@ class _DialogRoute<T> extends PopupRoute<T> {
 /// This function typically receives a [Dialog] widget as its child argument.
 /// Content below the dialog is dimmed with a [ModalBarrier].
 ///
+/// The `context` argument is used to look up the [Navigator] and [Theme] for
+/// the dialog. It is only used when the method is called. Its corresponding
+/// widget can be safely removed from the tree before the dialog is closed.
+///
 /// Returns a [Future] that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the dialog was closed.
 ///
@@ -465,5 +487,6 @@ Future<T> showDialog<T>({
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }

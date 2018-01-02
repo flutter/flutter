@@ -65,14 +65,25 @@ dependencies:
   }
   new File('dev/docs/lib/temp_doc.dart').writeAsStringSync(contents.toString());
 
+  final String flutterRoot = Directory.current.path;
+  final Map<String, String> pubEnvironment = <String, String>{
+    'FLUTTER_ROOT': flutterRoot,
+  };
+
+  // If there's a .pub-cache dir in the flutter root, use that.
+  final String pubCachePath = '$flutterRoot/.pub-cache';
+  if (new Directory(pubCachePath).existsSync()) {
+    pubEnvironment['PUB_CACHE'] = pubCachePath;
+  }
+
+  final String pubExecutable = '$flutterRoot/bin/cache/dart-sdk/bin/pub';
+
   // Run pub.
   Process process = await Process.start(
-    '../../bin/cache/dart-sdk/bin/pub',
+    pubExecutable,
     <String>['get'],
     workingDirectory: 'dev/docs',
-    environment: <String, String>{
-      'FLUTTER_ROOT': Directory.current.path,
-    },
+    environment: pubEnvironment,
   );
   printStream(process.stdout, prefix: 'pub:stdout: ');
   printStream(process.stderr, prefix: 'pub:stderr: ');
@@ -84,9 +95,10 @@ dependencies:
 
   // Verify which version of dartdoc we're using.
   final ProcessResult result = Process.runSync(
-    '../../bin/cache/dart-sdk/bin/pub',
+    pubExecutable,
     <String>['global', 'run', 'dartdoc', '--version'],
     workingDirectory: 'dev/docs',
+    environment: pubEnvironment,
   );
   print('\n${result.stdout}');
 
@@ -95,8 +107,12 @@ dependencies:
     'global', 'run', 'dartdoc',
     '--header', 'styles.html',
     '--header', 'analytics.html',
+    '--header', 'survey.html',
     '--footer-text', 'lib/footer.html',
-    '--exclude', 'temp_doc',
+    '--exclude-packages',
+'analyzer,args,barback,cli_util,csslib,front_end,glob,html,http_multi_server,io,isolate,js,kernel,logging,mime,mockito,node_preamble,plugin,shelf,shelf_packages_handler,shelf_static,shelf_web_socket,utf,watcher,yaml',
+    '--exclude',
+  'package:Flutter/temp_doc.dart,package:http/browser_client.dart,package:intl/intl_browser.dart,package:matcher/mirror_matchers.dart,package:quiver/mirrors.dart,pacakge:quiver/io.dart,package:vm_service_client/vm_service_client.dart,package:web_socket_channel/html.dart',
     '--favicon=favicon.ico',
     '--use-categories',
     '--category-order', 'flutter,Dart Core,flutter_test,flutter_driver',
@@ -112,9 +128,10 @@ dependencies:
   }
 
   process = await Process.start(
-    '../../bin/cache/dart-sdk/bin/pub',
+    pubExecutable,
     args,
     workingDirectory: 'dev/docs',
+    environment: pubEnvironment,
   );
   printStream(process.stdout, prefix: 'dartdoc:stdout: ',
     filter: kVerbose ? const <Pattern>[] : <Pattern>[

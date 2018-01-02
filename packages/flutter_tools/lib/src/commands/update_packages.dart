@@ -11,6 +11,7 @@ import 'package:meta/meta.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
+import '../base/platform.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
@@ -25,6 +26,10 @@ import '../runner/flutter_command.dart';
 ///   'linter': '0.1.35', // TODO(yjbanov): https://github.com/dart-lang/linter/issues/824
 /// ```
 const Map<String, String> _kManuallyPinnedDependencies = const <String, String>{
+  // New test package breaks the analyzer, see:
+  // https://github.com/dart-lang/sdk/issues/31442
+  // TODO(amirh): unpin this.
+  'test': '0.12.26',
   // Add pinned packages here.
 };
 
@@ -72,7 +77,8 @@ class UpdatePackagesCommand extends FlutterCommand {
 
   Future<Null> _downloadCoverageData() async {
     final Status status = logger.startProgress('Downloading lcov data for package:flutter...', expectSlowOperation: true);
-    final List<int> data = await fetchUrl(Uri.parse('https://storage.googleapis.com/flutter_infra/flutter/coverage/lcov.info'));
+    final String urlBase = platform.environment['FLUTTER_STORAGE_BASE_URL'] ?? 'https://storage.googleapis.com';
+    final List<int> data = await fetchUrl(Uri.parse('$urlBase/flutter_infra/flutter/coverage/lcov.info'));
     final String coverageDir = fs.path.join(Cache.flutterRoot, 'packages/flutter/coverage');
     fs.file(fs.path.join(coverageDir, 'lcov.base.info'))
       ..createSync(recursive: true)
@@ -146,7 +152,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         fakePackage.createSync();
         fakePackage.writeAsStringSync(_generateFakePubspec(dependencies.values));
         // First we run "pub upgrade" on this generated package:
-        await pubGet(directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
+        await pubGet(context: PubContext.updatePackages, directory: temporaryDirectory.path, upgrade: true, checkLastModified: false);
         // Then we run "pub deps --style=compact" on the result. We pipe all the
         // output to tree.fill(), which parses it so that it can create a graph
         // of all the dependencies so that we can figure out the transitive
@@ -154,6 +160,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         // each package.
         await pub(
           <String>['deps', '--style=compact'],
+          context: PubContext.updatePackages,
           directory: temporaryDirectory.path,
           filter: tree.fill,
           retry: false, // errors here are usually fatal since we're not hitting the network
@@ -179,7 +186,7 @@ class UpdatePackagesCommand extends FlutterCommand {
 
       if (isPrintTransitiveClosure) {
         tree._dependencyTree.forEach((String from, Set<String> to) {
-          print('$from -> $to');
+          printStatus('$from -> $to');
         });
         return;
       }
@@ -210,7 +217,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     int count = 0;
 
     for (Directory dir in packages) {
-      await pubGet(directory: dir.path, checkLastModified: false);
+      await pubGet(context: PubContext.updatePackages, directory: dir.path, checkLastModified: false);
       count += 1;
     }
 
@@ -256,7 +263,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         if (path != null)
           buf.write(' <- ');
       }
-      print(buf);
+      printStatus(buf.toString());
     }
 
     if (paths.isEmpty) {

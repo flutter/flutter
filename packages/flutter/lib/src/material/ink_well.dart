@@ -99,6 +99,8 @@ class InkResponse extends StatefulWidget {
   }) : assert(enableFeedback != null), super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Called when the user taps this part of the material.

@@ -192,4 +192,16 @@ void main() {
     // semanticLabel to make sure the subtree was not rebuilt.
     expect(richText2, same(richText1));
   });
+
+  testWidgets('IconData comparison', (WidgetTester tester) async {
+    expect(const IconData(123), const IconData(123));
+    expect(const IconData(123), isNot(const IconData(123, matchTextDirection: true)));
+    expect(const IconData(123), isNot(const IconData(123, fontFamily: 'f')));
+    expect(const IconData(123), isNot(const IconData(123, fontPackage: 'p')));
+    expect(const IconData(123).hashCode, const IconData(123).hashCode);
+    expect(const IconData(123).hashCode, isNot(const IconData(123, matchTextDirection: true).hashCode));
+    expect(const IconData(123).hashCode, isNot(const IconData(123, fontFamily: 'f').hashCode));
+    expect(const IconData(123).hashCode, isNot(const IconData(123, fontPackage: 'p').hashCode));
+    expect(const IconData(123).toString(), 'IconData(U+0007B)');
+  });
 }

@@ -12,6 +12,7 @@ void main() {
     expect(localizations.openAppDrawerTooltip, isNotNull);
     expect(localizations.backButtonTooltip, isNotNull);
     expect(localizations.closeButtonTooltip, isNotNull);
+    expect(localizations.deleteButtonTooltip, isNotNull);
     expect(localizations.nextMonthTooltip, isNotNull);
     expect(localizations.previousMonthTooltip, isNotNull);
     expect(localizations.nextPageTooltip, isNotNull);
@@ -28,6 +29,7 @@ void main() {
     expect(localizations.pasteButtonLabel, isNotNull);
     expect(localizations.selectAllButtonLabel, isNotNull);
     expect(localizations.viewLicensesButtonLabel, isNotNull);
+    expect(localizations.modalBarrierDismissLabel, isNotNull);
 
     expect(localizations.aboutListTileTitle('FOO'), isNotNull);
     expect(localizations.aboutListTileTitle('FOO'), contains('FOO'));

@@ -18,15 +18,21 @@ final Tween<Offset> _kBottomUpTween = new Tween<Offset>(
 class _MountainViewPageTransition extends StatelessWidget {
   _MountainViewPageTransition({
     Key key,
+    @required bool fade,
     @required Animation<double> routeAnimation,
     @required this.child,
   }) : _positionAnimation = _kBottomUpTween.animate(new CurvedAnimation(
          parent: routeAnimation, // The route's linear 0.0 - 1.0 animation.
          curve: Curves.fastOutSlowIn,
        )),
+       _opacityAnimation = fade ? new CurvedAnimation(
+         parent: routeAnimation,
+         curve: Curves.easeIn, // Eyeballed from other Material apps.
+       ) : const AlwaysStoppedAnimation<double>(1.0),
        super(key: key);
 
   final Animation<Offset> _positionAnimation;
+  final Animation<double> _opacityAnimation;
   final Widget child;
 
   @override
@@ -34,7 +40,10 @@ class _MountainViewPageTransition extends StatelessWidget {
     // TODO(ianh): tell the transform to be un-transformed for hit testing
     return new SlideTransition(
       position: _positionAnimation,
-      child: child,
+      child: new FadeTransition(
+        opacity: _opacityAnimation,
+        child: child,
+      ),
     );
   }
 }
@@ -75,6 +84,14 @@ class MaterialPageRoute<T> extends PageRoute<T> {
     assert(opaque);
   }
 
+  /// Turns on the fading of routes during page transitions.
+  ///
+  /// This is currently disabled by default because of performance issues on
+  /// low-end phones. Eventually these issues will be resolved and this flag
+  /// will be removed.
+  @Deprecated('This flag will eventually be removed once the performance issues are resolved. See: https://github.com/flutter/flutter/issues/13736')
+  static bool debugEnableFadingRoutes = false;
+
   /// Builds the primary contents of the route.
   final WidgetBuilder builder;
 
@@ -106,6 +123,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
 
   @override
   Color get barrierColor => null;
+
+  @override
+  String get barrierLabel => null;
 
   @override
   bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
@@ -148,6 +168,7 @@ class MaterialPageRoute<T> extends PageRoute<T> {
       return new _MountainViewPageTransition(
         routeAnimation: animation,
         child: child,
+        fade: debugEnableFadingRoutes, // ignore: deprecated_member_use
       );
     }
   }

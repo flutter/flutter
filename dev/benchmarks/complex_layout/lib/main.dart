@@ -610,8 +610,12 @@ class GalleryDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return new Drawer(
+      // Note: for real apps, see the Gallery material Drawer demo. More
+      // typically, a drawer would have a fixed header with a scrolling body
+      // below it.
       child: new ListView(
         key: const PageStorageKey<String>('gallery-drawer'),
+        padding: EdgeInsets.zero,
         children: <Widget>[
           new FancyDrawerHeader(),
           new ListTile(
@@ -664,6 +668,10 @@ class FancyDrawerHeader extends StatelessWidget {
     return new Container(
       color: Colors.purple,
       height: 200.0,
+      child: const SafeArea(
+        bottom: false,
+        child: const Placeholder(),
+      ),
     );
   }
 }
