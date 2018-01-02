@@ -101,6 +101,8 @@ class GridPaper extends StatelessWidget {
   final int subdivisions;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

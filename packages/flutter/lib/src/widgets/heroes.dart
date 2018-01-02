@@ -111,6 +111,8 @@ class Hero extends StatefulWidget {
   /// the subtrees of any other heroes in the application with the same [tag].
   /// Changes in scale and aspect ratio work well in hero animations, changes
   /// in layout or composition do not.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   // Returns a map of all of the heroes in context, indexed by hero tag.

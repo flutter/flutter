@@ -41,6 +41,8 @@ class Dialog extends StatelessWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   Color _getColor(BuildContext context) {

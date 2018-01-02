@@ -3315,12 +3315,30 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 class RenderBlockSemantics extends RenderProxyBox {
   /// Create a render object that blocks semantics for nodes below it in paint
   /// order.
-  RenderBlockSemantics({ RenderBox child }) : super(child);
+  RenderBlockSemantics({ RenderBox child, bool blocking: true, }) : _blocking = blocking, super(child);
+
+  /// Whether this render object is blocking semantics of previously painted
+  /// [RenderObject]s below a common semantics boundary from the semantic tree.
+  bool get blocking => _blocking;
+  bool _blocking;
+  set blocking(bool value) {
+    assert(value != null);
+    if (value == _blocking)
+      return;
+    _blocking = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
   }
 }
 

@@ -166,6 +166,7 @@ Future<Null> _runTests() async {
 
   await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
