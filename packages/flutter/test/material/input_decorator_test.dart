@@ -49,6 +49,8 @@ double getBorderBottom(WidgetTester tester) {
 }
 
 double getBorderWeight(WidgetTester tester) {
+  if (!tester.any(findBorderPainter()))
+    return 0.0;
   final CustomPaint customPaint = tester.widget(findBorderPainter());
   final dynamic/* _InputBorderPainter */ inputBorderPainter = customPaint.foregroundPainter;
   final dynamic/*_InputBorderTween */  inputBorderTween = inputBorderPainter.border;
@@ -392,14 +394,14 @@ void main() {
     expect(getBorderWeight(tester), 2.0);
   });
 
-  testWidgets('InputDecorator BorderType.none', (WidgetTester tester) async {
+  testWidgets('InputDecorator with null border', (WidgetTester tester) async {
     // Label is visible, hint is not (opacity 0.0).
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
-          borderType: InputBorderType.none,
+          border: null,
         ),
       ),
     );
@@ -897,7 +899,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(borderType: InputBorderType.underline), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(border: UnderlineInputBorder()), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 }

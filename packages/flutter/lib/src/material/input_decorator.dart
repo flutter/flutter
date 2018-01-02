@@ -10,33 +10,11 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'input_border.dart';
 import 'theme.dart';
 
 const Duration _kTransitionDuration = const Duration(milliseconds: 200);
 const Curve _kTransitionCurve = Curves.fastOutSlowIn;
-
-/// Used to define the appearance of an [InputDecorator]'s border
-/// with [InputDecoration.borderType].
-///
-/// The border is drawn around the input decorator's "container" which
-/// is the optionally filled area above the decorator's helper, error,
-/// and counter.
-///
-/// The value of [InputDecoration.borderType] also affects the internal
-/// layout of [InputDecorator], for example the default value of
-/// [InputDecoration.contentPadding] depends on the border type.
-enum InputBorderType {
-  /// A rounded rectangle outline that bounds the [InputDecorator] "container",
-  /// i.e. the area above the optional error, helper, and counter fields.
-  outline,
-
-  /// A single line that separates the [InputDecorator] "container"
-  /// and the optional error, helper, and counter fields below it.
-  underline,
-
-  /// A border is not drawn.
-  none,
-}
 
 // Defines the gap in the InputDecorator's outline border where the
 // floating label will appear.
@@ -73,6 +51,14 @@ class _InputBorderGap extends ChangeNotifier {
   int get hashCode => hashValues(start, extent);
 }
 
+// Used to interpolate between two InputBorders.
+class _InputBorderTween extends Tween<InputBorder> {
+  _InputBorderTween({ InputBorder begin, InputBorder end }) : super(begin: begin, end: end);
+
+  @override
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
+}
+
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
@@ -92,14 +78,19 @@ class _InputBorderPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    border.evaluate(borderAnimation).paint(
-      canvas,
-      Offset.zero & size,
-      gapStart: gap.start,
-      gapExtent: gap.extent,
-      gapPercentage: gapAnimation.value,
-      textDirection: textDirection,
-    );
+    final InputBorder inputBorder = border.evaluate(borderAnimation);
+    if (inputBorder is OutlineInputBorder) {
+        inputBorder.paint(
+          canvas,
+          Offset.zero & size,
+          gapStart: gap.start,
+          gapExtent: gap.extent,
+          gapPercentage: gapAnimation.value,
+          textDirection: textDirection,
+        );
+    } else {
+        inputBorder.paint(canvas, Offset.zero & size);
+    }
   }
 
   @override
@@ -127,7 +118,7 @@ class _BorderContainer extends StatefulWidget {
        assert(gap != null),
        super(key: key);
 
-  final _InputBorder border;
+  final InputBorder border;
   final _InputBorderGap gap;
   final Animation<double> gapAnimation;
   final Widget child;
@@ -192,230 +183,6 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
       child: widget.child,
     );
   }
-}
-
-// Paints an [InputDecorator]'s outline or underline border.
-//
-// The border separates the input decorator's "container", i.e. the
-// optionally filled area above the optional helper, error, and counter
-// fields and adjacent to the optional icon.
-//
-// When `borderType` is [InputBorderType.underline] a horizontal
-// line is drawn at the bottom of the container. The line's color
-// and weight are defined by the `borderSide` parameter.
-//
-// When `borderType` is [InputBorderType.outline] a rounded rectangle
-// outline is drawn. The line's color and weight are defined by the
-// `borderSide` parameter, and the (circular) radii of the corners are
-// defined by the `borderRadius` parameter. The outline border may
-// have an animated gap, see [paint].
-class _InputBorder extends ShapeBorder {
-  _InputBorder({
-    this.borderType: InputBorderType.underline,
-    this.borderSide: BorderSide.none,
-    this.borderRadius: BorderRadius.zero,
-    this.gapPad: 4.0,
-  }) : assert(borderSide != null),
-       assert(borderRadius != null),
-       assert(_cornersAreCircular(borderRadius)),
-       assert(gapPad != null);
-
-  static bool _cornersAreCircular(BorderRadius borderRadius) {
-    return borderRadius.topLeft.x ==  borderRadius.topLeft.y
-        && borderRadius.topRight.x ==  borderRadius.topRight.y
-        && borderRadius.bottomLeft.x ==  borderRadius.bottomLeft.y
-        && borderRadius.bottomRight.x ==  borderRadius.bottomRight.y;
-  }
-
-  final InputBorderType borderType;
-  final BorderSide borderSide;
-  final BorderRadius borderRadius;
-  final double gapPad;
-
-  @override
-  EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.all(borderSide.width);
-  }
-
-  @override
-  _InputBorder scale(double t) {
-    return new _InputBorder(
-      borderSide: borderSide.scale(t),
-      borderRadius: borderRadius * t,
-      gapPad: gapPad * t,
-    );
-  }
-
-  @override
-  Path getInnerPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
-  }
-
-  Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
-    final Rect tlCorner = new Rect.fromLTWH(
-      center.left,
-      center.top,
-      center.tlRadiusX * 2.0,
-      center.tlRadiusY * 2.0,
-    );
-    final Rect trCorner = new Rect.fromLTWH(
-      center.right - center.trRadiusX * 2.0,
-      center.top,
-      center.trRadiusX * 2.0,
-      center.trRadiusY * 2.0,
-    );
-    final Rect brCorner = new Rect.fromLTWH(
-      center.right - center.brRadiusX * 2.0,
-      center.bottom - center.brRadiusY * 2.0,
-      center.brRadiusX * 2.0,
-      center.brRadiusY * 2.0,
-    );
-    final Rect blCorner = new Rect.fromLTWH(
-      center.left,
-      center.bottom - center.brRadiusY * 2.0,
-      center.blRadiusX * 2.0,
-      center.blRadiusY * 2.0,
-    );
-
-    final double cornerArcSweep = math.PI / 2.0;
-    final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin(start / center.tlRadiusX)
-      : math.PI / 2.0;
-
-    final Path path = new Path()
-      ..addArc(tlCorner, math.PI, tlCornerArcSweep)
-      ..moveTo(center.left + center.tlRadiusX, center.top);
-
-    if (start > center.tlRadiusX)
-      path.lineTo(center.left + start, center.top);
-
-    final double trCornerArcStart = (3 * math.PI) / 2.0;
-    final double trCornerArcSweep = cornerArcSweep;
-    if (start + extent < center.width - center.trRadiusX) {
-      path
-        ..relativeMoveTo(extent, 0.0)
-        ..lineTo(center.right - center.trRadiusX, center.top)
-        ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
-    } else if (start + extent < center.width) {
-      final double dx = center.width - (start + extent);
-      final double sweep = math.acos(dx / center.trRadiusX);
-      path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
-    }
-
-    return path
-      ..moveTo(center.right, center.top + center.trRadiusY)
-      ..lineTo(center.right, center.bottom - center.brRadiusY)
-      ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(center.left + center.blRadiusX, center.bottom)
-      ..addArc(blCorner, math.PI / 2.0, cornerArcSweep)
-      ..lineTo(center.left, center.top + center.trRadiusY);
-  }
-
-  void paintOutline(Canvas canvas, Rect rect, TextDirection textDirection, double gapStart, double gapExtent, double gapPercentage) {
-    final Paint paint = borderSide.toPaint();
-    final RRect outer = borderRadius.toRRect(rect);
-    final RRect center = outer.deflate(borderSide.width / 2.0);
-    if (gapStart == null || gapExtent <= 0.0) {
-      canvas.drawRRect(center, paint);
-    } else {
-      final double extent = lerpDouble(0.0, gapExtent + gapPad * 2.0, gapPercentage);
-      if (textDirection == TextDirection.rtl) {
-        final Path path = _gapBorderPath(canvas, center, gapStart + gapPad - extent, extent);
-        canvas.drawPath(path, paint);
-      } else {
-        final Path path = _gapBorderPath(canvas, center, gapStart - gapPad, extent);
-        canvas.drawPath(path, paint);
-      }
-    }
-  }
-
-  void paintUnderline(Canvas canvas, Rect rect) {
-    canvas.drawLine(rect.bottomLeft, rect.bottomRight, borderSide.toPaint());
-  }
-
-  @override
-  void paint(Canvas canvas, Rect rect, {
-      double gapStart,
-      double gapExtent: 0.0,
-      double gapPercentage: 0.0,
-      TextDirection textDirection
-  }) {
-    // TBD: asserts
-    switch (borderSide.style) {
-      case BorderStyle.none:
-        break;
-      case BorderStyle.solid: {
-        switch(borderType) {
-          case InputBorderType.none:
-            return;
-          case InputBorderType.outline:
-            paintOutline(canvas, rect, textDirection, gapStart, gapExtent, gapPercentage);
-            break;
-          case InputBorderType.underline:
-            paintUnderline(canvas, rect);
-            break;
-          default:
-            assert(false);
-        }
-      }
-    }
-  }
-
-  @override
-  ShapeBorder lerpFrom(ShapeBorder a, double t) {
-    if (a is _InputBorder) {
-      return new _InputBorder(
-        borderType: a.borderType,
-        borderRadius: BorderRadius.lerp(a.borderRadius, borderRadius, t),
-        borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
-        gapPad: a.gapPad,
-      );
-    }
-    return super.lerpFrom(a, t);
-  }
-
-  @override
-  ShapeBorder lerpTo(ShapeBorder b, double t) {
-    if (b is _InputBorder) {
-      return new _InputBorder(
-        borderType: b.borderType,
-        borderRadius: BorderRadius.lerp(borderRadius, b.borderRadius, t),
-        borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
-        gapPad: b.gapPad,
-      );
-    }
-    return super.lerpTo(b, t);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (runtimeType != other.runtimeType)
-      return false;
-    final _InputBorder typedOther = other;
-    return typedOther.borderType == borderType
-        && typedOther.borderRadius == borderRadius
-        && typedOther.borderSide == borderSide
-        && typedOther.gapPad == gapPad;
-  }
-
-  @override
-  int get hashCode => hashValues(borderType, borderSide, borderRadius, gapPad);
-}
-
-class _InputBorderTween extends Tween<_InputBorder> {
-  _InputBorderTween({ _InputBorder begin, _InputBorder end }) : super(begin: begin, end: end);
-
-  @override
-  _InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
 }
 
 // Used to "shake" the floating label to the left to the left and right
@@ -642,7 +409,7 @@ class _Decoration {
     @required this.contentPadding,
     @required this.floatingLabelHeight,
     @required this.floatingLabelProgress,
-    this.borderType,
+    this.border,
     this.borderGap,
     this.icon,
     this.input,
@@ -662,7 +429,7 @@ class _Decoration {
   final EdgeInsets contentPadding;
   final double floatingLabelHeight;
   final double floatingLabelProgress;
-  final InputBorderType borderType;
+  final InputBorder border;
   final _InputBorderGap borderGap;
   final Widget icon;
   final Widget input;
@@ -686,7 +453,7 @@ class _Decoration {
     return typedOther.contentPadding == contentPadding
         && typedOther.floatingLabelHeight == floatingLabelHeight
         && typedOther.floatingLabelProgress == floatingLabelProgress
-        && typedOther.borderType == borderType
+        && typedOther.border == border
         && typedOther.borderGap == borderGap
         && typedOther.icon == icon
         && typedOther.input == input
@@ -707,7 +474,7 @@ class _Decoration {
       contentPadding,
       floatingLabelHeight,
       floatingLabelProgress,
-      borderType,
+      border,
       borderGap,
       icon,
       input,
@@ -1134,7 +901,7 @@ class _RenderDecoration extends RenderBox {
     final double right = overallWidth - contentPadding.right;
 
     height = layout.containerHeight;
-    baseline = decoration.borderType == InputBorderType.outline
+    baseline = decoration.border is OutlineInputBorder
       ? layout.outlineBaseline
       : layout.inputBaseline;
 
@@ -1227,7 +994,7 @@ class _RenderDecoration extends RenderBox {
       final Offset labelOffset = _boxParentData(label).offset;
       final double labelHeight = label.size.height;
       final double t = decoration.floatingLabelProgress;
-      final bool isOutlineBorder = decoration.borderType == InputBorderType.outline;
+      final bool isOutlineBorder = decoration.border is OutlineInputBorder;
       // The center of the outline border label ends up a little below the
       // center of the top border line.
       final double floatingY = isOutlineBorder ? -labelHeight * 0.25 : contentPadding.top;
@@ -1681,7 +1448,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   double get _borderWeight {
-    if (decoration.isCollapsed || decoration.borderType == InputBorderType.none || !decoration.enabled)
+    if (decoration.isCollapsed || decoration.border == null || !decoration.enabled)
       return 0.0;
     return isFocused ? 2.0 : 1.0;
   }
@@ -1709,29 +1476,21 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       ),
     );
 
-    final _InputBorder border = new _InputBorder(
-        borderType: decoration.borderType,
-        borderRadius: decoration.borderType == InputBorderType.outline
-          ? new BorderRadius.circular(4.0)
-          : const BorderRadius.only(
-              topLeft: const Radius.circular(4.0),
-              topRight: const Radius.circular(4.0),
-            ),
-        borderSide: new BorderSide(
-          color: _getBorderColor(themeData),
-          width: _borderWeight,
-        ),
-      );
+    final InputBorder border = decoration.border == null ? null : decoration.border.copyWith(
+      borderSide: new BorderSide(
+        color: _getBorderColor(themeData),
+        width: _borderWeight,
+      ),
+    );
 
-    final Widget container = new _BorderContainer(
+    final Widget containerFill = new DecoratedBox(
+      decoration: new BoxDecoration(color: _getFillColor(themeData)),
+    );
+    final Widget container = border == null ? containerFill : new _BorderContainer(
       border: border,
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
-      child: new DecoratedBox(
-        decoration: new BoxDecoration(
-          color: _getFillColor(themeData),
-        ),
-      ),
+      child: containerFill,
     );
 
     final Widget label = decoration.labelText == null ? null : new _Shaker(
@@ -1827,26 +1586,17 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.isCollapsed) {
       floatingLabelHeight = 0.0;
       contentPadding = decoration.contentPadding ?? EdgeInsets.zero;
+    } else if (decoration.border == null || decoration.border is UnderlineInputBorder) {
+      // 4.0: the vertical gap between the inline elements and the floating label.
+      floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
+      contentPadding = decoration.contentPadding ?? (decoration.isDense
+        ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
+        : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
     } else {
-      switch (decoration.borderType) {
-        case InputBorderType.none:
-        case InputBorderType.underline:
-          // 4.0: the vertical gap between the inline elements and the floating label.
-          floatingLabelHeight = 4.0 + 0.75 * inlineStyle.fontSize;
-          contentPadding = decoration.contentPadding ?? (decoration.isDense
-            ? const EdgeInsets.fromLTRB(12.0, 8.0, 12.0, 8.0)
-            : const EdgeInsets.fromLTRB(12.0, 12.0, 12.0, 12.0));
-            break;
-        case InputBorderType.outline:
-          floatingLabelHeight = 0.0;
-          contentPadding = decoration.contentPadding ?? (decoration.isDense
-            ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
-            : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
-            break;
-          break;
-        default:
-          assert(false);
-      }
+      floatingLabelHeight = 0.0;
+      contentPadding = decoration.contentPadding ?? (decoration.isDense
+        ? const EdgeInsets.fromLTRB(12.0, 20.0, 12.0, 12.0)
+        : const EdgeInsets.fromLTRB(12.0, 24.0, 12.0, 16.0));
     }
 
     return new _Decorator(
@@ -1854,7 +1604,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         contentPadding: contentPadding,
         floatingLabelHeight: floatingLabelHeight,
         floatingLabelProgress: _floatingLabelController.value,
-        borderType: border.borderType,
+        border: decoration.border,
         borderGap: _borderGap,
         icon: icon,
         input: widget.child,
@@ -1916,11 +1666,10 @@ class InputDecoration {
     this.counterStyle,
     this.filled: false,
     this.fillColor,
-    this.borderType: InputBorderType.underline,
+    this.border: const UnderlineInputBorder(),
     this.enabled: true,
   }) : assert(isDense != null),
        assert(filled != null),
-       assert(borderType != null),
        assert(enabled != null),
        isCollapsed = false;
 
@@ -1934,7 +1683,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled: false,
     this.fillColor,
-    this.borderType: InputBorderType.underline,
+    this.border: const UnderlineInputBorder(),
     this.enabled: true,
   }) : assert(filled != null),
        assert(enabled != null),
@@ -2167,7 +1916,7 @@ class InputDecoration {
   /// [errorText], and [counterText].
   ///
   /// The default value of this property is [BorderType.underline].
-  final InputBorderType borderType;
+  final InputBorder border;
 
   /// If false [helperText],[errorText], and [counterText] are not displayed,
   /// and the opacity of the remaining visual elements is reduced.
@@ -2201,7 +1950,7 @@ class InputDecoration {
     TextStyle counterStyle,
     bool filled,
     Color fillColor,
-    InputBorderType borderType,
+    InputBorder border,
     bool enabled,
   }) {
     return new InputDecoration(
@@ -2226,7 +1975,7 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
-      borderType: enabled ?? this.borderType,
+      border: border ?? this.border,
       enabled: enabled ?? this.enabled,
     );
   }
@@ -2260,7 +2009,7 @@ class InputDecoration {
         && typedOther.counterStyle == counterStyle
         && typedOther.filled == filled
         && typedOther.fillColor == fillColor
-        && typedOther.borderType == borderType
+        && typedOther.border == border
         && typedOther.enabled == enabled;
   }
 
@@ -2290,7 +2039,7 @@ class InputDecoration {
         counterStyle,
         filled,
         fillColor,
-        borderType,
+        border,
         enabled,
       ),
     );
@@ -2335,8 +2084,8 @@ class InputDecoration {
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
-    if (borderType != null)
-      description.add('borderType: $borderType');
+    if (border != null)
+      description.add('border: $border');
     if (!enabled)
       description.add('enabled: false');
     return 'InputDecoration(${description.join(', ')})';
