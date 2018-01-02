@@ -34,9 +34,11 @@ Future<Null> pumpTestWidget(WidgetTester tester, {
           child: new Center(
             child: new UserAccountsDrawerHeader(
               onDetailsPressed: withOnDetailsPressedHandler ? () {} : null,
-              currentAccountPicture: const CircleAvatar(
-                key: avatarA,
-                child: const Text('A'),
+              currentAccountPicture: const ExcludeSemantics(
+                child: const CircleAvatar(
+                  key: avatarA,
+                  child: const Text('A'),
+                ),
               ),
               otherAccountsPictures: <Widget>[
                 const CircleAvatar(
@@ -210,7 +212,7 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Signed in\nA\nname\nemail',
+              label: 'Signed in\nname\nemail',
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 new TestSemantics(
@@ -257,7 +259,7 @@ void main() {
         new TestSemantics(
           children: <TestSemantics>[
             new TestSemantics(
-              label: 'Signed in\nA',
+              label: 'Signed in',
               textDirection: TextDirection.ltr,
               children: <TestSemantics>[
                 new TestSemantics(
