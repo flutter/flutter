@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/platform.dart';
+import 'base/process_manager.dart';
 import 'build_info.dart';
 import 'globals.dart';
 
@@ -262,11 +263,11 @@ class LocalEngineArtifacts extends Artifacts {
   }
 
   String _genSnapshotPath() {
-    const List<String> clangDirs = const <String>['clang_x86', 'clang_x64', 'clang_i386'];
+    const List<String> clangDirs = const <String>['.', 'clang_x86', 'clang_x64', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
     for (String clangDir in clangDirs) {
       final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (fs.file(genSnapshotPath).existsSync())
+      if (processManager.canRun(genSnapshotPath))
         return genSnapshotPath;
     }
     throw new Exception('Unable to find $genSnapshotName');

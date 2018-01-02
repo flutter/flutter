@@ -67,6 +67,8 @@ class Card extends StatelessWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The color of material used for this card.
