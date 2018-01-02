@@ -12,7 +12,7 @@ import("//topaz/public/dart-pkg/zircon/sdk_ext.gni")
 import("//topaz/public/lib/ui/flutter/sdk_ext/sdk_ext.gni")
 
 declare_args() {
-  flutter_app_default_is_jit = true
+  flutter_app_default_is_jit = is_debug
 }
 
 gen_snapshot_label = "//third_party/dart/runtime/bin:gen_snapshot($host_toolchain)"
@@ -301,11 +301,12 @@ template("flutter_aot_app") {
       "-nostdlib",
       "-nostartfiles",
     ]
+    output_dir = target_gen_dir
     output_name = outer_target_name
   }
 
   dylib_path =
-      get_label_info(":$dylib_label($shlib_toolchain)", "root_out_dir") +
+      get_label_info(":$dylib_label($shlib_toolchain)", "target_gen_dir") +
       "/lib.unstripped/lib$target_name.so"
 
   action(target_name) {
