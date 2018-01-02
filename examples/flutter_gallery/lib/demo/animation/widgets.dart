@@ -142,7 +142,7 @@ class SectionDetailView extends StatelessWidget {
       item = new Container(
         height: 240.0,
         padding: const EdgeInsets.all(16.0),
-        child: image,
+        child: new SafeArea(top: false, bottom:false, child: image),
       );
     } else {
       item = new ListTile(
