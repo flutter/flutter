@@ -76,6 +76,8 @@ class _AccountDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    assert(debugCheckHasDirectionality(context));
+
     final ThemeData theme = Theme.of(context);
     final List<Widget> children = <Widget>[];
 
@@ -136,7 +138,9 @@ class _AccountDetails extends StatelessWidget {
     }
 
     Widget accountDetails = new CustomMultiChildLayout(
-      delegate: new _AccountDetailsLayout(),
+      delegate: new _AccountDetailsLayout(
+        textDirection: Directionality.of(context),
+      ),
       children: children,
     );
 
@@ -159,19 +163,21 @@ const double _kAccountDetailsHeight = 56.0;
 
 class _AccountDetailsLayout extends MultiChildLayoutDelegate {
 
+  _AccountDetailsLayout({ @required this.textDirection });
+
   static final String accountName = 'accountName';
   static final String accountEmail = 'accountEmail';
   static final String dropdownIcon = 'dropdownIcon';
 
+  final TextDirection textDirection;
+
   @override
   void performLayout(Size size) {
     Size iconSize;
-
     if (hasChild(dropdownIcon)) {
-      // place the dropdown icon in bottom right
+      // place the dropdown icon in bottom right (LTR) or bottom left (RTL)
       iconSize = layoutChild(dropdownIcon, new BoxConstraints.loose(size));
-      final Offset offset = new Offset(size.width - iconSize.width, size.height - iconSize.height);
-      positionChild(dropdownIcon, offset);
+      positionChild(dropdownIcon, _offsetForIcon(size, iconSize));
     }
 
     final String bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
@@ -181,21 +187,55 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
-      final Size emailSize = layoutChild(bottomLine, new BoxConstraints.loose(constraintSize));
-      final Offset emailOffset = new Offset(0.0, size.height - 0.5 * iconSize.height - 0.5 * emailSize.height);
-      positionChild(bottomLine, emailOffset);
+      final Size bottomLineSize = layoutChild(bottomLine, new BoxConstraints.loose(constraintSize));
+      final Offset bottomLineOffset = _offsetForBottomLine(size, iconSize, bottomLineSize);
+      positionChild(bottomLine, bottomLineOffset);
 
       // place account name above account email
       if (bottomLine == accountEmail && hasChild(accountName)) {
         final Size nameSize = layoutChild(accountName, new BoxConstraints.loose(constraintSize));
-        final Offset nameOffset = new Offset(0.0, emailOffset.dy - nameSize.height);
-        positionChild(accountName, nameOffset);
+        positionChild(accountName, _offsetForName(size, nameSize, bottomLineOffset));
       }
     }
   }
 
   @override
   bool shouldRelayout(MultiChildLayoutDelegate oldDelegate) => true;
+
+  Offset _offsetForIcon(Size size, Size iconSize) {
+    switch (textDirection) {
+      case TextDirection.ltr:
+        return new Offset(size.width - iconSize.width, size.height - iconSize.height);
+      case TextDirection.rtl:
+        return new Offset(0.0, size.height - iconSize.height);
+    }
+    assert(false, 'Unreachable');
+    return null;
+  }
+
+  Offset _offsetForBottomLine(Size size, Size iconSize, Size bottomLineSize) {
+    final double y = size.height - 0.5 * iconSize.height - 0.5 * bottomLineSize.height;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        return new Offset(0.0, y);
+      case TextDirection.rtl:
+        return new Offset(size.width - bottomLineSize.width, y);
+    }
+    assert(false, 'Unreachable');
+    return null;
+  }
+
+  Offset _offsetForName(Size size, Size nameSize, Offset bottomLineOffset) {
+    final double y = bottomLineOffset.dy - nameSize.height;
+    switch (textDirection) {
+      case TextDirection.ltr:
+        return new Offset(0.0, y);
+      case TextDirection.rtl:
+        return new Offset(size.width - nameSize.width, y);
+    }
+    assert(false, 'Unreachable');
+    return null;
+  }
 }
 
 /// A material design [Drawer] header that identifies the app's user.
@@ -274,7 +314,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
           color: Theme.of(context).primaryColor,
         ),
         margin: widget.margin,
-        padding: const EdgeInsets.only(top: 16.0, left: 16.0),
+        padding: const EdgeInsetsDirectional.only(top: 16.0, start: 16.0),
         child: new SafeArea(
           bottom: false,
           child: new Column(
@@ -282,7 +322,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
             children: <Widget>[
               new Expanded(
                 child: new Padding(
-                  padding: const EdgeInsets.only(right: 16.0),
+                  padding: const EdgeInsetsDirectional.only(end: 16.0),
                   child: new _AccountPictures(
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,

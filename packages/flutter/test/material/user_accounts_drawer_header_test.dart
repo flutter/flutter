@@ -106,7 +106,7 @@ void main() {
   });
 
 
-  testWidgets('UserAccountsDrawerHeader null parameters', (WidgetTester tester) async {
+  testWidgets('UserAccountsDrawerHeader null parameters LTR', (WidgetTester tester) async {
     Widget buildFrame({
       Widget currentAccountPicture,
       List<Widget> otherAccountsPictures,
@@ -149,6 +149,10 @@ void main() {
       tester.getCenter(find.text('accountName')).dy,
       tester.getCenter(find.byType(Icon)).dy
     );
+    expect(
+      tester.getCenter(find.text('accountName')).dx,
+      lessThan(tester.getCenter(find.byType(Icon)).dx)
+    );
 
     await tester.pumpWidget(buildFrame(
       accountEmail: const Text('accountEmail'),
@@ -157,6 +161,10 @@ void main() {
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
       tester.getCenter(find.byType(Icon)).dy
+    );
+    expect(
+      tester.getCenter(find.text('accountEmail')).dx,
+      lessThan(tester.getCenter(find.byType(Icon)).dx)
     );
 
     await tester.pumpWidget(buildFrame(
@@ -167,6 +175,10 @@ void main() {
     expect(
       tester.getCenter(find.text('accountEmail')).dy,
       tester.getCenter(find.byType(Icon)).dy
+    );
+    expect(
+      tester.getCenter(find.text('accountEmail')).dx,
+      lessThan(tester.getCenter(find.byType(Icon)).dx)
     );
     expect(
       tester.getBottomLeft(find.text('accountEmail')).dy,
@@ -195,6 +207,117 @@ void main() {
     expect(
       tester.getBottomLeft(find.byKey(avatarA)).dx,
       tester.getBottomLeft(find.text('accountName')).dx
+    );
+    expect(
+      tester.getBottomLeft(find.text('accountName')).dy,
+      greaterThan(tester.getBottomLeft(find.byKey(avatarA)).dy)
+    );
+  });
+
+  testWidgets('UserAccountsDrawerHeader null parameters RTL', (WidgetTester tester) async {
+    Widget buildFrame({
+      Widget currentAccountPicture,
+      List<Widget> otherAccountsPictures,
+      Widget accountName,
+      Widget accountEmail,
+      VoidCallback onDetailsPressed,
+      EdgeInsets margin,
+    }) {
+      return new MaterialApp(
+        home: new Directionality(
+          textDirection: TextDirection.rtl,
+          child: new Material(
+            child: new Center(
+              child: new UserAccountsDrawerHeader(
+                currentAccountPicture: currentAccountPicture,
+                otherAccountsPictures: otherAccountsPictures,
+                accountName: accountName,
+                accountEmail: accountEmail,
+                onDetailsPressed: onDetailsPressed,
+                margin: margin,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildFrame());
+    final RenderBox box = tester.renderObject(find.byType(UserAccountsDrawerHeader));
+    expect(box.size.height, equals(160.0 + 1.0)); // height + bottom edge)
+    expect(find.byType(Icon), findsNothing);
+
+    await tester.pumpWidget(buildFrame(
+      onDetailsPressed: () { },
+    ));
+    expect(find.byType(Icon), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(
+      accountName: const Text('accountName'),
+      onDetailsPressed: () { },
+    ));
+    expect(
+      tester.getCenter(find.text('accountName')).dy,
+      tester.getCenter(find.byType(Icon)).dy
+    );
+    expect(
+      tester.getCenter(find.text('accountName')).dx,
+      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+    );
+
+    await tester.pumpWidget(buildFrame(
+      accountEmail: const Text('accountEmail'),
+      onDetailsPressed: () { },
+    ));
+    expect(
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
+    );
+    expect(
+      tester.getCenter(find.text('accountEmail')).dx,
+      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+    );
+
+    await tester.pumpWidget(buildFrame(
+      accountName: const Text('accountName'),
+      accountEmail: const Text('accountEmail'),
+      onDetailsPressed: () { },
+    ));
+    expect(
+      tester.getCenter(find.text('accountEmail')).dy,
+      tester.getCenter(find.byType(Icon)).dy
+    );
+    expect(
+      tester.getCenter(find.text('accountEmail')).dx,
+      greaterThan(tester.getCenter(find.byType(Icon)).dx)
+    );
+    expect(
+      tester.getBottomLeft(find.text('accountEmail')).dy,
+      greaterThan(tester.getBottomLeft(find.text('accountName')).dy)
+    );
+    expect(
+      tester.getBottomRight(find.text('accountEmail')).dx,
+      tester.getBottomRight(find.text('accountName')).dx
+    );
+
+    await tester.pumpWidget(buildFrame(
+      currentAccountPicture: const CircleAvatar(child: const Text('A')),
+    ));
+    expect(find.text('A'), findsOneWidget);
+
+    await tester.pumpWidget(buildFrame(
+      otherAccountsPictures: <Widget>[const CircleAvatar(child: const Text('A'))],
+    ));
+    expect(find.text('A'), findsOneWidget);
+
+    final Key avatarA = const Key('A');
+    await tester.pumpWidget(buildFrame(
+      currentAccountPicture: new CircleAvatar(key: avatarA, child: const Text('A')),
+      accountName: const Text('accountName'),
+    ));
+    expect(
+      tester.getBottomRight(find.byKey(avatarA)).dx,
+      tester.getBottomRight(find.text('accountName')).dx
     );
     expect(
       tester.getBottomLeft(find.text('accountName')).dy,
