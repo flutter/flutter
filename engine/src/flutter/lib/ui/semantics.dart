@@ -145,6 +145,7 @@ class SemanticsFlags {
   static const int _kIsButtonIndex = 1 << 3;
   static const int _kIsTextFieldIndex = 1 << 4;
   static const int _kIsFocusedIndex = 1 << 5;
+  static const int _kIsDisabledIndex = 1 << 6;
 
   const SemanticsFlags._(this.index);
 
@@ -193,6 +194,16 @@ class SemanticsFlags {
   /// The focused element is usually the current receiver of keyboard inputs.
   static const SemanticsFlags isFocused = const SemanticsFlags._(_kIsFocusedIndex);
 
+  /// Whether the semantic node is currently disabled.
+  ///
+  /// A disabled element does not respond to user interaction. For example, a
+  /// button that currently does not respond to user interaction should be
+  /// marked as disabled.
+  ///
+  /// Elements, that never respond to user interactions (e.g. static text)
+  /// should not be marked as disabled.
+  static const SemanticsFlags isDisabled = const SemanticsFlags._(_kIsDisabledIndex);
+
   /// The possible semantics flags.
   ///
   /// The map's key is the [index] of the flag and the value is the flag itself.
@@ -203,6 +214,7 @@ class SemanticsFlags {
     _kIsButtonIndex: isButton,
     _kIsTextFieldIndex: isTextField,
     _kIsFocusedIndex: isFocused,
+    _kIsDisabledIndex: isDisabled,
   };
 
   @override
@@ -220,6 +232,8 @@ class SemanticsFlags {
         return 'SemanticsFlags.isTextField';
       case _kIsFocusedIndex:
         return 'SemanticsFlags.isFocused';
+      case _kIsDisabledIndex:
+        return 'SemanticsFlags.isDisabled';
     }
     return null;
   }

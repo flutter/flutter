@@ -65,7 +65,8 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         IS_SELECTED(1 << 2),
         IS_BUTTON(1 << 3),
         IS_TEXT_FIELD(1 << 4),
-        IS_FOCUSED(1 << 5);
+        IS_FOCUSED(1 << 5),
+        IS_DISABLED(1 << 6);
 
         Flag(int value) {
             this.value = value;
@@ -157,7 +158,7 @@ class AccessibilityBridge extends AccessibilityNodeProvider implements BasicMess
         }
         result.setBoundsInScreen(bounds);
         result.setVisibleToUser(true);
-        result.setEnabled(true); // TODO(ianh): Expose disabled subtrees
+        result.setEnabled(!object.hasFlag(Flag.IS_DISABLED));
 
         if (object.hasAction(Action.TAP)) {
             result.addAction(AccessibilityNodeInfo.ACTION_CLICK);
