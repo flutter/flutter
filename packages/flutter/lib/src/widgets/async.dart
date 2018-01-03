@@ -267,13 +267,13 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// a [Stream].
 ///
 /// Widget rebuilding is scheduled by each interaction, using [State.setState],
-/// but is otherwise decoupled from the timing of the stream. The [build] method
+/// but is otherwise decoupled from the timing of the stream. The [builder]
 /// is called at the discretion of the Flutter pipeline, and will thus receive a
 /// timing-dependent sub-sequence of the snapshots that represent the
 /// interaction with the stream.
 ///
 /// As an example, when interacting with a stream producing the integers
-/// 0 through 9, the [build] method may be called with any ordered sub-sequence
+/// 0 through 9, the [builder] may be called with any ordered sub-sequence
 /// of the following snapshots that includes the last one (the one with
 /// ConnectionState.done):
 ///
@@ -284,8 +284,9 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// * `new AsyncSnapshot<int>.withData(ConnectionState.active, 9)`
 /// * `new AsyncSnapshot<int>.withData(ConnectionState.done, 9)`
 ///
-/// The actual sequence of invocations of [build] depends on the relative timing
-/// of events produced by the stream and the build rate of the Flutter pipeline.
+/// The actual sequence of invocations of the [builder] depends on the relative
+/// timing of events produced by the stream and the build rate of the Flutter
+/// pipeline.
 ///
 /// Changing the [StreamBuilder] configuration to another stream during event
 /// generation introduces snapshot pairs of the form
@@ -303,15 +304,10 @@ typedef Widget AsyncWidgetBuilder<T>(BuildContext context, AsyncSnapshot<T> snap
 /// The data and error fields of snapshots produced are only changed when the
 /// state is `ConnectionState.active`.
 ///
-/// By default, the initial snapshot will not contain data, resulting in a
-/// snapshot of the form
-///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, null)`
-///
-/// You can override this by providing [initialData], which results in a
-/// snapshot of the form
-///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.none, 'initial data')`
+/// The initial snapshot data can be controlled by specifying [initialData].
+/// You would use this facility to ensure that if the [builder] is invoked
+/// before the first event arrives on the stream, the snapshot carries data of
+/// your choice rather than the default null value.
 ///
 /// See also:
 ///
@@ -344,7 +340,7 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
   /// Creates a new [StreamBuilder] that builds itself based on the latest
   /// snapshot of interaction with the specified [stream] and whose build
   /// strategy is given by [builder]. The [initialData] is used to create the
-  /// first snapshot delivered to the [builder].
+  /// initial snapshot. It is null by default.
   const StreamBuilder({
     Key key,
     this.initialData,
@@ -407,15 +403,10 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
 /// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
 /// * `new AsyncSnapshot<String>.withError(ConnectionState.done, 'some error')`
 ///
-/// By default, the initial snapshot delivered to the [builder] will not contain
-/// data, resulting in a snapshot of the form:
-///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, null)`
-///
-/// You can override this by providing [initialData], which results in a
-/// snapshot of the form:
-///
-/// * `new AsyncSnapshot<String>.withData(ConnectionState.waiting, 'initial data')`
+/// The initial snapshot data can be controlled by specifying [initialData]. You
+/// would use this facility to ensure that if the [builder] is invoked before
+/// the future completes, the snapshot carries data of your choice rather than
+/// the default null value.
 ///
 /// The data and error fields of the snapshot change only as the connection
 /// state field transitions from `waiting` to `done`, and they will be retained
@@ -493,7 +484,7 @@ class _FutureBuilderState<T> extends State<FutureBuilder<T>> {
   @override
   void initState() {
     super.initState();
-    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData); // ignore: prefer_const_constructors
+    _snapshot = new AsyncSnapshot<T>.withData(ConnectionState.none, widget.initialData);
     _subscribe();
   }
 
