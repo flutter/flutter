@@ -41,7 +41,8 @@ void PhysicalModelLayer::Preroll(PrerollContext* context,
 void PhysicalModelLayer::UpdateScene(SceneUpdateContext& context) {
   FXL_DCHECK(needs_system_composite());
 
-  SceneUpdateContext::Frame frame(context, rrect_, color_, elevation_);
+  SceneUpdateContext::Frame frame(context, shape_->getFrameRRect(), color_,
+                                  elevation_);
   for (auto& layer : layers()) {
     if (layer->needs_painting()) {
       frame.AddPaintedLayer(layer.get());
