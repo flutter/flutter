@@ -106,6 +106,27 @@ class TestTextInput {
     ));
   }
 
+  /// Simulates the user pressing one of the [TextInputAction] buttons.
+  /// Does not check that the [TextInputAction] performed is an acceptable one
+  /// based on the `inputAction` [setClientArgs].
+  void receiveAction(TextInputAction action) {
+    // Not using the `expect` function because in the case of a FlutterDriver
+    // test this code does not run in a package:test test zone.
+    if (_client == 0) {
+      throw new TestFailure('_client must be non-zero');
+    }
+    BinaryMessages.handlePlatformMessage(
+      SystemChannels.textInput.name,
+      SystemChannels.textInput.codec.encodeMethodCall(
+        new MethodCall(
+          'TextInputClient.performAction',
+          <dynamic>[_client, action.toString()],
+        ),
+      ),
+      (ByteData data) { /* response from framework is discarded */ },
+    );
+  }
+
   /// Simulates the user hiding the onscreen keyboard.
   void hide() {
     _isVisible = false;
