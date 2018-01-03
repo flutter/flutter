@@ -269,6 +269,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     target: target,
     hasPlugins: hasFlutterPlugins,
     previewDart2: buildInfo.previewDart2,
+    strongMode: buildInfo.strongMode,
   );
 
   final List<String> commands = <String>[

@@ -61,6 +61,7 @@ Future<String> compile(
     String mainPath,
     bool linkPlatformKernelIn : false,
     bool aot : false,
+    bool strongMode : false,
     List<String> extraFrontEndOptions,
     String incrementalCompilerByteStorePath}) async {
   final String frontendServer = artifacts.getArtifactPath(
@@ -80,6 +81,9 @@ Future<String> compile(
     command.add('--no-link-platform');
   if (aot) {
     command.add('--aot');
+  }
+  if (strongMode) {
+    command.add('--strong');
   }
   if (incrementalCompilerByteStorePath != null) {
     command.addAll(<String>[
