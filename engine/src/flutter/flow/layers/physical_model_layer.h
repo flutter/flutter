@@ -53,6 +53,7 @@ class PhysicalModelLayer : public ContainerLayer {
 // TODO(amirh): remove this once Scenic supports arbitrary shaped layers.
 class PhysicalLayerShape {
  public:
+  virtual ~PhysicalLayerShape() = default;
   virtual const SkRect& getBounds() const = 0;
   virtual SkPath getPath() const = 0;
   virtual void clipCanvas(SkCanvas& canvas) const = 0;
