@@ -53,7 +53,7 @@ tasks:
       Collects various performance metrics of compiling the Complex
       Layout for Android from Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   basic_material_app_android__compile:
     description: >
@@ -74,7 +74,7 @@ tasks:
       Collects various performance metrics of compiling the default
       app for Android from Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   flutter_gallery_android__compile:
     description: >
@@ -95,7 +95,7 @@ tasks:
       Collects various performance metrics of compiling the Flutter
       Gallery for Android from Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   # Android on-device tests
 
@@ -323,19 +323,19 @@ tasks:
     description: >
       Checks that flavored builds work on Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   channels_integration_test_win:
     description: >
       Checks that platform channels work when app is launched from Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   hot_mode_dev_cycle_win__benchmark:
     description: >
       Measures the performance of Dart VM hot patching feature on Windows.
     stage: devicelab_win
-    required_agent_capabilities: ["windows"]
+    required_agent_capabilities: ["windows/android"]
 
   # Tests running on Linux hosts
 
