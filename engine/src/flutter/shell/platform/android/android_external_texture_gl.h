@@ -35,8 +35,6 @@ class AndroidExternalTextureGL : public flow::Texture {
 
   void Detach();
 
-  void UpdateTransform();
-
   enum class AttachmentState { uninitialized, attached, detached };
 
   fml::jni::JavaObjectWeakGlobalRef surface_texture_;
@@ -46,8 +44,6 @@ class AndroidExternalTextureGL : public flow::Texture {
   bool new_frame_ready_ = false;
 
   GLuint texture_name_ = 0;
-
-  SkMatrix transform;
 
   FXL_DISALLOW_COPY_AND_ASSIGN(AndroidExternalTextureGL);
 };
