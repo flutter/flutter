@@ -53,6 +53,7 @@ class TextFormField extends FormField<String> {
     bool obscureText: false,
     bool autocorrect: true,
     int maxLines: 1,
+    ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
     List<TextInputFormatter> inputFormatters,
@@ -82,6 +83,7 @@ class TextFormField extends FormField<String> {
         autocorrect: autocorrect,
         maxLines: maxLines,
         onChanged: field.onChanged,
+        onSubmitted: onFieldSubmitted,
         inputFormatters: inputFormatters,
       );
     },
