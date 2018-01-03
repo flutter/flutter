@@ -448,10 +448,8 @@ class RenderListWheelViewport
     return layoutCoordinateY - _topScrollMarginExtent - offset.pixels;
   }
 
-  /// Smallest offset in the **scrollable layout coordinates** that a child can
-  /// have for its center to be visible inside the viewport in the
-  /// **untransformed plane's viewport painting coordinates**, given the
-  /// viewport's scroll offset.
+  /// Children with offsets larger than this value in the **scrollable layout
+  /// coordinates** can be painted.
   double get _firstVisibleLayoutOffset {
     assert(hasSize);
     if (_renderChildrenOutsideViewport)
@@ -459,10 +457,8 @@ class RenderListWheelViewport
     return _minScrollExtent - size.height / 2.0 - _itemExtent / 2.0 + offset.pixels;
   }
 
-  /// Largest offset in the **scrollable layout coordinates** that a child can
-  /// have for its center to be visible inside the viewport in the
-  /// **untransformed plane's viewport painting coordinates**, given the
-  /// viewport's scroll offset.
+  /// Children with offsets smaller than this value in the **scrollable layout
+  /// coordinates** can be painted.
   double get _lastVisibleLayoutOffset {
     assert(hasSize);
     if (_renderChildrenOutsideViewport)
@@ -592,7 +588,7 @@ class RenderListWheelViewport
     _ListWheelParentData childParentData = child.parentData;
 
     while (childParentData != null
-        && childParentData.offset.dy < firstVisibleLayoutOffset) {
+        && childParentData.offset.dy <= firstVisibleLayoutOffset) {
       child = childParentData.nextSibling;
       childParentData = child?.parentData;
     }
@@ -609,7 +605,7 @@ class RenderListWheelViewport
     _ListWheelParentData childParentData = childToPaint?.parentData;
 
     while (childParentData != null
-        && childParentData.offset.dy <= lastVisibleLayoutOffset) {
+        && childParentData.offset.dy < lastVisibleLayoutOffset) {
       _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
       childToPaint = childParentData.nextSibling;
       childParentData = childToPaint?.parentData;
