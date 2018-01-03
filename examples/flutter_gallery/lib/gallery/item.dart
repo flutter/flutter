@@ -110,6 +110,13 @@ List<GalleryItem> _buildGalleryItems() {
       buildRoute: (BuildContext context) => new ChipDemo(),
     ),
     new GalleryItem(
+      title: 'Data tables',
+      subtitle: 'Data tables',
+      category: 'Material Components',
+      routeName: DataTableDemo.routeName,
+      buildRoute: (BuildContext context) => new DataTableDemo(),
+    ),
+    new GalleryItem(
       title: 'Date and time pickers',
       subtitle: 'Date and time selection widgets',
       category: 'Material Components',

@@ -394,6 +394,8 @@ class Localizations extends StatefulWidget {
   final List<LocalizationsDelegate<dynamic>> delegates;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The locale of the Localizations widget for the widget tree that

@@ -60,6 +60,8 @@ class Theme extends StatelessWidget {
   final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   static final ThemeData _kFallbackTheme = new ThemeData.fallback();
@@ -219,6 +221,8 @@ class AnimatedTheme extends ImplicitlyAnimatedWidget {
   final bool isMaterialAppTheme;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

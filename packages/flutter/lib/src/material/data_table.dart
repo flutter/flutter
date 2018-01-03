@@ -177,6 +177,8 @@ class DataCell {
   /// If the cell has no data, then a [Text] widget with placeholder
   /// text should be provided instead, and [placeholder] should be set
   /// to true.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Whether the [child] is actually a placeholder.
@@ -411,14 +413,15 @@ class DataTable extends StatelessWidget {
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: new AnimatedDefaultTextStyle(
         style: new TextStyle(
-          // TODO(ianh): font family should be Roboto; see https://github.com/flutter/flutter/issues/3116
+          // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
           fontSize: _kHeadingFontSize,
-          height: _kHeadingRowHeight / _kHeadingFontSize,
+          height: math.min(1.0, _kHeadingRowHeight / _kHeadingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
             ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
             : ((onSort != null && sorted) ? Colors.white : Colors.white70),
         ),
+        softWrap: false,
         duration: _kSortArrowAnimationDuration,
         child: label,
       ),

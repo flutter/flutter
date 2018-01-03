@@ -108,98 +108,102 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
       appBar: new AppBar(
         title: const Text('Text fields'),
       ),
-      body: new Form(
-        key: _formKey,
-        autovalidate: _autovalidate,
-        onWillPop: _warnUserAboutInvalidData,
-        child: new ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          children: <Widget>[
-            new TextFormField(
-              decoration: const InputDecoration(
-                icon: const Icon(Icons.person),
-                hintText: 'What do people call you?',
-                labelText: 'Name *',
-              ),
-              onSaved: (String value) { person.name = value; },
-              validator: _validateName,
-            ),
-            new TextFormField(
-              decoration: const InputDecoration(
-                icon: const Icon(Icons.phone),
-                hintText: 'Where can we reach you?',
-                labelText: 'Phone Number *',
-                prefixText: '+1'
-              ),
-              keyboardType: TextInputType.phone,
-              onSaved: (String value) { person.phoneNumber = value; },
-              validator: _validatePhoneNumber,
-              // TextInputFormatters are applied in sequence.
-              inputFormatters: <TextInputFormatter> [
-                WhitelistingTextInputFormatter.digitsOnly,
-                // Fit the validating format.
-                _phoneNumberFormatter,
-              ],
-            ),
-            new TextFormField(
-              decoration: const InputDecoration(
-                hintText: 'Tell us about yourself',
-                helperText: 'Keep it short, this is just a demo',
-                labelText: 'Life story',
-              ),
-              maxLines: 3,
-            ),
-            new TextFormField(
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'Salary',
-                prefixText: '\$',
-                suffixText: 'USD',
-                suffixStyle: const TextStyle(color: Colors.green)
-              ),
-              maxLines: 1,
-            ),
-            new Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                new Expanded(
-                  child: new TextFormField(
-                    key: _passwordFieldKey,
-                    decoration: const InputDecoration(
-                      hintText: 'How do you log in?',
-                      labelText: 'New Password *',
-                    ),
-                    obscureText: true,
-                    onSaved: (String value) { person.password = value; },
-                  ),
+      body: new SafeArea(
+        top: false,
+        bottom: false,
+        child: new Form(
+          key: _formKey,
+          autovalidate: _autovalidate,
+          onWillPop: _warnUserAboutInvalidData,
+          child: new ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            children: <Widget>[
+              new TextFormField(
+                decoration: const InputDecoration(
+                  icon: const Icon(Icons.person),
+                  hintText: 'What do people call you?',
+                  labelText: 'Name *',
                 ),
-                const SizedBox(width: 16.0),
-                new Expanded(
-                  child: new TextFormField(
-                    decoration: const InputDecoration(
-                      hintText: 'How do you log in?',
-                      labelText: 'Re-type Password *',
-                    ),
-                    obscureText: true,
-                    validator: _validatePassword,
-                  ),
-                ),
-              ],
-            ),
-            new Container(
-              padding: const EdgeInsets.all(20.0),
-              alignment: Alignment.center,
-              child: new RaisedButton(
-                child: const Text('SUBMIT'),
-                onPressed: _handleSubmitted,
+                onSaved: (String value) { person.name = value; },
+                validator: _validateName,
               ),
-            ),
-            new Container(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: new Text('* indicates required field', style: Theme.of(context).textTheme.caption),
-            ),
-          ],
-        )
+              new TextFormField(
+                decoration: const InputDecoration(
+                  icon: const Icon(Icons.phone),
+                  hintText: 'Where can we reach you?',
+                  labelText: 'Phone Number *',
+                  prefixText: '+1'
+                ),
+                keyboardType: TextInputType.phone,
+                onSaved: (String value) { person.phoneNumber = value; },
+                validator: _validatePhoneNumber,
+                // TextInputFormatters are applied in sequence.
+                inputFormatters: <TextInputFormatter> [
+                  WhitelistingTextInputFormatter.digitsOnly,
+                  // Fit the validating format.
+                  _phoneNumberFormatter,
+                ],
+              ),
+              new TextFormField(
+                decoration: const InputDecoration(
+                  hintText: 'Tell us about yourself',
+                  helperText: 'Keep it short, this is just a demo',
+                  labelText: 'Life story',
+                ),
+                maxLines: 3,
+              ),
+              new TextFormField(
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Salary',
+                  prefixText: '\$',
+                  suffixText: 'USD',
+                  suffixStyle: const TextStyle(color: Colors.green)
+                ),
+                maxLines: 1,
+              ),
+              new Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  new Expanded(
+                    child: new TextFormField(
+                      key: _passwordFieldKey,
+                      decoration: const InputDecoration(
+                        hintText: 'How do you log in?',
+                        labelText: 'New Password *',
+                      ),
+                      obscureText: true,
+                      onSaved: (String value) { person.password = value; },
+                    ),
+                  ),
+                  const SizedBox(width: 16.0),
+                  new Expanded(
+                    child: new TextFormField(
+                      decoration: const InputDecoration(
+                        hintText: 'How do you log in?',
+                        labelText: 'Re-type Password *',
+                      ),
+                      obscureText: true,
+                      validator: _validatePassword,
+                    ),
+                  ),
+                ],
+              ),
+              new Container(
+                padding: const EdgeInsets.all(20.0),
+                alignment: Alignment.center,
+                child: new RaisedButton(
+                  child: const Text('SUBMIT'),
+                  onPressed: _handleSubmitted,
+                ),
+              ),
+              new Container(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: new Text('* indicates required field', style: Theme.of(context).textTheme.caption),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

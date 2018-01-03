@@ -34,6 +34,8 @@ class Title extends StatelessWidget {
   final Color color;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override

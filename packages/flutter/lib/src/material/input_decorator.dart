@@ -396,6 +396,8 @@ class InputDecorator extends StatelessWidget {
   final bool isEmpty;
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically an [EditableText], [DropdownButton], or [InkWell].
   final Widget child;
 
   static const double _kBottomBorderHeight = 1.0;

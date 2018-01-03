@@ -14,6 +14,7 @@ import 'framework.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,
+  FlutterErrorDetails,
   Listenable,
   TargetPlatform,
   ValueNotifier;
@@ -1001,6 +1002,15 @@ class FittedBox extends SingleChildRenderObjectWidget {
   /// An alignment of (-1.0, -1.0) aligns the child to the top-left corner of its
   /// parent's bounds.  An alignment of (1.0, 0.0) aligns the child to the middle
   /// of the right edge of its parent's bounds.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1672,7 +1682,7 @@ class UnconstrainedBox extends SingleChildRenderObjectWidget {
   /// be retained, and if set to [Axis.horizontal], then horizontal constraints
   /// will be retained.
   final Axis constrainedAxis;
-  
+
   @override
   void updateRenderObject(BuildContext context, covariant RenderUnconstrainedBox renderObject) {
     renderObject
@@ -1752,6 +1762,15 @@ class FractionallySizedBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   @override
@@ -1886,6 +1905,15 @@ class OverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The minimum width constraint to give the child. Set this to null (the
@@ -1973,6 +2001,15 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
   /// edge of the parent. Other values interpolate (and extrapolate) linearly.
   /// For example, a value of 0.0 means that the center of the child is aligned
   /// with the center of the parent.
+  ///
+  /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The size this widget should attempt to be.
@@ -2498,6 +2535,15 @@ class Stack extends MultiChildRenderObjectWidget {
   /// particular axis (e.g. that have neither `top` nor `bottom` set), use the
   /// alignment to determine how they should be positioned in that
   /// under-specified axis.
+  ///
+  /// Defaults to [AlignmentDirectional.topStart].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// The text direction with which to resolve [alignment].
@@ -2947,6 +2993,8 @@ class PositionedDirectional extends StatelessWidget {
   final double height;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -4244,6 +4292,13 @@ class RawImage extends LeafRenderObjectWidget {
   /// must be in scope.
   ///
   /// Defaults to [Alignment.center].
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// How to paint any portions of the layout bounds not covered by the image.
@@ -4773,7 +4828,7 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// more accessible.
   final SemanticsProperties properties;
 
-  /// If 'container' is true, this widget will introduce a new
+  /// If [container] is true, this widget will introduce a new
   /// node in the semantics tree. Otherwise, the semantics will be
   /// merged with the semantics of any ancestors (if the ancestor allows that).
   ///
@@ -4911,10 +4966,25 @@ class MergeSemantics extends SingleChildRenderObjectWidget {
 class BlockSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that excludes the semantics of all widgets painted before
   /// it in the same semantic container.
-  const BlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
+  const BlockSemantics({ Key key, this.blocking: true, Widget child }) : super(key: key, child: child);
+
+  /// Whether this widget is blocking semantics of all widget that were painted
+  /// before it in the same semantic container.
+  final bool blocking;
 
   @override
-  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics();
+  RenderBlockSemantics createRenderObject(BuildContext context) => new RenderBlockSemantics(blocking: blocking);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderBlockSemantics renderObject) {
+    renderObject.blocking = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
+  }
 }
 
 /// A widget that drops all the semantics of its descendants.
@@ -4969,6 +5039,8 @@ class KeyedSubtree extends StatelessWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Creates a KeyedSubtree for child with a key that's based on the child's existing key or childIndex.

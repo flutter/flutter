@@ -116,6 +116,8 @@ class Draggable<T> extends StatefulWidget {
   ///
   /// To limit the number of simultaneous drags on multitouch devices, see
   /// [maxSimultaneousDrags].
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The widget to display instead of [child] when one or more drags are under way.

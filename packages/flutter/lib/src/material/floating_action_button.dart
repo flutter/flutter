@@ -58,6 +58,8 @@ class FloatingActionButton extends StatefulWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// Typically an [Icon].
   final Widget child;
 
   /// Text that describes the action that will occur when the button is pressed.

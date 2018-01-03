@@ -459,7 +459,8 @@ abstract class WidgetsBinding extends BindingBase with SchedulerBinding, Gesture
       observer.didHaveMemoryPressure();
   }
 
-  Future<dynamic> _handleSystemMessage(Map<String, dynamic> message) async {
+  Future<Null> _handleSystemMessage(Object systemMessage) async {
+    final Map<String, dynamic> message = systemMessage;
     final String type = message['type'];
     switch (type) {
       case 'memoryPressure':
@@ -722,6 +723,8 @@ class RenderObjectToWidgetAdapter<T extends RenderObject> extends RenderObjectWi
   }) : super(key: new GlobalObjectKey(container));
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The [RenderObject] that is the parent of the [Element] created by this widget.
@@ -840,13 +843,14 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       _child = updateChild(_child, widget.child, _rootChildSlot);
       assert(_child != null);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetails(
+      final FlutterErrorDetails details = new FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'widgets library',
         context: 'attaching to the render tree'
-      ));
-      final Widget error = new ErrorWidget(exception);
+      );
+      FlutterError.reportError(details);
+      final Widget error = ErrorWidget.builder(details);
       _child = updateChild(null, error, _rootChildSlot);
     }
   }

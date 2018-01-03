@@ -85,15 +85,19 @@ class VideoCard extends StatelessWidget {
       Navigator.of(context).push(route);
     }
 
-    return new Card(
-      child: new Column(
-        children: <Widget>[
-          new ListTile(title: new Text(title), subtitle: new Text(subtitle)),
-          new GestureDetector(
-            onTap: pushFullScreenWidget,
-            child: _buildInlineVideo(),
-          ),
-        ],
+    return new SafeArea(
+      top: false,
+      bottom: false,
+      child: new Card(
+        child: new Column(
+          children: <Widget>[
+            new ListTile(title: new Text(title), subtitle: new Text(subtitle)),
+            new GestureDetector(
+              onTap: pushFullScreenWidget,
+              child: _buildInlineVideo(),
+            ),
+          ],
+        ),
       ),
     );
   }

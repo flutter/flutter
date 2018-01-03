@@ -70,6 +70,7 @@ class _TimePickerFragmentContext {
     @required this.onTimeChange,
     @required this.onModeChange,
     @required this.targetPlatform,
+    @required this.use24HourDials,
   }) : assert(headerTextTheme != null),
        assert(textDirection != null),
        assert(selectedTime != null),
@@ -80,7 +81,8 @@ class _TimePickerFragmentContext {
        assert(inactiveStyle != null),
        assert(onTimeChange != null),
        assert(onModeChange != null),
-       assert(targetPlatform != null);
+       assert(targetPlatform != null),
+       assert(use24HourDials != null);
 
   final TextTheme headerTextTheme;
   final TextDirection textDirection;
@@ -93,6 +95,7 @@ class _TimePickerFragmentContext {
   final ValueChanged<TimeOfDay> onTimeChange;
   final ValueChanged<_TimePickerMode> onModeChange;
   final TargetPlatform targetPlatform;
+  final bool use24HourDials;
 }
 
 /// Contains the [widget] and layout properties of an atom of time information,
@@ -278,21 +281,59 @@ class _HourControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
+    final bool alwaysUse24HourFormat = MediaQuery.of(context).alwaysUse24HourFormat;
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final TextStyle hourStyle = fragmentContext.mode == _TimePickerMode.hour
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
     final String formattedHour = localizations.formatHour(
       fragmentContext.selectedTime,
-      alwaysUse24HourFormat: MediaQuery.of(context).alwaysUse24HourFormat,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
+    );
+
+    TimeOfDay hoursFromSelected(int hoursToAdd) {
+      if (fragmentContext.use24HourDials) {
+        final int selectedHour = fragmentContext.selectedTime.hour;
+        return fragmentContext.selectedTime.replacing(
+          hour: (selectedHour + hoursToAdd) % TimeOfDay.hoursPerDay,
+        );
+      } else {
+        // Cycle 1 through 12 without changing day period.
+        final int periodOffset = fragmentContext.selectedTime.periodOffset;
+        final int hours = fragmentContext.selectedTime.hourOfPeriod;
+        return fragmentContext.selectedTime.replacing(
+          hour: periodOffset + (hours + hoursToAdd) % TimeOfDay.hoursPerPeriod,
+        );
+      }
+    }
+
+    final TimeOfDay nextHour = hoursFromSelected(1);
+    final String formattedNextHour = localizations.formatHour(
+      nextHour,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
+    );
+    final TimeOfDay previousHour = hoursFromSelected(-1);
+    final String formattedPreviousHour = localizations.formatHour(
+      previousHour,
+      alwaysUse24HourFormat: alwaysUse24HourFormat,
     );
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
       child: new Semantics(
-        selected: fragmentContext.mode == _TimePickerMode.hour,
         hint: localizations.timePickerHourModeAnnouncement,
-        child: new Text(formattedHour, style: hourStyle),
+        value: formattedHour,
+        increasedValue: formattedNextHour,
+        onIncrease: () {
+          fragmentContext.onTimeChange(nextHour);
+        },
+        decreasedValue: formattedPreviousHour,
+        onDecrease: () {
+          fragmentContext.onTimeChange(previousHour);
+        },
+        child: new ExcludeSemantics(
+          child: new Text(formattedHour, style: hourStyle),
+        ),
       ),
     );
   }
@@ -332,13 +373,34 @@ class _MinuteControl extends StatelessWidget {
     final TextStyle minuteStyle = fragmentContext.mode == _TimePickerMode.minute
         ? fragmentContext.activeStyle
         : fragmentContext.inactiveStyle;
+    final String formattedMinute = localizations.formatMinute(fragmentContext.selectedTime);
+
+    final TimeOfDay nextMinute = fragmentContext.selectedTime.replacing(
+      minute: (fragmentContext.selectedTime.minute + 1) % TimeOfDay.minutesPerHour,
+    );
+    final String formattedNextMinute = localizations.formatMinute(nextMinute);
+
+    final TimeOfDay previousMinute = fragmentContext.selectedTime.replacing(
+      minute: (fragmentContext.selectedTime.minute - 1) % TimeOfDay.minutesPerHour,
+    );
+    final String formattedPreviousMinute = localizations.formatMinute(previousMinute);
 
     return new GestureDetector(
       onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
       child: new Semantics(
-        selected: fragmentContext.mode == _TimePickerMode.minute,
         hint: localizations.timePickerMinuteModeAnnouncement,
-        child: new Text(localizations.formatMinute(fragmentContext.selectedTime), style: minuteStyle),
+        value: formattedMinute,
+        increasedValue: formattedNextMinute,
+        onIncrease: () {
+          fragmentContext.onTimeChange(nextMinute);
+        },
+        decreasedValue: formattedPreviousMinute,
+        onDecrease: () {
+          fragmentContext.onTimeChange(previousMinute);
+        },
+        child: new ExcludeSemantics(
+          child: new Text(formattedMinute, style: minuteStyle),
+        ),
       ),
     );
   }
@@ -605,15 +667,18 @@ class _TimePickerHeader extends StatelessWidget {
     @required this.orientation,
     @required this.onModeChanged,
     @required this.onChanged,
+    @required this.use24HourDials,
   }) : assert(selectedTime != null),
        assert(mode != null),
-       assert(orientation != null);
+       assert(orientation != null),
+       assert(use24HourDials != null);
 
   final TimeOfDay selectedTime;
   final _TimePickerMode mode;
   final Orientation orientation;
   final ValueChanged<_TimePickerMode> onModeChanged;
   final ValueChanged<TimeOfDay> onChanged;
+  final bool use24HourDials;
 
   void _handleChangeMode(_TimePickerMode value) {
     if (value != mode)
@@ -695,6 +760,7 @@ class _TimePickerHeader extends StatelessWidget {
       onTimeChange: onChanged,
       onModeChange: _handleChangeMode,
       targetPlatform: themeData.platform,
+      use24HourDials: use24HourDials,
     );
 
     final _TimePickerHeaderFormat format = _buildHeaderFormat(timeOfDayFormat, fragmentContext);
@@ -881,7 +947,7 @@ class _DialPainter extends CustomPainter {
           ),
           properties: new SemanticsProperties(
             selected: label.value == selectedValue,
-            label: labelPainter.text.text,
+            value: labelPainter.text.text,
             textDirection: textDirection,
             onTap: label.onTap,
           ),
@@ -964,11 +1030,11 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   @override
   void didUpdateWidget(_Dial oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.mode != oldWidget.mode) {
+    _updateDialRingFromWidget();
+    if (widget.mode != oldWidget.mode || widget.selectedTime != oldWidget.selectedTime) {
       if (!_dragging)
         _animateTo(_getThetaForTime(widget.selectedTime));
     }
-    _updateDialRingFromWidget();
   }
 
   void _updateDialRingFromWidget() {
@@ -1374,7 +1440,10 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 
   _TimePickerMode _mode = _TimePickerMode.hour;
   _TimePickerMode _lastModeAnnounced;
+
+  TimeOfDay get selectedTime => _selectedTime;
   TimeOfDay _selectedTime;
+
   Timer _vibrateTimer;
   MaterialLocalizations localizations;
 
@@ -1453,6 +1522,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
     assert(debugCheckHasMediaQuery(context));
     final MediaQueryData media = MediaQuery.of(context);
     final TimeOfDayFormat timeOfDayFormat = localizations.timeOfDayFormat(alwaysUse24HourFormat: media.alwaysUse24HourFormat);
+    final bool use24HourDials = hourFormat(of: timeOfDayFormat) != HourFormat.h;
 
     final Widget picker = new Padding(
       padding: const EdgeInsets.all(16.0),
@@ -1460,7 +1530,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         aspectRatio: 1.0,
         child: new _Dial(
           mode: _mode,
-          use24HourDials: hourFormat(of: timeOfDayFormat) != HourFormat.h,
+          use24HourDials: use24HourDials,
           selectedTime: _selectedTime,
           onChanged: _handleTimeChanged,
         )
@@ -1491,6 +1561,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
             orientation: orientation,
             onModeChanged: _handleModeChanged,
             onChanged: _handleTimeChanged,
+            use24HourDials: use24HourDials,
           );
 
           assert(orientation != null);

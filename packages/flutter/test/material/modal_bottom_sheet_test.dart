@@ -158,21 +158,28 @@ void main() {
     BuildContext outerContext;
     BuildContext innerContext;
 
-    await tester.pumpWidget(new Directionality(
-      textDirection: TextDirection.ltr,
-      child: new MediaQuery(
-        data: const MediaQueryData(
-          padding: const EdgeInsets.all(50.0),
-        ),
-        child: new Navigator(
-          onGenerateRoute: (_) {
-            return new PageRouteBuilder<Null>(
-              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-                outerContext = context;
-                return new Container();
-              },
-            );
-          },
+    await tester.pumpWidget(new Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: new Directionality(
+        textDirection: TextDirection.ltr,
+        child: new MediaQuery(
+          data: const MediaQueryData(
+            padding: const EdgeInsets.all(50.0),
+          ),
+          child: new Navigator(
+            onGenerateRoute: (_) {
+              return new PageRouteBuilder<Null>(
+                pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                  outerContext = context;
+                  return new Container();
+                },
+              );
+            },
+          ),
         ),
       ),
     ));

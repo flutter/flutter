@@ -361,15 +361,18 @@ class FlutterCommandRunner extends CommandRunner<Null> {
     if (fs.isFileSync(fs.path.join(rootPath, '.dartignore')))
       return <String>[];
 
-    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
-      return <String>[rootPath];
 
-    return fs.directory(rootPath)
+    final List<String> projectPaths = fs.directory(rootPath)
       .listSync(followLinks: false)
       .expand((FileSystemEntity entity) {
         return entity is Directory ? _gatherProjectPaths(entity.path) : <String>[];
       })
       .toList();
+
+    if (fs.isFileSync(fs.path.join(rootPath, 'pubspec.yaml')))
+      projectPaths.add(rootPath);
+
+    return projectPaths;
   }
 
   void _checkFlutterCopy() {

@@ -162,9 +162,11 @@ Future<Null> _runTests() async {
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'));
   await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'));
   await _pubRunTest(path.join(flutterRoot, 'packages', 'flutter_tools'));
+  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'));
 
   await _runAllDartTests(path.join(flutterRoot, 'dev', 'devicelab'));
   await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'));
+  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'));
   await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'));
@@ -372,11 +374,10 @@ Future<Null> _verifyNoBadImports(String workingDirectory) async {
     );
   }
   // Verify that the imports are well-ordered.
-  final Map<String, Set<String>> dependencyMap = new Map<String, Set<String>>.fromIterable(
-    directories,
-    key: (String directory) => directory,
-    value: (String directory) => _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation'),
-  );
+  final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
+  for (String directory in directories) {
+    dependencyMap[directory] = _findDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
+  }
   for (String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
@@ -497,10 +498,10 @@ Future<Null> _verifyGeneratedPluginRegistrants(String flutterRoot) async {
   final Set<String> outOfDate = new Set<String>();
 
   for (String package in packageToRegistrants.keys) {
-    final Map<File, String> fileToContent = new Map<File, String>.fromIterable(packageToRegistrants[package],
-      key: (File f) => f,
-      value: (File f) => f.readAsStringSync(),
-    );
+    final Map<File, String> fileToContent = <File, String>{};
+    for(File f in packageToRegistrants[package]) {
+      fileToContent[f] = f.readAsStringSync();
+    }
     await _runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
       printOutput: false,

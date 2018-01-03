@@ -389,6 +389,8 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// container will expand to fill all available space in its parent, unless
   /// the parent provides unbounded constraints, in which case the container
   /// will attempt to be as small as possible.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Align the [child] within the container.
@@ -398,6 +400,13 @@ class AnimatedContainer extends ImplicitlyAnimatedWidget {
   /// constraints are unbounded, then the child will be shrink-wrapped instead.
   ///
   /// Ignored if [child] is null.
+  ///
+  /// See also:
+  ///
+  ///  * [Alignment], a class with convenient constants typically used to
+  ///    specify an [AlignmentGeometry].
+  ///  * [AlignmentDirectional], like [Alignment] for specifying alignments
+  ///    relative to text direction.
   final AlignmentGeometry alignment;
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
@@ -516,6 +525,8 @@ class AnimatedPadding extends ImplicitlyAnimatedWidget {
   final EdgeInsetsGeometry padding;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -590,6 +601,8 @@ class AnimatedAlign extends ImplicitlyAnimatedWidget {
   final AlignmentGeometry alignment;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   @override
@@ -677,6 +690,8 @@ class AnimatedPositioned extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's left edge from the left of the stack.
@@ -798,6 +813,8 @@ class AnimatedPositionedDirectional extends ImplicitlyAnimatedWidget {
       super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The offset of the child's start edge from the start of the stack.
@@ -904,6 +921,8 @@ class AnimatedOpacity extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target opacity.
@@ -971,6 +990,8 @@ class AnimatedDefaultTextStyle extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The target text style.
@@ -1081,6 +1102,8 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
        super(key: key, curve: curve, duration: duration);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// The type of shape.
@@ -1144,7 +1167,7 @@ class _AnimatedPhysicalModelState extends AnimatedWidgetBaseState<AnimatedPhysic
       borderRadius: _borderRadius.evaluate(animation),
       elevation: _elevation.evaluate(animation),
       color: widget.animateColor ? _color.evaluate(animation) : widget.color,
-      shadowColor: widget.animateShadowColor 
+      shadowColor: widget.animateShadowColor
           ? _shadowColor.evaluate(animation)
           : widget.shadowColor,
     );

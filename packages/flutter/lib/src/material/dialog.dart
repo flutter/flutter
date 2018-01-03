@@ -12,6 +12,7 @@ import 'button_bar.dart';
 import 'colors.dart';
 import 'ink_well.dart';
 import 'material.dart';
+import 'material_localizations.dart';
 import 'theme.dart';
 
 // Examples can assume:
@@ -40,6 +41,8 @@ class Dialog extends StatelessWidget {
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   Color _getColor(BuildContext context) {
@@ -408,6 +411,7 @@ class _DialogRoute<T> extends PopupRoute<T> {
   _DialogRoute({
     @required this.theme,
     bool barrierDismissible: true,
+    this.barrierLabel,
     @required this.child,
   }) : assert(barrierDismissible != null),
        _barrierDismissible = barrierDismissible;
@@ -424,6 +428,9 @@ class _DialogRoute<T> extends PopupRoute<T> {
 
   @override
   Color get barrierColor => Colors.black54;
+
+  @override
+  final String barrierLabel;
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -480,5 +487,6 @@ Future<T> showDialog<T>({
     child: child,
     theme: Theme.of(context, shadowThemeOnly: true),
     barrierDismissible: barrierDismissible,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
   ));
 }

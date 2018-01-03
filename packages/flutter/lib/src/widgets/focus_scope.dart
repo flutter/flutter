@@ -68,6 +68,8 @@ class FocusScope extends StatefulWidget {
   final bool autofocus;
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// Returns the [node] of the [FocusScope] that most tightly encloses the

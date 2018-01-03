@@ -736,11 +736,15 @@ class RenderOpacity extends RenderProxyBox {
     assert(value >= 0.0 && value <= 1.0);
     if (_opacity == value)
       return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
+    final bool wasVisible = _alpha != 0;
     _opacity = value;
     _alpha = _getAlphaFromOpacity(_opacity);
-    markNeedsCompositingBitsUpdate();
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    markNeedsSemanticsUpdate();
+    if (wasVisible != (_alpha != 0))
+      markNeedsSemanticsUpdate();
   }
 
   int _alpha;
@@ -1354,8 +1358,10 @@ class RenderPhysicalModel extends _RenderCustomClip<RRect> {
     assert(value != null);
     if (elevation == value)
       return;
+    final bool didNeedCompositing = alwaysNeedsCompositing;
     _elevation = value;
-    markNeedsCompositingBitsUpdate();
+    if (didNeedCompositing != alwaysNeedsCompositing)
+      markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -3309,12 +3315,30 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
 class RenderBlockSemantics extends RenderProxyBox {
   /// Create a render object that blocks semantics for nodes below it in paint
   /// order.
-  RenderBlockSemantics({ RenderBox child }) : super(child);
+  RenderBlockSemantics({ RenderBox child, bool blocking: true, }) : _blocking = blocking, super(child);
+
+  /// Whether this render object is blocking semantics of previously painted
+  /// [RenderObject]s below a common semantics boundary from the semantic tree.
+  bool get blocking => _blocking;
+  bool _blocking;
+  set blocking(bool value) {
+    assert(value != null);
+    if (value == _blocking)
+      return;
+    _blocking = value;
+    markNeedsSemanticsUpdate();
+  }
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    config.isBlockingSemanticsOfPreviouslyPaintedNodes = true;
+    config.isBlockingSemanticsOfPreviouslyPaintedNodes = blocking;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder description) {
+    super.debugFillProperties(description);
+    description.add(new DiagnosticsProperty<bool>('blocking', blocking));
   }
 }
 

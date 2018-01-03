@@ -5,7 +5,7 @@
   "openAppDrawerTooltip": "باز کردن منوی پیمایش",
   "backButtonTooltip": "برگشت",
   "closeButtonTooltip": "بستن",
-  "deleteButtonTooltip": "",
+  "deleteButtonTooltip": "حذف",
   "nextMonthTooltip": "ماه بعد",
   "previousMonthTooltip": "ماه قبل",
   "nextPageTooltip": "صفحه بعد",
@@ -16,6 +16,7 @@
   "pageRowsInfoTitle": "$firstRow–$lastRow از $rowCount",
   "pageRowsInfoTitleApproximate": "$firstRow–$lastRow از حدود $rowCount",
   "rowsPerPageTitle": "ردیف در هر صفحه:",
+  "tabLabel": "$tabIndex از $tabCount",
   "selectedRowCountTitleOther": "$selectedRowCount مورد انتخاب شدند",
   "cancelButtonLabel": "لغو",
   "closeButtonLabel": "بستن",
@@ -28,6 +29,10 @@
   "viewLicensesButtonLabel": "مشاهده مجوزها",
   "anteMeridiemAbbreviation": "ق.ظ.",
   "postMeridiemAbbreviation": "ب.ظ.",
-  "timePickerHourModeAnnouncement": "ساعت ها را انتخاب کنید",
-  "timePickerMinuteModeAnnouncement": "دقیقه را انتخاب کنید"
+  "timePickerHourModeAnnouncement": "انتخاب ساعت",
+  "timePickerMinuteModeAnnouncement": "انتخاب دقیقه",
+  "signedInLabel": "وارد شدن",
+  "hideAccountsLabel": "پنهان کردن حساب ها",
+  "showAccountsLabel": "نمایش حساب ها",
+  "modalBarrierDismissLabel": "رد کردن"
 }

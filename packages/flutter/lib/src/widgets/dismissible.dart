@@ -88,6 +88,8 @@ class Dismissible extends StatefulWidget {
        super(key: key);
 
   /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   /// A widget that is stacked behind the child. If secondaryBackground is also
