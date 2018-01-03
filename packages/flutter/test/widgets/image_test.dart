@@ -363,6 +363,51 @@ void main() {
     expect(imageStreamCompleter.listeners.length, 0);
   });
 
+  testWidgets('Verify Image shows correct RenderImage when changing to an already completed provider', (WidgetTester tester) async {
+    final GlobalKey key = new GlobalKey();
+
+    final TestImageProvider imageProvider1 = new TestImageProvider();
+    final TestImageProvider imageProvider2 = new TestImageProvider();
+
+    await tester.pumpWidget(
+        new Container(
+            key: key,
+            child: new Image(
+                image: imageProvider1
+            )
+        ),
+        null,
+        EnginePhase.layout
+    );
+    RenderImage renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNull);
+
+    imageProvider1.complete();
+    imageProvider2.complete();
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+
+    final ui.Image oldImage = renderImage.image;
+
+    await tester.pumpWidget(
+        new Container(
+            key: key,
+            child: new Image(
+                image: imageProvider2
+            )
+        ),
+        null,
+        EnginePhase.layout
+    );
+
+    renderImage = key.currentContext.findRenderObject();
+    expect(renderImage.image, isNotNull);
+    expect(renderImage.image, isNot(equals(oldImage)));
+  });
+
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
