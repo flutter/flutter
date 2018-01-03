@@ -194,8 +194,6 @@ flutter/tools/gn --android --runtime-mode=release
 
 cd out
 find . -mindepth 1 -maxdepth 1 -type d | xargs -n 1 sh -c 'ninja -C $0 || exit 255'
-
-flutter update-packages --upgrade
 ```
 
 
