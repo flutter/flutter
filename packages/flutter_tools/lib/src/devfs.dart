@@ -383,7 +383,6 @@ class DevFS {
     String mainPath,
     String target,
     AssetBundle bundle,
-    bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
     ResidentCompiler generator,
@@ -446,10 +445,10 @@ class DevFS {
       // that isModified does not reset last check timestamp because we
       // want to report all modified files to incremental compiler next time
       // user does hot reload.
-      if (content.isModified || ((bundleDirty || bundleFirstUpload) && archivePath != null)) {
+      if (content.isModified || (bundleDirty && archivePath != null)) {
         dirtyEntries[deviceUri] = content;
         numBytes += content.size;
-        if (archivePath != null && !bundleFirstUpload)
+        if (archivePath != null)
           assetPathsToEvict.add(archivePath);
       }
     });

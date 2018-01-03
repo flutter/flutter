@@ -350,7 +350,6 @@ class FlutterDevice {
     String mainPath,
     String target,
     AssetBundle bundle,
-    bool bundleFirstUpload: false,
     bool bundleDirty: false,
     Set<String> fileFilter,
     bool fullRestart: false
@@ -365,7 +364,6 @@ class FlutterDevice {
         mainPath: mainPath,
         target: target,
         bundle: bundle,
-        bundleFirstUpload: bundleFirstUpload,
         bundleDirty: bundleDirty,
         fileFilter: fileFilter,
         generator: generator,
