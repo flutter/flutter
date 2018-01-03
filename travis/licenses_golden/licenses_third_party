@@ -1,4 +1,4 @@
-Signature: da364ae304275fa7646e2f477e1e6241
+Signature: 0539612b4ef14aaf6c11fb3a0a0464ea
 
 UNUSED LICENSES:
 
@@ -4683,7 +4683,6 @@ FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
-FILE: ../../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2012, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
@@ -5124,6 +5123,7 @@ FILE: ../../../third_party/dart/sdk/lib/io/namespace_impl.dart
 FILE: ../../../third_party/dart/sdk/lib/io/overrides.dart
 FILE: ../../../third_party/dart/sdk/lib/io/sync_socket.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/named_lookup.dart
+FILE: ../../../third_party/dart/utils/bazel/kernel_summary_worker.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2017, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
