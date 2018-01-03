@@ -453,7 +453,7 @@ class ListTile extends StatelessWidget {
       onLongPress: enabled ? onLongPress : null,
       child: new Semantics(
         selected: selected,
-        disabled: !enabled,
+        enabled: enabled,
         child: new ConstrainedBox(
           constraints: new BoxConstraints(minHeight: tileHeight),
           child: new Padding(

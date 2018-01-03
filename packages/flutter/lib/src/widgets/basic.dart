@@ -4764,7 +4764,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     Widget child,
     bool container: false,
     bool explicitChildNodes: false,
-    bool disabled,
+    bool enabled,
     bool checked,
     bool selected,
     bool button,
@@ -4790,7 +4790,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     container: container,
     explicitChildNodes: explicitChildNodes,
     properties: new SemanticsProperties(
-      disabled: disabled,
+      enabled: enabled,
       checked: checked,
       selected: selected,
       button: button,
@@ -4858,7 +4858,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     return new RenderSemanticsAnnotations(
       container: container,
       explicitChildNodes: explicitChildNodes,
-      disabled: properties.disabled,
+      enabled: properties.enabled,
       checked: properties.checked,
       selected: properties.selected,
       button: properties.button,
@@ -4898,7 +4898,7 @@ class Semantics extends SingleChildRenderObjectWidget {
     renderObject
       ..container = container
       ..explicitChildNodes = explicitChildNodes
-      ..disabled = properties.disabled
+      ..enabled = properties.enabled
       ..checked = properties.checked
       ..selected = properties.selected
       ..label = properties.label

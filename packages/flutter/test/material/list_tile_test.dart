@@ -361,14 +361,24 @@ void main() {
         children: <TestSemantics>[
           new TestSemantics.rootChild(
             label: 'one',
+            flags: <SemanticsFlags>[
+              SemanticsFlags.hasEnabledState,
+              SemanticsFlags.isEnabled,
+            ],
           ),
           new TestSemantics.rootChild(
             label: 'two',
-            flags: <SemanticsFlags>[SemanticsFlags.isSelected],
+            flags: <SemanticsFlags>[
+              SemanticsFlags.isSelected,
+              SemanticsFlags.hasEnabledState,
+              SemanticsFlags.isEnabled,
+            ],
           ),
           new TestSemantics.rootChild(
             label: 'three',
-            flags: <SemanticsFlags>[SemanticsFlags.isDisabled],
+            flags: <SemanticsFlags>[
+              SemanticsFlags.hasEnabledState,
+            ],
           ),
         ]
       ),
