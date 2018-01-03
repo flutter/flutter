@@ -33,19 +33,13 @@ class Usage {
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
     }
-
-    bool runningOnCI = false;
+    _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
     // Many CI systems don't do a full git checkout.
-    if (version.endsWith('/unknown'))
-      runningOnCI = true;
-
-    // Check for common CI systems.
-    if (isRunningOnBot)
-      runningOnCI = true;
-
-    // If we think we're running on a CI system, default to not sending analytics.
-    _analytics.analyticsOpt = runningOnCI ? AnalyticsOpt.optIn : AnalyticsOpt.optOut;
+    if (version.endsWith('/unknown') || isRunningOnBot) {
+      // If we think we're running on a CI system, default to not sending analytics.
+      suppressAnalytics = true;
+    }
   }
 
   /// Returns [Usage] active in the current app context.
