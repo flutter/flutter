@@ -71,7 +71,7 @@ class UnderlineInputBorder extends InputBorder {
 
   @override
   EdgeInsetsGeometry get dimensions {
-    return new EdgeInsets.all(borderSide.width); // TBD: just the bottom
+    return new EdgeInsets.only(bottom: borderSide.width);
   }
 
   @override
@@ -82,13 +82,12 @@ class UnderlineInputBorder extends InputBorder {
   @override
   Path getInnerPath(Rect rect, { TextDirection textDirection }) {
     return new Path()
-      ..addRect(rect.deflate(borderSide.width)); // TBD: just the bottom
+      ..addRect(new Rect.LTWH(rect.left, rect.top, rect.width, math.max(0.0, rect.height - borderSide.width)));
   }
 
   @override
   Path getOuterPath(Rect rect, { TextDirection textDirection }) {
-    return new Path()
-      ..addRect(rect); // TBD: just the bottom
+    return new Path()..addRect(rect);
   }
 
   @override

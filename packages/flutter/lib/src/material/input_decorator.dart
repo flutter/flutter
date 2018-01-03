@@ -1911,7 +1911,13 @@ class InputDecoration {
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// The default value of this property is [BorderType.underline].
+  /// The default value of this property is `const UnderlineInputBorder()`.
+  ///
+  /// See also:
+  ///  * [UnderlineInputBorder], which draws a horizontal line at the
+  ///    bottom of the input decorator's container.
+  ///  * [OutlineInputBorder], an [InputDecorator] border which draws a
+  ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
 
   /// If false [helperText],[errorText], and [counterText] are not displayed,
