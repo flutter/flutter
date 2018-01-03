@@ -334,13 +334,13 @@ Future<String> _buildAotSnapshot(
   }
 
   if (previewDart2) {
-    // if strongMode is specified we may have to get a different file.
     mainPath = await compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       mainPath: mainPath,
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
+      strongMode: strongMode,
     );
   }
 

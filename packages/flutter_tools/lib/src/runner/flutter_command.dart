@@ -149,10 +149,10 @@ abstract class FlutterCommand extends Command<Null> {
   }
 
   BuildInfo getBuildInfo() {
-    bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
         : false;
-    bool strongMode =  argParser.options.containsKey('strong')
+    final bool strongMode =  argParser.options.containsKey('strong')
         ? argResults['strong']
         : false;
     if (strongMode == true && previewDart2 == false) {
@@ -385,10 +385,10 @@ abstract class FlutterCommand extends Command<Null> {
         throw new ToolExit('Target file "$targetPath" not found.');
     }
 
-    bool previewDart2 = argParser.options.containsKey('preview-dart-2')
+    final bool previewDart2 = argParser.options.containsKey('preview-dart-2')
         ? argResults['preview-dart-2']
         : false;
-    bool strongMode =  argParser.options.containsKey('strong')
+    final bool strongMode =  argParser.options.containsKey('strong')
         ? argResults['strong']
         : false;
     if (strongMode == true && previewDart2 == false) {
