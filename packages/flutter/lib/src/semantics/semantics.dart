@@ -243,6 +243,7 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   /// The [container] argument must not be null.
   const SemanticsProperties({
+    this.disabled,
     this.checked,
     this.selected,
     this.button,
@@ -263,6 +264,14 @@ class SemanticsProperties extends DiagnosticableTree {
     this.onMoveCursorForwardByCharacter,
     this.onMoveCursorBackwardByCharacter,
   });
+
+  /// If non-null, indicates that this subtree represents something that can be
+  /// in a disabled or enabled state.
+  ///
+  /// For example, a button that a user can currently interact with is
+  /// considered enabled. A button that currently does not respond to user
+  /// interactions is disabled.
+  final bool disabled;
 
   /// If non-null, indicates that this subtree represents a checkbox
   /// or similar widget with a "checked" state, and what its current
@@ -1739,6 +1748,17 @@ class SemanticsConfiguration {
   bool get isSelected => _hasFlag(SemanticsFlags.isSelected);
   set isSelected(bool value) {
     _setFlag(SemanticsFlags.isSelected, value);
+  }
+
+  /// Whether the owning [RenderObject] is a currently disabled.
+  ///
+  /// A disabled object does not respond to user interactions. Only objects that
+  /// usually do respond to user interactions but currently don't (like a
+  /// disabled button) should be marked as disabled. Objects (like static text)
+  /// that never respond to user interactions should not be marked as disabled.
+  bool get isDisabled => _hasFlag(SemanticsFlags.isDisabled);
+  set isDisabled(bool value) {
+    _setFlag(SemanticsFlags.isDisabled, value);
   }
 
   /// If this node has Boolean state that can be controlled by the user, whether

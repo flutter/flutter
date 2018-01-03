@@ -347,6 +347,7 @@ void main() {
                 ),
                 const ListTile(
                   title: const Text('three'),
+                  enabled: false,
                 ),
               ],
             ),
@@ -367,6 +368,7 @@ void main() {
           ),
           new TestSemantics.rootChild(
             label: 'three',
+            flags: <SemanticsFlags>[SemanticsFlags.isDisabled],
           ),
         ]
       ),
