@@ -364,22 +364,21 @@ void main() {
   });
 
   testWidgets('Image State can be reconfigured to use another image', (WidgetTester tester) async {
-    int renderImagesWithImages() {
-      return tester.renderObjectList<RenderImage>(find.byType(Image))
-          .where((RenderImage renderImage) => renderImage.image != null)
-          .length;
-    }
-
     final Image image1 = new Image(image: new TestImageProvider()..complete(), width: 10.0);
     final Image image2 = new Image(image: new TestImageProvider()..complete(), width: 20.0);
 
     final Column column = new Column(children: <Widget>[image1, image2]);
     await tester.pumpWidget(column, null, EnginePhase.layout);
-    expect(renderImagesWithImages(), 2);
 
     final Column columnSwapped = new Column(children: <Widget>[image2, image1]);
     await tester.pumpWidget(columnSwapped, null, EnginePhase.layout);
-    expect(renderImagesWithImages(), 2);
+
+    final List<RenderImage> renderObjects = tester.renderObjectList<RenderImage>(find.byType(Image)).toList();
+    expect(renderObjects, hasLength(2));
+    expect(renderObjects[0].image, isNotNull);
+    expect(renderObjects[0].width, 20.0);
+    expect(renderObjects[1].image, isNotNull);
+    expect(renderObjects[1].width, 10.0);
   });
 }
 
