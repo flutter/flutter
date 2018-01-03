@@ -18,9 +18,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-part '../../lib/src/material_animated_icons/animated_icons.dart';
-part '../../lib/src/material_animated_icons/animated_icons_data.dart';
-part '../../lib/src/material_animated_icons/data/menu_arrow.g.dart';
+part 'package:flutter/src/material_animated_icons/animated_icons.dart';
+part 'package:flutter/src/material_animated_icons/animated_icons_data.dart';
+part 'package:flutter/src/material_animated_icons/data/menu_arrow.g.dart';
 
 class MockCanvas extends Mock implements ui.Canvas {}
 class MockPath extends Mock implements ui.Path {}
