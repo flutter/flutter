@@ -7,6 +7,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 void main() {
@@ -155,5 +156,34 @@ void main() {
     }
     await runTest(true);
     await runTest(false);
+  });
+
+  testWidgets('excludeFromSemantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = new SemanticsTester(tester);
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(
+        child: new InkWell(
+          onTap: () { },
+          child: const Text('Button'),
+        ),
+      ),
+    ));
+    expect(semantics, includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap]));
+
+    await tester.pumpWidget(new Directionality(
+      textDirection: TextDirection.ltr,
+      child: new Material(
+        child: new InkWell(
+          onTap: () { },
+          child: const Text('Button'),
+          excludeFromSemantics: true,
+        ),
+      ),
+    ));
+    expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
+
+    semantics.dispose();
   });
 }
