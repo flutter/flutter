@@ -1190,11 +1190,6 @@ class _RenderDecorationElement extends RenderObjectElement {
 
   @override
   void moveChildRenderObject(RenderObject child, dynamic slotValue) {
-    assert(child is RenderBox);
-    assert(slotValue is _DecorationSlot);
-    assert(renderObject.childToSlot.keys.contains(child));
-    // final _DecorationSlot slot = slotValue;
-    // TODO(hansmuller): verify that it's not possible to arrive here.
     assert(false, 'not reachable');
   }
 }
@@ -1642,7 +1637,7 @@ class InputDecoration {
   /// Creates a bundle of the border, labels, icons, and styles used to
   /// decorate a Material Design text field.
   ///
-  /// The [isDense], [filled], [borderType], and [enabled] arguments must not
+  /// The [isDense], [filled], and [enabled] arguments must not
   /// be null.
   const InputDecoration({
     this.icon,
@@ -1716,7 +1711,7 @@ class InputDecoration {
   /// The trailing edge of the icon is padded by 16dps.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
@@ -1791,12 +1786,13 @@ class InputDecoration {
   /// The padding for the input decoration's container.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
-  /// By default the `contentPadding` reflects [isDense] and [borderType]. If
-  /// [isCollapsed] is true then `contentPadding` is [EdgeInsets.zero].
+  /// By default the `contentPadding` reflects [isDense] and the type of the
+  /// [border]. If [isCollapsed] is true then `contentPadding` is
+  /// [EdgeInsets.zero].
   final EdgeInsets contentPadding;
 
   /// Whether the decoration is the same size as the input field.
@@ -1822,7 +1818,7 @@ class InputDecoration {
   /// ```
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
@@ -1856,7 +1852,7 @@ class InputDecoration {
   /// ```
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
@@ -1887,11 +1883,11 @@ class InputDecoration {
 
   /// If true the decoration's container is filled with [fillColor].
   ///
-  /// Typically this field set to true if [borderType] is
-  /// [InputBorderType.underline].
+  /// Typically this field set to true if [border] is
+  /// [const UnderlineInputBorder()].
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
@@ -1903,7 +1899,7 @@ class InputDecoration {
   /// By default the fillColor is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   final Color fillColor;
@@ -1911,7 +1907,7 @@ class InputDecoration {
   /// The border to draw around the decoration's container.
   ///
   /// The decoration's container is the area which is filled if [isFilled] is
-  /// true and bordered per the [borderType]. It's the area adjacent to
+  /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
   ///
