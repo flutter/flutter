@@ -25,7 +25,6 @@ group("flutter") {
     public_deps += [
       "$flutter_root/content_handler:aot",
       "$flutter_root/content_handler:jit",
-      "$flutter_root/examples",
       "$flutter_root/flow",
     ]
   }
