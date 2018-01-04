@@ -516,6 +516,8 @@ class HotRunner extends ResidentRunner {
       int countExpectedReports = 0;
       for (FlutterDevice device in flutterDevices) {
         // List has one report per Flutter view.
+        await device.resetAssetDirectory();
+
         final List<Future<Map<String, dynamic>>> reports = device.reloadSources(
           entryPath,
           pause: pause
