@@ -15,9 +15,9 @@ import 'dart:ui' as ui show Paint, Path, Canvas;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 part 'package:flutter/src/material/animated_icons/animated_icons.dart';
 part 'package:flutter/src/material/animated_icons/animated_icons_data.dart';
