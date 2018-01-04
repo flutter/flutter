@@ -69,6 +69,13 @@ void PlatformViewIOS::SetupAndLoadFromSource(const std::string& assets_directory
       });
 }
 
+void PlatformViewIOS::SetAssetBundlePathOnUI(const std::string& assets_directory) {
+  blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), assets_directory ] {
+    if (engine)
+      engine->SetAssetBundlePath(assets_directory);
+  });
+}
+
 fml::WeakPtr<PlatformViewIOS> PlatformViewIOS::GetWeakPtr() {
   return weak_factory_.GetWeakPtr();
 }
@@ -113,6 +120,18 @@ void PlatformViewIOS::RunFromSource(const std::string& assets_directory,
 
   dispatch_async(dispatch_get_main_queue(), ^{
     SetupAndLoadFromSource(assets_directory, main, packages);
+    latch->Signal();
+  });
+
+  latch->Wait();
+  delete latch;
+}
+
+void PlatformViewIOS::SetAssetBundlePath(const std::string& assets_directory) {
+  auto latch = new fxl::ManualResetWaitableEvent();
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    SetAssetBundlePathOnUI(assets_directory);
     latch->Signal();
   });
 

@@ -27,6 +27,8 @@ class PlatformViewTest : public PlatformView {
                      const std::string& main,
                      const std::string& packages) override;
 
+  void SetAssetBundlePath(const std::string& assets_directory) override;
+
  private:
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewTest);
 };

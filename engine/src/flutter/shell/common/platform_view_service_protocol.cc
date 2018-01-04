@@ -133,6 +133,8 @@ void PlatformViewServiceProtocol::RegisterHook(bool running_precompiled_code) {
   }
   Dart_RegisterRootServiceRequestCallback(kRunInViewExtensionName, &RunInView,
                                           nullptr);
+  Dart_RegisterRootServiceRequestCallback(kSetAssetBundlePathExtensionName,
+                                          &SetAssetBundlePath, nullptr);
   // [benchmark helper] Wait for the UI Thread to idle.
   Dart_RegisterRootServiceRequestCallback(kFlushUIThreadTasksExtensionName,
                                           &FlushUIThreadTasks, nullptr);
@@ -188,16 +190,15 @@ bool PlatformViewServiceProtocol::RunInView(const char* method,
   if (!view_existed) {
     // If the view did not exist this request has definitely failed.
     return ErrorUnknownView(json_object, view_id);
-  } else {
-    // The view existed and the isolate was created. Success.
-    std::stringstream response;
-    response << "{\"type\":\"Success\","
-             << "\"view\":";
-    AppendFlutterView(&response, view_id_as_num, main_port, isolate_name);
-    response << "}";
-    *json_object = strdup(response.str().c_str());
-    return true;
   }
+
+  // The view existed and the isolate was created. Success.
+  std::stringstream response;
+  response << "{\"type\":\"Success\","
+           << "\"view\":";
+  AppendFlutterView(&response, view_id_as_num, main_port, isolate_name);
+  response << "}";
+  *json_object = strdup(response.str().c_str());
   return true;
 }
 
@@ -388,6 +389,58 @@ bool PlatformViewServiceProtocol::FlushUIThreadTasks(const char* method,
   latch.Wait();
 
   *json_object = strdup("{\"type\":\"Success\"}");
+  return true;
+}
+
+const char* PlatformViewServiceProtocol::kSetAssetBundlePathExtensionName =
+    "_flutter.setAssetBundlePath";
+
+bool PlatformViewServiceProtocol::SetAssetBundlePath(const char* method,
+                                                     const char** param_keys,
+                                                     const char** param_values,
+                                                     intptr_t num_params,
+                                                     void* user_data,
+                                                     const char** json_object) {
+  const char* view_id =
+      ValueForKey(param_keys, param_values, num_params, "viewId");
+  if (view_id == nullptr) {
+    return ErrorMissingParameter(json_object, "viewId");
+  }
+  if (strncmp(view_id, kViewIdPrefx, kViewIdPrefxLength) != 0) {
+    return ErrorBadParameter(json_object, "viewId", view_id);
+  }
+  const char* asset_directory =
+      ValueForKey(param_keys, param_values, num_params, "assetDirectory");
+  if (asset_directory == nullptr) {
+    return ErrorMissingParameter(json_object, "assetDirectory");
+  }
+
+  // Convert the actual flutter view hex id into a number.
+  uintptr_t view_id_as_num =
+      std::stoull((view_id + kViewIdPrefxLength), nullptr, 16);
+
+  // Ask the Shell to update asset bundle path in the specified view.
+  // This will run a task on the UI thread before returning.
+  Shell& shell = Shell::Shared();
+  bool view_existed = false;
+  Dart_Port main_port = ILLEGAL_PORT;
+  std::string isolate_name;
+  shell.SetAssetBundlePathInPlatformView(view_id_as_num, asset_directory,
+                                         &view_existed, &main_port,
+                                         &isolate_name);
+
+  if (!view_existed) {
+    // If the view did not exist this request has definitely failed.
+    return ErrorUnknownView(json_object, view_id);
+  }
+
+  // The view existed and the isolate was created. Success.
+  std::stringstream response;
+  response << "{\"type\":\"Success\","
+           << "\"view\":";
+  AppendFlutterView(&response, view_id_as_num, main_port, isolate_name);
+  response << "}";
+  *json_object = strdup(response.str().c_str());
   return true;
 }
 

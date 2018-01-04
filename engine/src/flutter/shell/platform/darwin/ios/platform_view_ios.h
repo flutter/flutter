@@ -59,6 +59,8 @@ class PlatformViewIOS : public PlatformView {
                      const std::string& main,
                      const std::string& packages) override;
 
+  void SetAssetBundlePath(const std::string& assets_directory) override;
+
   NSObject<FlutterBinaryMessenger>* binary_messenger() const {
     return binary_messenger_;
   }
@@ -74,6 +76,8 @@ class PlatformViewIOS : public PlatformView {
   void SetupAndLoadFromSource(const std::string& assets_directory,
                               const std::string& main,
                               const std::string& packages);
+
+  void SetAssetBundlePathOnUI(const std::string& assets_directory);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(PlatformViewIOS);
 };

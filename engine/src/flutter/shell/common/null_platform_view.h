@@ -26,6 +26,7 @@ class NullPlatformView : public PlatformView {
   void RunFromSource(const std::string& assets_directory,
                      const std::string& main,
                      const std::string& packages) override;
+  void SetAssetBundlePath(const std::string& assets_directory) override;
 
  private:
   fxl::WeakPtrFactory<NullPlatformView> weak_factory_;

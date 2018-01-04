@@ -387,6 +387,11 @@ void Engine::RunFromSource(const std::string& main,
   RunBundleAndSource(bundle_path, main, packages);
 }
 
+void Engine::SetAssetBundlePath(const std::string& bundle_path) {
+  TRACE_EVENT0("flutter", "Engine::SetAssetBundlePath");
+  ConfigureAssetBundle(bundle_path);
+}
+
 Dart_Port Engine::GetUIIsolateMainPort() {
   if (!runtime_)
     return ILLEGAL_PORT;

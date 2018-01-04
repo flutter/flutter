@@ -73,6 +73,13 @@ void PlatformViewMac::SetupAndLoadFromSource(const std::string& assets_directory
       });
 }
 
+void PlatformViewMac::SetAssetBundlePathOnUI(const std::string& assets_directory) {
+  blink::Threads::UI()->PostTask([ engine = engine().GetWeakPtr(), assets_directory ] {
+    if (engine)
+      engine->SetAssetBundlePath(assets_directory);
+  });
+}
+
 intptr_t PlatformViewMac::GLContextFBO() const {
   // Default window bound framebuffer FBO 0.
   return 0;
@@ -146,6 +153,18 @@ void PlatformViewMac::RunFromSource(const std::string& assets_directory,
 
   dispatch_async(dispatch_get_main_queue(), ^{
     SetupAndLoadFromSource(assets_directory, main, packages);
+    latch->Signal();
+  });
+
+  latch->Wait();
+  delete latch;
+}
+
+void PlatformViewMac::SetAssetBundlePath(const std::string& assets_directory) {
+  auto latch = new fxl::ManualResetWaitableEvent();
+
+  dispatch_async(dispatch_get_main_queue(), ^{
+    SetAssetBundlePathOnUI(assets_directory);
     latch->Signal();
   });
 

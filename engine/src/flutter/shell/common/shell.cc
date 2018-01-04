@@ -300,4 +300,60 @@ void Shell::RunInPlatformViewUIThread(uintptr_t view_id,
   latch->Signal();
 }
 
+void Shell::SetAssetBundlePathInPlatformView(uintptr_t view_id,
+                                             const char* asset_directory,
+                                             bool* view_existed,
+                                             int64_t* dart_isolate_id,
+                                             std::string* isolate_name) {
+  fxl::AutoResetWaitableEvent latch;
+  FXL_DCHECK(view_id != 0);
+  FXL_DCHECK(asset_directory);
+  FXL_DCHECK(view_existed);
+
+  blink::Threads::UI()->PostTask([this, view_id, asset_directory, view_existed,
+                                  dart_isolate_id, isolate_name, &latch]() {
+    SetAssetBundlePathInPlatformViewUIThread(view_id, asset_directory,
+                                             view_existed, dart_isolate_id,
+                                             isolate_name, &latch);
+  });
+  latch.Wait();
+}
+
+void Shell::SetAssetBundlePathInPlatformViewUIThread(
+    uintptr_t view_id,
+    const std::string& assets_directory,
+    bool* view_existed,
+    int64_t* dart_isolate_id,
+    std::string* isolate_name,
+    fxl::AutoResetWaitableEvent* latch) {
+  FXL_DCHECK(ui_thread_checker_ &&
+             ui_thread_checker_->IsCreationThreadCurrent());
+
+  *view_existed = false;
+
+  IteratePlatformViews([
+    view_id,                                         // argument
+    assets_directory = std::move(assets_directory),  // argument
+    &view_existed,                                   // out
+    &dart_isolate_id,                                // out
+    &isolate_name                                    // out
+  ](PlatformView * view)
+                           ->bool {
+                             if (reinterpret_cast<uintptr_t>(view) != view_id) {
+                               // Keep looking.
+                               return true;
+                             }
+                             *view_existed = true;
+                             view->SetAssetBundlePath(assets_directory);
+                             *dart_isolate_id =
+                                 view->engine().GetUIIsolateMainPort();
+                             *isolate_name = view->engine().GetUIIsolateName();
+                             // We found the requested view. Stop iterating over
+                             // platform views.
+                             return false;
+                           });
+
+  latch->Signal();
+}
+
 }  // namespace shell

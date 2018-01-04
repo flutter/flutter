@@ -76,6 +76,11 @@ public class FlutterNativeView implements BinaryMessenger {
         nativeRunBundleAndSource(mNativePlatformView, assetsDirectory, main, packages);
     }
 
+    public void setAssetBundlePathOnUI(final String assetsDirectory) {
+        assertAttached();
+        nativeSetAssetBundlePathOnUI(mNativePlatformView, assetsDirectory);
+    }
+
     public static String getObservatoryUri() {
         return nativeGetObservatoryUri();
     }
@@ -195,6 +200,9 @@ public class FlutterNativeView implements BinaryMessenger {
         String bundlePath,
         String main,
         String packages);
+
+    private static native void nativeSetAssetBundlePathOnUI(long nativePlatformViewAndroid,
+        String bundlePath);
 
     private static native String nativeGetObservatoryUri();
 
