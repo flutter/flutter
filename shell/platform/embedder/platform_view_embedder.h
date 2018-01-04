@@ -53,6 +53,9 @@ class PlatformViewEmbedder : public PlatformView, public GPUSurfaceGLDelegate {
                      const std::string& packages) override;
 
   // |shell::PlatformView|
+  void SetAssetBundlePath(const std::string& assets_directory) override;
+
+  // |shell::PlatformView|
   void HandlePlatformMessage(
       fxl::RefPtr<blink::PlatformMessage> message) override;
 

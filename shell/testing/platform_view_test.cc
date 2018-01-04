@@ -26,4 +26,7 @@ void PlatformViewTest::RunFromSource(const std::string& assets_directory,
                                      const std::string& main,
                                      const std::string& packages) {}
 
+void PlatformViewTest::SetAssetBundlePath(const std::string& assets_directory) {
+}
+
 }  // namespace shell

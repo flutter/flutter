@@ -31,4 +31,7 @@ void NullPlatformView::RunFromSource(const std::string& assets_directory,
                                      const std::string& main,
                                      const std::string& packages) {}
 
+void NullPlatformView::SetAssetBundlePath(const std::string& assets_directory) {
+}
+
 }  // namespace shell

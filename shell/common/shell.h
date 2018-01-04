@@ -54,6 +54,12 @@ class Shell {
                          int64_t* dart_isolate_id,
                          std::string* isolate_name);
 
+  void SetAssetBundlePathInPlatformView(uintptr_t view_id,
+                                        const char* asset_directory,
+                                        bool* view_existed,
+                                        int64_t* dart_isolate_id,
+                                        std::string* isolate_name);
+
  private:
   fxl::CommandLine command_line_;
   std::unique_ptr<fml::Thread> gpu_thread_;
@@ -83,6 +89,14 @@ class Shell {
                                  int64_t* dart_isolate_id,
                                  std::string* isolate_name,
                                  fxl::AutoResetWaitableEvent* latch);
+
+  void SetAssetBundlePathInPlatformViewUIThread(
+      uintptr_t view_id,
+      const std::string& main,
+      bool* view_existed,
+      int64_t* dart_isolate_id,
+      std::string* isolate_name,
+      fxl::AutoResetWaitableEvent* latch);
 
   FXL_DISALLOW_COPY_AND_ASSIGN(Shell);
 };

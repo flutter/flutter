@@ -237,6 +237,14 @@ void PlatformViewAndroid::RunBundleAndSource(std::string bundle_path,
   });
 }
 
+void PlatformViewAndroid::SetAssetBundlePathOnUI(std::string bundle_path) {
+  blink::Threads::UI()->PostTask(
+      [ engine = engine_->GetWeakPtr(), bundle_path = std::move(bundle_path) ] {
+        if (engine)
+          engine->SetAssetBundlePath(std::move(bundle_path));
+      });
+}
+
 void PlatformViewAndroid::SetViewportMetrics(jfloat device_pixel_ratio,
                                              jint physical_width,
                                              jint physical_height,
@@ -564,6 +572,40 @@ void PlatformViewAndroid::RunFromSource(const std::string& assets_directory,
     FXL_CHECK(java_packages);
     env->CallVoidMethod(local_flutter_view.obj(), run_from_source_method_id,
                         java_assets_directory, java_main, java_packages);
+  }
+
+  // Detaching from the VM deletes any stray local references.
+  fml::jni::DetachFromVM();
+}
+
+void PlatformViewAndroid::SetAssetBundlePath(
+    const std::string& assets_directory) {
+  JNIEnv* env = fml::jni::AttachCurrentThread();
+  FXL_CHECK(env);
+
+  {
+    fml::jni::ScopedJavaLocalRef<jobject> local_flutter_view =
+        flutter_view_.get(env);
+    if (local_flutter_view.is_null()) {
+      // Collected.
+      return;
+    }
+
+    // Grab the class of the flutter view.
+    jclass flutter_view_class = env->GetObjectClass(local_flutter_view.obj());
+    FXL_CHECK(flutter_view_class);
+
+    // Grab the setAssetBundlePath method id.
+    jmethodID method_id = env->GetMethodID(
+        flutter_view_class, "setAssetBundlePathOnUI", "(Ljava/lang/String;)V");
+    FXL_CHECK(method_id);
+
+    // Invoke setAssetBundlePath on the Android UI thread.
+    jstring java_assets_directory = env->NewStringUTF(assets_directory.c_str());
+    FXL_CHECK(java_assets_directory);
+
+    env->CallVoidMethod(local_flutter_view.obj(), method_id,
+                        java_assets_directory);
   }
 
   // Detaching from the VM deletes any stray local references.

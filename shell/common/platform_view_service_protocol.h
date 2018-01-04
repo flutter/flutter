@@ -70,6 +70,14 @@ class PlatformViewServiceProtocol {
                                  intptr_t num_params,
                                  void* user_data,
                                  const char** json_object);
+
+  static const char* kSetAssetBundlePathExtensionName;
+  static bool SetAssetBundlePath(const char* method,
+                                 const char** param_keys,
+                                 const char** param_values,
+                                 intptr_t num_params,
+                                 void* user_data,
+                                 const char** json_object);
 };
 
 }  // namespace shell

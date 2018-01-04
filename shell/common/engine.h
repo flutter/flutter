@@ -60,6 +60,7 @@ class Engine : public blink::RuntimeDelegate {
   void RunFromSource(const std::string& main,
                      const std::string& packages,
                      const std::string& bundle);
+  void SetAssetBundlePath(const std::string& bundle_path);
 
   Dart_Port GetUIIsolateMainPort();
   std::string GetUIIsolateName();
