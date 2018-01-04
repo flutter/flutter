@@ -1440,17 +1440,6 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
-    if (_clipper != null) {
-      _updateClip();
-      assert(_clip != null);
-      if (!_clip.contains(position))
-        return false;
-    }
-    return super.hitTest(result, position: position);
-  }
-
-  @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(new DiagnosticsProperty<BoxShape>('shape', shape));
@@ -1622,6 +1611,17 @@ abstract class _RenderPhysicalModelBase<T> extends _RenderCustomClip<T> {
   // for physical model layers with non-zero elevation.
   @override
   bool get alwaysNeedsCompositing => _elevation != 0.0 && defaultTargetPlatform == TargetPlatform.fuchsia;
+
+  @override
+  bool hitTest(HitTestResult result, { Offset position }) {
+    if (_clipper != null) {
+      _updateClip();
+      assert(_clip != null);
+      if (!_clip.contains(position))
+        return false;
+    }
+    return super.hitTest(result, position: position);
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
