@@ -12,6 +12,7 @@ import 'globals.dart';
 class BuildInfo {
   const BuildInfo(this.mode, this.flavor,
       {this.previewDart2,
+      this.strongMode,
       this.extraFrontEndOptions,
       this.extraGenSnapshotOptions,
       this.preferSharedLibrary});
@@ -27,6 +28,9 @@ class BuildInfo {
 
   // Whether build should be done using Dart2 Frontend parser.
   final bool previewDart2;
+  
+  // Whether build should use strong mode semantics.
+  final bool strongMode;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
