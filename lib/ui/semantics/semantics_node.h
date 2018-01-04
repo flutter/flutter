@@ -41,7 +41,8 @@ enum class SemanticsFlags : int32_t {
   kIsButton = 1 << 3,
   kIsTextField = 1 << 4,
   kIsFocused = 1 << 5,
-  kIsDisabled = 1 << 6,
+  kHasEnabledState = 1 << 6,
+  kIsEnabled = 1 << 7,
 };
 
 struct SemanticsNode {

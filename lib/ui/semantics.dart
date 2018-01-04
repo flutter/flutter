@@ -145,7 +145,8 @@ class SemanticsFlags {
   static const int _kIsButtonIndex = 1 << 3;
   static const int _kIsTextFieldIndex = 1 << 4;
   static const int _kIsFocusedIndex = 1 << 5;
-  static const int _kIsDisabledIndex = 1 << 6;
+  static const int _kHasEnabledStateIndex = 1 << 6;
+  static const int _kIsEnabledIndex = 1 << 7;
 
   const SemanticsFlags._(this.index);
 
@@ -194,15 +195,20 @@ class SemanticsFlags {
   /// The focused element is usually the current receiver of keyboard inputs.
   static const SemanticsFlags isFocused = const SemanticsFlags._(_kIsFocusedIndex);
 
-  /// Whether the semantic node is currently disabled.
+  /// The semantics node has the quality of either being "enabled" or
+  /// "disabled".
+  ///
+  /// For example, a button can be enabled or disabled and therefore has an
+  /// "enabled" state. Static text is usually neither enabled nor disabled and
+  /// therefore does not have an "enabled" state.
+  static const SemanticsFlags hasEnabledState = const SemanticsFlags._(_kHasEnabledStateIndex);
+
+  /// Whether a semantic node that [hasEnabledState] is currently enabled.
   ///
   /// A disabled element does not respond to user interaction. For example, a
   /// button that currently does not respond to user interaction should be
   /// marked as disabled.
-  ///
-  /// Elements, that never respond to user interactions (e.g. static text)
-  /// should not be marked as disabled.
-  static const SemanticsFlags isDisabled = const SemanticsFlags._(_kIsDisabledIndex);
+  static const SemanticsFlags isEnabled = const SemanticsFlags._(_kIsEnabledIndex);
 
   /// The possible semantics flags.
   ///
@@ -214,7 +220,8 @@ class SemanticsFlags {
     _kIsButtonIndex: isButton,
     _kIsTextFieldIndex: isTextField,
     _kIsFocusedIndex: isFocused,
-    _kIsDisabledIndex: isDisabled,
+    _kHasEnabledStateIndex: hasEnabledState,
+    _kIsEnabledIndex: isEnabled,
   };
 
   @override
@@ -232,8 +239,10 @@ class SemanticsFlags {
         return 'SemanticsFlags.isTextField';
       case _kIsFocusedIndex:
         return 'SemanticsFlags.isFocused';
-      case _kIsDisabledIndex:
-        return 'SemanticsFlags.isDisabled';
+      case _kHasEnabledStateIndex:
+        return 'SemanticsFlags.hasEnabledState';
+      case _kIsEnabledIndex:
+        return 'SemanticsFlags.isEnabled';
     }
     return null;
   }
