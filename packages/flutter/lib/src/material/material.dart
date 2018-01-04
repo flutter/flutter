@@ -90,11 +90,14 @@ abstract class MaterialInkController {
 /// contents because content that is conceptually printing on a separate piece
 /// of material cannot be printed beyond the bounds of the material.
 ///
-/// If the layout changes (e.g. because there's a list on the paper, and it's
-/// been scrolled), a LayoutChangedNotification must be dispatched at the
-/// relevant subtree. (This in particular means that Transitions should not be
-/// placed inside Material.) Otherwise, in-progress ink features (e.g., ink
-/// splashes and ink highlights) won't move to account for the new layout.
+/// If the layout changes (e.g. because there's a list on the material, and it's
+/// been scrolled), a [LayoutChangedNotification] must be dispatched at the
+/// relevant subtree. This in particular means that transitions (e.g.
+/// [SlideTransition]) should not be placed inside [Material] widgets so as to
+/// move subtrees that contain [InkResponse]s, [InkWell]s, [Ink]s, or other
+/// widgets that use the [InkFeature] mechanism. Otherwise, in-progress ink
+/// features (e.g., ink splashes and ink highlights) won't move to account for
+/// the new layout.
 ///
 /// In general, the features of a [Material] should not change over time (e.g. a
 /// [Material] should not change its [color], [shadowColor] or [type]). The one

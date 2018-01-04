@@ -39,6 +39,8 @@ import 'image.dart';
 ///
 /// See also:
 ///
+///  * [Ink], which paints a [Decoration] on a [Material], allowing
+///    [InkResponse] and [InkWell] splashes to paint over them.
 ///  * [DecoratedBoxTransition], the version of this class that animates on the
 ///    [decoration] property.
 ///  * [Decoration], which you can extend to provide other effects with
@@ -224,6 +226,8 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///  * [AnimatedContainer], a variant that smoothly animates the properties when
 ///    they change.
 ///  * [Border], which has a sample which uses [Container] heavily.
+///  * [Ink], which paints a [Decoration] on a [Material], allowing
+///    [InkResponse] and [InkWell] splashes to paint over them.
 ///  * The [catalog of layout widgets](https://flutter.io/widgets/layout/).
 class Container extends StatelessWidget {
   /// Creates a widget that combines common painting, positioning, and sizing widgets.
@@ -292,6 +296,9 @@ class Container extends StatelessWidget {
 
   /// Empty space to inscribe inside the [decoration]. The [child], if any, is
   /// placed inside this padding.
+  ///
+  /// This padding is in addition to any padding inherent in the [decoration];
+  /// see [Decoration.padding].
   final EdgeInsetsGeometry padding;
 
   /// The decoration to paint behind the [child].
