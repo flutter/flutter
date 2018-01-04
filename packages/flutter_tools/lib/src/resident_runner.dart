@@ -38,7 +38,8 @@ class FlutterDevice {
 
   StreamSubscription<String> _loggingSubscription;
 
-  FlutterDevice(this.device, { bool previewDart2 : false }) {
+  FlutterDevice(this.device,
+                { bool previewDart2 : false, bool strongMode : false }) {
     if (previewDart2)
       generator = new ResidentCompiler(
         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
@@ -138,6 +139,15 @@ class FlutterDevice {
       reports.add(report);
     }
     return reports;
+  }
+
+  Future<Null> resetAssetDirectory() async {
+    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(
+        fs.path.toUri(getAssetBuildDirectory()));
+    assert(deviceAssetsDirectoryUri != null);
+    await Future.wait(views.map(
+      (FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)
+    ));
   }
 
   // Lists program elements changed in the most recent reload that have not
@@ -259,6 +269,8 @@ class FlutterDevice {
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
+    if (hotRunner.strongMode != null)
+      platformArgs['strong'] = hotRunner.strongMode;
 
     startEchoingDeviceLog();
 
@@ -320,6 +332,8 @@ class FlutterDevice {
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
     if (coldRunner.traceStartup != null)
       platformArgs['trace-startup'] = coldRunner.traceStartup;
+    if (coldRunner.strongMode != null)
+      platformArgs['strong'] = coldRunner.strongMode;
 
     startEchoingDeviceLog();
 

@@ -34,10 +34,10 @@ dependencies:
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.5.1 # TRANSITIVE DEPENDENCY
-  petitparser: 1.6.1 # TRANSITIVE DEPENDENCY
-  pool: 1.3.3 # TRANSITIVE DEPENDENCY
+  petitparser: 1.7.0 # TRANSITIVE DEPENDENCY
+  pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
-  quiver: 0.26.2 # TRANSITIVE DEPENDENCY
+  quiver: 0.27.0 # TRANSITIVE DEPENDENCY
   shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
   shelf_static: 0.2.6 # TRANSITIVE DEPENDENCY
@@ -46,7 +46,7 @@ dependencies:
   source_maps: 0.10.4 # TRANSITIVE DEPENDENCY
   source_span: 1.4.0 # TRANSITIVE DEPENDENCY
   stack_trace: 1.9.1 # TRANSITIVE DEPENDENCY
-  stream_channel: 1.6.2 # TRANSITIVE DEPENDENCY
+  stream_channel: 1.6.3 # TRANSITIVE DEPENDENCY
   string_scanner: 1.0.2 # TRANSITIVE DEPENDENCY
   term_glyph: 1.0.0 # TRANSITIVE DEPENDENCY
   test: 0.12.26 # TRANSITIVE DEPENDENCY
