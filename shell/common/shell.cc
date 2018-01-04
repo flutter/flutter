@@ -331,27 +331,33 @@ void Shell::SetAssetBundlePathInPlatformViewUIThread(
 
   *view_existed = false;
 
-  IteratePlatformViews([
-    view_id,                                         // argument
-    assets_directory = std::move(assets_directory),  // argument
-    &view_existed,                                   // out
-    &dart_isolate_id,                                // out
-    &isolate_name                                    // out
-  ](PlatformView * view)
-                           ->bool {
-                             if (reinterpret_cast<uintptr_t>(view) != view_id) {
-                               // Keep looking.
-                               return true;
-                             }
-                             *view_existed = true;
-                             view->SetAssetBundlePath(assets_directory);
-                             *dart_isolate_id =
-                                 view->engine().GetUIIsolateMainPort();
-                             *isolate_name = view->engine().GetUIIsolateName();
-                             // We found the requested view. Stop iterating over
-                             // platform views.
-                             return false;
-                           });
+  IteratePlatformViews(
+      [view_id,  // argument
+#if !defined(OS_WIN)
+                 // Using std::move on const references inside lambda capture is
+                 // not supported on Windows for some reason.
+                 // TODO(https://github.com/flutter/flutter/issues/13908):
+                 // Investigate the root cause of the difference.
+       assets_directory = std::move(assets_directory),  // argument
+#else
+       assets_directory,  // argument
+#endif
+       &view_existed,     // out
+       &dart_isolate_id,  // out
+       &isolate_name      // out
+  ](PlatformView* view) -> bool {
+        if (reinterpret_cast<uintptr_t>(view) != view_id) {
+          // Keep looking.
+          return true;
+        }
+        *view_existed = true;
+        view->SetAssetBundlePath(assets_directory);
+        *dart_isolate_id = view->engine().GetUIIsolateMainPort();
+        *isolate_name = view->engine().GetUIIsolateName();
+        // We found the requested view. Stop iterating over
+        // platform views.
+        return false;
+      });
 
   latch->Signal();
 }
