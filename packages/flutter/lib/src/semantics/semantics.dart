@@ -266,7 +266,7 @@ class SemanticsProperties extends DiagnosticableTree {
   });
 
   /// If non-null, indicates that this subtree represents something that can be
-  /// in a disabled or enabled state.
+  /// in an enabled or disabled state.
   ///
   /// For example, a button that a user can currently interact with would set
   /// this field to true. A button that currently does not respond to user
@@ -1755,7 +1755,7 @@ class SemanticsConfiguration {
   /// Whether the owning [RenderObject] is currently enabled.
   ///
   /// A disabled object does not respond to user interactions. Only objects that
-  /// usually do respond to user interactions but currently don't (like a
+  /// usually respond to user interactions, but which currently do not (like a
   /// disabled button) should be marked as disabled. Objects (like static text)
   /// that never respond to user interactions should not be marked as disabled.
   bool get isEnabled => _hasFlag(SemanticsFlags.hasEnabledState) ? _hasFlag(SemanticsFlags.isEnabled) : null;
