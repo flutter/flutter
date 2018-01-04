@@ -9,9 +9,9 @@ environment:
 dependencies:
   # To update these, use "flutter update-packages --force-upgrade".
   archive: 1.0.33
-  args: 1.2.0
+  args: 0.13.7
   cli_util: 0.1.2+1
-  coverage: 0.10.0
+  coverage: 0.9.3
   crypto: 2.0.2+1
   file: 2.3.5
   http: 0.11.3+14
@@ -25,7 +25,7 @@ dependencies:
   platform: 2.1.1
   plugin: 0.2.0+2
   process: 2.0.7
-  quiver: 0.26.2
+  quiver: 0.27.0
   stack_trace: 1.9.1
   stream_channel: 1.6.3
   usage: 3.3.0
@@ -67,7 +67,7 @@ dev_dependencies:
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   path: 1.5.1 # TRANSITIVE DEPENDENCY
   petitparser: 1.7.0 # TRANSITIVE DEPENDENCY
-  pool: 1.3.3 # TRANSITIVE DEPENDENCY
+  pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
   shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY

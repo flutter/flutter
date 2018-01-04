@@ -40,6 +40,7 @@ class BuildAotCommand extends BuildSubCommand {
       ..addFlag('interpreter')
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('preview-dart-2', negatable: false, hide: !verboseHelp)
+      ..addFlag('strong', negatable: false, hide: !verboseHelp)
       ..addOption(FlutterOptions.kExtraFrontEndOptions,
         allowMultiple: true,
         splitCommas: true,
@@ -81,6 +82,7 @@ class BuildAotCommand extends BuildSubCommand {
       outputPath: argResults['output-dir'],
       interpreter: argResults['interpreter'],
       previewDart2: argResults['preview-dart-2'],
+      strongMode: argResults['strong'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
       extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
       preferSharedLibrary: argResults['prefer-shared-library'],
@@ -112,6 +114,7 @@ Future<String> buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
+  bool strongMode: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
   bool preferSharedLibrary: false,
@@ -125,6 +128,7 @@ Future<String> buildAotSnapshot(
       outputPath: outputPath,
       interpreter: interpreter,
       previewDart2: previewDart2,
+      strongMode: strongMode,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: extraGenSnapshotOptions,
       preferSharedLibrary: preferSharedLibrary,
@@ -144,6 +148,7 @@ Future<String> _buildAotSnapshot(
   String outputPath,
   bool interpreter: false,
   bool previewDart2: false,
+  bool strongMode: false,
   List<String> extraFrontEndOptions,
   List<String> extraGenSnapshotOptions,
   bool preferSharedLibrary: false,
@@ -335,6 +340,7 @@ Future<String> _buildAotSnapshot(
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn : true,
       aot : true,
+      strongMode: strongMode,
     );
   }
 

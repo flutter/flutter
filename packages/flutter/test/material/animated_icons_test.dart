@@ -6,7 +6,6 @@ import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/material_animated_icons.dart';
 import 'package:mockito/mockito.dart';
 
 import '../widgets/semantics_tester.dart';

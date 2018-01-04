@@ -105,6 +105,10 @@ class RunCommand extends RunCommandBase {
     argParser.addFlag('preview-dart-2',
         hide: !verboseHelp,
         help: 'Preview Dart 2.0 functionality.');
+    argParser.addFlag('strong',
+        hide: !verboseHelp,
+        help: 'Turn on strong mode semantics.\n'
+              'Valid only when --preview-dart-2 is also specified');
     argParser.addOption('packages',
         hide: !verboseHelp,
         valueHelp: 'path',
@@ -290,7 +294,9 @@ class RunCommand extends RunCommandBase {
     }
 
     final List<FlutterDevice> flutterDevices = devices.map((Device device) {
-      return new FlutterDevice(device, previewDart2: argResults['preview-dart-2']);
+      return new FlutterDevice(device,
+                               previewDart2: argResults['preview-dart-2'],
+                               strongMode : argResults['strong']);
     }).toList();
 
     ResidentRunner runner;
@@ -302,6 +308,7 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: argResults['benchmark'],
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
+        strongMode: argResults['strong'],
         projectRootPath: argResults['project-root'],
         packagesFilePath: argResults['packages'],
         projectAssets: argResults['project-assets'],
@@ -316,6 +323,7 @@ class RunCommand extends RunCommandBase {
         traceStartup: traceStartup,
         applicationBinary: argResults['use-application-binary'],
         previewDart2: argResults['preview-dart-2'],
+        strongMode: argResults['strong'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

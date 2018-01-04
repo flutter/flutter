@@ -22,6 +22,7 @@ void main() {
     'pl', // Polish
     'ps', // Pashto
     'pt', // Portugese
+    'ro', // Romanian
     'ru', // Russian
     'th', // Thai
     'tr', // Turkish
@@ -95,5 +96,11 @@ void main() {
     expect(localizations.selectedRowCountTitle(1), '1 elemento seleccionado');
     expect(localizations.selectedRowCountTitle(2), '2 elementos seleccionados');
     expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elementos seleccionados');
+
+    localizations = new GlobalMaterialLocalizations(const Locale('ro', ''));
+    expect(localizations.selectedRowCountTitle(0), 'Nu există elemente selectate');
+    expect(localizations.selectedRowCountTitle(1), '1 element selectat');
+    expect(localizations.selectedRowCountTitle(2), '2 elemente selectate');
+    expect(localizations.selectedRowCountTitle(123456789), '123.456.789 elemente selectate');
   });
 }

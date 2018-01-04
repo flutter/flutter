@@ -8,7 +8,7 @@ environment:
   sdk: '>=1.12.0 <2.0.0'
 
 dependencies:
-  args: 1.2.0
+  args: 0.13.7
   file: 2.3.5
   image: 1.1.29
   meta: 1.1.1
@@ -45,7 +45,7 @@ dev_dependencies:
   package_config: 1.0.3 # TRANSITIVE DEPENDENCY
   package_resolver: 1.0.2 # TRANSITIVE DEPENDENCY
   petitparser: 1.7.0 # TRANSITIVE DEPENDENCY
-  pool: 1.3.3 # TRANSITIVE DEPENDENCY
+  pool: 1.3.4 # TRANSITIVE DEPENDENCY
   pub_semver: 1.3.2 # TRANSITIVE DEPENDENCY
   shelf: 0.7.1 # TRANSITIVE DEPENDENCY
   shelf_packages_handler: 1.0.3 # TRANSITIVE DEPENDENCY
