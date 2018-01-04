@@ -1318,6 +1318,15 @@ class FlutterView extends ServiceObject {
     await subscription.cancel();
   }
 
+  Future<Null> setAssetDirectory(Uri assetsDirectory) async {
+    assert(assetsDirectory != null);
+    await owner.vmService.vm.invokeRpc('_flutter.setAssetBundlePath',
+        params: <String, dynamic>{
+          'viewId': id,
+          'assetDirectory': assetsDirectory.toFilePath(windows: false)
+        });
+  }
+
   bool get hasIsolate => _uiIsolate != null;
 
   Future<Null> flushUIThreadTasks() async {
