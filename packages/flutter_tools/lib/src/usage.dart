@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:usage/usage_io.dart';
@@ -19,11 +20,13 @@ const String _kFlutterUA = 'UA-67589403-6';
 Usage get flutterUsage => Usage.instance;
 
 class Usage {
-  /// Create a new Usage instance; [versionOverride] is used for testing.
-  Usage({ String settingsName: 'flutter', String versionOverride }) {
+  /// Create a new Usage instance; [versionOverride] and [configDirOverride] are
+  /// used for testing.
+  Usage({ String settingsName: 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
     final String version = versionOverride ?? flutterVersion.getVersionString(whitelistBranchName: true);
-    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version);
+    _analytics = new AnalyticsIO(_kFlutterUA, settingsName, version,
+        documentDirectory: configDirOverride != null ? new Directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
     _analytics.setSessionValue('cd1', os.name);
