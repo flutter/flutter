@@ -2913,8 +2913,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isDisabled] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsNode.hasEnabledState] semantic to true and
+  /// the [SemanticsNode.isEnabled] semantic to the given value.
   bool get enabled => _enabled;
   bool _enabled;
   set enabled(bool value) {

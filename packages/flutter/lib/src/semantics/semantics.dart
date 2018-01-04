@@ -1752,7 +1752,7 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlags.isSelected, value);
   }
 
-  /// Whether the owning [RenderObject] is a currently enabled.
+  /// Whether the owning [RenderObject] is currently enabled.
   ///
   /// A disabled object does not respond to user interactions. Only objects that
   /// usually do respond to user interactions but currently don't (like a
